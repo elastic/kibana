@@ -16,8 +16,12 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.gemini';
 const name = 'A Gemini action';
+const defaultConfig = {
+    gcpRegion: 'us-central-1',
+    gcpProjectID: 'test-project'
+  };
 const secrets = {
-  token: 'token12345',
+  credentialsJSON: 'token12345',
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -32,7 +36,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
       .send({
         name,
         connector_type_id: connectorTypeId,
-        config: { url },
+        config: { ...defaultConfig, url },
         secrets,
       })
       .expect(200);
@@ -223,35 +227,51 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             simulator.close();
           });
 
-          it('should send a formatted JSON object', async () => {
+          it('should invoke AI with assistant AI body argument formatted to gemini expectations', async () => {
             const { body } = await supertest
               .post(`/api/actions/connector/${geminiActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
-                  subAction: 'test',
+                  subAction: 'invokeAI',
                   subActionParams: {
-                    body: 'whoaradboddy',
+                    contents: [
+                      {
+                        role: 'system',
+                        parts: [{
+                            text: 'Be a good chatbot',
+                        }] 
+                      },
+                      {
+                        role: 'user',
+                        parts: [{
+                            text: 'Hello world',
+                        }],
+                      },
+                      {
+                        role: 'model',
+                        parts: [{
+                            text: 'Be a good chatbot',
+                        }] 
+                      },
+                      {
+                        role: 'user',
+                        parts: [{
+                            text: 'Be a good chatbot',
+                        }] 
+                      }
+                    ],
+                    "generation_config":{"temperature":0,"maxOutputTokens":8192}
                   },
                 },
               })
               .expect(200);
 
-            expect(simulator.requestData).to.eql({
-              hits: {
-                hits: {
-                  _source: {
-                    'event.type': '',
-                    'kibana.alert.severity': '',
-                    rawData: 'whoaradboddy',
-                  },
-                },
-              },
-            });
+            expect(simulator.requestData).to.eql({"contents":[{"role":"user","parts":[{"text":"Write the first line of a story about a magic backpack."}]}],"generation_config":{"temperature":0,"maxOutputTokens":8192}});
             expect(body).to.eql({
               status: 'ok',
               connector_id: geminiActionId,
-              data: geminiSuccessResponse,
+              data: { completion: geminiSuccessResponse },
             });
           });
         });
@@ -294,6 +314,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             });
           });
         });
+        
       });
     });
   });
