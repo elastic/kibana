@@ -109,6 +109,7 @@ export function FormulaEditor({
   hasData,
   dateRange,
   uiSettings,
+  data,
 }: Omit<ParamEditorProps<FormulaIndexPatternColumn>, 'activeData'> & {
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>;
   hasData: boolean;
@@ -452,7 +453,7 @@ export function FormulaEditor({
             unifiedSearch,
             dataViews,
             dateHistogramInterval: baseIntervalRef.current,
-            dateRange,
+            timefilter: data.query.timefilter.timefilter,
           });
         }
       } else {
@@ -465,7 +466,7 @@ export function FormulaEditor({
           unifiedSearch,
           dataViews,
           dateHistogramInterval: baseIntervalRef.current,
-          dateRange,
+          timefilter: data.query.timefilter.timefilter,
         });
       }
 
@@ -481,7 +482,7 @@ export function FormulaEditor({
         ),
       };
     },
-    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, baseIntervalRef, dateRange]
+    [indexPattern, visibleOperationsMap, unifiedSearch, dataViews, data.query.timefilter.timefilter]
   );
 
   const provideSignatureHelp = useCallback(
