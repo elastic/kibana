@@ -719,6 +719,7 @@ export class SearchSource {
   private mergeProps(
     root = this,
     searchRequest: SearchRequest = { body: {} },
+    // selects fields to be processed. used by useDataViewLazy param since sort field requires an existing field list
     filter?: string[]
   ): SearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
@@ -836,13 +837,9 @@ export class SearchSource {
     } else if (fields.length) {
       return (
         await dataView.getFields({
-          // const fieldSpec = await dataView.getFields({
           fieldName: fields,
-          // fieldTypes: ['date', 'date_nanos'],
         })
       ).getFieldMapSorted();
-      // const spec = Object.values(fieldSpec.getFieldMap()).map((field) => field.spec);
-      // dataView.setFields(spec);
     }
     // no fields needed to be loaded for query
     return {};
