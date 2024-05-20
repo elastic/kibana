@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('available in view mode', async () => {
       await PageObjects.dashboard.saveDashboard('full screen test', {
-        operation: 'create',
+        saveAsNew: true,
         exitFromEditMode: true,
       });
       const exists = await PageObjects.dashboard.fullScreenModeMenuItemExists();

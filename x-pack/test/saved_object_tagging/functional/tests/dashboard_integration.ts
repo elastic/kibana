@@ -85,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.clickNewDashboard();
 
         await PageObjects.dashboard.saveDashboard('my-new-dashboard', {
-          operation: 'create',
+          saveAsNew: true,
           waitDialogIsClosed: true,
           tags: ['tag-1', 'tag-3'],
         });
@@ -149,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.dashboard.switchToEditMode();
         await PageObjects.dashboard.saveDashboard('dashboard 4 with real data (tag-1)', {
-          operation: 'update',
+          saveAsNew: false,
           waitDialogIsClosed: true,
           tags: ['tag-3'],
         });

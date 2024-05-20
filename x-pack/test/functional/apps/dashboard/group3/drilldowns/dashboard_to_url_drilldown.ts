@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard(
         dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME,
         {
-          operation: 'update',
+          saveAsNew: false,
           waitDialogIsClosed: true,
           exitFromEditMode: true,
         }

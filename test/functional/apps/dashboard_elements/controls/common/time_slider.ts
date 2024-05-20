@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         await dashboard.saveDashboard('test time slider control', {
           exitFromEditMode: false,
-          operation: 'create',
+          saveAsNew: true,
         });
       });
 

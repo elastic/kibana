@@ -35,7 +35,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     await timePicker.setDefaultDataRange();
     await elasticChart.setNewChartUiDebugFlag();
     await dashboard.saveDashboard(OPTIONS_LIST_DASHBOARD_NAME, {
-      operation: 'create',
+      saveAsNew: true,
       exitFromEditMode: false,
       storeTimeWithDashboard: true,
     });

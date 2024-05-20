@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // save the dashboard before adding controls
       await dashboard.saveDashboard('Test Control Group Apply Button', {
         exitFromEditMode: false,
-        operation: 'create',
+        saveAsNew: true,
       });
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();

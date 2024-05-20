@@ -117,9 +117,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('duplication (edit mode)', () => {
       it('Warns you when you Save as New Dashboard, and the title is a duplicate', async function () {
         await PageObjects.dashboard.switchToEditMode();
-        await PageObjects.dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, {
-          saveAsNew: true,
-        });
+        await PageObjects.dashboard.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName);
 
         await PageObjects.dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
 

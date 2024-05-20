@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardCustomizePanel.disableCustomTimeRange();
       await dashboardCustomizePanel.clickSaveButton();
       await dashboard.saveDashboard('Dashboard with Pie Chart', {
-        operation: 'update',
+        saveAsNew: false,
         exitFromEditMode: true,
       });
     });
@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardCustomizePanel.clickSaveButton();
 
       await dashboard.saveDashboard('Dashboard with Pie Chart', {
-        operation: 'update',
+        saveAsNew: false,
         exitFromEditMode: true,
       });
 

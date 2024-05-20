@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.discover.assertFieldStatsTableNotExists();
-        await PageObjects.dashboard.saveDashboard(dashboardTitle, { operation: 'update' });
+        await PageObjects.dashboard.saveDashboard(dashboardTitle, { saveAsNew: false });
       });
     });
   }

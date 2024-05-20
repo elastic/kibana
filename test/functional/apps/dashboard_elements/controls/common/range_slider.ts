@@ -59,7 +59,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await dashboard.saveDashboard(DASHBOARD_NAME, {
         exitFromEditMode: false,
-        operation: 'create',
+        saveAsNew: true,
       });
     });
 

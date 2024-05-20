@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addVisualization('Rendering-Test:-animal-sounds-pie');
       await PageObjects.dashboard.saveDashboard('legacyTest', {
         waitDialogIsClosed: true,
-        operation: 'create',
+        saveAsNew: true,
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       const currentUrl = await browser.getCurrentUrl();

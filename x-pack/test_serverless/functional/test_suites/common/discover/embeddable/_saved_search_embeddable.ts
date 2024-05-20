@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard(dashboardName, {
         waitDialogIsClosed: true,
         exitFromEditMode: false,
-        operation: 'create',
+        saveAsNew: true,
       });
 
       await refreshDashboardPage();
@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await dataGrid.changeRowsPerPageTo(10);
 
-      await PageObjects.dashboard.saveDashboard(dashboardName, { operation: 'update' });
+      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await refreshDashboardPage();
 
       await dataGrid.checkCurrentRowsPerPageToBe(10);

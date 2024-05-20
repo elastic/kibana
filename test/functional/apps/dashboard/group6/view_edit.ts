@@ -77,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: true,
-          operation: 'update',
+          saveAsNew: false,
         });
         const isViewMode = await PageObjects.dashboard.getIsInViewMode();
         expect(isViewMode).to.equal(false);
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.dashboard.saveDashboard(dashboardName, {
             storeTimeWithDashboard: true,
-            operation: 'update',
+            saveAsNew: false,
           });
 
           await PageObjects.timePicker.setAbsoluteRange(
@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Sep 19, 2013 @ 06:31:44.000',
             'Sep 19, 2013 @ 06:31:44.000'
           );
-          await PageObjects.dashboard.saveDashboard(dashboardName, { operation: 'update' });
+          await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
           await PageObjects.dashboard.switchToEditMode();
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 19, 2015 @ 06:31:44.000',
@@ -193,7 +193,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await PageObjects.common.clickCancelOnModal();
           await PageObjects.dashboard.saveDashboard(dashboardName, {
-            operation: 'update',
+            saveAsNew: false,
             storeTimeWithDashboard: true,
           });
 
@@ -211,7 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('when time changed is stored with dashboard', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.timePicker.setDefaultDataRange();
-        await PageObjects.dashboard.saveDashboard(dashboardName, { operation: 'update' });
+        await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
         await PageObjects.timePicker.setAbsoluteRange(
           'Sep 19, 2013 @ 06:31:44.000',
           'Sep 19, 2013 @ 06:31:44.000'
@@ -223,7 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.clickCancelOnModal();
         await PageObjects.dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: true,
-          operation: 'update',
+          saveAsNew: false,
         });
 
         await PageObjects.dashboard.loadSavedDashboard(dashboardName);
@@ -240,7 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: false,
-          operation: 'update',
+          saveAsNew: false,
         });
         await PageObjects.timePicker.setAbsoluteRange(
           'Oct 19, 2014 @ 06:31:44.000',

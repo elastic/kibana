@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('save the dashboard', async () => {
-      await PageObjects.dashboard.saveDashboard(dashboardName, { operation: 'update' });
+      await PageObjects.dashboard.saveDashboard(dashboardName, { saveAsNew: false });
       await a11y.testAppSnapshot();
     });
 

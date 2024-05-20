@@ -24,7 +24,6 @@ interface SaveDashboardOptions {
   storeTimeWithDashboard?: boolean;
   saveAsNew?: boolean;
   tags?: string[];
-  operation?: 'update' | 'create';
 }
 
 interface AddNewDashboardOptions {
@@ -509,27 +508,24 @@ export class DashboardPageObject extends FtrService {
   }
 
   /**
-   * Save the current dashboard with the specified name and options and
+   * @description Save the current dashboard with the specified name and options and
    * verify that the save was successful, close the toast and return the
    * toast message
-   *
-   * @param dashboardName {String}
-   * @param saveOptions {{storeTimeWithDashboard: boolean, needsConfirm: false,  waitDialogIsClosed: boolean }}
    */
   public async saveDashboard(
     dashboardName: string,
     saveOptions: SaveDashboardOptions = {
       waitDialogIsClosed: true,
       exitFromEditMode: true,
-      operation: 'create',
+      saveAsNew: true,
     }
   ) {
     await this.retry.try(async () => {
-      if (saveOptions.operation === 'update') {
+      if (saveOptions.saveAsNew) {
+        await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
+      } else {
         await this.modifyExistingDashboardDetails(dashboardName, saveOptions);
         await this.clickQuickSave();
-      } else if (saveOptions.operation === 'create') {
-        await this.enterDashboardSaveModalApplyUpdatesAndClickSave(dashboardName, saveOptions);
       }
 
       if (saveOptions.needsConfirm) {
@@ -543,7 +539,7 @@ export class DashboardPageObject extends FtrService {
 
     let message;
 
-    if (saveOptions.operation === 'create') {
+    if (saveOptions.saveAsNew) {
       message = await this.toasts.getTitleAndDismiss();
       await this.header.waitUntilLoadingHasFinished();
       await this.common.waitForSaveModalToClose();
@@ -573,7 +569,7 @@ export class DashboardPageObject extends FtrService {
    */
   public async enterDashboardSaveModalApplyUpdatesAndClickSave(
     dashboardTitle: string,
-    saveOptions: Omit<SaveDashboardOptions, 'operation'> = { waitDialogIsClosed: true }
+    saveOptions: Omit<SaveDashboardOptions, 'saveAsNew'> = { waitDialogIsClosed: true }
   ) {
     const isSaveModalOpen = await this.testSubjects.exists('savedObjectSaveModal', {
       timeout: 2000,

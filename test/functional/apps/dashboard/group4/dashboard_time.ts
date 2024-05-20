@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
         await PageObjects.dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: false,
-          operation: 'create',
+          saveAsNew: true,
         });
       });
 
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await PageObjects.dashboard.saveDashboard(dashboardName, {
           storeTimeWithDashboard: true,
-          operation: 'update',
+          saveAsNew: false,
         });
       });
 

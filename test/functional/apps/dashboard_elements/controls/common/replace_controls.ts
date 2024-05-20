@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await timePicker.setDefaultDataRange();
       await dashboard.saveDashboard(DASHBOARD_NAME, {
         exitFromEditMode: false,
-        operation: 'create',
+        saveAsNew: true,
       });
     });
 
