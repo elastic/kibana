@@ -141,7 +141,7 @@ export const createCrowdstrikeGetAgentOnlineStatusDetailsMock: (
   return merge(
     {
       state: 'online',
-      id: '0eec3717b2eb472195bbb3964c05cfd3',
+      id: 'ae86ad7402404048ac9b8d94db8f7ba2',
     },
     overrides
   );
