@@ -13,10 +13,14 @@ The `share` plugin contains various utilities for displaying sharing context men
 generating deep links to other apps using *locators*, and creating short URLs.
 
 
-## Sharing context menu
+## Sharing context menu and modal
 
-You can register an item into sharing context menu (which is displayed in
-Dashboard, Discover, and Visualize apps).
+You can register an item into sharing context modal or menu (which is displayed in
+Dashboard, Discover, and Visualize apps). In early 2024, the Shared UX team created a tabbed share modal redesign.
+Canvas still is using the older share context menu, but Dashboard, Discover, and Visualize apps are since using 
+the new modal implementation. This change was made for a less cluttered UI and streamlined user experience. 
+Copy links default to short links based on user feedback. Reports/Exports have been consolidated into one tab called 
+Exports, versus the separated panels in the share context menu. 
 
 
 ## Locators
@@ -204,15 +208,3 @@ const url = await shortUrls.create({
 
 To resolve the short URL, navigate to `/r/s/<slug>` in the browser.
 
-### Redesign of Share Context menu
-April 2024 the share context menu changed from using EUI panels to a tabbed modal. One of the goals
-was to streamline the user experience and remove areas of confusion. For instance, the saved object
-and snapshot radio options in the Link portion was confusing to users. The following was implemented 
-in the redesign:
-
-When user clicks the ‘copy link’ button
-For dashboard: copy the “snapshot” URL to user clipboard
-For lens: copy the “saved object” URL to user clipboard. 
-If lens is not saved to library you cannot copy (show unsaved changed error as in figma)
-For discover: discover is saved: copy the “snapshot” URL to user clipboard
-Default to short URL where possible 
