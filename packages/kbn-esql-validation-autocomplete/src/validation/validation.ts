@@ -19,6 +19,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '@kbn/esql-ast';
+import { get } from 'lodash';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
@@ -72,6 +73,7 @@ import {
   retrieveFieldsFromStringSources,
 } from './resources';
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
+import { getParamAtPosition } from '../autocomplete/helper';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -454,9 +456,9 @@ function validateFunction(
   const failingSignatures: ESQLMessage[][] = [];
   for (const signature of matchingSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    signature.params.forEach((argDef, index) => {
-      const outerArg = astFunction.args[index]!;
-      if (!outerArg && argDef.optional) {
+    astFunction.args.forEach((outerArg, index) => {
+      const argDef = getParamAtPosition(signature, index);
+      if ((!outerArg && argDef?.optional) || !argDef) {
         // that's ok, just skip it
         // the else case is already catched with the argument counts check
         // few lines above
