@@ -9,12 +9,13 @@ import { type Observable, map, debounceTime } from 'rxjs';
 
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type {
-  SolutionNavigationDefinition,
   NavigationTreeDefinition,
   NodeDefinition,
   EuiSideNavItemTypeEnhanced,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+
+import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
 import { SEARCH_INDICES_PATH } from './applications/enterprise_search_content/routes';
@@ -68,8 +69,9 @@ export const getNavigationTreeDefinition = ({
   dynamicItems$,
 }: {
   dynamicItems$: Observable<DynamicSideNavItems>;
-}): SolutionNavigationDefinition => {
+}): AddSolutionNavigationArg => {
   return {
+    dataTestSubj: 'searchSideNav',
     homePage: 'enterpriseSearch',
     icon,
     id: 'es',
