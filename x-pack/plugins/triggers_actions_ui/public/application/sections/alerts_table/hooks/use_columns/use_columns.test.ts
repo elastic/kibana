@@ -8,7 +8,7 @@
 import { EuiDataGridColumn } from '@elastic/eui';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 
 import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
@@ -113,7 +113,7 @@ describe('useColumn', () => {
     // storageTable will always be in sync with defualtColumns.
     // it is an invariant. If that is the case, that can be considered an issue
     const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-    const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+    const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
       useColumns({
         defaultColumns,
         featureIds,
@@ -142,7 +142,7 @@ describe('useColumn', () => {
   describe('visibleColumns', () => {
     test('hide all columns with onChangeVisibleColumns', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns,
           featureIds,
@@ -162,7 +162,7 @@ describe('useColumn', () => {
 
     test('show all columns with onChangeVisibleColumns', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns,
           featureIds,
@@ -189,7 +189,7 @@ describe('useColumn', () => {
 
     test('should populate visiblecolumns correctly', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns,
           featureIds,
@@ -205,7 +205,7 @@ describe('useColumn', () => {
     test('should change visiblecolumns if provided defaultColumns change', async () => {
       let localDefaultColumns = [...defaultColumns];
       let localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(localDefaultColumns);
-      const { result, rerender } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result, rerender } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns: localDefaultColumns,
           featureIds,
@@ -240,7 +240,7 @@ describe('useColumn', () => {
   describe('columns', () => {
     test('should changes the column list when defaultColumns has been updated', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result, waitFor } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns,
           featureIds,
@@ -257,7 +257,7 @@ describe('useColumn', () => {
   describe('onToggleColumns', () => {
     test('should update the list of columns when on Toggle Columns is called', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns,
           featureIds,
@@ -276,7 +276,7 @@ describe('useColumn', () => {
 
     test('should update the list of visible columns when onToggleColumn is called', async () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns,
           featureIds,
@@ -303,7 +303,7 @@ describe('useColumn', () => {
 
     test('should update the column details in the storage when onToggleColumn is called', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns,
           featureIds,
@@ -334,7 +334,7 @@ describe('useColumn', () => {
   describe('onResetColumns', () => {
     test('should restore visible columns defaults', () => {
       const localStorageAlertsTable = getStorageAlertsTableByDefaultColumns(defaultColumns);
-      const { result } = renderHook<UseColumnsArgs, UseColumnsResp>(() =>
+      const { result } = renderHook<UseColumnsResp, UseColumnsArgs>(() =>
         useColumns({
           defaultColumns,
           featureIds,

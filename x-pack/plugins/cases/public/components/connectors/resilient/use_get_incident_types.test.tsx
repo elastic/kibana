@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
 import { connector } from '../mock';
@@ -30,7 +30,7 @@ describe('useGetIncidentTypes', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'getIncidentTypes');
-    const { waitFor } = renderHook(
+    renderHook(
       () =>
         useGetIncidentTypes({
           http,
@@ -72,7 +72,7 @@ describe('useGetIncidentTypes', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitFor } = renderHook(
+    renderHook(
       () =>
         useGetIncidentTypes({
           http,
@@ -97,7 +97,7 @@ describe('useGetIncidentTypes', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess: jest.fn(), addError });
 
-    const { waitFor } = renderHook(
+    renderHook(
       () =>
         useGetIncidentTypes({
           http,

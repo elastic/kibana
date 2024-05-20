@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, PropsWithChildren } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
 import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -92,7 +92,7 @@ export interface AppMockRenderer {
 export const createAppMockRenderer = (): AppMockRenderer => {
   const services = createStartServicesMock();
 
-  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+  const AppWrapper: React.FC<PropsWithChildren> = ({ children }) => (
     <I18nProvider>
       <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
     </I18nProvider>

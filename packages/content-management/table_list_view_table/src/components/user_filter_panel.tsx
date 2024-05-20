@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { FC } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { EuiFilterButton, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,7 +29,10 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false, staleTime: 30 * 60 * 1000 } },
 });
 
-export const UserFilterContextProvider: FC<Context> = ({ children, ...props }) => {
+export const UserFilterContextProvider: FC<PropsWithChildren<Context>> = ({
+  children,
+  ...props
+}) => {
   if (!props.enabled) {
     return <>{children}</>;
   }

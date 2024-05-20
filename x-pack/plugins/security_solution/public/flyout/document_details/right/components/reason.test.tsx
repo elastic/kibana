@@ -50,11 +50,14 @@ const panelContextValue = {
 const renderReason = (panelContext: RightPanelContext = panelContextValue) =>
   render(
     <TestProviders>
-      <IntlProvider locale="en">
-        <RightPanelContext.Provider value={panelContext}>
-          <Reason />
-        </RightPanelContext.Provider>
-      </IntlProvider>
+      {
+        // @ts-expect-error
+        <IntlProvider locale="en">
+          <RightPanelContext.Provider value={panelContext}>
+            <Reason />
+          </RightPanelContext.Provider>
+        </IntlProvider>
+      }
     </TestProviders>
   );
 

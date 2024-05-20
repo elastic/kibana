@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import {
   stubDataViewWithoutTimeField,
   stubLogstashDataView as dataView,
@@ -55,17 +55,17 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: null,
       services: mockedServices,
     };
-    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+    const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
 
-    await waitForNextUpdate();
-
-    let fieldListGroupedProps = result.current.fieldListGroupedProps;
-    expect(fieldListGroupedProps.fieldGroups).toMatchSnapshot();
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
-    expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
+    waitFor(() => {
+      const fieldListGroupedProps = result.current.fieldListGroupedProps;
+      expect(fieldListGroupedProps.fieldGroups).toMatchSnapshot();
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
+      expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
+    });
 
     rerender({
       ...props,
@@ -73,10 +73,12 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: null,
     });
 
-    fieldListGroupedProps = result.current.fieldListGroupedProps;
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
-    expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
+    waitFor(() => {
+      fieldListGroupedProps = result.current.fieldListGroupedProps;
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.unknown);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+      expect(fieldListGroupedProps.scrollToTopResetCounter).toBeTruthy();
+    });
   });
 
   it('should work correctly for no data', async () => {
@@ -100,11 +102,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       })
     );
 
-    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+    const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
-
-    await waitForNextUpdate();
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -124,9 +124,11 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       'SmartFields-0',
     ]);
 
-    expect(fieldGroups).toMatchSnapshot();
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
+    waitFor(() => {
+      expect(fieldGroups).toMatchSnapshot();
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(false);
+    });
 
     rerender({
       ...props,
@@ -162,11 +164,11 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       })
     );
 
-    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+    const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -234,38 +236,38 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       })
     );
 
-    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+    const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
-
-    await waitForNextUpdate();
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     const fieldGroups = fieldListGroupedProps.fieldGroups;
     const scrollToTopResetCounter1 = fieldListGroupedProps.scrollToTopResetCounter;
 
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-1',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
+    waitFor(() => {
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-1',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
 
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
-    expect(result.current.allFieldsModified).toStrictEqual([
-      ...allFields,
-      new DataViewField(newField),
-    ]);
-    expect(result.current.hasNewFields).toBe(true);
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+      expect(result.current.allFieldsModified).toStrictEqual([
+        ...allFields,
+        new DataViewField(newField),
+      ]);
+      expect(result.current.hasNewFields).toBe(true);
+    });
 
     rerender({
       ...props,
@@ -273,15 +275,16 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields,
     });
 
-    fieldListGroupedProps = result.current.fieldListGroupedProps;
-    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
-    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
-    expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
-      scrollToTopResetCounter1
-    );
-    expect(result.current.allFieldsModified).toBe(allFields);
-    expect(result.current.hasNewFields).toBe(false);
-
+    waitFor(() => {
+      fieldListGroupedProps = result.current.fieldListGroupedProps;
+      expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+      expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+      expect(result.current.fieldListGroupedProps.scrollToTopResetCounter).not.toBe(
+        scrollToTopResetCounter1
+      );
+      expect(result.current.allFieldsModified).toBe(allFields);
+      expect(result.current.hasNewFields).toBe(false);
+    });
     (ExistenceApi.useExistingFieldsReader as jest.Mock).mockRestore();
   });
 
@@ -291,31 +294,31 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: allFieldsIncludingUnmapped,
       services: mockedServices,
     };
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: props,
     });
 
-    await waitForNextUpdate();
+    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    let fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) =>
-          `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
-            fieldGroups![key as FieldsGroupNames]?.fieldCount
-          }`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0-0',
-      'SelectedFields-0-0',
-      'PopularFields-0-0',
-      'AvailableFields-25-25',
-      'UnmappedFields-28-28',
-      'EmptyFields-0-0',
-      'MetaFields-3-3',
-      'SmartFields-0-0',
-    ]);
+    waitFor(() => {
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) =>
+            `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}-${
+              fieldGroups![key as FieldsGroupNames]?.fieldCount
+            }`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0-0',
+        'SelectedFields-0-0',
+        'PopularFields-0-0',
+        'AvailableFields-25-25',
+        'UnmappedFields-28-28',
+        'EmptyFields-0-0',
+        'MetaFields-3-3',
+        'SmartFields-0-0',
+      ]);
+    });
 
     act(() => {
       result.current.fieldListFiltersProps.onChangeNameFilter('@');
@@ -372,11 +375,11 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields,
       services: mockedServices,
     };
-    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+    const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     const scrollToTopResetCounter1 = result.current.fieldListGroupedProps.scrollToTopResetCounter;
 
@@ -391,7 +394,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
   });
 
   it('should work correctly when custom unsupported fields are skipped', async () => {
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
@@ -400,28 +403,28 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitForNextUpdate();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-23',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-0',
+        'AvailableFields-23',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
+    });
   });
 
   it('should work correctly when selected fields are present', async () => {
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
@@ -431,24 +434,24 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitForNextUpdate();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-4',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-4',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
+    });
   });
 
   it('should work correctly for text-based queries (no data view)', async () => {
@@ -530,7 +533,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
           };
         }
       });
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
@@ -538,8 +541,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
         onOverrideFieldGroupDetails,
       },
     });
-
-    await waitForNextUpdate();
 
     const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
@@ -571,10 +572,9 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       })
     );
 
-    const { result, waitForNextUpdate, rerender } = renderHook(useGroupedFields, {
+    const { result, rerender } = renderHook(useGroupedFields, {
       initialProps: props,
     });
-    await waitForNextUpdate();
 
     let fieldListGroupedProps = result.current.fieldListGroupedProps;
     fieldGroups = fieldListGroupedProps.fieldGroups;
@@ -603,8 +603,6 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields: anotherDataView.fields,
     });
 
-    await waitForNextUpdate();
-
     fieldListGroupedProps = result.current.fieldListGroupedProps;
     fieldGroups = fieldListGroupedProps.fieldGroups;
 
@@ -632,7 +630,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     // `bytes` is popular, but we are skipping it here to test that it would not be shown under Popular and Available
     const onSupportedFieldFilter = jest.fn((field) => field.name !== 'bytes');
 
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
@@ -642,32 +640,32 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitForNextUpdate();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-3',
+        'AvailableFields-24',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
 
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-3',
-      'AvailableFields-24',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
-
-    expect(fieldGroups.PopularFields?.fields.map((field) => field.name).join(',')).toBe(
-      '@timestamp,time,ssl'
-    );
+      expect(fieldGroups.PopularFields?.fields.map((field) => field.name).join(',')).toBe(
+        '@timestamp,time,ssl'
+      );
+    });
   });
 
-  it('should work correctly when global filters are set', async () => {
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+  it('should work correctly when global filters are set', () => {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields: [],
@@ -676,14 +674,14 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitForNextUpdate();
-
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-    expect(fieldGroups).toMatchSnapshot();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+      expect(fieldGroups).toMatchSnapshot();
+    });
   });
 
   it('should work correctly and show unmapped fields separately', async () => {
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields: allFieldsIncludingUnmapped,
@@ -691,24 +689,24 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitForNextUpdate();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
-
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-28',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-28',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
+    });
   });
 
   it('should work correctly when custom selected fields are provided', async () => {
@@ -717,7 +715,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       allFields[2],
       allFields[0],
     ];
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
@@ -726,30 +724,30 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitForNextUpdate();
+    waitFor(() => {
+      const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
 
-    const fieldGroups = result.current.fieldListGroupedProps.fieldGroups;
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-3',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-0',
+      ]);
 
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-3',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-0',
-    ]);
-
-    expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
+      expect(fieldGroups.SelectedFields?.fields).toBe(customSortedFields);
+    });
   });
 
   it('should include filters props', async () => {
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
@@ -757,16 +755,16 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitForNextUpdate();
-
     const { fieldListFiltersProps, fieldListGroupedProps } = result.current;
-    const fieldGroups = fieldListGroupedProps.fieldGroups;
+    waitFor(() => {
+      const fieldGroups = fieldListGroupedProps.fieldGroups;
 
-    expect(fieldGroups.AvailableFields?.fields?.length).toBe(25);
-    expect(fieldGroups.AvailableFields?.fieldSearchHighlight).toBeUndefined();
-    expect(fieldListFiltersProps.screenReaderDescriptionId).toBe(
-      fieldListGroupedProps.screenReaderDescriptionId
-    );
+      expect(fieldGroups.AvailableFields?.fields?.length).toBe(25);
+      expect(fieldGroups.AvailableFields?.fieldSearchHighlight).toBeUndefined();
+      expect(fieldListFiltersProps.screenReaderDescriptionId).toBe(
+        fieldListGroupedProps.screenReaderDescriptionId
+      );
+    });
 
     act(() => {
       fieldListFiltersProps.onChangeNameFilter('Me');
@@ -805,7 +803,7 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     const additionalFieldGroups = {
       smartFields,
     };
-    const { result, waitForNextUpdate } = renderHook(useGroupedFields, {
+    const { result } = renderHook(useGroupedFields, {
       initialProps: {
         dataViewId: dataView.id!,
         allFields,
@@ -814,23 +812,25 @@ describe('UnifiedFieldList useGroupedFields()', () => {
       },
     });
 
-    await waitForNextUpdate();
-    const fieldListGroupedProps = result.current.fieldListGroupedProps;
-    const fieldGroups = fieldListGroupedProps.fieldGroups;
-    expect(fieldGroups.SmartFields?.fields?.length).toBe(1);
-    expect(
-      Object.keys(fieldGroups!).map(
-        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
-      )
-    ).toStrictEqual([
-      'SpecialFields-0',
-      'SelectedFields-0',
-      'PopularFields-0',
-      'AvailableFields-25',
-      'UnmappedFields-0',
-      'EmptyFields-0',
-      'MetaFields-3',
-      'SmartFields-1',
-    ]);
+    waitFor(() => {
+      const fieldListGroupedProps = result.current.fieldListGroupedProps;
+      const fieldGroups = fieldListGroupedProps.fieldGroups;
+
+      expect(fieldGroups.SmartFields?.fields?.length).toBe(1);
+      expect(
+        Object.keys(fieldGroups!).map(
+          (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+        )
+      ).toStrictEqual([
+        'SpecialFields-0',
+        'SelectedFields-0',
+        'PopularFields-0',
+        'AvailableFields-25',
+        'UnmappedFields-0',
+        'EmptyFields-0',
+        'MetaFields-3',
+        'SmartFields-1',
+      ]);
+    });
   });
 });

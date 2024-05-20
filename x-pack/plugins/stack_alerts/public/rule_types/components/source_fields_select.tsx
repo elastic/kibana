@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { uniqBy } from 'lodash';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+// import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { MAX_SELECTABLE_SOURCE_FIELDS, validSourceFields } from '../../../common/constants';
@@ -23,7 +23,7 @@ interface SourceFieldsOption {
 interface SourceFieldsProps {
   esFields: FieldOption[];
   onChangeSourceFields: (selectedSourceFields: SourceField[]) => void;
-  errors: string | string[] | IErrorObject;
+  errors: string | string[];
   sourceFields?: SourceField[];
 }
 

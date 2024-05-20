@@ -7,7 +7,7 @@
  */
 
 import * as React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import * as conn from '..';
 
@@ -32,9 +32,10 @@ export const openConnectionDetails = async ({ props, start }: OpenConnectionDeta
         <conn.ConnectionDetailsFlyoutContent />
       </conn.KibanaConnectionDetailsProvider>
     );
-    ReactDOM.render(reactElement, element);
+    const root = createRoot(element);
+    root.render(reactElement);
 
-    return () => ReactDOM.unmountComponentAtNode(element);
+    return () => root.unmount();
   };
   const flyoutRef = start.core.overlays.openFlyout(mount, { size: 's' });
 

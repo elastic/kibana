@@ -25,6 +25,7 @@ export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
 export const React = require('react');
 export const ReactDom = require('react-dom');
+export const ReactDomClient = require('react-dom/client');
 export const ReactDomServer = require('react-dom/server');
 // eslint-disable-next-line @kbn/eslint/module_migration
 export const ReactRouter = require('react-router');

@@ -7,7 +7,7 @@
  */
 
 import React, { useCallback, useState, useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { EuiWrappingPopover, EuiContextMenu } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-plugin/common';
@@ -190,12 +190,6 @@ export function AlertsPopover({
   );
 }
 
-function closeAlertsPopover() {
-  ReactDOM.unmountComponentAtNode(container);
-  document.body.removeChild(container);
-  isOpen = false;
-}
-
 export function openAlertsPopover({
   anchorElement,
   stateContainer,
@@ -209,6 +203,14 @@ export function openAlertsPopover({
   adHocDataViews: DataView[];
   isEsqlMode?: boolean;
 }) {
+  const root = createRoot(container);
+
+  function closeAlertsPopover() {
+    root.unmount();
+    document.body.removeChild(container);
+    isOpen = false;
+  }
+
   if (isOpen) {
     closeAlertsPopover();
     return;
@@ -231,5 +233,6 @@ export function openAlertsPopover({
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
-  ReactDOM.render(element, container);
+
+  root.render(element);
 }

@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import ReactDOM from 'react-dom';
 import { EuiPopoverTitle, EuiSwitch, EuiWrappingPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -76,12 +75,6 @@ export function SettingsMenu({
   );
 }
 
-function closeSettingsMenu() {
-  ReactDOM.unmountComponentAtNode(container);
-  document.body.removeChild(container);
-  isMenuOpen = false;
-}
-
 /**
  * Toggles the settings menu
  *
@@ -92,6 +85,14 @@ export function toggleSettingsMenuOpen(props: {
   anchorElement: HTMLElement;
   startServices: StartServices;
 }) {
+  const root = createRoot(container);
+
+  function closeSettingsMenu() {
+    root.unmount();
+    document.body.removeChild(container);
+    isMenuOpen = false;
+  }
+
   if (isMenuOpen) {
     closeSettingsMenu();
     return;
@@ -107,5 +108,5 @@ export function toggleSettingsMenuOpen(props: {
       </Provider>
     </KibanaRenderContextProvider>
   );
-  ReactDOM.render(element, container);
+  root.render(element);
 }

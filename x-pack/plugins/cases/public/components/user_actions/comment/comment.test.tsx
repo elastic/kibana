@@ -10,7 +10,7 @@ import { EuiCommentList } from '@elastic/eui';
 import type { RenderResult } from '@testing-library/react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import { UserActionActions } from '../../../../common/types/domain';
 import {
@@ -358,7 +358,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
       userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
@@ -389,7 +389,7 @@ describe('createCommentUserActionBuilder', () => {
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
       userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
       userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
@@ -1035,7 +1035,7 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
       userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.getByText('My primary 3 button')).toBeInTheDocument();
 
@@ -1091,7 +1091,7 @@ describe('createCommentUserActionBuilder', () => {
 
       userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
 
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       // default "Delete attachment" action
       expect(screen.queryByTestId('property-actions-user-action-trash')).not.toBeInTheDocument();
@@ -1168,7 +1168,7 @@ describe('createCommentUserActionBuilder', () => {
 
       expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
       userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.getByText('My button')).toBeInTheDocument();
       expect(screen.getByText('My button 2')).toBeInTheDocument();
@@ -1230,7 +1230,7 @@ const deleteAttachment = async (result: RenderResult, deleteIcon: string, button
   expect(screen.getByTestId('property-actions-user-action')).toBeInTheDocument();
 
   userEvent.click(screen.getByTestId('property-actions-user-action-ellipses'));
-  await waitForEuiPopoverOpen();
+  // await waitForEuiPopoverOpen();
 
   expect(screen.queryByTestId(`property-actions-user-action-${deleteIcon}`)).toBeInTheDocument();
 

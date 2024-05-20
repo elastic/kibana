@@ -6,7 +6,7 @@
  */
 
 import React, { type FC } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
@@ -57,7 +57,9 @@ export const renderApp = (
     },
   });
 
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaRenderContextProvider {...appDependencies}>
       <QueryClientProvider client={queryClient}>
         <KibanaContextProvider services={appDependencies}>
@@ -68,11 +70,10 @@ export const renderApp = (
           </EnabledFeaturesContextProvider>
         </KibanaContextProvider>
       </QueryClientProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 };

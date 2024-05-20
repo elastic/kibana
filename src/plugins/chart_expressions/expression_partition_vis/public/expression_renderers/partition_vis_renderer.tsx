@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -88,9 +88,9 @@ export const getPartitionVisRenderer: (
     handlers
   ) => {
     const { core, plugins } = getStartDeps();
-
+    const root = createRoot(domNode);
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const renderComplete = () => {
@@ -128,7 +128,7 @@ export const getPartitionVisRenderer: (
 
     handlers.event(chartSizeEvent);
 
-    render(
+    root.render(
       <KibanaRenderContextProvider {...core}>
         <div css={partitionVisRenderer}>
           <PartitionVisComponent
@@ -148,8 +148,7 @@ export const getPartitionVisRenderer: (
             hasOpenedOnAggBasedEditor={hasOpenedOnAggBasedEditor}
           />
         </div>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

@@ -478,7 +478,7 @@ The more interesting logic is in `renderApp`:
 ```typescript
 /** public/application.ts */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { switchMap } from 'rxjs';
 
 import { AppMountParameters, CoreStart } from 'src/core/public';
@@ -500,14 +500,14 @@ export const renderApp = (
   })).subscribe();
 
   // Render app
-  ReactDOM.render(
+  root.render(
     <AppRoot routerHistory={history} core={core} plugins={plugins} />,
     element
   );
 
   return () => {
     // Unmount UI
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
     // Close any subscriptions
     pollingSubscription.unsubscribe();
     // Make chrome visible again

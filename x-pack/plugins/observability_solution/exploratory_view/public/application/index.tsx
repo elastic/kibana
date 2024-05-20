@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
@@ -68,7 +68,9 @@ export const renderApp = ({
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <ApplicationUsageTrackingProvider>
         <KibanaContextProvider
@@ -100,10 +102,9 @@ export const renderApp = ({
           </PluginContext.Provider>
         </KibanaContextProvider>
       </ApplicationUsageTrackingProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

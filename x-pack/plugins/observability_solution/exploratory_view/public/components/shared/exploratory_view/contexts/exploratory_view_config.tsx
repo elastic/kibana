@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, PropsWithChildren } from 'react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AppDataType, ConfigProps, ReportViewType, SeriesConfig } from '../types';
@@ -42,7 +42,7 @@ export function ExploratoryViewContextProvider({
   asPanel = true,
   theme$,
   ...startServices
-}: { children: JSX.Element } & ExploratoryViewContextValue) {
+}: PropsWithChildren<ExploratoryViewContextValue>) {
   const [isEditMode, setIsEditMode] = useState(false);
 
   const value = {

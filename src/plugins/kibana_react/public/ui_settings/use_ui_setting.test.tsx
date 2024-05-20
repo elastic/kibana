@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { act, Simulate } from 'react-dom/test-utils';
 import { useGlobalUiSetting$, useUiSetting$ } from './use_ui_setting';
 import { createKibanaReactContext } from '../context';
@@ -63,12 +63,12 @@ describe('useUiSetting', () => {
   test('returns setting value', async () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumer setting="foo" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     const strong = container!.querySelector('strong');
@@ -80,12 +80,12 @@ describe('useUiSetting', () => {
   test('calls uiSettings.get() method with correct key and default value', async () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumer setting="foo" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(core.uiSettings!.get).toHaveBeenCalledTimes(0);
@@ -125,12 +125,12 @@ describe('useGlobalUiSetting', () => {
   test('returns setting value', async () => {
     const [core] = mockGlobal();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumer setting="foo" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     const strong = container!.querySelector('strong');
@@ -142,12 +142,12 @@ describe('useGlobalUiSetting', () => {
   test('calls uiSettings.get() method with correct key and default value', async () => {
     const [core] = mockGlobal();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumer setting="fooBar" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(core.settings!.globalClient.get).toHaveBeenCalledTimes(1);
@@ -174,12 +174,12 @@ describe('useUiSetting$', () => {
   test('synchronously renders setting value', async () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumerX setting="foo" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     const strong = container!.querySelector('strong');
@@ -191,12 +191,12 @@ describe('useUiSetting$', () => {
   test('calls Core with correct arguments', async () => {
     const core = coreMock.createStart();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumerX setting="non_existing" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(core.settings!.client.get).toHaveBeenCalledWith('non_existing', 'DEFAULT');
@@ -207,12 +207,12 @@ describe('useUiSetting$', () => {
     const { Provider } = createKibanaReactContext(core);
 
     expect(useObservableSpy).toHaveBeenCalledTimes(0);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumerX setting="theme:darkMode" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(useObservableSpy).toHaveBeenCalledTimes(1);
@@ -222,12 +222,12 @@ describe('useUiSetting$', () => {
   test('can set new hook value', async () => {
     const [core] = mock();
     const { Provider } = createKibanaReactContext(core);
+    const root = createRoot(container!);
 
-    ReactDOM.render(
+    root.render(
       <Provider>
         <TestConsumerX setting="a" newValue="c" />
-      </Provider>,
-      container
+      </Provider>
     );
 
     expect(core.uiSettings!.set).toHaveBeenCalledTimes(0);

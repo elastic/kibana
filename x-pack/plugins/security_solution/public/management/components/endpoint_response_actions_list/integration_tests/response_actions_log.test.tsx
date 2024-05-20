@@ -9,7 +9,7 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
   type AppContextTestRender,
@@ -453,7 +453,7 @@ describe('Response actions history', () => {
 
       // toggle page size popover
       userEvent.click(getByTestId('tablePaginationPopoverButton'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       // click size 20
       userEvent.click(getByTestId('tablePagination-20-rows'));
 
@@ -606,7 +606,7 @@ describe('Response actions history', () => {
 
       const quickMenuButton = getByTestId('superDatePickerToggleQuickMenuButton');
       userEvent.click(quickMenuButton);
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       const toggle = getByTestId('superDatePickerToggleRefreshButton');
       const intervalInput = getByTestId('superDatePickerRefreshIntervalInput');
@@ -643,7 +643,7 @@ describe('Response actions history', () => {
 
       // pick another relative date
       userEvent.click(quickMenuButton);
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
     });

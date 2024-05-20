@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RenderHookResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import type {
   UseFetchRelatedAlertsBySameSourceEventParams,
   UseFetchRelatedAlertsBySameSourceEventResult,
@@ -21,8 +21,8 @@ const scopeId = 'scopeId';
 
 describe('useFetchRelatedAlertsBySameSourceEvent', () => {
   let hookResult: RenderHookResult<
-    UseFetchRelatedAlertsBySameSourceEventParams,
-    UseFetchRelatedAlertsBySameSourceEventResult
+    UseFetchRelatedAlertsBySameSourceEventResult,
+    UseFetchRelatedAlertsBySameSourceEventParams
   >;
 
   it('should return loading true while data is loading', () => {

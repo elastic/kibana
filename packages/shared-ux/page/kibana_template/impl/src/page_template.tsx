@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC } from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import {
@@ -17,7 +17,7 @@ import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-typ
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
-export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
+export const _KibanaPageTemplate: FC<PropsWithChildren<KibanaPageTemplateProps>> = ({
   className,
   children,
   solutionNav,

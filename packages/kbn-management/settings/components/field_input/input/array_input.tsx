@@ -13,6 +13,7 @@ import { getFieldInputValue } from '@kbn/management-settings-utilities';
 import { useUpdate } from '@kbn/management-settings-utilities';
 
 import { debounce } from 'lodash';
+import { OnInputChangeFn } from '@kbn/management-settings-types';
 import { useServices } from '../services';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
@@ -39,7 +40,7 @@ export const ArrayInput = ({
   const onUpdate = useUpdate({ onInputChange, field });
 
   const updateValue = useCallback(
-    async (newValue: string, onUpdateFn) => {
+    async (newValue: string, onUpdateFn: OnInputChangeFn<'array'>) => {
       const parsedValue = newValue
         .replace(REGEX, ',')
         .split(',')

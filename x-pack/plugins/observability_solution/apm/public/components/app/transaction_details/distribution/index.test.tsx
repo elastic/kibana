@@ -55,6 +55,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
   }) as unknown as ApmPluginContextValue;
 
   return (
+    // @ts-expect-error
     <IntlProvider locale="en">
       <EuiThemeProvider darkMode={false}>
         <KibanaReactContext.Provider>

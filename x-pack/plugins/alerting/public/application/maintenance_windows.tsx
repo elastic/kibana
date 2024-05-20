@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
@@ -82,7 +82,9 @@ export const renderApp = ({
 
   const queryClient = new QueryClient();
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaRenderContextProvider i18n={i18n} theme={theme}>
       <KibanaContextProvider
         services={{
@@ -98,10 +100,9 @@ export const renderApp = ({
           </QueryClientProvider>
         </Router>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { ReactWrapper, mount, shallow } from 'enzyme';
+import { shallow } from 'enzyme';
 import {
   TabbedTableListView,
   TableListTabParentProps,
@@ -15,7 +15,7 @@ import {
 } from './tabbed_table_list_view';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiPageTemplate } from '@elastic/eui';
-import { act } from 'react-dom/test-utils';
+import { act, waitFor, render } from '@testing-library/react';
 
 // Mock the necessary props for the component
 const title = 'Test Title';
@@ -96,33 +96,44 @@ describe('TabbedTableListView', () => {
   it('should switch tabs when props change', async () => {
     const changeActiveTab = jest.fn();
 
-    let wrapper: ReactWrapper | undefined;
+    const {
+      container: wrapper,
+      getByText,
+      debug,
+      getAllByRole,
+      rerender,
+    } = render(
+      <TabbedTableListView
+        title={title}
+        description={description}
+        headingId={headingId}
+        children={children}
+        tabs={tabs}
+        activeTabId={'tab-1'}
+        changeActiveTab={changeActiveTab}
+      />
+    );
+
+    await waitFor(() => {
+      expect(getByText(tableList1)).toBeInTheDocument();
+    });
+
     await act(async () => {
-      wrapper = mount(
+      rerender(
         <TabbedTableListView
           title={title}
           description={description}
           headingId={headingId}
           children={children}
           tabs={tabs}
-          activeTabId={'tab-1'}
+          activeTabId={'tab-2'}
           changeActiveTab={changeActiveTab}
         />
       );
     });
 
-    if (!wrapper) {
-      throw new Error("enzyme wrapper didn't initialize");
-    }
-
-    expect(wrapper.find(EuiPageTemplate.Section).text()).toContain(tableList1);
-
-    await act(async () => {
-      wrapper?.setProps({
-        activeTabId: 'tab-2',
-      });
+    await waitFor(() => {
+      expect(getByText(tableList2)).toBeInTheDocument();
     });
-
-    expect(wrapper.find(EuiPageTemplate.Section).text()).toContain(tableList2);
   });
 });

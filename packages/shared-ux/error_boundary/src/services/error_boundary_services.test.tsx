@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { render } from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -30,7 +30,10 @@ describe('<KibanaErrorBoundaryProvider>', () => {
         </KibanaErrorBoundary>
       </KibanaErrorBoundaryProvider>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+
+    await act(async () => {
+      fireEvent.click(await findByTestId('clickForErrorBtn'));
+    });
 
     expect(reportEventSpy).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
@@ -58,7 +61,10 @@ describe('<KibanaErrorBoundaryProvider>', () => {
         </KibanaErrorBoundary>
       </KibanaErrorBoundaryProvider>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+
+    await act(async () => {
+      fireEvent.click(await findByTestId('clickForErrorBtn'));
+    });
 
     expect(reportEventSpy2).not.toBeCalled();
     expect(reportEventSpy1).toBeCalledWith('fatal-error-react', {

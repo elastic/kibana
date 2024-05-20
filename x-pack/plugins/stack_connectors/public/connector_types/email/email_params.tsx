@@ -66,7 +66,7 @@ export const EmailParamsFields = ({
     <>
       <EuiFormRow
         fullWidth
-        error={errors.to}
+        error={<>{errors.to}</>}
         isInvalid={isToInvalid}
         label={i18n.translate('xpack.stackConnectors.components.email.recipientTextFieldLabel', {
           defaultMessage: 'To',

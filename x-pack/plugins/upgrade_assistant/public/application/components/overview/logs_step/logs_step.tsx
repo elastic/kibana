@@ -110,7 +110,9 @@ interface LogStepProps {
 
 const LogStepDescription = () => (
   <EuiText>
-    <p>{i18nTexts.logsStepDescription}</p>
+    <p>
+      <>{i18nTexts.logsStepDescription}</>
+    </p>
   </EuiText>
 );
 
@@ -161,7 +163,9 @@ const LogsStep = ({
             title={i18nTexts.missingClusterPrivilegesTitle}
             data-test-subj="missingClusterPrivilegesCallout"
           >
-            <p>{i18nTexts.missingClusterPrivilegesDescription(privilegesMissing)}</p>
+            <p>
+              <>{i18nTexts.missingClusterPrivilegesDescription(privilegesMissing)}</>
+            </p>
           </EuiCallOut>
         )}
 
@@ -174,7 +178,9 @@ const LogsStep = ({
             title={i18nTexts.missingIndexPrivilegesTitle}
             data-test-subj="missingIndexPrivilegesCallout"
           >
-            <p>{i18nTexts.missingIndexPrivilegesDescription(privilegesMissing)}</p>
+            <p>
+              <>{i18nTexts.missingIndexPrivilegesDescription(privilegesMissing)}</>
+            </p>
           </EuiCallOut>
         )}
       </>
@@ -194,7 +200,9 @@ const LogsStep = ({
         data-test-subj="deprecationLogsErrorCallout"
       >
         <p>
-          {error.statusCode} - {error.message}
+          <>
+            {error.statusCode} - {error.message}
+          </>
         </p>
 
         <EuiButton
@@ -218,7 +226,7 @@ const LogsStep = ({
 
           <EuiText>
             <p data-test-subj="logsCountDescription">
-              {i18nTexts.logsCountDescription(logsCount.count, checkpoint)}
+              <>{i18nTexts.logsCountDescription(logsCount.count, checkpoint)}</>
             </p>
           </EuiText>
 

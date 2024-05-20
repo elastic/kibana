@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
@@ -46,11 +46,13 @@ export const getRevealImageRenderer =
       handlers: IInterpreterRenderHandlers
     ) => {
       const { RevealImageComponent } = await import('../components/reveal_image_component');
+      const root = createRoot(domNode);
+
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
             <KibanaThemeProvider theme={{ theme$ }}>
@@ -59,8 +61,7 @@ export const getRevealImageRenderer =
               </I18nProvider>
             </KibanaThemeProvider>
           </KibanaErrorBoundary>
-        </KibanaErrorBoundaryProvider>,
-        domNode
+        </KibanaErrorBoundaryProvider>
       );
     },
   });

@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -141,13 +141,13 @@ export const App = (props: {
                                 onApplyCb={() => {
                                   setIsinlineEditingVisible(false);
                                   if (container) {
-                                    ReactDOM.unmountComponentAtNode(container);
+                                    createRoot(container).unmount();
                                   }
                                 }}
                                 onCancelCb={() => {
                                   setIsinlineEditingVisible(false);
                                   if (container) {
-                                    ReactDOM.unmountComponentAtNode(container);
+                                    createRoot(container).unmount();
                                   }
                                 }}
                                 isESQL
@@ -164,7 +164,7 @@ export const App = (props: {
                             setIsinlineEditingVisible(false);
                             setPanelActive(null);
                             if (container) {
-                              ReactDOM.unmountComponentAtNode(container);
+                              createRoot(container).unmount();
                             }
                           }}
                         />

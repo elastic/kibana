@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider } from '../data_quality_panel/data_quality_context';
@@ -47,23 +47,29 @@ describe('useMappings', () => {
     beforeEach(async () => {
       mockHttpFetch.mockResolvedValue(mockMappingsResponse);
 
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
+      const { result } = renderHook(() => useMappings(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       mappingsResult = await result.current;
     });
 
-    test('it returns the expected mappings', async () => {
-      expect(mappingsResult?.indexes).toEqual(mockMappingsResponse);
+    test('it returns the expected mappings', () => {
+      waitFor(() => {
+        expect(mappingsResult?.indexes).toEqual(mockMappingsResponse);
+      });
     });
 
-    test('it returns loading: false, because the data has loaded', async () => {
-      expect(mappingsResult?.loading).toBe(false);
+    test('it returns loading: false, because the data has loaded', () => {
+      waitFor(() => {
+        expect(mappingsResult?.loading).toBe(false);
+      });
     });
 
-    test('it returns a null error, because no errors occurred', async () => {
-      expect(mappingsResult?.error).toBeNull();
+    test('it returns a null error, because no errors occurred', () => {
+      waitFor(() => {
+        expect(mappingsResult?.error).toBeNull();
+      });
     });
   });
 
@@ -74,25 +80,30 @@ describe('useMappings', () => {
     beforeEach(async () => {
       mockHttpFetch.mockRejectedValue(new Error(errorMessage));
 
-      const { result, waitForNextUpdate } = renderHook(() => useMappings(pattern), {
+      const { result } = renderHook(() => useMappings(pattern), {
         wrapper: ContextWrapper,
       });
-      await waitForNextUpdate();
       mappingsResult = await result.current;
     });
 
-    test('it returns null mappings, because an error occurred', async () => {
-      expect(mappingsResult?.indexes).toBeNull();
+    test('it returns null mappings, because an error occurred', () => {
+      waitFor(() => {
+        expect(mappingsResult?.indexes).toBeNull();
+      });
     });
 
-    test('it returns loading: false, because data loading reached a terminal state', async () => {
-      expect(mappingsResult?.loading).toBe(false);
+    test('it returns loading: false, because data loading reached a terminal state', () => {
+      waitFor(() => {
+        expect(mappingsResult?.loading).toBe(false);
+      });
     });
 
-    test('it returns the expected error', async () => {
-      expect(mappingsResult?.error).toEqual(
-        ERROR_LOADING_MAPPINGS({ details: errorMessage, patternOrIndexName: pattern })
-      );
+    test('it returns the expected error', () => {
+      waitFor(() => {
+        expect(mappingsResult?.error).toEqual(
+          ERROR_LOADING_MAPPINGS({ details: errorMessage, patternOrIndexName: pattern })
+        );
+      });
     });
   });
 });

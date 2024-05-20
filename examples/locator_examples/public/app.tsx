@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { EuiPageBody, EuiPageTemplate, EuiPageSection, EuiText } from '@elastic/eui';
 import { Redirect, useLocation } from 'react-router-dom';
@@ -70,7 +70,7 @@ export const LinksExample: React.FC<{
 };
 
 export const renderApp = (props: { appBasePath: string }, { element }: AppMountParameters) => {
-  ReactDOM.render(<LinksExample {...props} />, element);
-
-  return () => ReactDOM.unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<LinksExample {...props} />);
+  return () => root.unmount();
 };

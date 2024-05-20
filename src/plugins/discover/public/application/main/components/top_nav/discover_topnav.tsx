@@ -11,6 +11,7 @@ import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { TextBasedLanguages } from '@kbn/esql-utils';
+import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import {
   useSavedSearch,
   useSavedSearchHasChanged,
@@ -150,7 +151,9 @@ export const DiscoverTopNav = ({
     }
   };
 
-  const onEsqlSavedAndExit = useCallback(
+  const onEsqlSavedAndExit = useCallback<
+    NonNullable<TopNavMenuProps<AggregateQuery>['onTextBasedSavedAndExit']>
+  >(
     ({ onSave, onCancel }) => {
       onSaveSearch({
         savedSearch: stateContainer.savedSearchState.getState(),

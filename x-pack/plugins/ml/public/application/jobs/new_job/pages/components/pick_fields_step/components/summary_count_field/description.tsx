@@ -14,6 +14,7 @@ import type { Validation } from '../../../../../common/job_validator';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 interface Props {
+  children: React.ReactNode;
   validation: Validation;
 }
 

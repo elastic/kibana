@@ -15,7 +15,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../common/telemetry_events';
 import { ConfigSchema } from '..';
 import { ObservabilityOnboardingHeaderActionMenu } from './shared/header_action_menu';
@@ -113,10 +113,11 @@ interface RenderAppProps {
 
 export const renderApp = (props: RenderAppProps) => {
   const { element } = props.appMountParameters;
+  const root = createRoot(element);
 
-  ReactDOM.render(<ObservabilityOnboardingAppRoot {...props} />, element);
+  root.render(<ObservabilityOnboardingAppRoot {...props} />);
   return () => {
     props.corePlugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

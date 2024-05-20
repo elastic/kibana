@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
+import type {
+  Criteria,
+  Direction,
+  EuiBasicTableProps,
+  Pagination,
+  PropertySort,
+} from '@elastic/eui';
 import { useCallback, useMemo } from 'react';
 
 import type { DataVisualizerTableState } from '../../../../../common/types';
@@ -25,8 +31,8 @@ export function useTableSettings<TypeOfItem extends object>(
 ): UseTableSettingsReturnValue<TypeOfItem> {
   const { pageIndex, pageSize, sortField, sortDirection } = pageState;
 
-  const onTableChange: EuiBasicTableProps<TypeOfItem>['onChange'] = useCallback(
-    ({ page, sort }) => {
+  const onTableChange = useCallback(
+    ({ page, sort }: Criteria<TypeOfItem>) => {
       const result = {
         ...pageState,
         pageIndex: page?.index ?? pageState.pageIndex,

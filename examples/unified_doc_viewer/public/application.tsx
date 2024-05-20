@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -21,10 +21,11 @@ export const renderApp = (
   { data }: StartDeps,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(<UnifiedDocViewerExamplesApp data={data} />, element);
+  const root = createRoot(element);
+  root.render(<UnifiedDocViewerExamplesApp data={data} />);
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };
 

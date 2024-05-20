@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import type { HttpSetup } from '@kbn/core/public';
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -36,10 +37,12 @@ export const renderQuery = async (
   hook: () => any,
   waitForHook: 'isSuccess' | 'isLoading' | 'isError' = 'isSuccess'
 ) => {
-  const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
+  const wrapper: React.JSXElementConstructor<{ children: React.ReactNode }> = ({
+    children,
+  }: PropsWithChildren): React.ReactNode => (
     <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
   );
-  const { result: resultHook, waitFor } = renderHook(() => hook(), {
+  const { result: resultHook } = renderHook(() => hook(), {
     wrapper,
   });
   await waitFor(() => resultHook.current[waitForHook]);
@@ -50,7 +53,7 @@ export const renderMutation = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hook: () => any
 ) => {
-  const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
+  const wrapper = ({ children }: PropsWithChildren): React.ReactNode => (
     <ReactQueryClientProvider>{children}</ReactQueryClientProvider>
   );
   const { result: resultHook } = renderHook(() => hook(), {

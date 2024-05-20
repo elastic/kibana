@@ -16,7 +16,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, PropsWithChildren } from 'react';
 import { useHistory } from 'react-router-dom';
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
@@ -36,15 +36,14 @@ export function ProfilingAppPageTemplate({
     defaultMessage: 'Universal Profiling',
   }),
   showBetaBadge = false,
-}: {
-  children: React.ReactElement;
+}: PropsWithChildren<{
   tabs?: EuiPageHeaderContentProps['tabs'];
   hideSearchBar?: boolean;
   noDataConfig?: NoDataPageProps;
   restrictWidth?: boolean;
   pageTitle?: React.ReactNode;
   showBetaBadge?: boolean;
-}) {
+}>) {
   const {
     start: { observabilityShared },
   } = useProfilingDependencies();

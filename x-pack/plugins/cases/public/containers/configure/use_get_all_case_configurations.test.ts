@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useGetAllCaseConfigurations } from './use_get_all_case_configurations';
 import * as api from './api';
 import type { AppMockRenderer } from '../../common/mock';
@@ -32,11 +32,11 @@ describe('Use get all case configurations hook', () => {
       { id: 'my-configuration-3', owner: '3' },
     ]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetAllCaseConfigurations(), {
+    const { result } = renderHook(() => useGetAllCaseConfigurations(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     /**
      * Ensures that the initial data is returned≠
@@ -70,11 +70,11 @@ describe('Use get all case configurations hook', () => {
     const spy = jest.spyOn(api, 'getCaseConfigure');
     spy.mockResolvedValue([]);
 
-    const { result, waitForNextUpdate } = renderHook(() => useGetAllCaseConfigurations(), {
+    const { result } = renderHook(() => useGetAllCaseConfigurations(), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     /**
      * Ensures that the initial data is returned≠

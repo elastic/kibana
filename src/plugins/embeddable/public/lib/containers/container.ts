@@ -322,7 +322,9 @@ export abstract class Container<
   public destroy() {
     super.destroy();
     for (const child of Object.values(this.children$.value)) {
-      (child as IEmbeddable)?.destroy?.();
+      setTimeout(() => {
+        (child as IEmbeddable)?.destroy?.();
+      });
     }
     this.subscription?.unsubscribe();
   }

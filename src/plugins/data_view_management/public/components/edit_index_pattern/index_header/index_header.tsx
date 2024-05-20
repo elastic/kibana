@@ -20,6 +20,7 @@ interface IndexHeaderProps {
   refreshIndexPatternClick?: () => void;
   canSave: boolean;
   isRefreshing?: boolean;
+  children?: React.ReactNode;
 }
 
 const setDefaultAriaLabel = i18n.translate('indexPatternManagement.editDataView.setDefaultAria', {

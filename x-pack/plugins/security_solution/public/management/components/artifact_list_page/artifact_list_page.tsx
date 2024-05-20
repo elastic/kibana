@@ -349,6 +349,7 @@ export const ArtifactListPage = memo<ArtifactListPageProps>(
               ItemComponent={ArtifactEntryCard}
               itemComponentProps={handleCardProps}
               onChange={handlePaginationChange}
+              // @ts-expect-error
               error={error}
               loading={isLoading}
               pagination={uiPagination}

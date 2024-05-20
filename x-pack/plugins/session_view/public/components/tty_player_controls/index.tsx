@@ -64,7 +64,7 @@ export const TTYPlayerControls = ({
   };
 
   const onLineChange: EuiRangeProps['onChange'] = useCallback(
-    (event) => {
+    (event: any) => {
       const line = parseInt(event.currentTarget.value || '0', 10);
       onSeekLine(line);
     },

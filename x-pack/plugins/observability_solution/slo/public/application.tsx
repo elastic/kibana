@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
@@ -108,7 +108,8 @@ export const renderApp = ({
     ],
   });
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <PresentationContextProvider>
         <ApplicationUsageTrackingProvider>
@@ -152,8 +153,7 @@ export const renderApp = ({
           </KibanaThemeProvider>
         </ApplicationUsageTrackingProvider>
       </PresentationContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
@@ -163,6 +163,6 @@ export const renderApp = ({
     // these sessions.
     plugins.data.search.session.clear();
     unregisterPrompts?.();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

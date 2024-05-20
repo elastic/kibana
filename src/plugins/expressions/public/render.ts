@@ -158,6 +158,7 @@ export class ExpressionRenderHandler {
     this.eventsSubject.complete();
     this.updateSubject.complete();
     if (this.destroyFn) {
+      console.error('ss', this.destroyFn);
       this.destroyFn();
     }
   };

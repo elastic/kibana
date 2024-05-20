@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import type { SuggestUsersPopoverProps } from './suggest_users_popover';
 import { SuggestUsersPopover } from './suggest_users_popover';
 import { userProfiles } from '../../../containers/user_profiles/api.mock';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { AssigneeWithProfile } from '../../user_profiles/types';
 
@@ -46,7 +46,7 @@ describe('SuggestUsersPopover', () => {
     const props = { ...defaultProps, onUsersChange };
     appMockRender.render(<SuggestUsersPopover {...props} />);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.paste(await screen.findByPlaceholderText('Search users'), 'dingo');
     userEvent.click(await screen.findByText('WD'));
@@ -72,7 +72,7 @@ describe('SuggestUsersPopover', () => {
     const props = { ...defaultProps, onUsersChange };
     appMockRender.render(<SuggestUsersPopover {...props} />);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.paste(await screen.findByPlaceholderText('Search users'), 'elastic');
     userEvent.click(await screen.findByText('WD'));
@@ -114,7 +114,7 @@ describe('SuggestUsersPopover', () => {
     };
     appMockRender.render(<SuggestUsersPopover {...props} />);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.paste(await screen.findByPlaceholderText('Search users'), 'elastic');
     userEvent.click(await screen.findByText('WD'));
@@ -158,7 +158,7 @@ describe('SuggestUsersPopover', () => {
   it('does not show the assigned users total if there are no assigned users', async () => {
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
 
@@ -171,7 +171,7 @@ describe('SuggestUsersPopover', () => {
   it('shows the 1 assigned total after clicking on a user', async () => {
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('assigned')).not.toBeInTheDocument();
 
@@ -188,7 +188,7 @@ describe('SuggestUsersPopover', () => {
     };
     appMockRender.render(<SuggestUsersPopover {...props} />);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('1 assigned')).toBeInTheDocument();
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
@@ -202,7 +202,7 @@ describe('SuggestUsersPopover', () => {
     };
     appMockRender.render(<SuggestUsersPopover {...props} />);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('case-view-assignees-edit-button')).not.toBeDisabled();
 
@@ -214,7 +214,7 @@ describe('SuggestUsersPopover', () => {
   it('shows results initially', async () => {
     appMockRender.render(<SuggestUsersPopover {...defaultProps} />);
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
   });

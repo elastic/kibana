@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useGetCase } from './use_get_case';
 import * as api from './api';
-import { waitFor } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -31,8 +30,8 @@ const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
 describe('Use get case hook', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'resolveCase');
-    const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
-    await waitForNextUpdate();
+    renderHook(() => useGetCase('case-1'), { wrapper });
+    // await waitFor();
     expect(spy).toHaveBeenCalledWith({
       caseId: 'case-1',
       includeComments: true,
@@ -44,8 +43,8 @@ describe('Use get case hook', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
     const spy = jest.spyOn(api, 'resolveCase').mockRejectedValue(new Error("C'est la vie"));
-    const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
-    await waitForNextUpdate();
+    renderHook(() => useGetCase('case-1'), { wrapper });
+    // await waitFor();
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith({
         caseId: 'case-1',

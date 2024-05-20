@@ -18,6 +18,7 @@ import { VerificationCodeForm } from './verification_code_form';
 
 export interface VerificationProps {
   defaultCode?: string;
+  children: React.ReactNode;
 }
 
 const [OuterVerificationProvider, useVerification] = constate(

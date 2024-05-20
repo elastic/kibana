@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
@@ -37,8 +37,9 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
         // depsStart.security.userProfiles.suggest('/internal/user_profiles_examples/_suggest', {
         //   name: 'a',
         // });
+        const root = createRoot(element);
 
-        ReactDOM.render(
+        root.render(
           <KibanaPageTemplate>
             <KibanaPageTemplate.Header pageTitle="User profile components" />
             <KibanaPageTemplate.Section>
@@ -53,10 +54,9 @@ export class UserProfilesPlugin implements Plugin<void, void, SetupDeps, StartDe
             <KibanaPageTemplate.Section>
               <PopoverDemo />
             </KibanaPageTemplate.Section>
-          </KibanaPageTemplate>,
-          element
+          </KibanaPageTemplate>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
 

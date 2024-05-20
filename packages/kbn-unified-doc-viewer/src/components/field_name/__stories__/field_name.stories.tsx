@@ -30,7 +30,7 @@ const renderFieldName = (fldName: {} | null | undefined) => {
       gutterSize="none"
       style={{ width: '30%', alignItems: 'flex-start', padding: '4px' }}
     >
-      {fldName}
+      <>{fldName}</>
     </EuiFlexGroup>
   );
 };

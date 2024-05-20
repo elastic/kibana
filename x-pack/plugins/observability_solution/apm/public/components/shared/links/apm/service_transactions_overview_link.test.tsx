@@ -6,7 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -19,7 +19,7 @@ import {
 const history = createMemoryHistory();
 
 function wrapper({ queryParams }: { queryParams?: Record<string, unknown> }) {
-  return ({ children }: { children: React.ReactElement }) => (
+  return ({ children }: React.PropsWithChildren) => (
     <MockApmPluginContextWrapper history={history}>
       <MockUrlParamsContextProvider params={queryParams}>{children}</MockUrlParamsContextProvider>
     </MockApmPluginContextWrapper>

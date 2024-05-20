@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
@@ -156,7 +156,8 @@ export const renderApp = (
   const { http } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaContextProvider
       services={{
         ...core,
@@ -165,17 +166,19 @@ export const renderApp = (
         actionTypeRegistry,
       }}
     >
-      <IntlProvider locale="en">
-        <TriggersActionsUiExampleApp
-          basename={appBasePath}
-          http={http}
-          triggersActionsUi={deps.triggersActionsUi}
-          data={deps.data}
-        />
-      </IntlProvider>
-    </KibanaContextProvider>,
-    element
+      {
+        // @ts-expect-error
+        <IntlProvider locale="en">
+          <TriggersActionsUiExampleApp
+            basename={appBasePath}
+            http={http}
+            triggersActionsUi={deps.triggersActionsUi}
+            data={deps.data}
+          />
+        </IntlProvider>
+      }
+    </KibanaContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

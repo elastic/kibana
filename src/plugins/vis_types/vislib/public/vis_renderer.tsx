@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
@@ -39,18 +39,19 @@ export const getVislibVisRenderer: (
   displayName: 'Vislib visualization',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
+    const root = createRoot(domNode);
+
     const [startServices] = await core.getStartServices();
     const showNoResult = shouldShowNoResultsMessage(config.visData, config.visType);
 
-    handlers.onDestroy(() => unmountComponentAtNode(domNode));
+    handlers.onDestroy(() => root.unmount());
 
-    render(
+    root.render(
       <KibanaRenderContextProvider {...startServices}>
         <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
           <VislibWrapper {...config} core={core} charts={charts} handlers={handlers} />
         </VisualizationContainer>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

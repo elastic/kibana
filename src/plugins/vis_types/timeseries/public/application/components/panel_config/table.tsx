@@ -29,6 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { TimeseriesVisData } from '../../../../common/types';
 import { FieldSelect } from '../aggs/field_select';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
@@ -47,6 +48,7 @@ export class TablePanelConfig extends Component<
   { selectedTab: PANEL_CONFIG_TABS }
 > {
   static contextType = VisDataContext;
+  declare context: TimeseriesVisData;
   constructor(props: PanelConfigProps) {
     super(props);
     this.state = { selectedTab: PANEL_CONFIG_TABS.DATA };

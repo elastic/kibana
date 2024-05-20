@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme } from '../services';
 
@@ -134,7 +134,7 @@ class ContextMenuSession extends EventEmitter {
     if (activeSession === this) {
       const container = document.getElementById(CONTAINER_ID);
       if (container) {
-        ReactDOM.unmountComponentAtNode(container);
+        // ReactDOM.unmountComponentAtNode(container);
         this.emit('closed');
       }
     }
@@ -168,12 +168,12 @@ export function openContextMenu(
     }
     session.close();
   };
-
-  ReactDOM.render(
+  const root = createRoot(container);
+  root.render(
     <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getI18n()} theme={getTheme()}>
       <EuiPopover
         className="embPanel__optionsMenuPopover"
-        button={container}
+        button={<>{container}</>}
         isOpen={true}
         closePopover={onClose}
         panelPaddingSize="none"
@@ -185,8 +185,7 @@ export function openContextMenu(
           data-test-subj={props['data-test-subj']}
         />
       </EuiPopover>
-    </KibanaRenderContextProvider>,
-    container
+    </KibanaRenderContextProvider>
   );
 
   return session;

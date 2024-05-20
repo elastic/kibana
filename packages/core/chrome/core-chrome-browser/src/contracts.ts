@@ -35,7 +35,7 @@ import type { ChromeGlobalHelpExtensionMenuLink } from './help_extension';
  * How to set the help dropdown extension:
  * ```tsx
  * core.chrome.setHelpExtension(elem => {
- *   ReactDOM.render(<MyHelpComponent />, elem);
+ *   root.render(<MyHelpComponent />, elem);
  *   return () => ReactDOM.unmountComponentAtNode(elem);
  * });
  * ```

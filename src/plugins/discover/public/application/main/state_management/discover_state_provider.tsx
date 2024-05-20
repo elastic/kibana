@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, PropsWithChildren } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { InternalStateProvider } from './discover_internal_state_container';
@@ -56,10 +56,9 @@ export const {
 export const DiscoverMainProvider = ({
   value,
   children,
-}: {
+}: PropsWithChildren<{
   value: DiscoverStateContainer;
-  children: React.ReactElement;
-}) => {
+}>) => {
   return (
     <DiscoverStateProvider value={value}>
       <DiscoverAppStateProvider value={value.appState}>

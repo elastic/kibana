@@ -15,6 +15,7 @@ import type { ExpandedDetailType } from '../../../../common/types';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { getScopedActions } from '../../../helpers';
 import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
+import type { DraggableWrapperProps } from '../../../common/components/drag_and_drop/draggable_wrapper';
 import {
   DragEffects,
   DraggableWrapper,
@@ -27,6 +28,7 @@ import type { DataProvider } from '../timeline/data_providers/data_provider';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { Provider } from '../timeline/data_providers/provider';
 import type { TimelineTabs } from '../../../../common/types/timeline';
+import type { NetworkDetailsLinkProps } from '../../../common/components/links';
 import { NetworkDetailsLink } from '../../../common/components/links';
 
 const getUniqueId = ({
@@ -116,7 +118,7 @@ const NonDecoratedIpComponent: React.FC<{
     [value]
   );
 
-  const render = useCallback(
+  const render: DraggableWrapperProps['render'] = useCallback(
     (dataProvider, _, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>
@@ -182,7 +184,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
   const isInTimelineContext =
     address && eventContext?.enableIpDetailsFlyout && eventContext?.timelineID;
 
-  const openNetworkDetailsSidePanel = useCallback(
+  const openNetworkDetailsSidePanel: NetworkDetailsLinkProps['onClick'] = useCallback(
     (e) => {
       e.preventDefault();
       if (onClick) {
@@ -249,7 +251,7 @@ const AddressLinksItemComponent: React.FC<AddressLinksItemProps> = ({
     ]
   );
 
-  const render = useCallback(
+  const render: DraggableWrapperProps['render'] = useCallback(
     (_props, _provided, snapshot) =>
       snapshot.isDragging ? (
         <DragEffects>

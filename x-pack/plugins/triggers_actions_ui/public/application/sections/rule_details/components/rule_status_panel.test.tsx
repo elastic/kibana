@@ -112,6 +112,7 @@ describe('rule status panel', () => {
     const rule = mockRule({ enabled: true });
     const bulkDisableRules = jest.fn();
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RuleStatusPanelWithProvider
           {...mockAPIs}

@@ -120,6 +120,7 @@ describe('Alert details', () => {
 
   const renderComponent = () =>
     render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <AlertDetails />
       </IntlProvider>,

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   EuiPageTemplate,
   EuiFlexGrid,
@@ -53,6 +53,7 @@ const CasesFixtureAppWithContext: React.FC<CasesFixtureAppDeps> = (props) => {
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal();
 
   return (
+    // @ts-expect-error
     <EuiPageTemplate template="empty">
       <EuiFlexGrid columns={1}>
         <EuiFlexItem>
@@ -120,7 +121,8 @@ export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
   const { element } = mountParams;
 
-  ReactDOM.render(<CasesFixtureApp deps={deps} />, element);
+  const root = createRoot(element);
+  root.render(<CasesFixtureApp deps={deps} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

@@ -8,7 +8,7 @@
 
 import { throwError, of } from 'rxjs';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act, waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
@@ -95,7 +95,9 @@ async function mountDoc(update = false) {
 describe('Test of <Doc /> of Discover', () => {
   test('renders loading msg', async () => {
     const comp = await mountDoc();
-    expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
+    waitFor(() => {
+      expect(findTestSubject(comp, 'doc-msg-loading').length).toBe(1);
+    });
   });
 
   test('renders notFound msg', async () => {

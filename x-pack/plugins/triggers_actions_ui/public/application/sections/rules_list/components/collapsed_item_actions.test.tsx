@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as React from 'react';
+import React from 'react';
 import moment from 'moment';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { CollapsedItemActions } from './collapsed_item_actions';

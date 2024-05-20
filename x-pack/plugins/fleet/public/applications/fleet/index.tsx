@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
@@ -70,7 +70,9 @@ export function renderApp(
   kibanaVersion: string,
   extensions: UIExtensionsStorage
 ) {
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <FleetApp
       startServices={startServices}
       config={config}
@@ -83,7 +85,7 @@ export function renderApp(
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 }
 

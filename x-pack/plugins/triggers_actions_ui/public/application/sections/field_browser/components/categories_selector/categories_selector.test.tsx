@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { CategoriesSelector } from './categories_selector';
 
@@ -45,7 +45,7 @@ describe('CategoriesSelector', () => {
     const result = render(<CategoriesSelector {...defaultProps} />);
 
     result.getByTestId('categories-filter-button').click();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(result.getByTestId('categories-selector-search')).toBeInTheDocument();
     expect(result.getByTestId(`categories-selector-option-base`)).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe('CategoriesSelector', () => {
     );
 
     result.getByTestId('categories-filter-button').click();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(result.getByTestId('categories-selector-search')).toBeInTheDocument();
     expect(result.getByTestId(`categories-selector-option-base`)).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe('CategoriesSelector', () => {
     const result = render(<CategoriesSelector {...defaultProps} />);
 
     result.getByTestId('categories-filter-button').click();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     result.getByTestId(`categories-selector-option-base`).click();
     expect(mockSetSelectedCategoryIds).toHaveBeenCalledWith(['base']);

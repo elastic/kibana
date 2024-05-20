@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -40,8 +40,10 @@ export const getVegaVisRenderer: (
   name: 'vega_vis',
   reuseDomNode: true,
   render: async (domNode, { visData }, handlers) => {
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const renderComplete = () => {
@@ -64,7 +66,7 @@ export const getVegaVisRenderer: (
 
     const [startServices] = await deps.core.getStartServices();
 
-    render(
+    root.render(
       <KibanaRenderContextProvider {...startServices}>
         <VisualizationContainer handlers={handlers}>
           <LazyVegaVisComponent
@@ -75,8 +77,7 @@ export const getVegaVisRenderer: (
             visData={visData}
           />
         </VisualizationContainer>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

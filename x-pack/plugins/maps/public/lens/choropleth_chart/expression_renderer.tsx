@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
@@ -95,18 +95,18 @@ export function getExpressionRenderer(coreSetup: CoreSetup<MapsPluginStartDepend
       };
 
       handlers.event(chartSizeEvent);
+      const root = createRoot(domNode);
 
-      ReactDOM.render(
+      root.render(
         <ChoroplethChart
           {...config}
           formatFactory={plugins.fieldFormats.deserialize}
           uiSettings={coreStart.uiSettings}
           emsFileLayers={emsFileLayers}
           onRenderComplete={renderComplete}
-        />,
-        domNode
+        />
       );
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      handlers.onDestroy(() => root.unmount());
     },
   };
 }

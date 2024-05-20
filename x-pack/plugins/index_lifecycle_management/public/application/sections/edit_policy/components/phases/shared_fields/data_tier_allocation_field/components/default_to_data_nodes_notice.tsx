@@ -25,14 +25,16 @@ export const DefaultToDataNodesNotice: FunctionComponent<{ phase: PhaseWithAlloc
       title={noCustomAttributesTitle}
       color="primary"
     >
-      <p>
-        {i18n.translate(
-          'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultToDataNodesDescription',
-          { defaultMessage: 'Data will be allocated to any available data node.' }
-        )}
-      </p>
+      <>
+        <p>
+          {i18n.translate(
+            'xpack.indexLifecycleMgmt.warmPhase.dataTier.defaultToDataNodesDescription',
+            { defaultMessage: 'Data will be allocated to any available data node.' }
+          )}
+        </p>
 
-      {nodeAllocationMigrationGuidance}
+        {nodeAllocationMigrationGuidance}
+      </>
     </EuiCallOut>
   );
 };

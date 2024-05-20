@@ -8,7 +8,7 @@
 
 import React, { lazy } from 'react';
 import { get } from 'lodash';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CoreSetup, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/public';
 
@@ -59,8 +59,10 @@ export const getTimeseriesVisRenderer: (deps: {
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
     const [startServices] = await core.getStartServices();
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
     const {
       visParams: model,
@@ -95,7 +97,7 @@ export const getTimeseriesVisRenderer: (deps: {
       handlers.done();
     };
 
-    render(
+    root.render(
       <KibanaRenderContextProvider {...startServices}>
         <VisualizationContainer
           data-test-subj="timeseriesVis"
@@ -117,8 +119,7 @@ export const getTimeseriesVisRenderer: (deps: {
             initialRender={renderComplete}
           />
         </VisualizationContainer>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

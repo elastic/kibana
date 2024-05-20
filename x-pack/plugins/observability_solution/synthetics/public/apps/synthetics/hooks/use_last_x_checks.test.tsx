@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { getTimeRangeFilter, useLastXChecks } from './use_last_x_checks';
 import { WrappedHelper } from '../utils/testing';
 import * as searchHooks from './use_redux_es_search';
@@ -151,7 +151,7 @@ describe('useLastXChecks', () => {
       data: { hits: { hits: getMockHits() } },
     } as any);
 
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper
           state={{ serviceLocations: { locationsLoaded: true, loading: false, locations: [] } }}

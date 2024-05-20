@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
@@ -45,6 +45,7 @@ export const MountWrapper: MountWrapperComponent = ({ mount, className = default
 export const mountReactNode =
   (node: React.ReactNode): MountPoint =>
   (element: HTMLElement) => {
-    render(<I18nProvider>{node}</I18nProvider>, element);
-    return () => unmountComponentAtNode(element);
+    const root = createRoot(element);
+    root.render(<I18nProvider>{node}</I18nProvider>);
+    return () => root.unmount();
   };

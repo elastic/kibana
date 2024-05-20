@@ -111,6 +111,7 @@ function FormRow({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <SelectWithPlaceholder
+              // @ts-expect-error
               placeholder={i18n.translate('xpack.apm.unitLabel', {
                 defaultMessage: 'Select unit',
               })}

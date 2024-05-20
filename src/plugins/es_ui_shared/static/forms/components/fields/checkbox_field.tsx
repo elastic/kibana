@@ -24,6 +24,7 @@ export const CheckBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
 
   return (
     <EuiFormRow
+      // @ts-expect-error
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}

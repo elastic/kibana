@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { Subject, Subscription, type BehaviorSubject } from 'rxjs';
@@ -41,6 +41,7 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
   AnomalyChartsEmbeddableOutput
 > {
   private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot> | null = null;
   private reload$ = new Subject<void>();
   public readonly type: string = ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE;
 
@@ -91,8 +92,9 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
 
     // required for the export feature to work
     this.node.setAttribute('data-shared-item', '');
+    this.root = createRoot(node);
 
-    ReactDOM.render(
+    this.root.render(
       <KibanaRenderContextProvider {...this.services[0]}>
         <KibanaContextProvider
           services={{
@@ -118,8 +120,7 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
             />
           </Suspense>
         </KibanaContextProvider>
-      </KibanaRenderContextProvider>,
-      node
+      </KibanaRenderContextProvider>
     );
   }
 
@@ -128,8 +129,8 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
 
     this.apiSubscriptions.unsubscribe();
 
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
   }
 

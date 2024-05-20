@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import { setupEnvironment } from './helpers';
 import { getPolicy } from '../../test/fixtures';
 import { setupPoliciesListPage, PoliciesListTestBed } from './helpers/policy_list.helpers';
@@ -82,7 +83,9 @@ describe('<PolicyList />', () => {
       expect(find('policyFeatureStatesSummary.value').text()).toEqual('No');
 
       // Close the flyout
-      find('srPolicyDetailsFlyoutCloseButton').simulate('click');
+      act(() => {
+        find('srPolicyDetailsFlyoutCloseButton').simulate('click');
+      });
     });
 
     test('When it only has include globalState summary should also mention that it includes all features', async () => {

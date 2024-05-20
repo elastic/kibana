@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode, memo } from 'react';
+import React, { memo } from 'react';
+import { UserMessage } from '../../types';
 
 interface BannerWrapperProps {
-  nodes: ReactNode[];
+  nodes: Array<UserMessage['longMessage']>;
 }
 
 export const BannerWrapper = memo(({ nodes }: BannerWrapperProps) => (

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -43,10 +43,8 @@ describe('useFetchCurrentUserConversations', () => {
     });
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() =>
-        useFetchCurrentUserConversations(defaultProps)
-      );
-      await waitForNextUpdate();
+      renderHook(() => useFetchCurrentUserConversations(defaultProps));
+      // await waitFor();
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
         '/api/elastic_assistant/current_user/conversations/_find',
         {

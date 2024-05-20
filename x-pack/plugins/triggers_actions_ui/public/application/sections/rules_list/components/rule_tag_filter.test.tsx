@@ -29,6 +29,7 @@ const disconnect = jest.fn();
 jest.mock('../../../../common/lib/kibana');
 
 const WithProviders = ({ children }: { children: any }) => (
+  // @ts-expect-error
   <IntlProvider locale="en">
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   </IntlProvider>

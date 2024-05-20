@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as api from './api';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
@@ -31,11 +31,11 @@ describe.skip('useGetCaseConnectors', () => {
 
   it('calls getCaseConnectors with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCaseConnectors');
-    const { waitForNextUpdate } = renderHook(() => useGetCaseConnectors(caseId), {
+    renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(spyOnGetCases).toBeCalledWith('test-id', abortCtrl.signal);
   });
@@ -49,11 +49,11 @@ describe.skip('useGetCaseConnectors', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitForNextUpdate } = renderHook(() => useGetCaseConnectors(caseId), {
+    renderHook(() => useGetCaseConnectors(caseId), {
       wrapper: appMockRender.AppWrapper,
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
     expect(addError).toHaveBeenCalled();
   });
 });

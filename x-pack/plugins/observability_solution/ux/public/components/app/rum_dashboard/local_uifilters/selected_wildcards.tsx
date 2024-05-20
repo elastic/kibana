@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';

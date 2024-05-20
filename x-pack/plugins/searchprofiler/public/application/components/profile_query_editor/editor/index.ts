@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export type { EditorInstance } from './editor';
+export type { EditorInstance, Props } from './editor';
 export { Editor } from './editor';

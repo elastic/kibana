@@ -18,7 +18,7 @@ type AllowedButtonProps = Omit<
 >;
 type AllowedPopoverProps = Omit<
   EuiPopoverProps,
-  'button' | 'isOpen' | 'closePopover' | 'anchorPosition'
+  'button' | 'isOpen' | 'closePopover' | 'anchorPosition' | 'children'
 >;
 
 /**

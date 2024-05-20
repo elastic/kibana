@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { render } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { KibanaErrorBoundary } from '../..';
@@ -44,12 +44,17 @@ describe('<KibanaErrorBoundary>', () => {
         <ChunkLoadErrorComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+
+    await act(async () => {
+      fireEvent.click(await findByTestId('clickForErrorBtn'));
+    });
 
     expect(await findByText(strings.recoverable.callout.title())).toBeVisible();
     expect(await findByText(strings.recoverable.callout.pageReloadButton())).toBeVisible();
 
-    (await findByTestId('errorBoundaryRecoverablePromptReloadBtn')).click();
+    await act(async () => {
+      fireEvent.click(await findByTestId('errorBoundaryRecoverablePromptReloadBtn'));
+    });
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
@@ -62,14 +67,19 @@ describe('<KibanaErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+
+    await act(async () => {
+      fireEvent.click(await findByTestId('clickForErrorBtn'));
+    });
 
     expect(await findByText(strings.fatal.callout.title())).toBeVisible();
     expect(await findByText(strings.fatal.callout.body())).toBeVisible();
     expect(await findByText(strings.fatal.callout.showDetailsButton())).toBeVisible();
     expect(await findByText(strings.fatal.callout.pageReloadButton())).toBeVisible();
 
-    (await findByTestId('errorBoundaryFatalPromptReloadBtn')).click();
+    await act(async () => {
+      fireEvent.click(await findByTestId('errorBoundaryFatalPromptReloadBtn'));
+    });
 
     expect(reloadSpy).toHaveBeenCalledTimes(1);
   });
@@ -85,7 +95,10 @@ describe('<KibanaErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+
+    await act(async () => {
+      fireEvent.click(await findByTestId('clickForErrorBtn'));
+    });
 
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
     expect(mockDeps.analytics.reportEvent.mock.calls[0][1]).toMatchObject({
@@ -105,7 +118,10 @@ describe('<KibanaErrorBoundary>', () => {
         <BadComponent />
       </Template>
     );
-    (await findByTestId('clickForErrorBtn')).click();
+
+    await act(async () => {
+      fireEvent.click(await findByTestId('clickForErrorBtn'));
+    });
 
     expect(
       mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')

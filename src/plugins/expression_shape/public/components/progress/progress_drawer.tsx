@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { Ref } from 'react';
+import React, { Ref, PropsWithChildren } from 'react';
 import { ShapeDrawer, ShapeRef, ShapeDrawerComponentProps } from '../reusable';
 import { getShape } from './shapes';
 
 export const ProgressDrawerComponent = React.forwardRef(
-  (props: ShapeDrawerComponentProps, ref: Ref<ShapeRef>) => (
+  (props: PropsWithChildren<ShapeDrawerComponentProps>, ref: Ref<ShapeRef>) => (
     <ShapeDrawer {...props} ref={ref} getShape={getShape} />
   )
 );

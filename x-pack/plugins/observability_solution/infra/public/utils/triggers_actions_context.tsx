@@ -17,6 +17,7 @@ export const TriggerActionsContext = React.createContext<ContextProps>({
 });
 
 interface Props {
+  children: React.ReactNode;
   triggersActionsUI: TriggersAndActionsUIPublicPluginStart;
 }
 

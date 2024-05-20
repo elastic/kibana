@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import SemVer from 'semver/classes/semver';
 
 import { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
@@ -102,15 +102,16 @@ export const renderApp = (
   }
   const { history } = dependencies;
 
-  render(
+  const root = createRoot(elem);
+
+  root.render(
     <IndexManagementAppContext core={core} dependencies={dependencies}>
       <App history={history} />
-    </IndexManagementAppContext>,
-    elem
+    </IndexManagementAppContext>
   );
 
   return () => {
-    unmountComponentAtNode(elem);
+    root.unmount();
   };
 };
 

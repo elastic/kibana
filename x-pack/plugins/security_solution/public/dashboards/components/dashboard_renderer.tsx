@@ -8,13 +8,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { DashboardContainerInput } from '@kbn/dashboard-plugin/common';
-import type { DashboardAPI, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import type {
+  DashboardAPI,
+  DashboardCreationOptions,
+  DashboardLocatorParams,
+} from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
+import type { DashboardRendererProps } from '@kbn/dashboard-plugin/public/dashboard_container/external_api/dashboard_renderer';
 import { APP_UI_ID } from '../../../common';
 import { DASHBOARDS_PATH, SecurityPageName } from '../../../common/constants';
 import { useGetSecuritySolutionUrl } from '../../common/components/link_to';
@@ -64,7 +69,7 @@ const DashboardRendererComponent = ({
   const isCreateDashboard = !savedObjectId;
 
   const getSecuritySolutionDashboardUrl = useCallback(
-    ({ dashboardId }) => {
+    ({ dashboardId }: DashboardLocatorParams) => {
       return getSecuritySolutionUrl({
         deepLinkId: SecurityPageName.dashboards,
         path: dashboardId,
@@ -73,7 +78,7 @@ const DashboardRendererComponent = ({
     [getSecuritySolutionUrl]
   );
 
-  const goToDashboard = useCallback(
+  const goToDashboard = useCallback<NonNullable<DashboardRendererProps['locator']>['navigate']>(
     /**
      * Note: Due to the query bar being separate from the portable dashboard, the "Use filters and query from origin
      * dashboard" and "Use date range from origin dashboard" Link embeddable settings do not make sense in this context.

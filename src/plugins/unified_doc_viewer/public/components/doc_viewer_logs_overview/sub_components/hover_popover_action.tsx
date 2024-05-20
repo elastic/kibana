@@ -65,24 +65,26 @@ export const HoverActionPopover = ({
         panelStyle={{ minWidth: '24px' }}
         display={display}
       >
-        {title && (
-          <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
-            {title}
-          </EuiPopoverTitle>
-        )}
-        <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-          {uiFieldActions.map((action) => (
-            <EuiToolTip content={action.label} key={action.id}>
-              <EuiButtonIcon
-                data-test-subj="unifiedDocViewLogsOverviewHoverActionPopoverButton"
-                size="xs"
-                iconType={action.iconType}
-                aria-label={action.label}
-                onClick={action.onClick}
-              />
-            </EuiToolTip>
-          ))}
-        </EuiFlexGroup>
+        <>
+          {title && (
+            <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
+              <>{title}</>
+            </EuiPopoverTitle>
+          )}
+          <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
+            {uiFieldActions.map((action) => (
+              <EuiToolTip content={action.label} key={action.id}>
+                <EuiButtonIcon
+                  data-test-subj="unifiedDocViewLogsOverviewHoverActionPopoverButton"
+                  size="xs"
+                  iconType={action.iconType}
+                  aria-label={action.label}
+                  onClick={action.onClick}
+                />
+              </EuiToolTip>
+            ))}
+          </EuiFlexGroup>
+        </>
       </EuiPopover>
     </span>
   );

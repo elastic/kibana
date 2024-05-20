@@ -108,6 +108,7 @@ describe('SearchBar', () => {
         .mockReturnValueOnce(of(createBatch('Discover', { id: 'My Dashboard', type: 'test' })));
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -130,6 +131,7 @@ describe('SearchBar', () => {
 
     it('keyboard shortcut', async () => {
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -157,6 +159,7 @@ describe('SearchBar', () => {
       );
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -174,7 +177,12 @@ describe('SearchBar', () => {
 
       jest.spyOn(Date, 'now').mockReturnValue(2000);
 
-      fireEvent.click(await screen.findByTestId('nav-search-option'));
+      // await waitFor(async () => {
+      //   expect(await screen.findByTestId('nav-search-option')).toBeInTheDocument();
+      // });
+      await act(async () => {
+        fireEvent.click(await screen.findByTestId('nav-search-option'));
+      });
 
       expect(mockReportEvent).nthCalledWith(1, 'global_search_bar_click_application', {
         selected_rank: 1,
@@ -194,6 +202,7 @@ describe('SearchBar', () => {
       );
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -230,6 +239,7 @@ describe('SearchBar', () => {
       searchService.find.mockReturnValueOnce(throwError(() => new Error('service unavailable :(')));
 
       render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           <SearchBar
             globalSearch={searchService}
@@ -259,6 +269,8 @@ describe('SearchBar', () => {
 
       it('keyboard shortcut expsoses the component and focuses the text input', async () => {
         render(
+          // @ts-expect-error
+
           <IntlProvider locale="en">
             <SearchBar
               globalSearch={searchService}
@@ -288,6 +300,8 @@ describe('SearchBar', () => {
 
       it('show/hide', async () => {
         render(
+          // @ts-expect-error
+
           <IntlProvider locale="en">
             <SearchBar
               globalSearch={searchService}

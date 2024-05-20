@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { TileMapVisRenderValue } from './tile_map_fn';
@@ -23,8 +23,9 @@ export const tileMapRenderer = {
   name: TILE_MAP_RENDER,
   reuseDomNode: true,
   render: async (domNode, { filters, query, timeRange, visConfig }, handlers) => {
+    const root = createRoot(domNode);
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const props = {
@@ -37,6 +38,6 @@ export const tileMapRenderer = {
       visConfig,
     };
 
-    render(<Component {...props} />, domNode);
+    root.render(<Component {...props} />);
   },
 } as ExpressionRenderDefinition<TileMapVisRenderValue>;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { KibanaServices } from '../context/types';
 import { KibanaReactNotifications } from './types';
 import { toMountPoint } from '../util';

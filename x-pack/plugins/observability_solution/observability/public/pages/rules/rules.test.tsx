@@ -136,6 +136,7 @@ describe('RulesPage with all capabilities', () => {
     });
 
     return render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <RulesPage />
       </IntlProvider>

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreStart } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -19,7 +19,8 @@ export const renderApp = (
   breadcrumbService: BreadcrumbService,
   { element }: ManagementAppMountParams
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider
         services={{
@@ -28,9 +29,8 @@ export const renderApp = (
       >
         <CloudDataMigrationApp http={core.http} breadcrumbService={breadcrumbService} />
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

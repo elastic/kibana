@@ -16,7 +16,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC, useMemo } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { pluginServices } from '../../../public/services';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
@@ -127,6 +127,7 @@ export const embeddableRendererFactory = (
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render: async (domNode, { input, embeddableType, canvasApi }, handlers) => {
+      const root = createRoot(domNode);
       const { embeddables } = pluginServices.getServices();
       const uniqueId = handlers.getElementId();
       const isByValueEnabled = plugins.presentationUtil.labsService.isProjectEnabled(
@@ -137,7 +138,7 @@ export const embeddableRendererFactory = (
         /**
          * Prioritize React embeddables
          */
-        ReactDOM.render(
+        root.render(
           renderReactEmbeddable({
             input,
             handlers,
@@ -146,13 +147,12 @@ export const embeddableRendererFactory = (
             container: canvasApi,
             core,
           }),
-          domNode,
           () => handlers.done()
         );
 
         handlers.onDestroy(() => {
           handlers.onEmbeddableDestroyed();
-          return ReactDOM.unmountComponentAtNode(domNode);
+          return root.unmount();
         });
       } else if (!embeddablesRegistry[uniqueId]) {
         /**
@@ -198,7 +198,7 @@ export const embeddableRendererFactory = (
         const palettes = await plugins.charts.palettes.getPalettes();
 
         embeddablesRegistry[uniqueId] = embeddableObject;
-        ReactDOM.unmountComponentAtNode(domNode);
+        root.unmount();
 
         const subscription = embeddableObject.getInput$().subscribe(function (updatedInput) {
           const updatedExpression = embeddableInputToExpression(
@@ -213,7 +213,7 @@ export const embeddableRendererFactory = (
           }
         });
 
-        ReactDOM.render(renderEmbeddable(embeddableObject), domNode, () => handlers.done());
+        root.render(renderEmbeddable(embeddableObject), () => handlers.done());
 
         handlers.onDestroy(() => {
           subscription.unsubscribe();
@@ -221,7 +221,7 @@ export const embeddableRendererFactory = (
 
           delete embeddablesRegistry[uniqueId];
 
-          return ReactDOM.unmountComponentAtNode(domNode);
+          return root.unmount();
         });
       } else {
         /**

@@ -11,7 +11,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { SearchBar } from './components/search_bar';
 import { EventReporter, eventTypes } from './telemetry';
 
@@ -43,7 +43,9 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
     const navControl: ChromeNavControl = {
       order: 1000,
       mount: (container) => {
-        ReactDOM.render(
+        const root = createRoot(container);
+
+        root.render(
           <KibanaRenderContextProvider theme={theme} i18n={i18n}>
             <SearchBar
               globalSearch={globalSearch}
@@ -53,11 +55,10 @@ export class GlobalSearchBarPlugin implements Plugin<{}, {}, {}, GlobalSearchBar
               chromeStyle$={core.chrome.getChromeStyle$()}
               reportEvent={reportEvent}
             />
-          </KibanaRenderContextProvider>,
-          container
+          </KibanaRenderContextProvider>
         );
 
-        return () => ReactDOM.unmountComponentAtNode(container);
+        return () => root.unmount();
       },
     };
     return navControl;

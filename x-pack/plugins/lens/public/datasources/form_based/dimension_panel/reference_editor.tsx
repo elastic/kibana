@@ -72,7 +72,7 @@ export interface ReferenceEditorProps {
   validation: RequiredReference;
   columnId: string;
   column?: GenericIndexPatternColumn;
-  incompleteColumn?: IncompleteColumn;
+  incompleteColumn?: IncompleteColumn | null;
   currentIndexPattern: IndexPattern;
   functionLabel?: string;
   fieldLabel?: string;

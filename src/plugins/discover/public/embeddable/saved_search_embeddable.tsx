@@ -16,7 +16,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import React from 'react';
-import ReactDOM, { unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import type { KibanaExecutionContext } from '@kbn/core/public';
@@ -107,6 +107,7 @@ export class SavedSearchEmbeddable
   private searchProps?: SearchProps;
   private initialized?: boolean;
   private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot> | null = null;
 
   constructor(
     { editable, services, executeTriggerActions }: SearchEmbeddableConfig,
@@ -635,6 +636,7 @@ export class SavedSearchEmbeddable
 
   private renderReactComponent(domNode: HTMLElement, searchProps: SearchProps) {
     const savedSearch = this.savedSearch;
+    this.root = createRoot(domNode);
 
     if (!searchProps || !savedSearch) {
       return;
@@ -653,7 +655,7 @@ export class SavedSearchEmbeddable
       searchProps.dataView &&
       Array.isArray(searchProps.columns)
     ) {
-      ReactDOM.render(
+      this.root.render(
         <KibanaRenderContextProvider {...searchProps.services.core}>
           <KibanaContextProvider services={searchProps.services}>
             <FieldStatisticsTable
@@ -666,8 +668,7 @@ export class SavedSearchEmbeddable
               searchSessionId={this.input.searchSessionId}
             />
           </KibanaContextProvider>
-        </KibanaRenderContextProvider>,
-        domNode
+        </KibanaRenderContextProvider>
       );
 
       this.updateOutput({
@@ -693,7 +694,7 @@ export class SavedSearchEmbeddable
     if (searchProps.services) {
       const { getTriggerCompatibleActions } = searchProps.services.uiActions;
 
-      ReactDOM.render(
+      this.root.render(
         <KibanaRenderContextProvider {...searchProps.services.core}>
           <KibanaContextProvider services={searchProps.services}>
             <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
@@ -703,8 +704,7 @@ export class SavedSearchEmbeddable
               />
             </CellActionsProvider>
           </KibanaContextProvider>
-        </KibanaRenderContextProvider>,
-        domNode
+        </KibanaRenderContextProvider>
       );
 
       const hasError = this.getOutput().error !== undefined;
@@ -770,8 +770,8 @@ export class SavedSearchEmbeddable
       delete this.searchProps;
     }
 
-    if (this.node) {
-      unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
 
     this.subscription?.unsubscribe();

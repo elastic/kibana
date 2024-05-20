@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
@@ -47,7 +47,7 @@ describe('UserActionPropertyActions', () => {
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
       1

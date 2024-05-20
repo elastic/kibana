@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, OverlayStart, ThemeServiceStart, ToastsSetup } from '@kbn/core/public';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
@@ -20,6 +20,7 @@ export class ShareMenuManager {
   private isOpen = false;
 
   private container = document.createElement('div');
+  private root: ReturnType<typeof createRoot> | null = null;
 
   start(
     core: CoreStart,
@@ -58,7 +59,7 @@ export class ShareMenuManager {
   }
 
   private onClose = () => {
-    ReactDOM.unmountComponentAtNode(this.container);
+    this.root?.unmount();
     this.isOpen = false;
   };
 

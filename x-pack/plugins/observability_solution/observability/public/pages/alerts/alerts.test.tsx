@@ -125,9 +125,12 @@ function AllTheProviders({ children }: { children: any }) {
     <ThemeProvider
       theme={() => ({ eui: { ...euiDarkVars, euiColorLightShade: '#ece' }, darkMode: true })}
     >
-      <IntlProvider locale="en">
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-      </IntlProvider>
+      {
+        // @ts-expect-error
+        <IntlProvider locale="en">
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        </IntlProvider>
+      }
     </ThemeProvider>
   );
 }

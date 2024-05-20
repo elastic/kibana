@@ -28,6 +28,7 @@ export const EnabledFeaturesContext = createContext({
 });
 
 interface Props {
+  children: React.ReactNode;
   isServerless: boolean;
   mlFeatures: MlFeatures;
   showMLNavMenu?: boolean;

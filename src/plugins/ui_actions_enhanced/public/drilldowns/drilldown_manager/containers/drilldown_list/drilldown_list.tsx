@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { DrilldownTable } from '../../components/drilldown_table';
 import { useDrilldownManager } from '../context';
 import { CloningNotification } from './cloning_notification';

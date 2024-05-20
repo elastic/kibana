@@ -16,7 +16,7 @@ import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 
-export function FunctionsView({ children }: { children: React.ReactElement }) {
+export function FunctionsView({ children }: React.PropsWithChildren) {
   const { query } = useProfilingParams('/functions/*');
   const routePath = useProfilingRoutePath() as
     | '/functions'

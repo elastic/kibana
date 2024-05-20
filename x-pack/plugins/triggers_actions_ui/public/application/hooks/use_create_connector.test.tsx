@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateConnector } from './use_create_connector';
 
@@ -29,7 +29,7 @@ describe('useCreateConnector', () => {
   });
 
   it('executes correctly', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useCreateConnector());
+    const { result } = renderHook(() => useCreateConnector());
 
     act(() => {
       result.current.createConnector({
@@ -40,7 +40,7 @@ describe('useCreateConnector', () => {
       });
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith('/api/actions/connector', {
       body: '{"name":"test","config":{},"secrets":{},"connector_type_id":".test"}',

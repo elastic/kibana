@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import React, { PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react';
 import { useLoadTagsQuery } from './use_load_tags_query';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../../common/lib/kibana';
@@ -30,7 +30,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 );
 
@@ -53,7 +53,7 @@ describe('useLoadTagsQuery', () => {
   });
 
   it('should call loadRuleTags API and handle result', async () => {
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () =>
         useLoadTagsQuery({
           enabled: true,
@@ -67,7 +67,7 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(loadRuleTags).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -88,7 +88,7 @@ describe('useLoadTagsQuery', () => {
       perPage: 5,
       total: 10,
     });
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () =>
         useLoadTagsQuery({
           enabled: true,
@@ -101,7 +101,7 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(loadRuleTags).toHaveBeenLastCalledWith(
       expect.objectContaining({
@@ -129,7 +129,7 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current.hasNextPage).toEqual(false);
   });
@@ -142,7 +142,7 @@ describe('useLoadTagsQuery', () => {
       total: 0,
     });
 
-    const { rerender, result, waitForNextUpdate } = renderHook(
+    const { rerender, result } = renderHook(
       () =>
         useLoadTagsQuery({
           enabled: true,
@@ -155,7 +155,7 @@ describe('useLoadTagsQuery', () => {
     );
 
     rerender();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(loadRuleTags).toHaveBeenLastCalledWith(
       expect.objectContaining({

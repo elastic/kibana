@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { RenderResult } from '@testing-library/react-hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
-import type { LensAttributes } from '../../types';
+import type { LensAttributes, UseLensAttributesProps } from '../../types';
 
 import { useLensAttributes } from '../../use_lens_attributes';
 
@@ -33,7 +33,7 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
 }));
 
 describe('getDnsTopDomainsLensAttributes', () => {
-  let result: RenderResult<LensAttributes | null>;
+  let result: RenderHookResult<LensAttributes | null, UseLensAttributesProps>['result'];
   const render = () => {
     const hookRenderResponse = renderHook(
       () =>

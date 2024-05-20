@@ -14,6 +14,7 @@ import { Observable } from 'rxjs';
 interface CoreThemeProviderProps {
   theme$: Observable<CoreTheme>;
   globalStyles?: boolean;
+  children: React.ReactNode;
 }
 
 /**

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { UseInsightDataProvidersProps, Provider } from './use_insight_data_providers';
 import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
 import {
@@ -103,7 +103,7 @@ const providerWithRange: Provider[][] = [
 
 describe('useInsightDataProviders', () => {
   it('should return 2 data providers, 1 with a nested provider ANDed to it', () => {
-    const { result } = renderHook<UseInsightDataProvidersProps, UseInsightDataProvidersResult>(() =>
+    const { result } = renderHook<UseInsightDataProvidersResult, UseInsightDataProvidersProps>(() =>
       useInsightDataProviders({
         providers: nestedAndProvider,
         alertData: mockAlertDetailsDataWithIsObject,
@@ -117,7 +117,7 @@ describe('useInsightDataProviders', () => {
   });
 
   it('should return 3 data providers without any containing nested ANDs', () => {
-    const { result } = renderHook<UseInsightDataProvidersProps, UseInsightDataProvidersResult>(() =>
+    const { result } = renderHook<UseInsightDataProvidersResult, UseInsightDataProvidersProps>(() =>
       useInsightDataProviders({
         providers: topLevelOnly,
         alertData: mockAlertDetailsDataWithIsObject,
@@ -130,7 +130,7 @@ describe('useInsightDataProviders', () => {
   });
 
   it('should use the string literal if no field in the alert matches a bracketed value', () => {
-    const { result } = renderHook<UseInsightDataProvidersProps, UseInsightDataProvidersResult>(() =>
+    const { result } = renderHook<UseInsightDataProvidersResult, UseInsightDataProvidersProps>(() =>
       useInsightDataProviders({
         providers: nonExistantField,
         alertData: mockAlertDetailsDataWithIsObject,
@@ -145,7 +145,7 @@ describe('useInsightDataProviders', () => {
   });
 
   it('should use template data providers when called without alertData', () => {
-    const { result } = renderHook<UseInsightDataProvidersProps, UseInsightDataProvidersResult>(() =>
+    const { result } = renderHook<UseInsightDataProvidersResult, UseInsightDataProvidersProps>(() =>
       useInsightDataProviders({
         providers: nestedAndProvider,
       })
@@ -159,7 +159,7 @@ describe('useInsightDataProviders', () => {
   });
 
   it('should return an empty array of dataProviders and populated filters if a provider contains a range type', () => {
-    const { result } = renderHook<UseInsightDataProvidersProps, UseInsightDataProvidersResult>(() =>
+    const { result } = renderHook<UseInsightDataProvidersResult, UseInsightDataProvidersProps>(() =>
       useInsightDataProviders({
         providers: providerWithRange,
       })

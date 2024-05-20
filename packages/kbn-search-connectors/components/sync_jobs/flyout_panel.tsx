@@ -11,6 +11,7 @@ import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 interface FlyoutPanelProps {
   title: string;
+  children?: React.ReactNode;
 }
 
 export const FlyoutPanel: FC<PropsWithChildren<FlyoutPanelProps>> = ({ children, title }) => {

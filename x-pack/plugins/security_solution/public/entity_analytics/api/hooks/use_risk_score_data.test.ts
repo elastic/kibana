@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { ONLY_FIRST_ITEM_PAGINATION, useRiskScoreData } from './use_risk_score_data';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';

@@ -142,7 +142,9 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
         data-test-subj="systemIndicesStatusErrorCallout"
       >
         <p>
-          {migrationStatus.error.statusCode} - {migrationStatus.error.message}
+          <>
+            {migrationStatus.error.statusCode} - {migrationStatus.error.message}
+          </>
         </p>
         <EuiButton
           color="danger"
@@ -164,7 +166,9 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText color="success">
-            <p>{i18nTexts.noMigrationNeeded}</p>
+            <p>
+              <>{i18nTexts.noMigrationNeeded}</>
+            </p>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -250,7 +254,9 @@ export const getMigrateSystemIndicesStep = ({
     children: (
       <>
         <EuiText>
-          <p>{i18nTexts.bodyDescription(docLinks.links.elasticsearch.hiddenIndices)}</p>
+          <p>
+            <>{i18nTexts.bodyDescription(docLinks.links.elasticsearch.hiddenIndices)}</>
+          </p>
         </EuiText>
 
         <EuiSpacer size="m" />

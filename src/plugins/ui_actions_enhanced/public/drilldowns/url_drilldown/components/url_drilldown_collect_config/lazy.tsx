@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { UrlDrilldownOptionsProps } from './url_drilldown_options';
 import type { UrlDrilldownCollectConfigProps } from './url_drilldown_collect_config';
 

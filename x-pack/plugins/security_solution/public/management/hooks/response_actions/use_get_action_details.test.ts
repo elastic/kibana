@@ -26,8 +26,8 @@ jest.mock('@tanstack/react-query', () => {
 
 describe('useGetActionDetails hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
-    Parameters<typeof useGetActionDetails>,
-    ReturnType<typeof useGetActionDetails>
+    ReturnType<typeof useGetActionDetails>,
+    Parameters<typeof useGetActionDetails>
   >;
   let http: AppContextTestRender['coreStart']['http'];
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;

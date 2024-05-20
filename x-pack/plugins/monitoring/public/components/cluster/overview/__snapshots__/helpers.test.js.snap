@@ -3,7 +3,7 @@
 exports[`Bytes Usage should format correctly with only usedBytes 1`] = `
 <span>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText css-1py2xv4-euiText-m"
   >
     50.0 B
   </div>
@@ -13,7 +13,7 @@ exports[`Bytes Usage should format correctly with only usedBytes 1`] = `
 exports[`Bytes Usage should format correctly with used and max bytes 1`] = `
 <span>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText css-1py2xv4-euiText-m"
   >
     50.0 B / 100.0 B
   </div>
@@ -23,12 +23,12 @@ exports[`Bytes Usage should format correctly with used and max bytes 1`] = `
 exports[`BytesPercentageUsage should format correctly with used bytes and max bytes 1`] = `
 <span>
   <div
-    class="euiText emotion-euiText-m"
+    class="euiText css-1py2xv4-euiText-m"
   >
     50.00%
   </div>
   <div
-    class="euiText emotion-euiText-s-euiTextColor-subdued"
+    class="euiText css-6o5696-euiText-s-euiTextColor-subdued"
   >
     50.0 B / 100.0 B
   </div>
@@ -37,7 +37,7 @@ exports[`BytesPercentageUsage should format correctly with used bytes and max by
 
 exports[`BytesPercentageUsage should return zero bytes if both parameters are not present 1`] = `
 <div
-  class="euiText emotion-euiText-m"
+  class="euiText css-1py2xv4-euiText-m"
 >
   0
 </div>

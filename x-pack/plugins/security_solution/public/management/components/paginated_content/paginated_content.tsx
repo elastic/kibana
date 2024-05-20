@@ -159,26 +159,27 @@ export const PaginatedContent = memo(
       }
     }, [pageCount, onChange, pagination, loading]);
 
-    const handleItemsPerPageChange: EuiTablePaginationProps['onChangeItemsPerPage'] = useCallback(
-      (pageSize) => {
-        if (pagination?.pageIndex) {
-          const pageIndex = Math.floor(
-            ((pagination?.pageIndex ?? MANAGEMENT_DEFAULT_PAGE) *
-              (pagination?.pageSize ?? MANAGEMENT_DEFAULT_PAGE_SIZE)) /
-              pageSize
-          );
-          onChange({
-            pageSize,
-            pageIndex: isNaN(pageIndex) ? MANAGEMENT_DEFAULT_PAGE : pageIndex,
-          });
-        } else {
-          onChange({ pageSize, pageIndex: MANAGEMENT_DEFAULT_PAGE });
-        }
-      },
-      [onChange, pagination]
-    );
+    const handleItemsPerPageChange: NonNullable<EuiTablePaginationProps['onChangeItemsPerPage']> =
+      useCallback(
+        (pageSize) => {
+          if (pagination?.pageIndex) {
+            const pageIndex = Math.floor(
+              ((pagination?.pageIndex ?? MANAGEMENT_DEFAULT_PAGE) *
+                (pagination?.pageSize ?? MANAGEMENT_DEFAULT_PAGE_SIZE)) /
+                pageSize
+            );
+            onChange({
+              pageSize,
+              pageIndex: isNaN(pageIndex) ? MANAGEMENT_DEFAULT_PAGE : pageIndex,
+            });
+          } else {
+            onChange({ pageSize, pageIndex: MANAGEMENT_DEFAULT_PAGE });
+          }
+        },
+        [onChange, pagination]
+      );
 
-    const handlePageChange: EuiTablePaginationProps['onChangePage'] = useCallback(
+    const handlePageChange: NonNullable<EuiTablePaginationProps['onChangePage']> = useCallback(
       (pageIndex) => {
         onChange({ pageIndex, pageSize: pagination?.pageSize || MANAGEMENT_DEFAULT_PAGE_SIZE });
       },

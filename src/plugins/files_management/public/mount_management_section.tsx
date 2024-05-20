@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -31,7 +31,8 @@ export const mountManagementSection = (
     files: { filesClientFactory, getAllFindKindDefinitions, getFileKindDefinition },
   } = startDeps;
 
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <QueryClientProvider client={queryClient}>
         <TableListViewKibanaProvider
@@ -51,11 +52,10 @@ export const mountManagementSection = (
           </FilesManagementAppContextProvider>
         </TableListViewKibanaProvider>
       </QueryClientProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

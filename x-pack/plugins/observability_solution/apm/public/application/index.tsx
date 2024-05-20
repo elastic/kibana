@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import { AppMountParameters, CoreStart, APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -68,8 +68,9 @@ export const renderApp = ({
 
   // add .kbnAppWrappers class to root element
   element.classList.add(APP_WRAPPER_CLASS);
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaThemeProvider
         theme={{ theme$ }}
@@ -86,10 +87,9 @@ export const renderApp = ({
           apmServices={apmServices}
         />
       </KibanaThemeProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

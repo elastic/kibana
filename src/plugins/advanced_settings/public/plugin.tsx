@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from '@kbn/core/public';
 import { SectionRegistry } from '@kbn/management-settings-section-registry';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -43,17 +43,16 @@ export class AdvancedSettingsPlugin
       async mount({ element, setBreadcrumbs, history }) {
         const [coreStart] = await core.getStartServices();
         setBreadcrumbs([{ text: title }]);
-
-        ReactDOM.render(
+        const root = createRoot(element);
+        root.render(
           <KibanaRenderContextProvider {...coreStart}>
             <KibanaSettingsApplication
               {...{ ...coreStart, history, sectionRegistry: sectionRegistryStart }}
             />
-          </KibanaRenderContextProvider>,
-          element
+          </KibanaRenderContextProvider>
         );
         return () => {
-          ReactDOM.unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     });

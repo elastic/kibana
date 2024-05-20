@@ -11,7 +11,7 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { Severity } from './severity';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { FormTestComponent } from '../../common/test_utils';
 
 const onSubmit = jest.fn();
@@ -56,7 +56,7 @@ describe('Severity form field', () => {
     expect(await screen.findByTestId('caseSeverity')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('case-severity-selection'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByTestId('case-severity-selection-high'));
 

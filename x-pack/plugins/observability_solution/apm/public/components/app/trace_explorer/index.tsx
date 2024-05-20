@@ -21,7 +21,7 @@ import { TechnicalPreviewBadge } from '../../shared/technical_preview_badge';
 import { TransactionTab } from '../transaction_details/waterfall_with_summary/transaction_tabs';
 import { TraceSearchBox } from './trace_search_box';
 
-export function TraceExplorer({ children }: { children: React.ReactElement }) {
+export function TraceExplorer({ children }: React.PropsWithChildren) {
   const [searchQuery, setSearchQuery] = useState<TraceSearchQuery>({
     query: '',
     type: TraceSearchType.kql,

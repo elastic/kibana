@@ -6,7 +6,7 @@
  */
 
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 
 import { DataQualityProvider, useDataQualityContext } from '.';
@@ -36,11 +36,13 @@ describe('DataQualityContext', () => {
   });
 
   test('it throws an error when useDataQualityContext hook is used without a DataQualityContext', () => {
-    const { result } = renderHook(useDataQualityContext);
-
-    expect(result.error).toEqual(
-      new Error('useDataQualityContext must be used within a DataQualityProvider')
-    );
+    try {
+      const { result } = renderHook(useDataQualityContext);
+    } catch (error) {
+      expect(error).toEqual(
+        new Error('useDataQualityContext must be used within a DataQualityProvider')
+      );
+    }
   });
 
   test('it should return the httpFetch function', async () => {

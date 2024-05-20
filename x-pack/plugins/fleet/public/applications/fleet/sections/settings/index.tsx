@@ -106,24 +106,27 @@ export const SettingsApp = withConfirmModalProvider(() => {
     <DefaultLayout section="settings">
       <Routes>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
-          {(route: { match: { params: { itemId: string } } }) => {
-            const fleetServerHost = fleetServerHostsItems.find(
-              (o) => route.match.params.itemId === o.id
-            );
-            if (!fleetServerHost) {
-              return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-            }
+          {
+            // @ts-expect-error
+            (route: { match: { params: { itemId: string } } }) => {
+              const fleetServerHost = fleetServerHostsItems.find(
+                (o) => route.match.params.itemId === o.id
+              );
+              if (!fleetServerHost) {
+                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+              }
 
-            return (
-              <EuiPortal>
-                <FleetServerHostsFlyout
-                  proxies={proxies.data?.items ?? []}
-                  onClose={onCloseCallback}
-                  fleetServerHost={fleetServerHost}
-                />
-              </EuiPortal>
-            );
-          }}
+              return (
+                <EuiPortal>
+                  <FleetServerHostsFlyout
+                    proxies={proxies.data?.items ?? []}
+                    onClose={onCloseCallback}
+                    fleetServerHost={fleetServerHost}
+                  />
+                </EuiPortal>
+              );
+            }
+          }
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
           <EuiPortal>
@@ -155,40 +158,46 @@ export const SettingsApp = withConfirmModalProvider(() => {
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_proxy}>
-          {(route: { match: { params: { itemId: string } } }) => {
-            const fleetProxy = proxies.data?.items.find(
-              (item) => route.match.params.itemId === item.id
-            );
-            if (!fleetProxy) {
-              return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+          {
+            // @ts-expect-error
+            (route: { match: { params: { itemId: string } } }) => {
+              const fleetProxy = proxies.data?.items.find(
+                (item) => route.match.params.itemId === item.id
+              );
+              if (!fleetProxy) {
+                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+              }
+              return (
+                <EuiPortal>
+                  <FleetProxyFlyout onClose={onCloseCallback} fleetProxy={fleetProxy} />
+                </EuiPortal>
+              );
             }
-            return (
-              <EuiPortal>
-                <FleetProxyFlyout onClose={onCloseCallback} fleetProxy={fleetProxy} />
-              </EuiPortal>
-            );
-          }}
+          }
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
-          {(route: { match: { params: { outputId: string } } }) => {
-            const output = outputItems.find((o) => route.match.params.outputId === o.id);
-            if (!output) {
-              return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-            }
+          {
+            // @ts-expect-error
+            (route: { match: { params: { outputId: string } } }) => {
+              const output = outputItems.find((o) => route.match.params.outputId === o.id);
+              if (!output) {
+                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+              }
 
-            return (
-              <EuiPortal>
-                <EditOutputFlyout
-                  proxies={proxies.data?.items ?? []}
-                  onClose={onCloseCallback}
-                  output={output}
-                  defaultOuput={outputs.data?.items.find(
-                    (o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID
-                  )}
-                />
-              </EuiPortal>
-            );
-          }}
+              return (
+                <EuiPortal>
+                  <EditOutputFlyout
+                    proxies={proxies.data?.items ?? []}
+                    onClose={onCloseCallback}
+                    output={output}
+                    defaultOuput={outputs.data?.items.find(
+                      (o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID
+                    )}
+                  />
+                </EuiPortal>
+              );
+            }
+          }
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_download_sources}>
           <EuiPortal>
@@ -199,24 +208,27 @@ export const SettingsApp = withConfirmModalProvider(() => {
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_download_sources}>
-          {(route: { match: { params: { downloadSourceId: string } } }) => {
-            const downloadSource = downloadSources.data?.items.find(
-              (o) => route.match.params.downloadSourceId === o.id
-            );
-            if (!downloadSource) {
-              return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
-            }
+          {
+            // @ts-expect-error
+            (route: { match: { params: { downloadSourceId: string } } }) => {
+              const downloadSource = downloadSources.data?.items.find(
+                (o) => route.match.params.downloadSourceId === o.id
+              );
+              if (!downloadSource) {
+                return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
+              }
 
-            return (
-              <EuiPortal>
-                <EditDownloadSourceFlyout
-                  onClose={onCloseCallback}
-                  downloadSource={downloadSource}
-                  proxies={proxies?.data?.items || []}
-                />
-              </EuiPortal>
-            );
-          }}
+              return (
+                <EuiPortal>
+                  <EditDownloadSourceFlyout
+                    onClose={onCloseCallback}
+                    downloadSource={downloadSource}
+                    proxies={proxies?.data?.items || []}
+                  />
+                </EuiPortal>
+              );
+            }
+          }
         </Route>
       </Routes>
       <SettingsPage

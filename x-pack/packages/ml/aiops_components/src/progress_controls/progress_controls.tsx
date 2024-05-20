@@ -30,6 +30,7 @@ import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_ba
  * Props for ProgressControlProps
  */
 interface ProgressControlProps {
+  children?: React.ReactNode;
   isBrushCleared: boolean;
   progress: number;
   progressMessage: string;

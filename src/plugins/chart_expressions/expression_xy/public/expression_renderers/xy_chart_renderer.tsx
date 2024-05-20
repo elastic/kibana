@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
@@ -200,16 +199,23 @@ export const getXyChartRenderer = ({
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers) => {
+  render: async (root: Element, config: XYChartProps, handlers) => {
     const deps = await getStartDeps();
 
+    // console.error('domNode', domNode, domNode.hasOwnProperty('_reactRootContainer'));
+
+    // const root = createRoot(domNode);
     // Lazy loaded parts
     const [{ XYChartReportable }, { calculateMinInterval, getDataLayers }] = await Promise.all([
       import('../components/xy_chart'),
       import('../helpers'),
     ]);
 
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    handlers.onDestroy(() => {
+      setTimeout(() => {
+        root.unmount();
+      });
+    });
     const onClickValue = (data: FilterEvent['data']) => {
       handlers.event({ name: 'filter', data });
     };
@@ -258,7 +264,7 @@ export const getXyChartRenderer = ({
       height: '100%',
     });
 
-    ReactDOM.render(
+    root.render(
       <KibanaRenderContextProvider {...deps.startServices}>
         <div css={chartContainerStyle} data-test-subj="xyVisChart">
           <XYChartReportable
@@ -287,8 +293,7 @@ export const getXyChartRenderer = ({
             setChartSize={setChartSize}
           />
         </div>
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

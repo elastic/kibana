@@ -29,6 +29,7 @@ export const criterionErrorsRT = rt.record(rt.string, criterionErrorRT);
 export type CriterionErrors = rt.TypeOf<typeof criterionErrorsRT>;
 
 const alertingErrorRT: rt.Type<IErrorObject> = rt.recursion('AlertingError', () =>
+  // @ts-expect-error
   rt.record(rt.string, rt.union([rt.string, rt.array(rt.string), alertingErrorRT]))
 );
 

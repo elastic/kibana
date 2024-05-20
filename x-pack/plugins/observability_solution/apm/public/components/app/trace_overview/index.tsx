@@ -21,7 +21,7 @@ type Tab = Required<
   Required<React.ComponentProps<typeof ApmMainTemplate>>['pageHeader']
 >['tabs'][number];
 
-export function TraceOverview({ children }: { children: React.ReactElement }) {
+export function TraceOverview({ children }: React.PropsWithChildren) {
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
 
   const router = useApmRouter();

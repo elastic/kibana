@@ -13,7 +13,7 @@ import { InvalidLicenseNotification } from './invalid_license_notification';
 
 export const LicenseContext = React.createContext<ILicense | undefined>(undefined);
 
-export function LicenseProvider({ children }: { children: React.ReactChild }) {
+export function LicenseProvider({ children }: React.PropsWithChildren) {
   const { plugins } = useApmPluginContext();
   const { licensing } = plugins;
   const license = useObservable(licensing.license$);

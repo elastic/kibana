@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { act, waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -38,21 +38,22 @@ describe('DiscoverMainApp', () => {
       initialEntries: ['/'],
     });
 
+    const component = await mountWithIntl(
+      <Router history={history}>
+        <KibanaContextProvider services={discoverServiceMock}>
+          <DiscoverMainProvider value={stateContainer}>
+            <DiscoverMainApp {...props} />
+          </DiscoverMainProvider>
+        </KibanaContextProvider>
+      </Router>
+    );
+
+    // wait for lazy modules
     await act(async () => {
-      const component = await mountWithIntl(
-        <Router history={history}>
-          <KibanaContextProvider services={discoverServiceMock}>
-            <DiscoverMainProvider value={stateContainer}>
-              <DiscoverMainApp {...props} />
-            </DiscoverMainProvider>
-          </KibanaContextProvider>
-        </Router>
-      );
-
-      // wait for lazy modules
       await new Promise((resolve) => setTimeout(resolve, 0));
-      await component.update();
+    });
 
+    waitFor(() => {
       expect(component.find(DiscoverTopNav).exists()).toBe(true);
     });
   });

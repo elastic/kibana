@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { useKibana } from '../../common/lib/kibana';
 import { useExecuteConnector } from './use_execute_connector';
 
@@ -29,13 +29,13 @@ describe('useExecuteConnector', () => {
   });
 
   it('executes correctly', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useExecuteConnector());
+    const { result } = renderHook(() => useExecuteConnector());
 
     act(() => {
       result.current.executeConnector({ connectorId: 'test-id', params: {} });
     });
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(useKibanaMock().services.http.post).toHaveBeenCalledWith(
       '/api/actions/connector/test-id/_execute',

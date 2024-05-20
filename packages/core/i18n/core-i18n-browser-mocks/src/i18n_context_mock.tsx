@@ -16,6 +16,7 @@ const emptyMessages = {};
 
 export const I18nProviderMock: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
+    // @ts-expect-error
     <IntlProvider
       locale={i18n.getLocale()}
       messages={emptyMessages}

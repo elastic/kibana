@@ -6,7 +6,7 @@
  */
 
 import { FilterQueryContextProvider, useFilterQueryUpdates } from './use_filters_query';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { dataPluginMock as mockDataPlugin } from '@kbn/data-plugin/public/mocks';
 import { Timefilter } from '@kbn/data-plugin/public/query';
 import { useAiopsAppContext } from './use_aiops_app_context';

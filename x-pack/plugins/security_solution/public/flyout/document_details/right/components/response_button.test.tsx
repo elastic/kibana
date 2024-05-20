@@ -32,6 +32,7 @@ const mockValidSearchHit = {
 
 const renderResponseButton = (panelContextValue: RightPanelContext = mockContextValue) =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <TestProvider>
         <RightPanelContext.Provider value={panelContextValue}>

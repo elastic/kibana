@@ -34,7 +34,7 @@ export const useUrlPagination = (): UrlPagination => {
   const { pagination, pageSizeOptions, setPagination } = usePagination(urlPaginationParams);
 
   const setUrlPagination = useCallback<SetUrlPagination>(
-    ({ pageSize, currentPage }) => {
+    ({ pageSize, currentPage }: any) => {
       history.push({
         ...location,
         search: toUrlParams({

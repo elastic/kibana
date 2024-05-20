@@ -14,7 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import type { DocLinksStart, MountPoint } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -84,8 +84,9 @@ export const insecureClusterAlertText = (
         </I18nProvider>
       );
     };
+    const root = createRoot(e);
 
-    render(<AlertText />, e);
+    root.render(<AlertText />);
 
-    return () => unmountComponentAtNode(e);
+    return () => root.unmount();
   }) as MountPoint;

@@ -9,7 +9,7 @@
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { batch } from 'react-redux';
 import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
@@ -88,7 +88,7 @@ export class OptionsListEmbeddable
   public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
-  private node?: HTMLElement;
+  private root?: ReturnType<typeof createRoot> | null = null;
 
   // Controls services
   private dataViewsService: ControlsDataViewsService;
@@ -455,16 +455,20 @@ export class OptionsListEmbeddable
     this.cleanupStateTools();
     this.abortController?.abort();
     this.subscriptions.unsubscribe();
-    if (this.node) ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      setTimeout(() => {
+        this.root.unmount();
+      });
+    }
   };
 
   public render = (node: HTMLElement) => {
-    if (this.node) {
-      ReactDOM.unmountComponentAtNode(this.node);
+    if (this.root) {
+      this.root.unmount();
     }
-    this.node = node;
+    this.root = createRoot(node);
 
-    ReactDOM.render(
+    this.root.render(
       <KibanaRenderContextProvider {...pluginServices.getServices().core}>
         <OptionsListEmbeddableContext.Provider value={this}>
           <OptionsListControl
@@ -472,8 +476,7 @@ export class OptionsListEmbeddable
             loadMoreSubject={this.loadMoreSubject}
           />
         </OptionsListEmbeddableContext.Provider>
-      </KibanaRenderContextProvider>,
-      node
+      </KibanaRenderContextProvider>
     );
   };
 

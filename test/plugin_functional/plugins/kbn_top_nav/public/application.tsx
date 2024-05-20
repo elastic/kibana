@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters } from '@kbn/core/public';
 import { AppPluginDependencies } from './types';
 
@@ -15,6 +15,7 @@ export const renderApp = (
   depsStart: AppPluginDependencies,
   { appBasePath, element }: AppMountParameters
 ) => {
+  const root = createRoot(element);
   const { TopNavMenu } = depsStart.navigation.ui;
   const config = [
     {
@@ -25,7 +26,6 @@ export const renderApp = (
       testId: 'demoNewButton',
     },
   ];
-  render(<TopNavMenu appName="demo-app" config={config} />, element);
-
-  return () => unmountComponentAtNode(element);
+  root.render(<TopNavMenu appName="demo-app" config={config} />);
+  return () => root.unmount();
 };

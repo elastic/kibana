@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   EuiPage,
   EuiPageHeader,
@@ -98,7 +98,8 @@ const ExpressionsExplorer = ({
 };
 
 export const renderApp = (props: Props, { element }: AppMountParameters) => {
-  ReactDOM.render(<ExpressionsExplorer {...props} />, element);
+  const root = createRoot(element);
+  root.render(<ExpressionsExplorer {...props} />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

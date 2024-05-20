@@ -34,6 +34,7 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(
 
 const renderRelatedAlertsBySameSourceEvent = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RelatedAlertsBySameSourceEvent originalEventId={originalEventId} scopeId={scopeId} />
     </IntlProvider>

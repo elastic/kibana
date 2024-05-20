@@ -7,7 +7,7 @@
  */
 
 import { registerTestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 import { IngestPipelinePanel } from './ingest_pipeline_panel';
 
 const DEFAULT_INGESTION_PIPELINE = 'default-ingestion-pipeline';
@@ -46,7 +46,7 @@ describe('IngestPipelinePanel', () => {
   let exists: any;
   let find: any;
 
-  beforeAll(async () => {
+  beforeAll(() => {
     const setup = registerTestBed(IngestPipelinePanel, {
       defaultProps: {
         setSelectedPipeline: setSelectedPipelineMock,
@@ -56,24 +56,24 @@ describe('IngestPipelinePanel', () => {
       memoryRouter: { wrapComponent: false },
     });
 
-    await act(async () => {
-      const testBed = setup();
-      exists = testBed.exists;
-      find = testBed.find;
-    });
+    const testBed = setup();
+    exists = testBed.exists;
+    find = testBed.find;
   });
 
   it('should display Process Data section', () => {
-    expect(exists('ingestPipelinePanelTitle')).toBe(true);
-    expect(find('ingestPipelinePanelTitle').contains('Preprocess your data')).toBe(true);
-    expect(
-      find('ingestPipelinePanelBody').contains(
-        'You can use ingest pipelines to preprocess data before indexing into Elasticsearch.'
-      )
-    ).toBe(true);
-    expect(find('ingestPipelinePanelTitle').find('.euiBadge__text').contains('Optional')).toBe(
-      true
-    );
+    waitFor(() => {
+      expect(exists('ingestPipelinePanelTitle')).toBe(true);
+      expect(find('ingestPipelinePanelTitle').contains('Preprocess your data')).toBe(true);
+      expect(
+        find('ingestPipelinePanelBody').contains(
+          'You can use ingest pipelines to preprocess data before indexing into Elasticsearch.'
+        )
+      ).toBe(true);
+      expect(find('ingestPipelinePanelTitle').find('.euiBadge__text').contains('Optional')).toBe(
+        true
+      );
+    });
   });
 
   it('should display number of processors', () => {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import React, { PropsWithChildren } from 'react';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../utils/filter_integrations';
 
 const createWrapper = () => {
   const queryClient = new QueryClient();
-  return ({ children }: { children: any }) => (
+  return ({ children }: PropsWithChildren) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
@@ -25,12 +25,12 @@ const renderUseQuery = (result: { items: any[] }) =>
 describe('useIntegrations', () => {
   it('should have undefined data during loading state', async () => {
     const mockIntegrations = { items: [] };
-    const { result, waitFor } = renderUseQuery(mockIntegrations);
+    const { result } = renderUseQuery(mockIntegrations);
 
-    await waitFor(() => result.current.isLoading);
-
-    expect(result.current.isLoading).toBeTruthy();
-    expect(result.current.data).toBeUndefined();
+    await waitFor(() => {
+      expect(result.current.isLoading).toBeTruthy();
+      expect(result.current.data).toBeUndefined();
+    });
   });
 
   it('should return integrations on success', async () => {
@@ -43,11 +43,11 @@ describe('useIntegrations', () => {
         },
       ],
     };
-    const { result, waitFor } = renderUseQuery(mockIntegrations);
+    const { result } = renderUseQuery(mockIntegrations);
 
-    await waitFor(() => result.current.isSuccess);
-
-    expect(result.current.isLoading).toBeFalsy();
-    expect(result.current.data).toEqual(mockIntegrations);
+    await waitFor(() => {
+      expect(result.current.isLoading).toBeFalsy();
+      expect(result.current.data).toEqual(mockIntegrations);
+    });
   });
 });

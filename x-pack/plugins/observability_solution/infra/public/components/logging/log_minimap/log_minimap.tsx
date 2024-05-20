@@ -13,7 +13,7 @@ import {
 } from '@kbn/logs-shared-plugin/common';
 import { scaleLinear } from 'd3-scale';
 import moment from 'moment';
-import * as React from 'react';
+import React from 'react';
 import { DensityChart } from './density_chart';
 import { HighlightedInterval } from './highlighted_interval';
 import { SearchMarkers } from './search_markers';

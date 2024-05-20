@@ -6,7 +6,7 @@
  */
 
 import { TestBed } from '@kbn/test-jest-helpers';
-import { act } from 'react-dom/test-utils';
+import { act } from '@testing-library/react';
 
 import { setupEnvironment, RemoteClustersActions } from '../helpers';
 import { setup } from './remote_clusters_add.helpers';
@@ -43,7 +43,9 @@ describe('Create Remote cluster', () => {
       // By default it should be set to "true"
       expect(actions.skipUnavailableSwitch.isChecked()).toBe(true);
 
-      actions.skipUnavailableSwitch.toggle();
+      act(() => {
+        actions.skipUnavailableSwitch.toggle();
+      });
 
       expect(actions.skipUnavailableSwitch.isChecked()).toBe(false);
     });
@@ -55,13 +57,18 @@ describe('Create Remote cluster', () => {
         // By default it should be set to "false"
         expect(actions.connectionModeSwitch.isChecked()).toBe(false);
 
-        actions.connectionModeSwitch.toggle();
+        act(() => {
+          actions.connectionModeSwitch.toggle();
+        });
 
         expect(actions.connectionModeSwitch.isChecked()).toBe(true);
       });
 
       test('server name has optional label', () => {
-        actions.connectionModeSwitch.toggle();
+        act(() => {
+          actions.connectionModeSwitch.toggle();
+        });
+
         expect(actions.serverNameInput.getLabel()).toBe('Server name (optional)');
       });
 
@@ -69,7 +76,9 @@ describe('Create Remote cluster', () => {
         expect(actions.globalErrorExists()).toBe(false);
         expect(actions.saveButton.isDisabled()).toBe(false);
 
-        await actions.saveButton.click();
+        act(() => {
+          actions.saveButton.click();
+        });
 
         expect(actions.globalErrorExists()).toBe(true);
         expect(actions.getErrorMessages()).toEqual([
@@ -90,11 +99,15 @@ describe('Create Remote cluster', () => {
           ({ actions, component } = await setup(httpSetup, { isCloudEnabled: true }));
         });
 
-        component.update();
+        act(() => {
+          component.update();
+        });
       });
 
       test('TLS server name has optional label', () => {
-        actions.cloudAdvancedOptionsSwitch.toggle();
+        act(() => {
+          actions.cloudAdvancedOptionsSwitch.toggle();
+        });
         expect(actions.tlsServerNameInput.getLabel()).toBe('TLS server name (optional)');
       });
 
@@ -114,9 +127,13 @@ describe('Create Remote cluster', () => {
   describe('form validation', () => {
     describe('remote cluster name', () => {
       test('should not allow spaces', async () => {
-        actions.nameInput.setValue('with space');
+        act(() => {
+          actions.nameInput.setValue('with space');
+        });
 
-        await actions.saveButton.click();
+        await act(async () => {
+          await actions.saveButton.click();
+        });
 
         expect(actions.getErrorMessages()).toContain('Spaces are not allowed in the name.');
       });
@@ -138,7 +155,9 @@ describe('Create Remote cluster', () => {
           }
         };
 
-        await actions.saveButton.click(); // display form errors
+        act(() => {
+          actions.saveButton.click(); // display form errors
+        });
 
         [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS].forEach(expectInvalidChar);
       });
@@ -150,13 +169,19 @@ describe('Create Remote cluster', () => {
           ({ actions, component } = await setup(httpSetup));
         });
 
-        component.update();
+        act(() => {
+          component.update();
+        });
 
-        actions.connectionModeSwitch.toggle();
+        act(() => {
+          actions.connectionModeSwitch.toggle();
+        });
       });
 
       test('should only allow alpha-numeric characters and "-" (dash) in the proxy address "host" part', async () => {
-        await actions.saveButton.click(); // display form errors
+        act(() => {
+          actions.saveButton.click(); // display form errors
+        });
 
         const expectInvalidChar = (char: string) => {
           actions.proxyAddressInput.setValue(`192.16${char}:3000`);
@@ -171,7 +196,9 @@ describe('Create Remote cluster', () => {
       });
 
       test('should require a numeric "port" to be set', async () => {
-        await actions.saveButton.click();
+        act(() => {
+          actions.saveButton.click();
+        });
 
         actions.proxyAddressInput.setValue('192.168.1.1');
         expect(actions.getErrorMessages()).toContain('A port is required.');
@@ -189,12 +216,12 @@ describe('Create Remote cluster', () => {
           }));
         });
 
-        component.update();
-
-        actions.nameInput.setValue('remote_cluster_test');
-        actions.seedsInput.setValue('192.168.1.1:3000');
-
-        await actions.saveButton.click();
+        act(() => {
+          component.update();
+          actions.nameInput.setValue('remote_cluster_test');
+          actions.seedsInput.setValue('192.168.1.1:3000');
+          actions.saveButton.click();
+        });
       });
 
       test('should contain two cards for setting up trust', () => {
@@ -207,10 +234,16 @@ describe('Create Remote cluster', () => {
       });
 
       test('on submit should open confirm modal', async () => {
-        await actions.setupTrust.setupTrustConfirmClick();
+        act(() => {
+          actions.setupTrust.setupTrustConfirmClick();
+        });
 
         expect(actions.setupTrust.isSubmitInConfirmDisabled()).toBe(true);
-        await actions.setupTrust.toggleConfirmSwitch();
+
+        act(() => {
+          actions.setupTrust.toggleConfirmSwitch();
+        });
+
         expect(actions.setupTrust.isSubmitInConfirmDisabled()).toBe(false);
       });
 
@@ -266,19 +299,25 @@ describe('Create Remote cluster', () => {
         });
 
         test('should require a numeric "port" to be set', async () => {
-          await actions.saveButton.click();
+          act(() => {
+            actions.saveButton.click();
+            actions.seedsInput.setValue('192.168.1.1');
+          });
 
-          actions.seedsInput.setValue('192.168.1.1');
           expect(actions.getErrorMessages()).toContain('A port is required.');
 
-          actions.seedsInput.setValue('192.168.1.1:abc');
+          act(() => {
+            actions.seedsInput.setValue('192.168.1.1:abc');
+          });
           expect(actions.getErrorMessages()).toContain('A port is required.');
         });
       });
 
       test('server name is optional (proxy connection)', () => {
-        actions.connectionModeSwitch.toggle();
-        actions.saveButton.click();
+        act(() => {
+          actions.connectionModeSwitch.toggle();
+          actions.saveButton.click();
+        });
         expect(actions.getErrorMessages()).toEqual(['A proxy address is required.']);
       });
     });
@@ -289,16 +328,22 @@ describe('Create Remote cluster', () => {
           ({ actions, component } = await setup(httpSetup, { isCloudEnabled: true }));
         });
 
-        component.update();
+        act(() => {
+          component.update();
+        });
       });
 
       test('remote address is required', () => {
-        actions.saveButton.click();
+        act(() => {
+          actions.saveButton.click();
+        });
         expect(actions.getErrorMessages()).toContain('A remote address is required.');
       });
 
       test('should only allow alpha-numeric characters and "-" (dash) in the remote address "host" part', async () => {
-        await actions.saveButton.click(); // display form errors
+        act(() => {
+          actions.saveButton.click(); // display form errors
+        });
 
         const expectInvalidChar = (char: string) => {
           actions.cloudRemoteAddressInput.setValue(`192.16${char}:3000`);

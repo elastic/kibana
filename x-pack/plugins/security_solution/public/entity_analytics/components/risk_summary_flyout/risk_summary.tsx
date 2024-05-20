@@ -93,7 +93,7 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
   );
 
   const onToggle = useCallback(
-    (isOpen) => {
+    (isOpen: boolean) => {
       const entity = isUserRiskData(riskData) ? 'user' : 'host';
 
       telemetry.reportToggleRiskSummaryClicked({

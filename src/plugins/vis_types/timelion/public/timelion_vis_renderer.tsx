@@ -7,7 +7,7 @@
  */
 
 import React, { lazy } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { RangeFilterParams } from '@kbn/es-query';
@@ -45,8 +45,10 @@ export const getTimelionVisRenderer: (
   displayName: 'Timelion visualization',
   reuseDomNode: true,
   render: async (domNode, { visData, visParams, syncTooltips, syncCursor }, handlers) => {
+    const root = createRoot(domNode);
+
     handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
+      root.unmount();
     });
 
     const seriesList = visData?.sheet[0];
@@ -84,7 +86,7 @@ export const getTimelionVisRenderer: (
       handlers.done();
     };
 
-    render(
+    root.render(
       <VisualizationContainer
         renderComplete={renderComplete}
         handlers={handlers}
@@ -105,8 +107,7 @@ export const getTimelionVisRenderer: (
             )}
           </KibanaContextProvider>
         </KibanaRenderContextProvider>
-      </VisualizationContainer>,
-      domNode
+      </VisualizationContainer>
     );
   },
 });

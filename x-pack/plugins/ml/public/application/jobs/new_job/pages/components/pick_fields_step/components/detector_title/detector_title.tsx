@@ -20,6 +20,7 @@ interface DetectorTitleProps {
     field: SplitField;
     value: string | null;
   };
+  children?: React.ReactNode;
   deleteDetector?: (dtrIds: number) => void;
 }
 

@@ -224,7 +224,7 @@ export const useExplorerData = (): [Partial<ExplorerState> | undefined, (d: any)
   const explorerData$ = useMemo(() => loadExplorerData$.pipe(switchMap(loadExplorerData)), []);
   const explorerData = useObservable(explorerData$);
 
-  const update = useCallback((c) => {
+  const update = useCallback((c: any) => {
     loadExplorerData$.next(c);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

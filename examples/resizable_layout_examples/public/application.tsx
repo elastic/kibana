@@ -10,7 +10,7 @@ import { CoreThemeProvider } from '@kbn/core-theme-browser-internal';
 import type { AppMountParameters } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import React, { ReactNode, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { useIsWithinBreakpoints } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
@@ -98,7 +98,8 @@ const ResizableSection = ({
 };
 
 export const renderApp = ({ element, theme$ }: AppMountParameters) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <I18nProvider>
       <CoreThemeProvider theme$={theme$}>
         <div
@@ -151,11 +152,10 @@ export const renderApp = ({ element, theme$ }: AppMountParameters) => {
           />
         </div>
       </CoreThemeProvider>
-    </I18nProvider>,
-    element
+    </I18nProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

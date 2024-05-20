@@ -6,23 +6,11 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import React from 'react';
+import { render } from '@testing-library/react';
 import { act, Simulate } from 'react-dom/test-utils';
 import { createStateContainer } from './create_state_container';
 import { createStateContainerReactHelpers } from './create_state_container_react_helpers';
-
-let container: HTMLDivElement | null;
-
-beforeEach(() => {
-  container = document.createElement('div');
-  document.body.appendChild(container);
-});
-
-afterEach(() => {
-  document.body.removeChild(container!);
-  container = null;
-});
 
 test('can create React context', () => {
   const context = createStateContainerReactHelpers();
@@ -39,11 +27,10 @@ test('<Provider> passes state to <Consumer>', () => {
   const stateContainer = createStateContainer({ hello: 'world' });
   const { Provider, Consumer } = createStateContainerReactHelpers<typeof stateContainer>();
 
-  ReactDOM.render(
+  const { container } = render(
     <Provider value={stateContainer}>
       <Consumer>{(s: typeof stateContainer) => s.get().hello}</Consumer>
-    </Provider>,
-    container
+    </Provider>
   );
 
   expect(container!.innerHTML).toBe('world');
@@ -71,11 +58,10 @@ test('<Provider> passes state to connect()()', () => {
   const mergeProps = ({ hello }: State1) => ({ message: hello });
   const DemoConnected = connect<Props1, 'message'>(mergeProps)(Demo);
 
-  ReactDOM.render(
+  const { container } = render(
     <Provider value={stateContainer}>
       <DemoConnected stop="?" />
-    </Provider>,
-    container
+    </Provider>
   );
 
   expect(container!.innerHTML).toBe('Bob?');
@@ -85,13 +71,11 @@ test('context receives stateContainer', () => {
   const stateContainer = createStateContainer({ foo: 'bar' });
   const { Provider, context } = createStateContainerReactHelpers<typeof stateContainer>();
 
-  ReactDOM.render(
+  const { container } = render(
     /* eslint-disable @typescript-eslint/no-shadow */
     <Provider value={stateContainer}>
       <context.Consumer>{(stateContainer) => stateContainer.get().foo}</context.Consumer>
-    </Provider>,
-    /* eslint-enable @typescript-eslint/no-shadow */
-    container
+    </Provider>
   );
 
   expect(container!.innerHTML).toBe('bar');
@@ -105,16 +89,14 @@ describe('hooks', () => {
       const stateContainer = createStateContainer({ foo: 'bar' });
       const { Provider, useContainer } = createStateContainerReactHelpers<typeof stateContainer>();
       const Demo: React.FC<{}> = () => {
-        // eslint-disable-next-line @typescript-eslint/no-shadow
         const stateContainer = useContainer();
         return <>{stateContainer.get().foo}</>;
       };
 
-      ReactDOM.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       expect(container!.innerHTML).toBe('bar');
@@ -130,11 +112,10 @@ describe('hooks', () => {
         return <>{foo}</>;
       };
 
-      ReactDOM.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       expect(container!.innerHTML).toBe('qux');
@@ -153,11 +134,10 @@ describe('hooks', () => {
         return <>{foo}</>;
       };
 
-      ReactDOM.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       expect(container!.innerHTML).toBe('bar');
@@ -195,11 +175,10 @@ describe('hooks', () => {
         );
       };
 
-      ReactDOM.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       expect(container!.querySelector('strong')!.innerHTML).toBe('0');
@@ -230,11 +209,10 @@ describe('hooks', () => {
         return <>{value}</>;
       };
 
-      ReactDOM.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       expect(container!.innerHTML).toBe('qux');
@@ -255,11 +233,10 @@ describe('hooks', () => {
         return <>{value}</>;
       };
 
-      ReactDOM.render(
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       expect(container!.innerHTML).toBe('qux');
@@ -286,11 +263,11 @@ describe('hooks', () => {
         const value = useSelector(selector);
         return <>{value}</>;
       };
-      ReactDOM.render(
+
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       await new Promise((r) => setTimeout(r, 1));
@@ -322,11 +299,11 @@ describe('hooks', () => {
         const value = useSelector(selector);
         return <>{JSON.stringify(value)}</>;
       };
-      ReactDOM.render(
+
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       await new Promise((r) => setTimeout(r, 1));
@@ -364,11 +341,11 @@ describe('hooks', () => {
         const value = useSelector(selector, comparator);
         return <>{JSON.stringify(value)}</>;
       };
-      ReactDOM.render(
+
+      const { container } = render(
         <Provider value={stateContainer}>
           <Demo />
-        </Provider>,
-        container
+        </Provider>
       );
 
       await new Promise((r) => setTimeout(r, 1));

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as React from 'react';
+import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { ActionTypeForm } from './action_type_form';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
@@ -413,6 +413,7 @@ describe('action_type_form', () => {
       frequency: DEFAULT_FREQUENCY,
     };
     const wrapper = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         {getActionTypeForm({
           index: 1,
@@ -489,6 +490,7 @@ describe('action_type_form', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
 
     const wrapper = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         {getActionTypeForm({
           index: 1,
@@ -552,6 +554,7 @@ describe('action_type_form', () => {
         },
       };
       const wrapper = render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,
@@ -606,6 +609,7 @@ describe('action_type_form', () => {
         },
       };
       const wrapper = render(
+        // @ts-expect-error
         <IntlProvider locale="en">
           {getActionTypeForm({
             index: 1,

@@ -75,7 +75,7 @@ export interface GetAggregatableFields {
 export function getAggregatableFields(
   fields: GetAggregatableFields,
   useLensCompatibleFields?: boolean
-): EuiComboBoxOptionOption[] {
+): Array<EuiComboBoxOptionOption<string>> {
   const result = [];
   for (const [key, field] of Object.entries(fields)) {
     if (useLensCompatibleFields) {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import {
   type AppMountParameters,
   DEFAULT_APP_CATEGORIES,
@@ -76,19 +76,19 @@ export class ObservabilityAIAssistantAppPlugin
             [CoreStart, ObservabilityAIAssistantAppPluginStartDependencies, unknown]
           >,
         ]);
+        const root = createRoot(appMountParameters.element);
 
-        ReactDOM.render(
+        root.render(
           <Application
             {...appMountParameters}
             service={this.appService!}
             coreStart={coreStart}
             pluginsStart={pluginsStart as ObservabilityAIAssistantAppPluginStartDependencies}
-          />,
-          appMountParameters.element
+          />
         );
 
         return () => {
-          ReactDOM.unmountComponentAtNode(appMountParameters.element);
+          root.unmount();
         };
       },
     });
@@ -106,7 +106,9 @@ export class ObservabilityAIAssistantAppPlugin
 
     coreStart.chrome.navControls.registerRight({
       mount: (element) => {
-        ReactDOM.render(
+        const root = createRoot(element);
+
+        root.render(
           <SharedProviders
             coreStart={coreStart}
             pluginsStart={pluginsStart}
@@ -114,9 +116,7 @@ export class ObservabilityAIAssistantAppPlugin
             theme$={coreStart.theme.theme$}
           >
             <LazyNavControl />
-          </SharedProviders>,
-          element,
-          () => {}
+          </SharedProviders>
         );
 
         return () => {};

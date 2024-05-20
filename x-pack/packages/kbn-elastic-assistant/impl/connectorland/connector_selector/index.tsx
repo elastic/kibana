@@ -21,7 +21,7 @@ import { AddConnectorModal } from '../add_connector_modal';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
-interface Props {
+export interface ConnectorSelectorProps {
   isDisabled?: boolean;
   isOpen?: boolean;
   onConnectorSelectionChange: (connector: AIConnector) => void;
@@ -36,7 +36,7 @@ export type AIConnector = ActionConnector & {
   apiProvider?: OpenAiProviderType;
 };
 
-export const ConnectorSelector: React.FC<Props> = React.memo(
+export const ConnectorSelector = React.memo<ConnectorSelectorProps>(
   ({
     isDisabled = false,
     isOpen = false,

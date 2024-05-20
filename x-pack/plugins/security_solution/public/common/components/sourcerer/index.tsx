@@ -248,7 +248,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   );
 
   const onChangeDataView = useCallback(
-    (newSelectedOption) => {
+    (newSelectedOption: string) => {
       setDataViewId(newSelectedOption);
       setIndexPatternsByDataView(newSelectedOption);
     },

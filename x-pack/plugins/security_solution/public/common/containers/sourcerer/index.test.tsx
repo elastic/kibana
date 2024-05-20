@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { Provider } from 'react-redux';
 
 import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
@@ -156,10 +156,10 @@ describe('Sourcerer Hooks', () => {
   });
   it('initializes loading default and timeline index patterns', async () => {
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+      const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       rerender();
       expect(mockDispatch).toBeCalledTimes(3);
       expect(mockDispatch.mock.calls[0][0]).toEqual({
@@ -201,10 +201,10 @@ describe('Sourcerer Hooks', () => {
         loading: false,
         signalIndexName: mockSourcererState.signalIndexName,
       }));
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+      const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       rerender();
       await waitFor(() => {
         expect(mockDispatch.mock.calls[3][0]).toEqual({
@@ -248,8 +248,8 @@ describe('Sourcerer Hooks', () => {
       })
     );
 
-    renderHook<string, void>(() => useInitSourcerer(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    renderHook<void, string>(() => useInitSourcerer(), {
+      wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(mockDispatch).toHaveBeenCalledWith(
@@ -268,8 +268,8 @@ describe('Sourcerer Hooks', () => {
       onInitialize(null)
     );
 
-    renderHook<string, void>(() => useInitSourcerer(), {
-      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    renderHook<void, string>(() => useInitSourcerer(), {
+      wrapper: ({ children }: PropsWithChildren) => <TestProviders>{children}</TestProviders>,
     });
 
     expect(updateUrlParam).toHaveBeenCalledWith({
@@ -293,8 +293,8 @@ describe('Sourcerer Hooks', () => {
       },
     });
     await act(async () => {
-      renderHook<string, void>(() => useInitSourcerer(), {
-        wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+      renderHook<void, string>(() => useInitSourcerer(), {
+        wrapper: ({ children }: PropsWithChildren) => <Provider store={store}>{children}</Provider>,
       });
 
       await waitFor(() => {
@@ -329,11 +329,11 @@ describe('Sourcerer Hooks', () => {
         loading: false,
         signalIndexName: mockSourcererState.signalIndexName,
       }));
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+      const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
 
-      await waitForNextUpdate();
+      // await waitFor();
       rerender();
 
       await waitFor(() => {
@@ -368,11 +368,11 @@ describe('Sourcerer Hooks', () => {
         loading: false,
         signalIndexName: mockSourcererState.signalIndexName,
       }));
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+      const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
 
-      await waitForNextUpdate();
+      // await waitFor();
       rerender();
 
       await waitFor(() => {
@@ -388,13 +388,13 @@ describe('Sourcerer Hooks', () => {
         signalIndexName: mockSourcererState.signalIndexName,
         isSignalIndexExists: true,
       }));
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(
+      const { rerender } = renderHook<void, string>(
         () => useInitSourcerer(SourcererScopeName.detections),
         {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       rerender();
       expect(mockDispatch.mock.calls[3][0]).toEqual({
         type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
@@ -408,10 +408,10 @@ describe('Sourcerer Hooks', () => {
   });
   it('index field search is not repeated when default and timeline have same dataViewId', async () => {
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+      const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       rerender();
       await waitFor(() => {
         expect(mockSearch).toHaveBeenCalledTimes(1);
@@ -433,10 +433,10 @@ describe('Sourcerer Hooks', () => {
       },
     });
     await act(async () => {
-      const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+      const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
         wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       rerender();
       await waitFor(() => {
         expect(mockSearch).toHaveBeenCalledTimes(2);
@@ -455,10 +455,10 @@ describe('Sourcerer Hooks', () => {
     });
     it('does not needToBeInit if scope is default and selectedPatterns/missingPatterns have values', async () => {
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
-        await waitForNextUpdate();
+        // await waitFor();
         rerender();
         await waitFor(() => {
           expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
@@ -486,10 +486,10 @@ describe('Sourcerer Hooks', () => {
         },
       });
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
-        await waitForNextUpdate();
+        // await waitFor();
         rerender();
         await waitFor(() => {
           expect(mockIndexFieldsSearch).toHaveBeenCalledWith({
@@ -522,10 +522,10 @@ describe('Sourcerer Hooks', () => {
         },
       });
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
-        await waitForNextUpdate();
+        // await waitFor();
         rerender();
         await waitFor(() => {
           expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
@@ -559,10 +559,10 @@ describe('Sourcerer Hooks', () => {
         },
       });
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
-        await waitForNextUpdate();
+        // await waitFor();
         rerender();
         await waitFor(() => {
           expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
@@ -600,10 +600,10 @@ describe('Sourcerer Hooks', () => {
         },
       });
       await act(async () => {
-        const { rerender, waitForNextUpdate } = renderHook<string, void>(() => useInitSourcerer(), {
+        const { rerender } = renderHook<void, string>(() => useInitSourcerer(), {
           wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
         });
-        await waitForNextUpdate();
+        // await waitFor();
         rerender();
         await waitFor(() => {
           expect(mockIndexFieldsSearch).toHaveBeenNthCalledWith(2, {
@@ -642,13 +642,13 @@ describe('Sourcerer Hooks', () => {
             },
           },
         });
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          SourcererScopeName,
-          SelectedDataView
-        >(() => useSourcererDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
+        const { result, rerender } = renderHook<SelectedDataView, SourcererScopeName>(
+          () => useSourcererDataView(),
+          {
+            wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
+          }
+        );
+        // await waitFor();
         rerender();
         expect(result.current.selectedPatterns).toEqual([
           'apm-*-transaction*',

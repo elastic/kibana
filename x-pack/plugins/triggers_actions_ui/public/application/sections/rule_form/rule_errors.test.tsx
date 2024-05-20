@@ -268,6 +268,7 @@ describe('rule_errors', () => {
       expect(
         hasObjectErrors({
           foo: {
+            // @ts-expect-error
             foo: ['1'],
           },
         })

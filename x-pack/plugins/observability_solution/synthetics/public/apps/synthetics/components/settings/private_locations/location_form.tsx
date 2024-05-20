@@ -46,6 +46,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
           fullWidth
           label={LOCATION_NAME_LABEL}
           isInvalid={Boolean(errors?.label)}
+          // @ts-expect-error
           error={errors?.label?.message}
         >
           <FieldText

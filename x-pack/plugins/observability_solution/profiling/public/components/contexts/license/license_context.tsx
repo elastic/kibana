@@ -14,7 +14,7 @@ import { useProfilingDependencies } from '../profiling_dependencies/use_profilin
 
 export const LicenseContext = React.createContext<ILicense | undefined>(undefined);
 
-export function LicenseProvider({ children }: { children: React.ReactChild }) {
+export function LicenseProvider({ children }: React.PropsWithChildren) {
   const { license$ } = useProfilingDependencies().setup.licensing;
   const license = useObservable(license$);
   // if license is not loaded yet, consider it valid

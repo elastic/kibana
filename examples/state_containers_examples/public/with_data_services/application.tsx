@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { AppPluginDependencies } from './types';
@@ -21,8 +21,9 @@ export const renderApp = (
   { exampleLinks }: { exampleLinks: ExampleLink[] }
 ) => {
   const kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <App
       navigation={navigation}
       data={data}
@@ -30,9 +31,8 @@ export const renderApp = (
       kbnUrlStateStorage={kbnUrlStateStorage}
       exampleLinks={exampleLinks}
       navigateToApp={application.navigateToApp}
-    />,
-    element
+    />
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

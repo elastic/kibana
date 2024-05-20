@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
@@ -44,16 +44,16 @@ export const getDebugRenderer =
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render(domNode, config, handlers) {
+      const root = createRoot(domNode);
       handlers.onDestroy(() => unmountComponentAtNode(domNode));
-      render(
+      root.render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
             <KibanaThemeProvider theme={{ theme$ }}>
               <Debug parentNode={domNode} payload={config} onLoaded={handlers.done} />
             </KibanaThemeProvider>
           </KibanaErrorBoundary>
-        </KibanaErrorBoundaryProvider>,
-        domNode
+        </KibanaErrorBoundaryProvider>
       );
     },
   });

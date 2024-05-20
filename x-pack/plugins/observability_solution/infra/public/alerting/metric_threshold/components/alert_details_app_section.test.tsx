@@ -62,6 +62,7 @@ describe('AlertDetailsAppSection', () => {
   const ruleLink = 'ruleLink';
   const renderComponent = () => {
     return render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <QueryClientProvider client={queryClient}>
           <AlertDetailsAppSection

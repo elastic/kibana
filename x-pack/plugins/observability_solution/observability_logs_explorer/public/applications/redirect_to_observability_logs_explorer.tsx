@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { useLocation } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
@@ -16,16 +16,15 @@ export const renderObservabilityLogsExplorerRedirect = (
   core: CoreStart,
   appParams: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(appParams.element);
+
+  root.render(
     <Router history={appParams.history}>
       <ObservabilityLogsExplorerRedirect core={core} />
-    </Router>,
-    appParams.element
+    </Router>
   );
 
-  return () => {
-    ReactDOM.unmountComponentAtNode(appParams.element);
-  };
+  return () => root.unmount();
 };
 
 export const ObservabilityLogsExplorerRedirect = ({ core }: { core: CoreStart }) => {

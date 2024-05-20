@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
@@ -118,7 +118,7 @@ describe('CasesTableFilters ', () => {
   it('should call onFilterChange when the severity filter changes', async () => {
     appMockRender.render(<CasesTableFilters {...props} />);
     userEvent.click(await screen.findByTestId('options-filter-popover-button-severity'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(await screen.findByTestId('options-filter-popover-item-high'));
 
     expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, severity: ['high'] });
@@ -128,7 +128,7 @@ describe('CasesTableFilters ', () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-tags'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(await screen.findByTestId('options-filter-popover-item-coke'));
 
     expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, tags: ['coke'] });
@@ -138,7 +138,7 @@ describe('CasesTableFilters ', () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-category'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
     expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, category: ['twix'] });
@@ -153,7 +153,7 @@ describe('CasesTableFilters ', () => {
 
     const { getByTestId, getByText } = appMockRender.render(<CasesTableFilters {...props} />);
     userEvent.click(getByTestId('options-filter-popover-button-assignees'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(getByText('Physical Dinosaur'));
 
@@ -212,7 +212,7 @@ describe('CasesTableFilters ', () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
     userEvent.click(await screen.findByTestId('options-filter-popover-item-closed'));
 
     expect(onFilterChanged).toBeCalledWith({
@@ -225,7 +225,7 @@ describe('CasesTableFilters ', () => {
     appMockRender.render(<CasesTableFilters {...props} />);
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-status'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.type(await screen.findByTestId('status-search-input'), 'in p');
 
@@ -254,7 +254,7 @@ describe('CasesTableFilters ', () => {
 
     appMockRender.render(<CasesTableFilters {...overrideProps} />);
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(screen.getByText('Physical Dinosaur'));
 
@@ -338,7 +338,7 @@ describe('CasesTableFilters ', () => {
       );
 
       userEvent.click(screen.getByRole('button', { name: 'More' }));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(screen.getByRole('option', { name: 'Solution' }));
 
       expect(onFilterChanged).toHaveBeenCalledWith({
@@ -368,7 +368,7 @@ describe('CasesTableFilters ', () => {
       );
 
       userEvent.click(screen.getByRole('button', { name: 'Solution' }));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       const allOptions = screen.getAllByRole('option');
       expect(allOptions).toHaveLength(2);
@@ -416,7 +416,7 @@ describe('CasesTableFilters ', () => {
 
       // deactivate the assignees filter
       userEvent.click(screen.getByRole('button', { name: 'More' }));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
       userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
 
       expect(onFilterChanged).toHaveBeenCalledWith({
@@ -491,7 +491,7 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
       userEvent.click(await screen.findByRole('button', { name: 'Toggle' }));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       const allOptions = screen.getAllByRole('option');
       expect(allOptions).toHaveLength(2);
@@ -503,7 +503,7 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
       userEvent.click(await screen.findByRole('button', { name: 'Toggle' }));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(await screen.findByTestId('options-filter-popover-item-on'));
 
@@ -522,7 +522,7 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
       userEvent.click(await screen.findByRole('button', { name: 'Toggle' }));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(await screen.findByTestId('options-filter-popover-item-off'));
 
@@ -553,7 +553,7 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...customProps} />);
 
       userEvent.click(await screen.findByRole('button', { name: 'Toggle' }));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       userEvent.click(await screen.findByTestId('options-filter-popover-item-off'));
 
@@ -643,7 +643,7 @@ describe('CasesTableFilters ', () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
       userEvent.click(screen.getByRole('button', { name: 'More' }));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       expect(screen.queryByTestId('options-filter-popover-item-text')).not.toBeInTheDocument();
     });

@@ -26,14 +26,16 @@ const StyledEuiFlexItemHistoryItem = styled(EuiFlexItem)`
 
 export type HistoryItemProps = PropsWithChildren<{}>;
 
-export const HistoryItem = memo<HistoryItemProps>(({ children }) => {
-  const getTestId = useTestIdGenerator(useDataTestSubj());
+export const HistoryItem = memo<HistoryItemProps>(
+  ({ children }: { children?: React.ReactNode }) => {
+    const getTestId = useTestIdGenerator(useDataTestSubj());
 
-  return (
-    <StyledEuiFlexItemHistoryItem grow={true} data-test-subj={getTestId('historyItem')}>
-      {children}
-    </StyledEuiFlexItemHistoryItem>
-  );
-});
+    return (
+      <StyledEuiFlexItemHistoryItem grow={true} data-test-subj={getTestId('historyItem')}>
+        {children}
+      </StyledEuiFlexItemHistoryItem>
+    );
+  }
+);
 
 HistoryItem.displayName = 'HistoryItem';

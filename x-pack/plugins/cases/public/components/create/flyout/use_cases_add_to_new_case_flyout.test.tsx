@@ -6,7 +6,7 @@
  */
 
 import { alertComment } from '../../../containers/mock';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { CasesContext } from '../../cases_context';
@@ -26,7 +26,7 @@ describe('use cases add to new case flyout hook', () => {
   let wrapper: FC<PropsWithChildren<unknown>>;
   beforeEach(() => {
     dispatch.mockReset();
-    wrapper = ({ children }) => {
+    wrapper = ({ children }: { children?: React.ReactNode }) => {
       return (
         <CasesContext.Provider
           value={{
@@ -50,7 +50,8 @@ describe('use cases add to new case flyout hook', () => {
     const { result } = renderHook(() => {
       useCasesAddToNewCaseFlyout();
     });
-    expect(result.error?.message).toContain(
+    // @ts-expect-error
+    expect(result.current.error?.message).toContain(
       'useCasesContext must be used within a CasesProvider and have a defined value'
     );
   });

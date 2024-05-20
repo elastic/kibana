@@ -8,11 +8,12 @@ import React, { useMemo, useReducer } from 'react';
 import { identity } from 'lodash';
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsTable } from '../alerts_table';
 import {
   Alerts,
   AlertsField,
+  AlertsTableConfigurationRegistry,
   AlertsTableProps,
   BulkActionsConfig,
   BulkActionsState,
@@ -213,10 +214,10 @@ describe('AlertsTable.BulkActions', () => {
       body: jest.fn(),
       footer: jest.fn(),
     })),
-    getRenderCellValue: () =>
+    getRenderCellValue: (() =>
       jest.fn().mockImplementation((props) => {
         return `${props.colIndex}:${props.rowIndex}`;
-      }),
+      })) as unknown as AlertsTableConfigurationRegistry['getRenderCellValue'],
   };
 
   const casesMap = getCasesMockMap();
@@ -448,7 +449,7 @@ describe('AlertsTable.BulkActions', () => {
       render(<AlertsTableWithBulkActionsContext {...props} />);
 
       fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
 
       fireEvent.click(await screen.findByText('Fake Bulk Action'));
 
@@ -702,7 +703,7 @@ describe('AlertsTable.BulkActions', () => {
           render(<AlertsTableWithBulkActionsContext {...props} />);
 
           fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
-          await waitForEuiPopoverOpen();
+          // await waitForEuiPopoverOpen();
 
           fireEvent.click(await screen.findByText('Fake Bulk Action'));
           expect(mockedFn.mock.calls[0][0]).toEqual([
@@ -782,7 +783,7 @@ describe('AlertsTable.BulkActions', () => {
             );
 
             fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
-            await waitForEuiPopoverOpen();
+            // await waitForEuiPopoverOpen();
 
             fireEvent.click(await screen.findByText('Fake Bulk Action'));
 
@@ -812,7 +813,7 @@ describe('AlertsTable.BulkActions', () => {
               />
             );
             fireEvent.click(await screen.findByTestId('selectedShowBulkActionsButton'));
-            await waitForEuiPopoverOpen();
+            // await waitForEuiPopoverOpen();
 
             fireEvent.click(await screen.findByText('Fake Bulk Action'));
 
@@ -934,7 +935,7 @@ describe('AlertsTable.BulkActions', () => {
             );
 
             fireEvent.click(getByTestId('selectedShowBulkActionsButton'));
-            await waitForEuiPopoverOpen();
+            // await waitForEuiPopoverOpen();
 
             fireEvent.click(getByText('Fake Bulk Action'));
             expect(mockedFn.mock.calls[0][0]).toEqual([
@@ -1031,7 +1032,7 @@ describe('AlertsTable.BulkActions', () => {
             });
 
             fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
-            await waitForEuiPopoverOpen();
+            // await waitForEuiPopoverOpen();
 
             fireEvent.click(screen.getByTestId('fake-bulk-action-loading'));
 
@@ -1067,7 +1068,7 @@ describe('AlertsTable.BulkActions', () => {
             });
 
             fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
-            await waitForEuiPopoverOpen();
+            // await waitForEuiPopoverOpen();
 
             refreshMockFn.mockClear();
             expect(refreshMockFn.mock.calls.length).toBe(0);
@@ -1096,7 +1097,7 @@ describe('AlertsTable.BulkActions', () => {
             expect(screen.getByTestId('selectedShowBulkActionsButton')).toBeVisible();
 
             fireEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
-            await waitForEuiPopoverOpen();
+            // await waitForEuiPopoverOpen();
 
             fireEvent.click(screen.getByTestId('fake-bulk-action-clear'));
 

@@ -31,6 +31,7 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(
 
 const renderRelatedAlertsByAncestry = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
     </IntlProvider>

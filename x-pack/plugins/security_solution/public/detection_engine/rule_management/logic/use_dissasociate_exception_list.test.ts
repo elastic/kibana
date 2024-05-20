@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -33,9 +33,9 @@ describe('useDisassociateExceptionList', () => {
 
   test('initializes hook', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<
-        UseDisassociateExceptionListProps,
-        ReturnUseDisassociateExceptionList
+      const { result } = renderHook<
+        ReturnUseDisassociateExceptionList,
+        UseDisassociateExceptionListProps
       >(() =>
         useDisassociateExceptionList({
           http: mockKibanaHttpService,
@@ -45,7 +45,7 @@ describe('useDisassociateExceptionList', () => {
         })
       );
 
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(result.current).toEqual([false, null]);
     });

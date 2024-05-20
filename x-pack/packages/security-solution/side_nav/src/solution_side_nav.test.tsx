@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { SolutionSideNav, type SolutionSideNavProps } from './solution_side_nav';
 import type { SolutionSideNavItem } from './types';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -111,7 +111,9 @@ describe('SolutionSideNav', () => {
       const result = renderNav();
       expect(result.queryByTestId('solutionSideNavPanel')).not.toBeInTheDocument();
 
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      act(() => {
+        result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      });
       expect(result.getByTestId('solutionSideNavPanel')).toBeInTheDocument();
       expect(result.getByText('Overview')).toBeInTheDocument();
     });
@@ -129,10 +131,14 @@ describe('SolutionSideNav', () => {
 
     it('should close the panel when the same button is clicked', () => {
       const result = renderNav();
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      act(() => {
+        result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      });
       expect(result.getByTestId('solutionSideNavPanel')).toBeInTheDocument();
 
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      act(() => {
+        result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      });
 
       // add check at the end of the event loop to ensure the panel is removed
       setTimeout(() => {
@@ -158,12 +164,15 @@ describe('SolutionSideNav', () => {
         },
       ];
       const result = renderNav({ items });
-
-      result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      act(() => {
+        result.getByTestId(`solutionSideNavItemButton-${'dashboardsLanding'}`).click();
+      });
       expect(result.getByTestId('solutionSideNavPanel')).toBeInTheDocument();
       expect(result.getByText('Overview')).toBeInTheDocument();
 
-      result.getByTestId(`solutionSideNavItemButton-${'exploreLanding'}`).click();
+      act(() => {
+        result.getByTestId(`solutionSideNavItemButton-${'exploreLanding'}`).click();
+      });
       expect(result.queryByTestId('solutionSideNavPanel')).toBeInTheDocument();
       expect(result.getByText('Users')).toBeInTheDocument();
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { encode } from '@kbn/rison';
@@ -256,7 +256,7 @@ describe('SLOs Page', () => {
 
         (await screen.findAllByLabelText('All actions')).at(0)?.click();
 
-        await waitForEuiPopoverOpen();
+        // await waitForEuiPopoverOpen();
 
         const button = screen.getByTestId('sloActionsEdit');
 
@@ -282,7 +282,7 @@ describe('SLOs Page', () => {
         fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
-        await waitForEuiPopoverOpen();
+        // await waitForEuiPopoverOpen();
 
         const button = screen.getByTestId('sloActionsCreateRule');
 
@@ -308,7 +308,7 @@ describe('SLOs Page', () => {
         fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
-        await waitForEuiPopoverOpen();
+        // await waitForEuiPopoverOpen();
 
         const button = screen.getByTestId('sloActionsManageRules');
 
@@ -335,7 +335,7 @@ describe('SLOs Page', () => {
         fireEvent.click(screen.getByTestId('compactView'));
         (await screen.findAllByLabelText('All actions')).at(0)?.click();
 
-        await waitForEuiPopoverOpen();
+        // await waitForEuiPopoverOpen();
 
         const button = screen.getByTestId('sloActionsDelete');
 
@@ -367,7 +367,7 @@ describe('SLOs Page', () => {
         fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
-        await waitForEuiPopoverOpen();
+        // await waitForEuiPopoverOpen();
 
         const button = screen.getByTestId('sloActionsClone');
 

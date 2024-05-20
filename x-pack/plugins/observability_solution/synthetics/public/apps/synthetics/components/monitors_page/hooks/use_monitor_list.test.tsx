@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import * as redux from 'react-redux';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 import { mockState } from '../../../utils/testing/__mocks__/synthetics_store.mock';
@@ -64,7 +64,7 @@ describe('useMonitorList', () => {
     const url = `/monitor/1?query=${query}`;
 
     jest.useFakeTimers().setSystemTime(Date.now());
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper url={url} path={MONITOR_ROUTE}>
           {children}
@@ -97,7 +97,7 @@ describe('useMonitorList', () => {
     )}&projects=${JSON.stringify(exp.projects)}`;
 
     jest.useFakeTimers().setSystemTime(Date.now());
-    const WrapperWithState = ({ children }: { children: React.ReactElement }) => {
+    const WrapperWithState = ({ children }: React.PropsWithChildren) => {
       return (
         <WrappedHelper url={url} path={MONITOR_ROUTE}>
           {children}

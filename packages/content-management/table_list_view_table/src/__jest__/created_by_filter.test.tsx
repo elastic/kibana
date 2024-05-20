@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { render, screen, within, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, screen, within, waitForElementToBeRemoved, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { WithServices } from './tests.helpers';
 import { TableListViewTable, type TableListViewTableProps } from '../table_list_view_table';
@@ -144,6 +144,12 @@ describe('created_by filter', () => {
 
     const userSelectablePopover = screen.getByTestId('userSelectableList');
     const popover = within(userSelectablePopover);
+    await waitFor(async () => {
+      expect(await popover.findByTestId('userProfileSelectableOption-null')).not.toHaveAttribute(
+        'pointer-events',
+        'none'
+      );
+    });
     userEvent.click(await popover.findByTestId('userProfileSelectableOption-null'));
 
     // just 1 item in the list

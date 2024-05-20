@@ -21,6 +21,7 @@ import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 
 interface TimeSeriesExplorerPageProps {
+  children: React.ReactNode;
   dateFormatTz?: string;
   resizeRef?: any;
   noSingleMetricJobsFound?: boolean;

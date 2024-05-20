@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { useConnectorSetup } from '.';
-import { act, renderHook } from '@testing-library/react-hooks';
-import { fireEvent, render } from '@testing-library/react';
+import { act, renderHook, fireEvent, render } from '@testing-library/react';
 import { welcomeConvo } from '../../mock/conversation';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { EuiCommentList } from '@elastic/eui';
@@ -56,10 +55,10 @@ describe('useConnectorSetup', () => {
   });
   it('should render comments and prompts', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
+      const { result } = renderHook(() => useConnectorSetup(defaultProps), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       expect(
         result.current.comments.map((c) => ({ username: c.username, timestamp: c.timestamp }))
       ).toEqual([
@@ -78,10 +77,10 @@ describe('useConnectorSetup', () => {
   });
   it('should set api config for each conversation when new connector is saved', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
+      const { result } = renderHook(() => useConnectorSetup(defaultProps), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       const { getByTestId, queryByTestId, rerender } = render(result.current.prompt, {
         wrapper: TestProviders,
       });
@@ -97,7 +96,7 @@ describe('useConnectorSetup', () => {
 
   it('should NOT set the api config for each conversation when a new connector is saved and updateConversationsOnSaveConnector is false', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useConnectorSetup({
             ...defaultProps,
@@ -107,7 +106,7 @@ describe('useConnectorSetup', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
+
       const { getByTestId, queryByTestId, rerender } = render(result.current.prompt, {
         wrapper: TestProviders,
       });
@@ -124,7 +123,7 @@ describe('useConnectorSetup', () => {
 
   it('should show skip button if message has presentation data', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
+      const { result } = renderHook(
         () =>
           useConnectorSetup({
             ...defaultProps,
@@ -145,7 +144,7 @@ describe('useConnectorSetup', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
+      // await waitFor();
       const { getByTestId, queryByTestId } = render(result.current.prompt, {
         wrapper: TestProviders,
       });
@@ -155,10 +154,10 @@ describe('useConnectorSetup', () => {
   });
   it('should call onSetupComplete and setConversations when onHandleMessageStreamingComplete', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConnectorSetup(defaultProps), {
+      const { result } = renderHook(() => useConnectorSetup(defaultProps), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
-      await waitForNextUpdate();
+      // await waitFor();
       render(<EuiCommentList comments={result.current.comments} />, {
         wrapper: TestProviders,
       });

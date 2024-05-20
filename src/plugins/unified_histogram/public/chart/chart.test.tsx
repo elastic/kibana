@@ -7,7 +7,7 @@
  */
 
 import React, { ReactElement } from 'react';
-import { act } from 'react-dom/test-utils';
+import { act, waitFor } from '@testing-library/react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -151,19 +151,23 @@ describe('Chart', () => {
 
   test('render when chart is undefined', async () => {
     const component = await mountComponent({ noChart: true });
-    expect(component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()).toBe(
-      true
-    );
+    waitFor(() => {
+      expect(component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()).toBe(
+        true
+      );
+    });
   });
 
   test('should render a custom toggle when provided', async () => {
     const component = await mountComponent({
       customToggle: <span data-test-subj="custom-toggle" />,
     });
-    expect(component.find('[data-test-subj="custom-toggle"]').exists()).toBe(true);
-    expect(component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()).toBe(
-      false
-    );
+    waitFor(() => {
+      expect(component.find('[data-test-subj="custom-toggle"]').exists()).toBe(true);
+      expect(component.find('[data-test-subj="unifiedHistogramToggleChartButton"]').exists()).toBe(
+        false
+      );
+    });
   });
 
   test('should not render when custom toggle is provided and chart is hidden', async () => {

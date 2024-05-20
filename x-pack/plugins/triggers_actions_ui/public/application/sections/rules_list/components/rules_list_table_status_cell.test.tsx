@@ -36,6 +36,7 @@ const onManageLicenseClickMock = jest.fn();
 
 const ComponentWithLocale = (props: RulesListTableStatusCellProps) => {
   return (
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RulesListTableStatusCell {...props} />
     </IntlProvider>

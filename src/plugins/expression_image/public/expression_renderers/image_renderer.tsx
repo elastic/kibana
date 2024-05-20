@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
@@ -44,6 +44,7 @@ export const getImageRenderer =
       config: ImageRendererConfig,
       handlers: IInterpreterRenderHandlers
     ) => {
+      const root = createRoot(domNode);
       const { elasticLogo } = await getElasticLogo();
       const dataurl = isValidUrl(config.dataurl ?? '') ? config.dataurl : elasticLogo;
 
@@ -56,10 +57,10 @@ export const getImageRenderer =
       };
 
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
             <KibanaThemeProvider theme={{ theme$ }}>
@@ -67,7 +68,6 @@ export const getImageRenderer =
             </KibanaThemeProvider>
           </KibanaErrorBoundary>
         </KibanaErrorBoundaryProvider>,
-        domNode,
         () => handlers.done()
       );
     },

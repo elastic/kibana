@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { filter } from 'rxjs';
 import { Subscription } from 'rxjs';
 
@@ -62,7 +62,8 @@ export class UserBannerService {
       id = banners.replace(
         id,
         (el) => {
-          ReactDOM.render(
+          const root = createRoot(el);
+          root.render(
             <KibanaRenderContextProvider {...startServices}>
               <EuiCallOut
                 title={
@@ -90,13 +91,12 @@ export class UserBannerService {
                   />
                 </EuiButton>
               </EuiCallOut>
-            </KibanaRenderContextProvider>,
-            el
+            </KibanaRenderContextProvider>
           );
 
           timeout = setTimeout(dismiss, lifetime);
 
-          return () => ReactDOM.unmountComponentAtNode(el);
+          return () => root.unmount();
         },
         100
       );

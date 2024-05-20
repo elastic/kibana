@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es_doc_search';
 import { Subject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -280,13 +280,14 @@ describe('Test of <Doc /> helper / hook', () => {
         },
       });
       mockSearchResult.complete();
-      await hook.waitForNextUpdate();
     });
 
-    expect(hook.result.current.slice(0, 2)).toEqual([
-      ElasticRequestState.Found,
-      buildDataTableRecord(record),
-    ]);
+    await waitFor(() => {
+      expect(hook.result.current.slice(0, 2)).toEqual([
+        ElasticRequestState.Found,
+        buildDataTableRecord(record),
+      ]);
+    });
   });
 
   test('useEsDocSearch for text based languages', async () => {

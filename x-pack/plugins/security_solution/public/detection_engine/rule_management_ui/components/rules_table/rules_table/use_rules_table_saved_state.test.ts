@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { RULES_TABLE_MAX_PAGE_SIZE } from '../../../../../../common/constants';
 import type {
   RulesTableStorageSavedState,

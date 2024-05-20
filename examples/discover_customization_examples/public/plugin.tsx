@@ -22,7 +22,7 @@ import type {
   DiscoverStart,
 } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import useObservable from 'react-use/lib/useObservable';
 import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
@@ -60,8 +60,8 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
       visibleIn: [],
       mount: async (appMountParams) => {
         const [_, { discover, data }] = await core.getStartServices();
-
-        ReactDOM.render(
+        const root = createRoot(appMountParams.element);
+        root.render(
           <I18nProvider>
             <KibanaThemeProvider theme={core.theme}>
               <Router history={appMountParams.history}>
@@ -78,16 +78,14 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                 </Routes>
               </Router>
             </KibanaThemeProvider>
-          </I18nProvider>,
-          appMountParams.element
+          </I18nProvider>
         );
 
         return () => {
           // work around race condition between unmount effect and current app id
           // observable in the search session service
           data.search.session.clear();
-
-          ReactDOM.unmountComponentAtNode(appMountParams.element);
+          root.unmount();
         };
       },
     });
@@ -105,8 +103,10 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
 
     let isOptionsOpen = false;
     const optionsContainer = document.createElement('div');
+    const root = createRoot(optionsContainer);
+
     const closeOptionsPopover = () => {
-      ReactDOM.unmountComponentAtNode(optionsContainer);
+      root.unmount();
       document.body.removeChild(optionsContainer);
       isOptionsOpen = false;
     };
@@ -177,7 +177,7 @@ export class DiscoverCustomizationExamplesPlugin implements Plugin {
                   </EuiWrappingPopover>
                 );
 
-                ReactDOM.render(element, optionsContainer);
+                createRoot(optionsContainer).render(element);
               },
             },
             order: 100,

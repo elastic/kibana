@@ -308,6 +308,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                 data-test-subj="settingsOutputsFlyout.typeInput"
                 {...inputs.typeInput.props}
                 options={OUTPUT_TYPE_OPTIONS}
+                // @ts-expect-error
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.editOutputFlyout.typeInputPlaceholder',
                   {

@@ -14,6 +14,7 @@ interface Props {
   className?: string;
   title: React.ReactNode;
   logo?: string;
+  children: React.ReactNode;
 }
 
 export const AuthenticationStatePage: FC<PropsWithChildren<Props>> = (props) => (

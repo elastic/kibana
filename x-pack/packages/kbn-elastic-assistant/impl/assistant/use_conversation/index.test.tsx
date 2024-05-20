@@ -6,7 +6,7 @@
  */
 
 import { useConversation } from '.';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import React from 'react';
 import { MessageRole } from '@kbn/elastic-assistant-common';
@@ -55,12 +55,12 @@ describe('useConversation', () => {
 
   it('should create a new conversation when called with valid conversationId and message', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
+      const { result } = renderHook(() => useConversation(), {
         wrapper: ({ children }) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
-      await waitForNextUpdate();
+      // await waitFor();
       createConversation.mockResolvedValue(mockConvo);
 
       const createResult = await result.current.createConversation({
@@ -76,12 +76,12 @@ describe('useConversation', () => {
 
   it('should delete an existing conversation when called with valid conversationId', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
+      const { result } = renderHook(() => useConversation(), {
         wrapper: ({ children }) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
-      await waitForNextUpdate();
+      // await waitFor();
 
       await result.current.deleteConversation('new-convo');
 
@@ -94,12 +94,12 @@ describe('useConversation', () => {
 
   it('should update the apiConfig for an existing conversation when called with a valid conversationId and apiConfig', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
+      const { result } = renderHook(() => useConversation(), {
         wrapper: ({ children }) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
-      await waitForNextUpdate();
+      // await waitFor();
 
       await result.current.setApiConfig({
         conversation: WELCOME_CONVERSATION,
@@ -115,12 +115,12 @@ describe('useConversation', () => {
 
   it('should remove the last message from a conversation when called with valid conversationId', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
+      const { result } = renderHook(() => useConversation(), {
         wrapper: ({ children }) => (
           <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
         ),
       });
-      await waitForNextUpdate();
+      // await waitFor();
 
       getConversationById.mockResolvedValue(mockConvo);
 

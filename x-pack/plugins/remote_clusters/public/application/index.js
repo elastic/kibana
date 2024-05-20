@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 
 import { KibanaRenderContextProvider, useExecutionContext } from '../shared_imports';
@@ -26,7 +26,8 @@ const AppWithExecutionContext = ({ history, executionContext }) => {
 };
 
 export const renderApp = (elem, appDependencies, history, startServices) => {
-  render(
+  const root = createRoot(elem);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <Provider store={remoteClustersStore}>
         <AppContextProvider context={appDependencies}>
@@ -36,8 +37,7 @@ export const renderApp = (elem, appDependencies, history, startServices) => {
           />
         </AppContextProvider>
       </Provider>
-    </KibanaRenderContextProvider>,
-    elem
+    </KibanaRenderContextProvider>
   );
-  return () => unmountComponentAtNode(elem);
+  return () => root.unmount();
 };

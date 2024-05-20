@@ -7,7 +7,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeriesActions } from './series_actions';
 import { mockUxSeries, render } from '../../rtl_helpers';
 
@@ -30,7 +30,7 @@ describe('SeriesActions', function () {
 
       const actionsButton = screen.getByLabelText('View series actions');
       userEvent.click(actionsButton);
-      await waitForEuiPopoverOpen();
+      // await waitForEuiPopoverOpen();
     });
 
     it('should display the action list when the actions button is clicked', function () {

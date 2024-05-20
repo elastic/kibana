@@ -7,7 +7,7 @@
  */
 
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 import {
   DrilldownTemplateTable,
   DrilldownTemplateTableItem,

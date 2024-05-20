@@ -8,7 +8,7 @@
 
 import { History } from 'history';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { Router, Route } from '@kbn/shared-ux-router';
 
@@ -119,7 +119,9 @@ const BarApp = ({ history, coreStart }: { history: History; coreStart: CoreStart
 );
 
 export const renderApp = (coreStart: CoreStart, { history, element }: AppMountParameters) => {
-  ReactDOM.render(<BarApp history={history} coreStart={coreStart} />, element);
+  const root = createRoot(element);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  root.render(<BarApp history={history} coreStart={coreStart} />);
+
+  return () => root.unmount();
 };

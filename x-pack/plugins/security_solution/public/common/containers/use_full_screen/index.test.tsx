@@ -7,15 +7,14 @@
 
 import React, { useEffect } from 'react';
 import { TestProviders } from '../../mock';
-import type { RenderResult, WaitForNextUpdate } from '@testing-library/react-hooks';
-import { renderHook, act, cleanup } from '@testing-library/react-hooks';
+import type { RenderHookResult } from '@testing-library/react';
+import { renderHook, act, cleanup } from '@testing-library/react';
 import type { GlobalFullScreen } from '.';
 import { useGlobalFullScreen } from '.';
 
 describe('useFullScreen', () => {
   describe('with no data-grid present in the dom', () => {
-    let result: RenderResult<GlobalFullScreen>;
-    let waitForNextUpdate: WaitForNextUpdate;
+    let result: RenderHookResult<GlobalFullScreen, void>['result'];
     test('Default values with no data grid in the dom', async () => {
       await act(async () => {
         const WrapperContainer: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
@@ -23,10 +22,10 @@ describe('useFullScreen', () => {
             <TestProviders>{children}</TestProviders>
           </div>
         );
-        ({ result, waitForNextUpdate } = renderHook(() => useGlobalFullScreen(), {
+        ({ result } = renderHook(() => useGlobalFullScreen(), {
           wrapper: WrapperContainer,
         }));
-        await waitForNextUpdate();
+        // await waitFor();
         expect(result.current.globalFullScreen).toEqual(false);
       });
       act(() => {
@@ -38,8 +37,7 @@ describe('useFullScreen', () => {
   });
 
   describe('with a mock full screen data-grid in the dom', () => {
-    let result: RenderResult<GlobalFullScreen>;
-    let waitForNextUpdate: WaitForNextUpdate;
+    let result: RenderHookResult<GlobalFullScreen, void>['result'];
     afterEach(() => {
       cleanup();
     });
@@ -55,10 +53,10 @@ describe('useFullScreen', () => {
             </div>
           );
         };
-        ({ result, waitForNextUpdate } = renderHook(() => useGlobalFullScreen(), {
+        ({ result } = renderHook(() => useGlobalFullScreen(), {
           wrapper: WrapperContainer,
         }));
-        await waitForNextUpdate();
+        // await waitFor();
       });
       act(() => {
         result.current.setGlobalFullScreen(true);
@@ -77,10 +75,10 @@ describe('useFullScreen', () => {
             </div>
           );
         };
-        ({ result, waitForNextUpdate } = renderHook(() => useGlobalFullScreen(), {
+        ({ result } = renderHook(() => useGlobalFullScreen(), {
           wrapper: WrapperContainer,
         }));
-        await waitForNextUpdate();
+        // await waitFor();
       });
       act(() => {
         result.current.setGlobalFullScreen(false);

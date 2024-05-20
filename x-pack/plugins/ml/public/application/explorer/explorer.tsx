@@ -102,6 +102,7 @@ interface ExplorerPageProps {
   queryString?: string;
   updateLanguage?: (language: string) => void;
   dataViews?: DataView[];
+  children: React.ReactNode;
 }
 
 const ExplorerPage: FC<PropsWithChildren<ExplorerPageProps>> = ({
@@ -232,7 +233,7 @@ export const Explorer: FC<ExplorerUIProps> = ({
   );
 
   const onPanelWidthChange = useCallback(
-    (newSizes) => {
+    (newSizes: any) => {
       setAnomalyExplorerPanelState({
         mainPage: {
           size: newSizes.mainPage,

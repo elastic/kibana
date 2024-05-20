@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import { useAgentVersion } from './use_agent_version';
 import { useKibanaVersion } from './use_kibana_version';
@@ -28,11 +28,11 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual(mockKibanaVersion);
   });
@@ -46,11 +46,11 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual('8.8.2');
   });
@@ -64,11 +64,11 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual('8.9.2');
   });
@@ -82,11 +82,11 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual('8.8.2');
   });
@@ -100,11 +100,11 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual('8.9.2');
   });
@@ -118,11 +118,11 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual('8.11.0');
   });
@@ -133,10 +133,10 @@ describe('useAgentVersion', () => {
     (useKibanaVersion as jest.Mock).mockReturnValue(mockKibanaVersion);
     (sendGetAgentsAvailableVersions as jest.Mock).mockRejectedValue(new Error('Fetching error'));
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual(mockKibanaVersion);
   });
@@ -157,11 +157,11 @@ describe('useAgentVersion', () => {
       data: { items: mockAvailableVersions },
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useAgentVersion());
+    const { result } = renderHook(() => useAgentVersion());
 
     expect(sendGetAgentsAvailableVersions).toHaveBeenCalled();
 
-    await waitForNextUpdate();
+    // await waitFor();
 
     expect(result.current).toEqual('8.11.1+build123456789');
   });

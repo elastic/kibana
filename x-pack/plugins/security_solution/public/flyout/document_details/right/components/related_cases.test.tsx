@@ -27,6 +27,7 @@ const LOADING_TEST_ID = SUMMARY_ROW_LOADING_TEST_ID(CORRELATIONS_RELATED_CASES_T
 
 const renderRelatedCases = () =>
   render(
+    // @ts-expect-error
     <IntlProvider locale="en">
       <RelatedCases eventId={eventId} />
     </IntlProvider>

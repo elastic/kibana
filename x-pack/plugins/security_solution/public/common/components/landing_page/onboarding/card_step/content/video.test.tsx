@@ -26,7 +26,7 @@ jest.mock('@elastic/eui', () => ({
       </div>
     );
   },
-  EuiFlexItem: ({ children }: { children: React.ReactElement }) => <div>{children}</div>,
+  EuiFlexItem: ({ children }: React.PropsWithChildren) => <div>{children}</div>,
   EuiIcon: () => <span data-test-subj="mock-play-icon" />,
   useEuiTheme: () => ({ euiTheme: { colors: { fullShade: '#000', emptyShade: '#fff' } } }),
   EuiCodeBlock: () => <span data-test-subj="mock-code-block" />,

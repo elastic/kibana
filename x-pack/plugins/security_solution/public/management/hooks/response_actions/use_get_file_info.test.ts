@@ -32,8 +32,8 @@ jest.mock('@tanstack/react-query', () => {
 
 describe('When using the `useGetFileInfo()` hook', () => {
   let renderReactQueryHook: ReactQueryHookRenderer<
-    Parameters<typeof useGetFileInfo>,
-    ReturnType<typeof useGetFileInfo>
+    ReturnType<typeof useGetFileInfo>,
+    Parameters<typeof useGetFileInfo>
   >;
   let http: AppContextTestRender['coreStart']['http'];
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;

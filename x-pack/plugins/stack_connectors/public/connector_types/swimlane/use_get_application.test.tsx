@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';
 import { getApplication } from './api';
@@ -44,13 +44,13 @@ describe('useGetApplication', () => {
 
   it('init', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
+      const { result } = renderHook<UseGetApplication, string>(() =>
         useGetApplication({
           toastNotifications: services.notifications.toasts,
         })
       );
 
-      await waitForNextUpdate();
+      // await waitFor();
       expect(result.current).toEqual({
         isLoading: false,
         getApplication: result.current.getApplication,
@@ -60,13 +60,13 @@ describe('useGetApplication', () => {
 
   it('calls getApplication with correct arguments', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
+      const { result } = renderHook<UseGetApplication, string>(() =>
         useGetApplication({
           toastNotifications: services.notifications.toasts,
         })
       );
 
-      await waitForNextUpdate();
+      // await waitFor();
 
       result.current.getApplication({
         appId: action.config.appId,
@@ -74,7 +74,7 @@ describe('useGetApplication', () => {
         apiUrl: action.config.apiUrl,
       });
 
-      await waitForNextUpdate();
+      // await waitFor();
       expect(getApplicationMock).toBeCalledWith({
         signal: abortCtrl.signal,
         appId: action.config.appId,
@@ -86,19 +86,19 @@ describe('useGetApplication', () => {
 
   it('get application', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
+      const { result } = renderHook<UseGetApplication, string>(() =>
         useGetApplication({
           toastNotifications: services.notifications.toasts,
         })
       );
 
-      await waitForNextUpdate();
+      // await waitFor();
       result.current.getApplication({
         appId: action.config.appId,
         apiToken: action.secrets.apiToken,
         apiUrl: action.config.apiUrl,
       });
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(result.current).toEqual({
         isLoading: false,
@@ -109,13 +109,13 @@ describe('useGetApplication', () => {
 
   it('set isLoading to true when getting the application', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
+      const { result } = renderHook<UseGetApplication, string>(() =>
         useGetApplication({
           toastNotifications: services.notifications.toasts,
         })
       );
 
-      await waitForNextUpdate();
+      // await waitFor();
       result.current.getApplication({
         appId: action.config.appId,
         apiToken: action.secrets.apiToken,
@@ -132,12 +132,12 @@ describe('useGetApplication', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
+      const { result } = renderHook<UseGetApplication, string>(() =>
         useGetApplication({
           toastNotifications: services.notifications.toasts,
         })
       );
-      await waitForNextUpdate();
+      // await waitFor();
       result.current.getApplication({
         appId: action.config.appId,
         apiToken: action.secrets.apiToken,
@@ -160,18 +160,18 @@ describe('useGetApplication', () => {
     getApplicationMock.mockResolvedValue({});
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetApplication>(() =>
+      const { result } = renderHook<UseGetApplication, string>(() =>
         useGetApplication({
           toastNotifications: services.notifications.toasts,
         })
       );
-      await waitForNextUpdate();
+      // await waitFor();
       result.current.getApplication({
         appId: action.config.appId,
         apiToken: action.secrets.apiToken,
         apiUrl: action.config.apiUrl,
       });
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(services.notifications.toasts.addDanger).toHaveBeenCalledWith({
         title: 'Unable to get application with id bcq16kdTbz5jlwM6h',

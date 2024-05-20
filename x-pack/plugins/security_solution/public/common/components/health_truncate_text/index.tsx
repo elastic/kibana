@@ -20,6 +20,7 @@ interface HealthTruncateTextProps {
   healthColor?: EuiHealthProps['color'];
   tooltipContent?: React.ReactNode;
   dataTestSubj?: string;
+  children: React.ReactNode;
 }
 
 /**

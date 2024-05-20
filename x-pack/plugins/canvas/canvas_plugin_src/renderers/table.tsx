@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
 import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StartInitializer } from '../plugin';
@@ -31,8 +31,9 @@ export const getTableRenderer =
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render(domNode, config, handlers) {
+      const root = createRoot(domNode);
       const { datatable, paginate, perPage, font = { spec: {} }, showHeader } = config;
-      ReactDOM.render(
+      root.render(
         <KibanaRenderContextProvider {...core}>
           <div style={{ ...(font.spec as React.CSSProperties), height: '100%' }}>
             <DatatableComponent
@@ -43,10 +44,9 @@ export const getTableRenderer =
             />
           </div>
         </KibanaRenderContextProvider>,
-        domNode,
         () => handlers.done()
       );
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      handlers.onDestroy(() => root.unmount());
     },
   });
 

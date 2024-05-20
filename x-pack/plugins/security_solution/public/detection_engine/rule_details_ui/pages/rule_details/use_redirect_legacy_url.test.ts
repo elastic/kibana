@@ -6,7 +6,7 @@
  */
 /* eslint-disable no-restricted-imports */
 
-import { renderHook, cleanup } from '@testing-library/react-hooks';
+import { renderHook, cleanup } from '@testing-library/react';
 import type { UseLegacyUrlRedirectParams } from './use_redirect_legacy_url';
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import type { Rule } from '../../../rule_management/logic';

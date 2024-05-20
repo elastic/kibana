@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 
 import {
   mockQuery,
@@ -50,7 +50,7 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 
 const renderUseUserAlertsItems = (overrides: Partial<UseUserAlertsItemsProps> = {}) =>
-  renderHook<UseUserAlertsItemsProps, ReturnType<UseUserAlertsItems>>(() =>
+  renderHook<ReturnType<UseUserAlertsItems>, UseUserAlertsItemsProps>(() =>
     useUserAlertsItems({
       skip: false,
       signalIndexName,

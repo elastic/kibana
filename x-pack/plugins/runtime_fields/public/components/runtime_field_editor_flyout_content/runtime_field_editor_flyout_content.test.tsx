@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { act } from '@testing-library/react';
 import { DocLinksStart } from '@kbn/core/public';
 
 import '../../__jest__/setup_environment';
@@ -87,7 +87,9 @@ describe('Runtime field editor flyout', () => {
     const onCancel = jest.fn();
     const { find } = setup({ ...defaultProps, onCancel });
 
-    find('closeFlyoutButton').simulate('click');
+    act(() => {
+      find('closeFlyoutButton').simulate('click');
+    });
 
     expect(onCancel).toHaveBeenCalled();
   });

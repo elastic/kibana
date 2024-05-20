@@ -11,6 +11,7 @@ import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 
 export interface PageProps {
   title?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const Page: FC<PropsWithChildren<PageProps>> = ({ title = 'Untitled', children }) => {

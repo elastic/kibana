@@ -8,7 +8,7 @@
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Redirect } from 'react-router-dom';
 import { DefaultTheme, ThemeProvider } from 'styled-components';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
@@ -213,7 +213,9 @@ export const renderApp = ({
     console.log('Error creating static data view', e);
   });
 
-  ReactDOM.render(
+  const root = createRoot(element);
+
+  root.render(
     <UXAppRoot
       appMountParameters={appMountParameters}
       core={core}
@@ -221,11 +223,10 @@ export const renderApp = ({
       corePlugins={corePlugins}
       isDev={isDev}
       spaceId={spaceId}
-    />,
-    element
+    />
   );
   return () => {
     corePlugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

@@ -32,8 +32,9 @@ export interface ChromeHelpMenuLink {
  * ```jsx
  * chrome.navControls.registerLeft({
  *   mount(targetDomElement) {
- *     ReactDOM.mount(<MyControl />, targetDomElement);
- *     return () => ReactDOM.unmountComponentAtNode(targetDomElement);
+ *     const root = createRoot(targetDomElement);
+ *     root.mount(<MyControl />);
+ *     return () => root.unmount();
  *   }
  * })
  * ```

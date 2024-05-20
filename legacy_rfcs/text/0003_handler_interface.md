@@ -56,7 +56,7 @@ taskManager.registerTaskDefinitions({
 application.registerApp({
   id: 'myApp',
   mount(context, domElement) {
-    ReactDOM.render(
+    root.render(
       <MyApp overlaysService={context.core.overlays} />,
       domElement
     );

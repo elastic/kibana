@@ -49,6 +49,7 @@ export const CommonInfraProviders: FC<
 };
 
 export interface CoreProvidersProps {
+  children: React.ReactNode;
   core: CoreStart;
   pluginStart: InfraClientStartExports;
   plugins: InfraClientStartDeps;

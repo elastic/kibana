@@ -17,6 +17,7 @@ export interface LayoutProps {
   onChangeRangeTime?: (time: MetricsTimeInput) => void;
   isLiveStreaming?: boolean;
   stopLiveStreaming?: () => void;
+  children?: React.ReactNode;
 }
 
 export type LayoutPropsWithTheme = LayoutProps & PropsWithChildren<{ theme: EuiTheme }>;

@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as React from 'react';
+import React from 'react';
 import { getTestRunDetailLink } from '../common/links/test_details_link';
 import { useLocations } from '../../hooks';
 import { useSyntheticsSettingsContext } from '../../contexts';

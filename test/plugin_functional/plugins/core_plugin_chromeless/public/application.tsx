@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import {
@@ -50,7 +50,7 @@ const ChromelessApp = ({ basename }: { basename: string }) => (
 );
 
 export const renderApp = ({ appBasePath, element }: AppMountParameters) => {
-  render(<ChromelessApp basename={appBasePath} />, element);
-
-  return () => unmountComponentAtNode(element);
+  const root = createRoot(element);
+  root.render(<ChromelessApp appName={appName} />);
+  return () => root.unmount();
 };

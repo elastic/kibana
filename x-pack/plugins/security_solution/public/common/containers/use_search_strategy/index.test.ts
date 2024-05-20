@@ -6,7 +6,7 @@
  */
 
 import { useSearch, useSearchStrategy } from '.';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 
 import { useObservable } from '@kbn/securitysolution-hook-utils';
 import type {

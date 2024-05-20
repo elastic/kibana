@@ -13,7 +13,7 @@ import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
 
-export function FlameGraphsView({ children }: { children: React.ReactElement }) {
+export function FlameGraphsView({ children }: React.PropsWithChildren) {
   const { query } = useProfilingParams('/flamegraphs/*');
   const routePath = useProfilingRoutePath();
   const profilingRouter = useProfilingRouter();

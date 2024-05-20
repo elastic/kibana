@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 /**
@@ -12,7 +13,7 @@ import React from 'react';
  * spliced into text children at word boundaries.
  */
 // eslint-disable-next-line react/display-name
-export const GeneratedText = React.memo(function ({ children }) {
+export const GeneratedText = React.memo(function ({ children }: PropsWithChildren) {
   return <>{processedValue()}</>;
 
   function processedValue() {

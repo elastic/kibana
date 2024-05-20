@@ -10,7 +10,7 @@ import React from 'react';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import {
   DataViewBase,
@@ -163,7 +163,7 @@ interface PreventableEvent {
 
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
-interface LensBaseEmbeddableInput extends EmbeddableInput {
+export interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
   timeRange?: TimeRange;
@@ -260,7 +260,9 @@ function VisualizationErrorPanel({ errors, canEdit }: { errors: UserMessage[]; c
           <>
             {errors.length ? (
               <>
-                <p>{errors[0].longMessage}</p>
+                <p>
+                  <>{errors[0].longMessage}</>
+                </p>
                 {showMore && !canFixInLens ? (
                   <p>
                     <FormattedMessage
@@ -439,6 +441,8 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
+  private root?: Root;
+  private badgeRoot?: Root;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
@@ -1077,7 +1081,11 @@ export class Embeddable
    * @param {ContainerState} containerState
    */
   render(domNode: HTMLElement | Element) {
+    if (domNode !== this.domNode && !this.root) {
+      this.root = createRoot(domNode);
+    }
     this.domNode = domNode;
+
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
@@ -1126,7 +1134,7 @@ export class Embeddable
     };
 
     if (this.expression && !blockingErrors.length) {
-      render(
+      this.root.render(
         <>
           <KibanaRenderContextProvider {...this.deps.coreStart}>
             <ExpressionWrapper
@@ -1165,12 +1173,13 @@ export class Embeddable
           </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
-              this.badgeDomNode = el;
+              // if (!this.badgeRoot) {
+              //   this.badgeRoot = createRoot(el);
+              // }
               this.renderBadgeMessages();
             }}
           />
-        </>,
-        domNode
+        </>
       );
     }
 
@@ -1201,8 +1210,8 @@ export class Embeddable
       severity: 'error',
     });
 
-    if (errors.length && this.domNode) {
-      render(
+    if (errors.length && this.root) {
+      this.root.render(
         <>
           <KibanaRenderContextProvider {...this.deps.coreStart}>
             <VisualizationErrorPanel
@@ -1212,19 +1221,16 @@ export class Embeddable
           </KibanaRenderContextProvider>
           <MessagesBadge
             onMount={(el) => {
-              this.badgeDomNode = el;
+              // this.badgeRoot = createRoot(el);
               this.renderBadgeMessages();
             }}
           />
-        </>,
-        this.domNode
+        </>
       );
     }
 
     this.renderBadgeMessages();
   }
-
-  badgeDomNode?: HTMLDivElement;
 
   /**
    * This method is called on every render, and also whenever the badges dom node is created
@@ -1239,13 +1245,12 @@ export class Embeddable
       ({ severity }) => severity !== 'info'
     );
 
-    if (this.badgeDomNode) {
-      render(
+    if (this.badgeRoot) {
+      this.badgeRoot.render(
         <KibanaRenderContextProvider {...this.deps.coreStart}>
           <EmbeddableMessagesPopover messages={warningOrErrorMessages} />
           <EmbeddableFeatureBadge messages={infoMessages} />
-        </KibanaRenderContextProvider>,
-        this.badgeDomNode
+        </KibanaRenderContextProvider>
       );
     }
   };
@@ -1634,8 +1639,10 @@ export class Embeddable
         reloadSub.unsubscribe();
       });
     }
-    if (this.domNode) {
-      unmountComponentAtNode(this.domNode);
+    if (this.root) {
+      setTimeout(() => {
+        this.root.unmount();
+      });
     }
   }
 

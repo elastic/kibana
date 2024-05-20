@@ -78,7 +78,7 @@ export const renderWithReduxStore = (
   const { store } = makeLensStore({ preloadedState, storeDeps });
   const { wrapper, ...options } = renderOptions || {};
 
-  const CustomWrapper = wrapper as React.ComponentType;
+  const CustomWrapper = wrapper as React.ComponentType<PropsWithChildren>;
 
   const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     return (
@@ -171,7 +171,7 @@ const getMountWithProviderParams = (
     restOptions = rest;
 
     if (_wrappingComponent) {
-      wrappingComponent = ({ children }) => {
+      wrappingComponent = ({ children }: { children?: React.ReactNode }) => {
         return _wrappingComponent({
           ...wrappingComponentProps,
           children: <Provider store={lensStore}>{children}</Provider>,

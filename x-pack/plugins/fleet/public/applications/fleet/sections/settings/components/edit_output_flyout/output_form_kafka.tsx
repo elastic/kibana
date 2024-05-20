@@ -66,6 +66,7 @@ export const OutputFormKafkaSection: React.FunctionComponent<Props> = (props) =>
           data-test-subj="settingsOutputsFlyout.kafkaVersionInput"
           {...inputs.kafkaVersionInput.props}
           options={kafkaVersionOptions}
+          // @ts-expect-error
           placeholder={i18n.translate(
             'xpack.fleet.settings.editOutputFlyout.kafkaVersionInputPlaceholder',
             {

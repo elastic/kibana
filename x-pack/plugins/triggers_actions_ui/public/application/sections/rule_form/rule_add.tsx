@@ -77,7 +77,7 @@ const RuleAdd = <
 }: RuleAddProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [metadata, setMetadata] = useState(initialMetadata);
-  const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);
+  const onChangeMetaData = useCallback((newMetadata: any) => setMetadata(newMetadata), []);
 
   const initialRule: InitialRule = useMemo(() => {
     return {

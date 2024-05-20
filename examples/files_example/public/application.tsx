@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { AppPluginStartDependencies } from './types';
@@ -21,14 +21,14 @@ export const renderApp = (
   { files }: AppPluginStartDependencies,
   { element }: AppMountParameters
 ) => {
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <QueryClientProvider client={queryClient}>
       <FilesContext client={files.unscoped}>
         <FilesExampleApp files={files} notifications={notifications} />
       </FilesContext>
-    </QueryClientProvider>,
-    element
+    </QueryClientProvider>
   );
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

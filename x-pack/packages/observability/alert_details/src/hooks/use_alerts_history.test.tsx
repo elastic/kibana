@@ -8,7 +8,7 @@ import React from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import {
   type UseAlertsHistory,
   useAlertsHistory,
@@ -40,7 +40,7 @@ describe('useAlertsHistory', () => {
 
   it('returns no data with error when http client is not provided', async () => {
     const http = undefined;
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook<UseAlertsHistory, useAlertsHistoryProps>(
       () =>
         useAlertsHistory({
           http,
@@ -66,7 +66,7 @@ describe('useAlertsHistory', () => {
         throw new Error('ES error');
       }),
     } as unknown as HttpSetup;
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook<UseAlertsHistory, useAlertsHistoryProps>(
       () =>
         useAlertsHistory({
           http,
@@ -130,7 +130,7 @@ describe('useAlertsHistory', () => {
         },
       }),
     } as unknown as HttpSetup;
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook<UseAlertsHistory, useAlertsHistoryProps>(
       () =>
         useAlertsHistory({
           http,
@@ -170,7 +170,7 @@ describe('useAlertsHistory', () => {
       }),
     } as unknown as HttpSetup;
 
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook<UseAlertsHistory, useAlertsHistoryProps>(
       () =>
         useAlertsHistory({
           http,
@@ -219,7 +219,7 @@ describe('useAlertsHistory', () => {
       }),
     } as unknown as HttpSetup;
 
-    const { result, waitFor } = renderHook<useAlertsHistoryProps, UseAlertsHistory>(
+    const { result } = renderHook<UseAlertsHistory, useAlertsHistoryProps>(
       () =>
         useAlertsHistory({
           http,

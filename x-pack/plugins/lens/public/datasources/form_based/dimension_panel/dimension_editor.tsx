@@ -26,7 +26,7 @@ import {
   EuiBasicTable,
   EuiButtonIcon,
 } from '@elastic/eui';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { NameInput } from '@kbn/visualization-ui-components';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
@@ -48,9 +48,9 @@ import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
 import type { FormBasedLayer } from '../types';
-import { FormatSelector } from './format_selector';
+import { FormatSelector, FormatSelectorProps } from './format_selector';
 import { ReferenceEditor } from './reference_editor';
-import { TimeScaling } from './time_scaling';
+import { TimeScaling, TimeScalingProps } from './time_scaling';
 import { Filtering } from './filtering';
 import { ReducedTimeRange } from './reduced_time_range';
 import { AdvancedOptions } from './advanced_options';
@@ -144,7 +144,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const { euiTheme } = useEuiTheme();
 
   const updateLayer = useCallback(
-    (newLayer) => setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
+    (newLayer: Partial<FormBasedLayer>) =>
+      setState((prevState) => mergeLayer({ state: prevState, layerId, newLayer })),
     [layerId, setState]
   );
 
@@ -372,12 +373,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
       .map((def) => def.type);
   }, [fieldByOperation, operationWithoutField]);
 
-  const helpPopoverContainer = useRef<HTMLDivElement | null>(null);
+  const helpPopoverContainer = useRef<ReturnType<typeof createRoot> | null>(null);
   useEffect(() => {
     return () => {
       if (helpPopoverContainer.current) {
-        ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
-        document.body.removeChild(helpPopoverContainer.current);
+        helpPopoverContainer.current.unmount();
+        // document.body.removeChild(helpPopoverContainer.current);
       }
     };
   }, []);
@@ -544,7 +545,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
               onClick: (e) => {
                 if (!helpPopoverContainer.current) {
                   const container = document.createElement('div');
-                  helpPopoverContainer.current = container;
+                  helpPopoverContainer.current = createRoot(container);
                   document.body.appendChild(container);
                   const HelpComponent = operationDefinitionMap[operationType].helpComponent!;
                   const element = (
@@ -554,8 +555,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       title={operationDefinitionMap[operationType].helpComponentTitle}
                       closePopover={() => {
                         if (helpPopoverContainer.current) {
-                          ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
-                          document.body.removeChild(helpPopoverContainer.current);
+                          helpPopoverContainer.current.unmount();
+                          // document.body.removeChild(helpPopoverContainer.current);
                           helpPopoverContainer.current = null;
                         }
                       }}
@@ -564,10 +565,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       <HelpComponent />
                     </WrappingHelpPopover>
                   );
-                  ReactDOM.render(element, helpPopoverContainer.current);
+                  helpPopoverContainer.current.render(element);
                 } else {
-                  ReactDOM.unmountComponentAtNode(helpPopoverContainer.current);
-                  document.body.removeChild(helpPopoverContainer.current);
+                  helpPopoverContainer.current.unmount();
+                  // document.body.removeChild(helpPopoverContainer.current);
                   helpPopoverContainer.current = null;
                 }
               },
@@ -843,7 +844,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   updateLayer({
                     ...layer,
                     // clean up the incomplete column data for the referenced id
-                    incompleteColumns: { ...layer.incompleteColumns, [referenceId]: null },
+                    incompleteColumns: { ...layer.incompleteColumns, [referenceId]: undefined },
                   });
                 }}
                 onDeleteColumn={() => {
@@ -993,7 +994,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const ButtonGroupContent = showQuickFunctions ? quickFunctions : customParamEditor;
 
-  const onFormatChange = useCallback(
+  const onFormatChange = useCallback<FormatSelectorProps['onChange']>(
     (newFormat) => {
       updateLayer(
         updateColumnParam({
@@ -1098,7 +1099,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
    * Advanced options can cause side effects on other columns (i.e. formulas)
    * so before updating the layer the full insertOrReplaceColumn needs to be performed
    */
-  const updateAdvancedOption = useCallback(
+  const updateAdvancedOption = useCallback<TimeScalingProps['updateLayer']>(
     (newLayer) => {
       if (selectedColumn) {
         setStateWrapper(

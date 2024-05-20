@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
 import { CoreSetup, CoreStart, AppMountParameters } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { PLUGIN_NAME } from '../common/constants';
@@ -45,6 +45,7 @@ export const mount =
         <App />
       </KibanaContextProvider>
     );
-    render(reactElement, element);
-    return () => unmountComponentAtNode(element);
+    const root = createRoot(element);
+    createRoot.render(reactElement);
+    return () => root.unmount();
   };

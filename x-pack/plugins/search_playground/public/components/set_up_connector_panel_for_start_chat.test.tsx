@@ -13,6 +13,7 @@ import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 const render = (children: React.ReactNode) =>
+  // @ts-expect-error
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);
 
 jest.mock('../hooks/use_kibana');

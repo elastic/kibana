@@ -17,8 +17,9 @@ const mockChatService = createMockChatService();
 
 let items: ReturnType<typeof getTimelineItemsfromConversation>;
 
-function Providers({ children }: { children: React.ReactElement }) {
+function Providers({ children }: React.PropsWithChildren) {
   return (
+    // @ts-expect-error
     <IntlProvider locale="en" messages={{}}>
       <KibanaContextProvider
         services={{
@@ -328,8 +329,9 @@ describe('getTimelineItemsFromConversation', () => {
     });
 
     it('returns a title that reflects a failure to execute the function', () => {
-      const { container } = render(items[3].title as React.ReactElement, {
+      const { container } = render(items[3].title as React.ReactNode, {
         wrapper: ({ children }) => (
+          // @ts-expect-error
           <IntlProvider locale="en" messages={{}}>
             {children}
           </IntlProvider>

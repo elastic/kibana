@@ -90,7 +90,7 @@ export function SaveDashboardModal({
     () => setAssetNameFiltersEnabled(!assetNameEnabled),
     [assetNameEnabled]
   );
-  const onSelect = useCallback((newSelection) => setSelectedDashboard(newSelection), []);
+  const onSelect = useCallback((newSelection: any) => setSelectedDashboard(newSelection), []);
 
   const onClickSave = useCallback(
     async function () {

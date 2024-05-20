@@ -45,6 +45,7 @@ export interface SendToTimelineButtonProps {
   timeRange?: TimeRange;
   keepDataView?: boolean;
   isDisabled?: boolean;
+  children: React.ReactNode;
 }
 
 export const SendToTimelineButton: FC<PropsWithChildren<SendToTimelineButtonProps>> = ({

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitForEuiPopoverOpen, screen } from '@elastic/eui/lib/test/rtl';
+import { screen } from '@elastic/eui/lib/test/rtl';
 import userEvent from '@testing-library/user-event';
 import type { AppMockRenderer } from '../../../common/mock';
 import {
@@ -38,7 +38,7 @@ describe('UserCommentPropertyActions', () => {
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect((await screen.findByTestId('property-actions-user-action-group')).children.length).toBe(
       3
@@ -54,7 +54,7 @@ describe('UserCommentPropertyActions', () => {
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.queryByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
 
@@ -69,7 +69,7 @@ describe('UserCommentPropertyActions', () => {
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.queryByTestId('property-actions-user-action-quote')).toBeInTheDocument();
 
@@ -84,7 +84,7 @@ describe('UserCommentPropertyActions', () => {
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
     userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.queryByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 

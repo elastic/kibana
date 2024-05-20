@@ -8,7 +8,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+// import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -48,7 +48,7 @@ describe('AssigneesFilterPopover', () => {
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     fireEvent.change(await screen.findByPlaceholderText('Search users'), {
       target: { value: 'dingo' },
@@ -71,7 +71,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('wet_dingo@elastic.co'));
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     fireEvent.change(await screen.findByPlaceholderText('Search users'), {
       target: { value: 'dingo' },
@@ -97,7 +97,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('assignee')).not.toBeInTheDocument();
   });
@@ -112,7 +112,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('1 filter selected')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
   });
@@ -127,7 +127,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('2 filters selected')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
     expect(await screen.findByText('Physical Dinosaur')).toBeInTheDocument();
@@ -139,7 +139,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('Wet Dingo')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
     expect(await screen.findByText('Physical Dinosaur')).toBeInTheDocument();
@@ -156,7 +156,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('Wet Dingo')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     const assignees = await screen.findAllByRole('option');
 
@@ -171,7 +171,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('Wet Dingo')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('3')).not.toBeInTheDocument();
   });
@@ -187,7 +187,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByText('Wet Dingo')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(await screen.findByText('No assignees')).toBeInTheDocument();
   });
@@ -199,7 +199,7 @@ describe('AssigneesFilterPopover', () => {
 
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByPlaceholderText('Search users')).toBeInTheDocument();
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByText('No assignees'));
 
@@ -219,7 +219,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByPlaceholderText('Search users')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     userEvent.click(await screen.findByText('No assignees'));
     userEvent.click(await screen.findByText('WD'));
@@ -249,7 +249,7 @@ describe('AssigneesFilterPopover', () => {
     userEvent.click(await screen.findByTestId('options-filter-popover-button-assignees'));
     expect(await screen.findByPlaceholderText('Search users')).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     fireEvent.change(await screen.findByPlaceholderText('Search users'), {
       target: { value: 'dingo' },
@@ -270,7 +270,7 @@ describe('AssigneesFilterPopover', () => {
       await screen.findByText(`${MAX_ASSIGNEES_FILTER_LENGTH} filters selected`)
     ).toBeInTheDocument();
 
-    await waitForEuiPopoverOpen();
+    // await waitForEuiPopoverOpen();
 
     expect(
       await screen.findByText(

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import ReactDOM from 'react-dom';
 import React from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -23,14 +22,14 @@ export const getTextRenderer =
     help: strings.getHelpDescription(),
     reuseDomNode: true,
     render(domNode, { text: textString }, handlers) {
-      ReactDOM.render(
+      const root = createRoot(domNode);
+      root.render(
         <KibanaRenderContextProvider {...core}>
           <div>{textString}</div>
         </KibanaRenderContextProvider>,
-        domNode,
         () => handlers.done()
       );
-      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+      handlers.onDestroy(() => root.unmount());
     },
   });
 

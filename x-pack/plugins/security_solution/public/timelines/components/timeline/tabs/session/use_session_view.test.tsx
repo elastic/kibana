@@ -8,8 +8,7 @@
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 
-import { render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { render, renderHook } from '@testing-library/react';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { mockTimelineModel, TestProviders } from '../../../../../common/mock';
 import { useKibana } from '../../../../../common/lib/kibana';

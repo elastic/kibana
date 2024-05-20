@@ -7,7 +7,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 export const loadingSpinner = (
   <EuiFlexGroup justifyContent="spaceAround">

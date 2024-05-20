@@ -71,11 +71,14 @@ describe('CustomLink', () => {
     it('shows when no link is available', () => {
       const component = render(
         <MockApmPluginContextWrapper>
-          <IntlProvider locale="en">
-            <LicenseContext.Provider value={goldLicense}>
-              <CustomLinkOverview />
-            </LicenseContext.Provider>
-          </IntlProvider>
+          {
+            // @ts-expect-error
+            <IntlProvider locale="en">
+              <LicenseContext.Provider value={goldLicense}>
+                <CustomLinkOverview />
+              </LicenseContext.Provider>
+            </IntlProvider>
+          }
         </MockApmPluginContextWrapper>
       );
       expectTextsInDocument(component, ['No links found.']);
@@ -355,11 +358,14 @@ describe('CustomLink', () => {
       });
       const component = render(
         <LicenseContext.Provider value={license}>
-          <IntlProvider locale="en">
-            <MockApmPluginContextWrapper>
-              <CustomLinkOverview />
-            </MockApmPluginContextWrapper>
-          </IntlProvider>
+          {
+            // @ts-expect-error
+            <IntlProvider locale="en">
+              <MockApmPluginContextWrapper>
+                <CustomLinkOverview />
+              </MockApmPluginContextWrapper>
+            </IntlProvider>
+          }
         </LicenseContext.Provider>
       );
       expectTextsNotInDocument(component, ['Start free 30-day trial']);
@@ -372,11 +378,14 @@ describe('CustomLink', () => {
 
       const { getByTestId } = render(
         <LicenseContext.Provider value={goldLicense}>
-          <IntlProvider locale="en">
-            <MockApmPluginContextWrapper value={mockContext}>
-              <CustomLinkOverview />
-            </MockApmPluginContextWrapper>
-          </IntlProvider>
+          {
+            // @ts-expect-error
+            <IntlProvider locale="en">
+              <MockApmPluginContextWrapper value={mockContext}>
+                <CustomLinkOverview />
+              </MockApmPluginContextWrapper>
+            </IntlProvider>
+          }
         </LicenseContext.Provider>
       );
       const createButton = getByTestId('createButton') as HTMLButtonElement;
@@ -388,11 +397,14 @@ describe('CustomLink', () => {
 
       const { queryAllByText } = render(
         <LicenseContext.Provider value={goldLicense}>
-          <IntlProvider locale="en">
-            <MockApmPluginContextWrapper value={mockContext}>
-              <CustomLinkOverview />
-            </MockApmPluginContextWrapper>
-          </IntlProvider>
+          {
+            // @ts-expect-error
+            <IntlProvider locale="en">
+              <MockApmPluginContextWrapper value={mockContext}>
+                <CustomLinkOverview />
+              </MockApmPluginContextWrapper>
+            </IntlProvider>
+          }
         </LicenseContext.Provider>
       );
 

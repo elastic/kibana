@@ -32,8 +32,8 @@ jest.mock('@tanstack/react-query', () => {
 
 describe('When using the `useGetFileInfo()` hook', () => {
   type HookRenderer = ReactQueryHookRenderer<
-    Parameters<typeof useFetchEndpointPolicy>,
-    ReturnType<typeof useFetchEndpointPolicy>
+    ReturnType<typeof useFetchEndpointPolicy>,
+    Parameters<typeof useFetchEndpointPolicy>
   >;
 
   let policy: PolicyData;

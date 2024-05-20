@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useRowHeightsOptions } from './use_row_heights_options';
 
 describe('useRowHeightsOptions', () => {

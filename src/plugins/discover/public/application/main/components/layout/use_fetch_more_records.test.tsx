@@ -7,10 +7,10 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { renderHook, WrapperComponent } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
-import { useFetchMoreRecords, UseFetchMoreRecordsParams } from './use_fetch_more_records';
+import { useFetchMoreRecords } from './use_fetch_more_records';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import {
   DataDocuments$,
@@ -18,7 +18,7 @@ import {
 } from '../../state_management/discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 
 describe('useFetchMoreRecords', () => {
@@ -46,10 +46,8 @@ describe('useFetchMoreRecords', () => {
     return stateContainer;
   };
 
-  const getWrapper = (
-    stateContainer: DiscoverStateContainer
-  ): WrapperComponent<UseFetchMoreRecordsParams> => {
-    return ({ children }) => (
+  const getWrapper = (stateContainer: DiscoverStateContainer) => {
+    return ({ children }: PropsWithChildren) => (
       <DiscoverMainProvider value={stateContainer}>
         <>{children}</>
       </DiscoverMainProvider>
@@ -64,7 +62,7 @@ describe('useFetchMoreRecords', () => {
     });
     const {
       result: { current },
-    } = renderHook((props) => useFetchMoreRecords(props), {
+    } = renderHook(useFetchMoreRecords, {
       wrapper: getWrapper(stateContainer),
       initialProps: { stateContainer },
     });
@@ -82,7 +80,7 @@ describe('useFetchMoreRecords', () => {
     });
     const {
       result: { current },
-    } = renderHook((props) => useFetchMoreRecords(props), {
+    } = renderHook(useFetchMoreRecords, {
       wrapper: getWrapper(stateContainer),
       initialProps: { stateContainer },
     });
@@ -99,7 +97,7 @@ describe('useFetchMoreRecords', () => {
     });
     const {
       result: { current },
-    } = renderHook((props) => useFetchMoreRecords(props), {
+    } = renderHook(useFetchMoreRecords, {
       wrapper: getWrapper(stateContainer),
       initialProps: { stateContainer },
     });
@@ -116,7 +114,7 @@ describe('useFetchMoreRecords', () => {
     });
     const {
       result: { current },
-    } = renderHook((props) => useFetchMoreRecords(props), {
+    } = renderHook(useFetchMoreRecords, {
       wrapper: getWrapper(stateContainer),
       initialProps: { stateContainer },
     });
@@ -134,7 +132,7 @@ describe('useFetchMoreRecords', () => {
     stateContainer.appState.update({ query: { esql: 'from *' } });
     const {
       result: { current },
-    } = renderHook((props) => useFetchMoreRecords(props), {
+    } = renderHook(useFetchMoreRecords, {
       wrapper: getWrapper(stateContainer),
       initialProps: { stateContainer },
     });

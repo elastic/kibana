@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { act, renderHook, type WrapperComponent } from '@testing-library/react-hooks';
+import { act, renderHook, RenderOptions, waitFor } from '@testing-library/react';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -34,7 +34,7 @@ const security = {
 
 const { http, notifications } = core;
 
-const wrapper: WrapperComponent<void> = ({ children }) => (
+const wrapper: RenderOptions['wrapper'] = ({ children }) => (
   <UserProfilesKibanaProvider
     core={core}
     security={security}
@@ -77,7 +77,7 @@ describe('useUpdateUserProfile() hook', () => {
       await lastValueFrom(updateDone.pipe(first((v) => v === true)));
     });
 
-    const { result, waitForNextUpdate } = renderHook(() => useUpdateUserProfile(), { wrapper });
+    const { result } = renderHook(() => useUpdateUserProfile(), { wrapper });
     const { update } = result.current;
 
     expect(result.current.isLoading).toBeFalsy();
@@ -89,9 +89,10 @@ describe('useUpdateUserProfile() hook', () => {
     expect(result.current.isLoading).toBeTruthy();
 
     updateDone.next(true); // Resolve the http.post promise
-    await waitForNextUpdate();
 
-    expect(result.current.isLoading).toBeFalsy();
+    waitFor(() => {
+      expect(result.current.isLoading).toBeFalsy();
+    });
   });
 
   test('should show a success notification by default', async () => {

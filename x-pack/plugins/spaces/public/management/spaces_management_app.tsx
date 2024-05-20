@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { useParams } from 'react-router-dom';
 
 import type { StartServicesAccessor } from '@kbn/core/public';
@@ -115,7 +115,9 @@ export const spacesManagementApp = Object.freeze({
           );
         };
 
-        render(
+        const root = createRoot(element);
+
+        root.render(
           <KibanaRenderContextProvider {...coreStart}>
             <KibanaContextProvider services={coreStart}>
               <RedirectAppLinks coreStart={coreStart}>
@@ -134,13 +136,12 @@ export const spacesManagementApp = Object.freeze({
                 </Router>
               </RedirectAppLinks>
             </KibanaContextProvider>
-          </KibanaRenderContextProvider>,
-          element
+          </KibanaRenderContextProvider>
         );
 
         return () => {
           chrome.docTitle.reset();
-          unmountComponentAtNode(element);
+          root.unmount();
         };
       },
     } as RegisterManagementAppArgs;

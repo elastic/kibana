@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
 import { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
@@ -35,7 +35,8 @@ export const renderApp = (
   cloud?: CloudSetup
 ): UnmountCallback => {
   const { getUrlForApp } = application;
-  render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <div className={APP_WRAPPER_CLASS}>
         <RedirectAppLinks
@@ -57,9 +58,8 @@ export const renderApp = (
           </KibanaContextProvider>
         </RedirectAppLinks>
       </div>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
-  return () => unmountComponentAtNode(element);
+  return () => root.unmount();
 };

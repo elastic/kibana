@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { useWorkpad } from './use_workpad';
 
 const mockDispatch = jest.fn();
@@ -60,7 +60,7 @@ describe('useWorkpad', () => {
       workpad: workpadResponse,
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
     try {
       await waitFor(() => expect(mockDispatch).toHaveBeenCalledTimes(3));
@@ -86,7 +86,7 @@ describe('useWorkpad', () => {
       aliasId,
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
 
     try {
       await waitFor(() => expect(mockDispatch).toHaveBeenCalledTimes(3));
@@ -116,7 +116,7 @@ describe('useWorkpad', () => {
       aliasPurpose: 'savedObjectConversion',
     });
 
-    const { waitFor, unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
+    const { unmount } = renderHook(() => useWorkpad(workpadId, true, getRedirectPath));
     try {
       await waitFor(() => expect(mockRedirectLegacyUrl).toHaveBeenCalled());
       expect(mockRedirectLegacyUrl).toBeCalledWith({

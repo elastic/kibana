@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 import * as pluginContext from './use_plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '..';
@@ -65,11 +65,11 @@ describe('useFetchAlertDetail', () => {
 
   it('initially is not loading and does not have data', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertData | null]>(() =>
+      const { result } = renderHook<[boolean, AlertData | null], string>(() =>
         useFetchAlertDetail(id)
       );
 
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(result.current).toEqual([false, null]);
     });
@@ -81,11 +81,11 @@ describe('useFetchAlertDetail', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertData | null]>(() =>
+      const { result } = renderHook<[boolean, AlertData | null], string>(() =>
         useFetchAlertDetail('123')
       );
 
-      await waitForNextUpdate();
+      // await waitFor();
 
       expect(result.current).toEqual([false, null]);
     });
@@ -93,12 +93,12 @@ describe('useFetchAlertDetail', () => {
 
   it('retrieves the alert data', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertData | null]>(() =>
+      const { result } = renderHook<[boolean, AlertData | null], string>(() =>
         useFetchAlertDetail(id)
       );
 
-      await waitForNextUpdate();
-      await waitForNextUpdate();
+      // await waitFor();
+      // await waitFor();
 
       expect(result.current).toMatchInlineSnapshot(`
         Array [
@@ -181,12 +181,11 @@ describe('useFetchAlertDetail', () => {
 
   it('does not populate the results when the request is canceled', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate, unmount } = renderHook<
-        string,
-        [boolean, AlertData | null]
-      >(() => useFetchAlertDetail('123'));
+      const { result, unmount } = renderHook<[boolean, AlertData | null], string>(() =>
+        useFetchAlertDetail('123')
+      );
 
-      await waitForNextUpdate();
+      // await waitFor();
       unmount();
 
       expect(result.current).toEqual([false, null]);

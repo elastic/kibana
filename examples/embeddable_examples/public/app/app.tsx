@@ -7,7 +7,7 @@
  */
 
 import React, { useState } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { AppMountParameters } from '@kbn/core-application-browser';
 import {
@@ -87,7 +87,8 @@ const App = () => {
 };
 
 export const renderApp = (element: AppMountParameters['element']) => {
-  ReactDOM.render(<App />, element);
+  const root = createRoot(element);
+  root.render(<App />);
 
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 };

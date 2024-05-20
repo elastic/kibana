@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
@@ -109,7 +109,9 @@ export async function renderApp(
     );
   }
 
-  render(
+  const root = createRoot(element);
+
+  root.render(
     <KibanaRenderContextProvider analytics={getAnalytics()} i18n={getCoreI18n()} theme={getTheme()}>
       <AppUsageTracker>
         <TableListViewKibanaProvider
@@ -142,11 +144,10 @@ export async function renderApp(
           </Router>
         </TableListViewKibanaProvider>
       </AppUsageTracker>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    unmountComponentAtNode(element);
+    root.unmount();
   };
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react';
 import { useEnableDataFeed } from './use_enable_data_feed';
 import { TestProviders } from '../../../mock';
 
@@ -78,7 +78,7 @@ describe('useSecurityJobsHelpers', () => {
           resolvePromiseCb = resolve;
         })
       );
-      const { result, waitForNextUpdate } = renderHook(() => useEnableDataFeed(), {
+      const { result } = renderHook(() => useEnableDataFeed(), {
         wrapper,
       });
       expect(result.current.isLoading).toBe(false);
@@ -86,7 +86,7 @@ describe('useSecurityJobsHelpers', () => {
       await act(async () => {
         const enableDataFeedPromise = result.current.enableDatafeed(JOB, TIMESTAMP);
 
-        await waitForNextUpdate();
+        // await waitFor();
         expect(result.current.isLoading).toBe(true);
 
         resolvePromiseCb({});

@@ -17,6 +17,7 @@ import { BulkActionTypeEnum } from '../../../../../../common/api/detection_engin
 
 const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
+    // @ts-expect-error
     <IntlProvider locale="en">
       <>{children}</>
     </IntlProvider>

@@ -25,6 +25,7 @@ interface CloudDefendAppDeps {
   core: CoreStart;
   deps: CloudDefendPluginStartDeps;
   params: AppMountParameters;
+  children: React.ReactNode;
 }
 
 export const TestProvider: FC<PropsWithChildren<Partial<CloudDefendAppDeps>>> = ({

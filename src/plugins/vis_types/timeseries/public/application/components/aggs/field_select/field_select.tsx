@@ -108,7 +108,7 @@ export function FieldSelect({
   );
 
   const onFieldSelectItemChange = useCallback(
-    (index: number = 0, [selectedItem]) => {
+    (index: number = 0, [selectedItem]: any) => {
       onChange(updateItem(selectedIds, selectedItem?.value, index));
     },
     [selectedIds, onChange]

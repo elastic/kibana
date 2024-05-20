@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -22,7 +22,8 @@ export async function renderApp(
   queryClient: QueryClient
 ) {
   const { ElasticsearchOverview } = await import('./components/overview');
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <KibanaContextProvider services={{ ...core, ...services }}>
         <QueryClientProvider client={queryClient}>
@@ -36,8 +37,7 @@ export async function renderApp(
           </Router>
         </QueryClientProvider>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
-  return () => ReactDOM.unmountComponentAtNode(element);
+  return () => root.unmount();
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react';
 import { usePerformEvaluation, UsePerformEvaluationParams } from './use_perform_evaluation';
 import { postEvaluation as _postEvaluation } from './evaluate';
 import { useMutation as _useMutation } from '@tanstack/react-query';
@@ -51,8 +51,8 @@ describe('usePerformEvaluation', () => {
   });
   it('should call api with undefined evalParams', async () => {
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => usePerformEvaluation(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => usePerformEvaluation(defaultProps));
+      // await waitFor();
 
       expect(defaultProps.http.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
         body: '{"dataset":[],"evalPrompt":""}',
@@ -95,8 +95,8 @@ describe('usePerformEvaluation', () => {
       }
     });
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => usePerformEvaluation(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => usePerformEvaluation(defaultProps));
+      // await waitFor();
 
       expect(defaultProps.http.post).toHaveBeenCalledWith('/internal/elastic_assistant/evaluate', {
         body: '{"dataset":["kewl"],"evalPrompt":"evalPrompt"}',
@@ -121,8 +121,8 @@ describe('usePerformEvaluation', () => {
 
   it('should return evaluation response', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => usePerformEvaluation(defaultProps));
-      await waitForNextUpdate();
+      const { result } = renderHook(() => usePerformEvaluation(defaultProps));
+      // await waitFor();
 
       await expect(result.current).resolves.toStrictEqual(statusResponse);
     });
@@ -131,8 +131,8 @@ describe('usePerformEvaluation', () => {
   it('should display error toast when api throws error', async () => {
     postEvaluationMock.mockRejectedValue(new Error('this is an error'));
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => usePerformEvaluation(defaultProps));
-      await waitForNextUpdate();
+      renderHook(() => usePerformEvaluation(defaultProps));
+      // await waitFor();
 
       expect(toasts.addError).toHaveBeenCalled();
     });

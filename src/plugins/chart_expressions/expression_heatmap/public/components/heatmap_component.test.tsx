@@ -25,6 +25,7 @@ import type { Datatable } from '@kbn/expressions-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { act } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 import { HeatmapRenderProps, HeatmapArguments } from '../../common';
 import HeatmapComponent from './heatmap_component';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
@@ -33,7 +34,7 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 const actWithTimeout = (action: Function, timer: number = 1) =>
   act(
     () =>
-      new Promise((resolve) =>
+      new Promise<void>((resolve) =>
         setTimeout(async () => {
           await action();
           resolve();
@@ -162,7 +163,7 @@ describe('HeatmapComponent', function () {
     await actWithTimeout(async () => {
       await component.update();
     });
-    await act(async () => {
+    await waitFor(async () => {
       expect(findTestSubject(component, 'vislibToggleLegend').length).toBe(1);
     });
   });

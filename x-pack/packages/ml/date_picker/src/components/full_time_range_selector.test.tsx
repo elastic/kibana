@@ -68,6 +68,7 @@ describe('FullTimeRangeSelector', () => {
     (setFullTimeRange as jest.MockedFunction<any>).mockImplementationOnce(() => undefined);
 
     const { getByText } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <DatePickerContextProvider {...mockDependencies}>
           {/* @ts-expect-error upgrade typescript v4.9.5*/}
@@ -97,6 +98,7 @@ describe('FullTimeRangeSelector', () => {
     }));
 
     const { getByText } = render(
+      // @ts-expect-error
       <IntlProvider locale="en">
         <DatePickerContextProvider {...mockDependencies}>
           {/* @ts-expect-error upgrade typescript v4.9.5*/}

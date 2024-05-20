@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
@@ -84,8 +84,9 @@ export const renderApp = ({
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
   const CloudProvider = plugins.cloud?.CloudContextProvider ?? React.Fragment;
   const PresentationContextProvider = plugins.presentationUtil?.ContextProvider ?? React.Fragment;
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <PresentationContextProvider>
         <ApplicationUsageTrackingProvider>
@@ -129,8 +130,7 @@ export const renderApp = ({
           </KibanaThemeProvider>
         </ApplicationUsageTrackingProvider>
       </PresentationContextProvider>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
   return () => {
     // This needs to be present to fix https://github.com/elastic/kibana/issues/155704
@@ -138,6 +138,6 @@ export const renderApp = ({
     // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
     // these sessions.
     plugins.data.search.session.clear();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

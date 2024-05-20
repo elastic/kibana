@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
@@ -99,7 +99,9 @@ export const getDatatableRenderer = (dependencies: {
     config: DatatableProps,
     handlers: ILensInterpreterRenderHandlers
   ) => {
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    const root = createRoot(domNode);
+
+    handlers.onDestroy(() => root.unmount());
 
     const resolvedGetType = await dependencies.getType;
     const { hasCompatibleActions, isInteractive, getCompatibleCellValueActions } = handlers;
@@ -153,7 +155,7 @@ export const getDatatableRenderer = (dependencies: {
       getColumnsFilterable(config.data, handlers),
     ]);
 
-    ReactDOM.render(
+    root.render(
       <KibanaRenderContextProvider {...startServices}>
         <DatatableComponent
           {...config}
@@ -169,8 +171,7 @@ export const getDatatableRenderer = (dependencies: {
           theme={dependencies.core.theme}
           renderComplete={renderComplete}
         />
-      </KibanaRenderContextProvider>,
-      domNode
+      </KibanaRenderContextProvider>
     );
   },
 });

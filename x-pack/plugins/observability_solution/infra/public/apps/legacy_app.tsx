@@ -9,7 +9,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { createBrowserHistory, History } from 'history';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { RouteProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
@@ -17,16 +17,16 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 // It will be removed in 8.0.0.
 export async function renderApp(core: CoreStart, { element }: AppMountParameters) {
   const history = createBrowserHistory();
+  const root = createRoot(element);
 
-  ReactDOM.render(
+  root.render(
     <KibanaRenderContextProvider {...core}>
       <LegacyApp history={history} />
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 }
 

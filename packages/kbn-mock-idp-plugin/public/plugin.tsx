@@ -8,7 +8,7 @@
 
 import type { PluginInitializer } from '@kbn/core-plugins-browser';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -44,19 +44,19 @@ export const plugin: PluginInitializer<
           coreSetup.getStartServices(),
           import('./login_page'),
         ]);
+        const root = createRoot(params.element);
 
-        ReactDOM.render(
+        root.render(
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
                 <LoginPage />
               </I18nProvider>
             </KibanaContextProvider>
-          </KibanaThemeProvider>,
-          params.element
+          </KibanaThemeProvider>
         );
 
-        return () => ReactDOM.unmountComponentAtNode(params.element);
+        return () => root.unmount();
       },
     });
   },
@@ -65,17 +65,18 @@ export const plugin: PluginInitializer<
     coreStart.chrome.navControls.registerRight({
       order: 4000 + 1, // Make sure it comes after the user menu
       mount: (element: HTMLElement) => {
-        ReactDOM.render(
+        const root = createRoot(element);
+
+        root.render(
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
                 <RoleSwitcher />
               </I18nProvider>
             </KibanaContextProvider>
-          </KibanaThemeProvider>,
-          element
+          </KibanaThemeProvider>
         );
-        return () => ReactDOM.unmountComponentAtNode(element);
+        return () => root.unmount();
       },
     });
   },

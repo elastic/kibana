@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { waitFor } from '@testing-library/react';
 
 import { StackAlertsPage } from './stack_alerts_page';

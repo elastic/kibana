@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
+import React from 'react';
 import { useDrilldownManager } from '../context';
 import { FlyoutFrame } from '../../components/flyout_frame';
 import { DrilldownManagerContent } from './drilldown_manager_content';

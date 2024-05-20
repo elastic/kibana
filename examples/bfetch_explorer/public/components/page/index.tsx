@@ -12,6 +12,7 @@ import { EuiPageTemplate, EuiPageSection, EuiPageHeader } from '@elastic/eui';
 export interface PageProps {
   title?: React.ReactNode;
   sidebar?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const Page: FC<PropsWithChildren<PageProps>> = ({

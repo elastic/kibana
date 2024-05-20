@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
@@ -101,7 +100,8 @@ export async function mountManagementSection(
   const createPath = '/dataView/:id/create-field/';
   const createEditPath = dataViews.scriptedFieldsEnabled ? [editPath, createPath] : [editPath];
 
-  ReactDOM.render(
+  const root = createRoot(params.element);
+  root.render(
     <KibanaRenderContextProvider {...startServices}>
       <KibanaContextProvider services={deps}>
         <Router history={params.history}>
@@ -122,12 +122,11 @@ export async function mountManagementSection(
           </Routes>
         </Router>
       </KibanaContextProvider>
-    </KibanaRenderContextProvider>,
-    params.element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
     chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(params.element);
+    root.unmount();
   };
 }

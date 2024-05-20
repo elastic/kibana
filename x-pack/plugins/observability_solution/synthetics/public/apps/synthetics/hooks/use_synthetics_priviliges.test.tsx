@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { render, WrappedHelper } from '../utils/testing';
 import { useSyntheticsPrivileges } from './use_synthetics_priviliges';
@@ -22,7 +22,7 @@ jest.mock('react-redux', () => {
   };
 });
 
-function wrapper({ children }: { children: React.ReactElement }) {
+function wrapper({ children }: React.PropsWithChildren) {
   return <WrappedHelper>{children}</WrappedHelper>;
 }
 

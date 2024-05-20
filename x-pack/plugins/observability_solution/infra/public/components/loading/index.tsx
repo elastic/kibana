@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
-import * as React from 'react';
+import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 

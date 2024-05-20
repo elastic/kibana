@@ -7,7 +7,7 @@
  */
 
 import React, { lazy, Suspense, FC, PropsWithChildren } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -52,8 +52,8 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
     }
     return children! as React.ReactElement;
   };
-
-  ReactDOM.render(
+  const root = createRoot(element);
+  root.render(
     <KibanaRenderContextProvider {...coreStart}>
       <Router history={history}>
         <Routes>
@@ -87,12 +87,11 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
           </Route>
         </Routes>
       </Router>
-    </KibanaRenderContextProvider>,
-    element
+    </KibanaRenderContextProvider>
   );
 
   return () => {
     coreStart.chrome.docTitle.reset();
-    ReactDOM.unmountComponentAtNode(element);
+    root.unmount();
   };
 };

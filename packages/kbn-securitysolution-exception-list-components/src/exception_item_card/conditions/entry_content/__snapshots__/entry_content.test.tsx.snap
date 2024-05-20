@@ -33,7 +33,6 @@ Object {
                   class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
                 />
                  
-                
               </span>
               <span
                 class="euiExpression emotion-euiExpression-success"
@@ -86,7 +85,6 @@ Object {
                 class="euiExpression__description emotion-euiExpression__description-subdued-isUppercase"
               />
                
-              
             </span>
             <span
               class="euiExpression emotion-euiExpression-success"

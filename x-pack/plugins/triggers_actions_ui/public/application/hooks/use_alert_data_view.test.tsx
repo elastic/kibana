@@ -8,10 +8,10 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
-import { renderHook } from '@testing-library/react-hooks/dom';
+import { renderHook } from '@testing-library/react';
 import { useAlertDataViews } from './use_alert_data_view';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { waitFor } from '@testing-library/react';
 
 const mockUseKibanaReturnValue = createStartServicesMock();
@@ -42,7 +42,7 @@ const queryClient = new QueryClient({
     },
   },
 });
-const wrapper = ({ children }: { children: Node }) => (
+const wrapper = ({ children }: PropsWithChildren) => (
   <QueryClientProvider client={queryClient}> {children} </QueryClientProvider>
 );
 

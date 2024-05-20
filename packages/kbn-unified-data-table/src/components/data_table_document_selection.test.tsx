@@ -160,6 +160,8 @@ describe('document selection', () => {
       setIsCompareActive = jest.fn(),
     }: Partial<Parameters<typeof DataTableCompareToolbarBtn>[0]> = {}) => {
       render(
+        // @ts-expect-error
+
         <IntlProvider locale="en">
           <DataTableCompareToolbarBtn
             selectedDocs={selectedDocs}

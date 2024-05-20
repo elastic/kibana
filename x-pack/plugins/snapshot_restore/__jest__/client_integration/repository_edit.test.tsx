@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act } from 'react-dom/test-utils';
+import { act, waitFor } from '@testing-library/react';
 
 import { setupEnvironment, pageHelpers, TestBed, getRandomString } from './helpers';
 import { RepositoryForm } from '../../public/application/components/repository_form';
@@ -28,17 +28,20 @@ describe('<RepositoryEdit />', () => {
         snapshots: { count: 0 },
       });
 
-      await act(async () => {
-        testBed = await setup(httpSetup);
+      testBed = await setup(httpSetup);
+
+      act(() => {
+        testBed.component.update();
       });
-      testBed.component.update();
     });
 
     test('should set the correct page title', () => {
       const { find } = testBed;
-      expect(find('repositoryForm.stepTwo.title').text()).toBe(
-        `'${REPOSITORY_EDIT.name}' settings`
-      );
+      waitFor(() => {
+        expect(find('repositoryForm.stepTwo.title').text()).toBe(
+          `'${REPOSITORY_EDIT.name}' settings`
+        );
+      });
     });
 
     /**
@@ -54,8 +57,10 @@ describe('<RepositoryEdit />', () => {
       const formEdit = testBed.component.find(RepositoryForm);
       const formAdd = testBedRepositoryAdd.component.find(RepositoryForm);
 
-      expect(formEdit.length).toBe(1);
-      expect(formAdd.length).toBe(1);
+      waitFor(() => {
+        expect(formEdit.length).toBe(1);
+        expect(formAdd.length).toBe(1);
+      });
     });
   });
 
@@ -67,49 +72,55 @@ describe('<RepositoryEdit />', () => {
         isManagedRepository: true,
       });
 
-      await act(async () => {
-        testBed = await setup(httpSetup);
+      testBed = await setup(httpSetup);
+      act(() => {
+        testBed.component.update();
       });
-      testBed.component.update();
     };
 
     it('azure repository', async () => {
       await mountComponentWithMock({ type: 'azure' });
       const { find } = testBed;
-      const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
+      waitFor(() => {
+        const clientInput = find('clientInput');
+        expect(clientInput.props().disabled).toEqual(true);
 
-      const containerInput = find('containerInput');
-      expect(containerInput.props().disabled).toEqual(true);
+        const containerInput = find('containerInput');
+        expect(containerInput.props().disabled).toEqual(true);
 
-      const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+        const basePathInput = find('basePathInput');
+        expect(basePathInput.props().disabled).toEqual(true);
+      });
     });
 
     it('gcs repository', async () => {
       await mountComponentWithMock({ type: 'gcs' });
       const { find } = testBed;
-      const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
+      waitFor(() => {
+        const clientInput = find('clientInput');
+        expect(clientInput.props().disabled).toEqual(true);
 
-      const bucketInput = find('bucketInput');
-      expect(bucketInput.props().disabled).toEqual(true);
+        const bucketInput = find('bucketInput');
+        expect(bucketInput.props().disabled).toEqual(true);
 
-      const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+        const basePathInput = find('basePathInput');
+        expect(basePathInput.props().disabled).toEqual(true);
+      });
     });
 
     it('s3 repository', async () => {
       await mountComponentWithMock({ type: 's3' });
       const { find } = testBed;
-      const clientInput = find('clientInput');
-      expect(clientInput.props().disabled).toEqual(true);
+      waitFor(() => {
+        const clientInput = find('clientInput');
+        expect(clientInput.props().disabled).toEqual(true);
 
-      const bucketInput = find('bucketInput');
-      expect(bucketInput.props().disabled).toEqual(true);
+        const bucketInput = find('bucketInput');
+        expect(bucketInput.props().disabled).toEqual(true);
 
-      const basePathInput = find('basePathInput');
-      expect(basePathInput.props().disabled).toEqual(true);
+        const basePathInput = find('basePathInput');
+        expect(basePathInput.props().disabled).toEqual(true);
+      });
     });
   });
 
@@ -139,16 +150,18 @@ describe('<RepositoryEdit />', () => {
 
       const { find } = testBed;
 
-      expect(find('locationInput').props().defaultValue).toBe(settings.location);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
-        settings.maxSnapshotBytesPerSec
-      );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
-        settings.maxRestoreBytesPerSec
-      );
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      waitFor(() => {
+        expect(find('locationInput').props().defaultValue).toBe(settings.location);
+        expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
+        expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
+        expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+          settings.maxSnapshotBytesPerSec
+        );
+        expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+          settings.maxRestoreBytesPerSec
+        );
+        expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      });
     });
 
     it('readonly repository', async () => {
@@ -160,8 +173,10 @@ describe('<RepositoryEdit />', () => {
 
       const { find } = testBed;
 
-      expect(find('schemeSelect').props().value).toBe('https');
-      expect(find('urlInput').props().defaultValue).toBe('elastic.co');
+      waitFor(() => {
+        expect(find('schemeSelect').props().value).toBe('https');
+        expect(find('urlInput').props().defaultValue).toBe('elastic.co');
+      });
     });
 
     it('azure repository', async () => {
@@ -181,19 +196,21 @@ describe('<RepositoryEdit />', () => {
 
       const { find } = testBed;
 
-      expect(find('clientInput').props().defaultValue).toBe(settings.client);
-      expect(find('containerInput').props().defaultValue).toBe(settings.container);
-      expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
-        settings.maxSnapshotBytesPerSec
-      );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
-        settings.maxRestoreBytesPerSec
-      );
-      expect(find('locationModeSelect').props().value).toBe(settings.locationMode);
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      waitFor(() => {
+        expect(find('clientInput').props().defaultValue).toBe(settings.client);
+        expect(find('containerInput').props().defaultValue).toBe(settings.container);
+        expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
+        expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
+        expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
+        expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+          settings.maxSnapshotBytesPerSec
+        );
+        expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+          settings.maxRestoreBytesPerSec
+        );
+        expect(find('locationModeSelect').props().value).toBe(settings.locationMode);
+        expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      });
     });
 
     it('gcs repository', async () => {
@@ -212,18 +229,20 @@ describe('<RepositoryEdit />', () => {
 
       const { find } = testBed;
 
-      expect(find('clientInput').props().defaultValue).toBe(settings.client);
-      expect(find('bucketInput').props().defaultValue).toBe(settings.bucket);
-      expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
-        settings.maxSnapshotBytesPerSec
-      );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
-        settings.maxRestoreBytesPerSec
-      );
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      waitFor(() => {
+        expect(find('clientInput').props().defaultValue).toBe(settings.client);
+        expect(find('bucketInput').props().defaultValue).toBe(settings.bucket);
+        expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
+        expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
+        expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
+        expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+          settings.maxSnapshotBytesPerSec
+        );
+        expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+          settings.maxRestoreBytesPerSec
+        );
+        expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      });
     });
 
     it('hdfs repository', async () => {
@@ -246,27 +265,29 @@ describe('<RepositoryEdit />', () => {
 
       const { find } = testBed;
 
-      expect(find('uriInput').props().defaultValue).toBe('elastic.co');
-      expect(find('pathInput').props().defaultValue).toBe(settings.path);
-      expect(find('loadDefaultsToggle').props()['aria-checked']).toBe(settings.loadDefault);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('securityPrincipalInput').props().defaultValue).toBe(
-        settings['security.principal']
-      );
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
-        settings.maxSnapshotBytesPerSec
-      );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
-        settings.maxRestoreBytesPerSec
-      );
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      waitFor(() => {
+        expect(find('uriInput').props().defaultValue).toBe('elastic.co');
+        expect(find('pathInput').props().defaultValue).toBe(settings.path);
+        expect(find('loadDefaultsToggle').props()['aria-checked']).toBe(settings.loadDefault);
+        expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
+        expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
+        expect(find('securityPrincipalInput').props().defaultValue).toBe(
+          settings['security.principal']
+        );
+        expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+          settings.maxSnapshotBytesPerSec
+        );
+        expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+          settings.maxRestoreBytesPerSec
+        );
+        expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
 
-      const codeEditorValue = testBed.find('codeEditor').props()['data-currentvalue'];
-      expect(JSON.parse(codeEditorValue)).toEqual({
-        loadDefault: true,
-        conf1: 'foo',
-        conf2: 'bar',
+        const codeEditorValue = testBed.find('codeEditor').props()['data-currentvalue'];
+        expect(JSON.parse(codeEditorValue)).toEqual({
+          loadDefault: true,
+          conf1: 'foo',
+          conf2: 'bar',
+        });
       });
     });
 
@@ -290,24 +311,26 @@ describe('<RepositoryEdit />', () => {
 
       const { find } = testBed;
 
-      expect(find('clientInput').props().defaultValue).toBe(settings.client);
-      expect(find('bucketInput').props().defaultValue).toBe(settings.bucket);
-      expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
-      expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
-      expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
-      expect(find('serverSideEncryptionToggle').props()['aria-checked']).toBe(
-        settings.serverSideEncryption
-      );
-      expect(find('bufferSizeInput').props().defaultValue).toBe(settings.bufferSize);
-      expect(find('cannedAclSelect').props().value).toBe(settings.cannedAcl);
-      expect(find('storageClassSelect').props().value).toBe(settings.storageClass);
-      expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
-        settings.maxSnapshotBytesPerSec
-      );
-      expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
-        settings.maxRestoreBytesPerSec
-      );
-      expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      waitFor(() => {
+        expect(find('clientInput').props().defaultValue).toBe(settings.client);
+        expect(find('bucketInput').props().defaultValue).toBe(settings.bucket);
+        expect(find('basePathInput').props().defaultValue).toBe(settings.basePath);
+        expect(find('compressToggle').props()['aria-checked']).toBe(settings.compress);
+        expect(find('chunkSizeInput').props().defaultValue).toBe(settings.chunkSize);
+        expect(find('serverSideEncryptionToggle').props()['aria-checked']).toBe(
+          settings.serverSideEncryption
+        );
+        expect(find('bufferSizeInput').props().defaultValue).toBe(settings.bufferSize);
+        expect(find('cannedAclSelect').props().value).toBe(settings.cannedAcl);
+        expect(find('storageClassSelect').props().value).toBe(settings.storageClass);
+        expect(find('maxSnapshotBytesInput').props().defaultValue).toBe(
+          settings.maxSnapshotBytesPerSec
+        );
+        expect(find('maxRestoreBytesInput').props().defaultValue).toBe(
+          settings.maxRestoreBytesPerSec
+        );
+        expect(find('readOnlyToggle').props()['aria-checked']).toBe(settings.readonly);
+      });
     });
   });
 });

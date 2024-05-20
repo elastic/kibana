@@ -15,7 +15,7 @@ jest.mock('../../contexts/request_context', () => ({ useRequestActionContext: je
 jest.mock('../../../lib/utils', () => ({ replaceVariables: jest.fn() }));
 
 import React from 'react';
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, RenderOptions } from '@testing-library/react';
 
 import { ContextValue, ServicesContextProvider } from '../../contexts';
 import { serviceContextMock } from '../../contexts/services_context.mock';
@@ -29,7 +29,7 @@ import { useSendCurrentRequest } from './use_send_current_request';
 describe('useSendCurrentRequest', () => {
   let mockContextValue: ContextValue;
   let dispatch: (...args: unknown[]) => void;
-  const contexts = ({ children }: { children: JSX.Element }) => (
+  const contexts: RenderOptions['wrapper'] = ({ children }) => (
     <ServicesContextProvider value={mockContextValue}>{children}</ServicesContextProvider>
   );
 

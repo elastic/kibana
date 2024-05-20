@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Observable } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
@@ -46,11 +46,13 @@ export const getShapeRenderer =
       handlers: IInterpreterRenderHandlers
     ) => {
       const { ShapeComponent } = await import('../components/shape');
+      const root = createRoot(domNode);
+
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
-      render(
+      root.render(
         <KibanaErrorBoundaryProvider analytics={undefined}>
           <KibanaErrorBoundary>
             <KibanaThemeProvider theme={{ theme$ }}>
@@ -59,9 +61,7 @@ export const getShapeRenderer =
               </I18nProvider>
             </KibanaThemeProvider>
           </KibanaErrorBoundary>
-        </KibanaErrorBoundaryProvider>,
-
-        domNode
+        </KibanaErrorBoundaryProvider>
       );
     },
   });

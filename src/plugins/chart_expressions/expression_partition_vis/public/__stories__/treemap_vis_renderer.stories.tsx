@@ -22,6 +22,7 @@ const containerSize = {
 const PartitionVisRenderer = () => getPartitionVisRenderer({ getStartDeps });
 
 type Props = {
+  children: React.ReactNode;
   visType: PartitionChartProps['visType'];
   syncColors: PartitionChartProps['syncColors'];
 } & PartitionChartProps['visConfig'];

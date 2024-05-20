@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { App } from '../components/app';
 import { CanvasRenderedWorkpad } from '../types';
 
@@ -133,13 +133,11 @@ const updateArea = async (area: Element) => {
       area.classList.add('kbnCanvas');
       area.removeAttribute(SHAREABLE);
 
-      render(
-        [
-          <style key="style">{`html body .kbnCanvas { height: ${stage.height}px; width: ${stage.width}px; }`}</style>,
-          <App key="app" workpad={workpad} {...{ stage, settings }} />,
-        ],
-        area
-      );
+      const root = createRoot(area);
+      root.render([
+        <style key="style">{`html body .kbnCanvas { height: ${stage.height}px; width: ${stage.width}px; }`}</style>,
+        <App key="app" workpad={workpad} {...{ stage, settings }} />,
+      ]);
     }
   }
 };

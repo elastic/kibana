@@ -51,7 +51,10 @@ const renderWithContext = (Element: React.ReactElement) => {
 
   return render(
     <ThemeProvider theme={mockTheme}>
-      <IntlProvider locale={'en'}>{Element}</IntlProvider>
+      {
+        // @ts-expect-error
+        <IntlProvider locale={'en'}>{Element}</IntlProvider>
+      }
     </ThemeProvider>
   );
 };

@@ -214,7 +214,7 @@ export const AlertsByStatus = ({
 
   const totalAlertsCount = isDonutChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
 
-  const fillColor: FillColor = useCallback((dataName) => {
+  const fillColor = useCallback((dataName: FillColor) => {
     return chartConfigs.find((cfg) => cfg.label === dataName)?.color ?? emptyDonutColor;
   }, []);
 
