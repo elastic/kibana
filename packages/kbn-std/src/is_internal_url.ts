@@ -6,37 +6,35 @@
  * Side Public License, v 1.
  */
 
-import { parse as parseUrl } from 'url';
-
 /**
  * Determine if url is outside of this Kibana install.
  */
 export function isInternalURL(url: string, basePath = '') {
-  const { protocol, hostname, port, pathname } = parseUrl(
-    url,
-    false /* parseQueryString */,
-    true /* slashesDenoteHost */
-  );
-
-  // We should explicitly compare `protocol`, `port` and `hostname` to null to make sure these are not
-  // detected in the URL at all. For example `hostname` can be empty string for Node URL parser, but
-  // browser (because of various bwc reasons) processes URL differently (e.g. `///abc.com` - for browser
-  // hostname is `abc.com`, but for Node hostname is an empty string i.e. everything between schema (`//`)
-  // and the first slash that belongs to path.
-  if (protocol !== null || hostname !== null || port !== null) {
+  // We use the WHATWG parser TWICE with completely different dummy base URLs to ensure that the parsed URL always
+  // inherits the origin of the base URL. This means that the specified URL isn't an absolute URL, or a scheme-relative
+  // URL (//), or a scheme-relative URL with an empty host (///). Browsers may process such URLs unexpectedly due to
+  // backward compatibility reasons (e.g., a browser may treat `///abc.com` as just `abc.com`). For more details, refer
+  // to https://url.spec.whatwg.org/#concept-basic-url-parser and https://url.spec.whatwg.org/#url-representation.
+  let normalizedURL: URL;
+  try {
+    for (const baseURL of ['http://example.org:5601', 'https://example.com']) {
+      normalizedURL = new URL(url, baseURL);
+      if (normalizedURL.origin !== baseURL) {
+        return false;
+      }
+    }
+  } catch {
     return false;
   }
 
+  // Now we need to normalize URL to make sure any relative path segments (`..`) cannot escape expected base path.
   if (basePath) {
-    // Now we need to normalize URL to make sure any relative path segments (`..`) cannot escape expected
-    // base path. We can rely on `URL` with a localhost to automatically "normalize" the URL.
-    const normalizedPathname = new URL(String(pathname), 'https://localhost').pathname;
-
     return (
       // Normalized pathname can add a leading slash, but we should also make sure it's included in
-      // the original URL too
-      pathname?.startsWith('/') &&
-      (normalizedPathname === basePath || normalizedPathname.startsWith(`${basePath}/`))
+      // the original URL too. We can safely use non-null assertion operator here since we know `normalizedURL` is
+      // always defined, otherwise we would have returned `false` already.
+      url.startsWith('/') &&
+      (normalizedURL!.pathname === basePath || normalizedURL!.pathname.startsWith(`${basePath}/`))
     );
   }
 
