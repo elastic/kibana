@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiFieldNumber,
   EuiFieldText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AnomalyChartsEmbeddableInput } from '..';
@@ -58,11 +59,12 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
   const isPanelTitleValid = panelTitle?.length > 0;
   const isMaxSeriesToPlotValid =
     maxSeriesToPlot >= 1 && maxSeriesToPlot <= MAX_ANOMALY_CHARTS_ALLOWED;
-  const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid;
   const newJobUrl = useMlLink({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB });
 
   const [jobIds, setJobIds] = useState(initialInput?.jobIds ?? []);
   const jobIdsErrors = getJobSelectionErrors(jobIds);
+
+  const isFormValid = isPanelTitleValid && isMaxSeriesToPlotValid && jobIdsErrors === undefined;
 
   useEffect(
     function updateDefaultTitle() {
@@ -74,13 +76,15 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
   );
 
   return (
-    <div data-test-subj={'mlAnomalyChartsEmbeddableInitializer'}>
+    <>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
-            defaultMessage="Anomaly explorer charts configuration"
-          />
+          <h2>
+            <FormattedMessage
+              id="xpack.ml.anomalyChartsEmbeddable.setupModal.title"
+              defaultMessage="Anomaly explorer charts configuration"
+            />
+          </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
 
@@ -95,6 +99,7 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
           }}
           errors={jobIdsErrors}
         />
+        <EuiSpacer size="s" />
         <EuiForm>
           <EuiFormRow
             label={
@@ -167,11 +172,11 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
           fill
         >
           <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.confirmButtonLabel"
-            defaultMessage="Confirm configurations"
+            id="xpack.ml.anomalyChartsEmbeddable.setupFlyout.confirmButtonLabel"
+            defaultMessage="Confirm"
           />
         </EuiButton>
       </EuiFlyoutFooter>
-    </div>
+    </>
   );
 };

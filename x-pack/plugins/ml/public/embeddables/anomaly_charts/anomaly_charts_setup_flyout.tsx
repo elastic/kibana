@@ -64,6 +64,7 @@ export async function resolveEmbeddableAnomalyChartsUserInput(
             flyoutSession.close();
             overlayTracker?.clearOverlays();
           },
+          'data-test-subj': 'mlAnomalyChartsEmbeddableInitializer',
         }
       );
       if (tracksOverlays(parentApi)) {
