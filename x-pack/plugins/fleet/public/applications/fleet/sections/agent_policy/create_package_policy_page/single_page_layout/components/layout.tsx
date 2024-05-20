@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useAgentlessPolicy } from '../hooks/setup_technology';
+import { useAgentless } from '../hooks/setup_technology';
 
 import { WithHeaderLayout } from '../../../../../layouts';
 import type { AgentPolicy, PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
@@ -233,7 +233,7 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
       </EuiFlexGroup>
     );
 
-    const { isAgentlessAgentPolicy } = useAgentlessPolicy();
+    const { isAgentlessAgentPolicy } = useAgentless();
     const hasAgentBasedPolicyId = !isAgentlessAgentPolicy(agentPolicy);
     const showAgentPolicyName = agentPolicy && (isAdd || isEdit) && hasAgentBasedPolicyId;
 

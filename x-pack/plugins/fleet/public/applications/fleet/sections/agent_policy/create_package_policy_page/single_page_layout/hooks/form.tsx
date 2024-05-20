@@ -45,7 +45,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useAgentlessPolicy } from './setup_technology';
+import { useAgentless } from './setup_technology';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -132,7 +132,7 @@ export function useOnSubmit({
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy, isAgentlessPackagePolicy } =
-    useAgentlessPolicy();
+    useAgentless();
 
   // Update agent policy method
   const updateAgentPolicy = useCallback(

@@ -19,7 +19,7 @@ import { sendGetOneAgentPolicy, useStartServices } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
 
-export const useAgentlessPolicy = () => {
+export const useAgentless = () => {
   const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
   const { cloud } = useStartServices();
   const isServerless = !!cloud?.isServerlessEnabled;
@@ -41,7 +41,7 @@ export const useAgentlessPolicy = () => {
     if (
       packageInfo?.policy_templates &&
       packageInfo?.policy_templates.length > 0 &&
-      packageInfo?.policy_templates.find(
+      !!packageInfo?.policy_templates.find(
         (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
       )
     ) {
@@ -68,20 +68,29 @@ export function useSetupTechnology({
   newAgentPolicy,
   updateAgentPolicy,
   setSelectedPolicyTab,
+  packageInfo,
 }: {
   updateNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
   updateAgentPolicy: (policy: AgentPolicy | undefined) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
+  packageInfo?: PackageInfo;
 }) {
-  const { isAgentlessEnabled } = useAgentlessPolicy();
+  const { isAgentlessEnabled, isAgentlessIntegration } = useAgentless();
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
   const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
 
   useEffect(() => {
+    if (isAgentlessEnabled && packageInfo && isAgentlessIntegration(packageInfo)) {
+      setSelectedSetupTechnology(SetupTechnology.AGENTLESS);
+    }
+  }, [isAgentlessEnabled, isAgentlessIntegration, packageInfo]);
+
+  useEffect(() => {
     const fetchAgentlessPolicy = async () => {
+      // TODO: replace the hardcoded agentless policy with a query that fetches all the policies with `supports_agentless`
       const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
       const isAgentlessAvailable = !error && data && data.item;
 

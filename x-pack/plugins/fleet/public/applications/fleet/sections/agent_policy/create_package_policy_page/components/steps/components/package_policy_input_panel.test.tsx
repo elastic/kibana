@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 import { createFleetTestRendererMock } from '../../../../../../../../mock';
 
 import type { TestRenderer } from '../../../../../../../../mock';
-import { useAgentlessPolicy } from '../../../single_page_layout/hooks/setup_technology';
+import { useAgentless } from '../../../single_page_layout/hooks/setup_technology';
 
 import type {
   PackageInfo,
@@ -23,10 +23,10 @@ import { shouldShowStreamsByDefault, PackagePolicyInputPanel } from './package_p
 
 jest.mock('../../../single_page_layout/hooks/setup_technology', () => {
   return {
-    useAgentlessPolicy: jest.fn(),
+    useAgentless: jest.fn(),
   };
 });
-const useAgentlessPolicyMock = useAgentlessPolicy as jest.MockedFunction<typeof useAgentlessPolicy>;
+const useAgentlessMock = useAgentless as jest.MockedFunction<typeof useAgentless>;
 
 describe('shouldShowStreamsByDefault', () => {
   it('should return true if a datastreamId is provided and contained in the input', () => {
@@ -358,7 +358,7 @@ describe('PackagePolicyInputPanel', () => {
   });
   describe('When agentless is enabled', () => {
     beforeEach(() => {
-      useAgentlessPolicyMock.mockReturnValue({
+      useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: true,
         isAgentlessPackagePolicy: jest.fn(),
         isAgentlessAgentPolicy: jest.fn(),
@@ -391,7 +391,7 @@ describe('PackagePolicyInputPanel', () => {
 
   describe('When agentless not enabled', () => {
     beforeEach(() => {
-      useAgentlessPolicyMock.mockReturnValue({
+      useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
         isAgentlessPackagePolicy: jest.fn(),
         isAgentlessAgentPolicy: jest.fn(),
