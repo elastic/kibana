@@ -17,13 +17,16 @@ export function appendWhereClauseToESQLQuery(
   baseESQLQuery: string,
   field: string,
   value: unknown,
-  operation: '+' | '-' | '_exists_',
+  operation: '+' | '-' | 'is_not_null' | 'is_null',
   fieldType?: string
 ): string {
   let operator;
   switch (operation) {
-    case '_exists_':
+    case 'is_not_null':
       operator = ' is not null';
+      break;
+    case 'is_null':
+      operator = ' is null';
       break;
     case '-':
       operator = '!=';
@@ -44,7 +47,7 @@ export function appendWhereClauseToESQLQuery(
 
   // checking that the value is not null
   // this is the existence filter
-  if (operation === '_exists_') {
+  if (operation === 'is_not_null' || operation === 'is_null') {
     fieldName = `\`${String(field)}\``;
     filterValue = '';
   }
@@ -67,7 +70,7 @@ export function appendWhereClauseToESQLQuery(
       const matches = whereClause.match(new RegExp(field + '(.*)' + String(filterValue)));
       if (matches) {
         const existingOperator = matches[1]?.trim().replace('`', '').toLowerCase();
-        if (!['==', '!=', 'is not null'].includes(existingOperator.trim())) {
+        if (!['==', '!=', 'is not null', 'is null'].includes(existingOperator.trim())) {
           return appendToESQLQuery(baseESQLQuery, `and ${fieldName}${operator}${filterValue}`);
         }
         // the filter is the same

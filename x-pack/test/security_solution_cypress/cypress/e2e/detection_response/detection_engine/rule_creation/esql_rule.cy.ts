@@ -16,6 +16,10 @@ import {
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
   RULE_NAME_OVERRIDE_DETAILS,
+  DEFINITION_DETAILS,
+  SUPPRESS_BY_DETAILS,
+  SUPPRESS_FOR_DETAILS,
+  SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 
 import { ESQL_QUERY_BAR } from '../../../../screens/create_new_rule';
@@ -38,6 +42,14 @@ import {
   fillRuleName,
   fillDescription,
   getAboutContinueButton,
+  fillAlertSuppressionFields,
+  selectAlertSuppressionPerInterval,
+  setAlertSuppressionDuration,
+  selectDoNotSuppressForMissingFields,
+  continueFromDefineStep,
+  fillAboutRuleMinimumAndContinue,
+  skipScheduleRuleAction,
+  interceptEsqlQueryFieldsRequest,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -55,165 +67,226 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-describe('Detection ES|QL rules, creation', { tags: ['@ess', '@serverless'] }, () => {
-  const rule = getEsqlRule();
-  const expectedNumberOfRules = 1;
+describe(
+  'Detection ES|QL rules, creation',
+  {
+    // skipped in MKI as it depends on feature flag alertSuppressionForEsqlRuleEnabled
+    // alertSuppressionForEsqlRuleEnabled feature flag is also enabled in a global config
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    env: {
+      kbnServerArgs: [
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+          'alertSuppressionForEsqlRuleEnabled',
+        ])}`,
+      ],
+    },
+  },
+  () => {
+    const rule = getEsqlRule();
+    const expectedNumberOfRules = 1;
 
-  describe('creation', () => {
-    beforeEach(() => {
-      deleteAlertsAndRules();
-      login();
+    describe('creation', () => {
+      beforeEach(() => {
+        deleteAlertsAndRules();
+        login();
+
+        visit(CREATE_RULE_URL);
+        workaroundForResizeObserver();
+      });
+
+      it('creates an ES|QL rule', function () {
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+
+        fillDefineEsqlRuleAndContinue(rule);
+        fillAboutRuleAndContinue(rule);
+        fillScheduleRuleAndContinue(rule);
+        createRuleWithoutEnabling();
+
+        // ensures after rule save ES|QL rule is displayed
+        cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+        getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
+
+        // ensures newly created rule is displayed in table
+        goBackToRulesTable();
+
+        expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
+
+        cy.get(RULE_NAME).should('have.text', rule.name);
+      });
+
+      // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
+      it('creates an ES|QL rule and overrides its name', function () {
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+
+        fillDefineEsqlRuleAndContinue(rule);
+        fillAboutSpecificEsqlRuleAndContinue({ ...rule, rule_name_override: 'test_id' });
+        fillScheduleRuleAndContinue(rule);
+        createRuleWithoutEnabling();
+
+        // ensure rule name override is displayed on details page
+        getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');
+      });
     });
 
-    it('creates an ES|QL rule', function () {
-      visit(CREATE_RULE_URL);
-      workaroundForResizeObserver();
+    describe('ES|QL query validation', () => {
+      beforeEach(() => {
+        login();
+        visit(CREATE_RULE_URL);
 
-      selectEsqlRuleType();
-      expandEsqlQueryBar();
+        workaroundForResizeObserver();
+      });
+      it('shows error when ES|QL query is empty', function () {
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+        getDefineContinueButton().click();
 
-      fillDefineEsqlRuleAndContinue(rule);
-      fillAboutRuleAndContinue(rule);
-      fillScheduleRuleAndContinue(rule);
-      createRuleWithoutEnabling();
+        cy.get(ESQL_QUERY_BAR).contains('ES|QL query is required');
+      });
 
-      // ensures after rule save ES|QL rule is displayed
-      cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
-      getDetails(RULE_TYPE_DETAILS).contains('ES|QL');
+      it('proceeds further once invalid query is fixed', function () {
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+        getDefineContinueButton().click();
 
-      // ensures newly created rule is displayed in table
-      goBackToRulesTable();
+        cy.get(ESQL_QUERY_BAR).contains('required');
 
-      expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
+        // once correct query typed, we can proceed ot the next step
+        fillEsqlQueryBar(rule.query);
+        getDefineContinueButton().click();
 
-      cy.get(RULE_NAME).should('have.text', rule.name);
+        cy.get(ESQL_QUERY_BAR).should('not.be.visible');
+      });
+
+      it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
+        const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+        fillEsqlQueryBar(invalidNonAggregatingQuery);
+        getDefineContinueButton().click();
+
+        cy.get(ESQL_QUERY_BAR).contains(
+          'must include the "metadata _id, _version, _index" operator after the source command'
+        );
+      });
+
+      it('shows error when non-aggregating ES|QL query does not return _id field', function () {
+        const invalidNonAggregatingQuery =
+          'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
+
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+        fillEsqlQueryBar(invalidNonAggregatingQuery);
+        getDefineContinueButton().click();
+
+        cy.get(ESQL_QUERY_BAR).contains(
+          'must include the "metadata _id, _version, _index" operator after the source command'
+        );
+      });
+
+      it('shows error when ES|QL query is invalid', function () {
+        const invalidEsqlQuery =
+          'from auditbeat* metadata _id, _version, _index | not_existing_operator';
+        visit(CREATE_RULE_URL);
+
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+        fillEsqlQueryBar(invalidEsqlQuery);
+        getDefineContinueButton().click();
+
+        cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
+      });
     });
 
-    // this test case is important, since field shown in rule override component are coming from ES|QL query, not data view fields API
-    it('creates an ES|QL rule and overrides its name', function () {
-      visit(CREATE_RULE_URL);
-      workaroundForResizeObserver();
+    describe('ES|QL investigation fields', () => {
+      beforeEach(() => {
+        login();
+        visit(CREATE_RULE_URL);
+      });
+      it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
+        const CUSTOM_ESQL_FIELD = '_custom_agent_name';
+        const queryWithCustomFields = [
+          `from auditbeat* metadata _id, _version, _index`,
+          `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
+          `keep _id, _custom_agent_name`,
+          `limit 5`,
+        ].join(' | ');
 
-      selectEsqlRuleType();
-      expandEsqlQueryBar();
+        workaroundForResizeObserver();
 
-      fillDefineEsqlRuleAndContinue(rule);
-      fillAboutSpecificEsqlRuleAndContinue({ ...rule, rule_name_override: 'test_id' });
-      fillScheduleRuleAndContinue(rule);
-      createRuleWithoutEnabling();
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+        fillEsqlQueryBar(queryWithCustomFields);
+        getDefineContinueButton().click();
 
-      // ensure rule name override is displayed on details page
-      getDetails(RULE_NAME_OVERRIDE_DETAILS).should('have.text', 'test_id');
-    });
-  });
+        expandAdvancedSettings();
+        fillRuleName();
+        fillDescription();
+        fillCustomInvestigationFields([CUSTOM_ESQL_FIELD]);
+        getAboutContinueButton().click();
 
-  describe('ES|QL query validation', () => {
-    beforeEach(() => {
-      login();
-      visit(CREATE_RULE_URL);
-    });
-    it('shows error when ES|QL query is empty', function () {
-      workaroundForResizeObserver();
+        fillScheduleRuleAndContinue(rule);
+        createRuleWithoutEnabling();
 
-      selectEsqlRuleType();
-      expandEsqlQueryBar();
-      getDefineContinueButton().click();
-
-      cy.get(ESQL_QUERY_BAR).contains('ES|QL query is required');
-    });
-
-    it('proceeds further once invalid query is fixed', function () {
-      workaroundForResizeObserver();
-
-      selectEsqlRuleType();
-      expandEsqlQueryBar();
-      getDefineContinueButton().click();
-
-      cy.get(ESQL_QUERY_BAR).contains('required');
-
-      // once correct query typed, we can proceed ot the next step
-      fillEsqlQueryBar(rule.query);
-      getDefineContinueButton().click();
-
-      cy.get(ESQL_QUERY_BAR).should('not.be.visible');
+        cy.get(INVESTIGATION_FIELDS_VALUE_ITEM).should('have.text', CUSTOM_ESQL_FIELD);
+      });
     });
 
-    it('shows error when non-aggregating ES|QL query does not have metadata operator', function () {
-      workaroundForResizeObserver();
+    describe('Alert suppression', () => {
+      beforeEach(() => {
+        login();
+        visit(CREATE_RULE_URL);
+      });
+      it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
+        const CUSTOM_ESQL_FIELD = '_custom_agent_name';
+        const SUPPRESS_BY_FIELDS = [CUSTOM_ESQL_FIELD, 'agent.type'];
 
-      const invalidNonAggregatingQuery = 'from auditbeat* | limit 5';
-      selectEsqlRuleType();
-      expandEsqlQueryBar();
-      fillEsqlQueryBar(invalidNonAggregatingQuery);
-      getDefineContinueButton().click();
+        const queryWithCustomFields = [
+          `from auditbeat* metadata _id, _version, _index`,
+          `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
+          `drop agent.*`,
+        ].join(' | ');
 
-      cy.get(ESQL_QUERY_BAR).contains(
-        'must include the "metadata _id, _version, _index" operator after the source command'
-      );
+        workaroundForResizeObserver();
+
+        selectEsqlRuleType();
+        expandEsqlQueryBar();
+
+        interceptEsqlQueryFieldsRequest(queryWithCustomFields, 'esqlSuppressionFieldsRequest');
+        fillEsqlQueryBar(queryWithCustomFields);
+
+        cy.wait('@esqlSuppressionFieldsRequest');
+        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
+        selectAlertSuppressionPerInterval();
+        setAlertSuppressionDuration(2, 'h');
+        selectDoNotSuppressForMissingFields();
+        continueFromDefineStep();
+
+        // ensures details preview works correctly
+        cy.get(DEFINITION_DETAILS).within(() => {
+          getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '2h');
+          getDetails(SUPPRESS_MISSING_FIELD).should(
+            'have.text',
+            'Do not suppress alerts for events with missing fields'
+          );
+        });
+
+        fillAboutRuleMinimumAndContinue(rule);
+        skipScheduleRuleAction();
+        createRuleWithoutEnabling();
+
+        // ensures rule details displayed correctly after rule created
+        cy.get(DEFINITION_DETAILS).within(() => {
+          getDetails(SUPPRESS_BY_DETAILS).should('have.text', SUPPRESS_BY_FIELDS.join(''));
+          getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '2h');
+          getDetails(SUPPRESS_MISSING_FIELD).should(
+            'have.text',
+            'Do not suppress alerts for events with missing fields'
+          );
+        });
+      });
     });
-
-    it('shows error when non-aggregating ES|QL query does not return _id field', function () {
-      workaroundForResizeObserver();
-
-      const invalidNonAggregatingQuery =
-        'from auditbeat* metadata _id, _version, _index | keep agent.* | limit 5';
-
-      selectEsqlRuleType();
-      expandEsqlQueryBar();
-      fillEsqlQueryBar(invalidNonAggregatingQuery);
-      getDefineContinueButton().click();
-
-      cy.get(ESQL_QUERY_BAR).contains(
-        'must include the "metadata _id, _version, _index" operator after the source command'
-      );
-    });
-
-    it('shows error when ES|QL query is invalid', function () {
-      workaroundForResizeObserver();
-      const invalidEsqlQuery =
-        'from auditbeat* metadata _id, _version, _index | not_existing_operator';
-      visit(CREATE_RULE_URL);
-
-      selectEsqlRuleType();
-      expandEsqlQueryBar();
-      fillEsqlQueryBar(invalidEsqlQuery);
-      getDefineContinueButton().click();
-
-      cy.get(ESQL_QUERY_BAR).contains('Error validating ES|QL');
-    });
-  });
-
-  describe('ES|QL investigation fields', () => {
-    beforeEach(() => {
-      login();
-      visit(CREATE_RULE_URL);
-    });
-    it('shows custom ES|QL field in investigation fields autocomplete and saves it in rule', function () {
-      const CUSTOM_ESQL_FIELD = '_custom_agent_name';
-      const queryWithCustomFields = [
-        `from auditbeat* metadata _id, _version, _index`,
-        `eval ${CUSTOM_ESQL_FIELD} = agent.name`,
-        `keep _id, _custom_agent_name`,
-        `limit 5`,
-      ].join(' | ');
-
-      workaroundForResizeObserver();
-
-      selectEsqlRuleType();
-      expandEsqlQueryBar();
-      fillEsqlQueryBar(queryWithCustomFields);
-      getDefineContinueButton().click();
-
-      expandAdvancedSettings();
-      fillRuleName();
-      fillDescription();
-      fillCustomInvestigationFields([CUSTOM_ESQL_FIELD]);
-      getAboutContinueButton().click();
-
-      fillScheduleRuleAndContinue(rule);
-      createRuleWithoutEnabling();
-
-      cy.get(INVESTIGATION_FIELDS_VALUE_ITEM).should('have.text', CUSTOM_ESQL_FIELD);
-    });
-  });
-});
+  }
+);

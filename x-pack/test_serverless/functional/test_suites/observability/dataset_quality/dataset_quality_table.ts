@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality table', () => {
+  describe('Dataset quality table', function () {
+    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
+
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');
@@ -88,7 +90,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(updatedDegradedDocsColCellTexts[2]).to.not.eql('0%');
     });
 
-    it('shows the updated size of the index', async () => {
+    // https://github.com/elastic/kibana/issues/178954
+    it.skip('shows the updated size of the index', async () => {
       const testDatasetIndex = 2;
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const datasetNameCol = cols['Dataset Name'];
