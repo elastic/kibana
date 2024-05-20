@@ -7,7 +7,7 @@
  */
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
+import { ExpressionRendererEvent, ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { toExpressionAst } from '../embeddable/to_ast';
 import { getExecutionContext, getTimeFilter } from '../services';
 import type { VisParams } from '../types';
@@ -30,6 +30,7 @@ interface GetExpressionRendererPropsParams {
   abortController?: AbortController;
   vis: Vis<VisParams>;
   onRender: () => void;
+  onEvent: (event: ExpressionRendererEvent) => void;
 }
 
 export const getExpressionRendererProps: (params: GetExpressionRendererPropsParams) => Promise<{
@@ -44,6 +45,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
   vis,
   abortController,
   onRender,
+  onEvent,
 }) => {
   const parentContext = parentExecutionContext ?? getExecutionContext().get();
   const childContext: KibanaExecutionContext = {
@@ -84,6 +86,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     inspectorAdapters,
     executionContext,
     onRender$: onRender,
+    onEvent,
   };
 
   if (abortController) {

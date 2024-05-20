@@ -7,10 +7,12 @@
  */
 
 import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { apiPublishesSettings } from '@kbn/presentation-containers';
 import {
   apiHasAppContext,
   apiHasDisableTriggers,
@@ -21,12 +23,13 @@ import {
   initializeTitles,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
-import { apiPublishesSettings } from '@kbn/presentation-containers';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { isEqual } from 'lodash';
+import { get, isEqual } from 'lodash';
 import React, { useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
+import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
+import { getUiActions } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
@@ -160,6 +163,33 @@ export const getVisualizeEmbeddableFactory: (
           if (hasRendered$.getValue() === true) return;
           hasRendered$.next(true);
           hasRendered$.complete();
+        },
+        onEvent: async (event) => {
+          // Visualize doesn't respond to sizing events, so ignore.
+          if (isChartSizeEvent(event)) {
+            return;
+          }
+          const currentVis = vis$.getValue();
+          if (!disableTriggers) {
+            const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
+            let context;
+
+            if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+              context = {
+                timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
+                ...event.data,
+              };
+            } else {
+              context = {
+                data: {
+                  timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
+                  ...event.data,
+                },
+              };
+            }
+
+            await getUiActions().getTrigger(triggerId).exec(context);
+          }
         },
       });
       if (params) expressionParams$.next(params);
