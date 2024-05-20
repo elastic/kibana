@@ -67,7 +67,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
             },
             aggs: {
                 unique_values: {
-                    terms: { field: 'resource.attributes.k8s.pod.name' },
+                    terms: { field: 'resource.attributes.k8s.pod.name', size: 500 },
                 },
             },
           };
@@ -83,6 +83,8 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         }
 
         const client = (await context.core).elasticsearch.client.asCurrentUser;
+        console.log("AAAAAAAAAA");
+        console.log(podNames);
         if (podNames.length === 0){
           const message =  `Pod ${request.query.namespace}/${request.query.name} not found`
           return response.ok({

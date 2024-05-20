@@ -76,8 +76,15 @@ export class PublicKubernetesObservabilityClient {
     }
 
     async getNodesCpu() {
-      console.log("CALLED TO GET PODS MEM")
+      console.log("CALLED TO GET NODES CPU")
       const results = await this.http.get('/api/kubernetes/nodes/cpu', {version: '1',});
+      console.log(results);
+      return results;
+    }
+
+    async getPodsStatus() {
+      console.log("CALLED TO GET PODS STATUS")
+      const results = await this.http.get('/api/kubernetes/pods/status', {version: '1',});
       console.log(results);
       return results;
     }
@@ -93,6 +100,8 @@ const  KubernetesObservabilityComp = ({
   const [nodeMemtime, setNodeMemTime] = useState([]);
   const [nodeCpuTime, setNodeCpuTime] = useState([]);
   const [nodesCpu, setNodesCpu] = useState([]);
+  const [podsStatusTime, setPodsStatusTime] = useState([]);
+  const [podsStatus, setPodsStatus] = useState([]);
   console.log("called");
   console.log(client);
   useEffect(() => {
@@ -121,6 +130,21 @@ const  KubernetesObservabilityComp = ({
       const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
       console.log("OOOOOOOOO");
       setNodesCpu(nodes);
+      })
+      .catch(error => {
+          console.log(error)
+      });
+  }, [client]); // *** Note the dependency
+
+  useEffect(() => {
+    client.getPodsStatus().then(data => {
+      console.log(data);
+      setPodsStatusTime(data.time);
+      const podsArray = data.pods;
+      const keys = ['name', 'namespace', 'message', 'node', 'failingReason'];
+
+      const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      setPodsStatus(pods);
       })
       .catch(error => {
           console.log(error)
@@ -192,6 +216,44 @@ const  KubernetesObservabilityComp = ({
               {
                 field: 'alarm',
                 name: 'Alarm',
+              }
+            ]}
+          />
+      </EuiFlexItem>
+      <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3 id="KubernetesPodsStatusTitle">
+                <FormattedMessage
+                  id="xpack.fleet.kubernetesObservability.podsstatus"
+                  defaultMessage="Kubernetes Pods Status"
+                />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiText size="s"><b>Timestamp</b>: {podsStatusTime}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiBasicTable
+            items= {podsStatus}
+            columns= {[
+              {
+                field: 'name',
+                name: 'Name',
+              },
+              {
+                field: 'namespace',
+                name: 'Namespace',
+              },
+              {
+                field: 'message',
+                name: 'Message',
+              },
+              {
+                field: 'node',
+                name: 'Node',
+              },
+              {
+                field: 'failingReason',
+                name: 'Failing Reason',
               }
             ]}
           />
