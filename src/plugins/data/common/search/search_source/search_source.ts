@@ -141,6 +141,8 @@ export interface SearchSourceDependencies extends FetchHandlers {
   scriptedFieldsEnabled: boolean;
 }
 
+const DATA_VIEW_KEY = 'index';
+
 interface ExpressionAstOptions {
   /**
    * When truthy, it will include either `esaggs` or `esdsl` function to the expression chain.
@@ -271,6 +273,15 @@ export class SearchSource {
     }
     const parent = this.getParent();
     return parent && parent.getField(field);
+  }
+
+  getDataView() {
+    return this.getField(DATA_VIEW_KEY);
+  }
+
+  async getDataViewLazy() {
+    const dataView = this.getField(DATA_VIEW_KEY);
+    return dataView ? await this.dependencies.dataViews.toDataViewLazy(dataView) : undefined;
   }
 
   getActiveIndexFilter() {

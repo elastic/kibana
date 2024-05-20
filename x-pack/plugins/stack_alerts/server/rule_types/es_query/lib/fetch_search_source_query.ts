@@ -13,6 +13,7 @@ import {
   ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
+import { DataViewLazy } from '@kbn/data-views-plugin/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -58,10 +59,10 @@ export async function fetchSearchSourceQuery({
   const isCountAgg = isCountAggregation(params.aggType);
   const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
 
-  const index = initialSearchSource.getField('index') as DataView;
+  const dataView = await initialSearchSource.getDataViewLazy();
   const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
     initialSearchSource,
-    index,
+    dataView,
     params,
     latestTimestamp,
     dateStart,
@@ -81,7 +82,7 @@ export async function fetchSearchSourceQuery({
     initialSearchSource,
     services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
     services.dataViews,
-    index,
+    dataView!,
     dateStart,
     dateEnd,
     spacePrefix,
@@ -97,13 +98,13 @@ export async function fetchSearchSourceQuery({
       esResult: searchResult,
       sourceFieldsParams: params.sourceFields,
     }),
-    index: [index.name],
+    index: [dataView?.name],
   };
 }
 
 export async function updateSearchSource(
   searchSource: ISearchSource,
-  index: DataView,
+  index: DataViewLazy,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
   dateStart: string,
@@ -183,7 +184,7 @@ export async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
   dataViews: DataViewsContract,
-  dataViewToUpdate: DataView,
+  dataViewToUpdate: DataViewLazy,
   dateStart: string,
   dateEnd: string,
   spacePrefix: string,
@@ -202,7 +203,7 @@ export async function generateLink(
   // make new adhoc data view
   const newDataView = await dataViews.create(
     {
-      ...dataViewToUpdate.toSpec(false),
+      ...dataViewToUpdate.toSpec({}),
       version: undefined,
       id: undefined,
     },
