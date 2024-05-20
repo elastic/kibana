@@ -1039,23 +1039,25 @@ function generateIncorrectlyTypedParameters(
         };
       }
 
-      // try to find an unacceptable field
-      const unacceptableField: { name: string; type: SupportedFieldType } | undefined =
-        availableFields
-          // sort to make the test deterministic
-          .sort((a, b) => a.type.localeCompare(b.type))
-          .find(({ type: fieldType }) =>
-            signatures.every((signature) => getParamAtPosition(signature, i)?.type !== fieldType)
-          );
+      if (type !== 'any') {
+        // try to find an unacceptable field
+        const unacceptableField: { name: string; type: SupportedFieldType } | undefined =
+          availableFields
+            // sort to make the test deterministic
+            .sort((a, b) => a.type.localeCompare(b.type))
+            .find(({ type: fieldType }) =>
+              signatures.every((signature) => getParamAtPosition(signature, i)?.type !== fieldType)
+            );
 
-      if (unacceptableField) {
-        return {
-          name: unacceptableField.name,
-          type,
-          actualType: unacceptableField.type,
-          wrong: true,
-          ...rest,
-        };
+        if (unacceptableField) {
+          return {
+            name: unacceptableField.name,
+            type,
+            actualType: unacceptableField.type,
+            wrong: true,
+            ...rest,
+          };
+        }
       }
 
       // failed to find a bad field... they may all be acceptable
