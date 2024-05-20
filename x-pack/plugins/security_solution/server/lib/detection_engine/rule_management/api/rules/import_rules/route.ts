@@ -169,7 +169,6 @@ export const importRulesRoute = (
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
             mlAuthz,
             overwriteRules: request.query.overwrite,
-            rulesClient,
             rulesManagementClient,
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
