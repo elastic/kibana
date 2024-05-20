@@ -30,6 +30,7 @@ import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { useGetAppContext } from './use_get_app_context';
+import { useSearchApi } from '@kbn/presentation-publishing';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -56,10 +57,17 @@ const renderReactEmbeddable = ({
   // wrap in functional component to allow usage of hooks
   const RendererWrapper: FC<{ canvasApi: CanvasContainerApi }> = ({ canvasApi }) => {
     const getAppContext = useGetAppContext(core);
+    const searchApi = useSearchApi({ filters: input.filters });
 
     useMemo(() => {
       canvasApi.getAppContext = getAppContext;
     }, [canvasApi, getAppContext]);
+
+    useMemo(() => {
+      canvasApi.filters$ = searchApi.filters$;
+      canvasApi.query$ = searchApi.query$;
+      canvasApi.timeRange$ = searchApi.timeRange$;
+    }, [canvasApi, searchApi]);
 
     return (
       <ReactEmbeddableRenderer

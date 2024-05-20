@@ -42,7 +42,7 @@ export const RenderWithFn: FC<Props> = ({
   width,
   height,
 }) => {
-  const canvasApi = useCanvasApi(config.input?.filters);
+  const canvasApi = useCanvasApi();
   const { error: onError } = useNotifyService();
 
   const [domNode, setDomNode] = useState<HTMLElement | null>(null);

@@ -23,5 +23,4 @@ export type EmbeddableInput = Input & {
 
 export type CanvasContainerApi = PublishesViewMode &
   CanAddNewPanel &
-  PublishesUnifiedSearch &
-  Partial<HasAppContext>;
+  Partial<HasAppContext & PublishesUnifiedSearch>;

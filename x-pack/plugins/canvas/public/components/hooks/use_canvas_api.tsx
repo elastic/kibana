@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 
 import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
 
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import { CanvasContainerApi } from '../../../types';
 import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
@@ -19,19 +18,7 @@ import { METRIC_TYPE, trackCanvasUiMetric } from '../../lib/ui_metric';
 import { addElement } from '../../state/actions/elements';
 import { getSelectedPage } from '../../state/selectors/workpad';
 
-export const useCanvasApi: (filters?: Filter[]) => CanvasContainerApi = (filters?: Filter[]) => {
-  const unifiedSearchApi = useMemo(() => {
-    return {
-      filters$: new BehaviorSubject<Filter[] | undefined>(undefined),
-      query$: new BehaviorSubject<Query | AggregateQuery | undefined>(undefined),
-      timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
-    };
-  }, []);
-
-  useEffect(() => {
-    unifiedSearchApi.filters$.next(filters);
-  }, [filters, unifiedSearchApi.filters$]);
-
+export const useCanvasApi: () => CanvasContainerApi = () => {
   const selectedPageId = useSelector(getSelectedPage);
   const dispatch = useDispatch();
 
@@ -60,9 +47,8 @@ export const useCanvasApi: (filters?: Filter[]) => CanvasContainerApi = (filters
       }) => {
         createNewEmbeddable(panelType, initialState);
       },
-      ...unifiedSearchApi,
     } as CanvasContainerApi;
-  }, [createNewEmbeddable, unifiedSearchApi]);
+  }, [createNewEmbeddable]);
 
   return useMemo(() => getCanvasApi(), [getCanvasApi]);
 };
