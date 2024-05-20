@@ -110,7 +110,7 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
                 alarm = "High";
             }
             reasons = {
-                'memory': `Pod ${podName} has ${alarm} memory utilization` ,
+                'memory': `Pod ${podName} has ${alarm} memory utilization`,
                 'memory_usage_median_absolute_deviation': `Pod ${podName} has ${deviation_alarm} deviation from median value`
             };
             message = `Pod ${podName} has ${memory_available_avg} bytes memory available, ${memory_usage_avg} bytes memory usage, ${toPct(memory_utilization)}% memory_utilisation and ${memory_usage_median_absolute_deviation} bytes deviation from median value`
@@ -178,6 +178,71 @@ export function defineQueryGeneralMemoryUtilisation(namespace: string, client: E
                             sort: { "metrics.k8s.pod.memory.usage": "desc" }
                         }
                     }
+                }
+            }
+        }
+    };
+    return dslPodsCpu;
+}
+
+
+export function defineQueryGeneralMemoryUtilisation2(namespace: string, client: ElasticsearchClient, period: string) {
+    const mustsPodsCpu = [
+        {
+            term: {
+                'resource.attributes.k8s.namespace.name': namespace,
+            },
+        },
+        { exists: { field: 'metrics.k8s.pod.memory.usage' } }
+    ];
+    const filter = [
+        {
+            range: {
+                "@timestamp": {
+                    "gte": period
+                }
+            }
+        }
+    ]
+    const dslPodsCpu: estypes.SearchRequest = {
+        index: ["metrics-otel.*"],
+        _source: false,
+        sort: [{ '@timestamp': 'desc' }],
+        fields: [
+            '@timestamp',
+            'metrics.k8s.pod.memory.usage',
+            'metrics.k8s.pod.memory.available',
+            'resource.attributes.k8s.*',
+        ],
+        query: {
+            bool: {
+                must: mustsPodsCpu,
+                filter: filter,
+            },
+        },
+
+        aggs: {
+            "group_by_category": {
+                terms: {
+                    field: "resource.attributes.k8s.pod.name"
+                },
+                aggs: {
+                    "stats_memory": {
+                        "stats": { field: "metrics.k8s.pod.memory_usage" }
+                    },
+                    "review_variability_memory_usage": {
+                        median_absolute_deviation: {
+                            field: "metrics.k8s.pod.memory_usage"
+                        }
+                    },
+                    "stats_available": {
+                        stats: { field: "metrics.k8s.pod.memory_available" }
+                    },
+                    "review_variability_memory_available": {
+                        median_absolute_deviation: {
+                            field: "metrics.k8s.pod.memory_available"
+                        }
+                    },
                 }
             }
         }
