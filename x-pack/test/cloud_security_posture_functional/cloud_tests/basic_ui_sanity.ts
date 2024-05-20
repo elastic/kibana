@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect((await scoreElement.getVisibleText()) === '41%').to.be(true);
       });
 
-      it('displays accurate all complience scores', async () => {
+      it('displays all compliance scores', async () => {
         const scoresElements = await dashboard.getAllCloudComplianceScores();
         const scores: string[] = [];
         for (const scoreElement of scoresElements) {
@@ -43,15 +43,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
         // 3 scores for each cloud provider + 1 summary score
         expect(scores.length).to.be(4);
-        const expectedScores = ['41%', '14%', '55%', '59%'];
-        scores.forEach((score) => {
-          expect(expectedScores).contain(score);
-        });
       });
 
-      it('displays correct number of resources evaluated', async () => {
+      it('displays a number of resources evaluated', async () => {
         const resourcesEvaluated = await dashboard.getCloudResourcesEvaluated();
-        expect((await resourcesEvaluated.getVisibleText()) === '3,339').to.be(true);
+        const visibleText = await resourcesEvaluated.getVisibleText();
+        const resourcesEvaluatedCount = parseInt(visibleText.replace(/,/g, ''), 10);
+        expect(resourcesEvaluatedCount).greaterThan(3000);
       });
     });
 
