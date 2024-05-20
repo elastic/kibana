@@ -89,7 +89,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
   const updateState = useCallback(
     (changes) => {
       if (changes.showDistributions !== undefined && stateContainer) {
-        stateContainer.appState.update({ hideAggregatedPreview: !changes.showDistributions });
+        stateContainer.appState.update({ hideAggregatedPreview: !changes.showDistributions }, true);
       }
     },
     [stateContainer]
