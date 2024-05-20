@@ -19,7 +19,6 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '@kbn/esql-ast';
-import { get } from 'lodash';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
