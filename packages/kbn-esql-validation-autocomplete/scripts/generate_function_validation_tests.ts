@@ -48,25 +48,25 @@ function main() {
 function generateTestsForEvalFunction(definition: FunctionDefinition) {
   const testCases: Map<string, string[]> = new Map();
   generateRowCommandTestsForEvalFunction(definition, testCases);
-  // generateWhereCommandTestsForEvalFunction(definition, testCases);
-  // generateEvalCommandTestsForEvalFunction(definition, testCases);
-  // generateSortCommandTestsForEvalFunction(definition, testCases);
+  generateWhereCommandTestsForEvalFunction(definition, testCases);
+  generateEvalCommandTestsForEvalFunction(definition, testCases);
+  generateSortCommandTestsForEvalFunction(definition, testCases);
   return testCases;
 }
 
 function generateTestsForAggFunction(definition: FunctionDefinition) {
   const testCases: Map<string, string[]> = new Map();
-  // generateStatsCommandTestsForAggFunction(definition, testCases);
-  // generateSortCommandTestsForAggFunction(definition, testCases);
-  // generateWhereCommandTestsForAggFunction(definition, testCases);
-  // generateEvalCommandTestsForAggFunction(definition, testCases);
+  generateStatsCommandTestsForAggFunction(definition, testCases);
+  generateSortCommandTestsForAggFunction(definition, testCases);
+  generateWhereCommandTestsForAggFunction(definition, testCases);
+  generateEvalCommandTestsForAggFunction(definition, testCases);
   return testCases;
 }
 
 function generateTestsForGroupingFunction(definition: FunctionDefinition) {
   const testCases: Map<string, string[]> = new Map();
-  // generateStatsCommandTestsForGroupingFunction(definition, testCases);
-  // generateSortCommandTestsForGroupingFunction(definition, testCases);
+  generateStatsCommandTestsForGroupingFunction(definition, testCases);
+  generateSortCommandTestsForGroupingFunction(definition, testCases);
   return testCases;
 }
 
