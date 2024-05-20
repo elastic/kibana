@@ -93,7 +93,7 @@ export const getDestinationMap = ({
     });
 
     const totalDocCount = hitCountResponse.hits.total.value;
-    const rawSamplingProbability = Math.min(100_000 / totalDocCount, 1);
+    const rawSamplingProbability = Math.min(10_000_000 / totalDocCount, 1);
     const samplingProbability =
       rawSamplingProbability < 0.5 ? rawSamplingProbability : randomSampler.probability;
 
