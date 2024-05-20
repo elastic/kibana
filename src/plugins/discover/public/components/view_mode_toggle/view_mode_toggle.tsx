@@ -18,13 +18,13 @@ import { HitsCounter, HitsCounterMode } from '../hits_counter';
 
 export const DocumentViewModeToggle = ({
   viewMode,
-  isTextBasedQuery,
+  isEsqlMode,
   prepend,
   stateContainer,
   setDiscoverViewMode,
 }: {
   viewMode: VIEW_MODE;
-  isTextBasedQuery: boolean;
+  isEsqlMode: boolean;
   prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
@@ -32,8 +32,8 @@ export const DocumentViewModeToggle = ({
   const { euiTheme } = useEuiTheme();
   const { uiSettings, dataVisualizer: dataVisualizerService } = useDiscoverServices();
   const isLegacy = useMemo(
-    () => isLegacyTableEnabled({ uiSettings, isTextBasedQueryMode: isTextBasedQuery }),
-    [uiSettings, isTextBasedQuery]
+    () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
+    [uiSettings, isEsqlMode]
   );
   const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
@@ -72,7 +72,7 @@ export const DocumentViewModeToggle = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        {isTextBasedQuery || !showViewModeToggle ? (
+        {isEsqlMode || !showViewModeToggle ? (
           <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
