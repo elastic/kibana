@@ -29,7 +29,7 @@ packageInfoCache.set('limited_package-0.0.0', {
   ],
 });
 
-describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
+describe.only('Fleet - storedPackagePoliciesToAgentInputs', () => {
   const mockPackagePolicy: PackagePolicy = {
     id: 'some-uuid',
     name: 'mock_package-policy',
@@ -734,6 +734,100 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
             fooKey2: ['fooValue2'],
           },
         ],
+      },
+    ]);
+  });
+
+  it('returns agent inputs with add fields process if global data tags are defined', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            package: {
+              name: 'mock_package',
+              title: 'Mock package',
+              version: '0.0.0',
+            },
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+              {
+                ...mockInput2,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        [{ name: 'testName', value: 'testValue'}, { name: 'testName2', value: 'testValue2'}]
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              fields: {
+                testName: 'testValue',
+                testName2: 'testValue2',
+              },
+              target: '',
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        inputVar: 'input-value',
+      },
+      {
+        id: 'test-metrics-some-template-some-uuid',
+        data_stream: {
+          namespace: 'default',
+        },
+        inputVar: 'input-value',
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              target: '',
+              fields: {
+                testName: 'testValue',
+                testName2: 'testValue2',
+              },
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-metrics',
+        use_output: 'default',
       },
     ]);
   });
