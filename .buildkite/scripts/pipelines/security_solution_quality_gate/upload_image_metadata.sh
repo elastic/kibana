@@ -25,14 +25,14 @@ vcs_url=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-sch
 version=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.version"')   
 
 markdown_text="""
-    # Triggered by: $triggered_by
+# Triggered by: $triggered_by
 
-    ---
+---
 
-    # Kibana Container Metadata
-    - Build Date            : $build_date 
-    - Github Commit Hash    : $vcs_ref 
-    - Github Repo           : $vcs_url 
-    - Version               : $version
+# Kibana Container Metadata
+- Build Date            : $build_date 
+- Github Commit Hash    : $vcs_ref 
+- Github Repo           : $vcs_url 
+- Version               : $version
 """
 echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"
