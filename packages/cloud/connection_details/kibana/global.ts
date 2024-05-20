@@ -19,6 +19,7 @@ export interface ConnectionDetailsGlobalDependencies {
       http: CoreStart['http'];
       application: CoreStart['application'];
       overlays: CoreStart['overlays'];
+      analytics?: CoreStart['analytics'];
     };
     plugins: {
       cloud?: CloudStart;
