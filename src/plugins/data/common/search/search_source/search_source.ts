@@ -68,7 +68,6 @@ import {
   pick,
   uniqueId,
   concat,
-  compact,
   omitBy,
   isNil,
 } from 'lodash';
@@ -82,7 +81,7 @@ import {
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
-  KueryNode,
+  getKqlFieldNames,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
@@ -148,24 +147,6 @@ interface ExpressionAstOptions {
    * @default true
    */
   asDatatable?: boolean;
-}
-
-export function getKueryFields(nodes: KueryNode[]): string[] {
-  const allFields = nodes
-    .map((node) => {
-      const {
-        arguments: [fieldNameArg],
-      } = node;
-
-      if (fieldNameArg.type === 'function') {
-        return getKueryFields(node.arguments);
-      }
-
-      return fieldNameArg.value;
-    })
-    .flat();
-
-  return compact(allFields);
 }
 
 /** @public **/
@@ -819,7 +800,7 @@ export class SearchSource {
     for (const query of request.query) {
       if (query.query) {
         const nodes = fromKueryExpression(query.query);
-        const queryFields = getKueryFields([nodes]);
+        const queryFields = getKqlFieldNames(nodes);
         fields = fields.concat(queryFields);
       }
     }

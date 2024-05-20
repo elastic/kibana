@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { compact } from 'lodash';
-import { KueryNode } from './src/kuery/types';
-
 export type {
   BoolQuery,
   DataViewBase,
@@ -132,21 +129,3 @@ export {
 } from './src/utils';
 
 export type { ExecutionContextSearch } from './src/expressions/types';
-
-export function getKueryFields(nodes: KueryNode[]): string[] {
-  const allFields = nodes
-    .map((node) => {
-      const {
-        arguments: [fieldNameArg],
-      } = node;
-
-      if (fieldNameArg.type === 'function') {
-        return getKueryFields(node.arguments);
-      }
-
-      return fieldNameArg.value;
-    })
-    .flat();
-
-  return compact(allFields);
-}
