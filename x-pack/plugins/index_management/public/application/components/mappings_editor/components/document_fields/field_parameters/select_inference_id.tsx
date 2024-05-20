@@ -39,15 +39,20 @@ import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
+import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
+import { InferenceToModelIdMap } from '../fields';
+
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
   setValue: (value: string) => void;
+  setNewInferenceEndpoint: (newInferenceEndpoint: InferenceToModelIdMap) => void;
 }
 export const SelectInferenceId = ({
   onChange,
   'data-test-subj': dataTestSubj,
   setValue,
+  setNewInferenceEndpoint,
 }: Props) => {
   const {
     core: { application },
@@ -135,7 +140,17 @@ export const SelectInferenceId = ({
         setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
         setIsCreateInferenceApiLoading(false);
         setInferenceAddError(undefined);
+
+        const trainedModelId =
+          'model_id' in modelConfig.service_settings ? modelConfig.service_settings.model_id : '';
+        const newModelId: InferenceToModelIdMap = {};
+        newModelId[inferenceId] = {
+          isDeployable: modelConfig.service === 'elser' || modelConfig.service === 'elasticsearch',
+          isDeployed: getTrainedModelStats()[trainedModelId] === 'deployed',
+          defaultInferenceEndpoint: false,
+        };
         resendRequest();
+        setNewInferenceEndpoint(newModelId);
       } catch (error) {
         const errorObj = extractErrorProperties(error);
         setInferenceAddError(errorObj.message);

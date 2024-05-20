@@ -40,7 +40,7 @@ const getCustomInferenceIdMap = (
   }, {});
 };
 
-const getTrainedModelStats = (modelStats?: InferenceStatsResponse): DeploymentStatusType => {
+export const getTrainedModelStats = (modelStats?: InferenceStatsResponse): DeploymentStatusType => {
   return (
     modelStats?.trained_model_stats.reduce<DeploymentStatusType>((acc, modelStat) => {
       if (modelStat.model_id) {
