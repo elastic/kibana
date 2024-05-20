@@ -122,21 +122,6 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
     }
   }, [dependencies, setDependencies, core, usageCollection, isOpen]);
 
-  useEffect(() => {
-    const stopAutoCompletePolling = () => {
-      if (dependencies) {
-        dependencies.autocompleteInfo.clearSubscriptions();
-      }
-    };
-
-    if (!isOpen) {
-      stopAutoCompletePolling();
-    }
-    return () => {
-      stopAutoCompletePolling();
-    };
-  }, [dependencies, isOpen]);
-
   if (!dependencies && !isOpen) {
     // Console has not been opened
     return null;
