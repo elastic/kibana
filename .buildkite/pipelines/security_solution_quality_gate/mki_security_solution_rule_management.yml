@@ -76,7 +76,7 @@ steps:
 
       - label: Running rule_creation:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_creation:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:qa:serverless:release
         key: rule_creation:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -108,7 +108,7 @@ steps:
 
       - label: Running rule_creation:essentials:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_creation:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_creation:essentials:qa:serverless:release
         key: rule_creation:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -140,7 +140,7 @@ steps:
 
       - label: Running rule_update:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_update:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:qa:serverless:release
         key: rule_update:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -172,7 +172,7 @@ steps:
 
       - label: Running rule_update:essentials:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_update:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_update:essentials:qa:serverless:release
         key: rule_update:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -204,7 +204,7 @@ steps:
 
       - label: Running rule_patch:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_patch:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:qa:serverless:release
         key: rule_patch:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -236,7 +236,7 @@ steps:
 
       - label: Running rule_patch:essentials:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_patch:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_patch:essentials:qa:serverless:release
         key: rule_patch:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -268,7 +268,7 @@ steps:
 
       - label: Running prebuilt_rules_management:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_management:qa:serverless:release
         key: prebuilt_rules_management:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -300,7 +300,7 @@ steps:
 
       - label: Running prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
         key: prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -332,7 +332,7 @@ steps:
 
       - label: Running prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
         key: prebuilt_rules_large_prebuilt_rules_package:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -364,7 +364,7 @@ steps:
 
       - label: Running prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
         key: prebuilt_rules_update_prebuilt_rules_package:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -396,7 +396,7 @@ steps:
 
       - label: Running rule_delete:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_delete:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:qa:serverless:release
         key: rule_delete:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -428,7 +428,7 @@ steps:
 
       - label: Running rule_delete:essentials:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_delete:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_delete:essentials:qa:serverless:release
         key: rule_delete:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -460,7 +460,7 @@ steps:
 
       - label: Running rule_import_export:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_import_export:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:qa:serverless:release
         key: rule_import_export:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -492,7 +492,7 @@ steps:
 
       - label: Running rule_import_export:essentials:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_import_export:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_import_export:essentials:qa:serverless:release
         key: rule_import_export:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -524,7 +524,7 @@ steps:
 
       - label: Running rule_management:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_management:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_management:qa:serverless:release
         key: rule_management:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -556,7 +556,7 @@ steps:
 
       - label: Running rule_bulk_actions:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_bulk_actions:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_bulk_actions:qa:serverless:release
         key: rule_bulk_actions:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -588,7 +588,7 @@ steps:
 
       - label: Running rule_read:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_read:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:qa:serverless:release
         key: rule_read:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -620,7 +620,7 @@ steps:
 
       - label: Running rule_read:essentials:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rule_read:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rule_read:essentials:qa:serverless:release
         key: rule_read:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
@@ -652,7 +652,7 @@ steps:
 
       - label: Running rules_management:essentials:qa:serverless:release
         if: "build.env('KIBANA_MKI_QUALITY_GATE') == '1'"
-        command: .buildkite/scripts/pipelines/security_soluion_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless:release
+        command: .buildkite/scripts/pipelines/security_solution_quality_gate/api_integration/api-integration-tests.sh rules_management:essentials:qa:serverless:release
         key: rules_management:essentials:qa:serverless:release
         agents:
           image: family/kibana-ubuntu-2004
