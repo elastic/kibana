@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import moment from 'moment';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { setupFleetAndAgents } from './services';
@@ -39,6 +40,9 @@ export default function (providerContext: FtrProviderContext) {
       const actionStatus = body.items[0];
 
       expect(actionStatus.nbAgentsActionCreated).to.eql(agentCount);
+      expect(
+        moment(actionStatus.expiration).diff(moment(actionStatus.creationTime), 'hours')
+      ).to.eql(3);
     }
 
     it('should respond 403 if user lacks fleet read permissions', async () => {
