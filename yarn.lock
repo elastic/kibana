@@ -4803,6 +4803,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/fields-metadata-plugin@link:x-pack/plugins/fields_metadata":
+  version "0.0.0"
+  uid ""
+
 "@kbn/file-upload-plugin@link:x-pack/plugins/file_upload":
   version "0.0.0"
   uid ""

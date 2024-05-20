@@ -63,6 +63,7 @@ export const integrationFieldMetadataRT = rt.intersection([
     description: rt.string,
     type: rt.string,
     flat_name: rt.string,
+    short: rt.string,
   }),
   rt.partial({
     example: rt.unknown,

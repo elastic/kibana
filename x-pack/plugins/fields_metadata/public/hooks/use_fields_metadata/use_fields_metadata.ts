@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { FindFieldsMetadataResponsePayload } from '../../../common/latest';
 import { FieldName } from '../../../common';
 import { IFieldsMetadataClient } from '../../services/fields_metadata';
 
@@ -14,23 +15,35 @@ interface UseFieldsMetadataFactoryDeps {
   fieldsMetadataClient: IFieldsMetadataClient;
 }
 
-interface Params {
+interface UseFieldsMetadataParams {
   fieldNames: FieldName[];
 }
 
+interface UseFieldsMetadataReturnType {
+  fieldsMetadata: FindFieldsMetadataResponsePayload['fields'] | undefined;
+  loading: boolean;
+  error: Error | undefined;
+}
+
+export type UseFieldsMetadataHook = (
+  params: UseFieldsMetadataParams
+) => UseFieldsMetadataReturnType;
+
 export const createUseFieldsMetadataHook = ({
   fieldsMetadataClient,
-}: UseFieldsMetadataFactoryDeps) => {
-  return ({ fieldNames }: Params) => {
-    const [{ error, loading, value: fieldsMetadata }, load] = useAsyncFn(
+}: UseFieldsMetadataFactoryDeps): UseFieldsMetadataHook => {
+  return ({ fieldNames }) => {
+    const serializedFieldNames = JSON.stringify(fieldNames);
+
+    const [{ error, loading, value }, load] = useAsyncFn(
       () => fieldsMetadataClient.find({ fieldNames }),
-      [fieldNames]
+      [serializedFieldNames]
     );
 
     useEffect(() => {
       load();
     }, [load]);
 
-    return { fieldsMetadata, loading, error };
+    return { fieldsMetadata: value?.fields, loading, error };
   };
 };

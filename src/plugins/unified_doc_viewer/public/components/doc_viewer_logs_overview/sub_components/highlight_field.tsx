@@ -11,12 +11,14 @@ import { css } from '@emotion/react';
 import React, { ReactNode } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { FieldMetadata } from '@kbn/fields-metadata-plugin/common';
 import { HoverActionPopover } from './hover_popover_action';
 
 const HighlightFieldDescription = dynamic(() => import('./highlight_field_description'));
 
 interface HighlightFieldProps {
   field: string;
+  fieldMetadata?: FieldMetadata;
   formattedValue?: string;
   icon?: ReactNode;
   label: string;
@@ -26,6 +28,7 @@ interface HighlightFieldProps {
 
 export function HighlightField({
   field,
+  fieldMetadata,
   formattedValue,
   icon,
   label,
@@ -39,7 +42,7 @@ export function HighlightField({
         <EuiTitle css={fieldNameStyle} size="xxxs">
           <span>{label}</span>
         </EuiTitle>
-        <HighlightFieldDescription fieldName={field} />
+        <HighlightFieldDescription fieldMetadata={fieldMetadata} />
       </EuiFlexGroup>
       <HoverActionPopover title={value} value={value} field={field}>
         <EuiFlexGroup

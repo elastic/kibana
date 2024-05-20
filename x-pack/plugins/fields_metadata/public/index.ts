@@ -8,8 +8,8 @@
 import { FieldsMetadataPlugin } from './plugin';
 
 export type {
-  FieldsMetadataClientSetupExports,
-  FieldsMetadataClientStartExports,
+  FieldsMetadataClientSetup,
+  FieldsMetadataClientStart,
   FieldsMetadataClientSetupDeps,
   FieldsMetadataClientStartDeps,
 } from './types';
