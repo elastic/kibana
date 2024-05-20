@@ -11,12 +11,12 @@ import { DOC_TABLE_LEGACY } from '../constants';
 
 export function isLegacyTableEnabled({
   uiSettings,
-  isTextBasedQueryMode,
+  isEsqlMode,
 }: {
   uiSettings: IUiSettingsClient;
-  isTextBasedQueryMode: boolean;
+  isEsqlMode: boolean;
 }): boolean {
-  if (isTextBasedQueryMode) {
+  if (isEsqlMode) {
     return false; // only show the new data grid
   }
 

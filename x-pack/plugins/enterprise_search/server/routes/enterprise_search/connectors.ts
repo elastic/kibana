@@ -472,21 +472,23 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/filtering',
       validate: {
-        body: schema.object({
-          advanced_snippet: schema.string(),
-          filtering_rules: schema.arrayOf(
-            schema.object({
-              created_at: schema.string(),
-              field: schema.string(),
-              id: schema.string(),
-              order: schema.number(),
-              policy: schema.string(),
-              rule: schema.string(),
-              updated_at: schema.string(),
-              value: schema.string(),
-            })
-          ),
-        }),
+        body: schema.maybe(
+          schema.object({
+            advanced_snippet: schema.string(),
+            filtering_rules: schema.arrayOf(
+              schema.object({
+                created_at: schema.string(),
+                field: schema.string(),
+                id: schema.string(),
+                order: schema.number(),
+                policy: schema.string(),
+                rule: schema.string(),
+                updated_at: schema.string(),
+                value: schema.string(),
+              })
+            ),
+          })
+        ),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -495,13 +497,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
-      const { advanced_snippet, filtering_rules } = request.body;
-      const result = await updateFiltering(client.asCurrentUser, connectorId, {
-        advancedSnippet: advanced_snippet,
-        // Have to cast here because our API schema validator doesn't know how to deal with enums
-        // We're relying on the schema in the validator above to flag if something goes wrong
-        filteringRules: filtering_rules as FilteringRule[],
-      });
+      const result = await updateFiltering(client.asCurrentUser, connectorId);
       return result ? response.ok({ body: result }) : response.conflict();
     })
   );
