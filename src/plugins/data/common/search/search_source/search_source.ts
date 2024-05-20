@@ -86,7 +86,7 @@ import {
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ExpressionAstExpression,
   buildExpression,
@@ -137,6 +137,7 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  dataViews: DataViewsContract;
   scriptedFieldsEnabled: boolean;
 }
 

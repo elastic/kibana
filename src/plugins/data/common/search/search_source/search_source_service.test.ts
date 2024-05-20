@@ -20,6 +20,10 @@ describe('SearchSource service', () => {
       search: jest.fn(),
       onResponse: jest.fn(),
       scriptedFieldsEnabled: true,
+      dataViews: {
+        getMetaFields: jest.fn(),
+        getShortDotsEnable: jest.fn(),
+      } as unknown as DataViewsContract,
     };
   });
 

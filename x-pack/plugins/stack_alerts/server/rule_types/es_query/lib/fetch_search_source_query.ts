@@ -123,7 +123,7 @@ export async function updateSearchSource(
     buildRangeFilter(
       timeField,
       { lte: dateEnd, gte: dateStart, format: 'strict_date_optional_time' },
-      index as DataView
+      index
     ),
   ];
 
@@ -135,7 +135,7 @@ export async function updateSearchSource(
       filterToExcludeHitsFromPreviousRun = buildRangeFilter(
         timeField,
         { gt: latestTimestamp, format: 'strict_date_optional_time' },
-        index as DataView
+        index
       );
       filters.push(filterToExcludeHitsFromPreviousRun);
     }

@@ -59,8 +59,8 @@ export const createSearchSource = (
             spec: await dataViewLazy.toSpec(),
             // field format functionality is not used within search source
             fieldFormats: {} as FieldFormatsStartCommon,
-            // shortDotsEnable?: boolean;
-            metaFields: dataViewLazy.metaFields,
+            shortDotsEnable: await searchSourceDependencies.dataViews.getShortDotsEnable(),
+            metaFields: await searchSourceDependencies.dataViews.getMetaFields(),
           });
 
           fields.index = dataView;
@@ -70,8 +70,8 @@ export const createSearchSource = (
             spec: await dataViewLazy.toSpec(),
             // field format functionality is not used within search source
             fieldFormats: {} as FieldFormatsStartCommon,
-            // shortDotsEnable?: boolean;
-            metaFields: dataViewLazy.metaFields,
+            shortDotsEnable: await searchSourceDependencies.dataViews.getShortDotsEnable(),
+            metaFields: await searchSourceDependencies.dataViews.getMetaFields(),
           });
           fields.index = dataView;
         }

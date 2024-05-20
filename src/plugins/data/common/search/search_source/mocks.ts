@@ -9,6 +9,7 @@
 import { of } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import { uiSettingsServiceMock } from '@kbn/core/public/mocks';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
 import { SearchSource, SearchSourceDependencies } from './search_source';
 import { ISearchStartSearchSource, ISearchSource, SearchSourceFields } from './types';
@@ -73,4 +74,8 @@ export const createSearchSourceMock = (
       ),
     onResponse: jest.fn().mockImplementation((req, res) => res),
     scriptedFieldsEnabled: true,
+    dataViews: {
+      getMetaFields: jest.fn(),
+      getShortDotsEnable: jest.fn(),
+    } as unknown as DataViewsContract,
   });
