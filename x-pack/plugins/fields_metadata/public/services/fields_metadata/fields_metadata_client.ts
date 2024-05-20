@@ -6,6 +6,7 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
+import { HashedCache } from '../../../common/hashed_cache';
 import {
   FindFieldsMetadataRequestQuery,
   findFieldsMetadataRequestQueryRT,
@@ -17,24 +18,36 @@ import { decodeOrThrow } from '../../../common/runtime_types';
 import { IFieldsMetadataClient } from './types';
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
-  constructor(private readonly http: HttpStart) {}
+  private cache: HashedCache<FindFieldsMetadataRequestQuery, FindFieldsMetadataResponsePayload>;
 
-  public async find({
-    fieldNames,
-  }: FindFieldsMetadataRequestQuery): Promise<FindFieldsMetadataResponsePayload> {
-    const query = findFieldsMetadataRequestQueryRT.encode({ fieldNames });
+  constructor(private readonly http: HttpStart) {
+    this.cache = new HashedCache();
+  }
+
+  public async find(
+    params: FindFieldsMetadataRequestQuery
+  ): Promise<FindFieldsMetadataResponsePayload> {
+    // Initially lookup for existing results given request parameters
+    if (this.cache.has(params)) {
+      return this.cache.get(params) as FindFieldsMetadataResponsePayload;
+    }
+
+    const query = findFieldsMetadataRequestQueryRT.encode(params);
 
     const response = await this.http
       .get(FIND_FIELDS_METADATA_URL, { query, version: '1' })
       .catch((error) => {
-        throw new Error(`Failed to fetch ecs fields ${fieldNames?.join() ?? ''}: ${error}`);
+        throw new Error(`Failed to fetch ecs fields ${params.fieldNames?.join() ?? ''}: ${error}`);
       });
 
     const data = decodeOrThrow(
       findFieldsMetadataResponsePayloadRT,
       (message: string) =>
-        new Error(`Failed to decode ecs fields ${fieldNames?.join() ?? ''}: ${message}"`)
+        new Error(`Failed to decode ecs fields ${params.fieldNames?.join() ?? ''}: ${message}"`)
     )(response);
+
+    // Store cached results for given request parameters
+    this.cache.set(params, data);
 
     return data;
   }
