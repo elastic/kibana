@@ -98,7 +98,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       method: 'invokeAI',
       schema: InvokeAIActionParamsSchema,
     });
-    
+
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_STREAM,
       method: 'invokeStream',
@@ -182,7 +182,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         GeminiConnector.token = null;
       }, 45 * 60 * 1000);
     }
-    return token || null; 
+    return token || null;
   }
 
   /**

@@ -143,9 +143,11 @@ const parseGeminiResponse = (responseBody: string) =>{
       }
     )
     .reduce((prev, line) => {
-      const parts = line.candidates[0].content.parts;
-      const text = parts.map(part => part.text).join('');
-      return prev + text;
+      if (line.candidates[0] && line.candidates[0].content) {
+        const parts = line.candidates[0].content.parts;
+        const text = parts.map(part => part.text).join('');
+        return prev + text;
+      }
     }, '');
   }
 
