@@ -8,21 +8,30 @@
 
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '@kbn/esql-ast';
 
+export const supportedFieldTypes = [
+  'number',
+  'date',
+  'string',
+  'boolean',
+  'ip',
+  'cartesian_point',
+  'cartesian_shape',
+  'geo_point',
+  'geo_shape',
+  'version',
+] as const;
+
+export const isSupportedFieldType = (type: string): type is SupportedFieldType =>
+  supportedFieldTypes.includes(type as SupportedFieldType);
+
+export type SupportedFieldType = typeof supportedFieldTypes[number];
+
 export type FunctionParameterType =
-  | 'number'
-  | 'date'
-  | 'string'
-  | 'boolean'
+  | SupportedFieldType
   | 'null'
   | 'any'
-  | 'ip'
   | 'chrono_literal'
   | 'time_literal'
-  | 'cartesian_point'
-  | 'cartesian_shape'
-  | 'geo_point'
-  | 'geo_shape'
-  | 'version'
   | 'number[]'
   | 'string[]'
   | 'boolean[]'
