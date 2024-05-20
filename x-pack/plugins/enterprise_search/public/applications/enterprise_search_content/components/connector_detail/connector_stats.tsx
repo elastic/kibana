@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
 
@@ -135,9 +136,13 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                 <EuiFlexGroup alignItems="center" gutterSize="xs">
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
-                      <EuiText size="s">
-                        ID: <EuiCode>{connector.id}</EuiCode>
-                      </EuiText>
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.connectors.connectorStats.connectorIdLabel"
+                        defaultMessage="ID: {connectorId}"
+                        values={{
+                          connectorId: <EuiCode>{connector.id}</EuiCode>,
+                        }}
+                      />
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
