@@ -31,7 +31,7 @@ export const LinkDestination = ({
   setDestination: (
     destination?: string,
     defaultLabel?: string,
-    defaultDestination?: string
+    defaultDescription?: string
   ) => void;
 }) => {
   const [destinationError, setDestinationError] = useState<string | undefined>();
