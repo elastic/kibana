@@ -46,7 +46,6 @@ interface Props {
   tableState: UseTableState<Category>;
   enableRowActions?: boolean;
   displayExamples?: boolean;
-  fieldName?: string;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -61,7 +60,6 @@ export const CategoryTable: FC<Props> = ({
   tableState,
   enableRowActions = true,
   displayExamples = true,
-  fieldName,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');

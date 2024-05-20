@@ -7,7 +7,7 @@
 import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
 
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -64,6 +64,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
     uiSettings,
     embeddingOrigin,
   } = useAiopsAppContext();
+  const tablePadding = useEuiPaddingSize('xs');
+
   const { dataView, savedSearch } = input;
 
   const { runValidateFieldRequest, cancelRequest: cancelValidationRequest } =
@@ -419,7 +421,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
           gutterSize="none"
           responsive={false}
         >
-          <EuiFlexItem css={{ position: 'relative', overflowY: 'auto' }}>
+          <EuiFlexItem css={{ position: 'relative', overflowY: 'auto', marginLeft: tablePadding }}>
             <>
               <FieldValidationCallout validationResults={fieldValidationResult} />
               {(loading ?? true) === true ? (
@@ -447,7 +449,6 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
                   setSelectedCategories={setSelectedCategories}
                   openInDiscover={openInDiscover}
                   tableState={tableState}
-                  fieldName={selectedField.name}
                 />
               ) : null}
             </>

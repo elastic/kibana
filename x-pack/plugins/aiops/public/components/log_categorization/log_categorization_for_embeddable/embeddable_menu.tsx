@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSuperSelect, EuiToolTip } from '@elastic/eui';
+import { EuiPopoverTitle, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -82,12 +82,12 @@ export const EmbeddableMenu: FC<Props> = ({
     >
       <EuiPanel color="transparent" paddingSize="s" css={{ maxWidth: '400px' }}>
         <EuiTitle size="xxxs">
-          <h3>
+          <EuiPopoverTitle>
             <FormattedMessage
               id="xpack.aiops.logCategorization.embeddableMenu.patternAnalysisSettingsTitle"
               defaultMessage=" Pattern analysis settings"
             />
-          </h3>
+          </EuiPopoverTitle>
         </EuiTitle>
         <EuiSpacer size="s" />
 
