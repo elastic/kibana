@@ -7294,6 +7294,7 @@
                 "properties": {
                   "log_level": {
                     "type": "string",
+                    "nullable": true,
                     "enum": [
                       "debug",
                       "info",

@@ -64,10 +64,8 @@ export function ErrorRateChart({
       viewMode={ViewMode.VIEW}
       onBrushEnd={({ range }) => {
         onBrushed?.({
-          from: range[0],
-          to: range[1],
-          fromUtc: moment(range[0]).format(),
-          toUtc: moment(range[1]).format(),
+          from: moment(range[0]).toDate(),
+          to: moment(range[1]).toDate(),
         });
       }}
       noPadding
