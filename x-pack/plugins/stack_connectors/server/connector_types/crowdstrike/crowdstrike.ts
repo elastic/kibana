@@ -6,6 +6,7 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type {
@@ -13,18 +14,17 @@ import type {
   CrowdstrikeSecrets,
   CrowdstrikeGetAgentsResponse,
   CrowdstrikeGetAgentsParams,
-  CrowdstrikeBaseApiResponse,
   CrowdstrikeHostActionsParams,
   CrowdstrikeGetTokenResponse,
   CrowdstrikeGetAgentOnlineStatusResponse,
+  RelaxedCrowdstrikeBaseApiResponse,
 } from '../../../common/crowdstrike/types';
 import {
-  CrowdstrikeGetAgentsResponseSchema,
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
   CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
-  CrowdstrikeGetAgentOnlineStatusResponseSchema,
+  RelaxedCrowdstrikeBaseApiResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -128,8 +128,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
         ids: payload.ids,
       },
       paramsSerializer,
-      responseSchema: CrowdstrikeGetAgentsResponseSchema,
-    });
+      responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+    }) as Promise<CrowdstrikeGetAgentsResponse>;
   }
 
   public async getAgentOnlineStatus(
@@ -142,8 +142,8 @@ export class CrowdstrikeConnector extends SubActionConnector<
         ids: payload.ids,
       },
       paramsSerializer,
-      responseSchema: CrowdstrikeGetAgentOnlineStatusResponseSchema,
-    });
+      responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+    }) as Promise<CrowdstrikeGetAgentOnlineStatusResponse>;
   }
 
   private async getTokenRequest() {
@@ -170,7 +170,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     return token;
   }
 
-  private async crowdstrikeApiRequest<R extends CrowdstrikeBaseApiResponse>(
+  private async crowdstrikeApiRequest<R extends RelaxedCrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>,
     retried?: boolean
   ): Promise<R> {

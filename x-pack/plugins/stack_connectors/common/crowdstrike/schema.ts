@@ -17,6 +17,7 @@ export const CrowdstrikeSecretsSchema = schema.object({
   clientSecret: schema.string(),
 });
 
+export const RelaxedCrowdstrikeBaseApiResponseSchema = schema.object({}, { unknowns: 'allow' });
 export const CrowdstrikeBaseApiResponseSchema = schema.object(
   {
     resources: schema.arrayOf(schema.any()),
