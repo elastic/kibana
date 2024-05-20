@@ -139,7 +139,7 @@ export const registerNodesMemoryRoute = (router: IRouter, logger: Logger) => {
                 }
               }
               const reason = `Node ${name} has ${alarm} memory utilization`
-              const message = `Node ${name} has ${memory_available} bytes memory available, ${memory_usage} bytes memory usage, ${toPct(memory_utilization)}% memory_utilisation and ${memory_usage_median_deviation} bytes deviation from median value.`
+              const message = `Node ${name} has ${memory_available.toFixed(1)} bytes memory available, ${memory_usage.toFixed(1)} bytes memory usage, ${toPct(memory_utilization)?.toFixed(1)}% memory_utilisation and ${memory_usage_median_deviation.toFixed(1)} bytes deviation from median value.`
               nodeMem = {
                   'name': name,
                   'memory_available': memory_available,
