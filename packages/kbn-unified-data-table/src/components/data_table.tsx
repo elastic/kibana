@@ -592,6 +592,18 @@ export const UnifiedDataTable = ({
    */
   const randomId = useMemo(() => htmlIdGenerator()(), []);
   const closeFieldEditor = useRef<() => void | undefined>();
+  const isOnESQLModePrev = useRef<boolean | null>(null);
+  const [modeHasChanged, setModeHasChanged] = useState<boolean>(false);
+
+  useEffect(() => {
+    // transition from ESQL to DSL and vice versa
+    if (isOnESQLModePrev.current !== isPlainRecord) {
+      isOnESQLModePrev.current = isPlainRecord;
+      setModeHasChanged(true);
+    } else {
+      setModeHasChanged(false);
+    }
+  }, [isPlainRecord]);
 
   useEffect(() => {
     return () => {
@@ -684,15 +696,22 @@ export const UnifiedDataTable = ({
     configRowHeight: configHeaderRowHeight ?? 1,
     rowHeightState: headerRowHeightState,
     onUpdateRowHeight: onUpdateHeaderRowHeight,
+    modeHasChanged,
   });
+
+  const isOnDocumentView = Boolean(columns.length === 0);
 
   const { rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = useRowHeight({
     storage,
     consumer,
-    key: 'dataGridRowHeight',
-    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+    key: isPlainRecord ? 'dataGridRowHeightESQL' : 'dataGridRowHeight',
+    configRowHeight:
+      configRowHeight ?? (isPlainRecord && isOnDocumentView)
+        ? ROWS_HEIGHT_OPTIONS.defaultESQL
+        : ROWS_HEIGHT_OPTIONS.default,
     rowHeightState,
     onUpdateRowHeight,
+    modeHasChanged,
   });
 
   const toggleRowHeight = useCallback(
