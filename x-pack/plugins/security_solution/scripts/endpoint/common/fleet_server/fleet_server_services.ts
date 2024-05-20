@@ -43,7 +43,6 @@ import {
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import pRetry from 'p-retry';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import {
   createToolingLogger,
