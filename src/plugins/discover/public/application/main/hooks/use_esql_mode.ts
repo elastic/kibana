@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import { useCallback, useEffect, useRef } from 'react';
@@ -20,10 +21,10 @@ const MAX_NUM_OF_COLUMNS = 50;
 const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
 
 /**
- * Hook to take care of text based query language state transformations when a new result is returned
+ * Hook to take care of ES|QL state transformations when a new result is returned
  * If necessary this is setting displayed columns and selected data view
  */
-export function useTextBasedQueryLanguage({
+export function useEsqlMode({
   dataViews,
   stateContainer,
 }: {
@@ -42,7 +43,7 @@ export function useTextBasedQueryLanguage({
 
   const cleanup = useCallback(() => {
     if (prev.current.query) {
-      // cleanup when it's not a text based query lang
+      // cleanup when it's not an ES|QL query
       prev.current = {
         columns: [],
         query: '',
@@ -54,7 +55,7 @@ export function useTextBasedQueryLanguage({
     const subscription = stateContainer.dataState.data$.documents$
       .pipe(
         switchMap(async (next) => {
-          const { query, recordRawType } = next;
+          const { query } = next;
           if (!query || next.fetchStatus === FetchStatus.ERROR) {
             return;
           }
@@ -66,7 +67,7 @@ export function useTextBasedQueryLanguage({
           };
           const { viewMode } = stateContainer.appState.getState();
           let nextColumns: string[] = [];
-          const isTextBasedQueryLang = recordRawType === 'plain' && isOfAggregateQueryType(query);
+          const isEsqlQuery = isOfAggregateQueryType(query);
           const hasResults = Boolean(next.result?.length);
           let queryHasTransformationalCommands = false;
           if ('esql' in query) {
@@ -78,7 +79,7 @@ export function useTextBasedQueryLanguage({
             });
           }
 
-          if (isTextBasedQueryLang) {
+          if (isEsqlQuery) {
             const language = getAggregateQueryMode(query);
             if (next.fetchStatus !== FetchStatus.PARTIAL) {
               return;
@@ -100,8 +101,7 @@ export function useTextBasedQueryLanguage({
             }
             const addColumnsToState = !isEqual(nextColumns, prev.current.columns);
             const queryChanged = query[language] !== prev.current.query;
-            const changeViewMode =
-              viewMode !== getValidViewMode({ viewMode, isTextBasedQueryMode: true });
+            const changeViewMode = viewMode !== getValidViewMode({ viewMode, isEsqlMode: true });
             if (!queryChanged || (!addColumnsToState && !changeViewMode)) {
               sendComplete();
               return;
