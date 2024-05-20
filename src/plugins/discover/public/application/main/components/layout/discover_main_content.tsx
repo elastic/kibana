@@ -22,6 +22,7 @@ import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const DROP_PROPS = {
   value: {
@@ -38,7 +39,6 @@ const DROP_PROPS = {
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
-  isPlainRecord: boolean;
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
@@ -51,7 +51,6 @@ export interface DiscoverMainContentProps {
 
 export const DiscoverMainContent = ({
   dataView,
-  isPlainRecord,
   viewMode,
   onAddFilter,
   onFieldEdited,
@@ -62,6 +61,7 @@ export const DiscoverMainContent = ({
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
+  const isEsqlMode = useIsEsqlMode();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -84,7 +84,7 @@ export const DiscoverMainContent = ({
     return (
       <DocumentViewModeToggle
         viewMode={viewMode}
-        isTextBasedQuery={isPlainRecord}
+        isEsqlMode={isEsqlMode}
         stateContainer={stateContainer}
         setDiscoverViewMode={setDiscoverViewMode}
         prepend={
@@ -94,14 +94,7 @@ export const DiscoverMainContent = ({
         }
       />
     );
-  }, [
-    viewMode,
-    setDiscoverViewMode,
-    isPlainRecord,
-    stateContainer,
-    panelsToggle,
-    isChartAvailable,
-  ]);
+  }, [viewMode, isEsqlMode, stateContainer, setDiscoverViewMode, panelsToggle, isChartAvailable]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
@@ -127,7 +120,7 @@ export const DiscoverMainContent = ({
               dataView={dataView}
               onAddFilter={onAddFilter}
               stateContainer={stateContainer}
-              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+              onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
           ) : (
             <>
@@ -136,9 +129,9 @@ export const DiscoverMainContent = ({
                 dataView={dataView}
                 columns={columns}
                 stateContainer={stateContainer}
-                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
-                isEsqlMode={isPlainRecord}
+                isEsqlMode={isEsqlMode}
               />
             </>
           )}

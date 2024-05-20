@@ -10,9 +10,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import { waitFor } from '@testing-library/react';
 import { DataViewsContract } from '@kbn/data-plugin/public';
 import { discoverServiceMock } from '../../../__mocks__/services';
-import { useTextBasedQueryLanguage } from './use_text_based_query_language';
+import { useEsqlMode } from './use_esql_mode';
 import { FetchStatus } from '../../types';
-import { RecordRawType } from '../state_management/discover_data_state_container';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -37,7 +36,6 @@ function getHookProps(
   stateContainer.internalState.transitions.setSavedDataViews([dataViewMock as DataViewListItem]);
 
   const msgLoading = {
-    recordRawType: RecordRawType.PLAIN,
     fetchStatus: FetchStatus.PARTIAL,
     query,
   };
@@ -52,7 +50,6 @@ function getHookProps(
 }
 const query = { esql: 'from the-data-view-title' };
 const msgComplete = {
-  recordRawType: RecordRawType.PLAIN,
   fetchStatus: FetchStatus.PARTIAL,
   result: [
     {
@@ -92,14 +89,14 @@ const renderHookWithContext = (
     });
   }
 
-  renderHook(() => useTextBasedQueryLanguage(props), {
+  renderHook(() => useEsqlMode(props), {
     wrapper: getHookContext(props.stateContainer),
   });
   return props;
 };
 
-describe('useTextBasedQueryLanguage', () => {
-  test('a text based query should change state when loading and finished', async () => {
+describe('useEsqlMode', () => {
+  test('an ES|QL query should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(true);
 
     replaceUrlState.mockReset();
@@ -114,14 +111,13 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
-  test('changing a text based query with different result columns should change state when loading and finished', async () => {
+  test('changing an ES|QL query with different result columns should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -142,13 +138,12 @@ describe('useTextBasedQueryLanguage', () => {
     });
   });
 
-  test('changing a text based query with same result columns should not change state when loading and finished', async () => {
+  test('changing an ES|QL query with same result columns should not change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -162,7 +157,7 @@ describe('useTextBasedQueryLanguage', () => {
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
 
-  test('only changing a text based query with same result columns should not change columns', async () => {
+  test('only changing an ES|QL query with same result columns should not change columns', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
 
     const documents$ = stateContainer.dataState.data$.documents$;
@@ -172,7 +167,6 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -192,7 +186,6 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -206,7 +199,7 @@ describe('useTextBasedQueryLanguage', () => {
 
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
-  test('if its not a text based query coming along, it should be ignored', async () => {
+  test('if its not an ES|QL query coming along, it should be ignored', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
 
@@ -215,7 +208,6 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.DOCUMENT,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -227,7 +219,6 @@ describe('useTextBasedQueryLanguage', () => {
     });
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -254,7 +245,6 @@ describe('useTextBasedQueryLanguage', () => {
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -269,7 +259,6 @@ describe('useTextBasedQueryLanguage', () => {
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -293,7 +282,6 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -313,7 +301,6 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -326,7 +313,6 @@ describe('useTextBasedQueryLanguage', () => {
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -350,13 +336,11 @@ describe('useTextBasedQueryLanguage', () => {
     const documents$ = stateContainer.dataState.data$.documents$;
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from the-data-view-title | WHERE field1=2' },
     });
     expect(replaceUrlState).toHaveBeenCalledTimes(0);
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -374,24 +358,20 @@ describe('useTextBasedQueryLanguage', () => {
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from the-data-view-title | keep field 1; | WHERE field1=2' },
     });
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.ERROR,
     });
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.LOADING,
       query: { esql: 'from the-data-view-title | keep field1' },
     });
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {
@@ -409,20 +389,19 @@ describe('useTextBasedQueryLanguage', () => {
     });
   });
 
-  test('changing a text based query with an index pattern that not corresponds to a dataview should return results', async () => {
+  test('changing an ES|QL query with an index pattern that not corresponds to a dataview should return results', async () => {
     const props = getHookProps(query, discoverServiceMock.dataViews);
     const { stateContainer, replaceUrlState } = props;
     const documents$ = stateContainer.dataState.data$.documents$;
     props.stateContainer.actions.setDataView(dataViewMock);
 
-    renderHook(() => useTextBasedQueryLanguage(props), { wrapper: getHookContext(stateContainer) });
+    renderHook(() => useEsqlMode(props), { wrapper: getHookContext(stateContainer) });
 
     documents$.next(msgComplete);
     await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
     replaceUrlState.mockReset();
 
     documents$.next({
-      recordRawType: RecordRawType.PLAIN,
       fetchStatus: FetchStatus.PARTIAL,
       result: [
         {

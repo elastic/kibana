@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         });
 
-        it('should show text-based columns callout', async () => {
+        it('should show ES|QL columns callout', async () => {
           await testSubjects.missingOrFail('dscSelectedColumnsCallout');
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
           await PageObjects.header.waitUntilLoadingHasFinished();

@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { isTextBasedQuery } from './is_text_based_query';
+import { DataSourceType, isDataSourceType } from '../../../../common/data_sources';
+import { useAppStateSelector } from '../state_management/discover_app_state_container';
 
-describe('isTextBasedQuery', () => {
-  it('should work correctly', () => {
-    expect(isTextBasedQuery({ query: '', language: 'lucene' })).toEqual(false);
-    expect(isTextBasedQuery({ esql: 'from foo' })).toEqual(true);
-    expect(isTextBasedQuery()).toEqual(false);
-  });
-});
+export const useIsEsqlMode = () => {
+  const dataSource = useAppStateSelector((state) => state.dataSource);
+  return isDataSourceType(dataSource, DataSourceType.Esql);
+};
