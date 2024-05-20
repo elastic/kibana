@@ -14,7 +14,9 @@ import {
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { INTEGRATION_PACKAGE_NAME } from '@kbn/cloud-defend-plugin/common/constants';
 
-const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat';
+const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat-*';
+// const CLOUD_DEFEND_HEARTBEAT_INDEX = 'metrics-cloud_defend.heartbeat-default';
+
 export const CLOUD_SECURITY_TASK_TYPE = 'cloud_security';
 export const AGGREGATION_PRECISION_THRESHOLD = 40000;
 export const ASSETS_SAMPLE_GRANULARITY = '24h';
@@ -40,7 +42,7 @@ export const METERING_CONFIGS = {
   },
   [CLOUD_DEFEND]: {
     index: CLOUD_DEFEND_HEARTBEAT_INDEX,
-    assets_identifier: 'agent.id',
+    assets_identifier: 'agent.id.keyword',
   },
 };
 
