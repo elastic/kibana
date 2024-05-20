@@ -44,7 +44,10 @@ export const getExistsFilterField = (filter: ExistsFilter) => {
  *
  * @public
  */
-export const buildExistsFilter = (field: DataViewFieldBase, indexPattern: DataViewBase) => {
+export const buildExistsFilter = (
+  field: DataViewFieldBase,
+  indexPattern: Pick<DataViewBase, 'id'>
+) => {
   return {
     meta: {
       index: indexPattern.id,

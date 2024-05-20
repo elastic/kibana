@@ -50,7 +50,7 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
 export const buildPhrasesFilter = (
   field: DataViewFieldBase,
   params: PhraseFilterValue[],
-  indexPattern: DataViewBase
+  indexPattern: Pick<DataViewBase, 'id'>
 ) => {
   const index = indexPattern.id;
   const type = FILTERS.PHRASES;

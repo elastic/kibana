@@ -101,7 +101,7 @@ export const getPhraseFilterValue = (
 export const buildPhraseFilter = (
   field: DataViewFieldBase,
   value: PhraseFilterValue,
-  indexPattern: DataViewBase
+  indexPattern: Pick<DataViewBase, 'id'>
 ): PhraseFilter | ScriptedPhraseFilter => {
   const convertedValue = getConvertedValueForField(field, value);
 

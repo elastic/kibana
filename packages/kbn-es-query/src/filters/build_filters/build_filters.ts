@@ -52,7 +52,7 @@ export function buildFilter(
 }
 
 function buildBaseFilter(
-  indexPattern: DataViewBase,
+  indexPattern: Pick<DataViewBase, 'id'>,
   field: DataViewFieldBase,
   type: FILTERS,
   params: Serializable
