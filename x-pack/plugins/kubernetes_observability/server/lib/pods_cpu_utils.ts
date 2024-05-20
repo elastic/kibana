@@ -161,3 +161,52 @@ export function defineQueryGeneralCpuUtilisation(namespace: string, client: Elas
     };
     return dslPodsCpu;
 }
+
+
+export function defineQueryGeneralCpuUtilisation2(namespace: string, client: ElasticsearchClient, period: string) {
+    const mustsPodsCpu = [
+        {
+            term: {
+                'resource.attributes.k8s.namespace.name': namespace,
+            },
+        },
+        { exists: { field: 'metrics.k8s.pod.cpu.utilization' } }
+    ];
+    const filter = [
+        {
+            range: {
+                "@timestamp": {
+                    "gte": period
+                }
+            }
+        }
+    ]
+    const dslPodsCpu: estypes.SearchRequest = {
+        index: ["metrics-otel.*"],
+        _source: false,
+        query: {
+            bool: {
+                must: mustsPodsCpu,
+                filter: filter,
+            },
+        },
+        aggs: {
+            "group_by_category": {
+                terms: {
+                    field: "resource.attributes.k8s.pod.name"
+                },
+                aggs: {
+                    "stats_cpu_utilization": {
+                        "stats": { field: "metrics.k8s.pod.cpu.utilization" }
+                    },
+                    "review_variability_cpu_utilization": {
+                        median_absolute_deviation: {
+                            field: "metrics.k8s.pod.cpu.utilization"
+                        }
+                    },
+                }
+            }
+        }
+    };
+    return dslPodsCpu;
+}

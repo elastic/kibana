@@ -5,14 +5,18 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod } from '../lib/utils';
-import { calulcatePodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation, defineQueryGeneralCpuUtilisation } from '../lib/pods_cpu_utils';
+import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod, NodeCpu, Limits, toPct } from '../lib/utils';
+import { calulcatePodsCpuUtilisation, defineQueryForAllPodsCpuUtilisation, defineQueryGeneralCpuUtilisation2 } from '../lib/pods_cpu_utils';
 
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   POD_CPU_ROUTE,
 } from '../../common/constants';
-import { Exception } from '@opentelemetry/api/build/src/common/Exception';
+
+const limits: Limits = {
+  medium: 0.7,
+  high: 0.9,
+};
 
 export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -75,32 +79,58 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
             return response.customError({ statusCode: 500, body: e});
           }
         } else { // Empty Pod name is provided
-          const dsl = defineQueryGeneralCpuUtilisation(namespace, client, period);
+          const dsl = defineQueryGeneralCpuUtilisation2(namespace, client, period);
           try {
             const esResponse = await client.search(dsl);
             if (esResponse.hits.hits.length > 0) {
-              var pod_metrics = new Array();
-
-              const hitsPods = esResponse.hits.hits[0];
-              const { fields = {} } = hitsPods
-              const hitsPodsAggs = esResponse.aggregations.group_by_category["buckets"];
+              const firsttHit = esResponse.hits.hits[0];
+              const { fields = {} } = firsttHit;
               var time = extractFieldValue(fields['@timestamp']);
-              for (var entries of hitsPodsAggs) {
-                const metrics = entries.tm.top[0]["metrics"];
-                const cpu_utilization = metrics['k8s.pod.cpu.utilization'];
-                const pod_name = metrics['resource.attributes.k8s.pod.name'];
-                const pod = { pod_name, cpu_utilization };
-                pod_metrics.push(pod);
+              const { after_key: _, buckets = [] } = (esResponse.aggregations?.group_by_category || {}) as any;
+              if (buckets.length > 0) {
+                var pods = new Array();
+                const getPods = buckets.map(async (bucket: any) => {
+                  const name = bucket.key;
+                  console.log("Each bucket" + name);
+                  var nodeMem = {} as NodeCpu;
+                  var alarm = '';
+                  console.log(bucket)
+                
+                  var cpu_utilisation = bucket.stats_cpu_utilization.avg;
+                  var cpu_utilisation_median_deviation = bucket.review_variability_cpu_utilization.value;      
+                  var reason = undefined;
+                  var message = undefined;
 
+                    if (cpu_utilisation < limits["medium"]) {
+                      alarm = "Low";
+                    } else if (cpu_utilisation >= limits["medium"] && cpu_utilisation < limits["high"]) {
+                      alarm = "Medium";
+                    } else {
+                      alarm = "High";
+                    }
+
+                    reason = `Pod ${name} has ${alarm} memory utilization`
+                    message = `Pod ${name} has  ${toPct(cpu_utilisation)}% memory_utilisation and ${cpu_utilisation_median_deviation} bytes deviation from median value.`
+
+                  nodeMem = {
+                    'name': name,
+                    'cpu_utilization': cpu_utilisation,
+                    'cpu_utilization_median_deviation': cpu_utilisation_median_deviation,
+                    'alarm': alarm,
+                    'message': message,
+                    'reason': reason
+                  };
+                  pods.push(nodeMem);
+                });
+                return Promise.all(getPods).then(() => {
+                  return response.ok({
+                    body: {
+                      time: time,
+                      pods: pods,
+                    },
+                  });
+                });
               }
-              return response.ok({
-                body: {
-                  time: time,
-                  namespace: namespace,
-                  message: "Pods with Highest Cpu",
-                  pods: pod_metrics,
-                },
-              });
 
             } else {
               const message = `No metrics returned for ${namespace}`
