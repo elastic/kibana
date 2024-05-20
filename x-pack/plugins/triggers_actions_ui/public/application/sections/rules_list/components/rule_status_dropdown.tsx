@@ -60,7 +60,6 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   hideSnoozeOption = false,
   direction = 'column',
 }: ComponentOpts) => {
-  const [isEnabled, setIsEnabled] = useState<boolean>(rule.enabled);
   const [isSnoozed, setIsSnoozed] = useState<boolean>(!hideSnoozeOption && isRuleSnoozed(rule));
 
   const {
@@ -70,11 +69,9 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   } = useKibana().services;
 
   useEffect(() => {
-    setIsEnabled(rule.enabled);
-  }, [rule.enabled]);
-  useEffect(() => {
     if (!hideSnoozeOption) setIsSnoozed(isRuleSnoozed(rule));
   }, [rule, hideSnoozeOption]);
+
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
@@ -106,7 +103,6 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     setIsUpdating(true);
     try {
       await enableRuleInternal();
-      setIsEnabled(true);
       onRuleChanged();
     } finally {
       setIsUpdating(false);
@@ -118,7 +114,6 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
       setIsUpdating(true);
       try {
         await disableRule(untrack);
-        setIsEnabled(false);
         onRuleChanged();
       } finally {
         setIsUpdating(false);
@@ -181,11 +176,11 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     [unsnoozeRule, onRuleChanged, onClosePopover]
   );
 
-  const badgeColor = !isEnabled ? 'default' : isSnoozed ? 'warning' : 'primary';
-  const badgeMessage = !isEnabled ? DISABLED : isSnoozed ? SNOOZED : ENABLED;
+  const badgeColor = !rule.enabled ? 'default' : isSnoozed ? 'warning' : 'primary';
+  const badgeMessage = !rule.enabled ? DISABLED : isSnoozed ? SNOOZED : ENABLED;
 
   const remainingSnoozeTime =
-    isEnabled && isSnoozed ? (
+    rule.enabled && isSnoozed ? (
       <EuiToolTip
         content={
           rule.muteAll
@@ -246,7 +241,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
               <RuleStatusMenu
                 onClosePopover={onClosePopover}
                 onChangeEnabledStatus={onChangeEnabledStatus}
-                isEnabled={isEnabled}
+                isEnabled={rule.enabled}
                 isSnoozed={isSnoozed}
                 snoozeEndTime={rule.isSnoozedUntil}
                 hideSnoozeOption={hideSnoozeOption}
