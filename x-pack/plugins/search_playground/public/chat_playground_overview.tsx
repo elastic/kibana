@@ -27,11 +27,7 @@ export const ChatPlaygroundOverview: React.FC = () => {
   );
 
   return (
-    <PlaygroundProvider
-      defaultValues={{
-        indices: [],
-      }}
-    >
+    <PlaygroundProvider>
       <EuiPageTemplate
         offset={0}
         restrictWidth={false}
