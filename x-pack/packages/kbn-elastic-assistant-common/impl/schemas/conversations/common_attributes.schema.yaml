@@ -130,9 +130,7 @@ components:
       additionalProperties: false
       properties:
         id:
-          oneOf:
-            - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
-            - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         error:
           type: object
           required:
@@ -156,9 +154,7 @@ components:
         - category
       properties:
         id:
-          oneOf:
-            - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
-            - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         title:
           type: string
           description: The conversation title.
@@ -205,9 +201,7 @@ components:
         - id
       properties:
         id:
-          oneOf:
-            - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
-            - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         title:
           type: string
           description: The conversation title.

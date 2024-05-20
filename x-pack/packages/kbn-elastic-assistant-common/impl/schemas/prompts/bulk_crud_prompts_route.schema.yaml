@@ -105,9 +105,7 @@ components:
         - content
       properties:
         id:
-          oneOf:
-            - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
-            - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         'timestamp':
           $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
         name:

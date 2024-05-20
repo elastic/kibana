@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: not applicable
  */
 
-import { NonEmptyString, UUID, User } from '../common_attributes.gen';
+import { NonEmptyString, User } from '../common_attributes.gen';
 
 export type KnowledgeBaseEntryErrorSchema = z.infer<typeof KnowledgeBaseEntryErrorSchema>;
 export const KnowledgeBaseEntryErrorSchema = z
@@ -64,7 +64,7 @@ export const Vector = z.object({
 export type KnowledgeBaseEntryResponse = z.infer<typeof KnowledgeBaseEntryResponse>;
 export const KnowledgeBaseEntryResponse = z.object({
   timestamp: NonEmptyString.optional(),
-  id: z.union([UUID, NonEmptyString]),
+  id: NonEmptyString,
   /**
    * Time the Knowledge Base Entry was created
    */
@@ -99,7 +99,7 @@ export const KnowledgeBaseEntryResponse = z.object({
 
 export type KnowledgeBaseEntryUpdateProps = z.infer<typeof KnowledgeBaseEntryUpdateProps>;
 export const KnowledgeBaseEntryUpdateProps = z.object({
-  id: z.union([UUID, NonEmptyString]),
+  id: NonEmptyString,
   /**
    * Metadata about the Knowledge Base Entry
    */

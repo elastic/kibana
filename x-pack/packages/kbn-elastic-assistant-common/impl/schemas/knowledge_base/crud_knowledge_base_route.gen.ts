@@ -21,7 +21,7 @@ import {
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
 } from './common_attributes.gen';
-import { UUID, NonEmptyString } from '../common_attributes.gen';
+import { NonEmptyString } from '../common_attributes.gen';
 
 export type CreateKnowledgeBaseEntryRequestBody = z.infer<
   typeof CreateKnowledgeBaseEntryRequestBody
@@ -41,7 +41,7 @@ export const DeleteKnowledgeBaseEntryRequestParams = z.object({
   /**
    * The Knowledge Base Entry's `id` value
    */
-  id: z.union([UUID, NonEmptyString]),
+  id: NonEmptyString,
 });
 export type DeleteKnowledgeBaseEntryRequestParamsInput = z.input<
   typeof DeleteKnowledgeBaseEntryRequestParams
@@ -57,7 +57,7 @@ export const ReadKnowledgeBaseEntryRequestParams = z.object({
   /**
    * The Knowledge Base Entry's `id` value.
    */
-  id: z.union([UUID, NonEmptyString]),
+  id: NonEmptyString,
 });
 export type ReadKnowledgeBaseEntryRequestParamsInput = z.input<
   typeof ReadKnowledgeBaseEntryRequestParams
@@ -73,7 +73,7 @@ export const UpdateKnowledgeBaseEntryRequestParams = z.object({
   /**
    * The Knowledge Base Entry's `id` value
    */
-  id: z.union([UUID, NonEmptyString]),
+  id: NonEmptyString,
 });
 export type UpdateKnowledgeBaseEntryRequestParamsInput = z.input<
   typeof UpdateKnowledgeBaseEntryRequestParams

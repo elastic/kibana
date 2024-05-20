@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: not applicable
  */
 
-import { NonEmptyString, UUID, User } from '../common_attributes.gen';
+import { NonEmptyString, User } from '../common_attributes.gen';
 
 /**
  * trace Data
@@ -152,7 +152,7 @@ export const ConversationSummary = z.object({
 export type ErrorSchema = z.infer<typeof ErrorSchema>;
 export const ErrorSchema = z
   .object({
-    id: z.union([UUID, NonEmptyString]).optional(),
+    id: NonEmptyString.optional(),
     error: z.object({
       status_code: z.number().int().min(400),
       message: z.string(),
@@ -162,7 +162,7 @@ export const ErrorSchema = z
 
 export type ConversationResponse = z.infer<typeof ConversationResponse>;
 export const ConversationResponse = z.object({
-  id: z.union([UUID, NonEmptyString]),
+  id: NonEmptyString,
   /**
    * The conversation title.
    */
@@ -207,7 +207,7 @@ export const ConversationResponse = z.object({
 
 export type ConversationUpdateProps = z.infer<typeof ConversationUpdateProps>;
 export const ConversationUpdateProps = z.object({
-  id: z.union([UUID, NonEmptyString]),
+  id: NonEmptyString,
   /**
    * The conversation title.
    */

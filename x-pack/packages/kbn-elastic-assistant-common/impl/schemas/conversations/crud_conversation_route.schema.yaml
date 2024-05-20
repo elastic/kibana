@@ -52,9 +52,7 @@ paths:
           required: true
           description: The conversation's `id` value.
           schema:
-            oneOf:
-              - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
-              - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates a successful call.
@@ -88,9 +86,7 @@ paths:
           required: true
           description: The conversation's `id` value.
           schema:
-            oneOf:
-              - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
-              - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:
@@ -130,9 +126,7 @@ paths:
           required: true
           description: The conversation's `id` value.
           schema:
-            oneOf:
-              - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
-              - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
           description: Indicates a successful call.
@@ -168,9 +162,7 @@ paths:
           required: true
           description: The conversation's `id` value.
           schema:
-            oneOf:
-              - $ref: '../common_attributes.schema.yaml#/components/schemas/UUID'
-              - $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       requestBody:
         required: true
         content:

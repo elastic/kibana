@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 1
  */
 
-import { UUID, NonEmptyString } from '../common_attributes.gen';
+import { NonEmptyString } from '../common_attributes.gen';
 import { Replacements } from '../conversations/common_attributes.gen';
 
 export type ExecuteConnectorRequestParams = z.infer<typeof ExecuteConnectorRequestParams>;
@@ -30,7 +30,7 @@ export type ExecuteConnectorRequestParamsInput = z.input<typeof ExecuteConnector
 
 export type ExecuteConnectorRequestBody = z.infer<typeof ExecuteConnectorRequestBody>;
 export const ExecuteConnectorRequestBody = z.object({
-  conversationId: z.union([UUID, NonEmptyString]).optional(),
+  conversationId: NonEmptyString.optional(),
   message: z.string().optional(),
   model: z.string().optional(),
   subAction: z.enum(['invokeAI', 'invokeStream']),
