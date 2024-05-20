@@ -7,13 +7,16 @@ results['score'] = 0.0;
 
 def inputs = states[0].inputs;
 
-// Currently the alerts index only has one shard so there will only be one state and we do not need to sort them
+// Currently the alerts index only has one shard so there will only be one state
 // If there are multiple shards we will need these lines
 // List inputs = [];
 // for (state in states) {
 //  inputs.addAll(state.inputs)
 // }
-// Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
+
+// sorting is needed even though we sort in the parent query because the scripted metric
+// agg does not guarantee order.
+Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
 
 for (int i = 0; i < inputs.length; i++) {
   double current_score = inputs[i].score / Math.pow(i + 1, params.p);
