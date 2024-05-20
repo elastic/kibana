@@ -12,6 +12,7 @@ import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
+import { shallow } from 'enzyme';
 import { of } from 'rxjs';
 
 const mockUseEnterpriseSearchAnalyticsNav = jest.fn().mockReturnValue([]);
@@ -19,8 +20,6 @@ const mockUseEnterpriseSearchAnalyticsNav = jest.fn().mockReturnValue([]);
 jest.mock('../../../shared/layout/nav', () => ({
   useEnterpriseSearchAnalyticsNav: (...args: any[]) => mockUseEnterpriseSearchAnalyticsNav(...args),
 }));
-
-import { shallow } from 'enzyme';
 
 import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
 import { EnterpriseSearchPageTemplateWrapper } from '../../../shared/layout';

@@ -10,6 +10,7 @@ import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
+import { shallow } from 'enzyme';
 import { of } from 'rxjs';
 
 const mockUseEnterpriseSearchApplicationNav = jest.fn().mockReturnValue([]);
@@ -18,8 +19,6 @@ jest.mock('../../../shared/layout', () => ({
   useEnterpriseSearchApplicationNav: (...args: any[]) =>
     mockUseEnterpriseSearchApplicationNav(...args),
 }));
-
-import { shallow } from 'enzyme';
 
 import { EnterpriseSearchApplicationsPageTemplate } from './page_template';
 
