@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext): void => {
             expect(transformStats.transforms.length).to.eql(1);
             const latestTransform = transformStats.transforms[0];
             if (latestTransform.state !== 'started') {
-              log.warn('Transform state is not started, logging the transform');
+              log.error('Transform state is not started, logging the transform');
               log.info(`latestTransform: ${JSON.stringify(latestTransform)}`);
             }
 
