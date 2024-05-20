@@ -484,6 +484,7 @@
     "@kbn/field-formats-plugin": "link:src/plugins/field_formats",
     "@kbn/field-types": "link:packages/kbn-field-types",
     "@kbn/field-utils": "link:packages/kbn-field-utils",
+    "@kbn/fields-metadata-plugin": "link:x-pack/plugins/fields_metadata",
     "@kbn/file-upload-plugin": "link:x-pack/plugins/file_upload",
     "@kbn/files-example-plugin": "link:examples/files_example",
     "@kbn/files-management-plugin": "link:src/plugins/files_management",
