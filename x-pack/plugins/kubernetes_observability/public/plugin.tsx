@@ -3,6 +3,23 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiFlyoutFooter,
+  EuiTab,
+  EuiTabs,
+  EuiLink,
+  EuiBasicTable,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 // const [state, setState] = useState<{'NODES'}>({'NODES':{}});
 
@@ -20,7 +37,20 @@ export class kubernetesObservability implements Plugin {
       order: 9019,
       euiIconType: 'logoElastic',
       async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<NodesMemory client={publicK8sObservabilityClient} />, element)
+        ReactDOM.render([<div><EuiTitle size="l">
+                            <h2 id="KubernetesObservabilityTitle">
+                                <FormattedMessage
+                                  id="xpack.fleet.kubernetesObservability"
+                                  defaultMessage="Kubernetes Observability"
+                                />
+                            </h2>
+                          </EuiTitle>
+                          <EuiSpacer size="l" />
+                          <EuiSpacer size="l" />
+                          </div>,
+                        <KubernetesObservabilityComp client={publicK8sObservabilityClient} />],
+                        element
+        )
         return () => ReactDOM.unmountComponentAtNode(element);
       },
     });
@@ -44,50 +74,129 @@ export class PublicKubernetesObservabilityClient {
       console.log(results);
       return results;
     }
+
+    async getNodesCpu() {
+      console.log("CALLED TO GET PODS MEM")
+      const results = await this.http.get('/api/kubernetes/nodes/cpu', {version: '1',});
+      console.log(results);
+      return results;
+    }
 }
 
-const  NodesMemory = ({
+const  KubernetesObservabilityComp = ({
   client,
 }: {
   client?: any;
 }) => {
 
   const [nodesMem, setNodesMem] = useState([]);
-  const [time, setTime] = useState([]);
+  const [nodeMemtime, setNodeMemTime] = useState([]);
+  const [nodeCpuTime, setNodeCpuTime] = useState([]);
+  const [nodesCpu, setNodesCpu] = useState([]);
   console.log("called");
   console.log(client);
   useEffect(() => {
     client.getNodesMemory().then(data => {
       console.log(data);
-      setTime(data.time);
+      setNodeMemTime(data.time);
       const nodesArray = data.nodes;
-      
-      const nodes = nodesArray?.map((node, i) => (
-          <tr key={i}>
-            <td>{node.name}</td>
-            <td>{node.message}</td> 
-            <td>{node.alarm}</td> 
-          </tr>
-      ));
-      console.log(nodes);
+      const keys = ['name', 'memory_utilization', 'message', 'alarm'];
+
+      const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      console.log("AAAAAAAAAAAAAA");
       setNodesMem(nodes);
       })
       .catch(error => {
           console.log(error)
       });
   }, [client]); // *** Note the dependency
+  
+  useEffect(() => {
+    client.getNodesCpu().then(data => {
+      console.log(data);
+      setNodeCpuTime(data.time);
+      const nodesArray = data.nodes;
+      const keys = ['name', 'cpu_utilization', 'message', 'alarm'];
+
+      const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      console.log("OOOOOOOOO");
+      setNodesCpu(nodes);
+      })
+      .catch(error => {
+          console.log(error)
+      });
+  }, [client]); // *** Note the dependency
   return (
-      <div>
-          <h1>Nodes Memory Info</h1>
-          <p>time: {time}</p>
-          <table className="w3-table">
-            <tr>
-            <th>Name</th>
-            <th>Message</th>
-            <th>Alarm</th>
-            </tr>
-            {nodesMem}
-          </table>
-      </div>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3 id="KubernetesNodesMemoryTitle">
+                <FormattedMessage
+                  id="xpack.fleet.kubernetesObservability.nodesmem"
+                  defaultMessage="Kubernetes Nodes Memory"
+                />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiText size="s"><b>Timestamp</b>: {nodeMemtime}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiBasicTable
+            items= {nodesMem}
+            columns= {[
+              {
+                field: 'name',
+                name: 'Name',
+              },
+              {
+                field: 'memory_utilization',
+                name: 'Utilization',
+              },
+              {
+                field: 'message',
+                name: 'Message',
+              },
+              {
+                field: 'alarm',
+                name: 'Alarm',
+              }
+            ]}
+          />
+      </EuiFlexItem>
+      <EuiFlexItem>
+          <EuiTitle size="s">
+            <h3 id="KubernetesNodesCpuTitle">
+                <FormattedMessage
+                  id="xpack.fleet.kubernetesObservability.nodescpu"
+                  defaultMessage="Kubernetes Nodes Cpu"
+                />
+            </h3>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiText size="s"><b>Timestamp</b>: {nodeCpuTime}</EuiText>
+          <EuiSpacer size="s" />
+          <EuiBasicTable
+            items= {nodesCpu}
+            columns= {[
+              {
+                field: 'name',
+                name: 'Name',
+              },
+              {
+                field: 'cpu_utilization',
+                name: 'Utilization',
+              },
+              {
+                field: 'message',
+                name: 'Message',
+              },
+              {
+                field: 'alarm',
+                name: 'Alarm',
+              }
+            ]}
+          />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+      
   );
 }
