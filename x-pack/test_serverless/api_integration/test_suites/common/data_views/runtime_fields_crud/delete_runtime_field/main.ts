@@ -6,16 +6,21 @@
  */
 
 import expect from '@kbn/expect';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
-
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
   describe('main', () => {
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });
 
@@ -23,6 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     configArray.forEach((config) => {

@@ -166,8 +166,8 @@ export default function ({ getService }: FtrProviderContext) {
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(res).to.have.property('status', 200);
         expect(res.body.result.length).to.equal(2);
 
@@ -180,8 +180,8 @@ export default function ({ getService }: FtrProviderContext) {
             forId: ['960372e0-3224-11e8-a572-ffca06da1357'],
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(res2).to.have.property('status', 200);
         expect(res2.body.result.length).to.equal(1);
       });
@@ -195,8 +195,8 @@ export default function ({ getService }: FtrProviderContext) {
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(res).to.have.property('status', 200);
         expect(res.body.result.length).to.equal(2);
 
@@ -209,8 +209,8 @@ export default function ({ getService }: FtrProviderContext) {
             forType: 'search',
           })
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(res2).to.have.property('status', 200);
         expect(res2.body.result.length).to.equal(1);
       });

@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 
@@ -19,6 +20,13 @@ export default function ({ getService }: FtrProviderContext) {
   let internalReqHeader: InternalRequestHeader;
 
   describe('main', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
     configArray.forEach((config) => {
       describe(config.name, () => {
         it('deletes an index_pattern', async () => {
@@ -76,13 +84,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         await supertestWithoutAuth
           .get(`${config.path}/${response1.body[config.serviceKey].id}`)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         const response2 = await supertestWithoutAuth
           .delete(`${config.path}/${response1.body[config.serviceKey].id}`)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
 
         // verify empty response
         expect(Object.keys(response2.body).length).to.be(0);

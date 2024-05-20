@@ -21,8 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns list of data views', async () => {
         const response = await supertestWithoutAuth
           .get(dataViewConfig.basePath)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader());
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader);
         expect(response.status).to.be(200);
         expect(response.body).to.have.property(dataViewConfig.serviceKey);
         expect(response.body[dataViewConfig.serviceKey]).to.be.an('array');
