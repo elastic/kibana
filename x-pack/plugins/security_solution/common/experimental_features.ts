@@ -181,6 +181,11 @@ export const allowedExperimentalValues = Object.freeze({
   disableTimelineSaveTour: false,
 
   /**
+   * Enables alerts suppression for ES|QL rules
+   */
+  alertSuppressionForEsqlRuleEnabled: false,
+
+  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
@@ -250,7 +255,12 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  malwareOnWriteScanOptionAvailable: false,
+  malwareOnWriteScanOptionAvailable: true,
+
+  /**
+   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
+   */
+  unifiedManifestEnabled: false,
 
   /**
    *  Enables Security AI Assistant's Flyout mode
