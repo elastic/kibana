@@ -60,7 +60,6 @@ describe('Responder offline callout', () => {
       jest.clearAllMocks();
     });
 
-    // TODO TC: include crowdstrike status test
     it.each(['endpoint', 'sentinel_one'] as ResponseActionAgentType[])(
       'should be visible when agent type is %s and host is offline',
       (agentType) => {
@@ -83,7 +82,6 @@ describe('Responder offline callout', () => {
       }
     );
 
-    // TODO TC: include crowdstrike status test
     it.each(['endpoint', 'sentinel_one'] as ResponseActionAgentType[])(
       'should not be visible when agent type is %s and host is online',
       (agentType) => {
