@@ -85,6 +85,11 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
       logger: context.logger,
       taskManager: context.taskManager,
     }),
+    context.backfillClient.deleteBackfillForRules({
+      ruleIds: rules.map(({ id }) => id),
+      namespace: context.namespace,
+      unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+    }),
     bulkMarkApiKeysForInvalidation(
       { apiKeys: apiKeysToInvalidate },
       context.logger,
