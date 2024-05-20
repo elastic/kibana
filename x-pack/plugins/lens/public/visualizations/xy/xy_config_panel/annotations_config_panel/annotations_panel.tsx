@@ -111,12 +111,12 @@ export const AnnotationsPanel = (
 const getEndTimestamp = (
   datatableUtilities: DatatableUtilitiesService,
   startTime: string,
-  { activeData, dateRange }: FramePublicAPI,
+  { activeData, absDateRange }: FramePublicAPI,
   dataLayers: XYDataLayerConfig[]
 ) => {
   const startTimeNumber = moment(startTime).valueOf();
   const dateRangeFraction =
-    (moment(dateRange.toDate).valueOf() - moment(dateRange.fromDate).valueOf()) * 0.1;
+    (moment(absDateRange.toDate).valueOf() - moment(absDateRange.fromDate).valueOf()) * 0.1;
   const fallbackValue = moment(startTimeNumber + dateRangeFraction).toISOString();
   const dataLayersId = dataLayers.map(({ layerId }) => layerId);
   if (

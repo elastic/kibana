@@ -108,6 +108,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
   return (
     <>
       <EuiPanel
+        className="sloCardItem"
         panelRef={containerRef as React.Ref<HTMLDivElement>}
         onMouseOver={() => {
           if (!isMouseOver) {

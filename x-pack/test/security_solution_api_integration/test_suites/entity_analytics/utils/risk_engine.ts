@@ -76,7 +76,7 @@ export const createAndSyncRuleAndAlertsFactory =
     log,
     namespace,
   }: {
-    supertest: SuperTest.SuperTest<SuperTest.Test>;
+    supertest: SuperTest.Agent;
     log: ToolingLog;
     namespace?: string;
   }) =>
@@ -412,7 +412,7 @@ export const clearLegacyDashboards = async ({
   supertest,
   log,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
 }): Promise<void> => {
   try {
@@ -481,10 +481,7 @@ export const getLegacyRiskScoreDashboards = async ({
   return savedObejectLens?.saved_objects.filter((s) => s?.attributes?.title?.includes('Risk'));
 };
 
-export const riskEngineRouteHelpersFactory = (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  namespace?: string
-) => ({
+export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namespace?: string) => ({
   init: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
@@ -536,7 +533,7 @@ interface Credentials {
 }
 
 export const riskEngineRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  supertestWithoutAuth: SuperTest.Agent,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: Credentials) =>
@@ -576,11 +573,7 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
       .expect(expectStatusCode),
 });
 
-export const installLegacyRiskScore = async ({
-  supertest,
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-}) => {
+export const installLegacyRiskScore = async ({ supertest }: { supertest: SuperTest.Agent }) => {
   await supertest
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')

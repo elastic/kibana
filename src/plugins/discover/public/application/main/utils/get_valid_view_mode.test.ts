@@ -14,21 +14,21 @@ describe('getValidViewMode', () => {
     expect(
       getValidViewMode({
         viewMode: undefined,
-        isTextBasedQueryMode: false,
+        isEsqlMode: false,
       })
     ).toBeUndefined();
 
     expect(
       getValidViewMode({
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
-        isTextBasedQueryMode: false,
+        isEsqlMode: false,
       })
     ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
 
     expect(
       getValidViewMode({
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
-        isTextBasedQueryMode: false,
+        isEsqlMode: false,
       })
     ).toBe(VIEW_MODE.AGGREGATED_LEVEL);
 
@@ -40,25 +40,25 @@ describe('getValidViewMode', () => {
     ).toBe(VIEW_MODE.PATTERN_LEVEL);
   });
 
-  test('should work correctly for text-based mode', () => {
+  test('should work correctly for ES|QL mode', () => {
     expect(
       getValidViewMode({
         viewMode: undefined,
-        isTextBasedQueryMode: true,
+        isEsqlMode: true,
       })
     ).toBeUndefined();
 
     expect(
       getValidViewMode({
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
-        isTextBasedQueryMode: true,
+        isEsqlMode: true,
       })
     ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
 
     expect(
       getValidViewMode({
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
-        isTextBasedQueryMode: true,
+        isEsqlMode: true,
       })
     ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
 

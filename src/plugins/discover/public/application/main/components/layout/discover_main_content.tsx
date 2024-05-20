@@ -24,6 +24,7 @@ import { useAppStateSelector } from '../../state_management/discover_app_state_c
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const DROP_PROPS = {
   value: {
@@ -40,7 +41,6 @@ const DROP_PROPS = {
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
-  isPlainRecord: boolean;
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
@@ -53,7 +53,6 @@ export interface DiscoverMainContentProps {
 
 export const DiscoverMainContent = ({
   dataView,
-  isPlainRecord,
   viewMode,
   onAddFilter,
   onFieldEdited,
@@ -64,6 +63,7 @@ export const DiscoverMainContent = ({
   isChartAvailable,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
+  const isEsqlMode = useIsEsqlMode();
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -89,7 +89,7 @@ export const DiscoverMainContent = ({
       return (
         <DocumentViewModeToggle
           viewMode={viewMode}
-          isTextBasedQuery={isPlainRecord}
+          isEsqlMode={isEsqlMode}
           stateContainer={stateContainer}
           setDiscoverViewMode={setDiscoverViewMode}
           patternCount={patternCount}
@@ -104,7 +104,7 @@ export const DiscoverMainContent = ({
     },
     [
       viewMode,
-      isPlainRecord,
+      isEsqlMode,
       stateContainer,
       setDiscoverViewMode,
       dataView,
@@ -139,7 +139,7 @@ export const DiscoverMainContent = ({
               dataView={dataView}
               onAddFilter={onAddFilter}
               stateContainer={stateContainer}
-              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+              onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
           ) : null}
           {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
@@ -149,7 +149,7 @@ export const DiscoverMainContent = ({
                 dataView={dataView}
                 columns={columns}
                 stateContainer={stateContainer}
-                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
               />
             </>
