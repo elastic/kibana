@@ -54,6 +54,7 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportType) => {
 };
 
 export function getDocumentPayloadFactory(reporting: ReportingCore) {
+  const { logger } = reporting.getPluginSetupDeps();
   const exportTypesRegistry = reporting.getExportTypesRegistry();
 
   async function getCompleted({
@@ -88,6 +89,8 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     const jobsQuery = jobsQueryFactory(reporting);
     const error = await jobsQuery.getError(id);
 
+    logger.debug(`Report job ${id} has failed. Sending statusCode: 500`);
+
     return {
       statusCode: 500,
       content: {
@@ -98,7 +101,9 @@ export function getDocumentPayloadFactory(reporting: ReportingCore) {
     };
   }
 
-  function getIncomplete({ status }: ReportApiJSON): Payload {
+  function getIncomplete({ id, status }: ReportApiJSON): Payload {
+    logger.debug(`Report job ${id} is processing. Sending statusCode: 503`);
+
     return {
       statusCode: 503,
       content: status,
