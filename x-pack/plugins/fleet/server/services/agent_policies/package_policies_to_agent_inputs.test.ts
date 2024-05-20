@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/global_data_tags_exclude';
+
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
 import { storedPackagePoliciesToAgentInputs } from './package_policies_to_agent_inputs';
@@ -739,6 +741,44 @@ describe.only('Fleet - storedPackagePoliciesToAgentInputs', () => {
   });
 
   it('returns agent inputs with add fields process if global data tags are defined', async () => {
+    const excludedInputs: PackagePolicyInput[] = [];
+    const expectedExcluded = []
+
+    for (const input of GLOBAL_DATA_TAG_EXCLUDED_INPUTS) {
+      excludedInputs.push({
+        type: input,
+        enabled: true,
+        vars: {
+          inputVar: { value: 'input-value' },
+          inputVar2: { value: undefined },
+          inputVar3: {
+            type: 'yaml',
+            value: 'testField: test',
+          },
+          inputVar4: { value: '' },
+        },
+        streams: [],
+      });
+
+      expectedExcluded.push({
+        data_stream: {
+          namespace: 'default',
+        },
+        id: `${input}-some-uuid`,
+        meta: {
+          package: {
+            name: 'mock_package',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package-policy',
+        package_policy_id: 'some-uuid',
+        revision: 1,
+        type: input,
+        use_output: 'default',
+      })
+    }
+
     expect(
       await storedPackagePoliciesToAgentInputs(
         [
@@ -750,6 +790,7 @@ describe.only('Fleet - storedPackagePoliciesToAgentInputs', () => {
               version: '0.0.0',
             },
             inputs: [
+              ...excludedInputs,
               {
                 ...mockInput,
                 compiled_input: {
@@ -770,9 +811,13 @@ describe.only('Fleet - storedPackagePoliciesToAgentInputs', () => {
         packageInfoCache,
         undefined,
         undefined,
-        [{ name: 'testName', value: 'testValue'}, { name: 'testName2', value: 'testValue2'}]
+        [
+          { name: 'testName', value: 'testValue' },
+          { name: 'testName2', value: 'testValue2' },
+        ]
       )
     ).toEqual([
+      ...expectedExcluded,
       {
         id: 'test-logs-some-uuid',
         name: 'mock_package-policy',
