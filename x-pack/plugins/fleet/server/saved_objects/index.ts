@@ -204,6 +204,22 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '3': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                global_data_tags: {
+                  type: 'nested',
+                  properties: {
+                    name: { type: 'keyword' },
+                    value: { type: 'text' },
+                  },
+                },
+              },
+            },
+          ],
+        },
       },
     },
     [OUTPUT_SAVED_OBJECT_TYPE]: {
