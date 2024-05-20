@@ -11,31 +11,37 @@ import type {
   QueryDslBoolQuery,
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import { stringify } from '../../../utils/stringify';
 import { getDateFilters } from '../..';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import { catchAndWrapError } from '../../../utils';
 import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
-import type { GetActionDetailsListParam } from '../action_list';
+import type {
+  ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+  ResponseActionType,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 
-export type FetchActionRequestsOptions = Pick<
-  GetActionDetailsListParam,
-  | 'agentTypes'
-  | 'commands'
-  | 'elasticAgentIds'
-  | 'esClient'
-  | 'endDate'
-  | 'from'
-  | 'size'
-  | 'startDate'
-  | 'userIds'
-  | 'unExpiredOnly'
-  | 'types'
-  | 'logger'
->;
+export interface FetchActionRequestsOptions {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  from?: number;
+  size?: number;
+  startDate?: string;
+  endDate?: string;
+  agentTypes?: ResponseActionAgentType[];
+  commands?: ResponseActionsApiCommandNames[];
+  elasticAgentIds?: string[];
+  userIds?: string[];
+  unExpiredOnly?: boolean;
+  types?: ResponseActionType[];
+}
 
 /**
  * Fetches a list of Action Requests from the Endpoint action request index (not fleet)
+ * @param logger
  * @param agentTypes
  * @param commands
  * @param elasticAgentIds
@@ -49,18 +55,18 @@ export type FetchActionRequestsOptions = Pick<
  * @param types
  */
 export const fetchActionRequests = async ({
+  logger,
+  esClient,
+  from = 0,
+  size = 10,
   agentTypes,
   commands,
   elasticAgentIds,
-  esClient,
   endDate,
-  from,
-  size,
   startDate,
   userIds,
-  unExpiredOnly,
+  unExpiredOnly = false,
   types,
-  logger,
 }: FetchActionRequestsOptions): Promise<LogsEndpointAction[]> => {
   const additionalFilters = [];
 
