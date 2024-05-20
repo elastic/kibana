@@ -58,7 +58,11 @@ export const deserializeState = (
   let serializedSearchSource = data.searchSource as SerializedSearchSourceFields & {
     indexRefName: string;
   };
-  if (!('indexRefName' in data.searchSource)) {
+  if (
+    data.searchSource.index &&
+    references.some((ref) => ref.id === data.searchSource.index) &&
+    !('indexRefName' in data.searchSource)
+  ) {
     // due to a bug in 8.0, some visualizations were saved with an injected state - re-extract in that case and inject the upstream references because they might have changed
     serializedSearchSource = extractSearchSourceReferences(
       serializedSearchSource
