@@ -9,26 +9,74 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
-import { FLEET_SERVER_SERVERS_INDEX, SO_SEARCH_LIMIT } from '../../constants';
+import type { AgentPolicy } from '../../../common/types';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../common/constants';
+
+import { SO_SEARCH_LIMIT } from '../../constants';
 import { getAgentsByKuery, getAgentStatusById } from '../agents';
 
 import { packagePolicyService } from '../package_policy';
 import { agentPolicyService } from '../agent_policy';
+import { getAgentStatusForAgentPolicy } from '../agents';
 import { appContextService } from '..';
+
+/**
+ * Retrieve all agent policies which has a Fleet Server package policy
+ */
+export const getFleetServerPolicies = async (
+  soClient: SavedObjectsClientContract
+): Promise<AgentPolicy[]> => {
+  const fleetServerPackagePolicies = await packagePolicyService.list(soClient, {
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_SERVER_PACKAGE}`,
+  });
+
+  // Extract associated fleet server agent policy IDs
+  const fleetServerAgentPolicyIds = [
+    ...new Set(fleetServerPackagePolicies.items.map((p) => p.policy_id)),
+  ];
+
+  // Retrieve associated agent policies
+  const fleetServerAgentPolicies = fleetServerAgentPolicyIds.length
+    ? await agentPolicyService.getByIDs(soClient, fleetServerAgentPolicyIds)
+    : [];
+
+  return fleetServerAgentPolicies;
+};
+
+/**
+ * Check if there is at least one active agent enrolled into the given agent policies
+ * Assumes that `agentPolicyIds` contains list of Fleet Server agent policies
+ */
+export const hasActiveFleetServersForPolicies = async (
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract,
+  agentPolicyIds: string[]
+): Promise<boolean> => {
+  if (agentPolicyIds.length > 0) {
+    const agentStatusesRes = await getAgentStatusForAgentPolicy(
+      esClient,
+      soClient,
+      undefined,
+      agentPolicyIds.map((id) => `policy_id:${id}`).join(' or ')
+    );
+
+    return agentStatusesRes.online > 0 || agentStatusesRes.updating > 0;
+  }
+  return false;
+};
 
 /**
  * Check if at least one fleet server is connected
  */
-export async function hasFleetServers(esClient: ElasticsearchClient) {
-  const res = await esClient.search<{}, {}>({
-    index: FLEET_SERVER_SERVERS_INDEX,
-    ignore_unavailable: true,
-    filter_path: 'hits.total',
-    track_total_hits: true,
-    rest_total_hits_as_int: true,
-  });
-
-  return (res.hits.total as number) > 0;
+export async function hasFleetServers(
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+) {
+  return await hasActiveFleetServersForPolicies(
+    esClient,
+    soClient,
+    (await getFleetServerPolicies(soClient)).map((policy) => policy.id)
+  );
 }
 
 /**
