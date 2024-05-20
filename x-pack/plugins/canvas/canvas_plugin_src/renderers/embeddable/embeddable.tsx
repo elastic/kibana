@@ -17,6 +17,7 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC, useMemo } from 'react';
 import ReactDOM from 'react-dom';
+import { useSearchApi } from '@kbn/presentation-publishing';
 import { pluginServices } from '../../../public/services';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
@@ -30,7 +31,6 @@ import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
 import { useGetAppContext } from './use_get_app_context';
-import { useSearchApi } from '@kbn/presentation-publishing';
 
 const { embeddable: strings } = RendererStrings;
 

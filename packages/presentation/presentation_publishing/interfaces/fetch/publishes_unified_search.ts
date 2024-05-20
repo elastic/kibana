@@ -79,9 +79,9 @@ export function useSearchApi({
   query,
   timeRange,
 }: {
-  filters?: Filter[],
-  query?: Query | AggregateQuery,
-  timeRange?: TimeRange,
+  filters?: Filter[];
+  query?: Query | AggregateQuery;
+  timeRange?: TimeRange;
 }) {
   const searchApi = useMemo(() => {
     return {
@@ -89,6 +89,8 @@ export function useSearchApi({
       query$: new BehaviorSubject<Query | AggregateQuery | undefined>(query),
       timeRange$: new BehaviorSubject<TimeRange | undefined>(timeRange),
     };
+    // filters, query, timeRange only used as initial values. Changes do not effect memoized value
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -103,5 +105,5 @@ export function useSearchApi({
     searchApi.timeRange$.next(timeRange);
   }, [timeRange, searchApi.timeRange$]);
 
-  return searchApi
+  return searchApi;
 }
