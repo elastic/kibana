@@ -241,7 +241,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         'Content-Type': 'application/json'
       },
       signal,
-      timeout,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
     });
 
     return response.data.pipe(new PassThrough());
