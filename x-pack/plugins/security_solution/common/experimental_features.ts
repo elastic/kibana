@@ -181,6 +181,11 @@ export const allowedExperimentalValues = Object.freeze({
   disableTimelineSaveTour: false,
 
   /**
+   * Enables alerts suppression for ES|QL rules
+   */
+  alertSuppressionForEsqlRuleEnabled: false,
+
+  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */

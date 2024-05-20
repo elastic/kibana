@@ -514,6 +514,56 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
+      context('with category weights', () => {
+        it('weights risk inputs from different categories according to the category weight', async () => {
+          const documentId = uuidv4();
+          const userSignal = buildDocument(
+            { 'event.kind': 'signal', 'user.name': 'user-1' },
+            documentId
+          );
+          const hostSignal = buildDocument(
+            { 'event.kind': 'signal', 'host.name': 'host-1' },
+            documentId
+          );
+          await indexListOfDocuments(Array(50).fill(userSignal).concat(Array(50).fill(hostSignal)));
+
+          await createAndSyncRuleAndAlerts({
+            query: `id: ${documentId}`,
+            alerts: 100,
+            riskScore: 100,
+          });
+          const { scores } = await previewRiskScores({
+            body: {
+              weights: [{ type: 'risk_category', value: 'category_1', host: 0.4, user: 0.8 }],
+            },
+          });
+
+          expect(sanitizeScores(scores.host!)).to.eql([
+            {
+              calculated_level: 'Low',
+              calculated_score: 93.2375911647125,
+              calculated_score_norm: 35.695861854790394,
+              category_1_score: 35.69586185479039,
+              category_1_count: 50,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+          ]);
+
+          expect(sanitizeScores(scores.user!)).to.eql([
+            {
+              calculated_level: 'High',
+              calculated_score: 186.475182329425,
+              calculated_score_norm: 71.39172370958079,
+              category_1_score: 71.39172370958077,
+              category_1_count: 50,
+              id_field: 'user.name',
+              id_value: 'user-1',
+            },
+          ]);
+        });
+      });
+
       describe('@skipInServerless with asset criticality data', () => {
         const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 

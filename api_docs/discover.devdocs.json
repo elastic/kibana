@@ -117,10 +117,10 @@
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.DataDocumentsMsg.textBasedQueryColumns",
+            "id": "def-public.DataDocumentsMsg.esqlQueryColumns",
             "type": "Array",
             "tags": [],
-            "label": "textBasedQueryColumns",
+            "label": "esqlQueryColumns",
             "description": [],
             "signature": [
               {
@@ -138,10 +138,10 @@
           },
           {
             "parentPluginId": "discover",
-            "id": "def-public.DataDocumentsMsg.textBasedHeaderWarning",
+            "id": "def-public.DataDocumentsMsg.esqlHeaderWarning",
             "type": "string",
             "tags": [],
-            "label": "textBasedHeaderWarning",
+            "label": "esqlHeaderWarning",
             "description": [],
             "signature": [
               "string | undefined"
