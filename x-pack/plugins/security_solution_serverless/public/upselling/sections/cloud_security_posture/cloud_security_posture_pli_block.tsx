@@ -53,7 +53,7 @@ export const CloudSecurityPosturePLIBlock = memo(() => {
             'xpack.securitySolutionServerless.cloudSecurityPosturePliBlock.cardMessage',
             {
               defaultMessage:
-                'To modify protection updates, you must add at least {requiredPLI} to your project.',
+                'To turn on CSPM, KSPM or CNVM, view your Cloud Posture Dashboards and generate findings of misconfiguration or vulnerabilities in your cloud environment, you must add {requiredPLI} under Manage --> Project features.',
               values: {
                 requiredPLI,
               },

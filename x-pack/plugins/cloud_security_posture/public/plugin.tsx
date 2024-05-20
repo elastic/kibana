@@ -104,13 +104,9 @@ export class CspPlugin
     plugins.fleet.registerExtension({
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
       view: 'package-policy-replace-define-step',
-      Component: (props) => (
-        <LazyCspPolicyTemplateForm
-          {...props}
-          pluginsOnStart={core.plugins.onStart}
-          isServerless={plugins.cloud.isServerlessEnabled}
-        />
-      ),
+      Component: (props) => {
+        return <LazyCspPolicyTemplateForm {...props} pluginsOnStart={core.plugins.onStart} />;
+      },
     });
 
     plugins.fleet.registerExtension({
