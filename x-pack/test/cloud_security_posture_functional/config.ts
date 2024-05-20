@@ -23,20 +23,20 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      /**
-       * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
-       *
-       * test a new package:
-       * 1. build the package and start the registry with elastic-package and uncomment the 'registryUrl' flag below
-       * 2. locally checkout the kibana version that matches the new package
-       * 3. update the package version below to use the new package version
-       * 4. run tests with NODE_EXTRA_CA_CERTS pointing to the elastic-package certificate
-       * 5. when test pass:
-       *   1. release a new package to EPR
-       *   2. merge the updated version number change to kibana
-       */
       serverArgs: [
         ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        /**
+         * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
+         *
+         * test a new package:
+         * 1. build the package and start the registry with elastic-package and uncomment the 'registryUrl' flag below
+         * 2. locally checkout the kibana version that matches the new package
+         * 3. update the package version below to use the new package version
+         * 4. run tests with NODE_EXTRA_CA_CERTS pointing to the elastic-package certificate
+         * 5. when test pass:
+         *   1. release a new package to EPR
+         *   2. merge the updated version number change to kibana
+         */
         `--xpack.fleet.packages.0.name=cloud_security_posture`,
         `--xpack.fleet.packages.0.version=1.7.4`,
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
