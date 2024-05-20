@@ -54,7 +54,8 @@ const getReportingHeaders = (output: TaskRunResult, exportType: ExportType) => {
 };
 
 export function getDocumentPayloadFactory(reporting: ReportingCore) {
-  const { logger } = reporting.getPluginSetupDeps();
+  const { logger: _logger } = reporting.getPluginSetupDeps();
+  const logger = _logger.get('download-report');
   const exportTypesRegistry = reporting.getExportTypesRegistry();
 
   async function getCompleted({
