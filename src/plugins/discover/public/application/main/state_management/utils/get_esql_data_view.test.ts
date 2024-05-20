@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
+import { getEsqlDataView } from './get_esql_data_view';
 import { dataViewAdHoc } from '../../../../__mocks__/data_view_complex';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 
-describe('getDataViewByTextBasedQueryLang', () => {
+describe('getEsqlDataView', () => {
   discoverServiceMock.dataViews.create = jest.fn().mockReturnValue({
     ...dataViewMock,
     isPersisted: () => false,
@@ -21,13 +21,13 @@ describe('getDataViewByTextBasedQueryLang', () => {
   const services = discoverServiceMock;
   it('returns the current dataview if is adhoc and query has not changed', async () => {
     const query = { esql: 'from data-view-ad-hoc-title' };
-    const dataView = await getDataViewByTextBasedQueryLang(query, dataViewAdHoc, services);
+    const dataView = await getEsqlDataView(query, dataViewAdHoc, services);
     expect(dataView).toStrictEqual(dataViewAdHoc);
   });
 
   it('creates an adhoc dataview if the current dataview is persistent and query has not changed', async () => {
     const query = { esql: 'from the-data-view-title' };
-    const dataView = await getDataViewByTextBasedQueryLang(query, dataViewMock, services);
+    const dataView = await getEsqlDataView(query, dataViewMock, services);
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.timeFieldName).toBe('@timestamp');
   });
@@ -41,7 +41,7 @@ describe('getDataViewByTextBasedQueryLang', () => {
       timeFieldName: undefined,
     });
     const query = { esql: 'from the-data-view-title' };
-    const dataView = await getDataViewByTextBasedQueryLang(query, dataViewAdHoc, services);
+    const dataView = await getEsqlDataView(query, dataViewAdHoc, services);
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.timeFieldName).toBeUndefined();
   });
@@ -55,7 +55,7 @@ describe('getDataViewByTextBasedQueryLang', () => {
       timeFieldName: undefined,
     });
     const query = { esql: 'ROW x = "ES|QL is awesome"' };
-    const dataView = await getDataViewByTextBasedQueryLang(query, dataViewAdHoc, services);
+    const dataView = await getEsqlDataView(query, dataViewAdHoc, services);
     expect(dataView.isPersisted()).toEqual(false);
     expect(dataView.name).toEqual(dataViewAdHoc.name);
     expect(dataView.timeFieldName).toBeUndefined();

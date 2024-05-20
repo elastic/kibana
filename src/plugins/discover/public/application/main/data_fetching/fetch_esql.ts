@@ -18,14 +18,14 @@ import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common'
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { RecordsFetchResponse } from '../../types';
 
-interface TextBasedErrorResponse {
+interface EsqlErrorResponse {
   error: {
     message: string;
   };
   type: 'error';
 }
 
-export function fetchTextBased(
+export function fetchEsql(
   query: Query | AggregateQuery,
   dataView: DataView,
   data: DataPublicPluginStart,
@@ -42,10 +42,10 @@ export function fetchTextBased(
     time: timeRange,
     dataView,
     inputQuery,
-    titleForInspector: i18n.translate('discover.inspectorTextBasedRequestTitle', {
+    titleForInspector: i18n.translate('discover.inspectorEsqlRequestTitle', {
       defaultMessage: 'Table',
     }),
-    descriptionForInspector: i18n.translate('discover.inspectorTextBasedRequestDescription', {
+    descriptionForInspector: i18n.translate('discover.inspectorEsqlRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch results for the table.',
     }),
   })
@@ -57,18 +57,18 @@ export function fetchTextBased(
         abortSignal?.addEventListener('abort', contract.cancel);
         const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
-        let textBasedQueryColumns: Datatable['columns'] | undefined;
+        let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
-        let textBasedHeaderWarning: string | undefined;
+        let esqlHeaderWarning: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
-          const response = resp as Datatable | TextBasedErrorResponse;
+          const response = resp as Datatable | EsqlErrorResponse;
           if (response.type === 'error') {
             error = response.error.message;
           } else {
             const table = response as Datatable;
             const rows = table?.rows ?? [];
-            textBasedQueryColumns = table?.columns ?? undefined;
-            textBasedHeaderWarning = table.warning ?? undefined;
+            esqlQueryColumns = table?.columns ?? undefined;
+            esqlHeaderWarning = table.warning ?? undefined;
             finalData = rows.map((row: Record<string, string>, idx: number) => {
               return {
                 id: String(idx),
@@ -84,16 +84,16 @@ export function fetchTextBased(
           } else {
             return {
               records: finalData || [],
-              textBasedQueryColumns,
-              textBasedHeaderWarning,
+              esqlQueryColumns,
+              esqlHeaderWarning,
             };
           }
         });
       }
       return {
         records: [] as DataTableRecord[],
-        textBasedQueryColumns: [],
-        textBasedHeaderWarning: undefined,
+        esqlQueryColumns: [],
+        esqlHeaderWarning: undefined,
       };
     })
     .catch((err) => {
