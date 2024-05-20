@@ -34,11 +34,12 @@ const getSpace = jest.fn();
 const getSpaceId = () => 'space1';
 
 const mockAuthorizationAction = (
-  type: string,
-  app: string,
-  alertingType: string,
+  ruleType: string,
+  consumer: string,
+  entity: string,
   operation: string
-) => `${type}/${app}/${alertingType}/${operation}`;
+) => `${ruleType}/${consumer}/${entity}/${operation}`;
+
 function mockSecurity() {
   const security = securityMock.createSetup();
   const authorization = security.authz;
@@ -61,7 +62,7 @@ function mockFeature(appName: string, typeName?: string | string[]) {
     category: { id: 'foo', label: 'foo' },
     ...(typeNameArray
       ? {
-          alerting: typeNameArray,
+          alerting: { ruleTypeIds: typeNameArray, consumers: [appName] },
         }
       : {}),
     privileges: {
@@ -70,10 +71,10 @@ function mockFeature(appName: string, typeName?: string | string[]) {
           ? {
               alerting: {
                 rule: {
-                  all: typeNameArray,
+                  all: { ruleTypeIds: typeNameArray, consumers: [appName] },
                 },
                 alert: {
-                  all: typeNameArray,
+                  all: { ruleTypeIds: typeNameArray, consumers: [appName] },
                 },
               },
             }
@@ -89,10 +90,10 @@ function mockFeature(appName: string, typeName?: string | string[]) {
           ? {
               alerting: {
                 rule: {
-                  read: typeNameArray,
+                  read: { ruleTypeIds: typeNameArray, consumers: [appName] },
                 },
                 alert: {
-                  read: typeNameArray,
+                  read: { ruleTypeIds: typeNameArray, consumers: [appName] },
                 },
               },
             }
@@ -115,7 +116,7 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
     category: { id: 'foo', label: 'foo' },
     ...(typeName
       ? {
-          alerting: [typeName],
+          alerting: { ruleTypeIds: [typeName], consumers: [appName] },
         }
       : {}),
     privileges: {
@@ -147,7 +148,7 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
                 includeIn: 'all',
                 alerting: {
                   rule: {
-                    all: [typeName],
+                    all: { ruleTypeIds: [typeName], consumers: [appName] },
                   },
                 },
                 savedObject: {
@@ -162,7 +163,7 @@ function mockFeatureWithSubFeature(appName: string, typeName: string) {
                 includeIn: 'read',
                 alerting: {
                   rule: {
-                    read: [typeName],
+                    read: { ruleTypeIds: [typeName], consumers: [appName] },
                   },
                 },
                 savedObject: {
@@ -884,6 +885,7 @@ describe('AlertingAuthorization', () => {
       );
       ensureRuleTypeIsAuthorized('someMadeUpType', 'myApp', 'rule');
     });
+
     test('creates a filter based on the privileged types', async () => {
       features.getKibanaFeatures.mockReturnValue([
         mockFeature('myApp', ['myAppAlertType', 'mySecondAppAlertType']),
@@ -899,7 +901,83 @@ describe('AlertingAuthorization', () => {
       checkPrivileges.mockResolvedValueOnce({
         username: 'some-user',
         hasAllRequested: true,
-        privileges: { kibana: [] },
+        privileges: {
+          kibana: [
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'alerts', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myApp', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myAppAlertType', 'myOtherApp', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction(
+                'myAppAlertType',
+                'myAppWithSubFeature',
+                'rule',
+                'find'
+              ),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'alerts', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('myOtherAppAlertType', 'myApp', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction(
+                'myOtherAppAlertType',
+                'myOtherApp',
+                'rule',
+                'find'
+              ),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction(
+                'myOtherAppAlertType',
+                'myAppWithSubFeature',
+                'rule',
+                'find'
+              ),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('mySecondAppAlertType', 'alerts', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction('mySecondAppAlertType', 'myApp', 'rule', 'find'),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction(
+                'mySecondAppAlertType',
+                'myOtherApp',
+                'rule',
+                'find'
+              ),
+              authorized: true,
+            },
+            {
+              privilege: mockAuthorizationAction(
+                'mySecondAppAlertType',
+                'myAppWithSubFeature',
+                'rule',
+                'find'
+              ),
+              authorized: true,
+            },
+          ],
+        },
       });
       const alertAuthorization = new AlertingAuthorization({
         request,
@@ -922,7 +1000,7 @@ describe('AlertingAuthorization', () => {
         ).filter
       ).toEqual(
         fromKueryExpression(
-          `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
+          `((path.to.rule_type_id:myAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:myOtherAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)) or (path.to.rule_type_id:mySecondAppAlertType and consumer-field:(alerts or myApp or myOtherApp or myAppWithSubFeature)))`
         )
       );
     });
@@ -969,6 +1047,7 @@ describe('AlertingAuthorization', () => {
         `"Unauthorized to find rules for any rule types"`
       );
     });
+
     test('creates an `ensureRuleTypeIsAuthorized` function which throws if type is unauthorized', async () => {
       features.getKibanaFeatures.mockReturnValue([
         mockFeature('myApp', ['myOtherAppAlertType', 'myAppAlertType']),
@@ -2250,6 +2329,7 @@ describe('AlertingAuthorization', () => {
           expect(ruleTypeRegistry.get).toHaveBeenCalledTimes(1);
         });
       });
+
       test('creates a filter based on the privileged types', async () => {
         expect(
           (
