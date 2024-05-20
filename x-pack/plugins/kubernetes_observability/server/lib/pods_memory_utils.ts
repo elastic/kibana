@@ -228,19 +228,19 @@ export function defineQueryGeneralMemoryUtilisation2(namespace: string, client: 
                 },
                 aggs: {
                     "stats_memory": {
-                        "stats": { field: "metrics.k8s.pod.memory_usage" }
+                        "stats": { field: "metrics.k8s.pod.memory.usage" }
                     },
                     "review_variability_memory_usage": {
                         median_absolute_deviation: {
-                            field: "metrics.k8s.pod.memory_usage"
+                            field: "metrics.k8s.pod.memory.usage"
                         }
                     },
                     "stats_available": {
-                        stats: { field: "metrics.k8s.pod.memory_available" }
+                        stats: { field: "metrics.k8s.pod.memory.available" }
                     },
                     "review_variability_memory_available": {
                         median_absolute_deviation: {
-                            field: "metrics.k8s.pod.memory_available"
+                            field: "metrics.k8s.pod.memory.available"
                         }
                     },
                 }
