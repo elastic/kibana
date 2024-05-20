@@ -269,7 +269,7 @@ const getActionDetailsList = async ({
   const actionDetails: ActionListApiResponse['data'] = normalizedActionRequests.map((action) => {
     const actionRecord = createActionDetailsRecord(
       action,
-      responsesByActionId[action.id] ?? [],
+      responsesByActionId[action.id] ?? { fleetResponses: [], endpointResponses: [] },
       agentsHostInfo
     );
 
