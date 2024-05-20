@@ -81,11 +81,12 @@ export const getAgentStatusRouteHandler = (
       esClient,
       soClient,
       endpointService: endpointContext.service,
-      connectorActionsClient: (await context.actions).getActionsClient(),
+      connectorActionsClient:
+        agentType === 'crowdstrike' ? (await context.actions).getActionsClient() : undefined,
     });
 
     // 8.15: use the new `agentStatusClientEnabled` FF enabled
-    const getAgentStatus = endpointContext.experimentalFeatures.agentStatusClientEnabled
+    const data = endpointContext.experimentalFeatures.agentStatusClientEnabled
       ? await agentStatusClient.getAgentStatuses(agentIds)
       : await getSentinelOneAgentStatus({
           agentType,
@@ -101,7 +102,7 @@ export const getAgentStatusRouteHandler = (
     try {
       return response.ok({
         body: {
-          data: getAgentStatus,
+          data,
         },
       });
     } catch (e) {

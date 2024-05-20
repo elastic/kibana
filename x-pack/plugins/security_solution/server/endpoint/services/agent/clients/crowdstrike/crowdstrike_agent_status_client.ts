@@ -12,6 +12,7 @@ import {
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { keyBy } from 'lodash';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RawCrowdstrikeInfo } from './types';
 import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary, NormalizedExternalConnectorClient } from '../../..';
@@ -39,7 +40,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
   private async getAgentStatusFromConnectorAction(agentIds: string[]) {
     const connectorActions = new NormalizedExternalConnectorClient(
-      this.options.connectorActionsClient,
+      this.options.connectorActionsClient as ActionsClient,
       this.log
     );
     connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
@@ -150,7 +151,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
               ? HostStatus.HEALTHY
               : // TODO TC: not sure what the UNKNOWN is - still to be figured
               agentStatus?.state === CROWDSTRIKE_STATUS_RESPONSE.UNKNOWN
-              ? HostStatus.UNENROLLED
+              ? HostStatus.OFFLINE
               : HostStatus.OFFLINE,
 
           pendingActions: pendingActions?.pending_actions ?? {},

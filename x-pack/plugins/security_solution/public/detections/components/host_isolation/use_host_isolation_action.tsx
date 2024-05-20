@@ -77,10 +77,7 @@ export const useHostIsolationAction = ({
   const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(detailsData), [detailsData]);
   const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(detailsData), [detailsData]);
 
-  const externalAgentId = useMemo(
-    () => sentinelOneAgentId ?? crowdstrikeAgentId ?? '',
-    [crowdstrikeAgentId, sentinelOneAgentId]
-  );
+  const externalAgentId = sentinelOneAgentId ?? crowdstrikeAgentId ?? '';
   const hostOsFamily = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
     [detailsData]
@@ -111,7 +108,7 @@ export const useHostIsolationAction = ({
     agentType,
   });
 
-  const { data: externalAgentData } = useAgentStatus([externalAgentId || ''], agentType, {
+  const { data: externalAgentData } = useAgentStatus([externalAgentId], agentType, {
     enabled:
       (!!sentinelOneAgentId && sentinelOneManualHostActionsEnabled) ||
       (!!crowdstrikeAgentId && crowdstrikeManualHostActionsEnabled),
@@ -146,13 +143,13 @@ export const useHostIsolationAction = ({
       });
     }
 
-    if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert && externalAgentStatus) {
+    if (
+      (externalAgentStatus && sentinelOneManualHostActionsEnabled && isSentinelOneAlert) ||
+      (externalAgentStatus && crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert)
+    ) {
       return externalAgentStatus.status === 'healthy';
     }
 
-    if (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert && externalAgentStatus) {
-      return externalAgentStatus.status === 'healthy';
-    }
     return false;
   }, [
     isEndpointAlert,

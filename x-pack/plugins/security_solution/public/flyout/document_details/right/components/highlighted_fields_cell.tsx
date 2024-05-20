@@ -124,7 +124,7 @@ export const HighlightedFieldsCell: VFC<HighlightedFieldsCellProps> = ({
     () => originalField === CROWDSTRIKE_AGENT_ID_FIELD,
     [originalField]
   );
-  const agentType = useMemo(() => {
+  const agentType: ResponseActionAgentType = useMemo(() => {
     if (isSentinelOneAgentIdField) {
       return 'sentinel_one';
     }

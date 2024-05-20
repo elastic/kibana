@@ -116,7 +116,7 @@ describe('<HighlightedFieldsCell />', () => {
 
   // TODO: 8.15 simplify when `agentStatusClientEnabled` FF is enabled and removed
   it.each(Object.keys(hooksToMock))(
-    'should render SentinelOne agent status cell if field is agent.status and `origialField` is `observer.serial_number` with %s hook',
+    'should render SentinelOne agent status cell if field is agent.status and `originalField` is `observer.serial_number` with %s hook',
     (hookName) => {
       const hook = hooksToMock[hookName];
       useAgentStatusHookMock.mockImplementation(() => hook);
@@ -140,7 +140,7 @@ describe('<HighlightedFieldsCell />', () => {
     }
   );
   it.each(Object.keys(hooksToMock))(
-    'should render Crowdstrike agent status cell if field is agent.status and `origialField` is `crowdstrike.event.DeviceId` with %s hook',
+    'should render Crowdstrike agent status cell if field is agent.status and `originalField` is `crowdstrike.event.DeviceId` with %s hook',
     (hookName) => {
       const hook = hooksToMock[hookName];
       useAgentStatusHookMock.mockImplementation(() => hook);

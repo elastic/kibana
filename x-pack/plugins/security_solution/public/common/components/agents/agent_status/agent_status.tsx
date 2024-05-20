@@ -73,7 +73,6 @@ export const AgentStatus = React.memo(
         className="eui-textTruncate"
         data-test-subj={dataTestSubj}
       >
-        <EuiFlexItem grow={false} />
         <EuiFlexItem grow={false}>
           {isFetched && !isLoading && agentStatus ? (
             <EuiBadge
