@@ -10,7 +10,7 @@ import {
   CROWDSTRIKE_NETWORK_STATUS,
   CROWDSTRIKE_STATUS_RESPONSE,
 } from './crowdstrike_agent_status_client';
-import { getPendingActionsSummary, NormalizedExternalConnectorClient } from '../../..';
+import { NormalizedExternalConnectorClient } from '../../..';
 import { AgentStatusClientError } from '../errors';
 import { HostStatus } from '../../../../../../common/endpoint/types';
 import { CrowdstrikeMock } from '../../../actions/clients/crowdstrike/mocks';
