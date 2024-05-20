@@ -10,6 +10,7 @@ import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { KbnClient } from '@kbn/test';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+import pRetry from 'p-retry';
 import { dump } from '../common/utils';
 import { type RuleResponse } from '../../../common/api/detection_engine';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -86,13 +87,18 @@ export class S1Client {
 
     this.log.debug(`Request: `, requestOptions);
 
-    return axios
-      .request<T>(requestOptions)
-      .then((response) => {
-        this.log.verbose(`Response: `, response);
-        return response.data;
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
+    return pRetry(
+      async () => {
+        return axios
+          .request<T>(requestOptions)
+          .then((response) => {
+            this.log.verbose(`Response: `, response);
+            return response.data;
+          })
+          .catch(catchAxiosErrorFormatAndThrow);
+      },
+      { maxTimeout: 10000 }
+    );
   }
 
   public buildUrl(path: string): string {

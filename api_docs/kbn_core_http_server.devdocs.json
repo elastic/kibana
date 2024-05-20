@@ -3632,11 +3632,11 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/indices/get_fields.ts"
+                "path": "x-pack/plugins/security/server/routes/feature_check/feature_check.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/role_mapping/feature_check.ts"
+                "path": "x-pack/plugins/security/server/routes/indices/get_fields.ts"
               },
               {
                 "plugin": "security",
@@ -4573,6 +4573,10 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/mapping_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/ingest_pipeline_routes.ts"
               },
               {
                 "plugin": "snapshotRestore",
@@ -5824,11 +5828,11 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/indices/get_fields.test.ts"
+                "path": "x-pack/plugins/security/server/routes/feature_check/feature_check.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/role_mapping/feature_check.test.ts"
+                "path": "x-pack/plugins/security/server/routes/indices/get_fields.test.ts"
               },
               {
                 "plugin": "security",
@@ -7239,6 +7243,14 @@
               {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/create.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/reset.ts"
               },
               {
                 "plugin": "profiling",
@@ -9657,6 +9669,10 @@
               {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/delete.ts"
               },
               {
                 "plugin": "synthetics",
@@ -13989,7 +14005,7 @@
               },
               {
                 "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_results.ts"
+                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_results_indices_latest.ts"
               },
               {
                 "plugin": "ml",
