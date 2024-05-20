@@ -56,7 +56,7 @@ interface BuilderExceptionListItemProps {
   onDeleteExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   onChangeExceptionItem: (item: ExceptionsBuilderExceptionItem, index: number) => void;
   setErrorsExist: (arg: EntryFieldError) => void;
-  setWarningsExist: (arg: boolean, arg2: string) => void;
+  setWarningsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
   isDisabled?: boolean;
   operatorsList?: OperatorOption[];
