@@ -173,7 +173,7 @@ const dateDiffOptions = [
 /**
  * Enrichments for function definitions
  *
- * This is the place to put information that is not reported by the `show functions` command
+ * This is the place to put information that is not provided by Elasticsearch
  * and, hence, won't be present in the JSON file.
  */
 const functionEnrichments = {

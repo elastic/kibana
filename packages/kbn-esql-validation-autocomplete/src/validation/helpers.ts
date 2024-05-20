@@ -40,7 +40,9 @@ export function buildQueryForFieldsForStringSources(queryString: string, ast: ES
 }
 
 /**
- * Returns the number of non-optional parameters for a given function
+ * Returns the maximum and minimum number of parameters allowed by a function
+ *
+ * Used for too-many, too-few arguments validation
  */
 export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
   let min = Infinity;
