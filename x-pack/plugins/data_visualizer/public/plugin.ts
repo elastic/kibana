@@ -51,6 +51,27 @@ export class DataVisualizerPlugin
   }
 
   public setup(core: DataVisualizerCoreSetup, plugins: DataVisualizerSetupDependencies) {
+    Promise.all([
+      import('./application/index_data_visualizer/embeddables/field_stats'),
+      import('./application/index_data_visualizer/ui_actions'),
+      // import('./cases/register_change_point_charts_attachment'),
+      core.getStartServices(),
+    ]).then(
+      ([
+        { registerEmbeddables },
+        { registerDataVisualizerUiActions },
+        [coreStart, pluginStart],
+      ]) => {
+        if (plugins.uiActions) {
+          registerDataVisualizerUiActions(plugins.uiActions, coreStart, pluginStart);
+        }
+
+        if (plugins.embeddable) {
+          registerEmbeddables(plugins.embeddable, core);
+        }
+      }
+    );
+
     if (plugins.home) {
       registerHomeAddData(plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);

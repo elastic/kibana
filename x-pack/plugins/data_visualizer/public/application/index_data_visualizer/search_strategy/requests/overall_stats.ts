@@ -87,6 +87,14 @@ export const checkAggregatableFieldsExistRequest = (
       : {}),
   };
 
+  // @TODO: remove
+  console.log('', {
+    index,
+    // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
+    track_total_hits: false,
+    size,
+    body: searchBody,
+  });
   return {
     index,
     // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
