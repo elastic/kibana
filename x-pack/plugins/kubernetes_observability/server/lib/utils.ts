@@ -43,7 +43,12 @@ export type PodCpu = {
         max: number | undefined
         avg: number | undefined
         median_absolute_deviation: number | undefined;
-    } 
+    },
+    reason: {
+        cpu_utilisation: string | undefined;
+        cpu_utilisation_median_absolute_deviation: String | undefined;
+    },
+    message: string | undefined; 
 }
 
 export type Node = {

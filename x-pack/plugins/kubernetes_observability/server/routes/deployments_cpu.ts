@@ -79,7 +79,7 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
           var pods_cpu_medium = new Array();
           var pods_cpu_high = new Array();
           var pods_deviation_high = new Array();
-          var messages = '';
+          var reasons = '';
           var cpu = '';
           var deviation_alarm = '';
 
@@ -93,40 +93,40 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
             const podName = entries.key;
             const dslPods = defineQueryForAllPodsCpuUtilisation(podName, namespace, client, period);
             const esResponsePods = await client.search(dslPods);
-            const [reason, pod] = calulcatePodsCpuUtilisation(podName, namespace, esResponsePods);
+            const [pod] = calulcatePodsCpuUtilisation(podName, namespace, esResponsePods);
 
             //For every pod we keep arrays for reason and metrics
-            pod_reasons.push(reason);
+            pod_reasons.push(pod.reason);
             pod_metrics.push(pod);
 
             //Create overall message for deployment
             for (var pod_reason of pod_reasons) {
               //Check for cpu utlisation in pod_reason.reason[0]
-              if (pod_reason.reason.reason == "Medium") {
+              if (pod_reason.reason == "Medium") {
                 pods_cpu_medium.push(pod_reason.pod);
-              } else if (pod_reason.reason.reason == "High") {
+              } else if (pod_reason.reason == "High") {
                 pods_cpu_high.push(pod_reason.pod);
               }
 
               //Check for cpu_utilization_median_absolute_deviation pod_reason.reason[1]
-              if (pod_reason.reason.cpu_utilisation_median_absolute_deviation == "High") {
+              if (pod_reason.cpu_utilisation_median_absolute_deviation == "High") {
                 pods_deviation_high.push(pod_reason.pod);
               }
             }
 
             if (pods_cpu_high.length > 0) {
-              messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_cpu_high.join(" , ");
+              reasons = reasons + `${resource} has High ${type} utilisation in following Pods:` + pods_cpu_high.join(" , ");
               cpu = "High";
             } else if (pods_cpu_medium.length > 0) {
-              messages = messages + `${resource} has Medium ${type} utilisation in following Pods:` + pods_cpu_medium.join(" , ");
+              reasons = reasons + `${resource} has Medium ${type} utilisation in following Pods:` + pods_cpu_medium.join(" , ");
               cpu = "Medium";
             } else {
-              messages = `${resource} has Low ${type} utilisation in all Pods`;
+              reasons = `${resource} has Low ${type} utilisation in all Pods`;
               cpu = "Low";
             }
 
             if (pods_deviation_high.length > 0) {
-              messages = messages + ` , ` + `${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
+              reasons = reasons + ` , ` + `${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
               deviation_alarm = "High";
             } else { deviation_alarm = "Low" }
             //End of Create overall message for deployment
@@ -137,11 +137,11 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
               name: request.query.name,
               namespace: namespace,
               pods: pod_metrics,
-              cpu: {
+              message: {
                 utilization: cpu,
                 deviation: deviation_alarm
               },
-              message: messages,
+              reason: reasons,
             },
           });
         } else {

@@ -69,8 +69,6 @@ export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespac
 
 
 export function calulcatePodsMemoryUtilisation(podName: string, namespace: string, esResponsePods: estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>) {
-    var message = undefined;
-    var reasons = undefined;
     var alarm = '';
     var memory_utilization = undefined;
     var pod = {} as PodMem;
@@ -87,7 +85,7 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
         const memory_usage_avg = hitsall?.memory_usage.avg;
         const memory_available_count = hitsall?.memory_available.count;
         const memory_available_avg = hitsall?.memory_available.avg;
-        var reason = undefined;
+        var reasons = undefined;
         var message = undefined;
 
         var deviation_alarm = "Low"
@@ -117,8 +115,6 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
             };
             message = `Pod ${podName} has ${memory_available_avg} bytes memory available, ${memory_usage_avg} bytes memory usage, ${toPct(memory_utilization)}% memory_utilisation and ${memory_usage_median_absolute_deviation} bytes deviation from median value`
         }
-
-        reason = `Pod ${podName} has ${alarm} memory utilization`
 
         pod = {
             'name': podName,

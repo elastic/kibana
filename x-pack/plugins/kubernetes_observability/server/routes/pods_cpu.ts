@@ -50,14 +50,12 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
               const { fields = {} } = hit;
               const time = extractFieldValue(fields['@timestamp']);
 
-              const [reason, pod] = calulcatePodsCpuUtilisation(request.query.name, namespace, esResponse)
+              const [pod] = calulcatePodsCpuUtilisation(request.query.name, namespace, esResponse)
 
               return response.ok({
                 body: {
                   time: time,
                   pod,
-                  message: message,
-                  reason: reason.reason
                 },
               });
             } else {

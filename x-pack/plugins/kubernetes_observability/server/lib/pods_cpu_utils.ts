@@ -1,5 +1,5 @@
 import { estypes } from '@elastic/elasticsearch';
-import { Limits, PodCpu } from './utils';
+import { Limits, PodCpu, toPct } from './utils';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 // Define the global CPU limits to categorise cpu utilisation
@@ -64,7 +64,6 @@ export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: 
 
 
 export function calulcatePodsCpuUtilisation(podName: string, namespace: string, esResponsePods: estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>) {
-    var reason = {};
     var alarm = '';
     var pod = {} as PodCpu;
 
@@ -74,18 +73,8 @@ export function calulcatePodsCpuUtilisation(podName: string, namespace: string, 
         const cpu_utilization_median_absolute_deviation = hitsall?.review_variability_cpu_utilization.value;
         const cpu_utilization_min = hitsall?.cpu_utilization.min;
         const cpu_utilization_max = hitsall?.cpu_utilization.min;
-        const cpu_utilization_avg = hitsall?.cpu_utilization.avg;
-
-        pod = {
-            'name': podName,
-            'namespace': namespace,
-            'cpu_utilization': {
-                'min': cpu_utilization_min,
-                'max': cpu_utilization_max,
-                'avg': cpu_utilization_avg,
-                'median_absolute_deviation': cpu_utilization_median_absolute_deviation
-            }
-        };
+        var cpu_utilization_avg = hitsall?.cpu_utilization.avg;
+        var reasons = undefined;
 
         var deviation_alarm = "Low"
         if (cpu_utilization_median_absolute_deviation >= deviation) {
@@ -99,15 +88,28 @@ export function calulcatePodsCpuUtilisation(podName: string, namespace: string, 
         } else {
             alarm = "High";
         }
-        reason = {
-            'pod': podName, reason: {
-                'cpu utilisation': alarm,
-                'cpu_utilisation_median_absolute_deviation': deviation_alarm
-            }
-        };
-    }
+        reasons = {
+            'cpu_utilisation': alarm,
+            'cpu_utilisation_median_absolute_deviation': deviation_alarm
+        }
 
-    return [reason, pod];
+        pod = {
+            'name': podName,
+            'namespace': namespace,
+            'cpu_utilization': {
+                'min': cpu_utilization_min,
+                'max': cpu_utilization_max,
+                'avg': cpu_utilization_avg,
+                'median_absolute_deviation': cpu_utilization_median_absolute_deviation
+            },
+            'reason': reasons,
+            'message': `Pod ${podName} has ${toPct(cpu_utilization_avg)} cpu utlization, min_cpu_utlization ${cpu_utilization_min} max_cpu_utlization ${cpu_utilization_max} and ${cpu_utilization_median_absolute_deviation} bytes deviation from median cpu_utilization value`
+
+        };
+
+    };
+
+    return [pod];
 }
 
 
