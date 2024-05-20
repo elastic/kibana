@@ -25,59 +25,65 @@ export const multiFieldRT = rt.type({
   type: rt.string,
 });
 
-export const ecsFieldMetadataRT = rt.intersection([
-  rt.type({
-    dashed_name: rt.string,
-    description: rt.string,
-    flat_name: rt.string,
-    level: rt.string,
-    name: rt.string,
-    normalize: rt.array(rt.string),
-    short: rt.string,
-    type: rt.string,
-  }),
-  rt.partial({
-    allowed_values: allowedValueRT,
-    beta: rt.string,
-    doc_values: rt.boolean,
-    example: rt.unknown,
-    expected_values: rt.array(rt.string),
-    format: rt.string,
-    ignore_above: rt.number,
-    index: rt.boolean,
-    input_format: rt.string,
-    multi_fields: rt.array(multiFieldRT),
-    object_type: rt.string,
-    original_fieldset: rt.string,
-    output_format: rt.string,
-    output_precision: rt.number,
-    pattern: rt.string,
-    required: rt.boolean,
-    scaling_factor: rt.number,
-  }),
+const requiredBaseMetadataPlainRT = rt.type({
+  description: rt.string,
+  flat_name: rt.string,
+  name: rt.string,
+  type: rt.string,
+});
+
+const optionalBaseMetadataPlainRT = rt.partial({
+  description: rt.string,
+  flat_name: rt.string,
+  name: rt.string,
+  type: rt.string,
+});
+
+const optionalMetadataPlainRT = rt.partial({
+  allowed_values: rt.array(allowedValueRT),
+  beta: rt.string,
+  dashed_name: rt.string,
+  doc_values: rt.boolean,
+  example: rt.unknown,
+  expected_values: rt.array(rt.string),
+  format: rt.string,
+  ignore_above: rt.number,
+  index: rt.boolean,
+  input_format: rt.string,
+  level: rt.string,
+  multi_fields: rt.array(multiFieldRT),
+  normalize: rt.array(rt.string),
+  object_type: rt.string,
+  original_fieldset: rt.string,
+  output_format: rt.string,
+  output_precision: rt.number,
+  pattern: rt.string,
+  required: rt.boolean,
+  scaling_factor: rt.number,
+  short: rt.string,
+});
+
+export const partialFieldMetadataPlainRT = rt.intersection([
+  optionalBaseMetadataPlainRT,
+  optionalMetadataPlainRT,
 ]);
 
-export const integrationFieldMetadataRT = rt.intersection([
-  rt.type({
-    name: rt.string,
-    description: rt.string,
-    type: rt.string,
-    flat_name: rt.string,
-    short: rt.string,
-  }),
-  rt.partial({
-    example: rt.unknown,
-  }),
+export const fieldMetadataPlainRT = rt.intersection([
+  requiredBaseMetadataPlainRT,
+  optionalMetadataPlainRT,
 ]);
 
-export const fieldMetadataRT = rt.union([ecsFieldMetadataRT, integrationFieldMetadataRT]);
+export const fieldAttributeRT = rt.union([
+  rt.keyof(requiredBaseMetadataPlainRT.props),
+  rt.keyof(optionalMetadataPlainRT.props),
+]);
 
 export type TEcsFields = typeof EcsFlat;
 export type EcsFieldName = keyof TEcsFields;
 export type IntegrationFieldName = string;
 
-export type EcsFieldMetadata = TEcsFields[EcsFieldName];
-export type IntegrationFieldMetadata = rt.TypeOf<typeof integrationFieldMetadataRT>;
-
 export type FieldName = EcsFieldName | (IntegrationFieldName & {});
-export type FieldMetadata = EcsFieldMetadata | IntegrationFieldMetadata;
+export type FieldMetadataPlain = rt.TypeOf<typeof fieldMetadataPlainRT>;
+export type PartialFieldMetadataPlain = rt.TypeOf<typeof partialFieldMetadataPlainRT>;
+
+export type FieldAttribute = rt.TypeOf<typeof fieldAttributeRT>;

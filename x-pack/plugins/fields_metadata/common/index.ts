@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-export { fieldMetadataRT } from './fields_metadata/types';
+export { fieldMetadataPlainRT } from './fields_metadata/types';
 export type {
-  EcsFieldMetadata,
   EcsFieldName,
-  FieldMetadata,
+  FieldAttribute,
+  FieldMetadataPlain,
   FieldName,
-  IntegrationFieldMetadata,
   IntegrationFieldName,
+  PartialFieldMetadataPlain,
   TEcsFields,
 } from './fields_metadata/types';
+
+export { FieldMetadata } from './fields_metadata/models/field_metadata';
+export { FieldsMetadataDictionary } from './fields_metadata/models/fields_metadata_dictionary';

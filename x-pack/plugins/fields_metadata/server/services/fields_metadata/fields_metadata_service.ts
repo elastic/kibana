@@ -8,8 +8,8 @@
 import { EcsFlat as ecsFields } from '@elastic/ecs';
 import { Logger } from '@kbn/core/server';
 import { FieldsMetadataClient } from './fields_metadata_client';
-import { EcsFieldsSourceClient } from './source_clients/ecs_fields_source_client';
-import { IntegrationsFieldsSourceClient } from './source_clients/integration_fields_source_client';
+import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
+import { IntegrationsFieldsSourceClient } from './repositories/integration_fields_repository';
 import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 
 export class FieldsMetadataService {
@@ -28,14 +28,14 @@ export class FieldsMetadataService {
   public start(): FieldsMetadataServiceStart {
     const { logger, packageService } = this;
 
-    const ecsFieldsSourceClient = EcsFieldsSourceClient.create({ ecsFields });
+    const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
     const integrationFieldsSourceClient = IntegrationsFieldsSourceClient.create({ packageService });
 
     return {
       getClient() {
         return FieldsMetadataClient.create({
           logger,
-          ecsFieldsSourceClient,
+          ecsFieldsRepository,
           integrationFieldsSourceClient,
         });
       },

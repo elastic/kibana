@@ -9,6 +9,7 @@ import { createValidationFunction } from '../../../common/runtime_types';
 import { FIND_FIELDS_METADATA_URL } from '../../../common/fields_metadata';
 import * as fieldsMetadataV1 from '../../../common/fields_metadata/v1';
 import { FieldsMetadataBackendLibs } from '../../lib/shared_types';
+import { FindFieldsMetadataResponsePayload } from '../../../common/fields_metadata/v1';
 
 export const initFindFieldsMetadataRoute = ({
   router,
@@ -29,16 +30,24 @@ export const initFindFieldsMetadataRoute = ({
         },
       },
       async (_requestContext, request, response) => {
-        const { fieldNames } = request.query;
+        const { attributes, fieldNames } = request.query;
 
         const { fieldsMetadata } = (await getStartServices())[2];
         const fieldsMetadataClient = fieldsMetadata.getClient();
 
         try {
-          const fields = fieldsMetadataClient.find({ fieldNames });
+          const fieldsDictionary = fieldsMetadataClient.find({ fieldNames });
+
+          const responsePayload: FindFieldsMetadataResponsePayload = { fields: {} };
+
+          if (attributes) {
+            responsePayload.fields = fieldsDictionary.pick(attributes);
+          } else {
+            responsePayload.fields = fieldsDictionary.toPlain();
+          }
 
           return response.ok({
-            body: fieldsMetadataV1.findFieldsMetadataResponsePayloadRT.encode({ fields }),
+            body: fieldsMetadataV1.findFieldsMetadataResponsePayloadRT.encode(responsePayload),
           });
         } catch (error) {
           return response.customError({

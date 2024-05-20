@@ -7,11 +7,15 @@
  */
 
 import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
-import { FieldMetadata } from '@kbn/fields-metadata-plugin/common';
+import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 
-export function HighlightFieldDescription({ fieldMetadata }: { fieldMetadata?: FieldMetadata }) {
+export function HighlightFieldDescription({
+  fieldMetadata,
+}: {
+  fieldMetadata?: PartialFieldMetadataPlain;
+}) {
   if (!fieldMetadata) return null;
 
   const { flat_name: fieldName, short, type } = fieldMetadata;

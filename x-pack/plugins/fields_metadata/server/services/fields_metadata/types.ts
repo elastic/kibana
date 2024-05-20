@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldName, FieldMetadata } from '../../../common';
+import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataServiceStartDeps {}
@@ -19,7 +19,5 @@ export interface FieldsMetadataServiceStart {
 
 export interface IFieldsMetadataClient {
   getByName(fieldName: FieldName): FieldMetadata | undefined;
-  find<TFieldName extends FieldName>(params: {
-    fieldNames?: TFieldName[];
-  }): Record<TFieldName, FieldMetadata>;
+  find(params: { fieldNames?: FieldName[] }): FieldsMetadataDictionary;
 }

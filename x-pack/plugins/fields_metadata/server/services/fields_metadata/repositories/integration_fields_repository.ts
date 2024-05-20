@@ -6,13 +6,13 @@
  */
 
 import { FieldMetadata, FieldName } from '../../../../common';
-import { ISourceClient } from './types';
+import { IFieldsRepository } from './types';
 
 interface IntegrationsFieldsSourceClientDeps {
   packageService: PackageService;
 }
 
-export class IntegrationsFieldsSourceClient implements ISourceClient {
+export class IntegrationsFieldsSourceClient implements IFieldsRepository {
   private constructor(private readonly packageClient: PackageClient) {}
 
   getByName<TFieldName extends FieldName>(fieldName: TFieldName) {

@@ -27,6 +27,7 @@ export function LogsOverviewHighlights({
   } = getUnifiedDocViewerServices();
 
   const { fieldsMetadata } = useFieldsMetadata({
+    attributes: ['flat_name', 'short', 'type'],
     fieldNames: [
       fieldConstants.SERVICE_NAME_FIELD,
       fieldConstants.HOST_NAME_FIELD,

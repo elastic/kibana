@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { FieldMetadata, FieldName } from '../../../../common';
+import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_dictionary';
+import type { FieldMetadata, FieldName } from '../../../../common';
 
-export interface ISourceClient {
+export interface IFieldsRepository {
   getByName<TFieldName extends FieldName>(fieldName: TFieldName): FieldMetadata | undefined;
-  find<TFieldName extends FieldName>(params: {
-    fieldNames?: TFieldName[];
-  }): Record<TFieldName, FieldMetadata>;
+  find<TFieldName extends FieldName>(params: { fieldNames?: TFieldName[] }): FieldsMetadataDictionary;
 }

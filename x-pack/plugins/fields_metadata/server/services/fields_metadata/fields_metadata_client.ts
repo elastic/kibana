@@ -7,28 +7,32 @@
 
 import { EcsFlat } from '@elastic/ecs';
 import { Logger } from '@kbn/core/server';
-import { FieldName, FieldMetadata, EcsFieldMetadata } from '../../../common';
-import { EcsFieldsSourceClient } from './source_clients/ecs_fields_source_client';
-import { IntegrationsFieldsSourceClient } from './source_clients/integration_fields_source_client';
+import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
+import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
+import { IntegrationsFieldsSourceClient } from './repositories/integration_fields_repository';
 import { IFieldsMetadataClient } from './types';
 
 interface FieldsMetadataClientDeps {
   logger: Logger;
-  ecsFieldsSourceClient: EcsFieldsSourceClient;
+  ecsFieldsRepository: EcsFieldsRepository;
   integrationFieldsSourceClient: IntegrationsFieldsSourceClient;
+}
+
+interface FindOptions {
+  fieldNames?: FieldName[];
 }
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
   private constructor(
     private readonly logger: Logger,
-    private readonly ecsFieldsSourceClient: EcsFieldsSourceClient,
+    private readonly ecsFieldsRepository: EcsFieldsRepository,
     private readonly integrationFieldsSourceClient: IntegrationsFieldsSourceClient
   ) {}
 
   getByName<TFieldName extends FieldName>(fieldName: TFieldName): FieldMetadata | undefined {
     this.logger.debug(`Retrieving field metadata for: ${fieldName}`);
 
-    const field = this.ecsFieldsSourceClient.getByName(fieldName);
+    const field = this.ecsFieldsRepository.getByName(fieldName);
 
     // TODO: enable resolution for integration field
     // if (!field) {
@@ -38,12 +42,12 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     return field;
   }
 
-  find({ fieldNames }: { fieldNames?: FieldName[] } = {}): Record<FieldName, FieldMetadata> {
+  find({ fieldNames }: FindOptions = {}): FieldsMetadataDictionary {
     if (!fieldNames) {
-      return EcsFlat;
+      return this.ecsFieldsRepository.find();
     }
 
-    const res = fieldNames.reduce((fieldsMetadata, fieldName) => {
+    const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
       const field = this.getByName(fieldName);
 
       if (field) {
@@ -53,14 +57,14 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
       return fieldsMetadata;
     }, {} as Record<FieldName, FieldMetadata>);
 
-    return res;
+    return FieldsMetadataDictionary.create(fields);
   }
 
   public static create({
     logger,
-    ecsFieldsSourceClient,
+    ecsFieldsRepository,
     integrationFieldsSourceClient,
   }: FieldsMetadataClientDeps) {
-    return new FieldsMetadataClient(logger, ecsFieldsSourceClient, integrationFieldsSourceClient);
+    return new FieldsMetadataClient(logger, ecsFieldsRepository, integrationFieldsSourceClient);
   }
 }

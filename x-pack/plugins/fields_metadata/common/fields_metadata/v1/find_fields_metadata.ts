@@ -7,16 +7,17 @@
 
 import { arrayToStringRt } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { fieldMetadataRT } from '../types';
+import { fieldAttributeRT, partialFieldMetadataPlainRT } from '../types';
 
 export const findFieldsMetadataRequestQueryRT = rt.exact(
   rt.partial({
+    attributes: arrayToStringRt.pipe(rt.array(fieldAttributeRT)),
     fieldNames: arrayToStringRt.pipe(rt.array(rt.string)),
   })
 );
 
 export const findFieldsMetadataResponsePayloadRT = rt.type({
-  fields: rt.record(rt.string, fieldMetadataRT),
+  fields: rt.record(rt.string, partialFieldMetadataPlainRT),
 });
 
 export type FindFieldsMetadataRequestQuery = rt.TypeOf<typeof findFieldsMetadataRequestQueryRT>;
