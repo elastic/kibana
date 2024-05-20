@@ -13,8 +13,14 @@ import type { OverlayModalStart } from './modal';
 export interface OverlayStart {
   /** {@link OverlayBannersStart} */
   banners: OverlayBannersStart;
-  /** {@link OverlayFlyoutStart#open} */
+  /**
+   * {@link OverlayFlyoutStart#open}
+   *
+   * @deprecated Use `.renderFlyout()` method instead.
+   */
   openFlyout: OverlayFlyoutStart['open'];
+  /** {@link OverlayFlyoutStart#render} */
+  renderFlyout: OverlayFlyoutStart['render'];
   /** {@link OverlayModalStart#open} */
   openModal: OverlayModalStart['open'];
   /** {@link OverlayModalStart#openConfirm} */
