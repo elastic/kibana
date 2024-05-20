@@ -11,7 +11,7 @@ import { writeFile, readFile } from 'fs/promises';
 import { ignoreErrorsMap, validateQuery } from './validation';
 import { evalFunctionDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
-import { FunctionDefinition } from '../definitions/types';
+import { FunctionDefinition, SupportedFieldType, supportedFieldTypes } from '../definitions/types';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
@@ -20,20 +20,8 @@ import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
 
-const fieldTypes = [
-  'number',
-  'date',
-  'boolean',
-  'version',
-  'ip',
-  'string',
-  'cartesian_point',
-  'cartesian_shape',
-  'geo_point',
-  'geo_shape',
-];
 const fields = [
-  ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
+  ...supportedFieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
   { name: 'any#Char$Field', type: 'number' },
   { name: 'kubernetes.something.something', type: 'number' },
   { name: '@timestamp', type: 'date' },
@@ -129,6 +117,9 @@ function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
   }
   return `1 ${literals[typeString]}`;
 }
+
+export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
+
 function getFieldName(
   typeString: string,
   { useNestedFunction, isStats }: { useNestedFunction: boolean; isStats: boolean }
@@ -179,7 +170,7 @@ function getFieldMapping(
   };
   return params.map(({ name: _name, type, constantOnly, literalOptions, ...rest }) => {
     const typeString: string = type;
-    if (fieldTypes.includes(typeString)) {
+    if (supportedFieldTypes.includes(typeString as SupportedFieldType)) {
       if (useLiterals && literalOptions) {
         return {
           name: `"${literalOptions[0]}"`,
@@ -1022,15 +1013,27 @@ describe('validation logic', () => {
         []
       );
 
-      for (const field of fieldTypes) {
-        testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field IS NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field IS null`, []);
-        testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field is null`, []);
-        testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field is NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field IS NOT NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field IS NOT null`, []);
-        testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field IS not NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${camelCase(field)}Field Is nOt NuLL`, []);
+      for (const field of supportedFieldTypes) {
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)}Field IS NULL`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)}Field IS null`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)}Field is null`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)}Field is NULL`, []);
+        testErrorsAndWarnings(
+          `from a_index | where ${fieldNameFromType(field)}Field IS NOT NULL`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a_index | where ${fieldNameFromType(field)}Field IS NOT null`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a_index | where ${fieldNameFromType(field)}Field IS not NULL`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a_index | where ${fieldNameFromType(field)}Field Is nOt NuLL`,
+          []
+        );
       }
 
       // this is a scenario that was failing because "or" didn't accept "null"
@@ -1085,14 +1088,23 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=["a", "b"]', []);
       testErrorsAndWarnings('from a_index | eval a=null', []);
 
-      for (const field of fieldTypes) {
-        testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field IS NULL`, []);
-        testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field IS null`, []);
-        testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field is null`, []);
-        testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field is NULL`, []);
-        testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field IS NOT NULL`, []);
-        testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field IS NOT null`, []);
-        testErrorsAndWarnings(`from a_index | eval ${camelCase(field)}Field IS not NULL`, []);
+      for (const field of supportedFieldTypes) {
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)}Field IS NULL`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)}Field IS null`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)}Field is null`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)}Field is NULL`, []);
+        testErrorsAndWarnings(
+          `from a_index | eval ${fieldNameFromType(field)}Field IS NOT NULL`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a_index | eval ${fieldNameFromType(field)}Field IS NOT null`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a_index | eval ${fieldNameFromType(field)}Field IS not NULL`,
+          []
+        );
       }
 
       for (const nesting of NESTED_DEPTHS) {
