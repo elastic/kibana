@@ -188,7 +188,14 @@ const nodeToEuiCollapsibleNavProps = (
   isVisible: boolean;
 } => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
-  const { id, path, href, renderAs, onClick: customOnClick, isCollapsible } = navNode;
+  const {
+    id,
+    path,
+    href,
+    renderAs,
+    onClick: customOnClick,
+    isCollapsible = DEFAULT_IS_COLLAPSIBLE,
+  } = navNode;
   const isAccordion = isAccordionNode(navNode);
 
   // If the node is an accordion and it is not collapsible, we only want to mark it as active
@@ -240,6 +247,9 @@ const nodeToEuiCollapsibleNavProps = (
       customOnClick(e);
       return;
     }
+
+    // Do not navigate if it is a collapsible accordion, link will be used in the breadcrumb
+    if (isAccordion && isCollapsible) return;
 
     if (href !== undefined) {
       e.preventDefault();

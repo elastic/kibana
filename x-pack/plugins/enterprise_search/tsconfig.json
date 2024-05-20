@@ -77,6 +77,8 @@
     "@kbn/search-types",
     "@kbn/try-in-console",
     "@kbn/core-chrome-browser",
-    "@kbn/navigation-plugin"
+    "@kbn/navigation-plugin",
+    "@kbn/cloud",
+    "@kbn/try-in-console"
   ]
 }
