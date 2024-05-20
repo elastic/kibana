@@ -84,7 +84,7 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
           var pods_memory_medium = new Array();
           var pods_memory_high = new Array();
           var pods_deviation_high = new Array();
-          var messages = '';
+          var reasons = '';
           var memory = '';
           var deviation_alarm = '';
 
@@ -98,38 +98,38 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
             console.log(podName);
             const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client, period);
             const esResponsePodsCpu = await client.search(dslPodsCpu);
-            const [reason, pod] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePodsCpu);
-            pod_reasons.push(reason);
+            const [pod] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePodsCpu);
+            pod_reasons.push(pod.reason);
             pod_metrics.push(pod);
           }
           //Create overall message for deployment
           for (var pod_reason of pod_reasons) {
             //Check for memory pod_reason.reason[0]
-            if (pod_reason.reason.memory == "Medium") {
+            if (pod_reason.memory == "Medium") {
               pods_memory_medium.push(pod_reason.pod);
-            } else if (pod_reason.reason.memory == "High") {
+            } else if (pod_reason.memory == "High") {
               pods_memory_high.push(pod_reason.pod);
             }
 
             //Check for memory_usage_median_absolute_deviation pod_reason.reason[1]
-            if (pod_reason.reason.memory_usage_median_absolute_deviation == "High") {
+            if (pod_reason.memory_usage_median_absolute_deviation == "High") {
               pods_deviation_high.push(pod_reason.pod);
             }
           }
 
           if (pods_memory_high.length > 0) {
-            messages = messages + `${resource} has High ${type} utilisation in following Pods:` + pods_memory_high.join(" , ");
+            reasons = reasons + `${resource} has High ${type} utilisation in following Pods:` + pods_memory_high.join(" , ");
             memory = "High";
           } else if (pods_memory_medium.length > 0) {
-            messages = messages + `${resource} has Medium ${type} utilisation in following Pods:` + pods_memory_medium.join(" , ");
+            reasons = reasons + `${resource} has Medium ${type} utilisation in following Pods:` + pods_memory_medium.join(" , ");
             memory = "Medium";
           } else {
-            messages = `${resource} has Low ${type} utilisation in all Pods`;
+            reasons = `${resource} has Low ${type} utilisation in all Pods`;
             memory = "Low";
           }
 
           if (pods_deviation_high.length > 0) {
-            messages = messages + ` , ` + `${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
+            reasons = reasons + ` , ` + `${resource} has High deviation in following Pods:` + pods_deviation_high.join(" , ");
             deviation_alarm = "High";
           } else { 
             deviation_alarm = "Low" 
@@ -143,11 +143,11 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
               name: request.query.name,
               namespace: namespace,
               pods: pod_metrics,
-              memory: {
+              message: {
                 usage: memory,
                 deviation: deviation_alarm
               },
-              message: messages
+              reason: reasons
             },
           });
         } else {

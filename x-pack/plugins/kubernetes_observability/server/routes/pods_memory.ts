@@ -47,12 +47,11 @@ export const registerPodsMemoryRoute = (router: IRouter, logger: Logger) => {
               const { fields = {} } = hits;
               const time = extractFieldValue(fields['@timestamp']);
 
-              const [reason, pod] = calulcatePodsMemoryUtilisation(request.query.name, namespace, esResponseAll)
+              const pod = calulcatePodsMemoryUtilisation(request.query.name, namespace, esResponseAll)
               return response.ok({
                 body: {
                   time: time,
-                  pod,
-                  reason: reason.reason,
+                  pod
                 },
               });
             } else {

@@ -1,5 +1,5 @@
 import { estypes } from '@elastic/elasticsearch';
-import { round, PodMem, Limits, } from './utils';
+import { round, PodMem, Limits, toPct } from './utils';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 // Define the global CPU limits to categorise memory utilisation
@@ -87,6 +87,38 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
         const memory_usage_avg = hitsall?.memory_usage.avg;
         const memory_available_count = hitsall?.memory_available.count;
         const memory_available_avg = hitsall?.memory_available.avg;
+        var reason = undefined;
+        var message = undefined;
+
+        var deviation_alarm = "Low"
+        if (memory_usage_median_absolute_deviation >= deviation) {
+            var deviation_alarm = "High"
+        }
+
+        if (memory_available_count == 0) {
+            reasons = {
+                'memory': 'Metric memory_available value is not defined',
+                'memory_usage_median_absolute_deviation': `Pod ${podName} has ${deviation_alarm} deviation from median value`
+            };
+            message = `Pod ${podName} has ${memory_usage_avg} bytes memory usage, ${toPct(memory_utilization)}% memory_utilisation and ${memory_usage_median_absolute_deviation} bytes deviation from median value.`
+        } else {
+            memory_utilization = round(memory_usage_avg / (memory_available_avg + memory_usage_avg), 3);
+
+            if (memory_utilization < limits.medium) {
+                alarm = "Low";
+            } else if (memory_utilization >= limits.medium && memory_utilization < limits.high) {
+                alarm = "Medium";
+            } else {
+                alarm = "High";
+            }
+            reasons = {
+                'memory': `Pod ${podName} has ${alarm} memory utilization` ,
+                'memory_usage_median_absolute_deviation': `Pod ${podName} has ${deviation_alarm} deviation from median value`
+            };
+            message = `Pod ${podName} has ${memory_available_avg} bytes memory available, ${memory_usage_avg} bytes memory usage, ${toPct(memory_utilization)}% memory_utilisation and ${memory_usage_median_absolute_deviation} bytes deviation from median value`
+        }
+
+        reason = `Pod ${podName} has ${alarm} memory utilization`
 
         pod = {
             'name': podName,
@@ -100,39 +132,11 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
                 'avg': memory_usage_avg,
                 'median_absolute_deviation': memory_usage_median_absolute_deviation,
             },
+            'reason': reasons,
+            'message': message
         };
-
-        var deviation_alarm = "Low"
-        if (memory_usage_median_absolute_deviation >= deviation) {
-            var deviation_alarm = "High"
-        }
-
-        if (memory_available_count == 0) {
-            reasons = {
-                'pod': podName, reason: {
-                    'memory': 'Metric memory_available value is not defined',
-                    'memory_usage_median_absolute_deviation': deviation_alarm }
-            };
-            message = { 'pod': podName, 'memory_usage': pod.memory_usage, 'memory_usage_median_absolute_deviation': pod.memory_usage.median_absolute_deviation, 'desc': ' Pod Memory usage in  Bytes' };
-        } else {
-            memory_utilization = round(memory_usage_avg / (memory_available_avg + memory_usage_avg), 3);
-
-            if (memory_utilization < limits.medium) {
-                alarm = "Low";
-            } else if (memory_utilization >= limits.medium && memory_utilization < limits.high) {
-                alarm = "Medium";
-            } else {
-                alarm = "High";
-            }
-            reasons = {
-                'pod': podName, reason: {
-                    'memory': alarm,
-                    'memory_usage_median_absolute_deviation': deviation_alarm }
-            };
-
-        }
     }
-    return [reasons, pod];
+    return [pod];
 }
 
 

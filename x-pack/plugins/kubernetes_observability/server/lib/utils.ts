@@ -24,10 +24,15 @@ export type PodMem = {
     }
     memory_usage:{
         min: number | undefined;
-        max: number | undefined
-        avg: number | undefined
+        max: number | undefined;
+        avg: number | undefined;
         median_absolute_deviation: number | undefined;
-    } 
+    },
+    reason: {
+        memory: string | undefined;
+        memory_usage_median_absolute_deviation: String | undefined;
+    },
+    message: string | undefined;
 }
 
 export type PodCpu = {
