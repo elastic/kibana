@@ -13,23 +13,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
+  // FTR configuration for cloud testing
   return {
     ...xpackFunctionalConfig.getAll(),
     pageObjects,
-    testFiles: [resolve(__dirname, './pages')],
+    testFiles: [resolve(__dirname, './cloud_tests')],
     junit: {
-      reportName: 'X-Pack Cloud Security Posture Functional Tests',
-    },
-    kbnTestServer: {
-      ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.fleet.packages.0.name=cloud_security_posture`,
-        `--xpack.fleet.packages.0.version=1.7.4`,
-        // `--xpack.fleet.registryUrl=https://localhost:8080`,
-        `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
-        `--xpack.fleet.internal.fleetServerStandalone=true`,
-      ],
+      reportName: 'X-Pack Cloud Security Posture Sanity Tests',
     },
   };
 }
