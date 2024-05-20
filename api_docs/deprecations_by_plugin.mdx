@@ -7,7 +7,7 @@ id: kibDevDocsDeprecationsByPlugin
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-plugin
 title: Deprecated API usage by plugin
 description: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2024-05-15
+date: 2024-05-20
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 ---
 
@@ -373,6 +373,14 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 
 
+## @kbn/reporting-public
+
+| Deprecated API | Reference location(s) | Remove By |
+| ---------------|-----------|-----------|
+| <DocLink id="kibSharePluginApi" section="def-public.ShareContext.shareableUrlForSavedObject" text="shareableUrlForSavedObject"/> | [register_pdf_png_modal_reporting.tsx](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx#:~:text=shareableUrlForSavedObject), [register_pdf_png_modal_reporting.tsx](https://github.com/elastic/kibana/tree/main/packages/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx#:~:text=shareableUrlForSavedObject) | - |
+
+
+
 ## @kbn/securitysolution-data-table
 
 | Deprecated API | Reference location(s) | Remove By |
@@ -442,7 +450,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibHomePluginApi" section="def-public.HomePublicPluginSetup.environment" text="environment"/> | [plugin.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/public/plugin.ts#:~:text=environment) | 8.8.0 |
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/public/application/index.tsx#:~:text=KibanaThemeProvider), [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/public/application/index.tsx#:~:text=KibanaThemeProvider), [index.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/public/application/index.tsx#:~:text=KibanaThemeProvider) | - |
 | <DocLink id="kibLicensingPluginApi" section="def-public.PublicLicense.mode" text="mode"/> | [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode)+ 2 more | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-public.LicensingPluginSetup.license$" text="license$"/> | [license_context.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/public/context/license/license_context.tsx#:~:text=license%24) | 8.8.0 |
 | <DocLink id="kibLicensingPluginApi" section="def-server.PublicLicense.mode" text="mode"/> | [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode), [license_check.test.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/apm/common/license_check.test.ts#:~:text=mode)+ 2 more | 8.8.0 |
@@ -636,6 +643,7 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | <DocLink id="kibDataPluginApi" section="def-common.SearchSource.create" text="create"/> | [saved_search_embeddable.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/embeddable/saved_search_embeddable.tsx#:~:text=create), [saved_search_embeddable.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/embeddable/saved_search_embeddable.tsx#:~:text=create) | - |
 | <DocLink id="kibEmbeddablePluginApi" section="def-public.EmbeddableSetup.registerEmbeddableFactory" text="registerEmbeddableFactory"/> | [plugin.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/plugin.tsx#:~:text=registerEmbeddableFactory) | - |
 | <DocLink id="kibSavedObjectsPluginApi" section="def-public.SavedObjectSaveModal" text="SavedObjectSaveModal"/> | [on_save_search.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx#:~:text=SavedObjectSaveModal), [on_save_search.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx#:~:text=SavedObjectSaveModal) | 8.8.0 |
+| <DocLink id="kibSharePluginApi" section="def-public.ShareContext.shareableUrlForSavedObject" text="shareableUrlForSavedObject"/> | [get_top_nav_links.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/application/main/components/top_nav/get_top_nav_links.tsx#:~:text=shareableUrlForSavedObject) | - |
 | <DocLink id="kibUiActionsPluginApi" section="def-public.UiActionsService.executeTriggerActions" text="executeTriggerActions"/> | [saved_search_embeddable.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/embeddable/saved_search_embeddable.tsx#:~:text=executeTriggerActions), [saved_search_embeddable.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/embeddable/saved_search_embeddable.tsx#:~:text=executeTriggerActions), [search_embeddable_factory.ts](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/embeddable/search_embeddable_factory.ts#:~:text=executeTriggerActions), [plugin.tsx](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/plugin.tsx#:~:text=executeTriggerActions) | - |
 | <DocLink id="kibKbnCoreLifecycleBrowserPluginApi" section="def-common.CoreStart.savedObjects" text="savedObjects"/> | [discover_state.test.ts](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/application/main/state_management/discover_state.test.ts#:~:text=savedObjects) | - |
 | <DocLink id="kibKbnCoreSavedObjectsApiBrowserPluginApi" section="def-common.SavedObjectsClientContract.resolve" text="resolve"/> | [discover_state.test.ts](https://github.com/elastic/kibana/tree/main/src/plugins/discover/public/application/main/state_management/discover_state.test.ts#:~:text=resolve) | - |
@@ -812,7 +820,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
 | <DocLink id="kibEmbeddablePluginApi" section="def-public.EmbeddableSetup.registerEmbeddableFactory" text="registerEmbeddableFactory"/> | [plugin.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/infra/public/plugin.ts#:~:text=registerEmbeddableFactory) | - |
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [common_providers.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx#:~:text=KibanaThemeProvider), [common_providers.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx#:~:text=KibanaThemeProvider), [common_providers.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx#:~:text=KibanaThemeProvider) | - |
 | <DocLink id="kibKbnCoreSavedObjectsServerPluginApi" section="def-common.SavedObjectsType.migrations" text="migrations"/> | [saved_object_type.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/infra/server/lib/sources/saved_object_type.ts#:~:text=migrations) | - |
 
 
@@ -961,14 +968,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 
 
-## metricsDataAccess
-
-| Deprecated API | Reference location(s) | Remove By |
-| ---------------|-----------|-----------|
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [common_providers.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx#:~:text=KibanaThemeProvider), [common_providers.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx#:~:text=KibanaThemeProvider), [common_providers.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx#:~:text=KibanaThemeProvider) | - |
-
-
-
 ## ml
 
 | Deprecated API | Reference location(s) | Remove By |
@@ -998,7 +997,6 @@ tags: ['contributor', 'dev', 'apidocs', 'kibana']
 
 | Deprecated API | Reference location(s) | Remove By |
 | ---------------|-----------|-----------|
-| <DocLink id="kibKibanaReactPluginApi" section="def-public.KibanaThemeProvider" text="KibanaThemeProvider"/> | [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx#:~:text=KibanaThemeProvider), [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx#:~:text=KibanaThemeProvider), [app.tsx](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx#:~:text=KibanaThemeProvider) | - |
 | <DocLink id="kibKbnCoreElasticsearchServerPluginApi" section="def-common.ElasticsearchServiceSetup.legacy" text="legacy"/> | [plugin.ts](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability_solution/observability_onboarding/server/plugin.ts#:~:text=legacy) | - |
 
 
