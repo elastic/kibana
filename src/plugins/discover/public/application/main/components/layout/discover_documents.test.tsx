@@ -109,17 +109,6 @@ describe('Discover documents layout', () => {
   });
 
   test('should render customisations', async () => {
-    const customCellRenderer = {
-      content: () => <span className="custom-renderer-test">Test</span>,
-    };
-
-    const customGridColumnsConfiguration = {
-      content: () => ({
-        id: 'content',
-        displayText: <span className="custom-column-test">Column</span>,
-      }),
-    };
-
     const customControlColumnsConfiguration = () => ({
       leadingControlColumns: [],
       trailingControlColumns: [],
@@ -127,8 +116,7 @@ describe('Discover documents layout', () => {
 
     const customization: DiscoverCustomization = {
       id: 'data_table',
-      customCellRenderer,
-      customGridColumnsConfiguration,
+      logsEnabled: true,
       customControlColumnsConfiguration,
     };
 
@@ -137,12 +125,10 @@ describe('Discover documents layout', () => {
     const discoverGridComponent = component.find(DiscoverGrid);
     expect(discoverGridComponent.exists()).toBeTruthy();
 
-    expect(discoverGridComponent.prop('externalCustomRenderers')).toEqual(customCellRenderer);
-    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toEqual(
-      customGridColumnsConfiguration
-    );
     expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
       customControlColumnsConfiguration
     );
+    expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
+    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
   });
 });

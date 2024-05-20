@@ -6,17 +6,12 @@
  */
 
 import { journey, step, expect, before, after } from '@elastic/synthetics';
-import { recordVideo } from '../../helpers/record_video';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { cleanSettings } from './services/settings';
 
 journey('AlertingDefaults', async ({ page, params }) => {
-  recordVideo(page);
-
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
-
-  page.setDefaultTimeout(60 * 1000);
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   before(async () => {
     await cleanSettings(params);
