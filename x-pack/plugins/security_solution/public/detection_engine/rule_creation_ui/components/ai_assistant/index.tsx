@@ -29,7 +29,7 @@ const retrieveErrorMessages = (errors: ValidationError[]): string =>
     .join(', ');
 
 const AiAssistantComponent: React.FC<AiAssistantProps> = ({ getFields }) => {
-  const { hasAssistantPrivilege } = useAssistantAvailability();
+  const { hasAssistantPrivilege, isAssistantEnabled } = useAssistantAvailability();
 
   const getPromptContext = async () => {
     const queryField = getFields().queryBar;
@@ -76,6 +76,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
               tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
               iconType={null}
               onShowOverlay={onShowOverlay}
+              isAssistantEnabled={isAssistantEnabled}
             >
               <AssistantAvatar size="xxs" /> {i18n.ASK_ASSISTANT_ERROR_BUTTON}
             </NewChat>
