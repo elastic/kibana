@@ -6,7 +6,6 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import { FLEET_SERVER_SERVERS_INDEX } from '@kbn/fleet-plugin/common';
 import { usageTracker } from './usage_tracker';
 import { wrapErrorAndRejectPromise } from './utils';
 
@@ -21,7 +20,7 @@ export const enableFleetServerIfNecessary = usageTracker.track(
   'enableFleetServerIfNecessary',
   async (esClient: Client, version: string = '8.0.0') => {
     const res = await esClient.search({
-      index: FLEET_SERVER_SERVERS_INDEX,
+      index: '.fleet-servers',
       ignore_unavailable: true,
       rest_total_hits_as_int: true,
     });
@@ -33,7 +32,7 @@ export const enableFleetServerIfNecessary = usageTracker.track(
     // Create a Fake fleet-server in this kibana instance
     await esClient
       .index({
-        index: FLEET_SERVER_SERVERS_INDEX,
+        index: '.fleet-servers',
         refresh: 'wait_for',
         body: {
           agent: {
