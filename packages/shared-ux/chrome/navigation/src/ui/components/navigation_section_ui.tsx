@@ -33,6 +33,7 @@ type EuiCollapsibleNavSubItemPropsEnhanced = EuiCollapsibleNavSubItemProps & { p
 const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
 const DEFAULT_IS_COLLAPSED = true;
 const DEFAULT_IS_COLLAPSIBLE = true;
+const DEFAULT_RENDER_AS: RenderAs = 'block';
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
   Boolean(navNode.deepLink) || Boolean(navNode.href);
@@ -62,7 +63,7 @@ const itemIsVisible = (item: ChromeProjectNavigationNode) => {
 const getRenderAs = (navNode: ChromeProjectNavigationNode): RenderAs => {
   if (navNode.renderAs) return navNode.renderAs;
   if (!navNode.children) return 'item';
-  return 'block';
+  return DEFAULT_RENDER_AS;
 };
 
 const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): string => {
@@ -378,7 +379,14 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   const { activeNodes } = useNavigation();
   const { navigateToUrl, isSideNavCollapsed } = useServices();
 
-  const { navNode } = useMemo(() => serializeNavNode(_navNode), [_navNode]);
+  const { navNode } = useMemo(
+    () =>
+      serializeNavNode({
+        renderAs: 'accordion', // Top level nodes are always rendered as accordion
+        ..._navNode,
+      }),
+    [_navNode]
+  );
   const { open: openPanel, close: closePanel } = usePanel();
 
   const navNodesById = useMemo(() => {
