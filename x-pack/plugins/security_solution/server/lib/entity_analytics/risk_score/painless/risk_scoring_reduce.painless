@@ -13,7 +13,7 @@ def inputs = states[0].inputs;
 // for (state in states) {
 //  inputs.addAll(state.inputs)
 // }
-// Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
+Collections.sort(inputs, (a, b) -> b.get('score').compareTo(a.get('score')));
 
 for (int i = 0; i < inputs.length; i++) {
   double current_score = inputs[i].score / Math.pow(i + 1, params.p);
