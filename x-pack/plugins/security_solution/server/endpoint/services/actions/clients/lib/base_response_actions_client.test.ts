@@ -11,6 +11,7 @@ import type {
   ResponseActionsClientUpdateCasesOptions,
   ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientWriteActionResponseToEndpointIndexOptions,
+  ResponseActionsClientPendingAction,
 } from './base_response_actions_client';
 import { HOST_NOT_ENROLLED, ResponseActionsClientImpl } from './base_response_actions_client';
 import type {
@@ -690,12 +691,15 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(iterationData.length).toBe(2);
       expect(iterationData[0]).toEqual([]); // First page of results should be empty due to how the mock was setup
       expect(iterationData[1]).toEqual([
-        expect.objectContaining({
-          EndpointActions: expect.objectContaining({
-            action_id: 'action-id-2',
+        {
+          action: expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              action_id: 'action-id-2',
+            }),
+            agent: { id: 'agent-b' },
           }),
-          agent: { id: 'agent-b' },
-        }),
+          pendingAgentIds: ['agent-b'],
+        },
       ]);
     });
   });
@@ -738,7 +742,7 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);
   }
 
-  public fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
+  public fetchAllPendingActions(): AsyncIterable<ResponseActionsClientPendingAction[]> {
     return super.fetchAllPendingActions();
   }
 }
