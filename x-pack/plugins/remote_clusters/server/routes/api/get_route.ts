@@ -7,6 +7,7 @@
 
 import { get } from 'lodash';
 
+import type { IndicesResolveClusterResponse } from '@elastic/elasticsearch/lib/api/types';
 import { RequestHandler } from '@kbn/core/server';
 import { deserializeCluster } from '../../../common/lib';
 import { API_BASE_PATH } from '../../../common/constants';
@@ -34,6 +35,16 @@ export const register = (deps: RouteDependencies): void => {
       const clustersByName = await clusterClient.asCurrentUser.cluster.remoteInfo();
       const clusterNames = (clustersByName && Object.keys(clustersByName)) || [];
 
+      // Retrieve the cluster information for all the configured remote clusters.
+      // _none is never a valid index/alias/data-stream name so that way we can avoid
+      // using * which could be computationally expensive.
+      let clustersStatus: IndicesResolveClusterResponse = {};
+      if (clusterNames.length > 0) {
+        clustersStatus = await clusterClient.asCurrentUser.indices.resolveCluster({
+          name: clusterNames.map((cluster) => `${cluster}:_none`),
+        });
+      }
+
       const body = clusterNames.map((clusterName: string): any => {
         const cluster = clustersByName[clusterName];
         const isTransient = transientClusterNames.includes(clusterName);
@@ -59,6 +70,9 @@ export const register = (deps: RouteDependencies): void => {
             config.isCloudEnabled
           ),
           isConfiguredByNode,
+          // We prioritize the cluster status from the resolve cluster api, and fallback to
+          // the cluster connected status in case its not present.
+          isConnected: clustersStatus[clusterName]?.connected || cluster.connected,
         };
       });
 
