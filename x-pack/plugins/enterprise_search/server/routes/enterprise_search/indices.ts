@@ -208,7 +208,7 @@ export function registerIndexRoutes({
 
         if (connector) {
           // detach the deleted index without removing the connector
-          updateConnectorIndexName(client.asCurrentUser, connector.id, null);
+          await updateConnectorIndexName(client.asCurrentUser, connector.id, null);
           if (connector.api_key_id) {
             await client.asCurrentUser.security.invalidateApiKey({ ids: [connector.api_key_id] });
           }
