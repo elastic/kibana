@@ -1060,8 +1060,25 @@ function generateIncorrectlyTypedParameters(
         }
       }
 
-      // failed to find a bad field... they may all be acceptable
-      return { name: paramName, type, actualType: type, wrong: false, ...rest };
+      // failed to find a bad field... they must all be acceptable
+      const acceptableField: { name: string; type: SupportedFieldType } | undefined =
+        type === 'any'
+          ? availableFields[0]
+          : availableFields.find(({ type: fieldType }) => fieldType === type);
+
+      if (!acceptableField) {
+        throw new Error(
+          `Unable to find an acceptable field for type ${type}... this should never happen`
+        );
+      }
+
+      return {
+        name: acceptableField.name,
+        type: acceptableField.type,
+        actualType: acceptableField.type,
+        wrong: false,
+        ...rest,
+      };
     }
   );
 
