@@ -147,7 +147,13 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                           onClick={copy}
                           color="text"
                           iconType="copyClipboard"
-                          aria-label="Help"
+                          aria-label={i18n.translate(
+                            'xpack.enterpriseSearch.connectors.connectorStats.copyConnectorIdButton',
+                            {
+                              defaultMessage: 'Copy Connector ID',
+                            }
+                          )}
+                          data-test-subj="copyConnectorIdButton"
                         />
                       )}
                     </EuiCopy>
