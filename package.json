@@ -52,7 +52,7 @@
     "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
     "lint": "yarn run lint:es && yarn run lint:style",
-    "lint:es": "node scripts/eslint",
+    "lint:es": "npx @biomejs/biome ci . || true && node scripts/eslint",
     "lint:style": "node scripts/stylelint",
     "makelogs": "node scripts/makelogs",
     "serverless": "node scripts/kibana --dev --serverless",
