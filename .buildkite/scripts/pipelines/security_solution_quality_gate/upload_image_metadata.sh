@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Assume the environment variable is named MY_VAR
+if [ "$KIBANA_MKI_QUALITY_GATE" == "1" ]; then
+    echo "Triggered by quality gate!"
+    triggered_by="Serverless Quality Gate."
+else
+    echo "MY_VAR is not '1'"
+    triggered_by="Serverless Kibana Periodic Pipeline."
+fi
+
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 KIBANA_LATEST=${KIBANA_BASE_IMAGE}:latest
 
@@ -16,6 +25,10 @@ vcs_url=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-sch
 version=$(docker inspect ${KBN_IMAGE} | jq -r '.[0].Config.Labels."org.label-schema.version"')   
 
 markdown_text="""
+    # Triggered by: $triggered_by
+
+    ---
+
     # Kibana Container Metadata
     - Build Date            : $build_date 
     - Github Commit Hash    : $vcs_ref 
