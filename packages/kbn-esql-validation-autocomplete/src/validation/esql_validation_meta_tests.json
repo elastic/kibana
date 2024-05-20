@@ -17,20 +17,16 @@
       "type": "date"
     },
     {
+      "name": "stringField",
+      "type": "string"
+    },
+    {
       "name": "booleanField",
       "type": "boolean"
     },
     {
-      "name": "versionField",
-      "type": "version"
-    },
-    {
       "name": "ipField",
       "type": "ip"
-    },
-    {
-      "name": "stringField",
-      "type": "string"
     },
     {
       "name": "cartesianPointField",
@@ -47,6 +43,10 @@
     {
       "name": "geoShapeField",
       "type": "geo_shape"
+    },
+    {
+      "name": "versionField",
+      "type": "version"
     },
     {
       "name": "any#Char$Field",
@@ -3972,6 +3972,46 @@
       "warning": []
     },
     {
+      "query": "from a_index | where stringField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where stringField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | where booleanField IS NULL",
       "error": [],
       "warning": []
@@ -4012,46 +4052,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | where versionField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where versionField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where versionField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where versionField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where versionField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where versionField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where versionField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where versionField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | where ipField IS NULL",
       "error": [],
       "warning": []
@@ -4088,46 +4088,6 @@
     },
     {
       "query": "from a_index | where ipField Is nOt NuLL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where stringField Is nOt NuLL",
       "error": [],
       "warning": []
     },
@@ -4288,6 +4248,46 @@
     },
     {
       "query": "from a_index | where geoShapeField Is nOt NuLL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | where versionField Is nOt NuLL",
       "error": [],
       "warning": []
     },
@@ -4493,6 +4493,41 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval stringField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval stringField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | eval booleanField IS NULL",
       "error": [],
       "warning": []
@@ -4528,41 +4563,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval versionField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval versionField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval versionField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval versionField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval versionField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval versionField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval versionField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval ipField IS NULL",
       "error": [],
       "warning": []
@@ -4594,41 +4594,6 @@
     },
     {
       "query": "from a_index | eval ipField IS not NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField IS NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField IS null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField is null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField is NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField IS NOT NULL",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField IS NOT null",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval stringField IS not NULL",
       "error": [],
       "warning": []
     },
@@ -4769,6 +4734,41 @@
     },
     {
       "query": "from a_index | eval geoShapeField IS not NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField is null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField is NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS NOT NULL",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS NOT null",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval versionField IS not NULL",
       "error": [],
       "warning": []
     },

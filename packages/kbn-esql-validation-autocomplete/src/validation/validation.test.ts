@@ -1014,26 +1014,14 @@ describe('validation logic', () => {
       );
 
       for (const field of supportedFieldTypes) {
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)}Field IS NULL`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)}Field IS null`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)}Field is null`, []);
-        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)}Field is NULL`, []);
-        testErrorsAndWarnings(
-          `from a_index | where ${fieldNameFromType(field)}Field IS NOT NULL`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | where ${fieldNameFromType(field)}Field IS NOT null`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | where ${fieldNameFromType(field)}Field IS not NULL`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | where ${fieldNameFromType(field)}Field Is nOt NuLL`,
-          []
-        );
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NULL`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS null`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is null`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is NULL`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NOT NULL`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NOT null`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS not NULL`, []);
+        testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} Is nOt NuLL`, []);
       }
 
       // this is a scenario that was failing because "or" didn't accept "null"
@@ -1089,22 +1077,13 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=null', []);
 
       for (const field of supportedFieldTypes) {
-        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)}Field IS NULL`, []);
-        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)}Field IS null`, []);
-        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)}Field is null`, []);
-        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)}Field is NULL`, []);
-        testErrorsAndWarnings(
-          `from a_index | eval ${fieldNameFromType(field)}Field IS NOT NULL`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | eval ${fieldNameFromType(field)}Field IS NOT null`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | eval ${fieldNameFromType(field)}Field IS not NULL`,
-          []
-        );
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NULL`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS null`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} is null`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} is NULL`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NOT NULL`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NOT null`, []);
+        testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS not NULL`, []);
       }
 
       for (const nesting of NESTED_DEPTHS) {
