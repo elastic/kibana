@@ -396,6 +396,7 @@ enabled:
   - x-pack/test/functional/apps/saved_objects_management/config.ts
   - x-pack/test/functional/apps/saved_query_management/config.ts
   - x-pack/test/functional/apps/security/config.ts
+  - x-pack/test/functional/apps/search_playground/config.ts
   - x-pack/test/functional/apps/snapshot_restore/config.ts
   - x-pack/test/functional/apps/spaces/config.ts
   - x-pack/test/functional/apps/status_page/config.ts
