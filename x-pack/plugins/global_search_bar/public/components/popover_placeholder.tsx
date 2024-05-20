@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
-import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { FC, ReactElement } from 'react';
+import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-interface PopoverPlaceholderProps {
-  basePath: string;
+export interface PopoverPlaceholderProps {
+  placeholderImage: ReactElement;
 }
 
-export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath }) => {
-  const { colorMode } = useEuiTheme();
-
+export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ placeholderImage }) => {
   return (
     <EuiFlexGroup
       style={{ minHeight: 300 }}
@@ -27,16 +24,7 @@ export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ basePath }) =>
       justifyContent="center"
     >
       <EuiFlexItem grow={false}>
-        <EuiImage
-          alt={i18n.translate('xpack.globalSearchBar.searchBar.noResultsImageAlt', {
-            defaultMessage: 'Illustration of black hole',
-          })}
-          size="fullWidth"
-          url={`${basePath}illustration_product_no_search_results_${
-            colorMode === 'DARK' ? 'dark' : 'light'
-          }.svg`}
-        />
-
+        {placeholderImage}
         <EuiText size="m">
           <p>
             <FormattedMessage
