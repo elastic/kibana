@@ -10,6 +10,9 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
+  EuiButtonIcon,
+  EuiCode,
+  EuiCopy,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -127,6 +130,107 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
             </EuiFlexGroup>
           }
           footer={
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="center" gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <EuiText size="s">
+                      <EuiText size="s">
+                        ID: <EuiCode>{connector.id}</EuiCode>
+                      </EuiText>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiCopy textToCopy={connector.id}>
+                      {(copy) => (
+                        <EuiButtonIcon
+                          onClick={copy}
+                          color="text"
+                          iconType="copyClipboard"
+                          aria-label="Help"
+                        />
+                      )}
+                    </EuiCopy>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {[ConnectorStatus.CONNECTED, ConnectorStatus.CONFIGURED].includes(
+                  connector.status
+                ) && connector.index_name ? (
+                  <EuiButtonEmptyTo
+                    size="s"
+                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                      connectorId: connector.id,
+                      tabId: ConnectorDetailTabId.CONFIGURATION,
+                    })}
+                  >
+                    {configureLabel}
+                  </EuiButtonEmptyTo>
+                ) : (
+                  <EuiButtonTo
+                    color="primary"
+                    size="s"
+                    fill
+                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                      connectorId: connector.id,
+                      tabId: ConnectorDetailTabId.CONFIGURATION,
+                    })}
+                  >
+                    {configureLabel}
+                  </EuiButtonTo>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <StatCard
+          title={i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.indexTitle', {
+            defaultMessage: 'Attached index',
+          })}
+          content={
+            connector.index_name ? (
+              indexData ? (
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge>{connector.index_name}</EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="xs">
+                      <EuiFlexItem grow={false}>
+                        <EuiHealth color="success" />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          {i18n.translate('xpack.enterpriseSearch.content.conectors.indexHealth', {
+                            defaultMessage: 'Healthy',
+                          })}
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ) : (
+                <EuiText size="s" color="warning">
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.connectors.connectorStats.indexDoesntExistLabel',
+                    {
+                      defaultMessage: "Index doesn't exist",
+                    }
+                  )}
+                </EuiText>
+              )
+            ) : (
+              <EuiText size="s" color="danger">
+                {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndexLabel', {
+                  defaultMessage: 'No index attached yet',
+                })}
+              </EuiText>
+            )
+          }
+          footer={
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -161,73 +265,6 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                 >
                   {seeDocumentsLabel}
                 </EuiButtonEmptyTo>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <StatCard
-          title={i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.indexTitle', {
-            defaultMessage: 'Index',
-          })}
-          content={
-            connector.index_name ? (
-              indexData ? (
-                <EuiFlexGroup justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge>{connector.index_name}</EuiBadge>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiHealth color="success" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : (
-                <EuiText size="s" color="warning">
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.connectors.connectorStats.indexDoesntExistLabel',
-                    {
-                      defaultMessage: "Index doesn't exist",
-                    }
-                  )}
-                </EuiText>
-              )
-            ) : (
-              <EuiText size="s" color="danger">
-                {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.noIndexLabel', {
-                  defaultMessage: 'No index attached yet',
-                })}
-              </EuiText>
-            )
-          }
-          footer={
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                {[ConnectorStatus.CONNECTED, ConnectorStatus.CONFIGURED].includes(
-                  connector.status
-                ) && connector.index_name ? (
-                  <EuiButtonEmptyTo
-                    size="s"
-                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                      connectorId: connector.id,
-                      tabId: ConnectorDetailTabId.CONFIGURATION,
-                    })}
-                  >
-                    {configureLabel}
-                  </EuiButtonEmptyTo>
-                ) : (
-                  <EuiButtonTo
-                    color="primary"
-                    size="s"
-                    fill
-                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                      connectorId: connector.id,
-                      tabId: ConnectorDetailTabId.CONFIGURATION,
-                    })}
-                  >
-                    {configureLabel}
-                  </EuiButtonTo>
-                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           }
