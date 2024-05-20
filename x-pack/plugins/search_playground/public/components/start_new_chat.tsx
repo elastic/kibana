@@ -103,7 +103,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
             fill
             iconType="arrowRight"
             iconSide="right"
-            data-test-subj='startChatButton'
+            data-test-subj="startChatButton"
             disabled={
               !watch(ChatFormFields.indices, [])?.length ||
               !Object.keys(connectors || {}).length ||
