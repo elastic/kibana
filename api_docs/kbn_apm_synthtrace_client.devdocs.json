@@ -2632,7 +2632,9 @@
           " | ",
           "PodMetricsDocument",
           " | ",
-          "ContainerMetricsDocument"
+          "DockerContainerMetricsDocument",
+          " | ",
+          "K8sContainerMetricsDocument"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
         "deprecated": false,
@@ -2926,14 +2928,14 @@
           },
           {
             "parentPluginId": "@kbn/apm-synthtrace-client",
-            "id": "def-common.infra.container",
+            "id": "def-common.infra.dockerContainer",
             "type": "Function",
             "tags": [],
-            "label": "container",
+            "label": "dockerContainer",
             "description": [],
             "signature": [
-              "(id: string, uid: string, nodeName: string) => ",
-              "Container"
+              "(id: string) => ",
+              "DockerContainer"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
             "deprecated": false,
@@ -2942,34 +2944,63 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.infra.container.$1",
+                "id": "def-common.infra.dockerContainer.$1",
                 "type": "string",
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/container.ts",
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/docker_container.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.infra.k8sContainer",
+            "type": "Function",
+            "tags": [],
+            "label": "k8sContainer",
+            "description": [],
+            "signature": [
+              "(id: string, uid: string, nodeName: string) => ",
+              "K8sContainer"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/apm-synthtrace-client",
+                "id": "def-common.infra.k8sContainer.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_container.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.infra.container.$2",
+                "id": "def-common.infra.k8sContainer.$2",
                 "type": "string",
                 "tags": [],
                 "label": "uid",
                 "description": [],
-                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/container.ts",
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_container.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/apm-synthtrace-client",
-                "id": "def-common.infra.container.$3",
+                "id": "def-common.infra.k8sContainer.$3",
                 "type": "string",
                 "tags": [],
                 "label": "nodeName",
                 "description": [],
-                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/container.ts",
+                "path": "packages/kbn-apm-synthtrace-client/src/lib/infra/k8s_container.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

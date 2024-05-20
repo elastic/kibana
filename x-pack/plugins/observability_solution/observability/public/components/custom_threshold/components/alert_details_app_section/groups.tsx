@@ -60,7 +60,6 @@ export function Groups({ groups, timeRange }: { groups: Group[]; timeRange: Time
                 <EuiLink
                   data-test-subj="o11yCustomThresholdAlertSourceLink"
                   href={sourceLinks[group.field]}
-                  target="_blank"
                 >
                   {group.value}
                 </EuiLink>

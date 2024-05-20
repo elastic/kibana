@@ -6,12 +6,23 @@
  */
 
 import { useMemo } from 'react';
+import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
+import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+import type { RiskEngineEnableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
+import type {
+  RiskScoresPreviewRequest,
+  RiskScoresPreviewResponse,
+} from '../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import type {
   RiskScoresEntityCalculationRequest,
   RiskScoresEntityCalculationResponse,
 } from '../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
 import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
-import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
+import type {
+  AssetCriticalityRecord,
+  EntityAnalyticsPrivileges,
+} from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
@@ -27,16 +38,6 @@ import {
   ASSET_CRITICALITY_CSV_UPLOAD_URL,
   RISK_SCORE_ENTITY_CALCULATION_URL,
 } from '../../../common/constants';
-
-import type {
-  CalculateScoresResponse,
-  EnableRiskEngineResponse,
-  GetRiskEngineStatusResponse,
-  InitRiskEngineResponse,
-  DisableRiskEngineResponse,
-} from '../../../server/lib/entity_analytics/types';
-import type { RiskScorePreviewRequestSchema } from '../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
-import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
 import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
@@ -56,9 +57,9 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params: RiskScorePreviewRequestSchema;
+      params: RiskScoresPreviewRequest;
     }) =>
-      http.fetch<CalculateScoresResponse>(RISK_SCORE_PREVIEW_URL, {
+      http.fetch<RiskScoresPreviewResponse>(RISK_SCORE_PREVIEW_URL, {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),
@@ -69,7 +70,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Fetches risks engine status
      */
     const fetchRiskEngineStatus = ({ signal }: { signal?: AbortSignal }) =>
-      http.fetch<GetRiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
+      http.fetch<RiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
         version: '1',
         method: 'GET',
         signal,
@@ -79,7 +80,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Init risk score engine
      */
     const initRiskEngine = () =>
-      http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
+      http.fetch<RiskEngineInitResponse>(RISK_ENGINE_INIT_URL, {
         version: '1',
         method: 'POST',
       });
@@ -88,7 +89,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Enable risk score engine
      */
     const enableRiskEngine = () =>
-      http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
+      http.fetch<RiskEngineEnableResponse>(RISK_ENGINE_ENABLE_URL, {
         version: '1',
         method: 'POST',
       });
@@ -97,7 +98,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Disable risk score engine
      */
     const disableRiskEngine = () =>
-      http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
+      http.fetch<RiskEngineDisableResponse>(RISK_ENGINE_DISABLE_URL, {
         version: '1',
         method: 'POST',
       });
