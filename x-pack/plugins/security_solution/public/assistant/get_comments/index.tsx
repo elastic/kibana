@@ -76,7 +76,6 @@ export const getComments = ({
   setIsStreaming: (isStreaming: boolean) => void;
 }): EuiCommentProps[] => {
   if (!currentConversation) return [];
-  console.log('heyo ', { currentConversation, isEnabledLangChain });
 
   const regenerateMessageOfConversation = () => {
     regenerateMessage(currentConversation.id);
