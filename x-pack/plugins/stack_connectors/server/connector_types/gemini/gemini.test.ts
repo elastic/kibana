@@ -4,15 +4,10 @@ import {
   Config,
   Secrets,
   RunActionParams,
-  RunActionResponse,
-  RunApiLatestResponse,
-  InvokeAIActionParams
+  RunActionResponse
 } from '../../../common/gemini/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { Logger } from '@kbn/logging';
-import {
-    RunApiLatestResponseSchema
-  } from 'x-pack/plugins/stack_connectors/common/gemini/schema';
   import type {
     Services
   } from 'x-pack/plugins/actions/server/types';
@@ -29,6 +24,8 @@ import {
     AxiosResponse,
     AxiosHeaders
   } from 'axios';
+import { RunApiResponse } from '@kbn/stack-connectors-plugin/common/gemini/types';
+import { RunApiResponseSchema } from '@kbn/stack-connectors-plugin/common/gemini/schema';
 
 
 jest.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', () => ({
@@ -152,7 +149,7 @@ describe('GeminiConnector', () => {
         gcpProjectID: 'my-project-12345',
       },
       secrets: {
-        accessToken: 'fake-access-token',
+        credentialsJson: 'some-random-string' 
       },
       logger: mockLogger,
       services: mockServices,
@@ -189,7 +186,7 @@ describe('GeminiConnector', () => {
             model: 'test-model'
         };
 
-        const mockApiResponse: AxiosResponse<RunApiLatestResponse> = {
+        const mockApiResponse: AxiosResponse<RunApiResponse> = {
             data: {
                 candidates: [{
                     content: {
@@ -215,7 +212,7 @@ describe('GeminiConnector', () => {
               (connector as jest.MockedFunction<any>).mockResolvedValueOnce(mockApiResponse);
 
 
-        const response = await connector.runTestApi(runActionParams);
+        const response = await connector.runApi(runActionParams);
 
         // Assert that the request was made with the correct parameters
         expect(connector).toHaveBeenCalledWith({
@@ -226,7 +223,7 @@ describe('GeminiConnector', () => {
                 'Authorization': 'Bearer fake-access-token',
                 'Content-Type': 'application/json'
             },
-            responseSchema: RunApiLatestResponseSchema
+            responseSchema: RunApiResponseSchema
         });
         
         // Assert the response
@@ -239,10 +236,10 @@ describe('GeminiConnector', () => {
 
   describe('invokeAI', () => {
     it('should call runApi with the correct parameters and return the response', async () => {
-      const invokeParams: InvokeAIActionParams = {
-        messages: [{ role: 'user', content: 'Hello' }],
+      const invokeParams: RunActionParams = {
+        body: 'Hello',
         model: 'my-model',
-        temperature: 0.5,
+        signal: 0.5,
         timeout: 5000,
       };
 
@@ -252,10 +249,10 @@ describe('GeminiConnector', () => {
 
       jest.spyOn(connector, 'runApi' as any).mockResolvedValueOnce(mockRunApiResponse);
 
-      const result = await connector.invokeAI(invokeParams);
+      const result = await connector.runApi(invokeParams);
 
       expect(connector.runApi).toHaveBeenCalledWith({
-        body: JSON.stringify({ messages: invokeParams.messages }),
+        body: JSON.stringify({ messages: invokeParams.body }),
         model: invokeParams.model,
         timeout: invokeParams.timeout,
       });
