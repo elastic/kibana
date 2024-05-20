@@ -16,6 +16,16 @@ export type Event = {
     object: string;
 };
 
+export type Pod = {
+    message: string;
+    state: string;
+    namespace: string;
+    time: string;
+    name: string;
+    node: string;
+    failingReason: Event;
+};
+
 export type PodMem = {
     name: string;
     namespace: string;

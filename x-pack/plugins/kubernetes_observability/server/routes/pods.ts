@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, phaseToState, Event, checkDefaultNamespace } from '../lib/utils';
+import {extractFieldValue, phaseToState, Event, Pod, checkDefaultNamespace } from '../lib/utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
     POD_STATUS_ROUTE,
@@ -26,7 +26,7 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              name: schema.string(),
+              name: schema.maybe(schema.string()),
               namespace: schema.maybe(schema.string()),
             }),
           },
@@ -35,83 +35,97 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
       async (context, request, response) => {
         var namespace = checkDefaultNamespace(request.query.namespace);
         console.log("namespace:"+namespace)
-        const client = (await context.core).elasticsearch.client.asCurrentUser;
-        const musts = [
-            {
-                term: {
-                  'resource.attributes.k8s.pod.name': request.query.name,
+        var podNames = new Array();
+        if (request.query.name !== undefined) {
+          podNames.push(request.query.name);
+        };
+      
+        if (request.query.name === undefined) {
+          var podmusts = new Array();
+          podmusts.push(
+            { exists: { field: 'resource.attributes.k8s.pod.name' } }
+          )
+          if (request.query.namespace !== undefined) {
+            podmusts.push(
+                {
+                    term: {
+                        'resource.attributes.k8s.namespace.name': request.query.namespace,
+                    },
                 },
-              },
-              {
-                term: {
-                  'resource.attributes.k8s.namespace.name': namespace,
-                },
-              },
-              { exists: { field: 'metrics.k8s.pod.phase' } }
-          ];
-        const dsl: estypes.SearchRequest = {
+            )
+          };
+          const dslPods: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
-            size: 1,
-            sort: [{ '@timestamp': 'desc' }],
             _source: false,
             fields: [
-              '@timestamp',
-              'metrics.k8s.pod.phase',
-              'resource.attributes.k8s.*',
+            'resource.attributes.k8s.pod.name',
             ],
             query: {
-              bool: {
-                must: musts,
-              },
+            bool: {
+                must: podmusts,
             },
-        };
-
-        const esResponse = await client.search(dsl);
-        console.log(esResponse);
-        console.log(esResponse.hits.hits.length);
-        if (esResponse.hits.hits.length > 0) {
-        const hit = esResponse.hits.hits[0];
-        const { fields = {} } = hit;
-        const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
-        const nodeName = extractFieldValue(fields['resource.attributes.k8s.node.name']);
-        const time = extractFieldValue(fields['@timestamp']);
-        const state = phaseToState(podPhase);
-        var failingReason = {} as Event;
-        if (state !== 'Succeeded' && state !== 'Running') {
-          const event = await getPodEvents(client, request.query.name, namespace);
-          if (event.note != '') {
-            failingReason = event;
+            },
+            aggs: {
+                unique_values: {
+                    terms: { field: 'resource.attributes.k8s.pod.name' },
+                },
+            },
+          };
+          const podEsclient = (await context.core).elasticsearch.client.asCurrentUser;
+          const podEsResponse = await podEsclient.search(dslPods);
+          const { after_key: _, buckets = [] } = (podEsResponse.aggregations?.unique_values || {}) as any;
+          if (buckets.length > 0) {
+            buckets.map((bucket: any) => {
+              const podName = bucket.key;
+              podNames.push(podName);
+            });
           }
+        }
+
+        const client = (await context.core).elasticsearch.client.asCurrentUser;
+        if (podNames.length === 0){
+          const message =  `Pod ${request.query.namespace}/${request.query.name} not found`
+          return response.ok({
+              body: {
+                time: '',
+                message: message,
+                name: request.query.name,
+                namespace: request.query.namespace,
+                reason: "Not found",
+              },
+            });
+        }
+
+        if (podNames.length === 1) {
+          const podObject = await getPodStatus(client, podNames[0], request.query.namespace);
+          return response.ok({
+            body: {
+              time: podObject.time,
+              message: podObject.message,
+              state: podObject.state,
+              name: podObject.name,
+              namespace: podObject.namespace,
+              node: podObject.node,
+              failingReason: podObject.failingReason,
+            },
+          });
+        }
+        var podObjects = new Array();
+        for (const name of podNames) {
+           const podObject = await getPodStatus(client, name, request.query.namespace);
+           podObjects.push(podObject);
         }
         return response.ok({
           body: {
-            time: time,
-            message: "Pod " + namespace + "/" + request.query.name + " is in " + state + " state",
-            state: state,
-            name: request.query.name,
-            namespace: namespace,
-            node: nodeName,
-            failingReason: failingReason,
+            time: podObjects[0].time,
+            pods: podObjects
           },
         });
-      } else {
-        const message =  `Pod ${namespace}/${request.query.name} not found`
-        return response.ok({
-            body: {
-              time: '',
-              message: message,
-              name: request.query.name,
-              namespace: namespace,
-              reason: "Not found",
-            },
-          });
-      }
       }
     );
 };
 
-export async function getPodEvents(client: any, podName: string, namespace: string): Promise<Event>{
-
+export async function getPodEvents(client: any, podName: string, namespace?: string): Promise<Event>{
   const musts = [
     {
         term: {
@@ -174,4 +188,76 @@ export async function getPodEvents(client: any, podName: string, namespace: stri
     };
   }
   return event;
+}
+
+
+export async function getPodStatus(client: any, podName: string, namespace?: string): Promise<Pod>{
+
+  var musts = new Array();
+  musts.push(
+    {
+      term: {
+        'resource.attributes.k8s.pod.name': podName,
+      },
+    },
+    { exists: { field: 'metrics.k8s.pod.phase' } }
+  )
+  if (namespace !== undefined) {
+    musts.push(
+       {
+        term: {
+          'resource.attributes.k8s.namespace.name': namespace,
+        },
+      }
+    )
+  }
+ 
+  const dsl: estypes.SearchRequest = {
+    index: ["metrics-otel.*"],
+    size: 1,
+    sort: [{ '@timestamp': 'desc' }],
+    _source: false,
+    fields: [
+      '@timestamp',
+      'metrics.k8s.pod.phase',
+      'resource.attributes.k8s.*',
+    ],
+    query: {
+      bool: {
+        must: musts,
+      },
+    },
+  };
+
+  const esResponse = await client.search(dsl);
+  console.log(esResponse);
+  console.log(esResponse.hits.hits.length);
+  var pod = {} as Pod;
+  if (esResponse.hits.hits.length > 0) {
+    const hit = esResponse.hits.hits[0];
+    const { fields = {} } = hit;
+    const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
+    const nodeName = extractFieldValue(fields['resource.attributes.k8s.node.name']);
+    const time = extractFieldValue(fields['@timestamp']);
+    const state = phaseToState(podPhase);
+    const podNamespace =  extractFieldValue(fields['resource.attributes.k8s.namespace.name']);
+    var failingReason = {} as Event;
+    if (state !== 'Succeeded' && state !== 'Running') {
+      const event = await getPodEvents(client, podName, podNamespace);
+      if (event.note != '') {
+        failingReason = event;
+      }
+    }
+    pod = {
+      time: time,
+      message: "Pod " + podNamespace + "/" + podName + " is in " + state + " state",
+      state: state,
+      name: podName,
+      namespace: podNamespace,
+      node: nodeName,
+      failingReason: failingReason,
+    }
+}
+
+  return pod;
 }
