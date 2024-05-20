@@ -213,6 +213,7 @@ const getActionDetailsList = async ({
       userIds,
       unExpiredOnly,
       types,
+      logger,
     });
   } catch (error) {
     // all other errors

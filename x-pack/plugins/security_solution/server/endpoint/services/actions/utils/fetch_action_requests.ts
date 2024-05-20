@@ -11,11 +11,28 @@ import type {
   QueryDslBoolQuery,
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { stringify } from '../../../utils/stringify';
 import { getDateFilters } from '../..';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
 import { catchAndWrapError } from '../../../utils';
 import type { LogsEndpointAction } from '../../../../../common/endpoint/types';
 import type { GetActionDetailsListParam } from '../action_list';
+
+export type FetchActionRequestsOptions = Pick<
+  GetActionDetailsListParam,
+  | 'agentTypes'
+  | 'commands'
+  | 'elasticAgentIds'
+  | 'esClient'
+  | 'endDate'
+  | 'from'
+  | 'size'
+  | 'startDate'
+  | 'userIds'
+  | 'unExpiredOnly'
+  | 'types'
+  | 'logger'
+>;
 
 /**
  * Fetches a list of Action Requests from the Endpoint action request index (not fleet)
@@ -43,10 +60,8 @@ export const fetchActionRequests = async ({
   userIds,
   unExpiredOnly,
   types,
-}: Omit<GetActionDetailsListParam, 'logger'>): Promise<LogsEndpointAction[]> => {
-  // TODO:PT detach options type from `GetActionDetailsListParams`
-  // TODO:PT maybe add a `logger` and log query and response?0
-
+  logger,
+}: FetchActionRequestsOptions): Promise<LogsEndpointAction[]> => {
   const additionalFilters = [];
 
   if (commands?.length) {
@@ -93,6 +108,8 @@ export const fetchActionRequests = async ({
     },
     sort: [{ '@timestamp': { order: 'desc' } }],
   };
+
+  logger.debug(`Searching for actions requests with:\n${stringify(actionsSearchQuery)}`);
 
   const actionRequests = await esClient
     .search<LogsEndpointAction>(actionsSearchQuery, { ignore: [404] })
