@@ -772,6 +772,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           }
           setIsPopoverVisible(false);
         },
+        className: 'integrationWrapper',
       })),
     },
   ];
@@ -1166,6 +1167,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                             if (content) {
                               codeRef.current = content || editor.getValue();
                             }
+                          });
+
+                          monaco.languages.setLanguageConfiguration(ESQL_LANG_ID, {
+                            wordPattern: /'?\w[\w'-.]*[?!,;:"]*/,
                           });
 
                           // this is fixing a bug between the EUIPopover and the monaco editor
