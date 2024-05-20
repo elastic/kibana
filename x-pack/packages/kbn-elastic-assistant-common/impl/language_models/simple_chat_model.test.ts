@@ -113,7 +113,7 @@ describe('ActionsClientSimpleChatModel', () => {
         callMessages,
         callOptions,
         callRunManager
-      ); // ignore the result
+      );
 
       expect(result).toEqual(mockActionResponse.message);
     });
