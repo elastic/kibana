@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCodeBlock,
-  EuiContextMenu,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiIcon,
-  EuiPopover,
-  EuiTitle,
-  EuiToolTip,
-} from '@elastic/eui';
+import React, { FunctionComponent, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent, useState } from 'react';
+import {
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiTitle,
+  EuiDescriptionList,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiButton,
+  EuiBadge,
+  EuiCodeBlock,
+  EuiToolTip,
+} from '@elastic/eui';
 
 import { Pipeline } from '../../../../common/types';
 
-import { stringifyJson } from '../../lib/utils';
-import { PipelineDetailsJsonBlock } from './details_json_block';
 import { deprecatedPipelineBadge } from './table';
+import { PipelineDetailsJsonBlock } from './details_json_block';
+import { stringifyJson } from '../../lib/utils';
 
 export interface Props {
   pipeline: Pipeline;

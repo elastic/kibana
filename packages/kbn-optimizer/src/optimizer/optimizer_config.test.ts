@@ -24,11 +24,11 @@ jest.mock('os', () => {
   };
 });
 
-import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
-import { parseThemeTags } from '../common';
 import { OptimizerConfig, ParsedOptions } from './optimizer_config';
+import { parseThemeTags } from '../common';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 

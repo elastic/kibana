@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useCallback, useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
+import { useForm, Form, FormConfig } from '../../../shared_imports';
 import { Pipeline, Processor } from '../../../../common/types';
-import { Form, FormConfig, useForm } from '../../../shared_imports';
 
-import { OnUpdateHandler, OnUpdateHandlerArg } from '../pipeline_editor';
+import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
 
-import { PipelineFormError } from './pipeline_form_error';
-import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
+import { PipelineFormFields } from './pipeline_form_fields';
+import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
 import { PipelineForm as IPipelineForm } from './types';
 

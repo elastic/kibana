@@ -6,7 +6,7 @@
  */
 
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import { fatalError, toasts } from './notification';
+import { toasts, fatalError } from './notification';
 
 interface CommonErrorBody {
   statusCode: number;

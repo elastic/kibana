@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { XYZTMSSource } from './xyz_tms_source';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { XYZTMSSourceDescriptor } from '../../../../common/descriptor_types';
-import { XYZTMSSource } from './xyz_tms_source';
 
 const descriptor: XYZTMSSourceDescriptor = {
   type: SOURCE_TYPES.EMS_XYZ,

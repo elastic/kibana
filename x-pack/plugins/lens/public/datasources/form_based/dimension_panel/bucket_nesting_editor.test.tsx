@@ -7,9 +7,9 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { IndexPatternField } from '../../../types';
-import { GenericIndexPatternColumn } from '../form_based';
 import { BucketNestingEditor } from './bucket_nesting_editor';
+import { GenericIndexPatternColumn } from '../form_based';
+import { IndexPatternField } from '../../../types';
 
 const fieldMap: Record<string, IndexPatternField> = {
   a: { displayName: 'a' } as IndexPatternField,

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { PluginStart as DataPluginStart, ISearchStrategy } from '@kbn/data-plugin/server';
-import type {
-  IEsSearchRequest,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
-} from '@kbn/search-types';
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
 import { concatMap, filter, map, shareReplay, take } from 'rxjs';
+import type {
+  IKibanaSearchResponse,
+  IKibanaSearchRequest,
+  IEsSearchRequest,
+} from '@kbn/search-types';
+import type { ISearchStrategy, PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { getLogEntryCursorFromHit } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   LogEntrySearchRequestParams,
-  LogEntrySearchResponsePayload,
   logEntrySearchRequestParamsRT,
+  LogEntrySearchResponsePayload,
   logEntrySearchResponsePayloadRT,
 } from '../../../common/search_strategies/log_entries/log_entry';
 import {
@@ -28,7 +28,7 @@ import {
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
 import { LogViewsServiceStart } from '../log_views/types';
-import { LogEntryHit, createGetLogEntryQuery, getLogEntryResponseRT } from './queries/log_entry';
+import { createGetLogEntryQuery, getLogEntryResponseRT, LogEntryHit } from './queries/log_entry';
 
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;

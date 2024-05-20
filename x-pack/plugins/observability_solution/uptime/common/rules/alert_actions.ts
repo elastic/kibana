@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import type {
-  EmailActionParams,
   IndexActionParams,
-  JiraActionParams,
   PagerDutyActionParams,
   ServerLogActionParams,
   ServiceNowActionParams,
+  JiraActionParams,
   WebhookActionParams,
+  EmailActionParams,
 } from '@kbn/stack-connectors-plugin/server/connector_types';
+import { RuleAction as RuleActionOrig } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
-import { DefaultEmail } from '../runtime_types';
 import { ActionConnector, ActionTypeId } from './types';
+import { DefaultEmail } from '../runtime_types';
 
 export const SLACK_WEBHOOK_ACTION_ID: ActionTypeId = '.slack';
 export const PAGER_DUTY_ACTION_ID: ActionTypeId = '.pagerduty';

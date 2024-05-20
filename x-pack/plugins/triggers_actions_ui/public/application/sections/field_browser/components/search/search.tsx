@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFieldSearch } from '@elastic/eui';
 import React from 'react';
+import { EuiFieldSearch } from '@elastic/eui';
 import * as i18n from '../../translations';
 interface Props {
   isSearching: boolean;

@@ -10,7 +10,7 @@ import { EuiSideNavItemType } from '@elastic/eui';
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { KibanaLogic } from '../kibana';
-import { ReactRouterProps, generateReactRouterProps } from '../react_router_helpers';
+import { generateReactRouterProps, ReactRouterProps } from '../react_router_helpers';
 import { GeneratedReactRouterProps } from '../react_router_helpers/generate_react_router_props';
 
 interface Params {

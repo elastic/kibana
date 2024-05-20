@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import fastIsEqual from 'fast-deep-equal';
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, map, skip, startWith } from 'rxjs';
+import { map, distinctUntilChanged, skip, startWith } from 'rxjs';
+import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { FilterableEmbeddableInput } from './types';
 
 export const shouldRefreshFilterCompareOptions = {
@@ -19,7 +19,7 @@ export const shouldRefreshFilterCompareOptions = {
 };
 
 export function shouldFetch$<
-  TFilterableEmbeddableInput extends FilterableEmbeddableInput = FilterableEmbeddableInput,
+  TFilterableEmbeddableInput extends FilterableEmbeddableInput = FilterableEmbeddableInput
 >(
   updated$: Observable<unknown>,
   getInput: () => TFilterableEmbeddableInput

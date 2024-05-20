@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
-import { Meta } from '@storybook/react';
 import React, { ComponentProps, useEffect } from 'react';
+import { Meta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { RulesList, RulesListProps } from './rules_list';
 

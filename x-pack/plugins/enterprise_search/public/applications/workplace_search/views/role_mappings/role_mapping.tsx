@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 
-import { AttributeSelector, RoleMappingFlyout, RoleSelector } from '../../../shared/role_mapping';
+import { AttributeSelector, RoleSelector, RoleMappingFlyout } from '../../../shared/role_mapping';
 
 import { Role } from '../../types';
 

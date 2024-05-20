@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
 import { Mask } from '../../../../layers/vector_layer/mask';
 import { IStyleProperty } from '../../properties/style_property';

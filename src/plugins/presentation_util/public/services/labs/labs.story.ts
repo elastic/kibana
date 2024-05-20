@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EnvironmentName, Project, projectIDs } from '../../../common';
-import { ProjectID, SolutionName, getProjectIDs, projects } from '../../../common';
+import { EnvironmentName, projectIDs, Project } from '../../../common';
 import { PluginServiceFactory } from '../create';
-import { PresentationLabsService, applyProjectStatus, isEnabledByStorageValue } from './types';
+import { projects, ProjectID, getProjectIDs, SolutionName } from '../../../common';
+import { PresentationLabsService, isEnabledByStorageValue, applyProjectStatus } from './types';
 
 export type LabsServiceFactory = PluginServiceFactory<PresentationLabsService>;
 
@@ -17,19 +17,16 @@ export const labsServiceFactory: LabsServiceFactory = () => {
   const storage = window.sessionStorage;
 
   const getProjects = (solutions: SolutionName[] = []) =>
-    projectIDs.reduce(
-      (acc, id) => {
-        const project = getProject(id);
-        if (
-          solutions.length === 0 ||
-          solutions.some((solution) => project.solutions.includes(solution))
-        ) {
-          acc[id] = project;
-        }
-        return acc;
-      },
-      {} as { [id in ProjectID]: Project }
-    );
+    projectIDs.reduce((acc, id) => {
+      const project = getProject(id);
+      if (
+        solutions.length === 0 ||
+        solutions.some((solution) => project.solutions.includes(solution))
+      ) {
+        acc[id] = project;
+      }
+      return acc;
+    }, {} as { [id in ProjectID]: Project });
 
   const getProject = (id: ProjectID) => {
     const project = projects[id];

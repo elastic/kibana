@@ -17,7 +17,9 @@
         "detector_index": 0
       }
     ],
-    "influencers": ["airline"]
+    "influencers": [
+      "airline"
+    ]
   },
   "analysis_limits": {
     "model_memory_limit": "13mb",
@@ -67,7 +69,9 @@
     "datafeed_id": "datafeed-mock-job-id",
     "job_id": "mock-job-id",
     "query_delay": "86658ms",
-    "indices": ["farequote-2017"],
+    "indices": [
+      "farequote-2017"
+    ],
     "query": {
       "match_all": {
         "boost": 1

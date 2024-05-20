@@ -12,17 +12,16 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import { transformError } from '@kbn/securitysolution-es-utils';
+import type { SavedObjectsClientContract, Logger, ElasticsearchClient } from '@kbn/core/server';
 import type {
   AgentPolicyServiceInterface,
   AgentService,
-  PackagePolicyClient,
   PackageService,
+  PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment';
-import type { CloudDefendSetupStatus, CloudDefendStatusCode, IndexStatus } from '../../../common';
+import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ALERTS_INDEX_PATTERN_DEFAULT_NS,
   FILE_INDEX_PATTERN_DEFAULT_NS,
@@ -30,14 +29,15 @@ import {
   PROCESS_INDEX_PATTERN_DEFAULT_NS,
   STATUS_ROUTE_PATH,
 } from '../../../common/constants';
-import { checkIndexStatus } from '../../lib/check_index_status';
+import type { CloudDefendApiRequestHandlerContext, CloudDefendRouter } from '../../types';
+import type { CloudDefendSetupStatus, CloudDefendStatusCode, IndexStatus } from '../../../common';
 import {
   getAgentStatusesByAgentPolicies,
   getCloudDefendAgentPolicies,
   getCloudDefendPackagePolicies,
   getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
-import type { CloudDefendApiRequestHandlerContext, CloudDefendRouter } from '../../types';
+import { checkIndexStatus } from '../../lib/check_index_status';
 
 interface CloudDefendStatusDependencies {
   logger: Logger;

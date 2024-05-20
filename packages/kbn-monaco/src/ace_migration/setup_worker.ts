@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { monaco } from '../monaco_imports';
 import { ParserWorker } from './types';
+import { monaco } from '../monaco_imports';
 import { WorkerProxyService } from './worker_proxy';
 
 export const setupWorker = (

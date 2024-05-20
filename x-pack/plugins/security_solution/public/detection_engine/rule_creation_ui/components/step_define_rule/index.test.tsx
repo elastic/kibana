@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React, { useEffect, useState } from 'react';
+import { screen, fireEvent, render, within, act, waitFor } from '@testing-library/react';
+import type { Type as RuleType } from '@kbn/securitysolution-io-ts-alerting-types';
 import { StepDefineRule, aggregatableFields } from '.';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { TestProviders } from '../../../../common/mock';
 import { useRuleFromTimeline } from '../../../../detections/containers/detection_engine/rules/use_rule_from_timeline';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { TestProviders } from '../../../../common/mock';
+import { schema as defineRuleSchema } from './schema';
 import { stepDefineDefaultValue } from '../../../../detections/pages/detection_engine/rules/utils';
 import type { FormSubmitHandler } from '../../../../shared_imports';
 import { useForm } from '../../../../shared_imports';
+import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { fleetIntegrationsApi } from '../../../fleet_integrations/api/__mocks__';
-import { schema as defineRuleSchema } from './schema';
 
 // Mocks integrations
 jest.mock('../../../fleet_integrations/api');

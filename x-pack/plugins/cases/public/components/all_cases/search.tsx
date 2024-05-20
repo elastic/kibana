@@ -7,8 +7,8 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import type { FilterOptions } from '../../containers/types';
 import * as i18n from './translations';
+import type { FilterOptions } from '../../containers/types';
 
 interface TableSearchComponentProps {
   filterOptionsSearch: string;

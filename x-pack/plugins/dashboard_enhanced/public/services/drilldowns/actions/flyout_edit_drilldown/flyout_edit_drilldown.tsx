@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import React from 'react';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
-  type HasDynamicActions,
-  apiHasDynamicActions,
-} from '@kbn/embeddable-enhanced-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import {
+  tracksOverlays,
   type PresentationContainer,
   type TracksOverlays,
-  tracksOverlays,
 } from '@kbn/presentation-containers';
 import {
-  type CanAccessViewMode,
-  type EmbeddableApiContext,
-  type HasParentApi,
-  type HasSupportedTriggers,
-  type HasUniqueId,
   apiCanAccessViewMode,
   apiHasSupportedTriggers,
   getInheritedViewMode,
+  type CanAccessViewMode,
+  type EmbeddableApiContext,
+  type HasUniqueId,
+  type HasParentApi,
+  type HasSupportedTriggers,
 } from '@kbn/presentation-publishing';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import React from 'react';
-import { StartDependencies } from '../../../../plugin';
-import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import {
+  apiHasDynamicActions,
+  type HasDynamicActions,
+} from '@kbn/embeddable-enhanced-plugin/public';
+import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
+import { StartDependencies } from '../../../../plugin';
+import { createDrilldownTemplatesFromSiblings, ensureNestedTriggers } from '../drilldown_shared';
 
 export const OPEN_FLYOUT_EDIT_DRILLDOWN = 'OPEN_FLYOUT_EDIT_DRILLDOWN';
 

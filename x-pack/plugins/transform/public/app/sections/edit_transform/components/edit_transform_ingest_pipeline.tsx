@@ -7,7 +7,7 @@
 
 import React, { type FC } from 'react';
 
-import { EuiComboBox, EuiFormRow, EuiSkeletonRectangle, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

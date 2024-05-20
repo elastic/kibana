@@ -1,11 +1,3 @@
-import {
-  EuiComboBoxOptionOption,
-  EuiIcon,
-  EuiSpacer,
-  EuiToolTip,
-  useEuiPaddingSize,
-} from '@elastic/eui';
-import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,17 +7,25 @@ import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
  */
 import React from 'react';
 import { useCallback, useMemo, useState } from 'react';
+import {
+  EuiComboBoxOptionOption,
+  EuiIcon,
+  EuiSpacer,
+  EuiToolTip,
+  useEuiPaddingSize,
+} from '@elastic/eui';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { FieldConflictsInfo, getMappingConflictsInfo } from '@kbn/securitysolution-list-utils';
 import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 import * as i18n from '../translations';
-import { disabledTypesWithTooltipText } from './disabled_types_with_tooltip_text';
 import {
   ComboBoxFields,
   DataViewField,
   FieldBaseProps,
   GetFieldComboBoxPropsReturn,
 } from './types';
+import { disabledTypesWithTooltipText } from './disabled_types_with_tooltip_text';
 
 const getExistingFields = (indexPattern: DataViewBase | undefined): DataViewFieldBase[] => {
   return indexPattern != null ? indexPattern.fields : [];

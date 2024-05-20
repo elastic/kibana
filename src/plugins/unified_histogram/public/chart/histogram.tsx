@@ -6,36 +6,36 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type { Datatable, DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type {
   EmbeddableComponentProps,
   LensEmbeddableInput,
   LensEmbeddableOutput,
 } from '@kbn/lens-plugin/public';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
-import React, { useState, useRef, useEffect } from 'react';
+import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
-import { useStableCallback } from '../hooks/use_stable_callback';
 import {
   UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
-  UnifiedHistogramChartLoadEvent,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
-  UnifiedHistogramInputMessage,
+  UnifiedHistogramChartLoadEvent,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  UnifiedHistogramInputMessage,
   UnifiedHistogramVisContext,
 } from '../types';
-import { useLensProps } from './hooks/use_lens_props';
-import { useTimeRange } from './hooks/use_time_range';
 import { buildBucketInterval } from './utils/build_bucket_interval';
+import { useTimeRange } from './hooks/use_time_range';
+import { useStableCallback } from '../hooks/use_stable_callback';
+import { useLensProps } from './hooks/use_lens_props';
 
 export interface HistogramProps {
   abortController?: AbortController;

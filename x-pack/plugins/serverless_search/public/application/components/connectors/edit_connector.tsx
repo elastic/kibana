@@ -16,22 +16,22 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { copyToClipboard } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { copyToClipboard } from '@elastic/eui';
 import {
   CONNECTOR_LABEL,
   COPY_CONNECTOR_ID_LABEL,
   DELETE_CONNECTOR_LABEL,
 } from '../../../../common/i18n_string';
-import { useConnector } from '../../hooks/api/use_connector';
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { ConnectorConfiguration } from './connector_config/connector_configuration';
-import { DeleteConnectorModal } from './delete_connector_modal';
-import { EditDescription } from './edit_description';
 import { EditName } from './edit_name';
 import { EditServiceType } from './edit_service_type';
+import { EditDescription } from './edit_description';
+import { DeleteConnectorModal } from './delete_connector_modal';
+import { ConnectorConfiguration } from './connector_config/connector_configuration';
+import { useConnector } from '../../hooks/api/use_connector';
 
 export const EditConnector: React.FC = () => {
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);

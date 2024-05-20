@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { InvalidEmailReason, ValidatedEmail } from './types';
+import { ValidatedEmail, InvalidEmailReason } from './types';
 import {
-  invalidEmailsAsMessage,
-  validateEmailAddresses,
   validateEmailAddressesAsAlwaysValid,
+  validateEmailAddresses,
+  invalidEmailsAsMessage,
 } from './validate_email_addresses';
 
 const AllowedDomains = ['elastic.co', 'dev.elastic.co', 'found.no'];

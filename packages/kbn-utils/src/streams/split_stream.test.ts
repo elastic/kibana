@@ -7,7 +7,7 @@
  */
 
 import { Transform } from 'stream';
-import { createConcatStream, createPromiseFromStreams, createSplitStream } from '.';
+import { createSplitStream, createConcatStream, createPromiseFromStreams } from '.';
 
 async function split(stream: Transform, input: Array<Buffer | string>) {
   const concat = createConcatStream();

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import * as Either from 'fp-ts/lib/Either';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-internal';
-import * as Either from 'fp-ts/lib/Either';
 
 export interface RetryableEsClientError {
   type: 'retryable_es_client_error';

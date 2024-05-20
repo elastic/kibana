@@ -8,15 +8,15 @@
 
 import { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from '.';
-import { createEMSSettings } from '../common/ems_settings';
-import type { MapConfig } from '../config';
 import {
-  getIsEnterprisePlus,
   setKibanaVersion,
   setLicensingPluginStart,
   setMapConfig,
+  getIsEnterprisePlus,
 } from './kibana_services';
+import type { MapsEmsPluginPublicSetup, MapsEmsPluginPublicStart } from '.';
+import type { MapConfig } from '../config';
+import { createEMSSettings } from '../common/ems_settings';
 import { createEMSClientLazy } from './lazy_load_bundle';
 
 interface MapsEmsStartPublicDependencies {

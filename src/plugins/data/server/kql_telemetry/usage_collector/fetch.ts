@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
+import { CollectorFetchContext } from '@kbn/usage-collection-plugin/server';
 import { DEFAULT_QUERY_LANGUAGE, UI_SETTINGS } from '../../../common';
 
 const defaultSearchQueryLanguageSetting = DEFAULT_QUERY_LANGUAGE;

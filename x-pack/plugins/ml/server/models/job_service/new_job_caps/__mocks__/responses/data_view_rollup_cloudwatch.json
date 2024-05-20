@@ -22,7 +22,9 @@
         "count": 0,
         "name": "_source",
         "type": "_source",
-        "esTypes": ["_source"],
+        "esTypes": [
+          "_source"
+        ],
         "scripted": false,
         "searchable": false,
         "aggregatable": false,
@@ -32,7 +34,9 @@
         "count": 0,
         "name": "_id",
         "type": "string",
-        "esTypes": ["_id"],
+        "esTypes": [
+          "_id"
+        ],
         "scripted": false,
         "searchable": true,
         "aggregatable": false,
@@ -51,7 +55,9 @@
         "count": 0,
         "name": "_index",
         "type": "string",
-        "esTypes": ["_index"],
+        "esTypes": [
+          "_index"
+        ],
         "scripted": false,
         "searchable": true,
         "aggregatable": true,
@@ -70,7 +76,9 @@
         "count": 0,
         "name": "@timestamp",
         "type": "date",
-        "esTypes": ["date"],
+        "esTypes": [
+          "date"
+        ],
         "scripted": false,
         "searchable": true,
         "aggregatable": true,
@@ -79,7 +87,13 @@
     ],
     "timeFieldName": "@timestamp",
     "type": "rollup",
-    "metaFields": ["_source", "_id", "_type", "_index", "_score"],
+    "metaFields": [
+      "_source",
+      "_id",
+      "_type",
+      "_index",
+      "_score"
+    ],
     "version": "WzY5NjEsNF0=",
     "originalSavedObjectBody": {
       "fieldAttrs": "{}",

@@ -6,8 +6,8 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 
-import * as useLocatorModule from '../../../hooks/use_locator';
 import type { DataStream } from '../types';
+import * as useLocatorModule from '../../../hooks/use_locator';
 
 import { useAPMServiceDetailHref } from './use_apm_service_href';
 

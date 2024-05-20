@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsStartContract } from '@kbn/actions-plugin/server';
-import { actionsAuthorizationMock, actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
+import { ruleTypeRegistryMock } from './rule_type_registry.mock';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
-  loggingSystemMock,
   savedObjectsClientMock,
-  savedObjectsRepositoryMock,
   savedObjectsServiceMock,
+  loggingSystemMock,
+  savedObjectsRepositoryMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { PluginStartContract as ActionsStartContract } from '@kbn/actions-plugin/server';
+import { actionsMock, actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
 import { alertingAuthorizationClientFactoryMock } from './alerting_authorization_client_factory.mock';
 import { AlertingAuthorization } from './authorization';
-import { alertingAuthorizationMock } from './authorization/alerting_authorization.mock';
-import { backfillClientMock } from './backfill_client/backfill_client.mock';
-import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
-import { ruleTypeRegistryMock } from './rule_type_registry.mock';
-import { RulesClientFactory, RulesClientFactoryOpts } from './rules_client_factory';
+import { AlertingAuthorizationClientFactory } from './alerting_authorization_client_factory';
+import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
   AD_HOC_RUN_SAVED_OBJECT_TYPE,
   API_KEY_PENDING_INVALIDATION_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from './saved_objects';
+import { backfillClientMock } from './backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');

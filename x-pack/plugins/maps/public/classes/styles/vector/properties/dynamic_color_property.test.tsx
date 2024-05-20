@@ -11,21 +11,21 @@ jest.mock('../components/vector_style_editor', () => ({
   },
 }));
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
+import { DynamicColorProperty } from './dynamic_color_property';
 import {
   COLOR_MAP_TYPE,
-  DATA_MAPPING_FUNCTION,
   FIELD_ORIGIN,
   RawValue,
+  DATA_MAPPING_FUNCTION,
   VECTOR_STYLES,
 } from '../../../../../common/constants';
+import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
-import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer';
-import { DynamicColorProperty } from './dynamic_color_property';
-import { MockLayer, MockStyle, mockField } from './test_helpers/test_util';
+import { IField } from '../../../fields/field';
 
 const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: IField) => {
   return new DynamicColorProperty(

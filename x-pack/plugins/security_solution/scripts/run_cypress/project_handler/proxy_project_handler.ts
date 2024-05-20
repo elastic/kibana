@@ -8,10 +8,10 @@
 import axios, { AxiosError } from 'axios';
 import pRetry from 'p-retry';
 import type {
-  CreateProjectRequestBody,
-  Credentials,
   ProductType,
   Project,
+  CreateProjectRequestBody,
+  Credentials,
 } from './project_handler';
 import { ProjectHandler } from './project_handler';
 

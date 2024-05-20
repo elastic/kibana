@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import { EuiButtonIcon, EuiExpression, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
-import React, { useState } from 'react';
-import { FILTER_FIELDS } from '../../../../../../common/constants';
-import { useUptimeDataView } from '../../../../contexts/uptime_data_view_context';
-import { useGetUrlParams } from '../../../../hooks';
 import { filterLabels } from '../../filter_group/translations';
 import { alertFilterLabels, filterAriaLabels } from './translations';
+import { useUptimeDataView } from '../../../../contexts/uptime_data_view_context';
+import { FILTER_FIELDS } from '../../../../../../common/constants';
+import { useGetUrlParams } from '../../../../hooks';
 
 export interface FilterExpressionsSelectProps {
   ruleParams: { [key: string]: any };

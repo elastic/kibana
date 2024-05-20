@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { getDebugRenderer, getErrorRenderer } from '@kbn/expression-error-plugin/public';
 import { getImageRenderer } from '@kbn/expression-image-plugin/public';
-import { getMetricRenderer } from '@kbn/expression-metric-plugin/public';
-import { getRepeatImageRenderer } from '@kbn/expression-repeat-image-plugin/public';
+import { getErrorRenderer, getDebugRenderer } from '@kbn/expression-error-plugin/public';
 import { getRevealImageRenderer } from '@kbn/expression-reveal-image-plugin/public';
-import { getProgressRenderer, getShapeRenderer } from '@kbn/expression-shape-plugin/public';
-import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
-import { pie } from '../canvas_plugin_src/renderers/pie';
-import { plot } from '../canvas_plugin_src/renderers/plot';
-import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
+import { getRepeatImageRenderer } from '@kbn/expression-repeat-image-plugin/public';
+import { getShapeRenderer, getProgressRenderer } from '@kbn/expression-shape-plugin/public';
+import { getMetricRenderer } from '@kbn/expression-metric-plugin/public';
 import { getTextRenderer } from '../canvas_plugin_src/renderers/text';
+import { getTableRenderer } from '../canvas_plugin_src/renderers/table';
+import { plot } from '../canvas_plugin_src/renderers/plot';
+import { pie } from '../canvas_plugin_src/renderers/pie';
+import { getMarkdownRenderer } from '../canvas_plugin_src/renderers/markdown';
 
 /**
  * FIXME: Render function factories require stateful dependencies to be

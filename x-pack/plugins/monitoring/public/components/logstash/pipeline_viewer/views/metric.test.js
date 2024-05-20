@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 import { Metric } from './metric';
+import { shallow } from 'enzyme';
 
 describe('Metric component', () => {
   let metric;

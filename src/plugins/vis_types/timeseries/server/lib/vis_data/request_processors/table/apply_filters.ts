@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { buildEsQuery } from '@kbn/es-query';
 import { get } from 'lodash';
+import { buildEsQuery } from '@kbn/es-query';
 import { overwrite } from '../../helpers';
 
 import type { TableRequestProcessorsFunction } from './types';

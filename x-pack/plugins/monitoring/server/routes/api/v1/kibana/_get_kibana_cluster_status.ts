@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ClusterUuid } from '../../../../../common/http_api/shared';
 import { getKibanasForClusters } from '../../../../lib/kibana/get_kibanas_for_clusters';
 import { LegacyRequest } from '../../../../types';
+import { ClusterUuid } from '../../../../../common/http_api/shared';
 
 export const getKibanaClusterStatus = (
   req: LegacyRequest,

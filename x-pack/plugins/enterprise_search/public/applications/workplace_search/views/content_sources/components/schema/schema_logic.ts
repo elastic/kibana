@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 import { cloneDeep, isEqual } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
 import { ADD, UPDATE } from '../../../../../shared/constants/operations';
 import {
-  clearFlashMessages,
   flashAPIErrors,
   flashSuccessToast,
   setErrorMessage,
+  clearFlashMessages,
 } from '../../../../../shared/flash_messages';
 import { defaultErrorMessage } from '../../../../../shared/flash_messages/handle_api_errors';
 import { HttpLogic } from '../../../../../shared/http';
 import {
-  FieldCoercionErrors,
   IndexJob,
+  FieldCoercionErrors,
   Schema,
   SchemaType,
 } from '../../../../../shared/schema/types';
@@ -31,8 +31,8 @@ import { OptionValue } from '../../../../types';
 import { SourceLogic } from '../../source_logic';
 
 import {
-  SCHEMA_FIELD_ADDED_MESSAGE,
   SCHEMA_FIELD_ERRORS_ERROR_MESSAGE,
+  SCHEMA_FIELD_ADDED_MESSAGE,
   SCHEMA_UPDATED_MESSAGE,
 } from './constants';
 

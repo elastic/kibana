@@ -55,8 +55,8 @@ import {
   TableSearchBar,
 } from '../../../shared/managed_table';
 import { TryItButton } from '../../../shared/try_it_button';
-import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
+import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 
 type ServicesDetailedStatisticsAPIResponse =
   APIReturnType<'POST /internal/apm/services/detailed_statistics'>;

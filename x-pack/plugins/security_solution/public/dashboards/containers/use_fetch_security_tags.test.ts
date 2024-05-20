@@ -6,17 +6,17 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common';
 import { act, renderHook } from '@testing-library/react-hooks';
 import {
   INTERNAL_TAGS_URL,
   SECURITY_TAG_DESCRIPTION,
   SECURITY_TAG_NAME,
 } from '../../../common/constants';
-import { DEFAULT_TAGS_RESPONSE } from '../../common/containers/tags/__mocks__/api';
 import { useKibana } from '../../common/lib/kibana';
 import { useFetchSecurityTags } from './use_fetch_security_tags';
+import { DEFAULT_TAGS_RESPONSE } from '../../common/containers/tags/__mocks__/api';
+import type { ITagsClient } from '@kbn/saved-objects-tagging-plugin/common';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../../common/utils/get_ramdom_color', () => ({

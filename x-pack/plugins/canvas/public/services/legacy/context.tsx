@@ -13,7 +13,7 @@ import React, {
   FC,
   ReactElement,
 } from 'react';
-import { CanvasServiceProviders, CanvasServices, services } from '.';
+import { CanvasServices, CanvasServiceProviders, services } from '.';
 
 export interface WithServicesProps {
   services: CanvasServices;

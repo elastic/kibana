@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldNumber, EuiFieldNumberProps, EuiFormRow } from '@elastic/eui';
 import React from 'react';
+import { EuiFormRow, EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 

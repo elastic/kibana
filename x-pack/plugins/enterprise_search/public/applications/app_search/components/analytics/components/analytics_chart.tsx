@@ -11,13 +11,13 @@ import { useValues } from 'kea';
 
 import moment from 'moment';
 
-import { Axis, Chart, CurveType, LineSeries, Settings, Tooltip } from '@elastic/charts';
+import { Chart, Settings, LineSeries, CurveType, Axis, Tooltip } from '@elastic/charts';
 
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import { TOOLTIP_DATE_FORMAT, X_AXIS_DATE_FORMAT } from '../constants';
+import { X_AXIS_DATE_FORMAT, TOOLTIP_DATE_FORMAT } from '../constants';
 
 interface ChartPoint {
   x: string; // Date string

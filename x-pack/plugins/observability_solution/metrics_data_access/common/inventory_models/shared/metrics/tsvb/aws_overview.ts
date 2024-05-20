@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TSVBMetricModel, TSVBMetricModelCreator } from '../../../types';
+import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 export const awsOverview: TSVBMetricModelCreator = (timeField, indexPattern): TSVBMetricModel => ({
   id: 'awsOverview',

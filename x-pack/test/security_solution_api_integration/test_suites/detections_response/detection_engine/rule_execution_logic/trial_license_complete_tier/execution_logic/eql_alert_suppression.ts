@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import {
-  ALERT_LAST_DETECTED,
-  ALERT_START,
-  ALERT_SUPPRESSION_DOCS_COUNT,
-  ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_START,
-  ALERT_SUPPRESSION_TERMS,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import expect from 'expect';
+import { v4 as uuidv4 } from 'uuid';
 import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import {
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_DOCS_COUNT,
+  ALERT_SUPPRESSION_TERMS,
+  ALERT_LAST_DETECTED,
+  TIMESTAMP,
+  ALERT_START,
+} from '@kbn/rule-data-utils';
 import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '@kbn/security-solution-plugin/common/constants';
-import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import expect from 'expect';
-import { v4 as uuidv4 } from 'uuid';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import {
   createRule,
-  deleteAllAlerts,
   deleteAllRules,
+  deleteAllAlerts,
   waitForRuleSuccess,
 } from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import {
-  dataGeneratorFactory,
-  fetchRule,
   getEqlRuleForAlertTesting,
   getOpenAlerts,
   getPreviewAlerts,
-  patchRule,
   previewRule,
-  previewRuleWithExceptionEntries,
+  dataGeneratorFactory,
+  patchRule,
   setAlertStatus,
+  fetchRule,
+  previewRuleWithExceptionEntries,
 } from '../../../../utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 const getQuery = (id: string) => `any where id == "${id}"`;
 const getSequenceQuery = (id: string) =>

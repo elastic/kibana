@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHighlight,
-  EuiIcon,
+  EuiButtonIcon,
   EuiToolTip,
+  EuiHighlight,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiIcon,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
-import { Prompt } from '../../../../../..';
 import { TEST_IDS } from '../../../../constants';
-import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
+import { Prompt } from '../../../../../..';
 import * as i18n from './translations';
+import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
 
 export const SYSTEM_PROMPT_SELECTOR_CLASSNAME = 'systemPromptSelector';
 

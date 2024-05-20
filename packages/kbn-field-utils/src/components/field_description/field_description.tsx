@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty, EuiText, EuiTextBlockTruncate, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiText, EuiButtonEmpty, EuiTextBlockTruncate, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 const MAX_VISIBLE_LENGTH = 110;
 

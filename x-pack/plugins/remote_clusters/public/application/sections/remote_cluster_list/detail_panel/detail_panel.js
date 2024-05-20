@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiBadge,
@@ -33,10 +33,10 @@ import {
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PROXY_MODE } from '../../../../../common/constants';
-import { getRouter } from '../../../services';
-import { proxyModeUrl } from '../../../services/documentation';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider, SecurityModel } from '../components';
+import { getRouter } from '../../../services';
+import { proxyModeUrl } from '../../../services/documentation';
 
 export class DetailPanel extends Component {
   static propTypes = {

@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
-import type { CombinedJob, CombinedJobWithStats, Job } from '../types/anomaly_detection_jobs';
 import {
   calculateDatafeedFrequencyDefaultSeconds,
-  getEarliestDatafeedStartTime,
-  getFiltersForDSLQuery,
-  getLatestDataOrBucketTimestamp,
-  getPartitioningFieldNames,
-  isJobIdValid,
-  isJobVersionGte,
-  isKnownEmptyQuery,
-  isModelPlotChartableForDetector,
-  isModelPlotEnabled,
-  isSourceDataChartableForDetector,
-  isTimeSeriesViewDetector,
   isTimeSeriesViewJob,
+  isTimeSeriesViewDetector,
+  isSourceDataChartableForDetector,
+  isModelPlotChartableForDetector,
+  getPartitioningFieldNames,
+  isModelPlotEnabled,
+  isJobVersionGte,
   mlFunctionToESAggregation,
+  isJobIdValid,
   prefixDatafeedId,
-  removeNodeInfo,
+  getLatestDataOrBucketTimestamp,
+  getEarliestDatafeedStartTime,
   resolveMaxTimeInterval,
+  getFiltersForDSLQuery,
+  isKnownEmptyQuery,
+  removeNodeInfo,
 } from './job_utils';
+import type { CombinedJob, CombinedJobWithStats, Job } from '../types/anomaly_detection_jobs';
+import { FilterStateStore } from '@kbn/es-query';
 
 import moment from 'moment';
 

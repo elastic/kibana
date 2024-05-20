@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { validateField } from '../../../../../common/fields_utils';
 import { overwrite } from '../../helpers';
+import { validateField } from '../../../../../common/fields_utils';
 
 import type { AnnotationsRequestProcessorsFunction } from './types';
 

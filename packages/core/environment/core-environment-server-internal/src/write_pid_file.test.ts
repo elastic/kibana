@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { exists, writeFile } from './fs';
+import { writeFile, exists } from './fs';
 import { writePidFile } from './write_pid_file';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 jest.mock('./fs', () => ({
   writeFile: jest.fn(),

@@ -10,11 +10,11 @@ import React, { useMemo } from 'react';
 import { RiskScoreEntity } from '../../../../common/search_strategy';
 
 import { HeaderSection } from '../../../common/components/header_section';
-import type { inputsModel } from '../../../common/store';
-import { useIsNewRiskScoreModuleInstalled } from '../../api/hooks/use_risk_engine_status';
+import * as i18n from './translations';
 import { RiskScoreHeaderTitle } from './risk_score_header_title';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
-import * as i18n from './translations';
+import type { inputsModel } from '../../../common/store';
+import { useIsNewRiskScoreModuleInstalled } from '../../api/hooks/use_risk_engine_status';
 
 const RiskScoresNoDataDetectedComponent = ({
   entityType,

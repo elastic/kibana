@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { from } from 'rxjs';
+import { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { GlobalSearchProviderContext } from '../types';
 
 export type GlobalSearchContextFactory = (request: KibanaRequest) => GlobalSearchProviderContext;

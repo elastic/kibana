@@ -49,7 +49,9 @@ const getTechniquesOptions = (techniques) =>
   techniques.map((t) =>
     `{
   label: i18n.translate(
-    'xpack.securitySolution.detectionEngine.mitreAttackTechniques.${camelCase(t.name)}Description', {
+    'xpack.securitySolution.detectionEngine.mitreAttackTechniques.${camelCase(
+      t.name
+    )}Description', {
       defaultMessage: '${t.name} (${t.id})'
   }),
   id: '${t.id}',

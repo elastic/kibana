@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { action } from '@storybook/addon-actions';
-import type { ComponentMeta } from '@storybook/react';
 import React, { useState } from 'react';
+import type { ComponentMeta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 
 import { EuiPanel } from '@elastic/eui';
 import { UiSettingsType } from '@kbn/core-ui-settings-common';
@@ -21,8 +21,8 @@ import {
 
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
-import { FieldInput as Component, FieldInput } from '../field_input';
 import { FieldInputProvider } from '../services';
+import { FieldInput as Component, FieldInput } from '../field_input';
 import { InputProps } from '../types';
 
 /**
@@ -91,7 +91,7 @@ export const getStory = (title: string, description: string) =>
         </FieldInputProvider>
       ),
     ],
-  }) as ComponentMeta<typeof Component>;
+  } as ComponentMeta<typeof Component>);
 
 /**
  * Utility function for returning a {@link FieldInput} Storybook story.

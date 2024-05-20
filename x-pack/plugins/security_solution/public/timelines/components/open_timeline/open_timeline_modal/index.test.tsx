@@ -9,11 +9,11 @@ import { mount } from 'enzyme';
 import type { ReactElement } from 'react';
 import React from 'react';
 
-import { OpenTimelineModal } from '.';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { mockOpenTimelineQueryResults } from '../../../../common/mock/timeline_results';
-import { getAllTimeline, useGetAllTimeline } from '../../../containers/all';
+import { useGetAllTimeline, getAllTimeline } from '../../../containers/all';
 import { useTimelineStatus } from '../use_timeline_status';
+import { OpenTimelineModal } from '.';
 
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');

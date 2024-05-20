@@ -31,19 +31,19 @@ import {
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { TimeBounds } from '../types';
+import { getBrushTimeBounds } from '../../../utils/slo/duration';
+import { SloTabId } from './slo_details';
 import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
-import { getBrushTimeBounds } from '../../../utils/slo/duration';
-import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
 import { GoodBadEventsChart } from '../../slos/components/common/good_bad_events_chart';
-import { TimeBounds } from '../types';
-import { SloTabId } from './slo_details';
+import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;

@@ -7,12 +7,12 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { createAppContextStartContractMock } from '../../mocks';
-import type { Agent } from '../../types';
 import { appContextService } from '../app_context';
+import type { Agent } from '../../types';
+import { createAppContextStartContractMock } from '../../mocks';
 
-import { createClientMock } from './action.mock';
 import { sendUpgradeAgentsActions } from './upgrade';
+import { createClientMock } from './action.mock';
 import { getRollingUpgradeOptions, upgradeBatch } from './upgrade_action_runner';
 
 jest.mock('./versions', () => {

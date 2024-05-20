@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { parse } from 'url';
-import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
+import { parse } from 'url';
 import { KUBERNETES_TOUR_STORAGE_KEY } from '@kbn/infra-plugin/public/pages/metrics/inventory_view/components/kubernetes_tour';
-import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
+import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES, INVENTORY_PATH } from './constants';
 import { generateDockerContainersData } from './helpers';
+import { getInfraSynthtraceEsClient } from '../../../common/utils/synthtrace/infra_es_client';
 
 const DATE_WITH_DATA = DATES.metricsAndLogs.hosts.withData;
 const DATE_WITHOUT_DATA = DATES.metricsAndLogs.hosts.withoutData;
@@ -158,8 +158,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.tryForTime(3 * 1000, async () => {
-                const tileValue =
-                  await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric);
+                const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
+                  metric
+                );
                 expect(tileValue).to.eql(value);
               });
             });

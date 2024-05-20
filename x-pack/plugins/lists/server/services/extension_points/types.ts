@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core/server';
 import { UnionToIntersection } from '@kbn/utility-types';
+import { KibanaRequest } from '@kbn/core/server';
 
-import type { ExceptionListClient } from '../exception_lists/exception_list_client';
 import {
   CreateExceptionListItemOptions,
   DeleteExceptionListItemOptions,
@@ -20,6 +19,7 @@ import {
   UpdateExceptionListItemOptions,
 } from '../exception_lists/exception_list_client_types';
 import { PromiseFromStreams } from '../exception_lists/import_exception_list_and_items';
+import type { ExceptionListClient } from '../exception_lists/exception_list_client';
 
 /**
  * The `this` context provided to extension point's callback function
@@ -48,7 +48,7 @@ export type ServerExtensionCallback<A extends object | void = void, R = A> = (ar
 interface ServerExtensionPointDefinition<
   T extends string,
   Args extends object | void = void,
-  Response = Args,
+  Response = Args
 > {
   type: T;
   /**
@@ -186,7 +186,7 @@ export interface ExtensionPointStorageClientInterface {
     T extends ExtensionPoint['type'],
     D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
     // @ts-expect-error ts upgrade v4.7.4
-    P extends Parameters<D['callback']> = Parameters<D['callback']>,
+    P extends Parameters<D['callback']> = Parameters<D['callback']>
   >(
     extensionType: T,
     initialCallbackInput: P[0]['data'],

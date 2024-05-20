@@ -7,8 +7,8 @@
 
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import type { MlStartDependencies } from '../plugin';
 import { registerAnomalyChartsCasesAttachment } from './register_anomaly_charts_attachment';
+import type { MlStartDependencies } from '../plugin';
 import { registerAnomalySwimLaneCasesAttachment } from './register_anomaly_swim_lane_attachment';
 
 export function registerCasesAttachments(

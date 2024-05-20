@@ -10,20 +10,21 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiToolTip } fro
 import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import type { RuleExecutionSummary } from '../../../../../common/api/detection_engine/rule_monitoring';
+import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
+import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import {
   DEFAULT_RELATIVE_DATE_THRESHOLD,
-  SHOW_RELATED_INTEGRATIONS_SETTING,
   SecurityPageName,
+  SHOW_RELATED_INTEGRATIONS_SETTING,
 } from '../../../../../common/constants';
+import type { RuleExecutionSummary } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
-import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
-import type { SecurityJob } from '../../../../common/components/ml_popover/types';
+import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../common/components/popover_items';
-import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { useKibana, useUiSetting$ } from '../../../../common/lib/kibana';
 import {
   canEditRuleWithActions,
@@ -32,19 +33,18 @@ import {
 import { IntegrationsPopover } from '../../../../detections/components/rules/related_integrations/integrations_popover';
 import { RuleStatusBadge } from '../../../../detections/components/rules/rule_execution_status';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
-import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import type { Rule } from '../../../rule_management/logic';
-import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
 import { PopoverTooltip } from './popover_tooltip';
 import { useRulesTableContext } from './rules_table/rules_table_context';
-import { RulesTableEmptyColumnName } from './rules_table_empty_column_name';
 import { TableHeaderTooltipCell } from './table_header_tooltip_cell';
 import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
+import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
+import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 

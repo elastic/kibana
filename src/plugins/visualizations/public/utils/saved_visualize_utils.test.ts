@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { VisSavedObject } from '../types';
-import { TypesStart, VisTypeAlias } from '../vis_types';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import {
-  SAVED_VIS_TYPE,
   findListItems,
   getSavedVisualization,
   saveVisualization,
+  SAVED_VIS_TYPE,
 } from './saved_visualize_utils';
+import { VisTypeAlias, TypesStart } from '../vis_types';
+import type { VisSavedObject } from '../types';
 
 let visTypes = [] as VisTypeAlias[];
 const mockGetAliases = jest.fn(() => visTypes);

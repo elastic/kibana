@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { getCase1 } from '../../../objects/case';
-import { getTimeline } from '../../../objects/timeline';
-import { ADD_COMMENT_INPUT, DESCRIPTION_INPUT } from '../../../screens/create_new_case';
-import { createCase, deleteCases } from '../../../tasks/api_calls/cases';
-import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
 import { login } from '../../../tasks/login';
 import { visitTimeline } from '../../../tasks/navigation';
 import {
-  addNewCase,
-  attachTimelineToExistingCase,
   attachTimelineToNewCase,
+  attachTimelineToExistingCase,
+  addNewCase,
   selectCase,
 } from '../../../tasks/timeline';
+import { DESCRIPTION_INPUT, ADD_COMMENT_INPUT } from '../../../screens/create_new_case';
+import { getCase1 } from '../../../objects/case';
+import { getTimeline } from '../../../objects/timeline';
+import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timelines';
+import { createCase, deleteCases } from '../../../tasks/api_calls/cases';
 
 const mockTimeline = getTimeline();
 

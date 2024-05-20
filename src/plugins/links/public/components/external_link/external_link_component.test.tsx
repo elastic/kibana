@@ -8,14 +8,14 @@
 
 import React from 'react';
 
-import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '@kbn/ui-actions-enhanced-plugin/public';
-import { createEvent, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { createEvent, fireEvent, render, screen, within } from '@testing-library/react';
+import { LinksEmbeddable, LinksContext } from '../../embeddable/links_embeddable';
 import { mockLinksPanel } from '../../../common/mocks';
-import { LinksContext, LinksEmbeddable } from '../../embeddable/links_embeddable';
-import { coreServices } from '../../services/kibana_services';
+import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { ExternalLinkComponent } from './external_link_component';
+import { coreServices } from '../../services/kibana_services';
+import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '@kbn/ui-actions-enhanced-plugin/public';
 
 const onRender = jest.fn();
 

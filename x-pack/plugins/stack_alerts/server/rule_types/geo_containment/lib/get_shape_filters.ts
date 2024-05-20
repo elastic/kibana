@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
+import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { BoundariesRequestMeta } from '../types';
 import { getQueryDsl } from './get_query_dsl';
 

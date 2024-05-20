@@ -1,13 +1,3 @@
-import {
-  Chart,
-  LEGACY_LIGHT_THEME,
-  Metric,
-  type MetricWNumber,
-  type MetricWTrend,
-  Settings,
-} from '@elastic/charts';
-import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,6 +5,16 @@ import { css } from '@emotion/react';
  * 2.0.
  */
 import React, { useEffect, useRef, CSSProperties } from 'react';
+import {
+  Chart,
+  LEGACY_LIGHT_THEME,
+  Metric,
+  Settings,
+  type MetricWNumber,
+  type MetricWTrend,
+} from '@elastic/charts';
+import { EuiPanel, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ChartPlaceholder } from '../../../../../components/lens';
 
 export interface Props extends Pick<MetricWTrend, 'title' | 'color' | 'extra' | 'subtitle'> {

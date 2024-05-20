@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { DataView } from '@kbn/data-plugin/common';
+import { Filter, buildEsQuery, TimeRange, Query } from '@kbn/es-query';
 import { KibanaContext, getEsQueryConfig } from '@kbn/data-plugin/public';
-import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { getTimeZone } from '@kbn/visualization-utils';
-import { VisSeries } from '../../common/vis_data';
 import { TimelionVisDependencies } from '../plugin';
 import { TimelionVisParams } from '../timelion_vis_fn';
 import { getDataSearch, getIndexPatterns } from './plugin_services';
+import { VisSeries } from '../../common/vis_data';
 
 interface Stats {
   cacheCount: number;

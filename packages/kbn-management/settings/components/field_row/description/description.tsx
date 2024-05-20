@@ -8,12 +8,12 @@
 
 import React, { ReactElement } from 'react';
 
-import { EuiText } from '@elastic/eui';
 import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import { EuiText } from '@elastic/eui';
 
 import { useFieldStyles } from '../field_row.styles';
-import { FieldDefaultValue } from './default_value';
 import { FieldDeprecation } from './deprecation';
+import { FieldDefaultValue } from './default_value';
 
 export const DATA_TEST_SUBJ_DESCRIPTION = 'settings-description';
 

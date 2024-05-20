@@ -15,31 +15,31 @@ import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import {
-  getActionsWithFrequencies,
-  getActionsWithoutFrequencies,
-  getSimpleMlRule,
-  getSimpleMlRuleOutput,
-  getSimpleMlRuleUpdate,
-  getSimpleRule,
   getSimpleRuleOutput,
-  getSimpleRuleOutputWithoutRuleId,
-  getSimpleRuleUpdate,
-  getSimpleRuleWithoutRuleId,
-  getSimpleSavedQueryRule,
-  getSomeActionsWithFrequencies,
-  getThresholdRuleForAlertTesting,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
+  getSimpleRuleOutputWithoutRuleId,
+  getSimpleMlRule,
+  getSimpleMlRuleOutput,
+  getSimpleRuleUpdate,
+  getSimpleMlRuleUpdate,
+  getSimpleSavedQueryRule,
+  getSimpleRule,
+  getThresholdRuleForAlertTesting,
+  getSimpleRuleWithoutRuleId,
   removeUUIDFromActions,
   updateUsername,
+  getActionsWithFrequencies,
+  getActionsWithoutFrequencies,
+  getSomeActionsWithFrequencies,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

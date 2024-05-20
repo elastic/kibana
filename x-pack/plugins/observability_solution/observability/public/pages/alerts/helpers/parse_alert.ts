@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import {
-  ALERT_REASON,
-  ALERT_RULE_NAME,
-  ALERT_RULE_TYPE_ID,
+  TIMESTAMP,
   ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
-  TIMESTAMP,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_NAME,
+  ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { parseExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
+import { parseExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import type { TopAlert } from '../../../typings/alerts';

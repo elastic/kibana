@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPage,
   EuiPageBody,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiPageSection,
   EuiTitle,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { AllSeries } from '@kbn/exploratory-view-plugin/public';
-import React from 'react';
 import { StartDependencies } from './plugin';
 
 export const App = (props: {

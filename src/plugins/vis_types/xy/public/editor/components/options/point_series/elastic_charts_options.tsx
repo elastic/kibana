@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormRow, EuiRange } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
-import { PalettePicker, SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
-import React, { useState, useEffect } from 'react';
+import { EuiFormRow, EuiRange } from '@elastic/eui';
+import { SelectOption, SwitchOption, PalettePicker } from '@kbn/vis-default-editor-plugin/public';
 
 import { ChartType } from '../../../../../common';
-import { getPalettesService } from '../../../../services';
 import { VisParams } from '../../../../types';
-import { getFittingFunctions } from '../../../collections';
 import { ValidationVisOptionsProps } from '../../common';
+import { getPalettesService } from '../../../../services';
+import { getFittingFunctions } from '../../../collections';
 
 const fittingFunctions = getFittingFunctions();
 

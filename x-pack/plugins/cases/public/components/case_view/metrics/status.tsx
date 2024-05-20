@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import prettyMilliseconds from 'pretty-ms';
 import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiFlexGrid,
@@ -15,13 +17,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import prettyMilliseconds from 'pretty-ms';
-import React, { useMemo } from 'react';
 import { CaseMetricsFeature } from '../../../../common/types/api';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
-import { getEmptyCellValue } from '../../empty_value';
-import { FormattedRelativePreferenceDate } from '../../formatted_date';
-import { getMaybeDate } from '../../formatted_date/maybe_date';
 import {
   CASE_CREATED,
   CASE_IN_PROGRESS_DURATION,
@@ -30,6 +27,9 @@ import {
   CASE_REOPENED,
   CASE_REOPENED_ON,
 } from './translations';
+import { getMaybeDate } from '../../formatted_date/maybe_date';
+import { FormattedRelativePreferenceDate } from '../../formatted_date';
+import { getEmptyCellValue } from '../../empty_value';
 
 export const CaseStatusMetrics = React.memo(
   ({ metrics, features }: { metrics: SingleCaseMetrics; features: SingleCaseMetricsFeature[] }) => {

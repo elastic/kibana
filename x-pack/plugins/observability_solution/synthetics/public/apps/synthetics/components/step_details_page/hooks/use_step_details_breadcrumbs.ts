@@ -1,4 +1,3 @@
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,12 +5,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
  * 2.0.
  */
 import moment from 'moment';
-import { generatePath, useParams } from 'react-router-dom';
-import { PLUGIN } from '../../../../../../common/constants/plugin';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useParams, generatePath } from 'react-router-dom';
+import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { TEST_RUN_DETAILS_ROUTE } from '../../../../../../common/constants/ui';
 import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-import { useSelectedLocation } from '../../monitor_details/hooks/use_selected_location';
 import { useTestRunDetailsBreadcrumbs } from '../../test_run_details/hooks/use_test_run_details_breadcrumbs';
+import { PLUGIN } from '../../../../../../common/constants/plugin';
 
 export const useStepDetailsBreadcrumbs = (extraCrumbs?: Array<{ text: string; href?: string }>) => {
   const { data, currentStep } = useJourneySteps();

@@ -11,19 +11,19 @@ import {
   LABEL_POSITIONS,
   MAX_ZOOM,
   MIN_ZOOM,
-  STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
+  STYLE_TYPE,
 } from '../../../../common/constants';
 
-import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
-import { getIsDarkMode } from '../../../kibana_services';
 import {
-  CATEGORICAL_COLOR_PALETTES,
   DEFAULT_FILL_COLORS,
   DEFAULT_LINE_COLORS,
   NUMERICAL_COLOR_PALETTES,
+  CATEGORICAL_COLOR_PALETTES,
 } from '../color_palettes';
+import { VectorStylePropertiesDescriptor } from '../../../../common/descriptor_types';
+import { getIsDarkMode } from '../../../kibana_services';
 
 export const MIN_SIZE = 1;
 export const MAX_SIZE = 64;

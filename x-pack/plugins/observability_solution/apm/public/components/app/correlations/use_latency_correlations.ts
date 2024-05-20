@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { chunk, debounce } from 'lodash';
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import { chunk, debounce } from 'lodash';
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
@@ -14,23 +14,23 @@ import {
   DEBOUNCE_INTERVAL,
   DEFAULT_PERCENTILE_THRESHOLD,
 } from '../../../../common/correlations/constants';
+import type { FieldValuePair } from '../../../../common/correlations/types';
+import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
 import type {
   LatencyCorrelation,
   LatencyCorrelationsResponse,
 } from '../../../../common/correlations/latency_correlations/types';
-import type { FieldValuePair } from '../../../../common/correlations/types';
-import { getPrioritizedFieldValuePairs } from '../../../../common/correlations/utils';
 import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 
-import { useFetchParams } from './use_fetch_params';
 import {
-  CorrelationsProgress,
   getInitialResponse,
   getLatencyCorrelationsSortedByCorrelation,
   getReducer,
+  CorrelationsProgress,
 } from './utils/analysis_hook_utils';
+import { useFetchParams } from './use_fetch_params';
 
 // Overall progress is a float from 0 to 1.
 const LOADED_OVERALL_HISTOGRAM = 0.05;

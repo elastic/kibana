@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import mockFs from 'mock-fs';
+import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { createDynamicAssetHandler } from './dynamic_asset_response';
 
 function getHandler(args?: Partial<Parameters<typeof createDynamicAssetHandler>[0]>) {

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
+import _ from 'lodash';
+import $ from 'jquery';
+import d3 from 'd3';
 import {
   setHTMLElementClientSizes,
   setSVGElementGetBBox,
   setSVGElementGetComputedTextLength,
 } from '@kbn/test-jest-helpers';
-import d3 from 'd3';
-import $ from 'jquery';
-import _ from 'lodash';
 
 // Data
 import series from '../../../fixtures/mock_data/date_histogram/_series';
-import seriesNeg from '../../../fixtures/mock_data/date_histogram/_series_neg';
 import seriesPosNeg from '../../../fixtures/mock_data/date_histogram/_series_pos_neg';
-import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
+import seriesNeg from '../../../fixtures/mock_data/date_histogram/_series_neg';
 import termsColumns from '../../../fixtures/mock_data/terms/_columns';
+import stackedSeries from '../../../fixtures/mock_data/date_histogram/_stacked_series';
 import { getMockUiState } from '../../../fixtures/mocks';
 import { getVis } from '../_vis_fixture';
 

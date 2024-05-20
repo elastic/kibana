@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { NotificationsStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { pluginName } from '../constants';
 import { DataView, UsageCollectionStart } from '../shared_imports';
+import { pluginName } from '../constants';
 
 export async function removeFields(
   fieldNames: string[],

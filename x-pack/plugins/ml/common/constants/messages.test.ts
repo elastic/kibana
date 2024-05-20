@@ -10,8 +10,8 @@ import { docLinksServiceMock } from '@kbn/core/public/mocks';
 import { parseMessages } from './messages';
 
 import {
-  basicInvalidJobMessages,
   basicValidJobMessages,
+  basicInvalidJobMessages,
   nonBasicIssuesMessages,
 } from './messages.test.mock';
 

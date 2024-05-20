@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../../../common/types/api';
 import { ExtractionRule } from '../../../../../../../common/types/extraction_rules';
@@ -22,10 +22,10 @@ import {
   DeleteCrawlerDomainResponse,
 } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import {
-  CrawlRule,
   CrawlerAuth,
   CrawlerDomain,
   CrawlerDomainFromServer,
+  CrawlRule,
   EntryPoint,
   Sitemap,
 } from '../../../../api/crawler/types';

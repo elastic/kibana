@@ -1,7 +1,3 @@
-import { IToasts } from '@kbn/core-notifications-browser';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { waitFor } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks/dom';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,9 +5,13 @@ import { renderHook } from '@testing-library/react-hooks/dom';
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '../../common/lib/kibana';
-import { RuleStatus } from '../../types';
+import { renderHook } from '@testing-library/react-hooks/dom';
 import { useLoadRuleAggregationsQuery as useLoadRuleAggregations } from './use_load_rule_aggregations_query';
+import { RuleStatus } from '../../types';
+import { useKibana } from '../../common/lib/kibana';
+import { IToasts } from '@kbn/core-notifications-browser';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { waitFor } from '@testing-library/react';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../lib/rule_api/aggregate_kuery_filter', () => ({

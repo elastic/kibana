@@ -29,7 +29,9 @@
         "tags": [],
         "label": "SECURITY_PROJECT_SETTINGS",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/serverless/settings/security_project/index.ts",
         "deprecated": false,
         "trackAdoption": false,

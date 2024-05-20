@@ -7,12 +7,12 @@
  */
 
 import { createHash } from 'crypto';
-import { Entity } from '../entity';
 import { ApmError } from './apm_error';
-import { ApmApplicationMetricFields, ApmFields, SpanParams } from './apm_fields';
+import { Entity } from '../entity';
 import { Metricset } from './metricset';
 import { Span } from './span';
 import { Transaction } from './transaction';
+import { ApmApplicationMetricFields, ApmFields, SpanParams } from './apm_fields';
 
 export class Instance extends Entity<ApmFields> {
   transaction(

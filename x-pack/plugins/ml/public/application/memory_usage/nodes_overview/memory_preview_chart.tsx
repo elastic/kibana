@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { SeriesColorAccessor } from '@elastic/charts';
-import {
-  AnnotationDomainType,
-  Axis,
-  BarSeries,
-  Chart,
-  LEGACY_LIGHT_THEME,
-  LineAnnotation,
-  Position,
-  ScaleType,
-  Settings,
-  Tooltip,
-} from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
-import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import type { SeriesColorAccessor } from '@elastic/charts';
+import {
+  Axis,
+  BarSeries,
+  Chart,
+  Position,
+  ScaleType,
+  Settings,
+  LineAnnotation,
+  AnnotationDomainType,
+  Tooltip,
+  LEGACY_LIGHT_THEME,
+} from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { NodeDeploymentStatsResponse } from '../../../../common/types/trained_models';
-import { useMlKibana } from '../../contexts/kibana';
 import { useFieldFormatter } from '../../contexts/kibana/use_field_formatter';
 import { getMemoryItemColor } from '../memory_item_colors';
+import { useMlKibana } from '../../contexts/kibana';
 
 interface MemoryPreviewChartProps {
   memoryOverview: NodeDeploymentStatsResponse['memory_overview'];

@@ -1,5 +1,3 @@
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { SerializableRecord } from '@kbn/utility-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +5,8 @@ import type { SerializableRecord } from '@kbn/utility-types';
  * 2.0.
  */
 import qs from 'query-string';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 
 export interface ServiceOverviewParams extends SerializableRecord {
   serviceName: string;

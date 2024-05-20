@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import Url from 'url';
 import { modifyUrl } from '@kbn/std';
 import { cloneDeepWith, isString } from 'lodash';
 import { Key, Origin, type WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import Url from 'url';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';
 import {
+  WebElementWrapper,
   Browsers,
   NETWORK_PROFILES,
   type NetworkOptions,
   type NetworkProfile,
-  WebElementWrapper,
 } from '..';
-import { type FtrProviderContext, FtrService } from './ftr_provider_context';
+import { FtrService, type FtrProviderContext } from './ftr_provider_context';
 
 export type Browser = BrowserService;
 

@@ -8,9 +8,9 @@
 import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import { Logger } from '@kbn/logging';
 
-import type { AssetManagerPublicConfig } from '../common/config';
-import { PublicAssetsClient } from './lib/public_assets_client';
 import { AssetManagerPluginClass } from './types';
+import { PublicAssetsClient } from './lib/public_assets_client';
+import type { AssetManagerPublicConfig } from '../common/config';
 
 export class Plugin implements AssetManagerPluginClass {
   public config: AssetManagerPublicConfig;

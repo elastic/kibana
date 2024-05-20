@@ -7,8 +7,8 @@
 
 jest.mock('getos', () => jest.fn());
 
-import getos from 'getos';
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
+import getos from 'getos';
 
 describe('getDefaultChromiumSandboxDisabled', () => {
   it.each`

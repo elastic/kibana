@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import { omit } from 'lodash';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { omit } from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { IndexMapping, VirtualVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import { diffMappings } from '../core/diff_mappings';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import { updateMappings } from './update_mappings';

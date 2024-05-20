@@ -9,8 +9,8 @@ import React, { Fragment } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiIconTip, EuiLoadingSpinner } from '@elastic/eui';
 
-import { useServices } from '../../../../../app_context';
 import { SNAPSHOT_STATE } from '../../../../../constants';
+import { useServices } from '../../../../../app_context';
 
 interface Props {
   state: any;

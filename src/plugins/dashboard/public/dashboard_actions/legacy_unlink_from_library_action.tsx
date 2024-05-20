@@ -9,14 +9,14 @@
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import {
-  CanAccessViewMode,
-  EmbeddableApiContext,
-  HasLegacyLibraryTransforms,
-  PublishesPanelTitle,
   apiCanAccessViewMode,
   apiHasLegacyLibraryTransforms,
+  CanAccessViewMode,
+  EmbeddableApiContext,
   getInheritedViewMode,
   getPanelTitle,
+  PublishesPanelTitle,
+  HasLegacyLibraryTransforms,
 } from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';

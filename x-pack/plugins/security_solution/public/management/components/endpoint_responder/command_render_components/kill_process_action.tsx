@@ -7,10 +7,10 @@
 
 import { memo, useMemo } from 'react';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
-import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
-import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import { parsedPidOrEntityIdParameter } from '../lib/utils';
+import { useSendKillProcessRequest } from '../../../hooks/response_actions/use_send_kill_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
+import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 
 export const KillProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[] }>

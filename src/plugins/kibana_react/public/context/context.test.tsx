@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { KibanaContextProvider, context, createKibanaReactContext, useKibana } from './context';
+import { context, createKibanaReactContext, useKibana, KibanaContextProvider } from './context';
+import { coreMock, overlayServiceMock } from '@kbn/core/public/mocks';
+import { CoreStart } from '@kbn/core/public';
 
 let container: HTMLDivElement | null;
 

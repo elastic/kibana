@@ -7,10 +7,10 @@
  */
 
 import {
-  isObjectTypeAttribute,
   isRootLevelAttribute,
-  rewriteObjectTypeAttribute,
   rewriteRootLevelAttribute,
+  isObjectTypeAttribute,
+  rewriteObjectTypeAttribute,
 } from './validation_utils';
 
 const mockMappings = {

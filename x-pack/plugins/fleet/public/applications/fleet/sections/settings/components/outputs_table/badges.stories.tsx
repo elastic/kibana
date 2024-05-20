@@ -8,9 +8,9 @@
 import React from 'react';
 
 import {
-  DefaultBadges as Component,
   DefaultMonitoringOutputBadge as DefaultMonitoringOutputBadgeComponent,
   DefaultOutputBadge as DefaultOutputBadgeComponent,
+  DefaultBadges as Component,
 } from './badges';
 
 export default {

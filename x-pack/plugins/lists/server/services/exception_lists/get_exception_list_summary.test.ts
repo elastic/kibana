@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
-import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 
 import { getExceptionListSummary } from './get_exception_list_summary';
 

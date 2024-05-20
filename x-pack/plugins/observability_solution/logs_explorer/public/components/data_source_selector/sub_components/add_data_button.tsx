@@ -12,8 +12,8 @@ import {
 } from '@kbn/deeplinks-observability';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import React from 'react';
-import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 import { addDataLabel } from '../constants';
+import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
 
 export const AddDataButton: React.FunctionComponent<{}> = ({}) => {
   const {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { GetGetResult, MgetResponseItem } from '@elastic/elasticsearch/lib/api/types';
+import type { MgetResponseItem, GetGetResult } from '@elastic/elasticsearch/lib/api/types';
+import type { CasesClientGetAlertsResponse } from './types';
 import type { CasesClientArgs } from '..';
 import type { AlertInfo } from '../../common/types';
 import type { Alert } from '../../services/alerts';
-import type { CasesClientGetAlertsResponse } from './types';
 
 function isAlert(
   doc?: MgetResponseItem<unknown>

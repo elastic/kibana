@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import { waitFor, fireEvent, screen } from '@testing-library/react';
 
 import { SortActivity, sortOptions } from './sort_activity';
 

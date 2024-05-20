@@ -7,9 +7,9 @@
  */
 
 import {
-  getReactEmbeddableFactory,
-  reactEmbeddableRegistryHasKey,
   registerReactEmbeddableFactory,
+  reactEmbeddableRegistryHasKey,
+  getReactEmbeddableFactory,
 } from './react_embeddable_registry';
 import { ReactEmbeddableFactory } from './types';
 

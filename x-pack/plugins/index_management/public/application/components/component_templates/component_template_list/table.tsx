@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiIcon,
-  EuiInMemoryTable,
-  EuiInMemoryTableProps,
-  EuiLink,
-  EuiPopover,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiTextColor,
-} from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ScopedHistory } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent, useState, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiInMemoryTable,
+  EuiButton,
+  EuiInMemoryTableProps,
+  EuiTextColor,
+  EuiIcon,
+  EuiLink,
+  EuiBadge,
+  EuiPopover,
+  EuiFilterGroup,
+  EuiSelectable,
+  EuiFilterButton,
+  EuiSelectableOption,
+} from '@elastic/eui';
+import { ScopedHistory } from '@kbn/core/public';
 
+import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
+import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
-import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
-import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 
 const inUseFilterLabel = i18n.translate(
   'xpack.idxMgmt.componentTemplatesList.table.inUseFilterLabel',

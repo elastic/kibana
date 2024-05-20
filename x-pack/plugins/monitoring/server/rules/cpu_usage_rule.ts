@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { AlertInstanceContext, RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { RULE_CPU_USAGE, RULE_DETAILS } from '../../common/constants';
-import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { ROUNDED_FLOAT } from '../../common/formatting';
-import {
-  AlertCluster,
-  AlertCpuUsageNodeStats,
-  AlertCpuUsageState,
-  AlertData,
-  AlertInstanceState,
-  AlertMessage,
-  AlertMessageLinkToken,
-  AlertMessageTimeToken,
-  AlertState,
-  CommonAlertFilter,
-  CommonAlertParams,
-} from '../../common/types/alerts';
-import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
-import { Globals } from '../static_globals';
-import { AlertingDefaults, createLink } from './alert_helpers';
 import { BaseRule } from './base_rule';
+import {
+  AlertData,
+  AlertCluster,
+  AlertState,
+  AlertMessage,
+  AlertCpuUsageState,
+  AlertCpuUsageNodeStats,
+  AlertMessageTimeToken,
+  AlertMessageLinkToken,
+  AlertInstanceState,
+  CommonAlertParams,
+  CommonAlertFilter,
+} from '../../common/types/alerts';
+import { RULE_CPU_USAGE, RULE_DETAILS } from '../../common/constants';
+import { ROUNDED_FLOAT } from '../../common/formatting';
+import { fetchCpuUsageNodeStats } from '../lib/alerts/fetch_cpu_usage_node_stats';
+import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
+import { AlertingDefaults, createLink } from './alert_helpers';
+import { Globals } from '../static_globals';
 
 export class CpuUsageRule extends BaseRule {
   constructor(public sanitizedRule?: SanitizedRule) {

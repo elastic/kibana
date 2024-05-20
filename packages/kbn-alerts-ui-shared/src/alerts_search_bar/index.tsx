@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { Query, TimeRange } from '@kbn/es-query';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { useCallback, useState } from 'react';
-import { useLoadRuleTypesQuery } from '../common/hooks/use_load_rule_types_query';
+import type { Query, TimeRange } from '@kbn/es-query';
+import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { NO_INDEX_PATTERNS } from './constants';
-import { useAlertDataView } from './hooks/use_alert_data_view';
-import { useRuleAADFields } from './hooks/use_rule_aad_fields';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import type { AlertsSearchBarProps, QueryLanguageType } from './types';
+import { useLoadRuleTypesQuery } from '../common/hooks/use_load_rule_types_query';
+import { useAlertDataView } from './hooks/use_alert_data_view';
+import { useRuleAADFields } from './hooks/use_rule_aad_fields';
 
 const SA_ALERTS = { type: 'alerts', fields: {} } as SuggestionsAbstraction;
 

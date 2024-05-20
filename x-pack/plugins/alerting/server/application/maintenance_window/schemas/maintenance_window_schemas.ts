@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
+import { maintenanceWindowStatus, maintenanceWindowCategoryIdTypes } from '../constants';
 import { rRuleSchema } from '../../r_rule/schemas';
-import { maintenanceWindowCategoryIdTypes, maintenanceWindowStatus } from '../constants';
+import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
 
 export const maintenanceWindowEventSchema = schema.object({
   gte: schema.string(),

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
-import { withSpan } from '@kbn/apm-utils';
-import { KueryNode } from '@kbn/es-query';
 import pMap from 'p-map';
-import { AlertingAuthorizationEntity, ReadOperations, WriteOperations } from '../../authorization';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import Boom from '@hapi/boom';
+import { KueryNode } from '@kbn/es-query';
+import { withSpan } from '@kbn/apm-utils';
 import { RawRule } from '../../types';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
+import { WriteOperations, ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
+import { BulkAction, RuleBulkOperationAggregation } from '../types';
 import {
   MAX_RULES_NUMBER_FOR_BULK_OPERATION,
   RULE_TYPE_CHECKS_CONCURRENCY,
 } from '../common/constants';
-import { BulkAction, RuleBulkOperationAggregation } from '../types';
 import { RulesClientContext } from '../types';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const checkAuthorizationAndGetTotal = async (
   context: RulesClientContext,

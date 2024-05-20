@@ -8,8 +8,8 @@
 import type { InstallFailedAttempt } from '../../../types';
 
 import {
-  addErrorToLatestFailedAttempts,
   clearLatestFailedAttempts,
+  addErrorToLatestFailedAttempts,
 } from './install_errors_helpers';
 
 const generateFailedAttempt = (version: string) => ({

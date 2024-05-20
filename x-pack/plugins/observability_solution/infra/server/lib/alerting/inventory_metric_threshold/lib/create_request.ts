@@ -7,12 +7,12 @@
 import type { ESSearchRequest } from '@kbn/es-types';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
-import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
-import { createBucketSelector } from './create_bucket_selector';
 import { createMetricAggregations } from './create_metric_aggregations';
+import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
+import { createBucketSelector } from './create_bucket_selector';
+import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
 export const createRequest = (
   index: string,

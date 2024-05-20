@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_STATUS, SECTIONS } from '../../constants';
+import { SECTIONS, API_STATUS } from '../../constants';
 import * as t from '../action_types';
 
 export const initialState = {

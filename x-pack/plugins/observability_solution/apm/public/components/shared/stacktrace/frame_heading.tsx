@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { ComponentType } from 'react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { Stackframe } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import {
   CSharpFrameHeadingRenderer,
@@ -14,8 +14,8 @@ import {
   FrameHeadingRendererProps,
   JavaFrameHeadingRenderer,
   JavaScriptFrameHeadingRenderer,
-  PhpFrameHeadingRenderer,
   RubyFrameHeadingRenderer,
+  PhpFrameHeadingRenderer,
 } from './frame_heading_renderers';
 
 const FileDetails = euiStyled.div`

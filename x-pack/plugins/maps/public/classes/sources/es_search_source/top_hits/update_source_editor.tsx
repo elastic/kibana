@@ -5,36 +5,36 @@
  * 2.0.
  */
 
+import React, { Component, Fragment } from 'react';
 import {
   EuiFormRow,
+  EuiTitle,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiTitle,
 } from '@elastic/eui';
-import { SortDirection } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Component, Fragment } from 'react';
-import { FIELD_ORIGIN } from '../../../../../common/constants';
+import { DataViewField } from '@kbn/data-views-plugin/public';
+import { SortDirection } from '@kbn/data-plugin/public';
 import { getDataViewNotFoundMessage } from '../../../../../common/i18n_getters';
+import { FIELD_ORIGIN } from '../../../../../common/constants';
 import { TooltipSelector } from '../../../../components/tooltip_selector';
 
+import { getIndexPatternService } from '../../../../kibana_services';
 import {
+  getTermsFields,
   getIsTimeseries,
   getSortFields,
   getSourceFields,
-  getTermsFields,
 } from '../../../../index_pattern_util';
-import { getIndexPatternService } from '../../../../kibana_services';
 import { ESDocField } from '../../../fields/es_doc_field';
-import { IField } from '../../../fields/field';
 import { OnSourceChangeArgs } from '../../source';
-import { ESSearchSource } from '../es_search_source';
 import { TopHitsForm } from './top_hits_form';
+import { ESSearchSource } from '../es_search_source';
+import { IField } from '../../../fields/field';
 
 interface Props {
   filterByMapBounds: boolean;

@@ -6,7 +6,7 @@
  */
 
 import { mapValues } from 'lodash';
-import { CreateTestConfig, createTestConfig } from '../common/config';
+import { createTestConfig, CreateTestConfig } from '../common/config';
 
 export const datasetQualityDebugLogger = {
   name: 'plugins.datasetQuality',

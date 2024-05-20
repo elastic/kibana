@@ -8,8 +8,8 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 
-import { OpenFieldDeleteModalOptions } from '../open_delete_modal';
 import { DataView } from '../shared_imports';
+import { OpenFieldDeleteModalOptions } from '../open_delete_modal';
 import { CloseEditor } from '../types';
 
 type DeleteFieldFunc = (fieldName: string | string[]) => void;

@@ -1,5 +1,3 @@
-import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
-import type { MountPoint } from '@kbn/core-mount-utils-browser';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
  * Side Public License, v 1.
  */
 import type { Observable } from 'rxjs';
+import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /**
  * Allowed fields for {@link ToastInput}.

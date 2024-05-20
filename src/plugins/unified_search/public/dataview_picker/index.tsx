@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { withSuspense } from '@kbn/shared-ux-utility';
 import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
 export type { DataViewPickerProps, OnSaveTextLanguageQueryProps } from './data_view_picker';
 

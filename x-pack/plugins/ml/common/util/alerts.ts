@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isDefined } from '@kbn/ml-is-defined';
 import { pick } from 'lodash';
-import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
+import { isDefined } from '@kbn/ml-is-defined';
 import type { CombinedJobWithStats, Datafeed, Job } from '../types/anomaly_detection_jobs';
 import { resolveMaxTimeInterval } from './job_utils';
 import { parseInterval } from './parse_interval';
+import type { JobsHealthRuleTestsConfig, JobsHealthTests } from '../types/alerts';
 
 const narrowBucketLength = 60;
 

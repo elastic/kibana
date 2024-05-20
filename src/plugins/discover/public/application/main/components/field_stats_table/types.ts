@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { type UiCounterMetricType } from '@kbn/analytics';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { type BehaviorSubject } from 'rxjs';
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 export interface RandomSamplingOption {

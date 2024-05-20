@@ -1,5 +1,3 @@
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
  * 2.0.
  */
 import React from 'react';
-import { ApmThemeProvider } from '../components/routing/app_root';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ApmPluginContext, ApmPluginContextValue } from '../context/apm_plugin/apm_plugin_context';
-import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
-import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
+import { ApmThemeProvider } from '../components/routing/app_root';
+import { ChartPointerEventContextProvider } from '../context/chart_pointer_event/chart_pointer_event_context';
 import { EmbeddableDeps } from './types';
+import { TimeRangeMetadataContextProvider } from '../context/time_range_metadata/time_range_metadata_context';
 
 export interface ApmEmbeddableContextProps {
   deps: EmbeddableDeps;

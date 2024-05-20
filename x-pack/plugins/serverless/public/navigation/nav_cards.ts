@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CardNavExtensionDefinition, appCategories } from '@kbn/management-cards-navigation';
+import { appCategories, CardNavExtensionDefinition } from '@kbn/management-cards-navigation';
 
 export const manageOrgMembersNavCardName = 'organization_members';
 

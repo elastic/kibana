@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type {
-  SavedObjectMigration,
-  SavedObjectUnsanitizedDoc,
-  SavedObjectsType,
-} from '@kbn/core-saved-objects-server';
-import { Logger } from '@kbn/logging';
 import { isFunction } from 'lodash';
 import Semver from 'semver';
+import type {
+  SavedObjectMigration,
+  SavedObjectsType,
+  SavedObjectUnsanitizedDoc,
+} from '@kbn/core-saved-objects-server';
+import { Logger } from '@kbn/logging';
 import { MigrationLogger } from '../core/migration_logger';
-import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
 import { maxVersion } from './pipelines/utils';
+import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
 import { type Transform, type TransformFn, TransformType } from './types';
 
 const TRANSFORM_PRIORITY = [

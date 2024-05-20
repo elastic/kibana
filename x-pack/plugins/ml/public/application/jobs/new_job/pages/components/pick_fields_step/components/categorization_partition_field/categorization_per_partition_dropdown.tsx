@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { useContext, useEffect, useState, useMemo } from 'react';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import type { CategorizationJobCreator } from '../../../../../common/job_creator';
+import { EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { JobCreatorContext } from '../../../job_creator_context';
+import type { CategorizationJobCreator } from '../../../../../common/job_creator';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { CategorizationPerPartitionFieldSelect } from './categorization_per_partition_input';
 
 export const CategorizationPerPartitionFieldDropdown = ({

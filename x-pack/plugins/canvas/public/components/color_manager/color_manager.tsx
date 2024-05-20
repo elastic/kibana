@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import React, { FC } from 'react';
+import PropTypes from 'prop-types';
+import { EuiButtonIcon, EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import tinycolor from 'tinycolor2';
+import { i18n } from '@kbn/i18n';
 
 import { ColorDot } from '../color_dot/color_dot';
 

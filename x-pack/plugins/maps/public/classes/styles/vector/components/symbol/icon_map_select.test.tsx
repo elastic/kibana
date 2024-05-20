@@ -25,13 +25,13 @@ jest.mock('../../symbol_utils', () => {
   };
 });
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 import { FIELD_ORIGIN } from '../../../../../../common/constants';
-import { IconDynamicOptions } from '../../../../../../common/descriptor_types';
 import { AbstractField } from '../../../../fields/field';
 import { IDynamicStyleProperty } from '../../properties/dynamic_style_property';
+import { IconDynamicOptions } from '../../../../../../common/descriptor_types';
 import { IconMapSelect } from './icon_map_select';
 
 class MockField extends AbstractField {}

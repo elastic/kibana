@@ -7,20 +7,20 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Aggregation, Field, SplitField } from '@kbn/ml-anomaly-utils';
+import type { Field, Aggregation, SplitField } from '@kbn/ml-anomaly-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
-import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
+import { JobCreator } from './job_creator';
 import type {
-  CustomRule,
+  Job,
   Datafeed,
   Detector,
-  Job,
+  CustomRule,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import { isValidJson } from '../../../../../../common/util/validation_utils';
-import { JobCreator } from './job_creator';
 import { createBasicDetector } from './util/default_configs';
+import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../common/constants/new_job';
 import { getRichDetectors } from './util/general';
+import { isValidJson } from '../../../../../../common/util/validation_utils';
 
 export interface RichDetector {
   agg: Aggregation | null;

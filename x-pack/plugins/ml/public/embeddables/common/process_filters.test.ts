@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
 import { processFilters } from './process_filters';
+import { CONTROLLED_BY_SWIM_LANE_FILTER } from '../..';
 
 describe('processFilters', () => {
   test('should format kql embeddable input to es query', () => {

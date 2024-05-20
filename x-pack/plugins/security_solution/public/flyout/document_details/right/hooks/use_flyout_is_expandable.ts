@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { useMemo } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
-import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
-import { EventKind } from '../../shared/constants/event_kinds';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getField, getFieldArray } from '../../shared/utils';
+import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
+import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
+import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { isEcsAllowedValue } from '../utils/event_utils';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { EventKind } from '../../shared/constants/event_kinds';
 
 export interface UseShowEventOverviewParams {
   /**

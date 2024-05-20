@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { act, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { fireEvent, act, waitFor } from '@testing-library/react';
 
 import type { TestRenderer } from '../../../../../mock';
 import { createFleetTestRendererMock } from '../../../../../mock';
 
-import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 import {
+  useUIExtension,
   sendGetAgentStatus,
   sendGetOneAgentPolicy,
   sendGetOnePackagePolicy,
-  sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
+  sendUpdatePackagePolicy,
   useStartServices,
-  useUIExtension,
 } from '../../../hooks';
+import { useGetOnePackagePolicy } from '../../../../integrations/hooks';
 
 import { EditPackagePolicyPage } from '.';
 

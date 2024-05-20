@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
-import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
-import { css } from '@emotion/react';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import type { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useFieldStatsTrigger } from './use_field_stats_trigger';
 
 export const optionCss = css`

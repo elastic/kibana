@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
+import { HttpSetup } from '@kbn/core/public';
 
 import {
-  AsyncTestBedConfig,
+  registerTestBed,
   TestBed,
+  AsyncTestBedConfig,
   findTestSubject,
   nextTick,
-  registerTestBed,
 } from '@kbn/test-jest-helpers';
 import { BASE_PATH } from '../../../../../../../common';
-import { ComponentTemplateList } from '../../../component_template_list/component_template_list';
 import { WithAppDependencies } from './setup_environment';
+import { ComponentTemplateList } from '../../../component_template_list/component_template_list';
 
 const getTestBedConfig = (props?: any): AsyncTestBedConfig => ({
   memoryRouter: {

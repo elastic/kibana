@@ -15,6 +15,4 @@ export {
   duplicateExceptionListQuerySchema as duplicateExceptionListRequestQuery,
   exceptionListSchema as duplicateExceptionListResponse,
 };
-export type {
-  DuplicateExceptionListQuerySchemaDecoded as DuplicateExceptionListRequestQueryDecoded,
-};
+export type { DuplicateExceptionListQuerySchemaDecoded as DuplicateExceptionListRequestQueryDecoded };

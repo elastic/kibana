@@ -8,8 +8,8 @@
 
 import { get } from 'lodash';
 import { internals } from '../internals';
-import { META_FIELD_X_OAS_DEPRECATED, META_FIELD_X_OAS_REF_ID } from '../oas_meta_fields';
 import { Type, TypeOptions } from './type';
+import { META_FIELD_X_OAS_REF_ID, META_FIELD_X_OAS_DEPRECATED } from '../oas_meta_fields';
 
 class MyType extends Type<any> {
   constructor(opts: TypeOptions<any> = {}) {

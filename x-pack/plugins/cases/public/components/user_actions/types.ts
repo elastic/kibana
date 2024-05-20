@@ -8,24 +8,24 @@
 import type { EuiCommentProps, EuiThemeComputed } from '@elastic/eui';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { UserActionTypes } from '../../../common/types/domain';
-import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
-import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import type {
-  AttachmentUI,
-  CaseConnectors,
   CaseUI,
+  CaseConnectors,
+  UserActionUI,
+  AttachmentUI,
+  UseFetchAlertData,
   CaseUserActionsStats,
   CasesConfigurationUI,
-  UseFetchAlertData,
-  UserActionUI,
 } from '../../containers/types';
 import type { AddCommentRefObject } from '../add_comment';
-import type { OnUpdateFields } from '../case_view/types';
+import type { UserActionMarkdownRefObject } from './markdown_form';
 import type { CasesNavigation } from '../links';
+import type { UNSUPPORTED_ACTION_TYPES } from './constants';
+import type { OnUpdateFields } from '../case_view/types';
+import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import type { CurrentUserProfile } from '../types';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import type { UNSUPPORTED_ACTION_TYPES } from './constants';
-import type { UserActionMarkdownRefObject } from './markdown_form';
 
 export interface UserActionTreeProps {
   caseConnectors: CaseConnectors;
@@ -44,7 +44,7 @@ export interface UserActionTreeProps {
   userActionsStats: CaseUserActionsStats;
 }
 
-type UnsupportedUserActionTypes = (typeof UNSUPPORTED_ACTION_TYPES)[number];
+type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
 export type SupportedUserActionTypes = keyof Omit<
   typeof UserActionTypes,
   UnsupportedUserActionTypes

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, DEFAULT_APP_CATEGORIES, Plugin } from '@kbn/core/public';
+import { CoreSetup, Plugin, AppMountParameters, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import { ExampleDefinition } from './types';
 

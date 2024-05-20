@@ -8,8 +8,8 @@
 import { Plugin } from '@kbn/core/public';
 import type {
   CustomBrandingPublicSetup,
-  CustomBrandingPublicSetupDependencies,
   CustomBrandingPublicStart,
+  CustomBrandingPublicSetupDependencies,
   CustomBrandingPublicStartDependencies,
 } from './types';
 

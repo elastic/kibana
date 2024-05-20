@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiContextMenuItem, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiContextMenuItem, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

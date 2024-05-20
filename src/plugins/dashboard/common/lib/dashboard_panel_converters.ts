@@ -6,17 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { omit } from 'lodash';
 import { v4 } from 'uuid';
+import { omit } from 'lodash';
+import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 import { DashboardPanelMap, DashboardPanelState } from '..';
 import { SavedDashboardPanel } from '../content_management';
 
 export function convertSavedDashboardPanelToPanelState<
-  TEmbeddableInput extends
-    | EmbeddableInput
-    | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 >(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
   return {
     type: savedDashboardPanel.type,

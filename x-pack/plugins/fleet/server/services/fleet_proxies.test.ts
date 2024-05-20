@@ -7,17 +7,17 @@
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { Logger } from '@kbn/core/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { FLEET_PROXY_SAVED_OBJECT_TYPE } from '../constants';
 
 import { appContextService } from './app_context';
 
-import { downloadSourceService } from './download_source';
 import { deleteFleetProxy } from './fleet_proxies';
 import { listFleetServerHostsForProxyId, updateFleetServerHost } from './fleet_server_host';
 import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 jest.mock('./output');
 jest.mock('./download_source');

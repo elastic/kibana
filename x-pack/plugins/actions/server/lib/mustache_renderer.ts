@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
-import { cloneDeepWith, isPlainObject, isString, merge } from 'lodash';
 import Mustache from 'mustache';
+import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
+import { Logger } from '@kbn/core/server';
 import { getMustacheLambdas } from './mustache_lambdas';
 
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';

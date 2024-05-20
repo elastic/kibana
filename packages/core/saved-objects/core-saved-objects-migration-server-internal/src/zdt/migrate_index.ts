@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type {
-  ElasticsearchCapabilities,
   ElasticsearchClient,
+  ElasticsearchCapabilities,
 } from '@kbn/core-elasticsearch-server';
-import { NodeRoles } from '@kbn/core-node-server';
 import type {
-  IDocumentMigrator,
-  MigrationResult,
   SavedObjectsMigrationConfigType,
+  MigrationResult,
+  IDocumentMigrator,
 } from '@kbn/core-saved-objects-base-server-internal';
 import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
-import { createContext } from './context';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
+import { NodeRoles } from '@kbn/core-node-server';
 import { migrationStateActionMachine } from './migration_state_action_machine';
-import { model } from './model';
+import { createContext } from './context';
 import { next } from './next';
+import { model } from './model';
 import { createInitialState } from './state';
 
 export interface MigrateIndexOptions {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { DetailPanelListItem } from '.';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { DetailPanelListItem } from '.';
 
 const TEST_STRING = 'item title';
 const TEST_CHILD = <span>{TEST_STRING}</span>;

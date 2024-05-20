@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { fireEvent, render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
 import { AutoRefreshButton } from './auto_refresh_button';

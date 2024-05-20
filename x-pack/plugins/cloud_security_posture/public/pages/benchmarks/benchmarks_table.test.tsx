@@ -1,4 +1,3 @@
-import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { render, screen } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { getBenchmarkApplicableTo, getBenchmarkCisName } from '../../../common/utils/helpers';
+import { render, screen } from '@testing-library/react';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
-import { TestProvider } from '../../test/test_provider';
 import { BenchmarksTable } from './benchmarks_table';
+import { TestProvider } from '../../test/test_provider';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 
 describe('<BenchmarksTable />', () => {
   const tableProps = {

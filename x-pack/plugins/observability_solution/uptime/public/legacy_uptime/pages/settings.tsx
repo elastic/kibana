@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useState } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiForm, EuiSpacer } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { selectDynamicSettings } from '../state/selectors';
+import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
 import { DynamicSettings } from '../../../common/runtime_types';
-import {
-  VALUE_MUST_BE_AN_INTEGER,
-  VALUE_MUST_BE_GREATER_THAN_ZERO,
-} from '../../../common/translations';
-import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
+import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
+import { IndicesForm } from '../components/settings/indices_form';
 import {
   CertificateExpirationForm,
   OnFieldChangeType,
   PartialSettings,
 } from '../components/settings/certificate_form';
-import { IndicesForm } from '../components/settings/indices_form';
+import * as Translations from './translations';
+import {
+  VALUE_MUST_BE_GREATER_THAN_ZERO,
+  VALUE_MUST_BE_AN_INTEGER,
+} from '../../../common/translations';
+import { AlertDefaultsForm } from '../components/settings/alert_defaults_form';
 import { SettingsActionBarPortal } from '../components/settings/settings_bottom_bar';
 import { useSettingsErrors } from '../components/settings/use_settings_errors';
-import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
-import { getDynamicSettings, setDynamicSettings } from '../state/actions/dynamic_settings';
-import { selectDynamicSettings } from '../state/selectors';
-import * as Translations from './translations';
 
 export interface SettingsPageFieldErrors {
   heartbeatIndices: string | '';

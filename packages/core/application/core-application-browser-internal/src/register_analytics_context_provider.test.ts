@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { ReplaySubject, Subject, firstValueFrom } from 'rxjs';
+import { firstValueFrom, ReplaySubject, Subject } from 'rxjs';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 
 describe('registerAnalyticsContextProvider', () => {
   let analytics: ReturnType<typeof analyticsServiceMock.createAnalyticsServiceSetup>;

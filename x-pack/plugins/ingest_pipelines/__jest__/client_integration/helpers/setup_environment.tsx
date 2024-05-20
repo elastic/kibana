@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { LocationDescriptorObject } from 'history';
 import React from 'react';
+import { LocationDescriptorObject } from 'history';
+import { HttpSetup } from '@kbn/core/public';
 
 import { ApplicationStart } from '@kbn/core/public';
+import { MockUrlService } from '@kbn/share-plugin/common/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
-  applicationServiceMock,
-  docLinksServiceMock,
   notificationServiceMock,
+  docLinksServiceMock,
   scopedHistoryMock,
   uiSettingsServiceMock,
+  applicationServiceMock,
 } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { MockUrlService } from '@kbn/share-plugin/common/mocks';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 import {
-  apiService,
   breadcrumbService,
   documentationService,
   uiMetricService,
+  apiService,
 } from '../../../public/application/services';
 
 import { init as initHttpRequests } from './http_requests';

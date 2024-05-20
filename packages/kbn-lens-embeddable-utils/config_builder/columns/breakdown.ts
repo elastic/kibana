@@ -16,9 +16,9 @@ import {
   LensBreakdownTopValuesConfig,
 } from '../types';
 import { getHistogramColumn } from './date_histogram';
-import { getFiltersColumn } from './filters';
-import { getIntervalsColumn } from './intervals';
 import { getTopValuesColumn } from './top_values';
+import { getIntervalsColumn } from './intervals';
+import { getFiltersColumn } from './filters';
 
 const DEFAULT_BREAKDOWN_SIZE = 5;
 

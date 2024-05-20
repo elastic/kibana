@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Action, handleActions } from 'redux-actions';
-import { MonitorDurationResult } from '../../../../common/types';
+import { handleActions, Action } from 'redux-actions';
 import {
   getMonitorDurationAction,
-  getMonitorDurationActionFail,
   getMonitorDurationActionSuccess,
+  getMonitorDurationActionFail,
 } from '../actions';
+import { MonitorDurationResult } from '../../../../common/types';
 
 export interface MonitorDuration {
   durationLines: MonitorDurationResult | null;

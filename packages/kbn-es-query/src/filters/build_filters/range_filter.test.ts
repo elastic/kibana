@@ -10,10 +10,10 @@ import { each } from 'lodash';
 import { DataViewBase, DataViewFieldBase } from '../../es_query';
 import { fields, getField } from '../stubs';
 import {
-  RangeFilter,
-  ScriptedRangeFilter,
   buildRangeFilter,
   getRangeFilterField,
+  RangeFilter,
+  ScriptedRangeFilter,
 } from './range_filter';
 
 describe('Range filter builder', () => {

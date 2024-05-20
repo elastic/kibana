@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import { EuiSpacer, EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
+  fieldValidators,
   FIELD_TYPES,
+  UseField,
   Field,
   SelectField,
-  UseField,
-  fieldValidators,
 } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import { TargetField } from './common_fields/target_field';
 import { FieldsConfig, from } from './shared';
+import { TargetField } from './common_fields/target_field';
 
 const fieldsConfig: FieldsConfig = {
   tile_type: {

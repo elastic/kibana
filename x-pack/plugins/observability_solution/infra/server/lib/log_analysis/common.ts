@@ -8,14 +8,14 @@
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { NoLogAnalysisMlJobError } from './errors';
 
-import { TracingSpan, startTracingSpan } from '../../../common/performance_tracing';
-import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   CompositeDatasetKey,
-  LogEntryDatasetBucket,
   createLogEntryDatasetsQuery,
+  LogEntryDatasetBucket,
   logEntryDatasetsResponseRT,
 } from './queries/log_entry_data_sets';
+import { decodeOrThrow } from '../../../common/runtime_types';
+import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
 
 export async function fetchMlJob(mlAnomalyDetectors: MlAnomalyDetectors, jobId: string) {
   const finalizeMlGetJobSpan = startTracingSpan('Fetch ml job from ES');

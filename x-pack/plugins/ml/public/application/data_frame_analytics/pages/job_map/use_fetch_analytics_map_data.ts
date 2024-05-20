@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  type AnalyticsMapReturnType,
-  JOB_MAP_NODE_TYPES,
-} from '@kbn/ml-data-frame-analytics-utils';
 import { asyncForEach } from '@kbn/std';
+import { uniqWith, isEqual } from 'lodash';
 import type cytoscape from 'cytoscape';
-import { isEqual, uniqWith } from 'lodash';
-import { useRef, useState } from 'react';
+import {
+  JOB_MAP_NODE_TYPES,
+  type AnalyticsMapReturnType,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { ml } from '../../../services/ml_api_service';
 
 interface GetDataObjectParameter {

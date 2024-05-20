@@ -1,4 +1,3 @@
-import { EuiPageTemplate } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { EuiPageTemplate } from '@elastic/eui';
  * 2.0.
  */
 import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 import type { DashboardViewPromptState } from '../hooks/use_dashboard_view_prompt_state';
 import { useDashboardViewPromptState } from '../hooks/use_dashboard_view_prompt_state';
 

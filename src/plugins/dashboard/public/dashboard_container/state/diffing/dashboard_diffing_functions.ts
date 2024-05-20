@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, isFilterPinned } from '@kbn/es-query';
 import fastIsEqual from 'fast-deep-equal';
 import { DashboardContainerInput } from '../../../../common';
 import { pluginServices } from '../../../services/plugin_services';

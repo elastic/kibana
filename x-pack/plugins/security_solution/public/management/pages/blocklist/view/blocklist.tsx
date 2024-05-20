@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import type { DocLinks } from '@kbn/doc-links';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
+import type { DocLinks } from '@kbn/doc-links';
+import { EuiLink } from '@elastic/eui';
 
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';

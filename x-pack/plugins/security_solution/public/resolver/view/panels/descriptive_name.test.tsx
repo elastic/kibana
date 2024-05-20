@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 import { DescriptiveName } from './descriptive_name';
+import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 
 describe('DescriptiveName', () => {
   const generator = new EndpointDocGenerator('seed');

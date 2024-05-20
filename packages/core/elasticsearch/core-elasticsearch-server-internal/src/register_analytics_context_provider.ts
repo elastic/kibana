@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { Observable } from 'rxjs';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { ClusterInfo } from './get_cluster_info';
 
 /**

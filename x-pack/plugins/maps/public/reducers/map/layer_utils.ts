@@ -6,8 +6,8 @@
  */
 
 import { LayerDescriptor } from '../../../common/descriptor_types';
-import { TRACKED_LAYER_DESCRIPTOR, copyPersistentState } from '../copy_persistent_state';
 import { MapState } from './types';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../copy_persistent_state';
 
 export function getLayerIndex(list: LayerDescriptor[], layerId: string): number {
   return list.findIndex(({ id }) => layerId === id);

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import React, { memo, useMemo, useState } from 'react';
 import {
-  EuiAccordion,
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiAccordion,
+  EuiTitle,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
+  EuiBadge,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import type { EuiAccordionProps } from '@elastic/eui/src/components/accordion';
 
-import { ExtensionWrapper, PackageIcon } from '../../../../../components';
-import { useLink, useUIExtension } from '../../../../../hooks';
 import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
+import { useLink, useUIExtension } from '../../../../../hooks';
+import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
 import { AgentDetailsIntegrationInputs } from './agent_details_integration_inputs';
 import { getInputUnitsByPackage } from './input_status_utils';

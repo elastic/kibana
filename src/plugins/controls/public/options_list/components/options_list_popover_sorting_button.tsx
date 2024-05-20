@@ -9,26 +9,26 @@
 import React, { useCallback, useState } from 'react';
 
 import {
-  Direction,
-  EuiButtonGroup,
   EuiButtonGroupOptionProps,
-  EuiButtonIcon,
+  EuiSelectableOption,
+  EuiPopoverTitle,
+  EuiButtonGroup,
+  EuiSelectable,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-  EuiSelectableOption,
+  Direction,
   EuiToolTip,
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import {
+  getCompatibleSortingTypes,
   OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortBy,
-  getCompatibleSortingTypes,
 } from '../../../common/options_list/suggestions_sorting';
-import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListStrings } from './options_list_strings';
+import { useOptionsList } from '../embeddable/options_list_embeddable';
 
 interface OptionsListSortingPopoverProps {
   showOnlySelected: boolean;

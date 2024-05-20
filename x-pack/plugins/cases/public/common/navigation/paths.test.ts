@@ -6,11 +6,11 @@
  */
 
 import {
-  generateCaseViewPath,
-  getCaseViewPath,
-  getCaseViewWithCommentPath,
-  getCasesConfigurePath,
   getCreateCasePath,
+  getCaseViewPath,
+  getCasesConfigurePath,
+  getCaseViewWithCommentPath,
+  generateCaseViewPath,
 } from './paths';
 
 describe('Paths', () => {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import { renderGroupPanel } from '.';
+import { render } from '@testing-library/react';
 
 describe('renderGroupPanel', () => {
   it('renders correctly when the field renderer exists', () => {

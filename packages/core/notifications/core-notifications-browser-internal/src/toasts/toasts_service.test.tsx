@@ -8,13 +8,13 @@
 
 import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.mocks';
 
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { ToastsService } from './toasts_service';
+import { ToastsApi } from './toasts_api';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { EventReporter } from './telemetry';
-import { ToastsApi } from './toasts_api';
-import { ToastsService } from './toasts_service';
 
 const mockI18n: any = {
   Context: function I18nContext() {

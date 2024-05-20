@@ -6,12 +6,12 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
-import { createErrorsFromShard } from '../utils/utils';
-import { buildThresholdSignalHistory } from './build_signal_history';
+import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ThresholdSignalHistory } from './types';
+import { buildThresholdSignalHistory } from './build_signal_history';
+import { createErrorsFromShard } from '../utils/utils';
 
 interface GetThresholdSignalHistoryParams {
   from: string;

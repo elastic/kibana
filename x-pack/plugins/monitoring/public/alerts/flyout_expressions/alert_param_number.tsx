@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import React, { useState } from 'react';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
 interface Props {
   name: string;

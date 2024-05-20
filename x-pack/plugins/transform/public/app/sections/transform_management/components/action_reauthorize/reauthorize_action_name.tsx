@@ -7,15 +7,15 @@
 
 import React, { type FC } from 'react';
 
-import { EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
-import type { TransformListRow } from '../../../../common';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import { useTransformCapabilities } from '../../../../hooks';
+import type { TransformListRow } from '../../../../common';
 
 export const reauthorizeActionNameText = i18n.translate(
   'xpack.transform.transformList.reauthorizeActionNameText',

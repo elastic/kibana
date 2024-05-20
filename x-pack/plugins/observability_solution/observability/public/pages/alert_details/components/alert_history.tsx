@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import React from 'react';
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import {
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
   EuiTitle,
+  EuiText,
+  EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { useAlertsHistory } from '@kbn/observability-alert-details';
 import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, type AlertConsumers } from '@kbn/rule-data-utils';
+import { useAlertsHistory } from '@kbn/observability-alert-details';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
-import { TopAlert } from '../../..';
 import { convertTo } from '../../../../common/utils/formatters';
 import { useFetchRuleTypes } from '../../../hooks/use_fetch_rule_types';
 import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
-import { getDefaultAlertSummaryTimeRange } from '../../../utils/alert_summary_widget';
 import { useKibana } from '../../../utils/kibana_react';
+import { TopAlert } from '../../..';
+import { getDefaultAlertSummaryTimeRange } from '../../../utils/alert_summary_widget';
 
 interface Props {
   alert: TopAlert;
@@ -53,8 +53,8 @@ export function AlertHistoryChart({ rule, alert }: Props) {
     rule?.consumer === ALERTING_FEATURE_ID && ruleType?.producer
       ? [ruleType.producer as AlertConsumers]
       : rule
-        ? [rule.consumer as AlertConsumers]
-        : [];
+      ? [rule.consumer as AlertConsumers]
+      : [];
   const ruleId = alert.fields[ALERT_RULE_UUID];
 
   const {

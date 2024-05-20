@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 
+import { ExperimentalFeaturesService } from '../../../../../services';
+import {
+  generateCreatePackagePolicyDevToolsRequest,
+  generateCreateAgentPolicyDevToolsRequest,
+} from '../../../services';
 import {
   FLEET_SYSTEM_PACKAGE,
   HIDDEN_API_REFERENCE_PACKAGES,
 } from '../../../../../../../../common/constants';
-import { ExperimentalFeaturesService } from '../../../../../services';
-import type { NewAgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
-import {
-  generateCreateAgentPolicyDevToolsRequest,
-  generateCreatePackagePolicyDevToolsRequest,
-} from '../../../services';
+import type { PackageInfo, NewAgentPolicy, NewPackagePolicy } from '../../../../../types';
 import { SelectedPolicyTab } from '../../components';
 
 export function useDevToolsRequest({

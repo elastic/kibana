@@ -6,10 +6,10 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { filter, map, mergeMap } from 'rxjs';
-import { BehaviorSubject, catchError, from, of, withLatestFrom } from 'rxjs';
-import { useDatePickerContext } from './use_date_picker';
+import { map, mergeMap, filter } from 'rxjs';
+import { catchError, of, from, BehaviorSubject, withLatestFrom } from 'rxjs';
 import { useLoadingStateContext } from './use_loading_state';
+import { useDatePickerContext } from './use_date_picker';
 
 export const useRequestObservable = <T>() => {
   const { requestState$, isAutoRefreshRequestPending$ } = useLoadingStateContext();

@@ -8,9 +8,9 @@
 import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { useKibana } from '../../common/lib/kibana';
 import { TimelinesPage } from './timelines_page';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');

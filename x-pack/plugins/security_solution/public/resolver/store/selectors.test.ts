@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import type { AnyAction, Reducer } from 'redux';
+import type { AnalyzerById } from '../types';
+import type { Reducer, AnyAction } from 'redux';
 import { createStore } from 'redux';
-import type { ResolverNode } from '../../../common/endpoint/types';
+import { analyzerReducer } from './reducer';
+import * as selectors from './selectors';
 import {
   mockTreeWith2AncestorsAndNoChildren,
   mockTreeWithNoAncestorsAnd2Children,
 } from '../mocks/resolver_tree';
+import type { ResolverNode } from '../../../common/endpoint/types';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 import { endpointSourceSchema } from '../mocks/tree_schema';
-import type { AnalyzerById } from '../types';
-import { userSetPositionOfCamera, userSetRasterSize } from './camera/action';
 import { serverReturnedResolverData } from './data/action';
+import { userSetPositionOfCamera, userSetRasterSize } from './camera/action';
 import { EMPTY_RESOLVER } from './helpers';
-import { analyzerReducer } from './reducer';
-import * as selectors from './selectors';
 
 describe('resolver selectors', () => {
   const actions: AnyAction[] = [];

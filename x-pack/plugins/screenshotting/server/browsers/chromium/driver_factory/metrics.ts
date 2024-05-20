@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { cpus } from 'os';
 import { type Protocol } from 'devtools-protocol';
 import type { Metrics as PuppeteerMetrics } from 'puppeteer';
+import { cpus } from 'os';
 import { PerformanceMetrics } from '../../../../common/types';
 
 export type Metrics = Protocol.Performance.GetMetricsResponse;

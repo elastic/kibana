@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
+import { TimeSeriesQuerySchema, TimeSeriesQuery } from './time_series_types';
 import { runTests } from './core_query_types.test';
-import { TimeSeriesQuery, TimeSeriesQuerySchema } from './time_series_types';
+import { TypeOf } from '@kbn/config-schema';
 
 const DefaultParams: Writable<Partial<TimeSeriesQuery>> = {
   index: 'index-name',

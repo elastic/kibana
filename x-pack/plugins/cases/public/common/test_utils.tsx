@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { MatcherFunction } from '@testing-library/react';
-import type { ReactWrapper } from 'enzyme';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import type { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import type { MatcherFunction } from '@testing-library/react';
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiButton } from '@elastic/eui';
 
 /**
  * Convenience utility to remove text appended to links by EUI

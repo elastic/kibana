@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import React from 'react';
 import {
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
   EuiForm,
   EuiFormLabel,
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Connector } from '@kbn/search-connectors';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import React from 'react';
-import { useConnector } from '../../hooks/api/use_connector';
-import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { Connector } from '@kbn/search-connectors';
 import { useKibanaServices } from '../../hooks/use_kibana';
+import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditServiceTypeProps {
   connector: Connector;

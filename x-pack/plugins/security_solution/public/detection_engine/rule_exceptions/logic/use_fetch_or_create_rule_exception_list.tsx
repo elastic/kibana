@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { HttpStart } from '@kbn/core/public';
+import { useEffect, useState } from 'react';
 import type {
-  CreateExceptionListSchema,
-  ExceptionListSchema,
   List,
   ListArray,
+  ExceptionListSchema,
+  CreateExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  addEndpointExceptionList,
-  addExceptionList,
   fetchExceptionListById,
+  addExceptionList,
+  addEndpointExceptionList,
 } from '@kbn/securitysolution-list-api';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { useEffect, useState } from 'react';
+import type { HttpStart } from '@kbn/core/public';
 
-import type { RuleResponse } from '../../../../common/api/detection_engine';
 import { fetchRuleById, patchRule } from '../../rule_management/api/api';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];
 

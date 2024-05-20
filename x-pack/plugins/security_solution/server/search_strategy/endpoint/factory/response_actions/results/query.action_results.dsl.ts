@@ -6,8 +6,8 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/search-types';
-import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../../../common/endpoint/constants';
 import type { ActionResponsesRequestOptions } from '../../../../../../common/search_strategy/endpoint/response_actions';
+import { ENDPOINT_ACTION_RESPONSES_INDEX } from '../../../../../../common/endpoint/constants';
 
 export const buildActionResultsQuery = ({
   actionId,

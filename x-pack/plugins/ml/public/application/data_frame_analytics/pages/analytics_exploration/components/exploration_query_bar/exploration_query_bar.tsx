@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { debounce } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiButtonGroup, EuiCode, EuiFlexGroup, EuiFlexItem, EuiInputPopover } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { Query } from '@kbn/es-query';
 import type { QueryErrorMessage } from '@kbn/ml-error-utils';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { debounce } from 'lodash';
-import type { FC } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
 
 import { PLUGIN_ID } from '../../../../../../../common/constants/app';
 import type { Dictionary } from '../../../../../../../common/types/common';
-import { useMlKibana } from '../../../../../contexts/kibana';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
+import { useMlKibana } from '../../../../../contexts/kibana';
 
 export interface ExplorationQueryBarProps {
   dataView: DataView;

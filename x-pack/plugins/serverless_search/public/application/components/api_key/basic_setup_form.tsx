@@ -6,15 +6,15 @@
  */
 
 import {
-  EuiFieldNumber,
+  EuiIcon,
+  EuiText,
+  EuiForm,
   EuiFieldText,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiRadioGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiIcon,
-  EuiRadioGroup,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';

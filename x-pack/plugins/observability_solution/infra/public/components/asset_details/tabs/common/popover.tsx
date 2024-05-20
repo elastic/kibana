@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiPopover, type IconColor, type IconSize, type IconType } from '@elastic/eui';
+import { EuiPopover, EuiIcon, type IconType, type IconColor, type IconSize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useBoolean } from '@kbn/react-hooks';
 import React from 'react';
+import { useBoolean } from '@kbn/react-hooks';
 
 export const Popover = ({
   children,

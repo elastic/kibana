@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
   EuiSpacer,
-  EuiSplitPanel,
+  EuiIcon,
   EuiText,
+  EuiSplitPanel,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { LensApi } from '@kbn/lens-plugin/public';
-import type { FC } from 'react';
-import React from 'react';
 import type { LayerResult } from '../../../../../application/jobs/new_job/job_from_lens';
 import { CompatibleLayer } from './compatible_layer';
 import { IncompatibleLayer } from './incompatible_layer';

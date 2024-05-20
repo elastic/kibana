@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { Story } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
+import React from 'react';
 import { HttpStart } from '@kbn/core/public';
-import { fields } from '@kbn/data-plugin/common/mocks';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
-import { action } from '@storybook/addon-actions';
-import { Story } from '@storybook/react';
-import React from 'react';
+import { fields } from '@kbn/data-plugin/common/mocks';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { BuilderEntryItem, EntryItemProps } from './entry_renderer';
 

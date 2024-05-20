@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SavedTimeline } from '../../../../common/api/timeline';
-import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
-import { Direction } from '../../../../common/search_strategy';
 import { defaultHeaders } from './default_timeline_headers';
+import type { SavedTimeline } from '../../../../common/api/timeline';
+import { TimelineType, TimelineStatus } from '../../../../common/api/timeline';
+import { Direction } from '../../../../common/search_strategy';
 
 export const draftTimelineDefaults: SavedTimeline = {
   columns: defaultHeaders,

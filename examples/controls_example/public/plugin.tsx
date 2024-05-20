@@ -10,8 +10,8 @@ import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/publ
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { PLUGIN_ID } from './constants';
 import img from './control_group_image.png';
+import { PLUGIN_ID } from './constants';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;

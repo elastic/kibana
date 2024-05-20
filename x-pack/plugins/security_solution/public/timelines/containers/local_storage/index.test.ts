@@ -7,23 +7,23 @@
 
 import { cloneDeep } from 'lodash/fp';
 import {
-  LOCAL_STORAGE_TABLE_KEY,
-  addAssigneesSpecsToSecurityDataTableIfNeeded,
-  addTableInStorage,
-  getAllDataTablesInStorage,
-  getDataTablesInStorageByIds,
-  migrateAlertTableStateToTriggerActionsState,
-  migrateColumnLabelToDisplayAsText,
   migrateColumnWidthToInitialWidth,
-  migrateTriggerActionsVisibleColumnsAlertTable88xTo89,
+  migrateColumnLabelToDisplayAsText,
+  LOCAL_STORAGE_TABLE_KEY,
   useDataTablesStorage,
+  getDataTablesInStorageByIds,
+  getAllDataTablesInStorage,
+  addTableInStorage,
+  migrateAlertTableStateToTriggerActionsState,
+  migrateTriggerActionsVisibleColumnsAlertTable88xTo89,
+  addAssigneesSpecsToSecurityDataTableIfNeeded,
 } from '.';
 
+import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
+import { useKibana } from '../../../common/lib/kibana';
+import { VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTableModel, DataTableState } from '@kbn/securitysolution-data-table';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { VIEW_SELECTION } from '../../../../common/constants';
-import { useKibana } from '../../../common/lib/kibana';
-import { createSecuritySolutionStorageMock, mockDataTableModel } from '../../../common/mock';
 import { v88xAlertOrignalData, v89xAlertsOriginalData } from './test.data';
 
 jest.mock('../../../common/lib/kibana');

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiTableRowCell } from '@elastic/eui';
 import React, { useState, useEffect, useCallback } from 'react';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import { EuiTableRowCell } from '@elastic/eui';
 import { GlobalFlyout } from '../../../../../shared_imports';
+import { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { HealthIndicatorFlyout, HealthIndicatorFlyoutProps } from './flyout';

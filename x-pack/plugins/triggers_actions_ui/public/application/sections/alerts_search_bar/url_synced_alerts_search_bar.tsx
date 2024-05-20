@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
+import { BoolQuery } from '@kbn/es-query';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { BoolQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useKibana } from '../../..';
-import { nonNullable } from '../../../../common/utils';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
-import AlertsSearchBar from './alerts_search_bar';
-import { buildEsQuery } from './build_es_query';
+import { useKibana } from '../../..';
+import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
 import { ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from './constants';
 import { AlertsSearchBarProps } from './types';
-import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
+import AlertsSearchBar from './alerts_search_bar';
+import { nonNullable } from '../../../../common/utils';
+import { buildEsQuery } from './build_es_query';
 
 const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
   'xpack.triggersActionsUI.urlSyncedAlertsSearchBar.invalidQueryTitle',

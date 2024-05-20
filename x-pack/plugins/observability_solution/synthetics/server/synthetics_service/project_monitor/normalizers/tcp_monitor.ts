@@ -8,21 +8,21 @@ import { get } from 'lodash';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import {
   ConfigKey,
-  FormMonitorType,
   MonitorTypeEnum,
+  FormMonitorType,
   TCPFields,
   TLSVersion,
 } from '../../../../common/runtime_types/monitor_management';
 import {
   NormalizedProjectProps,
   NormalizerResult,
-  getHasTLSFields,
-  getInvalidUrlsOrHostsError,
+  normalizeYamlConfig,
   getNormalizeCommonFields,
   getOptionalArrayField,
   getOptionalListField,
+  getInvalidUrlsOrHostsError,
   getUnsupportedKeysError,
-  normalizeYamlConfig,
+  getHasTLSFields,
 } from './common_fields';
 
 export const getNormalizeTCPFields = ({

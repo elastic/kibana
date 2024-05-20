@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
+import { testTable, relationalTable } from './__fixtures__/test_tables';
+import { dropdownControl } from './dropdownControl';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
-import { relationalTable, testTable } from './__fixtures__/test_tables';
-import { dropdownControl } from './dropdownControl';
 
 describe('dropdownControl', () => {
   const fn = functionWrapper(dropdownControl);

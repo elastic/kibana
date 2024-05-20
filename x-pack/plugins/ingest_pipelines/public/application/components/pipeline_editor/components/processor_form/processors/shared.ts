@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import type { FunctionComponent } from 'react';
+import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { isRight } from 'fp-ts/lib/Either';
-import * as rt from 'io-ts';
-import type { FunctionComponent } from 'react';
 
 import { FieldConfig, ValidationFunc, fieldValidators } from '../../../../../../shared_imports';
 
@@ -81,7 +81,7 @@ export const from = {
     return undefined;
   },
   optionalArrayOfStrings: (v: string[]) => (v.length ? v : undefined),
-  undefinedIfValue: (value: unknown) => (v: boolean) => (v === value ? undefined : v),
+  undefinedIfValue: (value: unknown) => (v: boolean) => v === value ? undefined : v,
   emptyStringToUndefined: (v: unknown) => (v === '' ? undefined : v),
   /**
    * Useful when serializing user input from a <textarea /> that we want to later JSON.stringify but keep the same as what

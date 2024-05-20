@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Container, ContainerInput, ViewMode } from '../..';
+import { I18nProvider } from '@kbn/i18n-react';
+import { Container, ViewMode, ContainerInput } from '../..';
+import { HelloWorldContainerComponent } from './hello_world_container_component';
 import { EmbeddableStart } from '../../../plugin';
 import { EmbeddableContainerSettings } from '../../containers/i_container';
-import { HelloWorldContainerComponent } from './hello_world_container_component';
 
 export const HELLO_WORLD_CONTAINER = 'HELLO_WORLD_CONTAINER';
 

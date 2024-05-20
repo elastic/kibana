@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { PolicyData } from '../../../../common/endpoint/types';
 import { getResponseActionFeatureKey } from './feature_keys';
 import type { FeatureUsageService } from './service';
+import type { PolicyData } from '../../../../common/endpoint/types';
 
 export function createFeatureUsageServiceMock() {
   return {

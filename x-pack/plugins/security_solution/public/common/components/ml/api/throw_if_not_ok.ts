@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SetupMlResponse } from '../../ml_popover/types';
-import { ToasterError } from '../../toasters';
-import { isMlStartJobError, isUnknownError } from './errors';
 import * as i18n from './translations';
+import { ToasterError } from '../../toasters';
+import type { SetupMlResponse } from '../../ml_popover/types';
+import { isMlStartJobError, isUnknownError } from './errors';
 
 export const tryParseResponse = (response: string): string => {
   try {

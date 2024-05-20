@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { IncomingHttpHeaders } from 'http';
 import { Stream } from 'stream';
-import { errors } from '@elastic/elasticsearch';
-import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IncomingHttpHeaders } from 'http';
 import { schema } from '@kbn/config-schema';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { errors } from '@elastic/elasticsearch';
+import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   APP_ID,
-  MVT_GETGRIDTILE_API_PATH,
   MVT_GETTILE_API_PATH,
+  MVT_GETGRIDTILE_API_PATH,
   RENDER_AS,
 } from '../../common/constants';
 import { getAggsTileRequest, getHitsTileRequest } from '../../common/mvt_request_body';

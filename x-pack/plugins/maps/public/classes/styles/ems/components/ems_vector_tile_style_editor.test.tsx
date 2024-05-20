@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 import { EMSVectorTileStyleEditor } from './ems_vector_tile_style_editor';
 

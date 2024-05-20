@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import type { Observable } from 'rxjs';
+import type { MaybePromise } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { ApiVersion } from '@kbn/core-http-common';
-import type { MaybePromise } from '@kbn/utility-types';
-import type { Observable } from 'rxjs';
 
 /** @public */
 export interface HttpSetup {
@@ -351,9 +351,9 @@ export interface HttpHandler {
     options: HttpFetchOptions & { asResponse: true }
   ): Promise<HttpResponse<TResponseBody>>;
 
-  <TResponseBody = unknown>(
-    options: HttpFetchOptionsWithPath & { asResponse: true }
-  ): Promise<HttpResponse<TResponseBody>>;
+  <TResponseBody = unknown>(options: HttpFetchOptionsWithPath & { asResponse: true }): Promise<
+    HttpResponse<TResponseBody>
+  >;
 
   <TResponseBody = unknown>(path: string, options?: HttpFetchOptions): Promise<TResponseBody>;
 

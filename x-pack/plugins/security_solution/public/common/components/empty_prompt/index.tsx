@@ -1,4 +1,3 @@
-import { EuiLoadingLogo } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { EuiLoadingLogo } from '@elastic/eui';
  * 2.0.
  */
 import React, { lazy, Suspense } from 'react';
+import { EuiLoadingLogo } from '@elastic/eui';
 
 const EmptyPromptLazy = lazy(() => import('./empty_prompt'));
 

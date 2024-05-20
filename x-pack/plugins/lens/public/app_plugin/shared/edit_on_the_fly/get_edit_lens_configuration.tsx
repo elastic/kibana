@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Provider } from 'react-redux';
+import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
 import type { CoreStart } from '@kbn/core/public';
-import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { Action, Dispatch, MiddlewareAPI } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import React, { useCallback, useState } from 'react';
-import { Provider } from 'react-redux';
-import { DOC_TYPE } from '../../../../common/constants';
-import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import { generateId } from '../../../id_generator';
-import { type Document, SavedObjectIndexStore } from '../../../persistence';
+import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import {
-  LensRootStore,
-  initEmpty,
-  initExisting,
-  loadInitial,
   makeConfigureStore,
+  LensRootStore,
+  loadInitial,
+  initExisting,
+  initEmpty,
 } from '../../../state_management';
+import { generateId } from '../../../id_generator';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
+import { SavedObjectIndexStore, type Document } from '../../../persistence';
+import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
+import { DOC_TYPE } from '../../../../common/constants';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,

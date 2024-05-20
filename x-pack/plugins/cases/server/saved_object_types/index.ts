@@ -7,14 +7,14 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
-import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import { createCaseSavedObjectType } from './cases/cases';
-import { casesRulesSavedObjectType } from './cases_rules';
-import { createCaseCommentSavedObjectType } from './comments';
 import { caseConfigureSavedObjectType } from './configure';
+import { createCaseCommentSavedObjectType } from './comments';
+import { createCaseUserActionSavedObjectType } from './user_actions';
 import { caseConnectorMappingsSavedObjectType } from './connector_mappings';
 import { casesTelemetrySavedObjectType } from './telemetry';
-import { createCaseUserActionSavedObjectType } from './user_actions';
+import { casesRulesSavedObjectType } from './cases_rules';
+import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 
 interface RegisterSavedObjectsArgs {
   core: CoreSetup;

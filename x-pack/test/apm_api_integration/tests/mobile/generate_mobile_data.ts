@@ -1,4 +1,3 @@
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
  * 2.0.
  */
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 
 export const SERVICE_VERSIONS = ['2.3', '1.2', '1.1'];
 

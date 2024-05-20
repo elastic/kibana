@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React from 'react';
 import type { BrushEndListener, PartialTheme } from '@elastic/charts';
 import {
-  Chart,
   HistogramBarSeries,
-  LEGACY_LIGHT_THEME,
+  Chart,
   ScaleType,
   Settings,
-  Tooltip,
   TooltipType,
+  Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type { FC } from 'react';
-import React from 'react';
+import { Axes } from '../common/axes';
 import type { LineChartPoint } from '../../../../common/chart_loader';
 import type { Anomaly } from '../../../../common/results_loader';
-import { Anomalies } from '../common/anomalies';
-import { Axes } from '../common/axes';
 import { useChartColors } from '../common/settings';
 import { LoadingWrapper } from '../loading_wrapper';
+import { Anomalies } from '../common/anomalies';
 import { OverlayRange } from './overlay_range';
 
 interface Props {

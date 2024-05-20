@@ -1,4 +1,3 @@
-import { render, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { render, screen } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { IntervalAbbrScreenReader } from '.';
+import { render, screen } from '@testing-library/react';
 import { TestProviders } from '../../../mock';
+import { IntervalAbbrScreenReader } from '.';
 
 describe('IntervalAbbrScreenReader', () => {
   test('should add screen reader text for 35s', () => {

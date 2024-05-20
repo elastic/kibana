@@ -10,8 +10,8 @@ import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/
 import { RenderParameterTemplates } from '@kbn/actions-plugin/server/types';
 import { set } from '@kbn/safer-lodash-set';
 import { cloneDeep, get, isString } from 'lodash';
-import { OpsgenieSubActions } from '../../../common';
 import { RULE_TAGS_TEMPLATE } from '../../../common/opsgenie';
+import { OpsgenieSubActions } from '../../../common';
 import { CreateAlertSubActionParams } from './types';
 
 export const renderParameterTemplates: RenderParameterTemplates<ExecutorParams> = (

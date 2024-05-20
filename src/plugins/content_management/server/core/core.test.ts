@@ -8,33 +8,33 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { ContentClient } from '../content_client/content_client';
-import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
 import { until } from '../event_stream/tests/util';
+import { setupEventStreamService } from '../event_stream/tests/setup_event_stream_service';
+import { ContentClient } from '../content_client/content_client';
 import { Core } from './core';
-import type { ContentCrud } from './crud';
-import type {
-  BulkGetItemError,
-  BulkGetItemStart,
-  BulkGetItemSuccess,
-  CreateItemError,
-  CreateItemStart,
-  CreateItemSuccess,
-  DeleteItemError,
-  DeleteItemStart,
-  DeleteItemSuccess,
-  GetItemError,
-  GetItemStart,
-  GetItemSuccess,
-  SearchItemError,
-  SearchItemStart,
-  SearchItemSuccess,
-  UpdateItemError,
-  UpdateItemStart,
-  UpdateItemSuccess,
-} from './event_types';
 import { createMemoryStorage, createMockedStorage } from './mocks';
 import { ContentRegistry } from './registry';
+import type { ContentCrud } from './crud';
+import type {
+  GetItemStart,
+  GetItemSuccess,
+  GetItemError,
+  BulkGetItemStart,
+  BulkGetItemSuccess,
+  BulkGetItemError,
+  CreateItemStart,
+  CreateItemSuccess,
+  CreateItemError,
+  UpdateItemStart,
+  UpdateItemSuccess,
+  UpdateItemError,
+  DeleteItemStart,
+  DeleteItemSuccess,
+  DeleteItemError,
+  SearchItemStart,
+  SearchItemSuccess,
+  SearchItemError,
+} from './event_types';
 import { ContentStorage, ContentTypeDefinition, StorageContext } from './types';
 
 const spyMsearch = jest.fn();

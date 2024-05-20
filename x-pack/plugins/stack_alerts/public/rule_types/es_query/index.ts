@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { lazy } from 'react';
+import { i18n } from '@kbn/i18n';
+import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { EsQueryRuleParams, SearchType } from './types';
-import { isSearchSourceRule } from './util';
 import { validateExpression } from './validation';
+import { isSearchSourceRule } from './util';
 
 const PLUGIN_ID = 'discover';
 

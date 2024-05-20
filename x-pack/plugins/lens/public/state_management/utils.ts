@@ -6,8 +6,8 @@
  */
 
 import memoizeOne from 'memoize-one';
-import type { DatasourceLayers, DatasourceMap } from '../types';
-import type { DataViewsState, DatasourceStates } from './types';
+import type { DatasourceMap, DatasourceLayers } from '../types';
+import type { DatasourceStates, DataViewsState } from './types';
 
 export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   datasourceStates: DatasourceStates,

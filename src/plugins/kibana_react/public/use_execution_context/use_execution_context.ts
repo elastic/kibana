@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreStart, KibanaExecutionContext } from '@kbn/core/public';
+import type { KibanaExecutionContext, CoreStart } from '@kbn/core/public';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 
 /**

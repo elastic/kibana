@@ -8,17 +8,17 @@
 import type { Client } from '@elastic/elasticsearch';
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import { isEndpointPackageV2 } from './package_v2';
+import { usageTracker } from '../data_loaders/usage_tracker';
 import {
+  metadataCurrentIndexPattern,
+  metadataTransformPrefix,
   METADATA_CURRENT_TRANSFORM_V2,
   METADATA_TRANSFORMS_PATTERN,
   METADATA_TRANSFORMS_PATTERN_V2,
   METADATA_UNITED_TRANSFORM,
   METADATA_UNITED_TRANSFORM_V2,
-  metadataCurrentIndexPattern,
-  metadataTransformPrefix,
 } from '../constants';
-import { usageTracker } from '../data_loaders/usage_tracker';
-import { isEndpointPackageV2 } from './package_v2';
 
 export const waitForMetadataTransformsReady = usageTracker.track(
   'waitForMetadataTransformsReady',

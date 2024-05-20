@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Ecs } from '@kbn/cases-plugin/common';
 import React, { lazy, Suspense, useMemo } from 'react';
-import { AlertAttachmentContext } from '../common/contexts';
-import type { OsqueryActionProps } from './osquery_action';
+import type { Ecs } from '@kbn/cases-plugin/common';
 import ServicesWrapper from './services_wrapper';
 import type { ServicesWrapperProps } from './services_wrapper';
+import type { OsqueryActionProps } from './osquery_action';
+import { AlertAttachmentContext } from '../common/contexts';
 
 const OsqueryAction = lazy(() => import('./osquery_action'));
 export const getLazyOsqueryAction =

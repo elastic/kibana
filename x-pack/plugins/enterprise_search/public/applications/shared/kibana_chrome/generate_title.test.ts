@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { appSearchTitle, generateTitle, searchTitle, workplaceSearchTitle } from './generate_title';
+import { generateTitle, searchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
 describe('generateTitle', () => {
   it('creates a hyphen separated string from an array of page titles', () => {

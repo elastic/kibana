@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
+import { storiesOf } from '@storybook/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { getTableRenderer } from '../table';
 import { Render } from './render';
 

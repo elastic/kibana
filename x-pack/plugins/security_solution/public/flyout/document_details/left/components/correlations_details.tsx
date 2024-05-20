@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { isActiveTimeline } from '../../../../helpers';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
-import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
-import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
+import { RelatedAlertsBySession } from './related_alerts_by_session';
+import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
+import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
+import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
 import { useLeftPanelContext } from '../context';
+import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
+import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsByAncestry } from './related_alerts_by_ancestry';
-import { RelatedAlertsBySameSourceEvent } from './related_alerts_by_same_source_event';
-import { RelatedAlertsBySession } from './related_alerts_by_session';
-import { RelatedCases } from './related_cases';
 import { SuppressedAlerts } from './suppressed_alerts';
-import { CORRELATIONS_DETAILS_TEST_ID } from './test_ids';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { isActiveTimeline } from '../../../../helpers';
 
 export const CORRELATIONS_TAB_ID = 'correlations';
 

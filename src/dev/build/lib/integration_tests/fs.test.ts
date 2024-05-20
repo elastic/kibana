@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { chmodSync, statSync } from 'fs';
 import { resolve } from 'path';
+import { chmodSync, statSync } from 'fs';
 
 import del from 'del';
 
-import { copyAll, getChildPaths, getFileHash, gunzip, mkdirp, read, untar, write } from '../fs';
+import { mkdirp, write, read, getChildPaths, copyAll, getFileHash, untar, gunzip } from '../fs';
 
 const TMP = resolve(__dirname, '../__tmp__');
 const FIXTURES = resolve(__dirname, '../__fixtures__');

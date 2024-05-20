@@ -7,9 +7,9 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
 import { buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getFieldCapabilities } from './get_field_capabilities';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 const dataView = buildDataViewMock({
   name: 'test-index-view',

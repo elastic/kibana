@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Logger } from '@kbn/logging';
-import { FileMetadata } from '@kbn/shared-ux-file-types';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { EsIndexFilesMetadataClient } from '../..';
+import { FileMetadata } from '@kbn/shared-ux-file-types';
+import { estypes } from '@elastic/elasticsearch';
 
 describe('EsIndexFilesMetadataClient', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

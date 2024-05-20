@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FilterSettings } from './anomaly_explorer_common_state';
 import type { OverallSwimlaneData, SwimlaneData } from './explorer_utils';
+import type { FilterSettings } from './anomaly_explorer_common_state';
 
 interface HasMatchingPointsParams {
   filteredFields?: FilterSettings['filteredFields'];

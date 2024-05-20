@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Capabilities, CoreStart } from '@kbn/core/public';
-import { coreMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { ILicense } from '@kbn/licensing-plugin/public';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RenderOptions, RenderResult, render as reactRender } from '@testing-library/react';
 import React, { FC, PropsWithChildren } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
+import { Capabilities, CoreStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { ILicense } from '@kbn/licensing-plugin/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 /* eslint-disable no-console */
 

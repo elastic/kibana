@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { addLayer } from './layer_actions';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../licensed_features';
-import { addLayer } from './layer_actions';
 
 jest.mock('../kibana_services', () => {
   return {

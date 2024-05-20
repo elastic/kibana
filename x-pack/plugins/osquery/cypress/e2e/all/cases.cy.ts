@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { ServerlessRoleName } from '../../support/roles';
-import { cleanupCase, loadCase, loadLiveQuery } from '../../tasks/api_fixtures';
+import { initializeDataViews } from '../../tasks/login';
 import {
   addLiveQueryToCase,
   checkActionItemsInResults,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
-import { initializeDataViews } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
+import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('Add to Cases', () => {
   let liveQueryId: string;

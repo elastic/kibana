@@ -9,7 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButton, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiLink, EuiButton, EuiText } from '@elastic/eui';
 
 import { RoleMappingsHeading } from './role_mappings_heading';
 

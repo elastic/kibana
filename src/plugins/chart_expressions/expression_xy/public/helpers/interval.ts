@@ -12,7 +12,7 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { XYChartProps } from '../../common';
 import { isTimeChart } from '../../common/helpers';
 import { getFilteredLayers } from './layers';
-import { getDataLayers, isDataLayer } from './visualization';
+import { isDataLayer, getDataLayers } from './visualization';
 
 export function calculateMinInterval(
   datatableUtilities: DatatableUtilitiesService,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { DashboardNavigationService } from './types';
 
 type NavigationServiceFactory = PluginServiceFactory<DashboardNavigationService>;

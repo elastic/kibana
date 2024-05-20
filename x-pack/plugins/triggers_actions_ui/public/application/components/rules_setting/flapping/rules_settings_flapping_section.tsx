@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiPanel,
-  EuiSpacer,
-  EuiSwitch,
-  EuiSwitchProps,
-  EuiText,
-} from '@elastic/eui';
+import React, { memo } from 'react';
 import { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchProps,
+  EuiPanel,
+  EuiText,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import {
   RulesSettingsFlappingFormSection,
   RulesSettingsFlappingFormSectionProps,

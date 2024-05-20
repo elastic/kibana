@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { LngLat, LngLatBounds, Map as MapboxMap, PointLike } from '@kbn/mapbox-gl';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mount, shallow } from 'enzyme';
 import { ScaleControl } from './scale_control';
+import type { LngLat, LngLatBounds, Map as MapboxMap, PointLike } from '@kbn/mapbox-gl';
 
 const CLIENT_HEIGHT_PIXELS = 1200;
 const DISTANCE_METERS = 87653;

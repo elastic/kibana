@@ -8,7 +8,7 @@
 
 import { expect } from 'chai';
 import { Artifact } from '../buildkite/types/artifact';
-import { TestFailure, getAnnotation, getPrComment, getSlackMessage } from './annotate';
+import { TestFailure, getAnnotation, getSlackMessage, getPrComment } from './annotate';
 
 let mockFailure: TestFailure;
 let mockArtifacts: Record<string, Artifact>;

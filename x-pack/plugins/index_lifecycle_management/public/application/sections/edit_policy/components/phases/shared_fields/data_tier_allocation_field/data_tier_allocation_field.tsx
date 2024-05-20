@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiDescribedFormGroup, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 
-import { DataTierRole, PhaseWithAllocation } from '../../../../../../../../common/types';
-import { useFormData, useKibana } from '../../../../../../../shared_imports';
+import { useKibana, useFormData } from '../../../../../../../shared_imports';
+import { PhaseWithAllocation, DataTierRole } from '../../../../../../../../common/types';
 import { getAvailableNodeRoleForPhase, isNodeRoleFirstPreference } from '../../../../../../lib';
 import { useLoadNodes } from '../../../../../../services/api';
 import { DataTierAllocationType } from '../../../../types';
 
 import {
-  CloudDataTierCallout,
   DataTierAllocation,
-  DefaultToDataNodesNotice,
-  DefaultToDataTiersNotice,
-  LoadingError,
-  NoTiersAvailableNotice,
-  NoTiersAvailableUsingNodeAttributesNotice,
   WillUseFallbackTierNotice,
   WillUseFallbackTierUsingNodeAttributesNotice,
+  NoTiersAvailableNotice,
+  NoTiersAvailableUsingNodeAttributesNotice,
+  DefaultToDataNodesNotice,
+  DefaultToDataTiersNotice,
+  CloudDataTierCallout,
+  LoadingError,
 } from './components';
 
 import './_data_tier_allocation.scss';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import React, { useEffect, useRef, FC, PropsWithChildren } from 'react';
+import { EuiCollapsibleNavBeta } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 const LOCAL_STORAGE_IS_COLLAPSED_KEY = 'PROJECT_NAVIGATION_COLLAPSED' as const;

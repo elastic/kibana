@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { map as _map, flatten, groupBy, pick, uniqWith } from 'lodash';
-import { Observable, combineLatest, defer, of } from 'rxjs';
+import { combineLatest, defer, of, Observable } from 'rxjs';
 import { map } from 'rxjs';
-import { getFunctionErrors, getFunctionHelp } from '../../../i18n';
+import { groupBy, flatten, pick, map as _map, uniqWith } from 'lodash';
 import { Datatable, DatatableColumn, ExpressionFunctionDefinition } from '../../../types';
+import { getFunctionHelp, getFunctionErrors } from '../../../i18n';
 
 interface Arguments {
   by?: string[];

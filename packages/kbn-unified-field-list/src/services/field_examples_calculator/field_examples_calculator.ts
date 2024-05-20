@@ -8,13 +8,13 @@
 
 // Adapted from src/plugins/discover/public/application/main/components/sidebar/lib/field_calculator.js
 
+import { map, sortBy, defaults, isObject, pick } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { flattenHit } from '@kbn/data-service/src/search/tabify';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { flattenHit } from '@kbn/data-service/src/search/tabify';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { defaults, isObject, map, pick, sortBy } from 'lodash';
-import { DEFAULT_SIMPLE_EXAMPLES_SIZE } from '../../constants';
 import { canProvideExamplesForField } from '../../utils/can_provide_stats';
+import { DEFAULT_SIMPLE_EXAMPLES_SIZE } from '../../constants';
 
 type FieldHitValue = any;
 

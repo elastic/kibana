@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { useEffect } from 'react';
+import { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { GaugeShape, GaugeShapes } from '../../../common';
 
 export const useGaugeSizeByType = (type: GaugeShape, setChartSize: (d: ChartSizeSpec) => void) => {

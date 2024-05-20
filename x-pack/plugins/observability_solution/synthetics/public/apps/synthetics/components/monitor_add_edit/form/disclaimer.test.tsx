@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import * as formContext from 'react-hook-form';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { ServiceLocations } from '../types';
+import * as formContext from 'react-hook-form';
 import { Disclaimer } from './disclaimer';
+import { ServiceLocations } from '../types';
 
 export const mockLocation = {
   label: 'US Central',

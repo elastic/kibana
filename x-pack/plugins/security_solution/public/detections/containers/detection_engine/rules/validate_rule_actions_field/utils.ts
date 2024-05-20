@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { flattenDeep, isArray, isString, startCase, uniq } from 'lodash/fp';
 import mustache from 'mustache';
+import { uniq, startCase, flattenDeep, isArray, isString } from 'lodash/fp';
 
 import type {
-  ActionTypeRegistryContract,
   RuleAction,
+  ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as I18n from './translations';
 

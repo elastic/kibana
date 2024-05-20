@@ -8,13 +8,13 @@
 
 import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import {
-  LoggingConfigType,
-  LoggingSystem,
   config as loggingConfig,
+  LoggingSystem,
+  LoggingConfigType,
 } from '@kbn/core-logging-server-internal';
 import { getConfigService } from './config';
-import { KibanaService, config as kibanaConfig } from './kibana';
-import { Server, ServerStart, config as serverConfig } from './server';
+import { config as kibanaConfig, KibanaService } from './kibana';
+import { config as serverConfig, Server, ServerStart } from './server';
 
 export async function bootstrap() {
   const loggingSystem = new LoggingSystem();

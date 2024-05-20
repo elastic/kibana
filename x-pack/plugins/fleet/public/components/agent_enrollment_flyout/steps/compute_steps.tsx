@@ -7,44 +7,44 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 
-import { EuiLoadingSpinner, EuiSteps } from '@elastic/eui';
+import { EuiSteps, EuiLoadingSpinner } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import { API_VERSIONS } from '../../../../common/constants';
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
-import { agentPolicyRouteService, fullAgentPolicyToYaml } from '../../../services';
+import { API_VERSIONS } from '../../../../common/constants';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
 
 import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
 
-import { ManualInstructions, StandaloneInstructions } from '../../enrollment_instructions';
+import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
 import {
-  sendGetOneAgentPolicyFull,
-  useAgentVersion,
   useGetOneEnrollmentAPIKey,
   useStartServices,
+  sendGetOneAgentPolicyFull,
+  useAgentVersion,
 } from '../../../hooks';
 
-import { usePollingAgentCount } from '../confirm_agent_enrollment';
 import type { InstructionProps } from '../types';
+import { usePollingAgentCount } from '../confirm_agent_enrollment';
 
 import {
-  InstallAzureArmTemplateManagedAgentStep,
   InstallCloudFormationManagedAgentStep,
   InstallGoogleCloudShellManagedAgentStep,
+  InstallAzureArmTemplateManagedAgentStep,
 } from '../../cloud_security_posture';
 
 import {
-  AgentEnrollmentConfirmationStep,
+  InstallationModeSelectionStep,
   AgentEnrollmentKeySelectionStep,
   AgentPolicySelectionStep,
-  ConfigureStandaloneAgentStep,
-  IncomingDataConfirmationStep,
-  InstallManagedAgentStep,
   InstallStandaloneAgentStep,
-  InstallationModeSelectionStep,
+  ConfigureStandaloneAgentStep,
+  AgentEnrollmentConfirmationStep,
+  InstallManagedAgentStep,
+  IncomingDataConfirmationStep,
 } from '.';
 
 export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({

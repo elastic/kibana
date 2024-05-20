@@ -8,8 +8,8 @@
 /* eslint-disable max-classes-per-file */
 
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
-import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 import { stringify } from '../../../utils/stringify';
+import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
 
 /**
  * Errors associated with Agent Status clients

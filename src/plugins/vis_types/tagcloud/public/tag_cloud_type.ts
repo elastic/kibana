@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { AggGroupNames } from '@kbn/data-plugin/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import { getTagCloudOptions } from './components/get_tag_cloud_options';
-import { TagCloudVisDependencies } from './plugin';
-import { toExpressionAst } from './to_ast';
 import type { TagCloudVisParams } from './types';
+import { getTagCloudOptions } from './components/get_tag_cloud_options';
+import { toExpressionAst } from './to_ast';
+import { TagCloudVisDependencies } from './plugin';
 
 export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependencies) => {
   return {

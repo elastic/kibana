@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 import { mockUseParams } from '../../../__mocks__/react_router';
 import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import '../../__mocks__/engine_logic.mock';
@@ -14,7 +14,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable, EuiPanel } from '@elastic/eui';
+import { EuiPanel, EuiBasicTable } from '@elastic/eui';
 
 import { getPageHeaderActions } from '../../../test_helpers';
 

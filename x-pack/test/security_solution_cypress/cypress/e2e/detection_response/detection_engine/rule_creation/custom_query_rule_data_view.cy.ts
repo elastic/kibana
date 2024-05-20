@@ -23,17 +23,15 @@ import {
 } from '../../../../screens/create_new_rule';
 
 import {
+  ADDITIONAL_LOOK_BACK_DETAILS,
   ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
   ABOUT_RULE_DESCRIPTION,
-  ADDITIONAL_LOOK_BACK_DETAILS,
   CUSTOM_QUERY_DETAILS,
-  DATA_VIEW_DETAILS,
   DEFINITION_DETAILS,
-  EDIT_RULE_SETTINGS_LINK,
   FALSE_POSITIVES_DETAILS,
+  removeExternalLinkText,
   INDEX_PATTERNS_DETAILS,
-  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -46,7 +44,9 @@ import {
   SEVERITY_DETAILS,
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-  removeExternalLinkText,
+  DATA_VIEW_DETAILS,
+  EDIT_RULE_SETTINGS_LINK,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../../screens/search_bar';
 
@@ -72,8 +72,8 @@ import {
 
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
+import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
 import { fillAddFilterForm } from '../../../../tasks/search_bar';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';

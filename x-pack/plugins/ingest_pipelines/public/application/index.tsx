@@ -9,13 +9,13 @@ import { CoreStart, HttpSetup } from '@kbn/core/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import type { ConsolePluginStart } from '@kbn/console-plugin/public';
-import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { ApplicationStart } from '@kbn/core/public';
-import { IUiSettingsClient, NotificationsSetup } from '@kbn/core/public';
-import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import { NotificationsSetup, IUiSettingsClient } from '@kbn/core/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 import { KibanaContextProvider, KibanaRenderContextProvider } from '../shared_imports';
 import { ILicense } from '../types';
@@ -26,11 +26,11 @@ import { AuthorizationProvider } from '../shared_imports';
 
 import { App } from './app';
 import {
+  DocumentationService,
+  UiMetricService,
   ApiService,
   BreadcrumbService,
-  DocumentationService,
   FileReaderService,
-  UiMetricService,
 } from './services';
 
 export interface AppServices {

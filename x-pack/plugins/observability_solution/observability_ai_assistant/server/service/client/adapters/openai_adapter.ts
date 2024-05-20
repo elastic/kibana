@@ -9,13 +9,13 @@ import { encode } from 'gpt-tokenizer';
 import { compact, isEmpty, merge, omit, pick } from 'lodash';
 import OpenAI from 'openai';
 import { identity } from 'rxjs';
-import { Message, MessageRole } from '../../../../common';
 import { CompatibleJSONSchema } from '../../../../common/functions/types';
-import { eventsourceStreamIntoObservable } from '../../util/eventsource_stream_into_observable';
+import { Message, MessageRole } from '../../../../common';
 import { processOpenAiStream } from './process_openai_stream';
-import { getMessagesWithSimulatedFunctionCalling } from './simulate_function_calling/get_messages_with_simulated_function_calling';
-import { parseInlineFunctionCalls } from './simulate_function_calling/parse_inline_function_calls';
+import { eventsourceStreamIntoObservable } from '../../util/eventsource_stream_into_observable';
 import { LlmApiAdapterFactory } from './types';
+import { parseInlineFunctionCalls } from './simulate_function_calling/parse_inline_function_calls';
+import { getMessagesWithSimulatedFunctionCalling } from './simulate_function_calling/get_messages_with_simulated_function_calling';
 
 function getOpenAIPromptTokenCount({
   messages,
@@ -33,8 +33,8 @@ function getOpenAIPromptTokenCount({
             'name' in message
               ? message.name
               : 'function_call' in message && message.function_call
-                ? message.function_call.name + '\n' + message.function_call.arguments
-                : ''
+              ? message.function_call.name + '\n' + message.function_call.arguments
+              : ''
           }<|end|>`
       )
       .join('\n')

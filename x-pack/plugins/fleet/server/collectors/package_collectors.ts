@@ -8,8 +8,8 @@
 import type { SavedObjectsClient } from '@kbn/core/server';
 import _ from 'lodash';
 
-import { agentPolicyService } from '../services';
 import { getPackageSavedObjects } from '../services/epm/packages/get';
+import { agentPolicyService } from '../services';
 import type { NewPackagePolicy } from '../types';
 
 export interface PackageUsage {

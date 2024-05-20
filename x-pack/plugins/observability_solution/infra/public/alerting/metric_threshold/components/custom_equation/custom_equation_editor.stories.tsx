@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { TimeUnitChar } from '@kbn/observability-plugin/common';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { Meta, Story } from '@storybook/react/types-6-0';
 import React, { useCallback, useEffect, useState } from 'react';
+import { TimeUnitChar } from '@kbn/observability-plugin/common';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   Aggregators,
   Comparator,
   MetricExpressionParams,
 } from '../../../../../common/alerting/metrics';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import { MetricExpression } from '../../types';
-import { aggregationType } from '../expression_row';
-import { validateMetricThreshold } from '../validation';
 import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
+import { aggregationType } from '../expression_row';
+import { MetricExpression } from '../../types';
+import { validateMetricThreshold } from '../validation';
 
 export default {
   title: 'infra/alerting/CustomEquationEditor',

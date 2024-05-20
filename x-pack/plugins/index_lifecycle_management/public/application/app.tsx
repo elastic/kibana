@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
-import { ScopedHistory } from '@kbn/core/public';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React, { useEffect } from 'react';
 import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { ScopedHistory } from '@kbn/core/public';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import { UIM_APP_LOAD } from './constants';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyList } from './sections/policy_list';
-import { ROUTES } from './services/navigation';
 import { trackUiMetric } from './services/ui_metric';
+import { ROUTES } from './services/navigation';
 
 export const App = ({ history }: { history: ScopedHistory }) => {
   useEffect(() => trackUiMetric(METRIC_TYPE.LOADED, UIM_APP_LOAD), []);

@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { ProcessTree, ProcessTreeDeps } from '.';
-import type { Process } from '../../../common';
 import {
-  deepNullMockData,
   mockData,
   nullMockData,
+  deepNullMockData,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import { useDateFormat } from '../../hooks';
+import type { Process } from '../../../common';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { ProcessTreeDeps, ProcessTree } from '.';
+import { useDateFormat } from '../../hooks';
 
 jest.mock('../../hooks/use_date_format');
 const mockUseDateFormat = useDateFormat as jest.Mock;

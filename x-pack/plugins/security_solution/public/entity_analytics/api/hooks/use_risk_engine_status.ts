@@ -7,8 +7,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { RiskEngineStatusEnum } from '../../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useEntityAnalyticsRoutes } from '../api';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 const FETCH_RISK_ENGINE_STATUS = ['GET', 'FETCH_RISK_ENGINE_STATUS'];
 
 export const useInvalidateRiskEngineStatusQuery = () => {

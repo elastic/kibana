@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiCard } from '@elastic/eui';
 import React from 'react';
+import { EuiCard } from '@elastic/eui';
 
-import type { InstalledStatus, SampleDataSet } from '@kbn/home-sample-data-types';
+import type { SampleDataSet, InstalledStatus } from '@kbn/home-sample-data-types';
 import { INSTALLED_STATUS } from './constants';
 
 import { Footer } from './footer';

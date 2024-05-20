@@ -8,26 +8,26 @@
 
 import 'jest-canvas-mock';
 
+import { VegaMapView } from './view';
+import { VegaViewParams } from '../vega_base_view';
+import { VegaParser } from '../../data_model/vega_parser';
+import { TimeCache } from '../../data_model/time_cache';
+import { SearchAPI } from '../../data_model/search_api';
+import vegaMap from '../../test_utils/vega_map_test.json';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { SearchAPI } from '../../data_model/search_api';
-import { TimeCache } from '../../data_model/time_cache';
-import { VegaParser } from '../../data_model/vega_parser';
-import vegaMap from '../../test_utils/vega_map_test.json';
-import { VegaViewParams } from '../vega_base_view';
-import { VegaMapView } from './view';
 
 import type { IServiceSettings } from './service_settings/service_settings_types';
 
 import {
-  setData,
-  setDataViews,
   setInjectedVars,
+  setData,
   setNotifications,
   setThemeService,
+  setDataViews,
 } from '../../services';
-import { initTmsRasterLayer, initVegaLayer } from './layers';
+import { initVegaLayer, initTmsRasterLayer } from './layers';
 
 import { maplibregl } from '@kbn/mapbox-gl';
 

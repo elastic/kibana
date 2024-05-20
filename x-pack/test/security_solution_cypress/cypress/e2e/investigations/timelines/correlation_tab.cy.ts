@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { openTimeline } from '../../../tasks/timelines';
 import {
   SERVER_SIDE_EVENT_COUNT,
-  TIMELINE_CORRELATION_INPUT,
   TIMELINE_TAB_CONTENT_EQL,
+  TIMELINE_CORRELATION_INPUT,
 } from '../../../screens/timeline';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { openTimeline } from '../../../tasks/timelines';
 
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { addEqlToTimeline, clearEqlInTimeline, saveTimeline } from '../../../tasks/timeline';
+import { addEqlToTimeline, saveTimeline, clearEqlInTimeline } from '../../../tasks/timeline';
 
+import { TIMELINES_URL } from '../../../urls/navigation';
 import { EQL_QUERY_VALIDATION_ERROR } from '../../../screens/create_new_rule';
 import { deleteTimelines } from '../../../tasks/api_calls/timelines';
-import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Correlation tab', { tags: ['@ess', '@serverless'] }, () => {
   const eql = 'any where process.name == "zsh"';

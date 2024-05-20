@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { createPromiseFromStreams } from '@kbn/utils';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
+import type { FrameworkRequest } from '../../../../framework';
 import {
   createMockConfig,
-  mockGetCurrentUser,
   requestContextMock,
+  mockGetCurrentUser,
 } from '../../../../detection_engine/routes/__mocks__';
 import {
   addPrepackagedRulesRequest,
   getFindResultWithSingleHit,
 } from '../../../../detection_engine/routes/__mocks__/request_responses';
-import type { FrameworkRequest } from '../../../../framework';
 
-import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
-import { buildFrameworkRequest } from '../../../utils/common';
-import { importTimelines } from '../../timelines/import_timelines/helpers';
 import * as helpers from './helpers';
+import { importTimelines } from '../../timelines/import_timelines/helpers';
+import { buildFrameworkRequest } from '../../../utils/common';
+import type { ImportTimelineResultSchema } from '../../../../../../common/api/timeline';
 
 jest.mock('../../timelines/import_timelines/helpers');
 

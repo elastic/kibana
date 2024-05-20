@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { useCallback, useMemo, useEffect, useRef } from 'react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { PLUGIN_ID } from '../../../../constants';
-import { useIntraAppState, useLink, useStartServices } from '../../../../hooks';
+import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
 import type {
   CreatePackagePolicyRouteState,
+  PackagePolicy,
   NewPackagePolicy,
   OnSaveQueryParamKeys,
-  PackagePolicy,
 } from '../../../../types';
 import type { EditPackagePolicyFrom } from '../types';
 
@@ -90,7 +90,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
 
       const [onSaveNavigateTo, onSaveQueryParams]: [
         Parameters<ApplicationStart['navigateToApp']>,
-        CreatePackagePolicyRouteState['onSaveQueryParams'],
+        CreatePackagePolicyRouteState['onSaveQueryParams']
       ] = routeState?.onSaveNavigateTo
         ? [routeState.onSaveNavigateTo, routeState?.onSaveQueryParams]
         : [

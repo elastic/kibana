@@ -62,7 +62,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/task_manager/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -99,7 +101,9 @@
             "tags": [],
             "label": "isNodeBackgroundTasksOnly",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/task_manager/server/plugin.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -287,7 +291,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/plugins/task_manager/server/queries/aggregate_task_overdue_percentiles_for_type.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -304,7 +310,9 @@
         "tags": [],
         "label": "asInterval",
         "description": [],
-        "signature": ["(ms: number) => string"],
+        "signature": [
+          "(ms: number) => string"
+        ],
         "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -316,7 +324,9 @@
             "tags": [],
             "label": "ms",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/task_manager/server/lib/intervals.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -362,7 +372,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["Error"],
+            "signature": [
+              "Error"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -416,7 +428,10 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["Error | ", "EphemeralTaskRejectedDueToCapacityError"],
+            "signature": [
+              "Error | ",
+              "EphemeralTaskRejectedDueToCapacityError"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -481,7 +496,9 @@
         "tags": [],
         "label": "throwRetryableError",
         "description": [],
-        "signature": ["(error: Error, shouldRetry: boolean | Date) => void"],
+        "signature": [
+          "(error: Error, shouldRetry: boolean | Date) => void"
+        ],
         "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -493,7 +510,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["Error"],
+            "signature": [
+              "Error"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -506,7 +525,9 @@
             "tags": [],
             "label": "shouldRetry",
             "description": [],
-            "signature": ["boolean | Date"],
+            "signature": [
+              "boolean | Date"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -523,7 +544,9 @@
         "tags": [],
         "label": "throwUnrecoverableError",
         "description": [],
-        "signature": ["(error: Error) => void"],
+        "signature": [
+          "(error: Error) => void"
+        ],
         "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -535,7 +558,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["Error"],
+            "signature": [
+              "Error"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -553,7 +578,9 @@
         "type": "Interface",
         "tags": [],
         "label": "BulkUpdateTaskResult",
-        "description": ["\nreturn type of TaskScheduling.bulkUpdateSchedules method"],
+        "description": [
+          "\nreturn type of TaskScheduling.bulkUpdateSchedules method"
+        ],
         "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -564,7 +591,9 @@
             "type": "Array",
             "tags": [],
             "label": "tasks",
-            "description": ["\nlist of successfully updated tasks"],
+            "description": [
+              "\nlist of successfully updated tasks"
+            ],
             "signature": [
               {
                 "pluginId": "taskManager",
@@ -585,7 +614,9 @@
             "type": "Array",
             "tags": [],
             "label": "errors",
-            "description": ["\nlist of failed tasks and errors caused failure"],
+            "description": [
+              "\nlist of failed tasks and errors caused failure"
+            ],
             "signature": [
               "{ type: string; id: string; error: ",
               {
@@ -610,7 +641,9 @@
         "type": "Interface",
         "tags": [],
         "label": "ConcreteTaskInstance",
-        "description": ["\nA task instance that has an id and is ready for storage."],
+        "description": [
+          "\nA task instance that has an id and is ready for storage."
+        ],
         "signature": [
           {
             "pluginId": "taskManager",
@@ -649,10 +682,14 @@
             "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.interval",
             "type": "string",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "interval",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -662,10 +699,14 @@
             "parentPluginId": "taskManager",
             "id": "def-server.ConcreteTaskInstance.numSkippedRuns",
             "type": "number",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "numSkippedRuns",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": true,
             "trackAdoption": false,
@@ -677,8 +718,12 @@
             "type": "string",
             "tags": [],
             "label": "version",
-            "description": ["\nThe saved object version from the Elasticsearch document."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe saved object version from the Elasticsearch document."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -692,7 +737,9 @@
             "description": [
               "\nThe date and time that this task was originally scheduled. This is used\nfor convenience to task run functions, and for troubleshooting."
             ],
-            "signature": ["Date"],
+            "signature": [
+              "Date"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -716,7 +763,9 @@
             "type": "Enum",
             "tags": [],
             "label": "status",
-            "description": ["\nIndicates whether or not the task is currently running."],
+            "description": [
+              "\nIndicates whether or not the task is currently running."
+            ],
             "signature": [
               {
                 "pluginId": "taskManager",
@@ -739,7 +788,9 @@
             "description": [
               "\nThe date and time that this task is scheduled to be run. It is not guaranteed\nto run at this time, but it is guaranteed not to run earlier than this."
             ],
-            "signature": ["Date"],
+            "signature": [
+              "Date"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -753,7 +804,9 @@
             "description": [
               "\nThe date and time that this task started execution. This is used to determine\nthe \"real\" runAt that ended up running the task. This value is only set\nwhen status is set to \"running\"."
             ],
-            "signature": ["Date | null"],
+            "signature": [
+              "Date | null"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -767,7 +820,9 @@
             "description": [
               "\nThe date and time that this task should re-execute if stuck in \"running\" / timeout\nstatus. This value is only set when status is set to \"running\"."
             ],
-            "signature": ["Date | null"],
+            "signature": [
+              "Date | null"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -781,7 +836,9 @@
             "description": [
               "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
             ],
-            "signature": ["{ [x: string]: any; }"],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -795,7 +852,9 @@
             "description": [
               "\nThe random uuid of the Kibana instance which claimed ownership of the task last"
             ],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -831,7 +890,9 @@
             "tags": [],
             "label": "[code]",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -843,7 +904,9 @@
             "tags": [],
             "label": "[retry]",
             "description": [],
-            "signature": ["boolean | Date | undefined"],
+            "signature": [
+              "boolean | Date | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_running/errors.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -966,7 +1029,9 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "signature": ["Record<string, any> | undefined"],
+            "signature": [
+              "Record<string, any> | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_scheduling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -994,7 +1059,9 @@
             "description": [
               "\nOptional ID that can be passed by the caller. When ID is undefined, ES\nwill auto-generate a unique id. Otherwise, ID will be used to either\ncreate a new document, or update existing document"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1021,7 +1088,9 @@
             "description": [
               "\nThe date and time that this task was originally scheduled. This is used\nfor convenience to task run functions, and for troubleshooting."
             ],
-            "signature": ["Date | undefined"],
+            "signature": [
+              "Date | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1035,7 +1104,9 @@
             "description": [
               "\nThe date and time that this task started execution. This is used to determine\nthe \"real\" runAt that ended up running the task. This value is only set\nwhen status is set to \"running\"."
             ],
-            "signature": ["Date | null | undefined"],
+            "signature": [
+              "Date | null | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1049,7 +1120,9 @@
             "description": [
               "\nThe date and time that this task should re-execute if stuck in \"running\" / timeout\nstatus. This value is only set when status is set to \"running\"."
             ],
-            "signature": ["Date | null | undefined"],
+            "signature": [
+              "Date | null | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1063,7 +1136,9 @@
             "description": [
               "\nThe date and time that this task is scheduled to be run. It is not\nguaranteed to run at this time, but it is guaranteed not to run earlier\nthan this. Defaults to immediately."
             ],
-            "signature": ["Date | undefined"],
+            "signature": [
+              "Date | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1100,7 +1175,9 @@
             "description": [
               "\nA task-specific set of parameters, used by the task's run function to tailor\nits work. This is generally user-input, such as { sms: '333-444-2222' }."
             ],
-            "signature": ["{ [x: string]: any; }"],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1114,7 +1191,9 @@
             "description": [
               "\nThe state passed into the task's run function, and returned by the previous\nrun. If there was no previous run, or if the previous run did not return\nany state, this will be the empy object: {}"
             ],
-            "signature": ["{ [x: string]: any; }"],
+            "signature": [
+              "{ [x: string]: any; }"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1126,7 +1205,9 @@
             "tags": [],
             "label": "stateVersion",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1140,7 +1221,9 @@
             "description": [
               "\nThe serialized traceparent string of the current APM transaction or span."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1151,8 +1234,12 @@
             "type": "string",
             "tags": [],
             "label": "user",
-            "description": ["\nThe id of the user who scheduled this task."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nThe id of the user who scheduled this task."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1166,7 +1253,9 @@
             "description": [
               "\nUsed to group tasks for querying. So, reporting might schedule tasks with a scope of 'reporting',\nand then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks."
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1180,7 +1269,9 @@
             "description": [
               "\nThe random uuid of the Kibana instance which claimed ownership of the task last"
             ],
-            "signature": ["string | null | undefined"],
+            "signature": [
+              "string | null | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1194,7 +1285,9 @@
             "description": [
               "\nIndicates whether the task is currently enabled. Disabled tasks will not be claimed."
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1206,7 +1299,9 @@
             "tags": [],
             "label": "timeoutOverride",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1233,8 +1328,12 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["\nA brief, human-friendly title for this task."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nA brief, human-friendly title for this task."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1248,7 +1347,9 @@
             "description": [
               "\nHow long, in minutes or seconds, the system should wait for the task to complete\nbefore it is considered to be timed out. (e.g. '5m', the default). If\nthe task takes longer than this, Kibana will send it a kill command and\nthe task will be re-attempted."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1282,8 +1383,12 @@
             "type": "string",
             "tags": [],
             "label": "description",
-            "description": ["\nAn optional more detailed description of what this task does."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nAn optional more detailed description of what this task does."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1354,7 +1459,9 @@
             "description": [
               "\nUp to how many times the task should retry when it fails to run. This will\ndefault to the global variable. The default value, if not specified, is 1."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1368,7 +1475,9 @@
             "description": [
               "\nThe maximum number tasks of this type that can be run concurrently per Kibana instance.\nSetting this value will force Task Manager to poll for this task type separately from other task types\nwhich can add significant load to the ES cluster, so please use this configuration only when absolutely necessary.\nThe default value, if not given, is 0."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/task_manager/server/task_type_dictionary.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1465,7 +1574,9 @@
         "type": "Type",
         "tags": [],
         "label": "EphemeralTask",
-        "description": ["\nA task instance that has an id and is ready for storage."],
+        "description": [
+          "\nA task instance that has an id and is ready for storage."
+        ],
         "signature": [
           "{ params: Record<string, any>; scope?: string[] | undefined; enabled?: boolean | undefined; state: Record<string, any>; taskType: string; }"
         ],
@@ -1480,7 +1591,9 @@
         "type": "Type",
         "tags": [],
         "label": "TaskDefinitionRegistry",
-        "description": ["\nA mapping of task type id to the task definition."],
+        "description": [
+          "\nA mapping of task type id to the task definition."
+        ],
         "signature": [
           "{ [x: string]: ",
           {
@@ -1653,7 +1766,9 @@
           "parentPluginId": "taskManager",
           "id": "def-server.TaskManagerSetupContract.index",
           "type": "string",
-          "tags": ["deprecated"],
+          "tags": [
+            "deprecated"
+          ],
           "label": "index",
           "description": [],
           "path": "x-pack/plugins/task_manager/server/plugin.ts",
@@ -1677,7 +1792,11 @@
           "tags": [],
           "label": "addMiddleware",
           "description": [],
-          "signature": ["(middleware: ", "Middleware", ") => void"],
+          "signature": [
+            "(middleware: ",
+            "Middleware",
+            ") => void"
+          ],
           "path": "x-pack/plugins/task_manager/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1689,7 +1808,9 @@
               "tags": [],
               "label": "middleware",
               "description": [],
-              "signature": ["Middleware"],
+              "signature": [
+                "Middleware"
+              ],
               "path": "x-pack/plugins/task_manager/server/plugin.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1728,7 +1849,9 @@
               "type": "Object",
               "tags": [],
               "label": "taskDefinitions",
-              "description": ["- The Kibana task definitions dictionary"],
+              "description": [
+                "- The Kibana task definitions dictionary"
+              ],
               "signature": [
                 {
                   "pluginId": "taskManager",

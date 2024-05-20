@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isArray, isEqual, last } from 'lodash';
+import { isArray, last, isEqual } from 'lodash';
 import type { PanelDataArray } from './types/vis_data';
 
 export const EMPTY_VALUE = null;

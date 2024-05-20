@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
-import { INSTRUCTION_VARIANT, InstructionsSchema } from '@kbn/home-plugin/server';
 import { i18n } from '@kbn/i18n';
+import { INSTRUCTION_VARIANT, InstructionsSchema } from '@kbn/home-plugin/server';
+import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   createDjangoAgentInstructions,
   createDotNetAgentInstructions,
@@ -16,10 +16,10 @@ import {
   createJavaAgentInstructions,
   createJsAgentInstructions,
   createNodeAgentInstructions,
-  createOpenTelemetryAgentInstructions,
   createPhpAgentInstructions,
   createRackAgentInstructions,
   createRailsAgentInstructions,
+  createOpenTelemetryAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
 import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
 

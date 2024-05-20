@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
 import {
   CoreSetup,
-  IKibanaResponse,
-  IRouter,
+  RequestHandlerContext,
   KibanaRequest,
   KibanaResponseFactory,
+  IKibanaResponse,
+  IRouter,
   Logger,
-  RequestHandlerContext,
   RouteValidationResultFactory,
 } from '@kbn/core/server';
 import { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
-import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server/types';
+import { schema } from '@kbn/config-schema';
+import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
 import { EventLogFixtureStartDeps } from './plugin';
 
 export const logEventRoute = (router: IRouter, eventLogger: IEventLogger, logger: Logger) => {

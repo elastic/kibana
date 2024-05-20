@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { SuperTest, Test } from 'supertest';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export const createDataView = async ({
   supertest,

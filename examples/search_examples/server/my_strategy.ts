@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { map } from 'rxjs';
+import { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { IMyStrategyRequest, IMyStrategyResponse } from '../common/types';
 
 export const mySearchStrategyProvider = (

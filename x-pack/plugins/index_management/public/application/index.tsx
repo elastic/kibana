@@ -6,24 +6,24 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
 import { Provider } from 'react-redux';
+import { render, unmountComponentAtNode } from 'react-dom';
 import SemVer from 'semver/classes/semver';
 
-import { ApplicationStart, CoreSetup, CoreStart } from '@kbn/core/public';
+import { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
 
 import { API_BASE_PATH } from '../../common';
 import {
-  GlobalFlyout,
-  KibanaRenderContextProvider,
   createKibanaReactContext,
+  GlobalFlyout,
   useKibana as useKibanaReactPlugin,
+  KibanaRenderContextProvider,
 } from '../shared_imports';
 
-import { App } from './app';
 import { AppContextProvider, AppDependencies } from './app_context';
-import { ComponentTemplatesProvider, MappingsEditorProvider } from './components';
+import { App } from './app';
 import { indexManagementStore } from './store';
+import { ComponentTemplatesProvider, MappingsEditorProvider } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 

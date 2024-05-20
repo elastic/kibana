@@ -7,13 +7,13 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 import type {
   StartTransformsRequestSchema,
   StartTransformsResponseSchema,
 } from '../../../../common/api_schemas/start_transforms';
-import { TRANSFORM_ACTIONS } from '../../../../common/types/transform';
 
-import { fillResultsWithTimeouts, isRequestTimeout } from '../../utils/error_utils';
+import { isRequestTimeout, fillResultsWithTimeouts } from '../../utils/error_utils';
 
 export async function startTransforms(
   transformsInfo: StartTransformsRequestSchema,

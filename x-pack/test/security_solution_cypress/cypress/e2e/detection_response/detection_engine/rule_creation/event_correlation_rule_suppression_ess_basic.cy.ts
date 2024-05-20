@@ -6,27 +6,27 @@
  */
 import { getEqlRule } from '../../../../objects/rule';
 
-import { TOOLTIP } from '../../../../screens/common';
-import {
-  ALERT_SUPPRESSION_FIELDS,
-  ALERT_SUPPRESSION_FIELDS_INPUT,
-} from '../../../../screens/create_new_rule';
-import {
-  ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON,
-  DEFINITION_DETAILS,
-  DETAILS_TITLE,
-  SUPPRESS_BY_DETAILS,
-  SUPPRESS_FOR_DETAILS,
-  SUPPRESS_MISSING_FIELD,
-} from '../../../../screens/rule_details';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { selectEqlRuleType } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { selectEqlRuleType } from '../../../../tasks/create_new_rule';
+import {
+  ALERT_SUPPRESSION_FIELDS_INPUT,
+  ALERT_SUPPRESSION_FIELDS,
+} from '../../../../screens/create_new_rule';
+import {
+  DEFINITION_DETAILS,
+  SUPPRESS_FOR_DETAILS,
+  SUPPRESS_BY_DETAILS,
+  SUPPRESS_MISSING_FIELD,
+  DETAILS_TITLE,
+  ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON,
+} from '../../../../screens/rule_details';
+import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { TOOLTIP } from '../../../../screens/common';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 
 const SUPPRESS_BY_FIELDS = ['agent.type'];

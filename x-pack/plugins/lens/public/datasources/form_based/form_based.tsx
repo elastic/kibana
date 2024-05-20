@@ -5,50 +5,42 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
-import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
-import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
-import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
-import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
-import { TimeRange } from '@kbn/es-query';
-import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DimensionTrigger } from '@kbn/visualization-ui-components';
-import { flatten, isEqual } from 'lodash';
-import memoizeOne from 'memoize-one';
 import React from 'react';
+import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { TimeRange } from '@kbn/es-query';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { flatten, isEqual } from 'lodash';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { EuiButton } from '@elastic/eui';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { type DraggingIdentifier } from '@kbn/dom-drag-drop';
+import { DimensionTrigger } from '@kbn/visualization-ui-components';
+import memoizeOne from 'memoize-one';
 import type {
-  DataSourceInfo,
-  DatasourceDataPanelProps,
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
+  DatasourceDataPanelProps,
   DatasourceLayerPanelProps,
-  FramePublicAPI,
-  IndexPattern,
-  IndexPatternField,
-  IndexPatternMap,
-  IndexPatternRef,
-  OperationDescriptor,
   PublicAPIProps,
-  StateSetter,
+  OperationDescriptor,
+  FramePublicAPI,
+  IndexPatternField,
+  IndexPattern,
+  IndexPatternRef,
+  DataSourceInfo,
   UserMessage,
+  StateSetter,
+  IndexPatternMap,
 } from '../../types';
-import { FormBasedDataPanel } from './datapanel';
-import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
-import {
-  getDatasourceSuggestionsForField,
-  getDatasourceSuggestionsForVisualizeCharts,
-  getDatasourceSuggestionsForVisualizeField,
-  getDatasourceSuggestionsFromCurrentState,
-} from './form_based_suggestions';
 import {
   changeIndexPattern,
   changeLayerIndexPattern,
@@ -60,46 +52,54 @@ import {
   triggerActionOnIndexPatternChange,
 } from './loader';
 import { toExpression } from './to_expression';
+import { FormBasedDimensionEditor, getDropProps, onDrop } from './dimension_panel';
+import { FormBasedDataPanel } from './datapanel';
+import {
+  getDatasourceSuggestionsForField,
+  getDatasourceSuggestionsFromCurrentState,
+  getDatasourceSuggestionsForVisualizeField,
+  getDatasourceSuggestionsForVisualizeCharts,
+} from './form_based_suggestions';
 
-import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
-import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
-import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
-import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
-import type { Datasource, VisualizeEditorContext } from '../../types';
+import {
+  getFiltersInLayer,
+  getSearchWarningMessages,
+  getVisualDefaultsForLayer,
+  isColumnInvalid,
+  cloneLayer,
+  getNotifiableFeatures,
+  getUnsupportedOperationsWarningMessage,
+} from './utils';
 import { getUniqueLabelGenerator, isDraggedDataViewField, nonNullable } from '../../utils';
-import { LayerSettingsPanel } from './layer_settings';
+import { hasField, normalizeOperationDataType } from './pure_utils';
 import { LayerPanel } from './layerpanel';
 import {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
-  TermsIndexPatternColumn,
   getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
   operationDefinitionMap,
+  TermsIndexPatternColumn,
 } from './operations';
-import { deleteColumn, isReferenced } from './operations';
-import { isColumnOfType } from './operations/definitions/helpers';
 import {
   copyColumn,
   getColumnOrder,
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import { hasField, normalizeOperationDataType } from './pure_utils';
+import { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
+import type { Datasource, VisualizeEditorContext } from '../../types';
+import { deleteColumn, isReferenced } from './operations';
+import { GeoFieldWorkspacePanel } from '../../editor_frame_service/editor_frame/workspace_panel/geo_field_workspace_panel';
 import { getStateTimeShiftWarningMessages } from './time_shift_utils';
-import { DataViewDragDropOperation, FormBasedPersistedState, FormBasedPrivateState } from './types';
-import {
-  cloneLayer,
-  getFiltersInLayer,
-  getNotifiableFeatures,
-  getSearchWarningMessages,
-  getUnsupportedOperationsWarningMessage,
-  getVisualDefaultsForLayer,
-  isColumnInvalid,
-} from './utils';
 import { getPrecisionErrorWarningMessages } from './utils';
+import { DOCUMENT_FIELD_NAME } from '../../../common/constants';
+import { isColumnOfType } from './operations/definitions/helpers';
+import { LayerSettingsPanel } from './layer_settings';
+import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
+import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 

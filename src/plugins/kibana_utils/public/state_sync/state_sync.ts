@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import defaultComparator from 'fast-deep-equal';
 import { EMPTY, Subscription } from 'rxjs';
 import { tap } from 'rxjs';
+import defaultComparator from 'fast-deep-equal';
+import { IStateSyncConfig } from './types';
+import { IStateStorage } from './state_sync_state_storage';
 import { distinctUntilChangedWithInitialValue } from '../../common';
 import { BaseState } from '../../common/state_containers';
 import { applyDiff } from '../state_management/utils/diff_object';
-import { IStateStorage } from './state_sync_state_storage';
-import { IStateSyncConfig } from './types';
 
 /**
  * @public
@@ -106,7 +106,7 @@ export interface ISyncStateRef<StateStorage extends IStateStorage = IStateStorag
  */
 export function syncState<
   State extends BaseState,
-  StateStorage extends IStateStorage = IStateStorage,
+  StateStorage extends IStateStorage = IStateStorage
 >({
   storageKey,
   stateStorage,

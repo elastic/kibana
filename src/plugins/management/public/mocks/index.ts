@@ -7,8 +7,8 @@
  */
 
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { ManagementSetup, ManagementStart, DefinedSections } from '../types';
 import { ManagementSection } from '..';
-import { DefinedSections, ManagementSetup, ManagementStart } from '../types';
 
 export const createManagementSectionMock = () =>
   ({
@@ -17,7 +17,7 @@ export const createManagementSectionMock = () =>
     registerApp: jest.fn(),
     getApp: jest.fn(),
     getEnabledItems: jest.fn().mockReturnValue([]),
-  }) as unknown as ManagementSection;
+  } as unknown as ManagementSection);
 
 const createSetupContract = (): ManagementSetup => ({
   sections: {

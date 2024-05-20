@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
 import { EndpointList } from '.';
 import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
 
-import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
-import type { HostInfo, HostPolicyResponse } from '../../../../../common/endpoint/types';
-import { HostPolicyResponseActionStatus, HostStatus } from '../../../../../common/endpoint/types';
-import { licenseService } from '../../../../common/hooks/use_license';
-import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
-import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { getEndpointDetailsPath } from '../../../common/routing';
-import {
-  isFailedResourceState,
-  isLoadedResourceState,
-  isUninitialisedResourceState,
-} from '../../../state';
-import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
   setEndpointListApiMockImplementation,
 } from '../store/mock_endpoint_result_list';
-import { getCurrentIsolationRequestState } from '../store/selectors';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import type { HostInfo, HostPolicyResponse } from '../../../../../common/endpoint/types';
+import { HostPolicyResponseActionStatus, HostStatus } from '../../../../../common/endpoint/types';
+import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
+import { mockPolicyResultList } from '../../policy/store/test_mock_utils';
+import { getEndpointDetailsPath } from '../../../common/routing';
+import { KibanaServices, useKibana, useToasts, useUiSetting$ } from '../../../../common/lib/kibana';
+import { hostIsolationHttpMocks } from '../../../../common/lib/endpoint_isolation/mocks';
+import {
+  isFailedResourceState,
+  isLoadedResourceState,
+  isUninitialisedResourceState,
+} from '../../../state';
+import { getCurrentIsolationRequestState } from '../store/selectors';
+import { licenseService } from '../../../../common/hooks/use_license';
 
 import {
   APP_PATH,
@@ -40,21 +40,21 @@ import {
   MANAGEMENT_PATH,
   TRANSFORM_STATES,
 } from '../../../../../common/constants';
+import type { TransformStats } from '../types';
 import {
   HOST_METADATA_LIST_ROUTE,
   METADATA_UNITED_TRANSFORM,
   metadataTransformPrefix,
 } from '../../../../../common/endpoint/constants';
-import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
-import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
-import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import {
   initialUserPrivilegesState,
   initialUserPrivilegesState as mockInitialUserPrivilegesState,
 } from '../../../../common/components/user_privileges/user_privileges_context';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { ENDPOINT_CAPABILITIES } from '../../../../../common/endpoint/service/response_actions/constants';
+import { getEndpointPrivilegesInitialStateMock } from '../../../../common/components/user_privileges/endpoint/mocks';
 import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import type { TransformStats } from '../types';
 
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';

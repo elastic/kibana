@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 
 import {
-  createAlertsIndex,
   createRule,
-  deleteAllAlerts,
+  createAlertsIndex,
   deleteAllRules,
-  getAlertsById,
+  deleteAllAlerts,
   getRuleForAlertTesting,
-  waitForAlertsToBePresent,
+  getAlertsById,
   waitForRuleSuccess,
+  waitForAlertsToBePresent,
 } from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 

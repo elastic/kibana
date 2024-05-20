@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RuleObjectId } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleSnoozeBadge } from '../../../rule_management/components/rule_snooze_badge';
 import * as i18n from './translations';

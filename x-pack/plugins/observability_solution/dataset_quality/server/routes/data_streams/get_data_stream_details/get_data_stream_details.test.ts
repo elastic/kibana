@@ -8,8 +8,8 @@
 import { SearchTotalHitsRelation } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import {
-  InventoryItemType,
   findInventoryFields,
+  InventoryItemType,
   inventoryModels,
 } from '@kbn/metrics-data-access-plugin/common';
 

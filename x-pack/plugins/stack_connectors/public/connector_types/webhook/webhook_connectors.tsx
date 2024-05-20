@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
+  EuiButtonIcon,
   EuiTitle,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiTabs,
+  EuiTab,
 } from '@elastic/eui';
-import {
-  CardRadioGroupField,
-  Field,
-  FilePickerField,
-  HiddenField,
-  PasswordField,
-  SelectField,
-  TextField,
-  ToggleField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import {
   UseArray,
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  Field,
+  SelectField,
+  TextField,
+  ToggleField,
+  PasswordField,
+  FilePickerField,
+  CardRadioGroupField,
+  HiddenField,
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { SSLCertType, WebhookAuthType } from '../../../common/webhook/constants';
+import { WebhookAuthType, SSLCertType } from '../../../common/webhook/constants';
 import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put'];

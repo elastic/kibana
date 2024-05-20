@@ -7,8 +7,8 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import * as constants from '../../../../../common/data_types/logs/constants';
 import { useDiscoverCustomization } from '../../../../customizations';
+import * as constants from '../../../../../common/data_types/logs/constants';
 
 export const useAdditionalFieldGroups = () => {
   // TODO / NOTE: This will eventually rely on Discover's context resolution to determine which fields

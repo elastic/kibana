@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { AlertingUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {

@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import type { ScopedHistory } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
-import type { TimeRange } from '@kbn/es-query';
-import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import { useQuery } from '@tanstack/react-query';
-import { isEqualWith } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import type { Subscription } from 'rxjs';
+import type { CustomizationCallback } from '@kbn/discover-plugin/public/customizations/types';
 import { createGlobalStyle } from 'styled-components';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { Subscription } from 'rxjs';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { useQuery } from '@tanstack/react-query';
+import { isEqualWith } from 'lodash';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
+import { useDispatch } from 'react-redux';
+import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../../common/lib/kibana';
+import { useDiscoverState } from './use_discover_state';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { timelineSelectors } from '../../../../store';
-import { updateSavedSearchId } from '../../../../store/actions';
-import { timelineDefaults } from '../../../../store/defaults';
 import { useSetDiscoverCustomizationCallbacks } from './customizations/use_set_discover_customizations';
 import { EmbeddedDiscoverContainer, TimelineESQLGlobalStyles } from './styles';
-import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
-import { useDiscoverState } from './use_discover_state';
+import { timelineSelectors } from '../../../../store';
+import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { timelineDefaults } from '../../../../store/defaults';
 import { savedSearchComparator } from './utils';
+import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
   [data-test-subj='searchSessionIndicator'] {

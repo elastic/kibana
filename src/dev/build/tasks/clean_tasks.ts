@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
-import { GlobalTask, Task, deleteAll, deleteEmptyFolders, scanDelete } from '../lib';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { deleteAll, deleteEmptyFolders, scanDelete, Task, GlobalTask } from '../lib';
 
 export const Clean: GlobalTask = {
   global: true,

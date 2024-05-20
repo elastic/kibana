@@ -16,8 +16,8 @@ import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import { OptionsListEmbeddableFactory } from '../..';
 import {
-  OPTIONS_LIST_CONTROL,
   OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '../../../common';
 import {

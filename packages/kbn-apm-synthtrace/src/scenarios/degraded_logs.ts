@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { LogDocument, generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
+import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 

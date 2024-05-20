@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { isRunningResponse } from '@kbn/data-plugin/common';
-import type { IEsSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { useEffect, useState } from 'react';
+import type { IKibanaSearchResponse, IEsSearchRequest } from '@kbn/search-types';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import { useKibana } from '../../../hooks/use_kibana';
-import type { RawIndicatorsResponse } from '../services/fetch_indicators';
 import { useSourcererDataView } from './use_sourcerer_data_view';
+import type { RawIndicatorsResponse } from '../services/fetch_indicators';
 
 export const useIndicatorsTotalCount = () => {
   const {

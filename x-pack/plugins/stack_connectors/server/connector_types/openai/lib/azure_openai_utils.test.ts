@@ -6,15 +6,15 @@
  */
 
 import {
-  AZURE_OPENAI_CHAT_URL,
-  AZURE_OPENAI_COMPLETIONS_EXTENSIONS_URL,
-  AZURE_OPENAI_COMPLETIONS_URL,
-} from '../../../../common/openai/constants';
-import {
-  getRequestWithStreamOption,
   sanitizeRequest,
+  getRequestWithStreamOption,
   transformApiUrlToRegex,
 } from './azure_openai_utils';
+import {
+  AZURE_OPENAI_CHAT_URL,
+  AZURE_OPENAI_COMPLETIONS_URL,
+  AZURE_OPENAI_COMPLETIONS_EXTENSIONS_URL,
+} from '../../../../common/openai/constants';
 
 describe('Azure Open AI Utils', () => {
   const chatUrl =

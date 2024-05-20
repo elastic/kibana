@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 import { IndexPatternsFetcher } from '../..';
 import { EXISTING_INDICES_PATH } from '../../../common/constants';
-import { INITIAL_REST_VERSION_INTERNAL as version } from '../../constants';
 
 /**
  * Accepts one of the following:

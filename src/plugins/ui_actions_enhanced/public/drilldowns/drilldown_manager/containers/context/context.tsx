@@ -15,10 +15,11 @@ export const useDrilldownManager = () => React.useContext(context)!;
 
 export type DrilldownManagerProviderProps = DrilldownManagerStateDeps;
 
-export const DrilldownManagerProvider: React.FC<PropsWithChildren<DrilldownManagerProviderProps>> =
-  ({ children, ...deps }) => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const value = React.useMemo(() => new DrilldownManagerState(deps), []);
+export const DrilldownManagerProvider: React.FC<
+  PropsWithChildren<DrilldownManagerProviderProps>
+> = ({ children, ...deps }) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const value = React.useMemo(() => new DrilldownManagerState(deps), []);
 
-    return <context.Provider value={value}>{children}</context.Provider>;
-  };
+  return <context.Provider value={value}>{children}</context.Provider>;
+};

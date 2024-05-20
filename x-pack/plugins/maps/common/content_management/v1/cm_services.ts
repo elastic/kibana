@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
+import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import {
+  savedObjectSchema,
+  objectTypeToGetResultSchema,
   createOptionsSchemas,
   createResultSchema,
-  objectTypeToGetResultSchema,
-  savedObjectSchema,
 } from '@kbn/content-management-utils';
-import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 
 const mapAttributesSchema = schema.object(
   {

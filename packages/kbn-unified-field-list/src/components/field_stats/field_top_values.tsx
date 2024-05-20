@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer, euiPaletteColorBlind } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import React, { Fragment } from 'react';
+import { euiPaletteColorBlind, EuiSpacer } from '@elastic/eui';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { AddFieldFilterHandler, BucketedAggregation } from '../../types';
 import FieldTopValuesBucket from './field_top_values_bucket';
 import type { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';

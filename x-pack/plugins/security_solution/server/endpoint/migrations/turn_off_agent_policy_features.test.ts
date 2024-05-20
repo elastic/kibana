@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/logging';
 import { createMockEndpointAppContextServiceStartContract } from '../mocks';
+import type { Logger } from '@kbn/logging';
 import type { EndpointInternalFleetServicesInterface } from '../services/fleet';
 
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
-import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
+import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import { turnOffAgentPolicyFeatures } from './turn_off_agent_policy_features';
 
 describe('Turn Off Agent Policy Features Migration', () => {

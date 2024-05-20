@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import type { FC } from 'react';
 import React, { Fragment, useContext } from 'react';
-import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
-import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiAccordion,
+  EuiSpacer,
+  EuiHorizontalRule,
+} from '@elastic/eui';
+import { ModelPlotSwitch } from './components/model_plot';
 import { AnnotationsSwitch } from './components/annotations';
 import { DedicatedIndexSwitch } from './components/dedicated_index';
+import { ModelMemoryLimitInput } from '../../../common/model_memory_limit';
+import { JobCreatorContext } from '../../../job_creator_context';
+import { JOB_TYPE } from '../../../../../../../../../common/constants/new_job';
 import { IgnoreUnavailableSwitch } from './components/ignore_unavailable';
-import { ModelPlotSwitch } from './components/model_plot';
 
 const buttonContent = i18n.translate(
   'xpack.ml.newJob.wizard.jobDetailsStep.advancedSectionButton',

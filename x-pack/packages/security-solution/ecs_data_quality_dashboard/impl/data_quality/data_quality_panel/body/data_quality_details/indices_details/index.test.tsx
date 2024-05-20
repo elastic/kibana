@@ -10,13 +10,13 @@ import numeral from '@elastic/numeral';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
-import { IndicesDetails, Props } from '.';
 import { EMPTY_STAT } from '../../../../helpers';
 import { alertIndexWithAllResults } from '../../../../mock/pattern_rollup/mock_alerts_pattern_rollup';
 import { auditbeatWithAllResults } from '../../../../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
 import { packetbeatNoResults } from '../../../../mock/pattern_rollup/mock_packetbeat_pattern_rollup';
 import { TestProviders } from '../../../../mock/test_providers/test_providers';
 import { PatternRollup } from '../../../../types';
+import { Props, IndicesDetails } from '.';
 
 const defaultBytesFormat = '0,0.[0]b';
 const formatBytes = (value: number | undefined) =>

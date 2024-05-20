@@ -5,30 +5,30 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFieldNumber, EuiLink, EuiRange, EuiText } from '@elastic/eui';
-import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import React from 'react';
+import { mount } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@elastic/eui';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { DragDropBuckets } from '@kbn/visualization-ui-components';
-import { mount } from 'enzyme';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { rangeOperation } from '..';
-import { IndexPattern } from '../../../../../types';
-import { getFieldByNameFactory } from '../../../pure_helpers';
 import type { FormBasedLayer } from '../../../types';
-import { RangePopover } from './advanced_editor';
-import {
-  DEFAULT_INTERVAL,
-  MIN_HISTOGRAM_BARS,
-  MODES,
-  SLICES,
-  TYPING_DEBOUNCE_TIME,
-} from './constants';
+import { rangeOperation } from '..';
 import { RangeIndexPatternColumn } from './ranges';
+import {
+  MODES,
+  DEFAULT_INTERVAL,
+  TYPING_DEBOUNCE_TIME,
+  MIN_HISTOGRAM_BARS,
+  SLICES,
+} from './constants';
+import { RangePopover } from './advanced_editor';
+import { DragDropBuckets } from '@kbn/visualization-ui-components';
+import { getFieldByNameFactory } from '../../../pure_helpers';
+import { IndexPattern } from '../../../../../types';
 
 // mocking random id generator function
 jest.mock('@elastic/eui', () => {

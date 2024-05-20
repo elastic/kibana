@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FindActionResult } from '@kbn/actions-plugin/server';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';

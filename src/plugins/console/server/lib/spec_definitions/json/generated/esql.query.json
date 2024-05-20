@@ -8,8 +8,12 @@
       "format": "",
       "delimiter": ""
     },
-    "methods": ["POST"],
-    "patterns": ["_query"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_query"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/esql-rest.html",
     "availability": {
       "stack": true,

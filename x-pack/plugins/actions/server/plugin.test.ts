@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import { ByteSizeValue, schema } from '@kbn/config-schema';
+import moment from 'moment';
+import { schema, ByteSizeValue } from '@kbn/config-schema';
 import { PluginInitializerContext, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/server/mocks';
-import moment from 'moment';
-import {
-  AlertHistoryEsIndexConnectorId,
-  DEFAULT_MICROSOFT_EXCHANGE_URL,
-  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
-  DEFAULT_MICROSOFT_GRAPH_API_URL,
-} from '../common';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
+import { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
 import { ActionsConfig } from './config';
 import {
   ActionsPlugin,
@@ -29,7 +24,12 @@ import {
   ActionsPluginsStart,
   PluginSetupContract,
 } from './plugin';
-import { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
+import {
+  AlertHistoryEsIndexConnectorId,
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../common';
 
 const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
   return { status: 'ok', actionId: options.actionId };
@@ -127,7 +127,7 @@ describe('Actions Plugin', () => {
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
           string,
-          Function,
+          Function
         ];
         expect(handler[0]).toEqual('actions');
 
@@ -154,7 +154,7 @@ describe('Actions Plugin', () => {
         expect(coreSetup.http.registerRouteHandlerContext).toHaveBeenCalledTimes(1);
         const handler = coreSetup.http.registerRouteHandlerContext.mock.calls[0] as [
           string,
-          Function,
+          Function
         ];
         expect(handler[0]).toEqual('actions');
 

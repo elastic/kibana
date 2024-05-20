@@ -7,12 +7,12 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { ReduxToolsPackage, registerExpressionsLanguage } from '.';
-import { createReduxTools } from './redux_tools/create_redux_tools';
-import { createReduxEmbeddableTools } from './redux_tools/redux_embeddables/create_redux_embeddable_tools';
+import { PresentationUtilPluginStart } from './types';
 import { pluginServices } from './services';
 import { registry as stubRegistry } from './services/plugin_services.story';
-import { PresentationUtilPluginStart } from './types';
+import { ReduxToolsPackage, registerExpressionsLanguage } from '.';
+import { createReduxEmbeddableTools } from './redux_tools/redux_embeddables/create_redux_embeddable_tools';
+import { createReduxTools } from './redux_tools/create_redux_tools';
 
 const createStartContract = (coreStart: CoreStart): PresentationUtilPluginStart => {
   pluginServices.setRegistry(stubRegistry.start({}));

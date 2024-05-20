@@ -7,8 +7,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { isEmpty } from 'lodash';
-import { COUNT_OF, TOP_VALUE } from '../../../translations';
 import type { GetLensAttributes, LensEmbeddableDataTableColumn } from '../../../types';
+import { COUNT_OF, TOP_VALUE } from '../../../translations';
 
 const layerId = uuidv4();
 const topValuesOfStackByFieldColumnId = uuidv4();

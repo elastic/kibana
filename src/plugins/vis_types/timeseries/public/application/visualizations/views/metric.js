@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiResizeObserver } from '@elastic/eui';
-import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import _ from 'lodash';
+import { EuiResizeObserver } from '@elastic/eui';
 
 import { getLastValue } from '../../../../common/last_value_utils';
-import { RenderCounter } from '../../components/render_counter';
 import { calculateCoordinates } from '../lib/calculate_coordinates';
+import { RenderCounter } from '../../components/render_counter';
 
 import './_metric.scss';
 

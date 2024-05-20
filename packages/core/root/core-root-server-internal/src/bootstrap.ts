@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
+import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
-import { getPackages } from '@kbn/repo-packages';
-import chalk from 'chalk';
-import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { Root } from './root';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 interface BootstrapArgs {
   configs: string[];

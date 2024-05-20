@@ -6,14 +6,14 @@
  */
 
 import { pick } from 'lodash/fp';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
+import { InputsModelId } from '../../store/inputs/constants';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { inputsSelectors } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { InputsModelId } from '../../store/inputs/constants';
-import type { DeleteQuery, SetQuery } from './types';
+import type { SetQuery, DeleteQuery } from './types';
 
 export const useGlobalTime = () => {
   const dispatch = useDispatch();

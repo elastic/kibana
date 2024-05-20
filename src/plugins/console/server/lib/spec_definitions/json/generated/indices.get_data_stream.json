@@ -5,11 +5,22 @@
       "filter_path": [],
       "human": "__flag__",
       "pretty": "__flag__",
-      "expand_wildcards": ["all", "open", "closed", "hidden", "none"],
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
       "include_defaults": "__flag__"
     },
-    "methods": ["GET"],
-    "patterns": ["_data_stream", "_data_stream/{name}"],
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_data_stream",
+      "_data_stream/{name}"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/data-streams.html",
     "availability": {
       "stack": true,

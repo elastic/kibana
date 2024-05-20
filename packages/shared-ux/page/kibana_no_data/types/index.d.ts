@@ -9,13 +9,13 @@
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 
 import {
-  NoDataCardKibanaDependencies,
-  NoDataCardServices,
-} from '@kbn/shared-ux-card-no-data-types';
-import {
-  NoDataViewsPromptKibanaDependencies,
   NoDataViewsPromptServices,
+  NoDataViewsPromptKibanaDependencies,
 } from '@kbn/shared-ux-prompt-no-data-views-types';
+import {
+  NoDataCardServices,
+  NoDataCardKibanaDependencies,
+} from '@kbn/shared-ux-card-no-data-types';
 
 export interface Services {
   /** True if the cluster contains data, false otherwise. */

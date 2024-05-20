@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import expect from '@kbn/expect';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

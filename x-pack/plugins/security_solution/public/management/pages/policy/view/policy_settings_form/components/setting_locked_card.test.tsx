@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import React from 'react';
 import { exactMatchText } from '../mocks';
 import type { SettingLockedCardProps } from './setting_locked_card';
 import { SettingLockedCard } from './setting_locked_card';

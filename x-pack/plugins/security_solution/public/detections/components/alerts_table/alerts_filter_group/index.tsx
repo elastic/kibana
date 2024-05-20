@@ -8,8 +8,8 @@
 import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import type { Status } from '../../../../../common/api/detection_engine';
 import { FILTER_OPEN } from '../../../../../common/types';
+import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from '../translations';
 
 interface Props {

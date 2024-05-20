@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
 import { INTERNAL_DELETE_FILE_ATTACHMENTS_URL } from '../../../../common/constants';
+import { createCasesRoute } from '../create_cases_route';
+import { createCaseError } from '../../../common/error';
+import { escapeHatch } from '../utils';
 import type { attachmentApiV1 } from '../../../../common/types/api';
 import { BulkDeleteFileAttachmentsRequestRt } from '../../../../common/types/api/attachment/v1';
-import { createCaseError } from '../../../common/error';
-import { decodeWithExcessOrThrow } from '../../../common/runtime_types';
-import { createCasesRoute } from '../create_cases_route';
-import { escapeHatch } from '../utils';
 
 export const bulkDeleteFileAttachments = createCasesRoute({
   method: 'post',

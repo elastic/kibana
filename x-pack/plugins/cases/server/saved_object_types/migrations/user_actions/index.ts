@@ -8,21 +8,21 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type {
-  SavedObjectMigrationMap,
-  SavedObjectSanitizedDoc,
   SavedObjectUnsanitizedDoc,
+  SavedObjectSanitizedDoc,
+  SavedObjectMigrationMap,
 } from '@kbn/core/server';
 
-import type { SanitizedCaseOwner } from '..';
-import { addOwnerToSO } from '..';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
+import type { SanitizedCaseOwner } from '..';
+import { addOwnerToSO } from '..';
 import { removeRuleInformation } from './alerts';
-import { addAssigneesToCreateUserAction } from './assignees';
 import { userActionsConnectorIdMigration } from './connector_id';
 import { payloadMigration } from './payload';
 import { addSeverityToCreateUserAction } from './severity';
 import type { UserActions } from './types';
+import { addAssigneesToCreateUserAction } from './assignees';
 
 export interface UserActionsMigrationsDeps {
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase } from '../../../..';
-import { fields } from '../../../filters/stubs';
 import { nodeTypes } from '../../node_types';
+import { fields } from '../../../filters/stubs';
+import { DataViewBase } from '../../../..';
 import { getFullFieldNameNode } from './get_full_field_name_node';
 
 describe('getFullFieldNameNode', function () {

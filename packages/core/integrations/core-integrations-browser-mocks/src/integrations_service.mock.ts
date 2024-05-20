@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { IntegrationsService } from '@kbn/core-integrations-browser-internal';
 
 export type IntegrationsServiceContract = PublicMethodsOf<IntegrationsService>;
 export type IntegrationsServiceMock = jest.Mocked<IntegrationsServiceContract>;

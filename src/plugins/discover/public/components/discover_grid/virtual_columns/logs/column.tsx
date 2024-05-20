@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import React from 'react';
+import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { CONTENT_FIELD, RESOURCE_FIELD } from '../../../../../common/data_types/logs/constants';
 import { ContentColumnTooltip } from './column_tooltips/content_column_tooltip';
 import { ResourceColumnTooltip } from './column_tooltips/resource_column_tooltip';

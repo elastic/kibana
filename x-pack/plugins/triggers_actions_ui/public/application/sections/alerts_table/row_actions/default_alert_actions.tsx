@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { AlertActionsProps } from '../../../../types';
-import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';
-import { MuteAlertAction } from './mute_alert_action';
-import { ViewAlertDetailsAlertAction } from './view_alert_details_alert_action';
 import { ViewRuleDetailsAlertAction } from './view_rule_details_alert_action';
+import type { AlertActionsProps } from '../../../../types';
+import { ViewAlertDetailsAlertAction } from './view_alert_details_alert_action';
+import { MuteAlertAction } from './mute_alert_action';
+import { MarkAsUntrackedAlertAction } from './mark_as_untracked_alert_action';
 
 /**
  * Common alerts table row actions

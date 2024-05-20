@@ -6,41 +6,41 @@
  */
 
 import { useMemo } from 'react';
-import type {
-  AssetCriticalityRecord,
-  EntityAnalyticsPrivileges,
-} from '../../../common/api/entity_analytics/asset_criticality';
-import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
-import type { RiskEngineEnableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
-import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
 import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
-import type {
-  RiskScoresEntityCalculationRequest,
-  RiskScoresEntityCalculationResponse,
-} from '../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+import type { RiskEngineEnableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
 import type {
   RiskScoresPreviewRequest,
   RiskScoresPreviewResponse,
 } from '../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  RiskScoresEntityCalculationRequest,
+  RiskScoresEntityCalculationResponse,
+} from '../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
+import type {
+  AssetCriticalityRecord,
+  EntityAnalyticsPrivileges,
+} from '../../../common/api/entity_analytics/asset_criticality';
+import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
-  ASSET_CRITICALITY_CSV_UPLOAD_URL,
-  ASSET_CRITICALITY_PRIVILEGES_URL,
-  ASSET_CRITICALITY_URL,
-  RISK_ENGINE_DISABLE_URL,
+  RISK_ENGINE_STATUS_URL,
+  RISK_SCORE_PREVIEW_URL,
   RISK_ENGINE_ENABLE_URL,
+  RISK_ENGINE_DISABLE_URL,
   RISK_ENGINE_INIT_URL,
   RISK_ENGINE_PRIVILEGES_URL,
-  RISK_ENGINE_SETTINGS_URL,
-  RISK_ENGINE_STATUS_URL,
-  RISK_SCORE_ENTITY_CALCULATION_URL,
+  ASSET_CRITICALITY_PRIVILEGES_URL,
+  ASSET_CRITICALITY_URL,
   RISK_SCORE_INDEX_STATUS_API_URL,
-  RISK_SCORE_PREVIEW_URL,
+  RISK_ENGINE_SETTINGS_URL,
+  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  RISK_SCORE_ENTITY_CALCULATION_URL,
 } from '../../../common/constants';
-import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
-import type { RiskScoreEntity } from '../../../common/search_strategy';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
+import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
+import { useKibana } from '../../common/lib/kibana/kibana_react';
 
 export interface DeleteAssetCriticalityResponse {
   deleted: true;

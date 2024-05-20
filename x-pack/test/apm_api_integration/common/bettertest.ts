@@ -6,8 +6,8 @@
  */
 
 import { format } from 'url';
-import request from 'superagent';
 import supertest from 'supertest';
+import request from 'superagent';
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete';
 

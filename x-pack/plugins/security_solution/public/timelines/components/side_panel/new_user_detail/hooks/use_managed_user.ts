@@ -7,20 +7,20 @@
 
 import { useEffect, useMemo } from 'react';
 
-import { UsersQueries } from '../../../../../../common/search_strategy';
-import type { ManagedUserHits } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
-import { useQueryInspector } from '../../../../../common/components/page/manage_query';
-import { useGlobalTime } from '../../../../../common/containers/use_global_time';
-import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useSpaceId } from '../../../../../common/hooks/use_space_id';
+import type { ManagedUserHits } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import { useIntegrations } from '../../../../../detections/components/rules/related_integrations/use_integrations';
+import { UsersQueries } from '../../../../../../common/search_strategy';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
+import { useSearchStrategy } from '../../../../../common/containers/use_search_strategy';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import {
   ENTRA_ID_PACKAGE_NAME,
-  MANAGED_USER_QUERY_ID,
   OKTA_PACKAGE_NAME,
   getEntraUserIndex,
   getOktaUserIndex,
+  MANAGED_USER_QUERY_ID,
 } from '../constants';
 import * as i18n from '../translations';
 

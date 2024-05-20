@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiToolTip } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiToolTip } from '@elastic/eui';
 
-import { Skeleton } from './skeleton';
 import { TooltipContent } from './tooltip_content';
 import type { CaseTooltipProps } from './types';
+import { Skeleton } from './skeleton';
 
 const CaseTooltipComponent = React.memo<CaseTooltipProps>((props) => {
   const { dataTestSubj, children, loading = false, className = '', content } = props;

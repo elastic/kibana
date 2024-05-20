@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
 import React from 'react';
+import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { lensVisualization } from './index.mock';
 import { LensRenderer } from './lens_renderer';
+import { lensVisualization } from './index.mock';
 
 describe('LensRenderer', () => {
   const mockEmbeddableComponent = jest

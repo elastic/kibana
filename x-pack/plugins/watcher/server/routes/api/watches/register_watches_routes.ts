@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
-import { registerDeleteRoute } from './register_delete_route';
 import { registerListRoute } from './register_list_route';
+import { registerDeleteRoute } from './register_delete_route';
+import { RouteDependencies } from '../../../types';
 
 export function registerWatchesRoutes(deps: RouteDependencies) {
   registerListRoute(deps);

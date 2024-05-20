@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';
 import type { ElasticsearchClientsMetrics, MetricsCollector } from '@kbn/core-metrics-server';
+import type { AgentStatsProvider } from '@kbn/core-elasticsearch-client-server-internal';
 
 export class ElasticsearchClientsMetricsCollector
   implements MetricsCollector<ElasticsearchClientsMetrics>

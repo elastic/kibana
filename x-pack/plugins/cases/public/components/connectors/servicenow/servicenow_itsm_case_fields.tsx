@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import {
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React, { useMemo } from 'react';
+import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
 import * as i18n from './translations';
 
-import { useKibana } from '../../../common/lib/kibana';
-import { DeprecatedCallout } from '../deprecated_callout';
 import type { ConnectorFieldsProps } from '../types';
-import { choicesToEuiOptions } from './helpers';
-import type { Fields } from './types';
+import { useKibana } from '../../../common/lib/kibana';
 import { useGetChoices } from './use_get_choices';
+import type { Fields } from './types';
+import { choicesToEuiOptions } from './helpers';
+import { DeprecatedCallout } from '../deprecated_callout';
 
 const choicesToGet = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render } from '@testing-library/react';
+import { CoreStart } from '@kbn/core/public';
 import { merge } from 'lodash';
 // import { renderWithTheme } from '../../../../utils/test_helpers';
 import React, { ReactNode } from 'react';
-import { ServiceIcons } from '.';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
-  MockApmPluginContextWrapper,
   mockApmPluginContextValue,
+  MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import * as fetcherHook from '../../../hooks/use_fetcher';
+import { ServiceIcons } from '.';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },

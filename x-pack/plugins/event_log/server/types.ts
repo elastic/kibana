@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import { KueryNode } from '@kbn/es-query';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import { IEvent } from '../generated/schemas';
+import { AggregateOptionsType, FindOptionsType } from './event_log_client';
 import {
   AggregateEventsBySavedObjectResult,
   QueryEventsBySavedObjectResult,
 } from './es/cluster_client_adapter';
-import { AggregateOptionsType, FindOptionsType } from './event_log_client';
 
 export type {
   QueryEventsBySavedObjectResult,

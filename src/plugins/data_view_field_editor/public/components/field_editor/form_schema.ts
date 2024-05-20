@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FieldConfig, RuntimeType, ValidationFunc, fieldValidators } from '../../shared_imports';
-import type { PreviewState } from '../preview/types';
+import { fieldValidators, FieldConfig, RuntimeType, ValidationFunc } from '../../shared_imports';
 import { RUNTIME_FIELD_OPTIONS } from './constants';
+import type { PreviewState } from '../preview/types';
 
 const { containsCharsField, emptyField, numberGreaterThanField, maxLengthField } = fieldValidators;
 const i18nTexts = {

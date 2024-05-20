@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { Query } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
-import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
-import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import type { Dictionary } from '@kbn/ml-url-state';
 import type { Moment } from 'moment';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useMemo, useState } from 'react';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { merge } from 'rxjs';
-import type { InitialSettings } from '../../data_drift/use_data_drift_result';
+import type { RandomSampler } from '@kbn/ml-random-sampler-utils';
+import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
+import type { Query } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { useTimeBuckets } from '@kbn/ml-time-buckets';
 import { useDataDriftStateManagerContext } from '../../data_drift/use_state_manager';
-import { useDataVisualizerKibana } from '../../kibana_context';
+import type { InitialSettings } from '../../data_drift/use_data_drift_result';
 import {
   type DocumentStatsSearchStrategyParams,
   useDocumentCountStats,
 } from './use_document_count_stats';
+import { useDataVisualizerKibana } from '../../kibana_context';
 
 const DEFAULT_BAR_TARGET = 75;
 

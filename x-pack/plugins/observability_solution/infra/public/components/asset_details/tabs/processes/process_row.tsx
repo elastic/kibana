@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
+  EuiTableRow,
+  EuiTableRowCell,
   EuiButtonEmpty,
   EuiCode,
   EuiDescriptionList,
-  EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButton,
   EuiSpacer,
-  EuiTableRow,
-  EuiTableRowCell,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { type Message } from '@kbn/observability-ai-assistant-plugin/public';
-import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import { type Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { ProcessRowCharts } from './process_row_charts';
 import { Process } from './types';
+import { ProcessRowCharts } from './process_row_charts';
 
 interface Props {
   cells: React.ReactNode[];

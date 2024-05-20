@@ -7,8 +7,7 @@
 
 jest.mock('../../actions', () => ({}));
 
-import _ from 'lodash';
-import { DataRequestDescriptor, DataRequestMeta } from '../../../common/descriptor_types';
+import { DataRequestMeta, DataRequestDescriptor } from '../../../common/descriptor_types';
 import {
   getDataRequest,
   setDataRequest,
@@ -17,6 +16,7 @@ import {
   updateSourceDataRequest,
 } from './data_request_utils';
 import { MapState } from './types';
+import _ from 'lodash';
 
 describe('getDataRequest', () => {
   const REQUEST_TOKEN = Symbol('request');

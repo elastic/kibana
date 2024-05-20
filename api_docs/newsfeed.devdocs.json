@@ -65,7 +65,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["Error | null"],
+            "signature": [
+              "Error | null"
+            ],
             "path": "src/plugins/newsfeed/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -113,7 +115,9 @@
             "tags": [],
             "label": "linkText",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "src/plugins/newsfeed/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -136,7 +140,9 @@
             "tags": [],
             "label": "badge",
             "description": [],
-            "signature": ["string | null"],
+            "signature": [
+              "string | null"
+            ],
             "path": "src/plugins/newsfeed/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -148,7 +154,9 @@
             "tags": [],
             "label": "publishOn",
             "description": [],
-            "signature": ["moment.Moment"],
+            "signature": [
+              "moment.Moment"
+            ],
             "path": "src/plugins/newsfeed/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -160,7 +168,9 @@
             "tags": [],
             "label": "expireOn",
             "description": [],
-            "signature": ["moment.Moment"],
+            "signature": [
+              "moment.Moment"
+            ],
             "path": "src/plugins/newsfeed/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -203,7 +213,9 @@
       "tags": [],
       "label": "NewsfeedPublicPluginSetup",
       "description": [],
-      "signature": ["{}"],
+      "signature": [
+        "{}"
+      ],
       "path": "src/plugins/newsfeed/public/plugin.tsx",
       "deprecated": false,
       "trackAdoption": false,

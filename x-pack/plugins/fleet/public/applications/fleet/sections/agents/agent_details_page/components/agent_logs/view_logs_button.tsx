@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { stringify } from 'querystring';
 import url from 'url';
+import { stringify } from 'querystring';
 
+import React, { useMemo } from 'react';
+import { encode } from '@kbn/rison';
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { encode } from '@kbn/rison';
-import React, { useMemo } from 'react';
 
 import { useStartServices } from '../../../../../hooks';
 

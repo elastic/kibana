@@ -9,9 +9,9 @@ import { significantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/sig
 import { significantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
 
 import { duplicateIdentifier } from './duplicate_identifier';
+import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
 import { groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
-import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
 import { getMarkedDuplicates } from './get_marked_duplicates';
 import { getMissingSignificantItems } from './get_missing_significant_items';
 

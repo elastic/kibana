@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { statSync } from 'fs';
 import { resolve } from 'path';
+import { statSync } from 'fs';
 
-import { filter, map, tap, toArray } from 'rxjs';
+import { tap, filter, map, toArray } from 'rxjs';
 
-import { Task, scan$ } from '../lib';
+import { scan$, Task } from '../lib';
 
 export const AssertFileTime: Task = {
   description: 'Checking for files dated before 1980',

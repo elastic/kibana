@@ -1,8 +1,3 @@
-import type { RefreshInterval } from '@kbn/data-plugin/common';
-import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
-import type { Filter, TimeRange } from '@kbn/es-query';
-import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { type Dictionary, isRisonSerializationRequired } from '@kbn/ml-url-state';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,9 +5,14 @@ import { type Dictionary, isRisonSerializationRequired } from '@kbn/ml-url-state
  * 2.0.
  */
 import { encode } from '@kbn/rison';
-import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
-import type { SerializableRecord } from '@kbn/utility-types';
 import { stringify } from 'query-string';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import type { RefreshInterval } from '@kbn/data-plugin/common';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
+import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
+import { type Dictionary, isRisonSerializationRequired } from '@kbn/ml-url-state';
+import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 
 export const DATA_VISUALIZER_APP_LOCATOR = 'DATA_VISUALIZER_APP_LOCATOR';
 

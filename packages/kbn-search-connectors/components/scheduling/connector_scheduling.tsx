@@ -1,15 +1,3 @@
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiSpacer,
-  EuiSplitPanel,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -18,6 +6,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * Side Public License, v 1.
  */
 import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiText,
+  EuiTitle,
+  EuiLink,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Connector,
   ConnectorStatus,

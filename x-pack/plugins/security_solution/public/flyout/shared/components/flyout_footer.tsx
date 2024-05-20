@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
+import { EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
 
 interface FlyoutFooterProps extends React.ComponentProps<typeof EuiFlyoutFooter> {
   children: React.ReactNode;

@@ -12,16 +12,16 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
-import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
-import type { BulkCreate, WrapHits } from '../types';
-import { createEnrichEventsFunction } from '../utils/enrichments';
-import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdBucket, ThresholdSignalHistory } from './types';
 import { calculateThresholdSignalUuid } from './utils';
+import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
+import type { ThresholdSignalHistory, ThresholdBucket } from './types';
+import type { BulkCreate, WrapHits } from '../types';
+import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import { createEnrichEventsFunction } from '../utils/enrichments';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 interface BulkCreateThresholdSignalsParams {
   buckets: ThresholdBucket[];

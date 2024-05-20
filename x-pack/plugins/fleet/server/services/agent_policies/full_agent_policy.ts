@@ -8,48 +8,48 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { set } from '@kbn/safer-lodash-set';
-import deepMerge from 'deepmerge';
 import { safeLoad } from 'js-yaml';
+import deepMerge from 'deepmerge';
+import { set } from '@kbn/safer-lodash-set';
 
 import {
   getDefaultPresetForEsOutput,
   outputTypeSupportPresets,
 } from '../../../common/services/output_helpers';
 
-import {
-  DEFAULT_OUTPUT,
-  dataTypes,
-  kafkaCompressionType,
-  outputType,
-} from '../../../common/constants';
+import type {
+  FullAgentPolicy,
+  PackagePolicy,
+  Output,
+  ShipperOutput,
+  FullAgentPolicyOutput,
+  FleetProxy,
+  FleetServerHost,
+} from '../../types';
 import type {
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
   PackageInfo,
 } from '../../../common/types';
-import type {
-  FleetProxy,
-  FleetServerHost,
-  FullAgentPolicy,
-  FullAgentPolicyOutput,
-  Output,
-  PackagePolicy,
-  ShipperOutput,
-} from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { appContextService } from '../app_context';
+import {
+  dataTypes,
+  DEFAULT_OUTPUT,
+  kafkaCompressionType,
+  outputType,
+} from '../../../common/constants';
+import { getSettingsValuesForAgentPolicy } from '../form_settings';
 import { getPackageInfo } from '../epm/packages';
 import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
-import { getSettingsValuesForAgentPolicy } from '../form_settings';
+import { appContextService } from '../app_context';
 
 import { getOutputSecretReferences } from '../secrets';
 
-import { storedPackagePoliciesToAgentInputs } from '.';
 import { getMonitoringPermissions } from './monitoring_permissions';
+import { storedPackagePoliciesToAgentInputs } from '.';
 import {
-  DEFAULT_CLUSTER_PERMISSIONS,
   storedPackagePoliciesToAgentPermissions,
+  DEFAULT_CLUSTER_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 import { fetchRelatedSavedObjects } from './related_saved_objects';
 
@@ -120,13 +120,10 @@ export async function getFullAgentPolicy(
     getOutputIdForAgentPolicy(dataOutput),
     agentPolicy.namespace
   );
-  const features = (agentPolicy.agent_features || []).reduce(
-    (acc, { name, ...featureConfig }) => {
-      acc[name] = featureConfig;
-      return acc;
-    },
-    {} as NonNullable<FullAgentPolicy['agent']>['features']
-  );
+  const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
+    acc[name] = featureConfig;
+    return acc;
+  }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
 
   const outputSecretReferences = outputs.flatMap((output) => getOutputSecretReferences(output));
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import { RoundedBadgeAntenna } from './rounded_badge_antenna';
 

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useMutation } from '@tanstack/react-query';
 
-import { archiveMaintenanceWindow } from '../services/maintenance_windows_api/archive';
 import { useKibana } from '../utils/kibana_react';
+import { archiveMaintenanceWindow } from '../services/maintenance_windows_api/archive';
 
 export function useArchiveMaintenanceWindow() {
   const {

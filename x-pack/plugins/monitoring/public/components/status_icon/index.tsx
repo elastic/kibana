@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { EuiIcon } from '@elastic/eui';
 
 export const STATUS_ICON_TYPES = {
   RED: 'RED' as const,

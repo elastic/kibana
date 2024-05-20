@@ -10,7 +10,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { Criteria } from '@elastic/eui';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 
 import type { CaseUI } from '../../../../common/ui/types';
 import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case_files';
@@ -18,8 +18,8 @@ import type { CaseFilesFilteringOptions } from '../../../containers/use_get_case
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { useGetCaseFiles } from '../../../containers/use_get_case_files';
 import { FilesTable } from '../../files/files_table';
-import { FilesUtilityBar } from '../../files/files_utility_bar';
 import { CaseViewTabs } from '../case_view_tabs';
+import { FilesUtilityBar } from '../../files/files_utility_bar';
 
 interface CaseViewFilesProps {
   caseData: CaseUI;

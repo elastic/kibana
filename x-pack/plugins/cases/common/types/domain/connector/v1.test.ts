@@ -6,12 +6,12 @@
  */
 
 import {
-  CaseConnectorRt,
+  ConnectorTypeFieldsRt,
   CaseUserActionConnectorRt,
+  CaseConnectorRt,
+  ConnectorTypes,
   ConnectorMappingsAttributesRt,
   ConnectorMappingsRt,
-  ConnectorTypeFieldsRt,
-  ConnectorTypes,
 } from './v1';
 
 describe('Connector', () => {

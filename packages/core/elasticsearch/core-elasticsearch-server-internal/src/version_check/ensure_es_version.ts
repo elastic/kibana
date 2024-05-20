@@ -11,19 +11,19 @@
  * that defined in Kibana's package.json.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/logging';
-import { BehaviorSubject, Observable, from, interval, of } from 'rxjs';
+import { interval, of, from, Observable, BehaviorSubject } from 'rxjs';
 import {
-  catchError,
-  distinctUntilChanged,
-  exhaustMap,
   map,
-  shareReplay,
-  startWith,
+  distinctUntilChanged,
+  catchError,
+  exhaustMap,
   switchMap,
   tap,
+  startWith,
+  shareReplay,
 } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,

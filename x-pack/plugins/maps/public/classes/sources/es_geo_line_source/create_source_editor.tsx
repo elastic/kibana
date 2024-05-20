@@ -7,14 +7,14 @@
 
 import React, { Component } from 'react';
 
-import { EuiPanel } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
-import { GeoFieldSelect } from '../../../components/geo_field_select';
+import { EuiPanel } from '@elastic/eui';
 import { GeoIndexPatternSelect } from '../../../components/geo_index_pattern_select';
+import { GeoFieldSelect } from '../../../components/geo_field_select';
+import { ESGeoLineSourceDescriptor } from '../../../../common/descriptor_types';
 import { getGeoPointFields, getIsTimeseries } from '../../../index_pattern_util';
-import { DEFAULT_LINE_SIMPLIFICATION_SIZE } from './constants';
 import { GeoLineForm } from './geo_line_form';
+import { DEFAULT_LINE_SIMPLIFICATION_SIZE } from './constants';
 
 interface Props {
   onSourceConfigChange: (sourceConfig: Partial<ESGeoLineSourceDescriptor> | null) => void;

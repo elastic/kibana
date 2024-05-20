@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import type { GeoContainmentAlertParams } from '../types';
 import { BoundaryForm } from './boundary_form';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { GeoContainmentAlertParams } from '../types';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 jest.mock('./query_input', () => {
   return {

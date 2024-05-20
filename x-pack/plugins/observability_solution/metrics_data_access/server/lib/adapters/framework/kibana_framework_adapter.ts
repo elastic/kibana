@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TransportRequestParams } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransportRequestParams } from '@elastic/elasticsearch';
 import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   CoreSetup,
   IRouter,
   RequestHandler,
-  RequestHandlerContext,
   RouteMethod,
+  RequestHandlerContext,
 } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 import type { MetricsDataPluginStartDeps } from '../../../types';

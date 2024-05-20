@@ -8,18 +8,18 @@
 import React from 'react';
 
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import { getPosturePolicy } from '../utils';
 import {
+  AzureCredentialsFormProps,
+  AzureSetupInfoContent,
+  AzureInputVarFields,
   ARM_TEMPLATE_EXTERNAL_DOC_URL,
   AZURE_CREDENTIALS_TYPE,
-  AzureCredentialsFormProps,
-  AzureInputVarFields,
-  AzureSetupInfoContent,
 } from './azure_credentials_form';
+import { getPosturePolicy } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,

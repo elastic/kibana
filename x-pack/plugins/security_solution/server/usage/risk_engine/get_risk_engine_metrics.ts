@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { RiskEngineMetrics } from './types';
 
 interface GetRiskEngineMetricsOptions {

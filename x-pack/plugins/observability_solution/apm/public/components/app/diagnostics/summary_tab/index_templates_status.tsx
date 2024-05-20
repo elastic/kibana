@@ -1,5 +1,3 @@
-import { EuiLink } from '@elastic/eui';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,9 +5,11 @@ import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
  * 2.0.
  */
 import React from 'react';
+import { EuiLink } from '@elastic/eui';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useDiagnosticsContext } from '../context/use_diagnostics';
 import { TabStatus } from './tab_status';
 

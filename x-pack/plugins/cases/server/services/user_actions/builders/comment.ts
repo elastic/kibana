@@ -7,12 +7,12 @@
 
 import { uniqBy } from 'lodash';
 import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
+import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
 import type { CommentUserAction } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
-import { extractPersistableStateReferencesFromSO } from '../../../attachment_framework/so_references';
-import { getAttachmentSOExtractor } from '../../so_references';
 import { UserActionBuilder } from '../abstract_builder';
-import type { EventDetails, UserActionEvent, UserActionParameters } from '../types';
+import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
+import { getAttachmentSOExtractor } from '../../so_references';
 import { getPastTenseVerb } from './audit_logger_utils';
 
 export class CommentUserActionBuilder extends UserActionBuilder {

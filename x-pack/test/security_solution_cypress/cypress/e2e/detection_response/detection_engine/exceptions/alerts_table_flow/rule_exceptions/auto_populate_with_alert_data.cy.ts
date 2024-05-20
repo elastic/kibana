@@ -1,4 +1,3 @@
-import { getEndpointRule } from '../../../../../../objects/rule';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,26 +5,28 @@ import { getEndpointRule } from '../../../../../../objects/rule';
  * 2.0.
  */
 import { LOADING_INDICATOR } from '../../../../../../screens/security_header';
+import { getEndpointRule } from '../../../../../../objects/rule';
+import { createRule } from '../../../../../../tasks/api_calls/rules';
 import {
   addExceptionFromFirstAlert,
   expandFirstAlert,
   openAddRuleExceptionFromAlertActionButton,
 } from '../../../../../../tasks/alerts';
-import { createRule } from '../../../../../../tasks/api_calls/rules';
 import {
   addExceptionEntryFieldValue,
   addExceptionEntryFieldValueValue,
   addExceptionFlyoutItemName,
-  editExceptionFlyoutItemName,
   submitNewExceptionItem,
-  validateEmptyExceptionConditionField,
-  validateExceptionCommentCountAndText,
   validateExceptionConditionField,
+  validateExceptionCommentCountAndText,
+  editExceptionFlyoutItemName,
   validateHighlightedFieldsPopulatedAsExceptionConditions,
+  validateEmptyExceptionConditionField,
 } from '../../../../../../tasks/exceptions';
 import { login } from '../../../../../../tasks/login';
 import { goToExceptionsTab, visitRuleDetailsPage } from '../../../../../../tasks/rule_details';
 
+import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 import {
   ADD_AND_BTN,
   ENTRY_DELETE_BTN,
@@ -33,7 +34,6 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../../../../screens/exceptions';
-import { deleteAlertsAndRules } from '../../../../../../tasks/api_calls/common';
 import { waitForAlertsToPopulate } from '../../../../../../tasks/create_new_rule';
 
 // TODO: https://github.com/elastic/kibana/issues/161539

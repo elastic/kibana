@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { EuiPageSidebar, EuiSideNav } from '@elastic/eui';
 
 export const Sidebar = () => {
   const history = useHistory();

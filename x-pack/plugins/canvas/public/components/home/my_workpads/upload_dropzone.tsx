@@ -7,8 +7,8 @@
 
 import React, { FC, PropsWithChildren, useState } from 'react';
 
-import { ErrorStrings } from '../../../../i18n';
 import { useNotifyService } from '../../../services';
+import { ErrorStrings } from '../../../../i18n';
 import { useImportWorkpad } from '../hooks';
 
 import { UploadDropzone as Component } from './upload_dropzone.component';

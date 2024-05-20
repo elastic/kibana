@@ -1,6 +1,3 @@
-import type { FindFileArgs } from '@kbn/files-plugin/server';
-import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
-import type { FileJSON } from '@kbn/shared-ux-file-types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,11 +5,14 @@ import type { FileJSON } from '@kbn/shared-ux-file-types';
  * 2.0.
  */
 import { MAX_DELETE_IDS_LENGTH, MAX_FILES_PER_CASE } from '../../../common/constants';
+import type { FindFileArgs } from '@kbn/files-plugin/server';
+import { createFileServiceMock } from '@kbn/files-plugin/server/mocks';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { CaseFileMetadataForDeletion } from '../../../common/files';
 import { constructFileKindIdByOwner } from '../../../common/files';
-import { mockCases } from '../../mocks';
+import { getFileEntities, deleteCases } from './delete';
 import { createCasesClientMockArgs } from '../mocks';
-import { deleteCases, getFileEntities } from './delete';
+import { mockCases } from '../../mocks';
 
 const getCaseIds = (numIds: number) => {
   return Array.from(Array(numIds).keys()).map((key) => key.toString());

@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment-timezone';
-import { DataViewFieldBase, IFieldSubTypeMulti, IFieldSubTypeNested } from './es_query';
+import { DataViewFieldBase, IFieldSubTypeNested, IFieldSubTypeMulti } from './es_query';
 
 /** @internal */
 export function getTimeZoneFromSettings(dateFormatTZ: string) {

@@ -10,14 +10,14 @@ import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';
 
-import type { GenerationInterval } from '../../../types';
 import { LastTimesPopover } from '../countdown/last_times_popover';
 import {
-  MAX_SECONDS_BADGE_WIDTH,
   getAverageIntervalSeconds,
+  MAX_SECONDS_BADGE_WIDTH,
 } from '../countdown/last_times_popover/helpers';
 import { SECONDS_ABBREVIATION } from '../countdown/last_times_popover/translations';
 import { AVERAGE_TIME } from '../countdown/translations';
+import type { GenerationInterval } from '../../../types';
 
 const TEXT_COLOR = '#343741';
 

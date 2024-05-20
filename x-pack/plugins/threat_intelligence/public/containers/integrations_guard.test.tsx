@@ -8,15 +8,15 @@
 import { UseQueryResult } from '@tanstack/react-query';
 import { render } from '@testing-library/react';
 import React from 'react';
-import { useTIDocumentationLink } from '../hooks/use_documentation_link';
+import { IntegrationsGuard } from './integrations_guard';
+import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
 import { Integration, useIntegrations } from '../hooks/use_integrations';
 import { useIntegrationsPageLink } from '../hooks/use_integrations_page_link';
-import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
-import { EMPTY_PROMPT_TEST_ID } from '../modules/empty_page/empty_page';
+import { useTIDocumentationLink } from '../hooks/use_documentation_link';
 import { useIndicatorsTotalCount } from '../modules/indicators/hooks/use_total_count';
 import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../utils/filter_integrations';
-import { IntegrationsGuard } from './integrations_guard';
 import { LOADING_LOGO_TEST_ID } from './test_ids';
+import { EMPTY_PROMPT_TEST_ID } from '../modules/empty_page/empty_page';
 
 jest.mock('../modules/indicators/hooks/use_total_count');
 jest.mock('../hooks/use_integrations_page_link');

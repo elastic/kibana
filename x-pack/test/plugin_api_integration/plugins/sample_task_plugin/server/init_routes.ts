@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EventEmitter } from 'events';
 import { schema } from '@kbn/config-schema';
 import {
+  RequestHandlerContext,
+  KibanaRequest,
+  KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
   IScopedClusterClient,
-  KibanaRequest,
-  KibanaResponseFactory,
-  RequestHandlerContext,
 } from '@kbn/core/server';
+import { EventEmitter } from 'events';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const scope = 'testing';

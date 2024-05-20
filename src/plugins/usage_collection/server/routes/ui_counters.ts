@@ -8,9 +8,9 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter, ISavedObjectsRepository } from '@kbn/core/server';
-import { UiCounters } from '../../common/types';
-import { reportSchema, storeReport } from '../report';
+import { storeReport, reportSchema } from '../report';
 import { UsageCounter } from '../usage_counters';
+import { UiCounters } from '../../common/types';
 
 export function registerUiCountersRoute(
   router: IRouter,

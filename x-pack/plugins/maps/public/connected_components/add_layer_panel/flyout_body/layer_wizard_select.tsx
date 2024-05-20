@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import {
-  EuiCard,
-  EuiFacetButton,
-  EuiFacetGroup,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import _ from 'lodash';
 import React, { Component } from 'react';
+import {
+  EuiCard,
+  EuiIcon,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiSkeletonText,
+  EuiFacetGroup,
+  EuiFacetButton,
+  EuiPanel,
+  EuiToolTip,
+  EuiSpacer,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { getLayerWizards, LayerWizard, LayerWizardWithMeta } from '../../../classes/layers';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import { LayerWizard, LayerWizardWithMeta, getLayerWizards } from '../../../classes/layers';
 import './layer_wizard_select.scss';
 
 interface Props {

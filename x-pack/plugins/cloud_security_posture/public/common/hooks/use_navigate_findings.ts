@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
 import { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
+import { Filter } from '@kbn/es-query';
 import {
   LATEST_FINDINGS_INDEX_PATTERN,
   SECURITY_DEFAULT_DATA_VIEW_ID,
 } from '../../../common/constants';
-import { useLatestFindingsDataView } from '../api/use_latest_findings_data_view';
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
 import { useKibana } from './use_kibana';
+import { useLatestFindingsDataView } from '../api/use_latest_findings_data_view';
 
 interface NegatedValue {
   value: string | number;

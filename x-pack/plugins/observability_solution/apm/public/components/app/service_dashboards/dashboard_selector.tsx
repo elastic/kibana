@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiComboBox } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import useMount from 'react-use/lib/useMount';
+import { EuiComboBox } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MergedServiceDashboard } from '.';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
 

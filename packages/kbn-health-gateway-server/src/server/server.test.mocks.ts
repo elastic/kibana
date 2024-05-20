@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getListenerOptions, getServerOptions, sslSchema } from '@kbn/server-http-tools';
+import { sslSchema, getServerOptions, getListenerOptions } from '@kbn/server-http-tools';
 
 export const hapiStartMock = jest.fn();
 export const hapiStopMock = jest.fn();

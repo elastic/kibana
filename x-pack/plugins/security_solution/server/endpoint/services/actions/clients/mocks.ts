@@ -5,50 +5,50 @@
  * 2.0.
  */
 
-import type { TransportResult } from '@elastic/elasticsearch';
-import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
-import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
-import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
+import type { DeepPartial } from 'utility-types';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { CasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
 import { createCasesClientMock } from '@kbn/cases-plugin/server/client/mocks';
-import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { merge } from 'lodash';
+import type * as esTypes from '@elastic/elasticsearch/lib/api/types';
+import type { TransportResult } from '@elastic/elasticsearch';
+import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attachments/client';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import {} from '@kbn/utility-types-jest';
-import { merge } from 'lodash';
-import type { DeepPartial } from 'utility-types';
 import type { ResponseActionsClient } from '../..';
-import { NormalizedExternalConnectorClient } from '../..';
-import type {
-  ExecuteActionRequestBody,
-  GetProcessesRequestBody,
-  IsolationRouteRequestBody,
-  ResponseActionGetFileRequestBody,
-  UploadActionApiRequestBody,
-} from '../../../../../common/api/endpoint';
-import {
-  ENDPOINT_ACTIONS_INDEX,
-  ENDPOINT_ACTION_RESPONSES_INDEX,
-} from '../../../../../common/endpoint/constants';
-import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
+import { BaseDataGenerator } from '../../../../../common/endpoint/data_generators/base_data_generator';
+import {
+  createActionRequestsEsSearchResultsMock,
+  createActionResponsesEsSearchResultsMock,
+  createHapiReadableStreamMock,
+} from '../mocks';
+import {
+  ENDPOINT_ACTION_RESPONSES_INDEX,
+  ENDPOINT_ACTIONS_INDEX,
+} from '../../../../../common/endpoint/constants';
 import type { DeepMutable } from '../../../../../common/endpoint/types/utility_types';
 import { EndpointAppContextService } from '../../../endpoint_app_context_services';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
 } from '../../../mocks';
-import { ACTION_RESPONSE_INDICES } from '../constants';
-import {
-  createActionRequestsEsSearchResultsMock,
-  createActionResponsesEsSearchResultsMock,
-  createHapiReadableStreamMock,
-} from '../mocks';
 import type { ResponseActionsClientOptions } from './lib/base_response_actions_client';
+import { ACTION_RESPONSE_INDICES } from '../constants';
+import type {
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  ResponseActionGetFileRequestBody,
+  IsolationRouteRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../../common/api/endpoint';
+import { NormalizedExternalConnectorClient } from '../..';
+import {} from '@kbn/utility-types-jest';
 
 export interface ResponseActionsClientOptionsMock extends ResponseActionsClientOptions {
   esClient: ElasticsearchClientMock;

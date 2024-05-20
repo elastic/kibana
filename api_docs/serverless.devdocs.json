@@ -133,7 +133,9 @@
           "tags": [],
           "label": "setProjectHome",
           "description": [],
-          "signature": ["(homeHref: string) => void"],
+          "signature": [
+            "(homeHref: string) => void"
+          ],
           "path": "x-pack/plugins/serverless/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -145,7 +147,9 @@
               "tags": [],
               "label": "homeHref",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -201,7 +205,9 @@
               "tags": [],
               "label": "id",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -257,7 +263,9 @@
                   "tags": [],
                   "label": "dataTestSubj",
                   "description": [],
-                  "signature": ["string | undefined"],
+                  "signature": [
+                    "string | undefined"
+                  ],
                   "path": "x-pack/plugins/serverless/public/types.ts",
                   "deprecated": false,
                   "trackAdoption": false
@@ -292,7 +300,9 @@
           "parentPluginId": "serverless",
           "id": "def-public.ServerlessPluginStart.setSideNavComponentDeprecated",
           "type": "Function",
-          "tags": ["deprecated"],
+          "tags": [
+            "deprecated"
+          ],
           "label": "setSideNavComponentDeprecated",
           "description": [],
           "signature": [
@@ -372,7 +382,9 @@
               "tags": [],
               "label": "roleManagementEnabled",
               "description": [],
-              "signature": ["boolean | undefined"],
+              "signature": [
+                "boolean | undefined"
+              ],
               "path": "x-pack/plugins/serverless/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -434,7 +446,9 @@
           "tags": [],
           "label": "setupProjectSettings",
           "description": [],
-          "signature": ["(keys: string[]) => void"],
+          "signature": [
+            "(keys: string[]) => void"
+          ],
           "path": "x-pack/plugins/serverless/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -446,7 +460,9 @@
               "tags": [],
               "label": "keys",
               "description": [],
-              "signature": ["string[]"],
+              "signature": [
+                "string[]"
+              ],
               "path": "x-pack/plugins/serverless/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -489,7 +505,9 @@
         "description": [
           "Internal API route responsible for switching between project configurations."
         ],
-        "signature": ["\"/internal/serverless/switch_project\""],
+        "signature": [
+          "\"/internal/serverless/switch_project\""
+        ],
         "path": "x-pack/plugins/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -502,7 +520,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"serverless\""],
+        "signature": [
+          "\"serverless\""
+        ],
         "path": "x-pack/plugins/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -515,7 +535,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"serverless\""],
+        "signature": [
+          "\"serverless\""
+        ],
         "path": "x-pack/plugins/serverless/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

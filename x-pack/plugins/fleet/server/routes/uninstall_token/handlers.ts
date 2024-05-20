@@ -8,15 +8,15 @@
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core-http-server';
 
-import type { GetUninstallTokenResponse } from '../../../common/types/rest_spec/uninstall_token';
-import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
-import { defaultFleetErrorHandler } from '../../errors';
-import { agentPolicyService, appContextService } from '../../services';
+import { appContextService, agentPolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import type {
-  GetUninstallTokenRequestSchema,
   GetUninstallTokensMetadataRequestSchema,
+  GetUninstallTokenRequestSchema,
 } from '../../types/rest_spec/uninstall_token';
+import { defaultFleetErrorHandler } from '../../errors';
+import type { GetUninstallTokenResponse } from '../../../common/types/rest_spec/uninstall_token';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
 
 const UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR: CustomHttpResponseOptions<ResponseError> = {
   statusCode: 500,

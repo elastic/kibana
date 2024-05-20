@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import { RULE_NAME_HEADER } from '../../../../screens/rule_details';
 import { getIndexConnector } from '../../../../objects/connector';
 import { getSimpleCustomQueryRule } from '../../../../objects/rule';
-import { RULE_NAME_HEADER } from '../../../../screens/rule_details';
 
 import { goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
+import {
+  deleteIndex,
+  waitForNewDocumentToBeIndexed,
+} from '../../../../tasks/api_calls/elasticsearch';
 import {
   deleteAlertsAndRules,
   deleteConnectors,
   deleteDataView,
 } from '../../../../tasks/api_calls/common';
-import {
-  deleteIndex,
-  waitForNewDocumentToBeIndexed,
-} from '../../../../tasks/api_calls/elasticsearch';
 import {
   createAndEnableRule,
   fillAboutRuleAndContinue,

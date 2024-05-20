@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { nodeTypeLabel, nodeTypeClass } from './lookups';
 import {
   ElasticsearchLegacySource,
   ElasticsearchMetricbeatNode,
 } from '../../../../common/types/es';
-import { nodeTypeClass, nodeTypeLabel } from './lookups';
 
 /*
  * Note: currently only `node` and `master` are supported due to

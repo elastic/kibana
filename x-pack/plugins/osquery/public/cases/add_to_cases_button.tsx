@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useContext, useMemo } from 'react';
-import { AlertAttachmentContext } from '../common/contexts';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useKibana } from '../common/lib/kibana';
+import { AlertAttachmentContext } from '../common/contexts';
 
 const ADD_TO_CASE = i18n.translate(
   'xpack.osquery.pack.queriesTable.addToCaseResultsActionAriaLabel',

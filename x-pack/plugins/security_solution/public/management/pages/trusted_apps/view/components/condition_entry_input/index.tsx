@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { EuiSuperSelectOption } from '@elastic/eui';
-import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { ChangeEventHandler } from 'react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
+import type { EuiSuperSelectOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSuperSelect, EuiText } from '@elastic/eui';
+import { ConditionEntryField, OperatingSystem } from '@kbn/securitysolution-utils';
 import type { TrustedAppConditionEntry } from '../../../../../../../common/endpoint/types';
 import { OperatorFieldIds } from '../../../../../../../common/endpoint/types';
 
-import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/path_placeholder';
-import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import {
   CONDITION_FIELD_DESCRIPTION,
   CONDITION_FIELD_TITLE,
   ENTRY_PROPERTY_TITLES,
   OPERATOR_TITLES,
 } from '../../translations';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
+import { getPlaceholderTextByOSType } from '../../../../../../../common/utils/path_placeholder';
 
 const ConditionEntryCell = memo<{
   showLabel: boolean;

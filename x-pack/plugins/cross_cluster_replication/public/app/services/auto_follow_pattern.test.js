@@ -7,8 +7,8 @@
 
 import moment from 'moment';
 import {
-  getPrefixSuffixFromFollowPattern,
   getPreviewIndicesFromAutoFollowPattern,
+  getPrefixSuffixFromFollowPattern,
 } from './auto_follow_pattern';
 
 describe('Auto-follo pattern service', () => {

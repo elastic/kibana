@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiBasicTable, EuiCallOut, EuiSpacer, EuiTableFieldDataColumnType } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiCallOut, EuiTableFieldDataColumnType, EuiBasicTable, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { RemoveDataViewProps } from '../edit_index_pattern';
 
 const all = i18n.translate('indexPatternManagement.dataViewTable.spaceCountAll', {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import React from 'react';
 import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { openDiscoverLabel } from '../constants';
 

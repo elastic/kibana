@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import fs from 'fs';
-import os from 'os';
 import path from 'path';
+import os from 'os';
+import fs from 'fs';
 
 import del from 'del';
 import globby from 'globby';

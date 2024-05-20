@@ -15,8 +15,8 @@ import { getAllFieldsByName } from '../../../common/containers/source';
 import type { QueryOperator } from '../timeline/data_providers/data_provider';
 import {
   EXISTS_OPERATOR,
-  IS_ONE_OF_OPERATOR,
   IS_OPERATOR,
+  IS_ONE_OF_OPERATOR,
 } from '../timeline/data_providers/data_provider';
 
 import * as i18n from './translations';
@@ -52,9 +52,7 @@ export const getFieldNames = (category: Partial<BrowserField>): string[] =>
     : EMPTY_ARRAY_RESULT;
 
 /** Returns all field names by category, for display in an `EuiComboBox`  */
-export const getCategorizedFieldNames = (
-  browserFields: BrowserFields
-): EuiComboBoxOptionOption[] =>
+export const getCategorizedFieldNames = (browserFields: BrowserFields): EuiComboBoxOptionOption[] =>
   !browserFields
     ? EMPTY_ARRAY_RESULT
     : Object.keys(browserFields)

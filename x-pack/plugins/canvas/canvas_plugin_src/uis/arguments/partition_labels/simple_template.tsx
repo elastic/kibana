@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React, { FunctionComponent, useCallback, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { set } from '@kbn/safer-lodash-set';
-import PropTypes from 'prop-types';
-import React, { FunctionComponent, useCallback, useEffect } from 'react';
 import { defaultExpression } from './default_expression';
 import { getFieldPath, getFieldValue } from './utils';
 

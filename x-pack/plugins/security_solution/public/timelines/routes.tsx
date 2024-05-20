@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import React from 'react';
-import { TIMELINES_PATH } from '../../common/constants';
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { Timelines } from './pages';
+import { TIMELINES_PATH } from '../../common/constants';
 
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';

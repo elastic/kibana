@@ -1,4 +1,3 @@
-import { EuiContextMenu } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,16 +5,17 @@ import { EuiContextMenu } from '@elastic/eui';
  * 2.0.
  */
 import React from 'react';
+import { EuiContextMenu } from '@elastic/eui';
 
 import { fireEvent, render, waitFor } from '@testing-library/react';
 
-import { TestProviders } from '../../mock';
-import { VisualizationActions } from './actions';
 import { getDnsTopDomainsLensAttributes } from './lens_attributes/network/dns_top_domains';
+import { VisualizationActions } from './actions';
+import { TestProviders } from '../../mock';
 
-import { SourcererScopeName } from '../../store/sourcerer/model';
 import type { VisualizationActionsProps } from './types';
 import * as useLensAttributesModule from './use_lens_attributes';
+import { SourcererScopeName } from '../../store/sourcerer/model';
 
 jest.mock('./use_actions');
 

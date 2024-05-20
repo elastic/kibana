@@ -13,21 +13,21 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { environmentQuery } from '../../../common/utils/environment_query';
-import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { Coordinate } from '../../../typings/timeseries';
-import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
+import {
+  getBackwardCompatibleDocumentTypeFilter,
+  getProcessorEventForTransactions,
+} from '../helpers/transactions';
 import { getBucketSizeForAggregatedTransactions } from '../helpers/get_bucket_size_for_aggregated_transactions';
 import {
   calculateTransactionColdstartRate,
   getColdstartAggregation,
   getTransactionColdstartRateTimeSeries,
 } from '../helpers/transaction_coldstart_rate';
-import {
-  getBackwardCompatibleDocumentTypeFilter,
-  getProcessorEventForTransactions,
-} from '../helpers/transactions';
+import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
+import { APMEventClient } from '../helpers/create_es_client/create_apm_event_client';
 
 export async function getColdstartRate({
   environment,

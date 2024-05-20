@@ -6,9 +6,9 @@
  */
 
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { retryIfConflicts, RetryForConflictsAttempts } from './retry_if_conflicts';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
-import { RetryForConflictsAttempts, retryIfConflicts } from './retry_if_conflicts';
 
 describe('retry_if_conflicts', () => {
   beforeEach(() => {

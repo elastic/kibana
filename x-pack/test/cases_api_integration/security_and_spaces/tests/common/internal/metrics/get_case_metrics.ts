@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import expect from '@kbn/expect';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { createCase, deleteAllCaseItems, getCaseMetrics } from '../../../../../common/lib/api';
 import {
-  globalRead,
-  noKibanaPrivileges,
-  obsOnly,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
   secOnly,
-  secOnlyRead,
+  obsOnly,
+  globalRead,
   superUser,
+  secOnlyRead,
+  obsOnlyRead,
+  obsSecRead,
+  noKibanaPrivileges,
+  obsSec,
 } from '../../../../../common/lib/authentication/users';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 

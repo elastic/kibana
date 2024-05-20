@@ -6,10 +6,10 @@
  */
 
 import { asyncForEach } from '@kbn/std';
-import { ObservabilityOnboardingUsername, users } from './authentication';
 import { AbortError, callKibana } from './helpers/call_kibana';
-import { createCustomRole } from './helpers/create_custom_role';
 import { createOrUpdateUser } from './helpers/create_or_update_user';
+import { ObservabilityOnboardingUsername, users } from './authentication';
+import { createCustomRole } from './helpers/create_custom_role';
 export interface Elasticsearch {
   node: string;
   username: string;

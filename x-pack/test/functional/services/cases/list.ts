@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import rison from '@kbn/rison';
 import deepEqual from 'react-fast-compare';
+import expect from '@kbn/expect';
+import rison from '@kbn/rison';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesCommon } from './common';
 
@@ -424,9 +424,9 @@ export function CasesTableServiceProvider(
     },
 
     async getCaseTitle(index: number) {
-      const titleElement = await (await this.getCaseByIndex(index)).findByTestSubject(
-        'case-details-link'
-      );
+      const titleElement = await (
+        await this.getCaseByIndex(index)
+      ).findByTestSubject('case-details-link');
 
       return await titleElement.getVisibleText();
     },

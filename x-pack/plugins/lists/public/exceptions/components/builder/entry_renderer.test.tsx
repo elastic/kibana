@@ -5,11 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { FieldSpec } from '@kbn/data-plugin/common';
-import { fields, getField } from '@kbn/data-plugin/common/mocks';
-import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import {
   doesNotExistOperator,
   doesNotMatchOperator,
@@ -23,13 +21,15 @@ import {
   matchesOperator,
 } from '@kbn/securitysolution-list-utils';
 import { validatePotentialWildcardInput } from '@kbn/securitysolution-utils';
+import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
+import type { FieldSpec } from '@kbn/data-plugin/common';
+import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { waitFor } from '@testing-library/react';
 import { ReactWrapper, mount } from 'enzyme';
-import React from 'react';
 
-import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
 import { MockedShowValueListModal } from '../__mock__/show_value_list_modal.mock';
+import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';
 
 import { BuilderEntryItem } from './entry_renderer';
 import * as i18n from './translations';

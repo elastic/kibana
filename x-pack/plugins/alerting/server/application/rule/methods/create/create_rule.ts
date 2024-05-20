@@ -1,6 +1,3 @@
-import Boom from '@hapi/boom';
-import { withSpan } from '@kbn/apm-utils';
-import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,37 +5,40 @@ import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
  * 2.0.
  */
 import Semver from 'semver';
-import { getRuleCircuitBreakerErrorMessage, parseDuration } from '../../../../../common';
-import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
-import { RuleAttributes } from '../../../../data/rule/types';
+import Boom from '@hapi/boom';
+import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
+import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
+import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
-  getDefaultMonitoringRuleDomainProperties,
-  getRuleNotifyWhenType,
   validateRuleTypeParams,
+  getRuleNotifyWhenType,
+  getDefaultMonitoringRuleDomainProperties,
 } from '../../../../lib';
 import { getRuleExecutionStatusPending } from '../../../../lib/rule_execution_status';
-import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
-import { apiKeyAsRuleDomainProperties, generateAPIKeyName } from '../../../../rules_client/common';
-import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
 import {
-  addGeneratedActionValues,
   extractReferences,
   validateActions,
+  addGeneratedActionValues,
 } from '../../../../rules_client/lib';
-import { createRuleSavedObject } from '../../../../rules_client/lib';
+import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { RulesClientContext } from '../../../../rules_client/types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { RuleDomain, RuleParams } from '../../types';
 import { SanitizedRule } from '../../../../types';
-import { ruleDomainSchema } from '../../schemas';
 import {
   transformRuleAttributesToRuleDomain,
-  transformRuleDomainToRule,
   transformRuleDomainToRuleAttributes,
+  transformRuleDomainToRule,
 } from '../../transforms';
-import { RuleDomain, RuleParams } from '../../types';
-import { ValidateScheduleLimitResult, validateScheduleLimit } from '../get_schedule_frequency';
-import { createRuleDataSchema } from './schemas';
+import { ruleDomainSchema } from '../../schemas';
+import { RuleAttributes } from '../../../../data/rule/types';
 import type { CreateRuleData } from './types';
+import { createRuleDataSchema } from './schemas';
+import { createRuleSavedObject } from '../../../../rules_client/lib';
+import { validateScheduleLimit, ValidateScheduleLimitResult } from '../get_schedule_frequency';
 
 export interface CreateRuleOptions {
   id?: string;

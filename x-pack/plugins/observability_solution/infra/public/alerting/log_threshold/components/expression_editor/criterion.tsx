@@ -19,10 +19,10 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
-import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { isFinite, isNumber } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ResolvedLogViewField } from '@kbn/logs-shared-plugin/common';
 import {
   Comparator,
   ComparatorToi18nMap,

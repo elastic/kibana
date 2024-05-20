@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
+import { shallow } from 'enzyme';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import {
   LicenseManagementLocator,
   LicenseManagementLocatorParams,
 } from '@kbn/license-management-plugin/public/locator';
-import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { shallow } from 'enzyme';
-import React from 'react';
 import { LicensePrompt } from '../public/application/license_prompt';
 
 describe('License prompt', () => {

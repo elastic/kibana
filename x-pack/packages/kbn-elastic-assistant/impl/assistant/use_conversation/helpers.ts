@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { Conversation } from '../../assistant_context/types';
 import { Prompt } from '../types';
+import { Conversation } from '../../assistant_context/types';
 
 export interface CodeBlockDetails {
   type: QueryType;

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import pMap from 'p-map';
+import { isEmpty } from 'lodash';
 
-import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { STATUS_VALUES } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { MgetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import { CaseStatuses } from '../../../common/types/domain';
+import { MAX_ALERTS_PER_CASE, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
+import { createCaseError } from '../../common/error';
+import type { AlertInfo } from '../../common/types';
 import type {
   RemoveCaseIdFromAlertsRequest,
   UpdateAlertCasesRequest,
   UpdateAlertStatusRequest,
 } from '../../client/alerts/types';
 import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { createCaseError } from '../../common/error';
-import type { AlertInfo } from '../../common/types';
 
 export class AlertService {
   constructor(
@@ -157,7 +157,7 @@ export class AlertService {
 
   private async updateByQuery([index, statusToAlertMap]: [
     string,
-    Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>,
+    Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>
   ]) {
     const statusBuckets = Array.from(statusToAlertMap);
     return Promise.all(

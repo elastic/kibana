@@ -1,6 +1,3 @@
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
-import { type DataView } from '@kbn/data-views-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,10 +5,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React, { FC, PropsWithChildren } from 'react';
-import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
-import { CSP_FIELDS_SELECTOR_OPEN_BUTTON } from '../test_subjects';
+import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
+import { type DataView } from '@kbn/data-views-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldsSelectorModal, useFieldsModal } from './fields_selector';
 import { useStyles } from './use_styles';
+import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
+import { CSP_FIELDS_SELECTOR_OPEN_BUTTON } from '../test_subjects';
 
 const GroupSelectorWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const styles = useStyles();

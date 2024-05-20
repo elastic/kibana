@@ -44,7 +44,9 @@
         "tags": [],
         "label": "DASHBOARD_APP_ID",
         "description": [],
-        "signature": ["\"dashboards\""],
+        "signature": [
+          "\"dashboards\""
+        ],
         "path": "packages/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -57,7 +59,9 @@
         "tags": [],
         "label": "DASHBOARD_APP_LOCATOR",
         "description": [],
-        "signature": ["\"DASHBOARD_APP_LOCATOR\""],
+        "signature": [
+          "\"DASHBOARD_APP_LOCATOR\""
+        ],
         "path": "packages/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -85,7 +89,9 @@
         "tags": [],
         "label": "DISCOVER_APP_ID",
         "description": [],
-        "signature": ["\"discover\""],
+        "signature": [
+          "\"discover\""
+        ],
         "path": "packages/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -98,7 +104,9 @@
         "tags": [],
         "label": "DISCOVER_ESQL_LOCATOR",
         "description": [],
-        "signature": ["\"DISCOVER_ESQL_LOCATOR\""],
+        "signature": [
+          "\"DISCOVER_ESQL_LOCATOR\""
+        ],
         "path": "packages/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -111,7 +119,9 @@
         "tags": [],
         "label": "VISUALIZE_APP_ID",
         "description": [],
-        "signature": ["\"visualize\""],
+        "signature": [
+          "\"visualize\""
+        ],
         "path": "packages/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

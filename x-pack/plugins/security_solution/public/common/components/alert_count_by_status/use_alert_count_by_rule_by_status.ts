@@ -7,10 +7,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import type { Status } from '../../../../common/api/detection_engine';
 import { firstNonNullValue } from '../../../../common/endpoint/models/ecs_safety_helpers';
-import type { GenericBuckets } from '../../../../common/search_strategy';
 import type { ESBoolQuery } from '../../../../common/typed_json';
+import type { Status } from '../../../../common/api/detection_engine';
+import type { GenericBuckets } from '../../../../common/search_strategy';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { useGlobalTime } from '../../containers/use_global_time';
@@ -193,7 +193,7 @@ interface RuleUuidData extends GenericBuckets {
           fields: {
             'kibana.alert.rule.uuid': string[];
           };
-        },
+        }
       ];
     };
   };

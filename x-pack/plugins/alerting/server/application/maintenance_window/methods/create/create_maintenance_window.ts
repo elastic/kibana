@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import { Filter, buildEsQuery } from '@kbn/es-query';
-import moment from 'moment';
+import { buildEsQuery, Filter } from '@kbn/es-query';
+import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { getScopedQueryErrorMessage } from '../../../../../common';
-import { createMaintenanceWindowSo } from '../../../../data/maintenance_window';
-import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
+import type { MaintenanceWindow } from '../../types';
+import type { CreateMaintenanceWindowParams } from './types';
 import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
   transformMaintenanceWindowToMaintenanceWindowAttributes,
 } from '../../transforms';
-import type { MaintenanceWindow } from '../../types';
+import { createMaintenanceWindowSo } from '../../../../data/maintenance_window';
 import { createMaintenanceWindowParamsSchema } from './schemas';
-import type { CreateMaintenanceWindowParams } from './types';
 
 export async function createMaintenanceWindow(
   context: MaintenanceWindowClientContext,

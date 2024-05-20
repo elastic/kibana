@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonEmpty } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
 
 import { DashboardRedirect } from '../types';
 

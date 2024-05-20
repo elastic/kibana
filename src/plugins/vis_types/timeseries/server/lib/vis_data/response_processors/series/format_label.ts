@@ -9,15 +9,15 @@
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { BUCKET_TYPES, PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../../../common/enums';
 import {
-  MULTI_FIELD_VALUES_SEPARATOR,
   createCachedFieldValueFormatter,
   getFieldsForTerms,
+  MULTI_FIELD_VALUES_SEPARATOR,
 } from '../../../../../common/fields_utils';
 import type { Panel, PanelData, Series } from '../../../../../common/types';
-import { SanitizedFieldType } from '../../../../../common/types';
-import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
 import type { createFieldsFetcher } from '../../../search_strategies/lib/fields_fetcher';
+import type { CachedIndexPatternFetcher } from '../../../search_strategies/lib/cached_index_pattern_fetcher';
 import type { BaseMeta } from '../../request_processors/types';
+import { SanitizedFieldType } from '../../../../../common/types';
 
 export function formatLabel(
   resp: unknown,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { EuiText, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const TableTitle = ({
   pageIndex,

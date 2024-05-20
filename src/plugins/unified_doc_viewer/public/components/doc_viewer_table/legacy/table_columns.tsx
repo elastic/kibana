@@ -7,12 +7,12 @@
  */
 
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldName } from '@kbn/unified-doc-viewer';
-import type { FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import React from 'react';
-import { TableFieldValue } from '../table_cell_value';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
+import { FieldName } from '@kbn/unified-doc-viewer';
 import { TableActions } from './table_cell_actions';
+import { TableFieldValue } from '../table_cell_value';
 
 export const ACTIONS_COLUMN: EuiBasicTableColumn<FieldRecordLegacy> = {
   field: 'action',

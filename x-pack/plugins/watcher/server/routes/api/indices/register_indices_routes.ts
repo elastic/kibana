@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../../../types';
-import { registerGetIndexPatternsRoute } from './register_get_index_patterns_route';
 import { registerGetRoute } from './register_get_route';
+import { registerGetIndexPatternsRoute } from './register_get_index_patterns_route';
+import { RouteDependencies } from '../../../types';
 
 export function registerIndicesRoutes(deps: RouteDependencies) {
   registerGetRoute(deps);

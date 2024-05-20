@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
   EuiPage,
   EuiPageBody,
-  EuiPanel,
+  EuiFlexGroup,
   EuiScreenReaderOnly,
-  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { checkAgentTypeMetric } from '../../lib/apm_agent';
 import { MonitoringTimeseriesContainer } from '../chart';
+import { checkAgentTypeMetric } from '../../lib/apm_agent';
 
 interface TitleType {
   title?: string;

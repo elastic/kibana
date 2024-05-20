@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import faker from 'faker';
-import { MAX_WIDTH } from './calculate_width_from_char_count';
 import { calculateWidthFromEntries } from './calculate_width_from_entries';
+import { MAX_WIDTH } from './calculate_width_from_char_count';
+import faker from 'faker';
 
 const generateLabel = (length: number) => faker.random.alpha({ count: length });
 

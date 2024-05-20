@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
-  Logger,
   Plugin,
+  Logger,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 
+import { registerCollector } from './usage';
 import { setupCapabilities } from './capabilities';
-import { registerTransformHealthRuleType } from './lib/alerting';
+import type { PluginSetupDependencies, PluginStartDependencies } from './types';
 import { registerRoutes } from './routes';
 import { License } from './services';
-import type { PluginSetupDependencies, PluginStartDependencies } from './types';
-import { registerCollector } from './usage';
+import { registerTransformHealthRuleType } from './lib/alerting';
 
 const basicLicense: LicenseType = 'basic';
 

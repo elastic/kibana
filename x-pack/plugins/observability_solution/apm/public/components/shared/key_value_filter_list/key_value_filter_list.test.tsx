@@ -1,4 +1,3 @@
-import { fireEvent } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +7,7 @@ import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { KeyValueFilterList } from '.';
 import { expectTextsInDocument, renderWithTheme } from '../../../utils/test_helpers';
+import { fireEvent } from '@testing-library/react';
 
 describe('KeyValueFilterList', () => {
   it('hides accordion when key value list is empty', () => {

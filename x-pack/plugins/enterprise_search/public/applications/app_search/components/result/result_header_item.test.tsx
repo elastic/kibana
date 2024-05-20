@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { mount, shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 
 import { ResultHeaderItem } from './result_header_item';
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { UptimeRefreshContext } from '../../../contexts';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useGetUrlParams } from '../../../hooks';
-import { fetchSnapshotCount } from '../../../state/api';
 import { esKuerySelector } from '../../../state/selectors';
+import { UptimeRefreshContext } from '../../../contexts';
+import { fetchSnapshotCount } from '../../../state/api';
 
 export const useSnapShotCount = () => {
   const { dateRangeStart, dateRangeEnd, query } = useGetUrlParams();

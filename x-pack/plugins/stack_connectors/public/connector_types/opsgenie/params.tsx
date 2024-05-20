@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
-  ActionConnectorMode,
   ActionParamsProps,
+  ActionConnectorMode,
   IErrorObject,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { cloneDeep, isEmpty, unset } from 'lodash';
-import React, { useCallback, useEffect, useRef } from 'react';
+import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { isEmpty, unset, cloneDeep } from 'lodash';
 import { OpsgenieSubActions } from '../../../common';
+import * as i18n from './translations';
+import { CreateAlert, isPartialCreateAlertSchema } from './create_alert';
+import { CloseAlert } from './close_alert';
+import { isPartialCloseAlertSchema } from './close_alert_schema';
 import type {
   OpsgenieActionParams,
   OpsgenieCreateAlertSubActionParams,
 } from '../../../server/connector_types';
-import { CloseAlert } from './close_alert';
-import { isPartialCloseAlertSchema } from './close_alert_schema';
-import { CreateAlert, isPartialCreateAlertSchema } from './create_alert';
-import * as i18n from './translations';
 
 const actionOptions = [
   {

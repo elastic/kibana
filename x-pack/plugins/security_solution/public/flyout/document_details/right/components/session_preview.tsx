@@ -6,15 +6,15 @@
  */
 
 import { EuiCode, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactElement } from 'react';
 import React, { useMemo, type FC, type PropsWithChildren } from 'react';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
-import { useRightPanelContext } from '../context';
-import { useProcessData } from '../hooks/use_process_data';
 import { SESSION_PREVIEW_RULE_DETAILS_LINK_TEST_ID, SESSION_PREVIEW_TEST_ID } from './test_ids';
+import { useRightPanelContext } from '../context';
+import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
+import { useProcessData } from '../hooks/use_process_data';
 
 /**
  * One-off helper to make sure that inline values are rendered consistently

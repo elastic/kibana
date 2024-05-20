@@ -1,4 +1,3 @@
-import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
  */
 import { fold } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
+import type { SavedObject, SavedObjectsType } from '@kbn/core/server';
 import { metricsExplorerViewSavedObjectRT } from '../types';
 
 export const thresholdExplorerViewSavedObjectName = 'threshold-explorer-view';

@@ -7,10 +7,10 @@
 
 import { CommonFields, ConfigKey, SourceType } from '../../../../common/runtime_types';
 import {
-  FormatterFn,
   arrayToJsonFormatter,
-  secondsToCronFormatter,
   stringToJsonFormatter,
+  FormatterFn,
+  secondsToCronFormatter,
 } from './formatting_utils';
 
 export type Formatter = null | FormatterFn;

@@ -6,38 +6,38 @@
  * Side Public License, v 1.
  */
 
+import { ApplicationStart, IBasePath } from '@kbn/core/public';
+import React, { PureComponent, Fragment } from 'react';
+import moment from 'moment';
 import {
-  CriteriaWithPagination,
+  EuiSearchBar,
   EuiBasicTable,
   EuiButton,
-  EuiFormErrorText,
-  EuiFormRow,
   EuiIconTip,
   EuiLink,
-  EuiPopover,
-  EuiSearchBar,
   EuiSpacer,
-  EuiSwitch,
-  EuiTableActionsColumnType,
-  EuiTableFieldDataColumnType,
-  EuiText,
   EuiToolTip,
+  EuiFormErrorText,
+  EuiPopover,
+  EuiSwitch,
+  EuiFormRow,
+  EuiText,
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
   QueryType,
+  CriteriaWithPagination,
 } from '@elastic/eui';
-import { ApplicationStart, IBasePath } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import moment from 'moment';
-import React, { PureComponent, Fragment } from 'react';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
+import { SavedObjectWithMetadata } from '../../../types';
 import {
-  SavedObjectsManagementAction,
   SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
-import { SavedObjectWithMetadata } from '../../../types';
 
 export type ItemId<T> = string | number | ((item: T) => string);
 

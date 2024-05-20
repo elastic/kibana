@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { docLinksServiceMock } from '@kbn/core/public/mocks';
-import { I18nProvider } from '@kbn/i18n-react';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { I18nProvider } from '@kbn/i18n-react';
 import { NotFoundErrors } from './not_found_errors';
+import { docLinksServiceMock } from '@kbn/core/public/mocks';
 
 describe('NotFoundErrors component', () => {
   const mountError = (type: string) =>

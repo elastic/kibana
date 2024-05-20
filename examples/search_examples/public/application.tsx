@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { I18nProvider } from '@kbn/i18n-react';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Redirect } from 'react-router-dom';
-import { ExampleLink, SearchExamplePage } from './common/example_page';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { I18nProvider } from '@kbn/i18n-react';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { AppPluginStartDependencies } from './types';
+import { SearchExamplePage, ExampleLink } from './common/example_page';
 import { SearchExamplesApp } from './search/app';
 import { SearchSessionsExampleApp } from './search_sessions/app';
 import { SqlSearchExampleApp } from './sql_search/app';
-import { AppPluginStartDependencies } from './types';
 
 const LINKS: ExampleLink[] = [
   {

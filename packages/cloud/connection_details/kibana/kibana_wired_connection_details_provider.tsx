@@ -7,11 +7,11 @@
  */
 
 import * as React from 'react';
-import { getGlobalDependencies } from './global';
 import {
   KibanaConnectionDetailsProvider,
   KibanaConnectionDetailsProviderProps,
 } from './kibana_connection_details_provider';
+import { getGlobalDependencies } from './global';
 
 export type KibanaWiredConnectionDetailsProviderProps = Omit<
   KibanaConnectionDetailsProviderProps,

@@ -27,14 +27,12 @@ export const Bar = styled.aside.attrs({
   className: 'siemUtilityBar',
 })<BarProps>`
   ${({ border, theme }) => css`
-    ${
-      border &&
-      css`
+    ${border &&
+    css`
       border-bottom: ${theme.eui.euiBorderThin};
       padding-bottom: ${theme.eui.euiSizeXS};
       align-items: center;
-    `
-    }
+    `}
 
     @media only screen and (min-width: ${theme.eui.euiBreakpoints.l}) {
       display: flex;
@@ -64,12 +62,10 @@ export const BarSection = styled.div.attrs({
         margin-left: ${theme.eui.euiSize};
       }
     }
-    ${
-      grow &&
-      css`
+    ${grow &&
+    css`
       flex: 1;
-    `
-    }
+    `}
   `}
 `;
 BarSection.displayName = 'BarSection';
@@ -110,12 +106,10 @@ export const BarGroup = styled.div.attrs({
         margin-right: 0;
       }
     }
-    ${
-      grow &&
-      css`
+    ${grow &&
+    css`
       flex: 1;
-    `
-    }
+    `}
   `}
 `;
 BarGroup.displayName = 'BarGroup';

@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import React from 'react';
-import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { dataViewWithoutTimefieldMock } from '../../__mocks__/data_view_without_timefield';
-import { servicesMock } from '../../__mocks__/services';
-import { dataTableContextMock } from '../../__mocks__/table_context';
-import { ROWS_HEIGHT_OPTIONS } from '../constants';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import {
-  canPrependTimeFieldColumn,
   deserializeHeaderRowHeight,
   getEuiGridColumns,
   getVisibleColumns,
+  canPrependTimeFieldColumn,
 } from './data_table_columns';
+import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { dataViewWithoutTimefieldMock } from '../../__mocks__/data_view_without_timefield';
+import { dataTableContextMock } from '../../__mocks__/table_context';
+import { servicesMock } from '../../__mocks__/services';
+import { ROWS_HEIGHT_OPTIONS } from '../constants';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(

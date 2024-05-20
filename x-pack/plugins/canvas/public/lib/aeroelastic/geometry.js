@@ -6,17 +6,17 @@
  */
 
 import {
-  BOTTOM_LEFT,
-  BOTTOM_RIGHT,
-  ORIGIN,
-  RIGHT,
-  TOP_LEFT,
-  TOP_RIGHT,
-  UP,
   componentProduct,
   invert,
   mvMultiply,
   normalize,
+  ORIGIN,
+  RIGHT,
+  UP,
+  TOP_LEFT,
+  BOTTOM_LEFT,
+  TOP_RIGHT,
+  BOTTOM_RIGHT,
 } from './matrix';
 
 import { dotProduct } from './matrix2d';

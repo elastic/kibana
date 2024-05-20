@@ -12,10 +12,10 @@ import type { ConnectorFieldsPreviewProps } from '../types';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
+import * as i18n from './translations';
 import type { ResilientFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { ConnectorCard } from '../card';
-import * as i18n from './translations';
 
 const ResilientFieldsComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<ResilientFieldsType>

@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { exec } from 'child_process';
-import crypto from 'crypto';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
+import { exec } from 'child_process';
+import crypto from 'crypto';
 
+import type { ProjectHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
+import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
+import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';
 import {
   proxyHealthcheck,
-  waitForEsAccess,
   waitForEsStatusGreen,
   waitForKibanaAvailable,
+  waitForEsAccess,
 } from '@kbn/security-solution-plugin/scripts/run_cypress/parallel_serverless';
-import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
-import type { ProjectHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
-import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';
 
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';

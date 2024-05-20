@@ -14,7 +14,7 @@ import { shallow } from 'enzyme';
 import { EuiBadge } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { CrawlEvent, CrawlType, CrawlerStatus } from '../../../../api/crawler/types';
+import { CrawlEvent, CrawlerStatus, CrawlType } from '../../../../api/crawler/types';
 
 import { CrawlEventTypeBadge } from './crawl_event_type_badge';
 

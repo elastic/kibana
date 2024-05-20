@@ -16,8 +16,8 @@ import React, {
   type SetStateAction,
 } from 'react';
 
-import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
 
 import type { GroupTableItem } from './types';
 

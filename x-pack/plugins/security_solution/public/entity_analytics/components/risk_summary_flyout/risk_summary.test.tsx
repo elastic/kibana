@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
-import React from 'react';
-import type {
-  LensAttributes,
-  VisualizationEmbeddableProps,
-} from '../../../common/components/visualization_actions/types';
-import { TestProviders } from '../../../common/mock';
 import {
   mockHostRiskScoreState,
   mockUserRiskScoreState,
 } from '../../../flyout/entity_details/mocks';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { TestProviders } from '../../../common/mock';
 import { RiskSummary } from './risk_summary';
+import type {
+  LensAttributes,
+  VisualizationEmbeddableProps,
+} from '../../../common/components/visualization_actions/types';
 
 const mockVisualizationEmbeddable = jest
   .fn()

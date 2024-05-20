@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { JsonArray, JsonValue } from '@kbn/utility-types';
 import stringify from 'json-stable-stringify';
 import React from 'react';
-import { ActiveHighlightMarker, HighlightMarker, highlightFieldValue } from './highlighting';
+import { JsonArray, JsonValue } from '@kbn/utility-types';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ActiveHighlightMarker, highlightFieldValue, HighlightMarker } from './highlighting';
 
 export const FieldValue: React.FC<{
   highlightTerms: string[];

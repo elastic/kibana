@@ -1,8 +1,3 @@
-import Fs from 'fs';
-import Util from 'util';
-import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import deepmerge from 'deepmerge';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,6 +5,11 @@ import deepmerge from 'deepmerge';
  * 2.0.
  */
 import { v4 as uuidGen } from 'uuid';
+import Fs from 'fs';
+import Util from 'util';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import deepmerge from 'deepmerge';
+import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 const asyncUnlink = Util.promisify(Fs.unlink);
 
 /**

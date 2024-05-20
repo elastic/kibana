@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createContextMock, createMigrationConfigMock } from '../test_helpers';
 import { createInitialState } from './create_initial_state';
+import { createContextMock, createMigrationConfigMock } from '../test_helpers';
 
 describe('createInitialState', () => {
   test('`skipDocumentMigration` is `false` if the node has the `migrator` role', () => {

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 
-import { colourPalette } from '../../../common/network_data/data_formatting';
 import { FriendlyTimingLabels, Timings } from '../../../common/network_data/types';
+import { colourPalette } from '../../../common/network_data/data_formatting';
 import { WaterfallLegendItem } from './waterfall_legend_item';
 
 export const WaterfallTimingLegend = () => {

@@ -6,13 +6,13 @@
  */
 
 import { CONTEXT_DEFAULTS, QUERY } from '../../../../common/constants';
+import { UMElasticsearchQueryFn } from '../adapters';
 import {
+  SortOrder,
   CursorDirection,
   MonitorSummariesResult,
-  SortOrder,
 } from '../../../../common/runtime_types';
-import { UMElasticsearchQueryFn } from '../adapters';
-import { MonitorSummaryIterator, QueryContext } from './search';
+import { QueryContext, MonitorSummaryIterator } from './search';
 
 export interface CursorPagination {
   cursorKey?: any;

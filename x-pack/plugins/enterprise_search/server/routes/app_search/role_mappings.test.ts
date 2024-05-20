@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MockRouter, mockDependencies, mockRequestHandler } from '../../__mocks__';
+import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
 import {
   registerEnableRoleMappingsRoute,
-  registerRoleMappingRoute,
   registerRoleMappingsRoute,
+  registerRoleMappingRoute,
   registerUserRoute,
 } from './role_mappings';
 

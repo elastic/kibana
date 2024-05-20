@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ProgressOutput as Arguments, Shape } from './expression_functions';
+import { Shape, ProgressOutput as Arguments } from './expression_functions';
 
 export type OriginString = 'bottom' | 'left' | 'top' | 'right';
 export interface ShapeRendererConfig {

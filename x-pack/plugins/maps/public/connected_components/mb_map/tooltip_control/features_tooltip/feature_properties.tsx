@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiContextMenu,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiTextAlign,
-} from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
-import { GeoJsonProperties } from 'geojson';
 import _ from 'lodash';
 import React, { Component, CSSProperties, RefObject, ReactNode } from 'react';
+import {
+  EuiCallOut,
+  EuiLoadingSpinner,
+  EuiTextAlign,
+  EuiButtonEmpty,
+  EuiIcon,
+  EuiContextMenu,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
+import { GeoJsonProperties } from 'geojson';
+import { Filter } from '@kbn/es-query';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
 import { RawValue } from '../../../../../common/constants';
 import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
-import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
 
 interface Props {
   featureId?: string | number;

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React, { useContext, useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
 import type { CoreSetup } from '@kbn/core/public';
 import classNames from 'classnames';
-import React, { useContext, useEffect } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import type { ColumnConfig } from '../../../../common/expressions';
-import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
-import { getContrastColor, getNumericValue } from '../../../shared_components/coloring/utils';
+import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
+import type { ColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
+import { getContrastColor, getNumericValue } from '../../../shared_components/coloring/utils';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,

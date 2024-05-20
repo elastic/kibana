@@ -1,12 +1,3 @@
-import { CoreSetup } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import {
-  ALERT_EVALUATION_THRESHOLD,
-  ALERT_EVALUATION_VALUE,
-  ALERT_REASON,
-  ALERT_URL,
-} from '@kbn/rule-data-utils';
-import { UngroupedGroupId, isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,27 +5,36 @@ import { UngroupedGroupId, isGroupAggregation } from '@kbn/triggers-actions-ui-p
  * 2.0.
  */
 import { sha256 } from 'js-sha256';
+import { i18n } from '@kbn/i18n';
+import { CoreSetup } from '@kbn/core/server';
+import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 import { ComparatorFns } from '../../../common';
 import {
-  EsQueryRuleActionContext,
   addMessages,
+  EsQueryRuleActionContext,
   getContextConditionsDescription,
 } from './action_context';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
-import { fetchEsQuery } from './lib/fetch_es_query';
-import { fetchEsqlQuery } from './lib/fetch_esql_query';
-import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
-import { EsQueryRuleParams } from './rule_type_params';
 import {
   ExecutorOptions,
   OnlyEsQueryRuleParams,
-  OnlyEsqlQueryRuleParams,
   OnlySearchSourceRuleParams,
+  OnlyEsqlQueryRuleParams,
 } from './types';
+import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { fetchEsQuery } from './lib/fetch_es_query';
+import { EsQueryRuleParams } from './rule_type_params';
+import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
+import { fetchEsqlQuery } from './lib/fetch_esql_query';
+import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE } from '..';
 
 export async function executor(core: CoreSetup, options: ExecutorOptions<EsQueryRuleParams>) {
   const searchSourceRule = isSearchSourceRule(options.params.searchType);
@@ -88,35 +88,35 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         dateEnd,
       })
     : esqlQueryRule
-      ? await fetchEsqlQuery({
-          ruleId,
-          alertLimit,
-          params: params as OnlyEsqlQueryRuleParams,
-          spacePrefix,
-          publicBaseUrl,
-          services: {
-            share,
-            scopedClusterClient,
-            logger,
-          },
-          dateStart,
-          dateEnd,
-        })
-      : await fetchEsQuery({
-          ruleId,
-          name,
-          alertLimit,
-          params: params as OnlyEsQueryRuleParams,
-          timestamp: latestTimestamp,
-          publicBaseUrl,
-          spacePrefix,
-          services: {
-            scopedClusterClient,
-            logger,
-          },
-          dateStart,
-          dateEnd,
-        });
+    ? await fetchEsqlQuery({
+        ruleId,
+        alertLimit,
+        params: params as OnlyEsqlQueryRuleParams,
+        spacePrefix,
+        publicBaseUrl,
+        services: {
+          share,
+          scopedClusterClient,
+          logger,
+        },
+        dateStart,
+        dateEnd,
+      })
+    : await fetchEsQuery({
+        ruleId,
+        name,
+        alertLimit,
+        params: params as OnlyEsQueryRuleParams,
+        timestamp: latestTimestamp,
+        publicBaseUrl,
+        spacePrefix,
+        services: {
+          scopedClusterClient,
+          logger,
+        },
+        dateStart,
+        dateEnd,
+      });
   const unmetGroupValues: Record<string, number> = {};
   for (const result of parsedResults.results) {
     const alertId = result.group;

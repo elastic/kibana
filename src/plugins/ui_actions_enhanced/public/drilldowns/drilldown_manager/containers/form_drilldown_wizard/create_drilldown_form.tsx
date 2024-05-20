@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { DrilldownForm } from '../../components/drilldown_form';
-import { TriggerPickerProps } from '../../components/trigger_picker';
-import { DrilldownState } from '../../state';
 import { useDrilldownManager } from '../context';
+import { DrilldownForm } from '../../components/drilldown_form';
+import { DrilldownState } from '../../state';
+import { TriggerPickerProps } from '../../components/trigger_picker';
 
 export interface CreateDrilldownFormProps {
   state: DrilldownState;

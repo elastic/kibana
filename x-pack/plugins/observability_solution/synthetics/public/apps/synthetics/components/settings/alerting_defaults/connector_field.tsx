@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetUrlParams, useUrlParams } from '../../../hooks';
-import { AddConnectorFlyout } from './add_connector_flyout';
 import { useAlertingDefaults } from './hooks/use_alerting_defaults';
 import { alertFormI18n } from './translations';
+import { AddConnectorFlyout } from './add_connector_flyout';
 
 export function DefaultConnectorField({
   isLoading,

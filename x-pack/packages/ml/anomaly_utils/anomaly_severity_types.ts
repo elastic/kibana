@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ML_ANOMALY_SEVERITY, type MlSeverityType } from './anomaly_severity';
+import { type MlSeverityType, ML_ANOMALY_SEVERITY } from './anomaly_severity';
 
 export const ML_ANOMALY_SEVERITY_TYPES: Record<ML_ANOMALY_SEVERITY, MlSeverityType> = {
   critical: {

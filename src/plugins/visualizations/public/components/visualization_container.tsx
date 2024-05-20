@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { ReactNode, Suspense, lazy } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { ReactNode, Suspense, lazy } from 'react';
 
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 

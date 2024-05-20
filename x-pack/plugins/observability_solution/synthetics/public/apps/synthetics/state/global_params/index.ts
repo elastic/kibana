@@ -6,8 +6,8 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { IHttpSerializedFetchError } from '..';
 import { SyntheticsParams } from '../../../../../common/runtime_types';
+import { IHttpSerializedFetchError } from '..';
 import { addNewGlobalParamAction, editGlobalParamAction, getGlobalParamAction } from './actions';
 
 export interface GlobalParamsState {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type { CoreStart } from '@kbn/core/server';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 /**
  * Creates an execution context to be passed on as part of ES queries.

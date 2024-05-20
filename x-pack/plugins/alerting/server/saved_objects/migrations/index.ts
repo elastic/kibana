@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { gte } from 'semver';
 import {
-  SavedObjectMigrationContext,
-  SavedObjectMigrationFn,
   SavedObjectMigrationMap,
   SavedObjectUnsanitizedDoc,
+  SavedObjectMigrationFn,
+  SavedObjectMigrationContext,
 } from '@kbn/core/server';
-import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
-import { SerializedSearchSourceFields, isSerializedSearchSource } from '@kbn/data-plugin/common';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
+import { isSerializedSearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Serializable } from '@kbn/utility-types';
-import { gte } from 'semver';
 import { RawRule } from '../../types';
 import { getMigrations7100 } from './7.10';
 import { getMigrations7110, getMigrations7112 } from './7.11';
@@ -32,8 +32,8 @@ import { getMigrations850 } from './8.5';
 import { getMigrations860 } from './8.6';
 import { getMigrations870 } from './8.7';
 import { getMigrations880 } from './8.8';
-import { MINIMUM_SS_MIGRATION_VERSION } from './constants';
 import { AlertLogMeta, AlertMigration } from './types';
+import { MINIMUM_SS_MIGRATION_VERSION } from './constants';
 import { createEsoMigration, isEsQueryRuleType, pipeMigrations } from './utils';
 
 export { FILEBEAT_7X_INDICATOR_PATH } from './constants';

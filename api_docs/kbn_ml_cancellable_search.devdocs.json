@@ -116,7 +116,9 @@
                 "tags": [],
                 "label": "requestBody",
                 "description": [],
-                "signature": ["RequestBody"],
+                "signature": [
+                  "RequestBody"
+                ],
                 "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -129,7 +131,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["object | undefined"],
+                "signature": [
+                  "object | undefined"
+                ],
                 "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -145,7 +149,9 @@
             "tags": [],
             "label": "cancelRequest",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
             "deprecated": false,
             "trackAdoption": false,

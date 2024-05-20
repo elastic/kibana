@@ -7,10 +7,10 @@
 
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
-import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
-import { MachineLearningTestResourcesProvider } from '../../functional/services/ml/test_resources';
 import { TransformAPIProvider } from '../../functional/services/transform/api';
 import { TransformSecurityCommonProvider } from '../../functional/services/transform/security_common';
+import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
+import { MachineLearningTestResourcesProvider } from '../../functional/services/ml/test_resources';
 
 export function TransformProvider(context: FtrProviderContext) {
   const api = TransformAPIProvider(context);

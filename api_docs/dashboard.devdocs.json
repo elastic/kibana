@@ -10,7 +10,9 @@
         "tags": [],
         "label": "cleanEmptyKeys",
         "description": [],
-        "signature": ["(stateObj: Record<string, unknown>) => Record<string, unknown>"],
+        "signature": [
+          "(stateObj: Record<string, unknown>) => Record<string, unknown>"
+        ],
         "path": "src/plugins/dashboard/public/dashboard_app/locator/locator.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -22,7 +24,9 @@
             "tags": [],
             "label": "stateObj",
             "description": [],
-            "signature": ["Record<string, unknown>"],
+            "signature": [
+              "Record<string, unknown>"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_app/locator/locator.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -39,7 +43,9 @@
         "tags": [],
         "label": "createDashboardEditUrl",
         "description": [],
-        "signature": ["(id: string | undefined, editMode: boolean | undefined) => string"],
+        "signature": [
+          "(id: string | undefined, editMode: boolean | undefined) => string"
+        ],
         "path": "src/plugins/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -51,7 +57,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -64,7 +72,9 @@
             "tags": [],
             "label": "editMode",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_constants.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -81,7 +91,11 @@
         "tags": [],
         "label": "DashboardListingTable",
         "description": [],
-        "signature": ["(props: ", "DashboardListingProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "DashboardListingProps",
+          ") => JSX.Element"
+        ],
         "path": "src/plugins/dashboard/public/dashboard_listing/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -93,7 +107,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["DashboardListingProps"],
+            "signature": [
+              "DashboardListingProps"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_listing/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -135,7 +151,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -150,7 +168,11 @@
         "tags": [],
         "label": "DashboardTopNav",
         "description": [],
-        "signature": ["(props: ", "DashboardTopNavProps", ") => JSX.Element"],
+        "signature": [
+          "(props: ",
+          "DashboardTopNavProps",
+          ") => JSX.Element"
+        ],
         "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -162,7 +184,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["DashboardTopNavProps"],
+            "signature": [
+              "DashboardTopNavProps"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_top_nav/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -390,7 +414,11 @@
             "tags": [],
             "label": "getInitialInput",
             "description": [],
-            "signature": ["(() => Partial<", "SavedDashboardInput", ">) | undefined"],
+            "signature": [
+              "(() => Partial<",
+              "SavedDashboardInput",
+              ">) | undefined"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -428,7 +456,9 @@
             "tags": [],
             "label": "useSearchSessionsIntegration",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -474,7 +504,9 @@
             "tags": [],
             "label": "useControlGroupIntegration",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -486,7 +518,9 @@
             "tags": [],
             "label": "useSessionStorageIntegration",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -498,7 +532,9 @@
             "tags": [],
             "label": "useUnifiedSearchIntegration",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -548,7 +584,9 @@
                 "tags": [],
                 "label": "result",
                 "description": [],
-                "signature": ["LoadDashboardReturn"],
+                "signature": [
+                  "LoadDashboardReturn"
+                ],
                 "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -564,7 +602,9 @@
             "tags": [],
             "label": "isEmbeddedExternally",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -598,7 +638,9 @@
                 "tags": [],
                 "label": "dashboardId",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "src/plugins/dashboard/public/dashboard_container/embeddable/dashboard_container_factory.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -679,7 +721,9 @@
                 "tags": [],
                 "label": "input",
                 "description": [],
-                "signature": ["InputType"],
+                "signature": [
+                  "InputType"
+                ],
                 "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -692,7 +736,9 @@
                 "tags": [],
                 "label": "attributes",
                 "description": [],
-                "signature": ["AttributesType | undefined"],
+                "signature": [
+                  "AttributesType | undefined"
+                ],
                 "path": "src/plugins/dashboard/public/dashboard_container/panel_placement/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -749,7 +795,9 @@
         "tags": [],
         "label": "DASHBOARD_APP_ID",
         "description": [],
-        "signature": ["\"dashboards\""],
+        "signature": [
+          "\"dashboards\""
+        ],
         "path": "src/plugins/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -762,7 +810,9 @@
         "tags": [],
         "label": "DASHBOARD_CONTAINER_TYPE",
         "description": [],
-        "signature": ["\"dashboard\""],
+        "signature": [
+          "\"dashboard\""
+        ],
         "path": "src/plugins/dashboard/public/dashboard_container/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -775,7 +825,9 @@
         "tags": [],
         "label": "DASHBOARD_GRID_COLUMN_COUNT",
         "description": [],
-        "signature": ["48"],
+        "signature": [
+          "48"
+        ],
         "path": "src/plugins/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -947,7 +999,9 @@
         "tags": [],
         "label": "LEGACY_DASHBOARD_APP_ID",
         "description": [],
-        "signature": ["\"dashboard\""],
+        "signature": [
+          "\"dashboard\""
+        ],
         "path": "src/plugins/dashboard/public/dashboard_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1050,7 +1104,11 @@
           "tags": [],
           "label": "findDashboardsService",
           "description": [],
-          "signature": ["() => Promise<", "FindDashboardsService", ">"],
+          "signature": [
+            "() => Promise<",
+            "FindDashboardsService",
+            ">"
+          ],
           "path": "src/plugins/dashboard/public/plugin.tsx",
           "deprecated": false,
           "trackAdoption": false,
@@ -1080,7 +1138,9 @@
               "tags": [],
               "label": "embeddableType",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/dashboard/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -1093,7 +1153,10 @@
               "tags": [],
               "label": "getPanelPlacementSettings",
               "description": [],
-              "signature": ["GetPanelPlacementSettings", "<object>"],
+              "signature": [
+                "GetPanelPlacementSettings",
+                "<object>"
+              ],
               "path": "src/plugins/dashboard/public/plugin.tsx",
               "deprecated": false,
               "trackAdoption": false,
@@ -1198,7 +1261,9 @@
             "tags": [],
             "label": "removeLegacyVersion",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1276,7 +1341,9 @@
             "tags": [],
             "label": "removeLegacyVersion",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1317,7 +1384,9 @@
             "tags": [],
             "label": "savedDashboardPanel",
             "description": [],
-            "signature": ["SavedDashboardPanel"],
+            "signature": [
+              "SavedDashboardPanel"
+            ],
             "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1357,7 +1426,10 @@
             "tags": [],
             "label": "panels",
             "description": [],
-            "signature": ["SavedDashboardPanel", "[] | undefined"],
+            "signature": [
+              "SavedDashboardPanel",
+              "[] | undefined"
+            ],
             "path": "src/plugins/dashboard/common/lib/dashboard_panel_converters.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1534,7 +1606,9 @@
             "tags": [],
             "label": "{ attributes, references = [] }",
             "description": [],
-            "signature": ["DashboardAttributesAndReferences"],
+            "signature": [
+              "DashboardAttributesAndReferences"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1547,7 +1621,9 @@
             "tags": [],
             "label": "deps",
             "description": [],
-            "signature": ["InjectExtractDeps"],
+            "signature": [
+              "InjectExtractDeps"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1589,7 +1665,9 @@
             "tags": [],
             "label": "{ attributes, references = [] }",
             "description": [],
-            "signature": ["DashboardAttributesAndReferences"],
+            "signature": [
+              "DashboardAttributesAndReferences"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1602,7 +1680,9 @@
             "tags": [],
             "label": "deps",
             "description": [],
-            "signature": ["InjectExtractDeps"],
+            "signature": [
+              "InjectExtractDeps"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_saved_object/persistable_state/dashboard_saved_object_references.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1676,7 +1756,9 @@
             "tags": [],
             "label": "[key: string]: boolean",
             "description": [],
-            "signature": ["[key: string]:  boolean"],
+            "signature": [
+              "[key: string]:  boolean"
+            ],
             "path": "src/plugins/dashboard/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1719,7 +1801,9 @@
             "tags": [],
             "label": "query",
             "description": [],
-            "signature": ["{ query: string | { [key: string]: any; }; language: string; }"],
+            "signature": [
+              "{ query: string | { [key: string]: any; }; language: string; }"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1784,7 +1868,9 @@
             "tags": [],
             "label": "timeslice",
             "description": [],
-            "signature": ["[number, number] | undefined"],
+            "signature": [
+              "[number, number] | undefined"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1828,7 +1914,9 @@
             "tags": [],
             "label": "tags",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1860,7 +1948,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1872,7 +1962,9 @@
             "tags": [],
             "label": "isEmbeddedExternally",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2126,7 +2218,9 @@
             "tags": [],
             "label": "gridData",
             "description": [],
-            "signature": ["GridData"],
+            "signature": [
+              "GridData"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2138,7 +2232,9 @@
             "tags": [],
             "label": "panelRefName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2152,7 +2248,9 @@
             "description": [
               "\nThis version key was used to store Kibana version information from versions 7.3.0 -> 8.11.0.\nAs of version 8.11.0, the versioning information is now per-embeddable-type and is stored on the\nembeddable's input. This key is needed for BWC, but its value will be removed on Dashboard save."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/dashboard/common/dashboard_container/types.ts",
             "deprecated": false,
             "trackAdoption": false

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/public';
 import { flatten } from 'lodash';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViews } from '../services';
 
 import type { Data, VegaSpec } from '../data_model/types';

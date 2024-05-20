@@ -5,31 +5,19 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { find } from 'lodash';
-import { API_VERSIONS } from '../../../common/constants';
-import { DEFAULT_POLICY, OSQUERY_POLICY } from '../../screens/fleet';
-import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   ADD_PACK_HEADER_BUTTON,
   EDIT_PACK_HEADER_BUTTON,
-  POLICY_SELECT_COMBOBOX,
   SAVE_PACK_BUTTON,
+  POLICY_SELECT_COMBOBOX,
   TABLE_ROWS,
   UPDATE_PACK_BUTTON,
   formFieldInputSelector,
 } from '../../screens/packs';
-import { ServerlessRoleName } from '../../support/roles';
-import { cleanupAgentPolicy, cleanupPack } from '../../tasks/api_fixtures';
-import { request } from '../../tasks/common';
-import {
-  addIntegration,
-  closeModalIfVisible,
-  closeToastIfVisible,
-  generateRandomStringName,
-  interceptAgentPolicyId,
-  interceptPackId,
-} from '../../tasks/integrations';
+import { API_VERSIONS } from '../../../common/constants';
+import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
   checkResults,
@@ -37,8 +25,20 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import { changePackActiveStatus, cleanupAllPrebuiltPacks } from '../../tasks/packs';
+import {
+  addIntegration,
+  closeModalIfVisible,
+  closeToastIfVisible,
+  generateRandomStringName,
+  interceptPackId,
+  interceptAgentPolicyId,
+} from '../../tasks/integrations';
+import { DEFAULT_POLICY, OSQUERY_POLICY } from '../../screens/fleet';
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import { cleanupPack, cleanupAgentPolicy } from '../../tasks/api_fixtures';
+import { request } from '../../tasks/common';
+import { ServerlessRoleName } from '../../support/roles';
 
 describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   const integration = 'Osquery Manager';

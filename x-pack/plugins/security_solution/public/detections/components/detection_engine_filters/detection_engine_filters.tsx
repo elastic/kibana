@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { createKbnUrlStateStorage, Storage } from '@kbn/kibana-utils-plugin/public';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { Storage, createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import React, { useCallback, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
-import { useSpaceId } from '../../../common/hooks/use_space_id';
-import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useKibana } from '../../../common/lib/kibana';
+import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
+import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 import type { SecuritySolutionDataViewBase } from '../../../common/types';
 import { SECURITY_ALERT_DATA_VIEW } from '../../constants';
 

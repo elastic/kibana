@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { installOrUpgradeEndpointFleetPackage } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
-import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
-import { ExecutionThrottler } from '../../common/execution_throttler';
+import type { KbnClient } from '@kbn/test';
 import { fetchAllEndpointIntegrationPolicyListIds } from '../../common/fleet_services';
+import { ExecutionThrottler } from '../../common/execution_throttler';
 import {
   createBlocklists,
   createEndpointExceptions,
@@ -18,9 +16,11 @@ import {
   createHostIsolationExceptions,
   createTrustedApps,
 } from './create_artifacts';
-import { createPolicies } from './create_policies';
+import { installOrUpgradeEndpointFleetPackage } from '../../../../common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { ProgressReporter } from './progress_reporter';
 import type { ProgressReporterInterface } from './types';
+import { createPolicies } from './create_policies';
+import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 
 interface LoadOptions {
   kbnClient: KbnClient;

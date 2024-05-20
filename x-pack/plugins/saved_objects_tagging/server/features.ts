@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { KibanaFeatureConfig } from '@kbn/features-plugin/server';
-import { i18n } from '@kbn/i18n';
-import { tagFeatureId, tagManagementSectionId, tagSavedObjectTypeName } from '../common/constants';
+import { tagSavedObjectTypeName, tagManagementSectionId, tagFeatureId } from '../common/constants';
 
 export const savedObjectsTaggingFeature: KibanaFeatureConfig = {
   id: tagFeatureId,

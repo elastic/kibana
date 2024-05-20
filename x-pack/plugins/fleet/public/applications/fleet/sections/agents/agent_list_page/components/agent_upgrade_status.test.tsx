@@ -6,8 +6,8 @@
  */
 
 import { fireEvent, waitFor } from '@testing-library/react';
-import moment from 'moment';
 import React from 'react';
+import moment from 'moment';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFieldNumber, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArgumentStrings } from '../../../i18n';
-import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+import PropTypes from 'prop-types';
+import { EuiFieldNumber, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { templateFromReactComponent } from '../../../public/lib/template_from_react_component';
+import { withDebounceArg } from '../../../public/components/with_debounce_arg';
+import { ArgumentStrings } from '../../../i18n';
 
 const { Number: strings } = ArgumentStrings;
 
@@ -41,7 +41,7 @@ const NumberArgInput = ({ argId, argValue, typeInstance, onValueChange }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <EuiFieldNumber compressed={true} id={argId} value={Number(value)} onChange={onChange} />
+        <EuiFieldNumber compressed id={argId} value={Number(value)} onChange={onChange} />
       </EuiFlexItem>
 
       {confirm && (

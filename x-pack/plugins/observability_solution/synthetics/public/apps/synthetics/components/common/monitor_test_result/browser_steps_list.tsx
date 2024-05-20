@@ -5,6 +5,16 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import React, {
+  CSSProperties,
+  ReactElement,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useState,
+  useMemo,
+} from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -18,31 +28,21 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
-import { i18n } from '@kbn/i18n';
-import React, {
-  CSSProperties,
-  ReactElement,
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useState,
-  useMemo,
-} from 'react';
 
-import { JourneyStep } from '../../../../../../common/runtime_types';
 import { StepTabs } from '../../test_run_details/step_tabs';
-import { StepDetailsLinkIcon } from '../links/step_details_link';
+import { ResultDetails } from './result_details';
+import { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
 import {
   ScreenshotImageSize,
   THUMBNAIL_SCREENSHOT_SIZE,
   THUMBNAIL_SCREENSHOT_SIZE_MOBILE,
 } from '../screenshot/screenshot_size';
-import { ResultDetails } from './result_details';
+import { StepDetailsLinkIcon } from '../links/step_details_link';
 
-import { ResultDetailsSuccessful } from './result_details_successful';
-import { getTextColorForMonitorStatus, parseBadgeStatus } from './status_badge';
+import { parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
 import { StepDurationText } from './step_duration_text';
+import { ResultDetailsSuccessful } from './result_details_successful';
 
 interface Props {
   steps: JourneyStep[];

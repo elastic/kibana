@@ -13,8 +13,8 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
 import React from 'react';
+import { css } from '@emotion/css';
 import * as i18n from '../json_diff/translations';
 
 export const RuleDiffHeaderBar = () => {

@@ -53,7 +53,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -111,8 +113,12 @@
             "type": "Function",
             "tags": [],
             "label": "getIndent",
-            "description": ["\nGet the current indentation level of the ToolingLog"],
-            "signature": ["() => number"],
+            "description": [
+              "\nGet the current indentation level of the ToolingLog"
+            ],
+            "signature": [
+              "() => number"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -140,7 +146,9 @@
                 "tags": [],
                 "label": "delta",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -153,7 +161,9 @@
                 "tags": [],
                 "label": "block",
                 "description": [],
-                "signature": ["(() => T | Promise<T>) | undefined"],
+                "signature": [
+                  "(() => T | Promise<T>) | undefined"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -169,7 +179,9 @@
             "tags": [],
             "label": "verbose",
             "description": [],
-            "signature": ["(...args: any[]) => void"],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -181,7 +193,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -197,7 +211,9 @@
             "tags": [],
             "label": "debug",
             "description": [],
-            "signature": ["(...args: any[]) => void"],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -209,7 +225,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -225,7 +243,9 @@
             "tags": [],
             "label": "info",
             "description": [],
-            "signature": ["(...args: any[]) => void"],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -237,7 +257,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -253,7 +275,9 @@
             "tags": [],
             "label": "success",
             "description": [],
-            "signature": ["(...args: any[]) => void"],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -265,7 +289,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -281,7 +307,9 @@
             "tags": [],
             "label": "warning",
             "description": [],
-            "signature": ["(...args: any[]) => void"],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -293,7 +321,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -309,7 +339,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["(error: string | Error) => void"],
+            "signature": [
+              "(error: string | Error) => void"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -321,7 +353,9 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": ["string | Error"],
+                "signature": [
+                  "string | Error"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -337,7 +371,9 @@
             "tags": [],
             "label": "write",
             "description": [],
-            "signature": ["(...args: any[]) => void"],
+            "signature": [
+              "(...args: any[]) => void"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -349,7 +385,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["any[]"],
+                "signature": [
+                  "any[]"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -487,7 +525,9 @@
                 "description": [
                   "A string that will be passed along with messages from this logger which can be used to filter messages with `ignoreSources`"
                 ],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -534,7 +574,9 @@
             "tags": [],
             "label": "messages",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -546,7 +588,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log_collecting_writer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -669,7 +713,9 @@
             "tags": [],
             "label": "writeTo",
             "description": [],
-            "signature": ["{ write(msg: string): void; }"],
+            "signature": [
+              "{ write(msg: string): void; }"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -681,7 +727,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -785,7 +833,9 @@
                 "tags": [],
                 "label": "writeTo",
                 "description": [],
-                "signature": ["{ write(msg: string): void; }"],
+                "signature": [
+                  "{ write(msg: string): void; }"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -798,7 +848,9 @@
                 "tags": [],
                 "label": "prefix",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -840,7 +892,9 @@
         "tags": [],
         "label": "getLogLevelFlagsHelp",
         "description": [],
-        "signature": ["(defaultLogLevel: string) => string"],
+        "signature": [
+          "(defaultLogLevel: string) => string"
+        ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -852,7 +906,9 @@
             "tags": [],
             "label": "defaultLogLevel",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -916,7 +972,9 @@
             "tags": [],
             "label": "flags",
             "description": [],
-            "signature": ["Record<string, string | boolean | string[] | undefined>"],
+            "signature": [
+              "Record<string, string | boolean | string[] | undefined>"
+            ],
             "path": "packages/kbn-tooling-log/src/log_levels.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -974,7 +1032,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "type",
-            "description": ["level/type of message"],
+            "description": [
+              "level/type of message"
+            ],
             "signature": [
               "\"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"write\" | \"verbose\""
             ],
@@ -988,7 +1048,9 @@
             "type": "number",
             "tags": [],
             "label": "indent",
-            "description": ["indentation intended when message written to a text log"],
+            "description": [
+              "indentation intended when message written to a text log"
+            ],
             "path": "packages/kbn-tooling-log/src/message.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -999,8 +1061,12 @@
             "type": "string",
             "tags": [],
             "label": "source",
-            "description": ["type of logger this message came from"],
-            "signature": ["string | undefined"],
+            "description": [
+              "type of logger this message came from"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-tooling-log/src/message.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1011,8 +1077,12 @@
             "type": "Array",
             "tags": [],
             "label": "args",
-            "description": ["args passed to the logging method"],
-            "signature": ["any[]"],
+            "description": [
+              "args passed to the logging method"
+            ],
+            "signature": [
+              "any[]"
+            ],
             "path": "packages/kbn-tooling-log/src/message.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1040,7 +1110,9 @@
             "description": [
               "\ntype name for this logger, will be assigned to the \"source\"\nproperties of messages produced by this logger"
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1088,7 +1160,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "level",
-            "description": ["\nLog level, messages below this level will be ignored"],
+            "description": [
+              "\nLog level, messages below this level will be ignored"
+            ],
             "signature": [
               "\"error\" | \"info\" | \"warning\" | \"success\" | \"debug\" | \"silent\" | \"verbose\""
             ],
@@ -1105,7 +1179,9 @@
             "description": [
               "\nList of message sources/ToolingLog types which will be ignored. Create\na logger with `ToolingLog#withType()` to create messages with a specific\nsource. Ignored messages will be dropped without writing."
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1119,7 +1195,9 @@
             "description": [
               "\nTarget which will receive formatted message lines, a common value for `writeTo`\nis process.stdout"
             ],
-            "signature": ["{ write(s: string): void; }"],
+            "signature": [
+              "{ write(s: string): void; }"
+            ],
             "path": "packages/kbn-tooling-log/src/tooling_log_text_writer.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1170,7 +1248,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "msg",
-                "description": ["The log message to write"],
+                "description": [
+                  "The log message to write"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/tooling-log",
@@ -1201,7 +1281,9 @@
         "tags": [],
         "label": "DEFAULT_LOG_LEVEL",
         "description": [],
-        "signature": ["\"info\""],
+        "signature": [
+          "\"info\""
+        ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1214,7 +1296,9 @@
         "tags": [],
         "label": "LOG_LEVEL_FLAGS",
         "description": [],
-        "signature": ["{ name: string; help: string; }[]"],
+        "signature": [
+          "{ name: string; help: string; }[]"
+        ],
         "path": "packages/kbn-tooling-log/src/log_levels.ts",
         "deprecated": false,
         "trackAdoption": false,

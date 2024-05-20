@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import path from 'path';
 import globby from 'globby';
+import path from 'path';
 import { FtrProviderContext } from '../../observability_ai_assistant_api_integration/common/ftr_provider_context';
 
 const cwd = path.join(__dirname);

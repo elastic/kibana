@@ -11,16 +11,16 @@ import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddabl
 
 import { DashboardStartDependencies } from '../plugin';
 import { AddToLibraryAction } from './add_to_library_action';
+import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';
 import { ClonePanelAction } from './clone_panel_action';
 import { CopyToDashboardAction } from './copy_to_dashboard_action';
 import { ExpandPanelAction } from './expand_panel_action';
 import { ExportCSVAction } from './export_csv_action';
 import { FiltersNotificationAction } from './filters_notification_action';
-import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';
 import { LegacyLibraryNotificationAction } from './legacy_library_notification_action';
+import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 import { LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
 import { LibraryNotificationAction } from './library_notification_action';
-import { UnlinkFromLibraryAction } from './unlink_from_library_action';
 
 interface BuildAllDashboardActionsProps {
   core: CoreStart;

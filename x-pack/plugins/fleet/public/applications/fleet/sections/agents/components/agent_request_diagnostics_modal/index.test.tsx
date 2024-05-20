@@ -11,7 +11,7 @@ import { act, fireEvent } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
-import { sendPostBulkRequestDiagnostics, sendPostRequestDiagnostics } from '../../../../hooks';
+import { sendPostRequestDiagnostics, sendPostBulkRequestDiagnostics } from '../../../../hooks';
 
 import { AgentRequestDiagnosticsModal } from '.';
 

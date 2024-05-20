@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import fs from 'fs';
-import path from 'path';
 import expect from '@kbn/expect';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
+import fs from 'fs';
+import path from 'path';
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
-import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 type SyncFlyoutObjectType =
@@ -472,9 +472,9 @@ export function MachineLearningStackManagementJobsProvider({
 
       const row = rows[matchedRowIndex];
       const col = await row.findByTestSubject('mlSpaceManagementTableColumnSpaces');
-      const spacesEl = await (await col.findByClassName('euiTableCellContent')).findAllByClassName(
-        'euiAvatar--space'
-      );
+      const spacesEl = await (
+        await col.findByClassName('euiTableCellContent')
+      ).findAllByClassName('euiAvatar--space');
 
       for (const el of spacesEl) {
         spaces.push(((await el.getAttribute('data-test-subj')) ?? '').replace('space-avatar-', ''));

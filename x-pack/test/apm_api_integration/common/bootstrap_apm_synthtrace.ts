@@ -1,4 +1,3 @@
-import url from 'url';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,9 +7,10 @@ import url from 'url';
 import {
   ApmSynthtraceEsClient,
   ApmSynthtraceKibanaClient,
-  LogLevel,
   createLogger,
+  LogLevel,
 } from '@kbn/apm-synthtrace';
+import url from 'url';
 import { kbnTestConfig } from '@kbn/test';
 import { InheritedFtrProviderContext } from './ftr_provider_context';
 

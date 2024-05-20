@@ -6,10 +6,10 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import type { RawBucket, StatRenderer } from '@kbn/securitysolution-grouping';
 import React from 'react';
-import * as i18n from '../translations';
+import type { RawBucket, StatRenderer } from '@kbn/securitysolution-grouping';
 import type { AlertsGroupingAggregation } from './types';
+import * as i18n from '../translations';
 
 const getSeverity = (severity?: string) => {
   switch (severity) {

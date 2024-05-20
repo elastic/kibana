@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { getOr } from 'lodash/fp';
 
 const StyledDiv = styled.div<{ targetClassNames: string[] }>`
   width: 100%;

@@ -6,7 +6,7 @@
  */
 import { get } from 'lodash/fp';
 import type { ConnectorServiceNowSIRTypeFields } from '../../../common/types/domain';
-import type { AlertFieldMappingAndValues, ServiceNowSIRFormat, SirFieldKey } from './types';
+import type { ServiceNowSIRFormat, SirFieldKey, AlertFieldMappingAndValues } from './types';
 
 export const format: ServiceNowSIRFormat = (theCase, alerts) => {
   const {

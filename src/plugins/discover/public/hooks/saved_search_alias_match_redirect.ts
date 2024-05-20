@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { SavedSearch, getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import type { History } from 'history';
 import { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import { getSavedSearchUrl, SavedSearch } from '@kbn/saved-search-plugin/public';
 
 interface SavedSearchAliasMatchRedirectProps {
   savedSearch?: SavedSearch;

@@ -8,9 +8,9 @@
 import { EuiText } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
+import * as i18n from '../translations';
 import { useKibana } from '../../../lib/kibana';
 import { LinkAnchor } from '../../links';
-import * as i18n from '../translations';
 
 export const NoNews = React.memo(() => {
   const { getUrlForApp, navigateToApp, capabilities } = useKibana().services.application;

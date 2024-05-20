@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { adminTestUser } from '@kbn/test';
 import { AuthenticatedUser, Role, RoleRemoteClusterPrivilege } from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
-import { adminTestUser } from '@kbn/test';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 
@@ -62,10 +62,10 @@ export class SecurityPageObject extends FtrService {
         options.expectSpaceSelector
           ? 'spaceSelector'
           : options.expectForbidden
-            ? 'error'
-            : options.expectSuccess
-              ? 'chrome'
-              : undefined
+          ? 'error'
+          : options.expectSuccess
+          ? 'chrome'
+          : undefined
       );
     },
 
@@ -458,13 +458,9 @@ export class SecurityPageObject extends FtrService {
       const [rolename, reserved, deprecated] = await Promise.all([
         role.findByTestSubject('roleRowName').then((el) => el.getVisibleText()),
         // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
-        role
-          .findAllByTestSubject('roleReserved', 1)
-          .then((el) => el.length > 0),
+        role.findAllByTestSubject('roleReserved', 1).then((el) => el.length > 0),
         // findAll is substantially faster than `find.descendantExistsByCssSelector for negative cases
-        role
-          .findAllByTestSubject('roleDeprecated', 1)
-          .then((el) => el.length > 0),
+        role.findAllByTestSubject('roleDeprecated', 1).then((el) => el.length > 0),
       ]);
 
       roles.push({ rolename, reserved, deprecated });

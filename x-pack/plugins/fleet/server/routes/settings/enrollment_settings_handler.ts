@@ -9,19 +9,19 @@ import type { TypeOf } from '@kbn/config-schema';
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { FLEET_SERVER_PACKAGE, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, FLEET_SERVER_PACKAGE } from '../../../common/constants';
 
 import type {
+  GetEnrollmentSettingsResponse,
   AgentPolicy,
   EnrollmentSettingsFleetServerPolicy,
-  GetEnrollmentSettingsResponse,
 } from '../../../common/types';
-import { defaultFleetErrorHandler } from '../../errors';
-import { agentPolicyService, downloadSourceService, packagePolicyService } from '../../services';
-import { getAgentStatusForAgentPolicy } from '../../services/agents';
-import { getFleetProxy } from '../../services/fleet_proxies';
-import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
 import type { FleetRequestHandler, GetEnrollmentSettingsRequestSchema } from '../../types';
+import { defaultFleetErrorHandler } from '../../errors';
+import { agentPolicyService, packagePolicyService, downloadSourceService } from '../../services';
+import { getAgentStatusForAgentPolicy } from '../../services/agents';
+import { getFleetServerHostsForAgentPolicy } from '../../services/fleet_server_host';
+import { getFleetProxy } from '../../services/fleet_proxies';
 
 export const getEnrollmentSettingsHandler: FleetRequestHandler<
   undefined,

@@ -6,20 +6,20 @@
  */
 import { getEqlRule } from '../../../../objects/rule';
 
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import {
-  continueFromDefineStep,
-  createRuleWithoutEnabling,
-  fillAboutRuleMinimumAndContinue,
-  fillAlertSuppressionFields,
-  fillDefineEqlRule,
-  selectEqlRuleType,
-  skipScheduleRuleAction,
-} from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { getDetails } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import {
+  fillAlertSuppressionFields,
+  fillAboutRuleMinimumAndContinue,
+  createRuleWithoutEnabling,
+  skipScheduleRuleAction,
+  continueFromDefineStep,
+  fillDefineEqlRule,
+  selectEqlRuleType,
+} from '../../../../tasks/create_new_rule';
 
 import { DEFINITION_DETAILS, SUPPRESS_BY_DETAILS } from '../../../../screens/rule_details';
 

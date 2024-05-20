@@ -1,4 +1,3 @@
-import { AsApiContract, RewriteResponseCase } from '@kbn/actions-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,8 +6,9 @@ import { AsApiContract, RewriteResponseCase } from '@kbn/actions-plugin/common';
  */
 import { HttpSetup } from '@kbn/core/public';
 import { pick } from 'lodash';
-import { Rule, RuleUpdates } from '../../../types';
+import { RewriteResponseCase, AsApiContract } from '@kbn/actions-plugin/common';
 import { BASE_ALERTING_API_PATH } from '../../constants';
+import { Rule, RuleUpdates } from '../../../types';
 import { transformRule } from './common_transformations';
 
 type RuleUpdatesBody = Pick<

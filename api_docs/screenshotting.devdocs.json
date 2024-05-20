@@ -12,7 +12,9 @@
         "type": "Type",
         "tags": [],
         "label": "LayoutParams",
-        "description": ["\nScreenshot layout parameters."],
+        "description": [
+          "\nScreenshot layout parameters."
+        ],
         "signature": [
           "{ id?: Id | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
@@ -54,7 +56,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PdfScreenshotOptions",
-        "description": ["\nOptions that should be provided to a PDF screenshot request."],
+        "description": [
+          "\nOptions that should be provided to a PDF screenshot request."
+        ],
         "signature": [
           {
             "pluginId": "screenshotting",
@@ -76,8 +80,12 @@
             "type": "string",
             "tags": [],
             "label": "format",
-            "description": ["\nWhether to format the output as a PDF."],
-            "signature": ["\"pdf\""],
+            "description": [
+              "\nWhether to format the output as a PDF."
+            ],
+            "signature": [
+              "\"pdf\""
+            ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -88,8 +96,12 @@
             "type": "string",
             "tags": [],
             "label": "title",
-            "description": ["\nDocument title."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nDocument title."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -100,8 +112,12 @@
             "type": "string",
             "tags": [],
             "label": "logo",
-            "description": ["\nLogo at the footer."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nLogo at the footer."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -141,7 +157,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PdfScreenshotResult",
-        "description": ["\nFinal, formatted PDF result"],
+        "description": [
+          "\nFinal, formatted PDF result"
+        ],
         "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -155,7 +173,9 @@
             "description": [
               "\nCollected performance metrics during the screenshotting session along with the PDF generation ones."
             ],
-            "signature": ["PdfScreenshotMetrics"],
+            "signature": [
+              "PdfScreenshotMetrics"
+            ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -166,8 +186,12 @@
             "type": "Object",
             "tags": [],
             "label": "data",
-            "description": ["\nPDF document data buffer."],
-            "signature": ["Buffer"],
+            "description": [
+              "\nPDF document data buffer."
+            ],
+            "signature": [
+              "Buffer"
+            ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -181,7 +205,9 @@
             "description": [
               "\nAny errors that were encountered while create the PDF and navigating between pages"
             ],
-            "signature": ["Error[]"],
+            "signature": [
+              "Error[]"
+            ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -195,7 +221,9 @@
             "description": [
               "\nAny render errors that could mean some visualizations are missing from the end result."
             ],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "x-pack/plugins/screenshotting/server/formats/pdf/index.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -209,7 +237,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PngScreenshotOptions",
-        "description": ["\nOptions that should be provided to a screenshot PNG request"],
+        "description": [
+          "\nOptions that should be provided to a screenshot PNG request"
+        ],
         "signature": [
           {
             "pluginId": "screenshotting",
@@ -229,10 +259,16 @@
             "parentPluginId": "screenshotting",
             "id": "def-server.PngScreenshotOptions.format",
             "type": "string",
-            "tags": ["default"],
+            "tags": [
+              "default"
+            ],
             "label": "format",
-            "description": ["\nWhether to format the output as a PNG."],
-            "signature": ["\"png\" | undefined"],
+            "description": [
+              "\nWhether to format the output as a PNG."
+            ],
+            "signature": [
+              "\"png\" | undefined"
+            ],
             "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -265,8 +301,12 @@
         "type": "Type",
         "tags": [],
         "label": "PngScreenshotResult",
-        "description": ["\nThe final output of a PNG screenshot"],
-        "signature": ["CaptureResult"],
+        "description": [
+          "\nThe final output of a PNG screenshot"
+        ],
+        "signature": [
+          "CaptureResult"
+        ],
         "path": "x-pack/plugins/screenshotting/server/formats/png.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -332,7 +372,9 @@
       "type": "Interface",
       "tags": [],
       "label": "ScreenshottingStart",
-      "description": ["\nStart public contract."],
+      "description": [
+        "\nStart public contract."
+      ],
       "path": "x-pack/plugins/screenshotting/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -343,12 +385,20 @@
           "type": "Function",
           "tags": [],
           "label": "diagnose",
-          "description": ["\nRuns browser diagnostics."],
-          "signature": ["(overrideFlags?: string[]) => ", "Observable", "<string>"],
+          "description": [
+            "\nRuns browser diagnostics."
+          ],
+          "signature": [
+            "(overrideFlags?: string[]) => ",
+            "Observable",
+            "<string>"
+          ],
           "path": "x-pack/plugins/screenshotting/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false,
-          "returnComment": ["Observable with output messages."],
+          "returnComment": [
+            "Observable with output messages."
+          ],
           "children": [
             {
               "parentPluginId": "screenshotting",
@@ -357,7 +407,9 @@
               "tags": [],
               "label": "overrideFlags",
               "description": [],
-              "signature": ["string[]"],
+              "signature": [
+                "string[]"
+              ],
               "path": "x-pack/plugins/screenshotting/server/browsers/chromium/driver_factory/index.ts",
               "deprecated": false,
               "trackAdoption": false
@@ -370,7 +422,9 @@
           "type": "Function",
           "tags": [],
           "label": "getScreenshots",
-          "description": ["\nTakes screenshots of multiple pages."],
+          "description": [
+            "\nTakes screenshots of multiple pages."
+          ],
           "signature": [
             "{ (options: ",
             {
@@ -441,7 +495,9 @@
         "type": "Interface",
         "tags": [],
         "label": "PerformanceMetrics",
-        "description": ["\nCollected performance metrics during a screenshotting session."],
+        "description": [
+          "\nCollected performance metrics during a screenshotting session."
+        ],
         "path": "x-pack/plugins/screenshotting/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -455,7 +511,9 @@
             "description": [
               "\nThe percentage of CPU time spent by the browser divided by number or cores."
             ],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/screenshotting/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -466,8 +524,12 @@
             "type": "number",
             "tags": [],
             "label": "cpuInPercentage",
-            "description": ["\nThe percentage of CPU in percent untis."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe percentage of CPU in percent untis."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/screenshotting/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -478,8 +540,12 @@
             "type": "number",
             "tags": [],
             "label": "memory",
-            "description": ["\nThe total amount of memory used by the browser."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe total amount of memory used by the browser."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/screenshotting/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -490,8 +556,12 @@
             "type": "number",
             "tags": [],
             "label": "memoryInMegabytes",
-            "description": ["\nThe total amount of memory used by the browser in megabytes."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nThe total amount of memory used by the browser in megabytes."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/plugins/screenshotting/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -508,7 +578,9 @@
         "type": "Type",
         "tags": [],
         "label": "LayoutParams",
-        "description": ["\nScreenshot layout parameters."],
+        "description": [
+          "\nScreenshot layout parameters."
+        ],
         "signature": [
           "{ id?: Id | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
@@ -543,8 +615,12 @@
         "type": "Type",
         "tags": [],
         "label": "LayoutType",
-        "description": ["\nSupported layout types."],
-        "signature": ["\"canvas\" | \"print\" | \"preserve_layout\""],
+        "description": [
+          "\nSupported layout types."
+        ],
+        "signature": [
+          "\"canvas\" | \"print\" | \"preserve_layout\""
+        ],
         "path": "x-pack/plugins/screenshotting/common/layout.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -557,7 +633,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"screenshotting\""],
+        "signature": [
+          "\"screenshotting\""
+        ],
         "path": "x-pack/plugins/screenshotting/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -570,7 +648,9 @@
         "tags": [],
         "label": "SCREENSHOTTING_APP_ID",
         "description": [],
-        "signature": ["\"screenshotting\""],
+        "signature": [
+          "\"screenshotting\""
+        ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -583,7 +663,9 @@
         "tags": [],
         "label": "SCREENSHOTTING_EXPRESSION",
         "description": [],
-        "signature": ["\"expression\""],
+        "signature": [
+          "\"expression\""
+        ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -596,7 +678,9 @@
         "tags": [],
         "label": "SCREENSHOTTING_EXPRESSION_INPUT",
         "description": [],
-        "signature": ["\"input\""],
+        "signature": [
+          "\"input\""
+        ],
         "path": "x-pack/plugins/screenshotting/common/expression.ts",
         "deprecated": false,
         "trackAdoption": false,

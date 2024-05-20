@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
+import type { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import type { ColumnRenderer } from './column_renderer';
 
 const unhandledColumnRenderer = (): never => {

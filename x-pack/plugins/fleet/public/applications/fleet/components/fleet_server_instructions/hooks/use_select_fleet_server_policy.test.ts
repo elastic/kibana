@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createFleetTestRendererMock } from '../../../../../mock';
 import { useGetEnrollmentSettings } from '../../../hooks';
+import { createFleetTestRendererMock } from '../../../../../mock';
 
 import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
 

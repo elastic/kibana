@@ -6,28 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { configServiceMock, getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
+import { duration } from 'moment';
+import { first } from 'rxjs';
+import { REPO_ROOT, fromRoot } from '@kbn/repo-info';
+import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import { REPO_ROOT, fromRoot } from '@kbn/repo-info';
-import { duration } from 'moment';
-import { first } from 'rxjs';
 import {
-  InstanceInfo,
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
+  InstanceInfo,
 } from './plugin_context';
 
-import { ConfigService, Env } from '@kbn/config';
-import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { PluginType } from '@kbn/core-base-common';
 import { PluginManifest } from '@kbn/core-plugins-server';
+import { schema, ByteSizeValue } from '@kbn/config-schema';
+import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
 
-import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { createCoreContextConfigServiceMock } from './test_helpers';
 
 function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): PluginManifest {

@@ -12,8 +12,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 import { stringHash } from '@kbn/ml-string-hash';
+import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { buildSamplerAggregation } from './build_sampler_aggregation';
 import { getSamplerAggregationsResponsePath } from './get_sampler_aggregations_response_path';
@@ -62,18 +62,15 @@ export const fetchAggIntervals = async (
     return {};
   }
 
-  const minMaxAggs = numericColumns.reduce(
-    (aggs, c) => {
-      const id = stringHash(c.fieldName);
-      aggs[id] = {
-        stats: {
-          field: c.fieldName,
-        },
-      };
-      return aggs;
-    },
-    {} as Record<string, object>
-  );
+  const minMaxAggs = numericColumns.reduce((aggs, c) => {
+    const id = stringHash(c.fieldName);
+    aggs[id] = {
+      stats: {
+        field: c.fieldName,
+      },
+    };
+    return aggs;
+  }, {} as Record<string, object>);
 
   const { wrap, unwrap } = createRandomSamplerWrapper({
     probability: randomSamplerProbability ?? 1,
@@ -105,8 +102,8 @@ export const fetchAggIntervals = async (
     aggsPath.length > 0
       ? get(body.aggregations, aggsPath)
       : randomSamplerProbability !== undefined && body.aggregations !== undefined
-        ? unwrap(body.aggregations)
-        : body.aggregations;
+      ? unwrap(body.aggregations)
+      : body.aggregations;
 
   return Object.keys(aggregations).reduce((p, aggName) => {
     if (aggregations === undefined) {

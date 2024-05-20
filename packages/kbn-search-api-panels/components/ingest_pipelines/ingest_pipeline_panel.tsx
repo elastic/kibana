@@ -8,17 +8,17 @@
 
 import React, { useMemo } from 'react';
 
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
-  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
   EuiTitle,
+  EuiBadge,
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createIngestPipelineOptions } from './ingest_pipeline_options';
 
 interface IngestPipelinePanelProps {

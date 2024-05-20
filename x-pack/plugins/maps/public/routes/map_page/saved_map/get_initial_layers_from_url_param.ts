@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
+import { i18n } from '@kbn/i18n';
 import { LayerDescriptor } from '../../../../common';
-import { INITIAL_LAYERS_KEY } from '../../../../common/constants';
 import { getToasts } from '../../../kibana_services';
+import { INITIAL_LAYERS_KEY } from '../../../../common/constants';
 
 function isObj(v: unknown): v is Record<string, unknown> {
   return typeof v === 'object' && v !== null;

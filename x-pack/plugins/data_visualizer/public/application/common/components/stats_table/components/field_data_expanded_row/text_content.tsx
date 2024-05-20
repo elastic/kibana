@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { Fragment } from 'react';
+import { EuiCallOut, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
-import { ExamplesList } from '../../../examples_list';
 import type { FieldDataRowProps } from '../../types/field_data_row';
+import { ExamplesList } from '../../../examples_list';
 import { ExpandedRowContent } from './expanded_row_content';
 
 export const TextContent: FC<FieldDataRowProps> = ({ config }) => {

@@ -6,10 +6,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildEventsSearchQuery } from '../../utils/build_events_query';
+import type { EventCountOptions, EventsOptions, EventDoc } from './types';
 import { getQueryFilter } from '../../utils/get_query_filter';
 import { singleSearchAfter } from '../../utils/single_search_after';
-import type { EventCountOptions, EventDoc, EventsOptions } from './types';
+import { buildEventsSearchQuery } from '../../utils/build_events_query';
 
 export const MAX_PER_PAGE = 9000;
 

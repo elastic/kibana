@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { DataViewBase } from '@kbn/es-query';
-import { AndBadgeComponent } from './and_badge';
-import { EntryDeleteButtonComponent } from './entry_delete_button';
-import { EntryItem } from './entry_item';
 import { getFormattedEntries, getUpdatedEntriesOnDelete } from './helpers';
-import type { Entry, FormattedEntry, ThreatMapEntries } from './types';
+import type { FormattedEntry, ThreatMapEntries, Entry } from './types';
+import { EntryItem } from './entry_item';
+import { EntryDeleteButtonComponent } from './entry_delete_button';
+import { AndBadgeComponent } from './and_badge';
 
 const MyOverflowContainer = styled(EuiFlexItem)`
   overflow: hidden;

@@ -7,8 +7,8 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React from 'react';
-import { SecuritySolutionTemplateWrapper, type SecuritySolutionTemplateWrapperProps } from '.';
 import { TestProviders } from '../../../common/mock';
+import { SecuritySolutionTemplateWrapper, type SecuritySolutionTemplateWrapperProps } from '.';
 import { SecurityPageName } from '../../types';
 
 const mockUseShowTimeline = jest.fn((): [boolean] => [false]);

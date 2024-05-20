@@ -9,8 +9,8 @@ import { getNormalizedDataStreams } from '../../../../../../common/services';
 
 import { installIndexTemplatesAndPipelines } from '../../install_index_template_pipeline';
 
-import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
+import { withPackageSpan } from '../../utils';
 
 export async function stepInstallIndexTemplatePipelines(context: InstallContext) {
   const { esClient, savedObjectsClient, packageInstallContext, logger, installedPkg } = context;

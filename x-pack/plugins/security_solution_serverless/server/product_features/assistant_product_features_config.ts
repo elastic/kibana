@@ -14,8 +14,8 @@ import {
   createEnabledProductFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
 import type {
-  AssistantSubFeatureId,
   ProductFeatureAssistantKey,
+  AssistantSubFeatureId,
 } from '@kbn/security-solution-features/keys';
 
 export const getSecurityAssistantProductFeaturesConfigurator =

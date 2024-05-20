@@ -1,4 +1,3 @@
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,9 +5,10 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { useSpaceId } from '../../../hooks/use_space_id';
-import { useAvailableSteps } from './hooks/use_available_steps';
+import { render } from '@testing-library/react';
 import { OnboardingWithSettings } from './onboarding_with_settings';
+import { useAvailableSteps } from './hooks/use_available_steps';
+import { useSpaceId } from '../../../hooks/use_space_id';
 
 const useAvailableStepsMock = useAvailableSteps as jest.Mock;
 const useSpaceIdMock = useSpaceId as jest.Mock;

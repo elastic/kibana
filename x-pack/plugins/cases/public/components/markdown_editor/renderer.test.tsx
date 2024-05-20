@@ -7,10 +7,10 @@
 
 import React from 'react';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { removeExternalLinkText } from '../../common/test_utils';
 import { MarkdownRenderer } from './renderer';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 describe('Markdown', () => {
   let appMockRender: AppMockRenderer;

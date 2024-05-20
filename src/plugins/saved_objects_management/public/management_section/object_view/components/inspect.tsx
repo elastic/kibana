@@ -1,8 +1,3 @@
-import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import { XJsonLang } from '@kbn/monaco';
-import { omit } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -11,6 +6,11 @@ import { omit } from 'lodash';
  * Side Public License, v 1.
  */
 import React, { FC, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { XJsonLang } from '@kbn/monaco';
+import { omit } from 'lodash';
+import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { CodeEditor } from '@kbn/code-editor';
 import { SavedObjectWithMetadata } from '../../../../common';
 
 export interface InspectProps {

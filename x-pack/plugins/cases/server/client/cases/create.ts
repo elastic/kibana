@@ -9,19 +9,19 @@ import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { Case } from '../../../common/types/domain';
-import { CaseRt, CaseSeverity, UserActionTypes } from '../../../common/types/domain';
-import { decodeOrThrow, decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { CaseSeverity, UserActionTypes, CaseRt } from '../../../common/types/domain';
+import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 
-import type { CasesClient, CasesClientArgs } from '..';
-import type { CasePostRequest } from '../../../common/types/api';
-import { CasePostRequestRt } from '../../../common/types/api';
 import { Operations } from '../../authorization';
-import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject, transformNewCase } from '../../common/utils';
+import type { CasesClient, CasesClientArgs } from '..';
+import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
+import type { CasePostRequest } from '../../../common/types/api';
+import { CasePostRequestRt } from '../../../common/types/api';
 import {} from '../utils';
-import { normalizeCreateCaseRequest } from './utils';
 import { validateCustomFields } from './validators';
+import { normalizeCreateCaseRequest } from './utils';
 
 /**
  * Creates a new case.

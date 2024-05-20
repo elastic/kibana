@@ -9,8 +9,8 @@
 import React, { Fragment } from 'react';
 import type { FieldStatsProps, FieldStatsServices, FieldStatsState } from './field_stats';
 import type {
-  FieldTopValuesBucketParams,
   FieldTopValuesBucketProps,
+  FieldTopValuesBucketParams,
 } from './field_top_values_bucket';
 
 const Fallback = () => <Fragment />;

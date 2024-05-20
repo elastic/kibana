@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FILTERS, FilterStateStore, buildFilter } from '.';
+import { buildFilter, FilterStateStore, FILTERS } from '.';
 import { DataViewBase } from '../../..';
 import { fields as stubFields } from '../stubs';
 

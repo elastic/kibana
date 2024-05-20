@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiCode, EuiConfirmModal } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiConfirmModal, EuiBadge, EuiCode } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
-import { TYPE_DEFINITION } from '../../../constants';
+import { NormalizedFields, NormalizedField } from '../../../types';
 import { buildFieldTreeFromIds } from '../../../lib';
-import { NormalizedField, NormalizedFields } from '../../../types';
 import { FieldsTree } from '../../fields_tree';
+import { TYPE_DEFINITION } from '../../../constants';
 
 interface Props {
   title: string;

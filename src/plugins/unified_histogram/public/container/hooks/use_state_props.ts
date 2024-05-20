@@ -7,7 +7,7 @@
  */
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { useCallback, useEffect, useMemo } from 'react';
 import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
@@ -15,11 +15,11 @@ import type { UnifiedHistogramStateService } from '../services/state_service';
 import {
   breakdownFieldSelector,
   chartHiddenSelector,
-  lensAdaptersSelector,
-  lensEmbeddableOutputSelector$,
   timeIntervalSelector,
   totalHitsResultSelector,
   totalHitsStatusSelector,
+  lensAdaptersSelector,
+  lensEmbeddableOutputSelector$,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 

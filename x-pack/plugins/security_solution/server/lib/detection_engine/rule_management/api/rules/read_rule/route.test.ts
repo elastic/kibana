@@ -8,18 +8,18 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import { requestContextMock, requestMock, serverMock } from '../../../../routes/__mocks__';
+import { readRuleRoute } from './route';
 import {
   getEmptyFindResult,
-  getEmptySavedObjectsResponse,
-  getFindResultWithSingleHit,
   getReadRequest,
   getReadRequestWithId,
+  getFindResultWithSingleHit,
   nonRuleFindResult,
+  getEmptySavedObjectsResponse,
   resolveRuleMock,
 } from '../../../../routes/__mocks__/request_responses';
+import { requestMock, requestContextMock, serverMock } from '../../../../routes/__mocks__';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { readRuleRoute } from './route';
 
 describe('Read rule route', () => {
   let server: ReturnType<typeof serverMock.create>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
 import { OBSERVABILITY_PROJECT_SETTINGS } from '@kbn/serverless-observability-settings';
 import type {

@@ -7,8 +7,8 @@
  */
 
 import type {
-  AggregationsAggregationContainer,
   SortOrder,
+  AggregationsAggregationContainer,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { SavedObject } from '../..';

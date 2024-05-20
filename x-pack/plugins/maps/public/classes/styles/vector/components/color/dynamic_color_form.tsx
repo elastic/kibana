@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import _ from 'lodash';
+import React, { ChangeEvent, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,24 +16,21 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
-import React, { ChangeEvent, ReactNode } from 'react';
-import {
-  CATEGORICAL_DATA_TYPES,
-  COLOR_MAP_TYPE,
-  VECTOR_STYLES,
-} from '../../../../../../common/constants';
+import { FieldSelect } from '../field_select';
+import { ColorMapSelect } from './color_map_select';
+import { OtherCategoryColorPicker } from './other_category_color_picker';
 import {
   CategoryColorStop,
   ColorDynamicOptions,
   OrdinalColorStop,
 } from '../../../../../../common/descriptor_types';
-import { DynamicColorProperty } from '../../properties/dynamic_color_property';
+import {
+  CATEGORICAL_DATA_TYPES,
+  COLOR_MAP_TYPE,
+  VECTOR_STYLES,
+} from '../../../../../../common/constants';
 import { StyleField } from '../../style_fields_helper';
-import { FieldSelect } from '../field_select';
-import { ColorMapSelect } from './color_map_select';
-import { OtherCategoryColorPicker } from './other_category_color_picker';
+import { DynamicColorProperty } from '../../properties/dynamic_color_property';
 
 interface Props {
   fields: StyleField[];

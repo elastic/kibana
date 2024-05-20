@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { cloneDeep, forOwn } from 'lodash';
+import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 
 import { DashboardPanelState } from '../../../common';
 import { GridData } from '../../../common/content_management';
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../dashboard_constants';
 import { PanelPlacementProps, PanelPlacementReturn } from './types';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../dashboard_constants';
 
 interface IplacementDirection {
   grid: Omit<GridData, 'i'>;

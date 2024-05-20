@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { DefaultLanguageString } from '.';
+import { left } from 'fp-ts/lib/Either';
 import { Language } from '../language';
+import { DefaultLanguageString } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('default_language_string', () => {
   test('it should validate a string', () => {

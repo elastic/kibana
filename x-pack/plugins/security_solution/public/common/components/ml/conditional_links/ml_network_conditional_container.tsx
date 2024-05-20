@@ -8,12 +8,12 @@
 import { parse, stringify } from 'query-string';
 import React from 'react';
 
-import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
-import { Route, Routes } from '@kbn/shared-ux-router';
 import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
+import { url as urlUtils } from '@kbn/kibana-utils-plugin/public';
 import { addEntitiesToKql } from './add_entities_to_kql';
-import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
 import { replaceKQLParts } from './replace_kql_parts';
+import { emptyEntity, getMultipleEntities, multipleEntities } from './entity_helpers';
 
 import { NETWORK_PATH } from '../../../../../common/constants';
 interface QueryStringType {

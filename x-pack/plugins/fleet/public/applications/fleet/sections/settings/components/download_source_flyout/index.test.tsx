@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { DownloadSource } from '../../../../types';
+import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { EditDownloadSourceFlyout } from '.';
 

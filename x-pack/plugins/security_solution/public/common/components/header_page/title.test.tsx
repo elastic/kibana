@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
-import { useMountAppended } from '../../utils/use_mount_appended';
 import { Title } from './title';
+import { useMountAppended } from '../../utils/use_mount_appended';
 
 jest.mock('../../lib/kibana');
 

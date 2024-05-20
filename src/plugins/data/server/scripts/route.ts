@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION } from '../../common/constants';
 
 export function registerScriptsRoute(router: IRouter) {

@@ -7,7 +7,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { RequestHandler, RequestHandlerContext, RouteMethod } from '@kbn/core/server';
+import type { RequestHandler, RouteMethod, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { ErrorIndexPatternNotFound } from '../../../error';
 

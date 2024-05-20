@@ -10,8 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import { JobType } from '../../../../common/http_api/latest';
 import {
-  DatasetFilter,
   combineDatasetFilters,
+  DatasetFilter,
   filterDatasetFilter,
   isExampleDataIndex,
 } from '../../../../common/log_analysis';

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiSuperDatePicker } from '@elastic/eui';
 import React, { useContext, useEffect } from 'react';
+import { EuiSuperDatePicker } from '@elastic/eui';
+import { useUrlParams } from '../../../hooks';
 import { CLIENT_DEFAULTS } from '../../../../../../common/constants';
 import {
-  SyntheticsRefreshContext,
   SyntheticsSettingsContext,
   SyntheticsStartupPluginsContext,
+  SyntheticsRefreshContext,
 } from '../../../contexts';
-import { useUrlParams } from '../../../hooks';
 
 export const SyntheticsDatePicker = ({ fullWidth }: { fullWidth?: boolean }) => {
   const [getUrlParams, updateUrl] = useUrlParams();

@@ -1,35 +1,35 @@
-import { IconChartMetric } from '@kbn/chart-icons';
-import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
-import { CUSTOM_PALETTE, PaletteOutput, PaletteRegistry, shiftPalette } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
-import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import {
-  ExpressionFunctionFont,
-  FontWeight,
-  TextAlignment,
-  buildExpression,
-  buildExpressionFunction,
-} from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { Ast } from '@kbn/interpreter';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */ import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { Ast } from '@kbn/interpreter';
+import { PaletteOutput, PaletteRegistry, CUSTOM_PALETTE, shiftPalette } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { ColorMode, CustomPaletteState } from '@kbn/charts-plugin/common';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { IconChartMetric } from '@kbn/chart-icons';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import {
+  buildExpression,
+  buildExpressionFunction,
+  ExpressionFunctionFont,
+  FontWeight,
+  TextAlignment,
+} from '@kbn/expressions-plugin/common';
+import { ExpressionFunctionVisDimension } from '@kbn/visualizations-plugin/common';
+import type { MetricVisExpressionFunctionDefinition } from '@kbn/expression-legacy-metric-vis-plugin/common';
+import { getSuggestions } from './metric_suggestions';
+import { Visualization, OperationMetadata, DatasourceLayers, FramePublicAPI } from '../../types';
 import type { LegacyMetricState } from '../../../common/types';
-import { DatasourceLayers, FramePublicAPI, OperationMetadata, Visualization } from '../../types';
 import { MetricDimensionEditor } from './dimension_editor';
 import { MetricToolbar } from './metric_config_panel';
-import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
-import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
 import { DEFAULT_TITLE_POSITION } from './metric_config_panel/title_position_option';
-import { getSuggestions } from './metric_suggestions';
+import { DEFAULT_TITLE_SIZE } from './metric_config_panel/size_options';
+import { DEFAULT_TEXT_ALIGNMENT } from './metric_config_panel/align_options';
 
 interface MetricConfig extends Omit<LegacyMetricState, 'palette' | 'colorMode'> {
   title: string;

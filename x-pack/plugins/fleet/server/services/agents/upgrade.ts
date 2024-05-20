@@ -6,15 +6,15 @@
  */
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { SO_SEARCH_LIMIT } from '../../constants';
-import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import type { Agent } from '../../types';
+import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { SO_SEARCH_LIMIT } from '../../constants';
 
 import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import { openPointInTime } from './crud';
 import { getAgentsByKuery } from './crud';
-import { getAgentPolicyForAgent, getAgentsById, updateAgent } from './crud';
+import { getAgentsById, updateAgent, getAgentPolicyForAgent } from './crud';
 import { UpgradeActionRunner, upgradeBatch } from './upgrade_action_runner';
 
 export async function sendUpgradeAgentAction({

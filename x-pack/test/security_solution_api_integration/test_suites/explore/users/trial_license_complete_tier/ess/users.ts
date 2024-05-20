@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import {
-  Direction,
-  FlowTarget,
   NetworkQueries,
+  Direction,
   NetworkUsersFields,
+  FlowTarget,
   NetworkUsersStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 

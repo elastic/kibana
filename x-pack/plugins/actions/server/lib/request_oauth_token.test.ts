@@ -8,11 +8,11 @@
 jest.mock('axios', () => ({
   create: jest.fn(),
 }));
+import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import axios from 'axios';
-import { actionsConfigMock } from '../actions_config.mock';
 import { requestOAuthToken } from './request_oauth_token';
+import { actionsConfigMock } from '../actions_config.mock';
 
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = jest.fn();

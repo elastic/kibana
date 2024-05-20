@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import { mockAnomalies } from '../mock';
+import { cloneDeep } from 'lodash/fp';
 import { getTopSeverityJobs } from './get_top_severity';
 
 describe('get_top_severity', () => {

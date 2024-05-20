@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import {
-  EuiCallOut,
-  EuiCode,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiPageBody,
-  EuiPageSection,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import {
+  EuiPageBody,
+  EuiPageSection,
+  EuiText,
+  EuiSpacer,
+  EuiIcon,
+  EuiCallOut,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiCode,
+  EuiCodeBlock,
+  EuiLink,
+} from '@elastic/eui';
 
 import styled from 'styled-components';
 
-import { useStartServices } from '../../../hooks';
 import { WithoutHeaderLayout } from '../../../layouts';
 import type { GetFleetStatusResponse } from '../../../types';
+import { useStartServices } from '../../../hooks';
 
 export const RequirementItem: React.FunctionComponent<{
   children: React.ReactNode;

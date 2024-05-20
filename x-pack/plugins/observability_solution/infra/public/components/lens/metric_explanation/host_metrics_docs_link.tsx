@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import {
   HOST_METRICS_DOC_HREF,
   HOST_METRICS_DOTTED_LINES_DOC_HREF,

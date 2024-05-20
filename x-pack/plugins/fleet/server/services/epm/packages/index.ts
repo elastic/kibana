@@ -7,8 +7,8 @@
 
 import type { SavedObject } from '@kbn/core/server';
 
-import { installationStatuses } from '../../../../common/constants';
 import { KibanaSavedObjectType } from '../../../../common/types';
+import { installationStatuses } from '../../../../common/constants';
 import { KibanaAssetType } from '../../../types';
 import type { AssetType, Installable, Installation } from '../../../types';
 

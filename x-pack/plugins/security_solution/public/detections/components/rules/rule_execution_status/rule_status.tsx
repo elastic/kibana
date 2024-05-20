@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../common/components/formatted_date';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { getStatusText, getStatusColor } from './utils';
 import * as i18n from './translations';
-import { getStatusColor, getStatusText } from './utils';
 
 interface RuleStatusProps {
   status: RuleExecutionStatus | null | undefined;

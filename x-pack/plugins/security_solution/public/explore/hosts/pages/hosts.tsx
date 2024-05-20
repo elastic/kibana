@@ -6,54 +6,54 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import type { Filter } from '@kbn/es-query';
-import { TableId, dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
-import { isTab } from '@kbn/timelines-plugin/public';
+import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import styled from 'styled-components';
-import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
+import type { Filter } from '@kbn/es-query';
+import { isTab } from '@kbn/timelines-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
+import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
-import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { LastEventIndexKey, RiskScoreEntity } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import type { State } from '../../../common/store';
 import { inputsSelectors } from '../../../common/store';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { HostsKpiComponent } from '../components/kpi_hosts';
 
-import { EmptyPrompt } from '../../../common/components/empty_prompt';
-import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
-import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { useLicense } from '../../../common/hooks/use_license';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { useHasSecurityCapability } from '../../../helper_hooks';
+import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
+import { Display } from './display';
+import { HostsTabs } from './hosts_tabs';
+import { navTabsHosts } from './nav_tabs';
+import * as i18n from './translations';
+import { hostsModel, hostsSelectors } from '../store';
+import { generateSeverityFilter } from '../store/helpers';
+import { HostsTableType } from '../store/model';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { ID } from '../containers/hosts';
-import { hostsModel, hostsSelectors } from '../store';
-import { generateSeverityFilter } from '../store/helpers';
-import { HostsTableType } from '../store/model';
-import { Display } from './display';
-import { HostsTabs } from './hosts_tabs';
-import { navTabsHosts } from './nav_tabs';
-import * as i18n from './translations';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
+import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
+import { useLicense } from '../../../common/hooks/use_license';
+import { useHasSecurityCapability } from '../../../helper_hooks';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase, KueryNode } from '../../../..';
 import * as literal from '../../node_types/literal';
 import * as wildcard from '../../node_types/wildcard';
+import { DataViewBase, KueryNode } from '../../../..';
 
 export function getFields(node: KueryNode, indexPattern?: DataViewBase) {
   if (!indexPattern) return [];

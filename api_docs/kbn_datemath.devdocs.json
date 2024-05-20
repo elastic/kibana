@@ -40,7 +40,9 @@
             "tags": [],
             "label": "input",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "packages/kbn-datemath/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -64,7 +66,9 @@
                 "tags": [],
                 "label": "roundUp",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -76,7 +80,9 @@
                 "tags": [],
                 "label": "momentInstance",
                 "description": [],
-                "signature": ["typeof moment | undefined"],
+                "signature": [
+                  "typeof moment | undefined"
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -88,7 +94,9 @@
                 "tags": [],
                 "label": "forceNow",
                 "description": [],
-                "signature": ["Date | undefined"],
+                "signature": [
+                  "Date | undefined"
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -110,7 +118,9 @@
         "tags": [],
         "label": "Unit",
         "description": [],
-        "signature": ["\"m\" | \"y\" | \"M\" | \"w\" | \"d\" | \"h\" | \"s\" | \"ms\""],
+        "signature": [
+          "\"m\" | \"y\" | \"M\" | \"w\" | \"d\" | \"h\" | \"s\" | \"ms\""
+        ],
         "path": "packages/kbn-datemath/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -239,7 +249,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"fixed\""],
+                "signature": [
+                  "\"fixed\""
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -286,7 +298,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"fixed\""],
+                "signature": [
+                  "\"fixed\""
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -333,7 +347,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"mixed\""],
+                "signature": [
+                  "\"mixed\""
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -380,7 +396,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"mixed\""],
+                "signature": [
+                  "\"mixed\""
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -427,7 +445,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"mixed\""],
+                "signature": [
+                  "\"mixed\""
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -474,7 +494,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"calendar\""],
+                "signature": [
+                  "\"calendar\""
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -521,7 +543,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"calendar\""],
+                "signature": [
+                  "\"calendar\""
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -570,7 +594,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["\"calendar\""],
+                "signature": [
+                  "\"calendar\""
+                ],
                 "path": "packages/kbn-datemath/index.ts",
                 "deprecated": false,
                 "trackAdoption": false

@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { LeftPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
+import { SESSION_VIEW_TEST_ID } from './test_ids';
+import { SessionView } from './session_view';
 import {
   ANCESTOR_INDEX,
   ENTRY_LEADER_ENTITY_ID,
   ENTRY_LEADER_START,
 } from '../../shared/constants/field_names';
-import { LeftPanelContext } from '../context';
-import { SessionView } from './session_view';
-import { SESSION_VIEW_TEST_ID } from './test_ids';
 
 interface MockData {
   [key: string]: string;

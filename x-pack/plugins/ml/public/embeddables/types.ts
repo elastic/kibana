@@ -21,10 +21,10 @@ import type {
   HasEditCapabilities,
   HasParentApi,
   HasType,
-  PublishesTimeRange,
   PublishesUnifiedSearch,
-  PublishesWritablePanelTitle,
   PublishingSubject,
+  PublishesTimeRange,
+  PublishesWritablePanelTitle,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
@@ -39,9 +39,9 @@ import type { MlFieldFormatService } from '../application/services/field_format_
 import type { MlJobService } from '../application/services/job_service';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import type { MlResultsService } from '../application/services/results_service';
-import type { ToastNotificationService } from '../application/services/toast_notification_service';
 import type { MlTimeSeriesSearchService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import type { TimeSeriesExplorerService } from '../application/util/time_series_explorer_service';
+import type { ToastNotificationService } from '../application/services/toast_notification_service';
 import type {
   AnomalyExplorerChartsEmbeddableType,
   AnomalySwimLaneEmbeddableType,
@@ -90,7 +90,7 @@ export interface AnomalySwimlaneServices {
 export type AnomalySwimlaneEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  AnomalySwimlaneServices,
+  AnomalySwimlaneServices
 ];
 
 export type EditSwimLaneActionApi = HasType<AnomalySwimLaneEmbeddableType> &
@@ -203,7 +203,7 @@ export type AnomalyChartsEmbeddableServices = [CoreStart, MlDependencies, Anomal
 export type SingleMetricViewerEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  SingleMetricViewerServices,
+  SingleMetricViewerServices
 ];
 export interface AnomalyChartsCustomOutput {
   entityFields?: MlEntityField[];

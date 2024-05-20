@@ -11,7 +11,7 @@ import { HasType, PublishesUnsavedChanges, StateComparators } from '@kbn/present
 import React, { ReactElement } from 'react';
 
 export type ReactEmbeddableRegistration<
-  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi,
+  ApiType extends DefaultEmbeddableApi = DefaultEmbeddableApi
 > = (ref: React.ForwardedRef<ApiType>) => ReactElement | null;
 
 /**
@@ -31,7 +31,7 @@ export interface DefaultEmbeddableApi<SerializedState extends object = object>
  */
 export type ReactEmbeddableApiRegistration<
   StateType extends object = object,
-  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>,
+  ApiType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
 > = Omit<ApiType, 'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'>;
 
 /**
@@ -44,7 +44,7 @@ export type ReactEmbeddableApiRegistration<
 export interface ReactEmbeddableFactory<
   SerializedState extends object = object,
   ApiType extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
-  RuntimeState extends object = SerializedState,
+  RuntimeState extends object = SerializedState
 > {
   /**
    * A unique key for the type of this embeddable. The React Embeddable Renderer will use this type

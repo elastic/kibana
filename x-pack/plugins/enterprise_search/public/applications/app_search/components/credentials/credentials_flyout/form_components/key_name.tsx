@@ -7,9 +7,9 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { CredentialsLogic } from '../../credentials_logic';

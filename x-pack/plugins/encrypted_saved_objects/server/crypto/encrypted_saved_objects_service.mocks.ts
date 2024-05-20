@@ -6,8 +6,8 @@
  */
 
 import type {
-  EncryptedSavedObjectTypeRegistration,
   EncryptedSavedObjectsService,
+  EncryptedSavedObjectTypeRegistration,
   SavedObjectDescriptor,
 } from './encrypted_saved_objects_service';
 

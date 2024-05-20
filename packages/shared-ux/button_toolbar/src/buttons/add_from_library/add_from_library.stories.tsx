@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
-import mdx from '../../../README.mdx';
 import { AddFromLibraryButton as Component } from './add_from_library';
+import mdx from '../../../README.mdx';
 
 export default {
   title: 'Button Toolbar/Buttons',

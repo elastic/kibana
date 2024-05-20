@@ -1,4 +1,3 @@
-import type { CoreSetup, CoreStart } from '@kbn/core/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import type { CoreSetup, CoreStart } from '@kbn/core/public';
  * 2.0.
  */
 import type { EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { CoreStart, CoreSetup } from '@kbn/core/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import type { ApmPluginStartDeps, ApmPluginSetupDeps } from '../plugin';
 import type { ConfigSchema } from '..';
 import type { KibanaEnvContext } from '../context/kibana_environment_context/kibana_environment_context';
-import type { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 export interface EmbeddableDeps {
   coreStart: CoreStart;
   pluginsStart: ApmPluginStartDeps;

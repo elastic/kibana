@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
 import { Embeddings, EmbeddingsParams } from '@langchain/core/embeddings';
+import { Logger } from '@kbn/core/server';
 
 /**
  * Shell class for Elasticsearch embeddings as not needed in ElasticsearchStore since ELSER embeds on index

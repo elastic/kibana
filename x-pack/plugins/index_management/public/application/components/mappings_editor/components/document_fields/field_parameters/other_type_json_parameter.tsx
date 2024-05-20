@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
-  FieldConfig,
-  JsonEditorField,
   UseField,
+  JsonEditorField,
   ValidationFuncArg,
   fieldValidators,
+  FieldConfig,
 } from '../../../shared_imports';
 
 const { isJsonField } = fieldValidators;

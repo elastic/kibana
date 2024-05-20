@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
 import { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { FieldFormatInstanceType } from '@kbn/field-formats-plugin/common';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
-import { FieldEdiorProps, FieldEditor } from './field_editor';
+import { FieldEditor, FieldEdiorProps } from './field_editor';
 
 import { mockManagementPlugin } from '../../mocks';
 import { createComponentWithContext } from '../test_utils';
@@ -105,7 +105,7 @@ describe('FieldEditor', () => {
 
   const mockContext = mockManagementPlugin.createIndexPatternManagmentContext();
   mockContext.fieldFormats.getDefaultType = jest.fn(
-    () => ({}) as unknown as FieldFormatInstanceType
+    () => ({} as unknown as FieldFormatInstanceType)
   );
   mockContext.fieldFormats.getByFieldType = jest.fn((fieldType) => {
     if (fieldType === 'number') {

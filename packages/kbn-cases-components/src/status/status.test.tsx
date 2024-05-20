@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
-import { getStatusConfiguration } from './config';
 import { Status } from './status';
 import { CaseStatuses } from './types';
+import { getStatusConfiguration } from './config';
 
 const statusConfiguration = getStatusConfiguration();
 

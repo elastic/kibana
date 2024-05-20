@@ -1,8 +1,3 @@
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
-import { omit } from 'lodash';
-import { debounce } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,13 +5,18 @@ import { debounce } from 'lodash';
  * 2.0.
  */
 import React, { ReactNode, useState } from 'react';
+import { omit } from 'lodash';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ALL_VALUE, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
+import { debounce } from 'lodash';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
+import { OptionalText } from '../common/optional_text';
 import {
-  Suggestion,
   useFetchSyntheticsSuggestions,
+  Suggestion,
 } from '../../../../hooks/use_fetch_synthetics_suggestions';
 import { CreateSLOForm } from '../../types';
-import { OptionalText } from '../common/optional_text';
 
 interface Option {
   label: string;

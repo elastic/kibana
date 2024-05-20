@@ -7,9 +7,9 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
+import { getAggValue } from './get_agg_value';
 import type { Metric } from '../../../../common/types';
 import type { PanelDataArray } from '../../../../common/types/vis_data';
-import { getAggValue } from './get_agg_value';
 
 export const mapEmptyToZero = (
   metric: Metric,

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import React, { FC, PropsWithChildren } from 'react';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
-import {
-  CustomIntegration,
-  ROUTES_APPEND_CUSTOM_INTEGRATIONS,
-  ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
-} from '../common';
 import {
   CustomIntegrationsSetup,
   CustomIntegrationsStart,
   CustomIntegrationsStartDependencies,
 } from './types';
+import {
+  CustomIntegration,
+  ROUTES_APPEND_CUSTOM_INTEGRATIONS,
+  ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
+} from '../common';
 
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/kibana';

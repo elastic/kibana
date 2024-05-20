@@ -7,8 +7,8 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { IndexMappingProps } from '@kbn/index-management';
-import { ExtensionsService } from '../../../../../services/extensions_service';
 import { AppDependencies } from '../../../../app_context';
+import { ExtensionsService } from '../../../../../services/extensions_service';
 
 export type IndexMappingWithContextProps = {
   core: CoreStart;

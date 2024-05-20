@@ -11,11 +11,11 @@
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { lazy } from 'react';
 import {
-  ObservabilityPublicPluginsSetup,
-  ObservabilityPublicPluginsStart,
-  ObservabilityPublicSetup,
-  ObservabilityPublicStart,
   Plugin,
+  ObservabilityPublicPluginsStart,
+  ObservabilityPublicPluginsSetup,
+  ObservabilityPublicStart,
+  ObservabilityPublicSetup,
 } from './plugin';
 export type {
   ObservabilityPublicSetup,
@@ -62,9 +62,9 @@ export { DatePicker } from './pages/overview/components/date_picker/date_picker'
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
 export * from './typings';
+import { TopAlert } from './typings/alerts';
 import { AlertSummary } from './pages/alert_details/components/alert_summary';
 import { AlertSummaryField } from './pages/alert_details/components/alert_summary';
-import { TopAlert } from './typings/alerts';
 export type { TopAlert, AlertSummary, AlertSummaryField };
 
 export { observabilityFeatureId, observabilityAppId } from '../common';

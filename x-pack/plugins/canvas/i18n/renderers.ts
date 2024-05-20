@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HTML, JSON, MARKDOWN } from './constants';
+import { JSON, HTML, MARKDOWN } from './constants';
 
 export const RendererStrings = {
   advancedFilter: {

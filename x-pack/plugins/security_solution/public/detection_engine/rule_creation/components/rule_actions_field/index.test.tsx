@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
+import { shallow } from 'enzyme';
 
 import { RuleActionsField } from '.';
+import { useForm, Form } from '../../../../shared_imports';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useFormFieldMock } from '../../../../common/mock';
-import { Form, useForm } from '../../../../shared_imports';
 jest.mock('../../../../common/lib/kibana');
 
 describe('RuleActionsField', () => {

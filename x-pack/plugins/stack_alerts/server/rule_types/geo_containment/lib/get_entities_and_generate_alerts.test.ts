@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { getEntitiesAndGenerateAlerts } from './get_entities_and_generate_alerts';
 import { OTHER_CATEGORY } from '../constants';
 import type { GeoContainmentAlertInstanceContext } from '../types';
-import { getEntitiesAndGenerateAlerts } from './get_entities_and_generate_alerts';
 
 describe('getEntitiesAndGenerateAlerts', () => {
   const alerts: unknown[] = [];

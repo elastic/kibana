@@ -9,10 +9,10 @@ import fs from 'fs/promises';
 
 import apm from 'elastic-apm-node';
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import { compact } from 'lodash';
 import pMap from 'p-map';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { MessageSigningError } from '../../common/errors';
 
@@ -21,36 +21,36 @@ import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
 
 import { appContextService } from './app_context';
-import { downloadSourceService } from './download_source';
-import { outputService } from './output';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
-import {
-  ensurePreconfiguredFleetProxies,
-  getPreconfiguredFleetProxiesFromConfig,
-} from './preconfiguration/fleet_proxies';
 import {
   ensurePreconfiguredOutputs,
   getPreconfiguredOutputFromConfig,
 } from './preconfiguration/outputs';
+import {
+  ensurePreconfiguredFleetProxies,
+  getPreconfiguredFleetProxiesFromConfig,
+} from './preconfiguration/fleet_proxies';
+import { outputService } from './output';
+import { downloadSourceService } from './download_source';
 
 import { getRegistryUrl, settingsService } from '.';
+import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
 import { ensureDefaultComponentTemplates } from './epm/elasticsearch/template/install';
 import { getInstallations, reinstallPackageForInstallation } from './epm/packages';
 import { isPackageInstalled } from './epm/packages/install';
-import { migrateSettingsToFleetServerHost } from './fleet_server_host';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
+import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
+import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
+import { migrateSettingsToFleetServerHost } from './fleet_server_host';
 import {
   ensurePreconfiguredFleetServerHosts,
   getPreconfiguredFleetServerHostFromConfig,
 } from './preconfiguration/fleet_server_host';
-import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
+import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
 import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
-import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
-import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
-import { awaitIfPending } from './setup_utils';
 
 export interface SetupStatus {
   isInitialized: boolean;

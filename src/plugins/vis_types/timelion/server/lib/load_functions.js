@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import globby from 'globby';
 import _ from 'lodash';
+import globby from 'globby';
 import processFunctionDefinition from './process_function_definition';
 
 export default function (directory) {

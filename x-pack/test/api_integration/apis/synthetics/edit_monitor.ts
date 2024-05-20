@@ -1,13 +1,3 @@
-import expect from '@kbn/expect';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import {
-  ConfigKey,
-  EncryptedSyntheticsSavedMonitor,
-  HTTPFields,
-  MonitorFields,
-} from '@kbn/synthetics-plugin/common/runtime_types';
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
-import { omit, omitBy } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,12 +6,22 @@ import { omit, omitBy } from 'lodash';
  */
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
+import { omit, omitBy } from 'lodash';
+import {
+  ConfigKey,
+  EncryptedSyntheticsSavedMonitor,
+  HTTPFields,
+  MonitorFields,
+} from '@kbn/synthetics-plugin/common/runtime_types';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import expect from '@kbn/expect';
+import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { LOCAL_LOCATION } from './get_filters';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { omitEmptyValues, omitResponseTimestamps } from './helper/monitor';
+import { omitResponseTimestamps, omitEmptyValues } from './helper/monitor';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('EditMonitor', function () {

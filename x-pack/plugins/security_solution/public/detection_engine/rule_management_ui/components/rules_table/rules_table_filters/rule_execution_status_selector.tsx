@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import React, { useState } from 'react';
+import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../../common/api/detection_engine';
-import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
 import { getCapitalizedStatusText } from '../../../../../detections/components/rules/rule_execution_status/utils';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import { RuleStatusBadge } from '../../../../../detections/components/rules/rule_execution_status/rule_status_badge';
 
 interface OptionData {
   status: RuleExecutionStatus;

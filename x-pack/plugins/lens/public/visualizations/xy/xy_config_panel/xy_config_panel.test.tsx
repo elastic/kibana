@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { Position } from '@elastic/charts';
-import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
-import { EuiColorPicker } from '@elastic/eui';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
+import { EuiButtonGroupProps, EuiButtonGroup } from '@elastic/eui';
 import { XyToolbar } from '.';
-import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
-import { DatasourcePublicAPI, FramePublicAPI } from '../../../types';
-import { State, XYDataLayerConfig, XYState } from '../types';
-import { AxisSettingsPopover } from './axis_settings_popover';
 import { DataDimensionEditor } from './dimension_editor';
+import { AxisSettingsPopover } from './axis_settings_popover';
+import { FramePublicAPI, DatasourcePublicAPI } from '../../../types';
+import { State, XYState, XYDataLayerConfig } from '../types';
+import { Position } from '@elastic/charts';
+import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { EuiColorPicker } from '@elastic/eui';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

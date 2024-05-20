@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Props } from './file_picker';
 
 export type { Props as FilePickerProps };

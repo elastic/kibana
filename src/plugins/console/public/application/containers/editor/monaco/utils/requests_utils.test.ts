@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { MetricsTracker } from '../../../../../types';
 import {
   getAutoIndentedRequests,
   getCurlRequest,
@@ -14,6 +13,7 @@ import {
   stringifyRequest,
   trackSentRequests,
 } from './requests_utils';
+import { MetricsTracker } from '../../../../../types';
 
 describe('requests_utils', () => {
   const dataObjects = [

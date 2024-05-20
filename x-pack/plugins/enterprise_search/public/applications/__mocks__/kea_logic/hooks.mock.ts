@@ -11,7 +11,7 @@
  * NOTE: These variable names MUST start with 'mock*' in order for
  * Jest to accept its use within a jest.mock()
  */
-import { mockFlashMessagesActions, mockFlashMessagesValues } from './flash_messages_logic.mock';
+import { mockFlashMessagesValues, mockFlashMessagesActions } from './flash_messages_logic.mock';
 import { mockHttpValues } from './http_logic.mock';
 import { mockKibanaValues } from './kibana_logic.mock';
 import { mockLicensingValues } from './licensing_logic.mock';
@@ -55,7 +55,7 @@ jest.mock('kea', () => ({
  *   shallow(<SomeComponent />);
  * });
  */
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 export const setMockValues = (values: object) => {
   (useValues as jest.Mock).mockImplementation(() => ({ ...mockAllValues, ...values }));

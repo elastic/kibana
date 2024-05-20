@@ -11,7 +11,7 @@ import Fsp from 'fs/promises';
 
 import * as Rx from 'rxjs';
 
-import { MatchOptions, makeMatcher } from '@kbn/picomatcher';
+import { makeMatcher, MatchOptions } from '@kbn/picomatcher';
 import { assertAbsolute, fsReadDir$ } from './fs';
 
 interface Options {

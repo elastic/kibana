@@ -7,8 +7,8 @@
  */
 
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { shouldFetch$ } from './should_fetch';
 import type { FilterableEmbeddableInput } from './types';
+import { shouldFetch$ } from './should_fetch';
 
 describe('shouldFetch$', () => {
   let shouldFetchCount = 0;

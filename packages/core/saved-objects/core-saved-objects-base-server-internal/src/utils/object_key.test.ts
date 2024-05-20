@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getObjectKey, parseObjectKey } from './object_key';
+import { parseObjectKey, getObjectKey } from './object_key';
 
 describe('#getObjectKey', () => {
   it('returns the expected key string', () => {

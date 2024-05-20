@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ReactNode } from 'react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ConsoleCodeBlock } from '../../console_code_block';
 
 export const executionTranslations = Object.freeze({

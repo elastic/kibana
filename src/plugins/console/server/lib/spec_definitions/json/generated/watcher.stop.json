@@ -6,8 +6,12 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
-    "methods": ["POST"],
-    "patterns": ["_watcher/_stop"],
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_watcher/_stop"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/watcher-api-stop.html",
     "availability": {
       "stack": true,

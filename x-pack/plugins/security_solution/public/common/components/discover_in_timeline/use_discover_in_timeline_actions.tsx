@@ -6,23 +6,23 @@
  */
 
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
-import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
-import type { TimeRange } from '@kbn/es-query';
-import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { isEqualWith } from 'lodash';
-import { useCallback, useMemo, useRef } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
 import { useDispatch } from 'react-redux';
-import { TimelineId } from '../../../../common/types';
+import type { SavedSearch } from '@kbn/saved-search-plugin/common';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
+import type { TimeRange } from '@kbn/es-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDiscoverState } from '../../../timelines/components/timeline/tabs/esql/use_discover_state';
-import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql/utils';
-import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { timelineDefaults } from '../../../timelines/store/defaults';
+import { TimelineId } from '../../../../common/types';
+import { timelineActions, timelineSelectors } from '../../../timelines/store';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useShallowEqualSelector } from '../../hooks/use_selector';
 import { useKibana } from '../../lib/kibana';
+import { savedSearchComparator } from '../../../timelines/components/timeline/tabs/esql/utils';
 import {
   DISCOVER_SEARCH_SAVE_ERROR_TITLE,
   DISCOVER_SEARCH_SAVE_ERROR_UNKNOWN,
@@ -121,8 +121,9 @@ export const useDiscoverInTimelineActions = (
       if (newSavedSearchId && discoverStateContainer.current) {
         let savedSearch;
         try {
-          savedSearch =
-            await discoverStateContainer.current?.savedSearchState.load(newSavedSearchId);
+          savedSearch = await discoverStateContainer.current?.savedSearchState.load(
+            newSavedSearchId
+          );
           const savedSearchState = savedSearch ? getAppStateFromSavedSearch(savedSearch) : null;
           discoverStateContainer.current?.appState.initAndSync(savedSearch);
           await discoverStateContainer.current?.appState.replaceUrlState(

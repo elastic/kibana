@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import type { ChangeEvent } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 
 import type { DropResult } from '@elastic/eui';
 
 import {
-  EuiButtonEmpty,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
   EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiHighlight,
-  EuiIcon,
-  EuiPanel,
-  EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
-  EuiSwitch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiDragDropContext,
+  EuiButtonEmpty,
+  EuiDraggable,
+  EuiDroppable,
+  EuiPanel,
   euiDragDropReorder,
+  EuiIcon,
+  EuiSwitch,
   useEuiTheme,
 } from '@elastic/eui';
 

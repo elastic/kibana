@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { services as apiIntegrationServices } from '../../api_integration/services';
 import { services as xpackServices } from '../../functional/services';
+import { services as apiIntegrationServices } from '../../api_integration/services';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { createScenarios } from './scenarios';
 import { createUsageServices } from './usage';
+import { createScenarios } from './scenarios';
 
 export function ReportingAPIProvider(context: FtrProviderContext) {
   return {

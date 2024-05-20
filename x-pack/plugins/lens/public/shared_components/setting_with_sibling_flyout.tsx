@@ -7,20 +7,20 @@
 
 import './setting_with_sibling_flyout.scss';
 
+import { i18n } from '@kbn/i18n';
+import React, { useState, useEffect, MutableRefObject } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiFocusTrap,
   EuiOutsideClickDetector,
   EuiPortal,
-  EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, MutableRefObject } from 'react';
 
 const DEFAULT_TITLE = i18n.translate('xpack.lens.colorSiblingFlyoutTitle', {
   defaultMessage: 'Color',

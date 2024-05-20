@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { CursorType, GenericBuckets, Inspect, Maybe, TotalValue } from '../../../common';
 import type { GeoItem, TopNetworkTablesEcsField } from '../common';
+import type { CursorType, Inspect, Maybe, TotalValue, GenericBuckets } from '../../../common';
 
 export interface NetworkTopNFlowStrategyResponse extends IEsSearchResponse {
   edges: NetworkTopNFlowEdges[];

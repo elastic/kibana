@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { File } from '@kbn/files-plugin/common';
-import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
 import { loggerMock } from '@kbn/logging-mocks';
 import pReflect from 'p-reflect';
+import type { File } from '@kbn/files-plugin/common';
+import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
+import { bulkDeleteFileAttachments, retrieveFilesIgnoringNotFound } from './bulk_delete';
 import { MAX_DELETE_FILES } from '../../../common/constants';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { bulkDeleteFileAttachments, retrieveFilesIgnoringNotFound } from './bulk_delete';
 
 describe('bulk_delete', () => {
   describe('bulkDeleteFileAttachments', () => {

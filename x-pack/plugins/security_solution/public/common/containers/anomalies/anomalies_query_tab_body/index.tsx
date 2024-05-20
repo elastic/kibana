@@ -8,12 +8,12 @@
 import React, { useEffect } from 'react';
 
 import { DEFAULT_ANOMALY_SCORE } from '../../../../../common/constants';
-import { MatrixHistogram } from '../../../components/matrix_histogram';
-import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
-import { useUiSetting$ } from '../../../lib/kibana';
-import { histogramConfigs } from './histogram_configs';
 import type { AnomaliesQueryTabBodyProps } from './types';
 import { getAnomaliesFilterQuery } from './utils';
+import { useInstalledSecurityJobs } from '../../../components/ml/hooks/use_installed_security_jobs';
+import { useUiSetting$ } from '../../../lib/kibana';
+import { MatrixHistogram } from '../../../components/matrix_histogram';
+import { histogramConfigs } from './histogram_configs';
 
 const ID = 'anomaliesHistogramQuery';
 

@@ -1,10 +1,3 @@
-import {
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiFilterSelectItem,
-  EuiPopover,
-  useEuiTheme,
-} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,6 +5,13 @@ import {
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFilterSelectItem,
+  EuiPopover,
+  useEuiTheme,
+} from '@elastic/eui';
 
 export const JobIdFilter: React.FC<{
   selectedJobIds: string[];

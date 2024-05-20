@@ -17,8 +17,8 @@ import {
   ALERT_RULE_UUID,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { AlertRule, AlertRuleData } from '../types';
+import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 
 interface FormatRuleOpts {
   rule: AlertRuleData;

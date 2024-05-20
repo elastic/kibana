@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React, { lazy } from 'react';
 import { EuiDelayRender, EuiSkeletonRectangle } from '@elastic/eui';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import React, { lazy } from 'react';
 import type { BreakdownFieldSelectorProps } from './breakdown_field_selector';
 
 export type { BreakdownFieldSelectorProps } from './breakdown_field_selector';

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { JourneyStep } from '../../../../../../common/runtime_types';
-import { fetchLastSuccessfulCheck } from '../../../state';
-import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
-import { formatMillisecond } from '../../step_details_page/common/network_data/data_formatting';
-import { IMAGE_UN_AVAILABLE } from '../../step_details_page/step_screenshot/last_successful_screenshot';
-import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
 import { StepMetrics, TimingDetails } from './result_details';
+import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
+import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
+import { formatMillisecond } from '../../step_details_page/common/network_data/data_formatting';
+import { JourneyStep } from '../../../../../../common/runtime_types';
+import { IMAGE_UN_AVAILABLE } from '../../step_details_page/step_screenshot/last_successful_screenshot';
+import { fetchLastSuccessfulCheck } from '../../../state';
 
 export const ResultDetailsSuccessful = ({
   isExpanded,

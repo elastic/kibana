@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import { useRedirectPath } from '../../../../hooks/redirect_path';
-import { IndexManagementBreadcrumb, breadcrumbService } from '../../../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
-import { MANAGED_BY_FLEET } from '../../constants';
 import {
   ComponentTemplateDeserialized,
-  Error,
-  PageError,
   PageLoading,
+  PageError,
   attemptToURIDecode,
+  Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
+import { useRedirectPath } from '../../../../hooks/redirect_path';
+import { MANAGED_BY_FLEET } from '../../constants';
 
-import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
 import { useStepFromQueryString } from '../use_step_from_query_string';
+import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
 
 interface MatchParams {
   name: string;

@@ -6,9 +6,9 @@
  */
 
 import { CaseStatuses } from '@kbn/cases-components';
+import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import { CaseSeverity } from '../../../../common';
 import { SortFieldCase } from '../../../../common/ui';
-import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import { stringifyUrlParams } from './stringify_url_params';
 
 describe('stringifyUrlParams', () => {

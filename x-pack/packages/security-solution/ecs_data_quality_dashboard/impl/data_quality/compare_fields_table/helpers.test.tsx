@@ -10,17 +10,17 @@ import { omit } from 'lodash/fp';
 import React from 'react';
 
 import {
-  eventCategory,
-  eventCategoryWithUnallowedValues,
-  someField,
-} from '../mock/enriched_field_metadata/mock_enriched_field_metadata';
-import { TestProviders } from '../mock/test_providers/test_providers';
-import {
   EMPTY_PLACEHOLDER,
   getCustomTableColumns,
   getEcsCompliantTableColumns,
   getIncompatibleValuesTableColumns,
 } from './helpers';
+import {
+  eventCategory,
+  eventCategoryWithUnallowedValues,
+  someField,
+} from '../mock/enriched_field_metadata/mock_enriched_field_metadata';
+import { TestProviders } from '../mock/test_providers/test_providers';
 
 describe('helpers', () => {
   describe('getCustomTableColumns', () => {

@@ -8,11 +8,11 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { useKibana, useToasts } from '../../../common/lib/kibana';
+import { connector } from '../mock';
+import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
+import * as api from './api';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { connector } from '../mock';
-import * as api from './api';
-import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./api');

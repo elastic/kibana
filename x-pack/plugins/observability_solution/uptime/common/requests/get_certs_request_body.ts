@@ -15,10 +15,10 @@ import type { CertificatesResults } from '../../server/legacy_uptime/lib/request
 import { asMutableArray } from '../utils/as_mutable_array';
 
 enum SortFields {
-  issuer = 'tls.server.x509.issuer.common_name',
-  not_after = 'tls.server.x509.not_after',
-  not_before = 'tls.server.x509.not_before',
-  common_name = 'tls.server.x509.subject.common_name',
+  'issuer' = 'tls.server.x509.issuer.common_name',
+  'not_after' = 'tls.server.x509.not_after',
+  'not_before' = 'tls.server.x509.not_before',
+  'common_name' = 'tls.server.x509.subject.common_name',
 }
 
 export const DEFAULT_SORT = 'not_after';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { RawRule } from '../types';
 import {
   CustomSavedObjectsModelVersionMap,
   getLatestRuleVersion,
   getMinimumCompatibleVersion,
 } from './rule_model_versions';
+import { schema } from '@kbn/config-schema';
+import { RawRule } from '../types';
 
 describe('rule model versions', () => {
   const ruleModelVersions: CustomSavedObjectsModelVersionMap = {

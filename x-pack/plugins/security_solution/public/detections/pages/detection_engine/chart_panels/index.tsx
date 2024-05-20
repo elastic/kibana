@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
+import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAlertsLocalStorage } from './alerts_local_storage';
+import type { AlertsSettings } from './alerts_local_storage/types';
+import { ChartContextMenu } from './chart_context_menu';
+import { ChartSelect } from './chart_select';
+import { ChartCollapse } from './chart_collapse';
+import * as i18n from './chart_select/translations';
 import { AlertsTreemapPanel } from '../../../../common/components/alerts_treemap_panel';
+import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box_reset';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { RunTimeMappings } from '../../../../common/store/sourcerer/model';
-import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
 import { AlertsHistogramPanel } from '../../../components/alerts_kpis/alerts_histogram_panel';
-import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
 import { AlertsSummaryChartsPanel } from '../../../components/alerts_kpis/alerts_summary_charts_panel';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
 } from '../../../components/alerts_kpis/common/config';
+import { AlertsCountPanel } from '../../../components/alerts_kpis/alerts_count_panel';
 import { GROUP_BY_LABEL } from '../../../components/alerts_kpis/common/translations';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import type { AddFilterProps } from '../../../components/alerts_kpis/common/types';
-import { useAlertsLocalStorage } from './alerts_local_storage';
-import type { AlertsSettings } from './alerts_local_storage/types';
-import { ChartCollapse } from './chart_collapse';
-import { ChartContextMenu } from './chart_context_menu';
-import { ChartSelect } from './chart_select';
-import * as i18n from './chart_select/translations';
+import { createResetGroupByFieldAction } from '../../../components/alerts_kpis/alerts_histogram_panel/helpers';
 
 const TREND_CHART_HEIGHT = 240; // px
 const CHART_PANEL_HEIGHT = 375; // px

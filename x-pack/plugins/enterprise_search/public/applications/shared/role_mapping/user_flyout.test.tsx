@@ -9,14 +9,14 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiFlyout, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlyout, EuiText, EuiIcon } from '@elastic/eui';
 
 import {
+  USERS_HEADING_LABEL,
+  UPDATE_USER_LABEL,
+  USER_UPDATED_LABEL,
   NEW_USER_DESCRIPTION,
   UPDATE_USER_DESCRIPTION,
-  UPDATE_USER_LABEL,
-  USERS_HEADING_LABEL,
-  USER_UPDATED_LABEL,
 } from './constants';
 
 import { UserFlyout } from '.';

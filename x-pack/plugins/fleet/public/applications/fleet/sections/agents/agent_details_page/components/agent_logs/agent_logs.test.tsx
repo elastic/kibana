@@ -7,8 +7,8 @@
 
 import React, { type ReactNode } from 'react';
 
-import { createFleetTestRendererMock } from '../../../../../../../mock';
 import { useAuthz, useStartServices } from '../../../../../hooks';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 
 import { AgentLogsUI } from './agent_logs';
 

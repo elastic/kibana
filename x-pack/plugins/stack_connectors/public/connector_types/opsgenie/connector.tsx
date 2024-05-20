@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import type {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
   SecretsFieldSchema,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
-import { DEFAULT_URL } from './constants';
+import { EuiLink } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
+import { DEFAULT_URL } from './constants';
 
 const configFormSchema: ConfigFieldSchema[] = [
   {

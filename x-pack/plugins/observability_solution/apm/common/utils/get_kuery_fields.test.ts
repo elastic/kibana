@@ -1,4 +1,3 @@
-import { fromKueryExpression } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { fromKueryExpression } from '@kbn/es-query';
  * 2.0.
  */
 import { getKueryFields } from './get_kuery_fields';
+import { fromKueryExpression } from '@kbn/es-query';
 
 describe('get kuery fields', () => {
   it('returns single kuery field', () => {

@@ -6,9 +6,21 @@
     "id": "savedObjectsManagement",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["management", "data", "dataViews"],
-    "optionalPlugins": ["home", "savedObjectsTaggingOss", "spaces"],
-    "requiredBundles": ["kibanaReact"],
-    "extraPublicDirs": ["public/lib"]
+    "requiredPlugins": [
+      "management",
+      "data",
+      "dataViews"
+    ],
+    "optionalPlugins": [
+      "home",
+      "savedObjectsTaggingOss",
+      "spaces"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "public/lib"
+    ]
   }
 }

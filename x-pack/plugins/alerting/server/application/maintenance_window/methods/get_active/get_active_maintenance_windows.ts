@@ -8,9 +8,9 @@
 import Boom from '@hapi/boom';
 import { nodeBuilder } from '@kbn/es-query';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
-import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
-import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import type { MaintenanceWindow } from '../../types';
+import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
+import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';
 
 export interface MaintenanceWindowAggregationResult {
   maintenanceWindow: {

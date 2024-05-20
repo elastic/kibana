@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { NetworkDnsRequestOptionsInput } from '../../../../../common/api/search_strategy';
-import type { NetworkDnsEdges, PageInfoPaginated } from '../../../../../common/search_strategy';
-import { NetworkQueries } from '../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
-import { createFilter } from '../../../../common/containers/helpers';
-import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { inputsModel } from '../../../../common/store';
-import type { InspectResponse } from '../../../../types';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { createFilter } from '../../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
+import type { NetworkDnsEdges, PageInfoPaginated } from '../../../../../common/search_strategy';
+import { NetworkQueries } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
+import type { InspectResponse } from '../../../../types';
+import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 
 export const ID = 'networkDnsQuery';
 

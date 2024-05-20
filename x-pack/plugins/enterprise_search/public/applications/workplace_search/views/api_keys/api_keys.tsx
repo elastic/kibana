@@ -11,31 +11,31 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiCopy,
-  EuiEmptyPrompt,
-  EuiPanel,
-  EuiSpacer,
   EuiTitle,
+  EuiPanel,
+  EuiCopy,
+  EuiButtonIcon,
+  EuiSpacer,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 
 import { docLinks } from '../../../shared/doc_links';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
 
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
-import { API_KEYS_TITLE, NAV } from '../../constants';
+import { NAV, API_KEYS_TITLE } from '../../constants';
 
 import { ApiKeysLogic } from './api_keys_logic';
 import { ApiKeyFlyout } from './components/api_key_flyout';
 import { ApiKeysList } from './components/api_keys_list';
 import {
+  API_KEYS_EMPTY_TITLE,
   API_KEYS_EMPTY_BODY,
   API_KEYS_EMPTY_BUTTON_LABEL,
-  API_KEYS_EMPTY_TITLE,
-  COPIED_TOOLTIP,
-  COPY_API_ENDPOINT_BUTTON_LABEL,
   CREATE_KEY_BUTTON_LABEL,
   ENDPOINT_TITLE,
+  COPIED_TOOLTIP,
+  COPY_API_ENDPOINT_BUTTON_LABEL,
 } from './constants';
 
 export const ApiKeys: React.FC = () => {

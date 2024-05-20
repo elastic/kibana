@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiFieldText, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { shallow, mount } from 'enzyme';
+import { EuiComboBox, EuiSwitchEvent, EuiSwitch, EuiFieldText } from '@elastic/eui';
 import { IncludeExcludeRow } from './include_exclude_options';
 
 const tableRows = [

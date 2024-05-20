@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
 import type { GeoContainmentAlertParams } from '../types';
 import { BoundaryForm } from './boundary_form';
 import { EntityForm } from './entity_form';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 import {
   isAlertFromCrowdstrikeAlert,

@@ -8,22 +8,22 @@
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import { useLocation } from 'react-router-dom';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import type { ListingPageUrlState } from '../../../../../common/types/common';
-import { HelpMenu } from '../../../components/help_menu';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
+import { DataFrameAnalyticsList } from './components/analytics_list';
+import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
 import { NodeAvailableWarning } from '../../../components/node_available_warning';
-import { MlPageHeader } from '../../../components/page_header';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 import { UpgradeWarning } from '../../../components/upgrade';
+import { JobMap } from '../job_map';
+import type { ListingPageUrlState } from '../../../../../common/types/common';
+import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
+import { ML_PAGES } from '../../../../../common/constants/locator';
+import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana } from '../../../contexts/kibana';
 import { useRefreshAnalyticsList } from '../../common';
-import { JobMap } from '../job_map';
-import { DataFrameAnalyticsList } from './components/analytics_list';
-import { DataFrameAnalyticsListColumn } from './components/analytics_list/common';
-import { useRefreshInterval } from './components/analytics_list/use_refresh_interval';
+import { MlPageHeader } from '../../../components/page_header';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;

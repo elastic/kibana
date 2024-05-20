@@ -10,9 +10,9 @@ import { maybe } from '@kbn/apm-plugin/common/utils/maybe';
 import callsites from 'callsites';
 import { castArray, groupBy } from 'lodash';
 import { ProfilingFtrConfigName } from '../configs';
-import { cleanUpProfilingData } from '../utils/profiling_data';
 import { getBettertest } from './bettertest';
 import { FtrProviderContext } from './ftr_provider_context';
+import { cleanUpProfilingData } from '../utils/profiling_data';
 
 interface RunCondition {
   config: ProfilingFtrConfigName;

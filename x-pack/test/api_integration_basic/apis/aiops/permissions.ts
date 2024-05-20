@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import fetch from 'node-fetch';
 import { format as formatUrl } from 'url';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import fetch from 'node-fetch';
 
+import expect from '@kbn/expect';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '@kbn/aiops-log-rate-analysis/api/schema';
-import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

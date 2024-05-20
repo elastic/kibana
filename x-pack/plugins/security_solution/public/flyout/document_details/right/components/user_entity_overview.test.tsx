@@ -1,5 +1,3 @@
-import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { render } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,24 +5,26 @@ import { render } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
+import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { LeftPanelInsightsTab } from '../../left';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { RightPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
+import { UserEntityOverview } from './user_entity_overview';
+import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LAST_SEEN_TEST_ID,
   ENTITIES_USER_OVERVIEW_LINK_TEST_ID,
-  ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
+  ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
 } from './test_ids';
-import { UserEntityOverview } from './user_entity_overview';
+import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { mockContextValue } from '../mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { RightPanelContext } from '../context';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
+import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';

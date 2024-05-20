@@ -1,4 +1,3 @@
-import { fireEvent, screen } from '@testing-library/react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,8 +5,9 @@ import { fireEvent, screen } from '@testing-library/react';
  * 2.0.
  */
 import React from 'react';
-import { PROFILES_MAP } from '../../../../../../../common/constants/monitor_defaults';
+import { fireEvent, screen } from '@testing-library/react';
 import { render } from '../../../../utils/testing';
+import { PROFILES_MAP } from '../../../../../../../common/constants/monitor_defaults';
 import { ThrottlingFields } from './throttling_fields';
 
 describe('ThrottlingFields', () => {

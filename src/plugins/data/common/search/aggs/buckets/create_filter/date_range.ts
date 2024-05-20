@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RangeFilterParams, buildRangeFilter } from '@kbn/es-query';
 import moment from 'moment-timezone';
+import { buildRangeFilter, RangeFilterParams } from '@kbn/es-query';
 import { DateRange } from '../../../expressions';
 import { IBucketAggConfig } from '../bucket_agg_type';
 

@@ -11,9 +11,9 @@ import {
   postApmInstancesResponsePayloadRT,
 } from '../../../../../common/http_api/apm';
 import { getApms, getStats } from '../../../../lib/apm';
-import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
 import { handleError } from '../../../../lib/errors';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 import { MonitoringCore } from '../../../../types';
 
 export function apmInstancesRoute(server: MonitoringCore) {

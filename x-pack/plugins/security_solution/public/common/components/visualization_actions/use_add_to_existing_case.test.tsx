@@ -1,4 +1,3 @@
-import { AttachmentType } from '@kbn/cases-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,14 +5,15 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks';
+import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
+import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
+import { useAddToExistingCase } from './use_add_to_existing_case';
 import {
   allCasesPermissions,
   readCasesPermissions,
   writeCasesPermissions,
 } from '../../../cases_test_utils';
-import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
-import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
-import { useAddToExistingCase } from './use_add_to_existing_case';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 
 jest.mock('../../lib/kibana');
 

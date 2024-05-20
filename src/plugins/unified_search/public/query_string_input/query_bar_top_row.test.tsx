@@ -8,19 +8,19 @@
 
 import { mockPersistedLogFactory } from './query_string_input.test.mocks';
 
-import { render } from '@testing-library/react';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import { EMPTY } from 'rxjs';
 
-import { coreMock } from '@kbn/core/public/mocks';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
-import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { unifiedSearchPluginMock } from '../mocks';
 import QueryBarTopRow, { SharingMetaFields } from './query_bar_top_row';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { I18nProvider } from '@kbn/i18n-react';
+import { stubIndexPattern } from '@kbn/data-plugin/public/stubs';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { unifiedSearchPluginMock } from '../mocks';
 
 const startMock = coreMock.createStart();
 

@@ -7,8 +7,8 @@
  */
 
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 export enum IgnoredReason {
   IGNORE_ABOVE = 'ignore_above',

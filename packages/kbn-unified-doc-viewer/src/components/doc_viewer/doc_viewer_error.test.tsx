@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 import { DocViewerError } from './doc_viewer_error';
 
 test('DocViewerError should wrap error in boundary', () => {

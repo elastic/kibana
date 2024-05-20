@@ -6,15 +6,15 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
 } from '../../../../../../../../common/waterfall/typings';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 
 type TraceAPIResponse = APIReturnType<'GET /internal/apm/traces/{traceId}'>;
 

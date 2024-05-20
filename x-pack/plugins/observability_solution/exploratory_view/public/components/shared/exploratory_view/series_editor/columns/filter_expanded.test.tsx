@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
-import { mockAppDataView, mockUseValuesList, mockUxSeries, render } from '../../rtl_helpers';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { FilterExpanded } from './filter_expanded';
+import { mockUxSeries, mockAppDataView, mockUseValuesList, render } from '../../rtl_helpers';
+import { USER_AGENT_NAME } from '../../configurations/constants/elasticsearch_fieldnames';
 
 describe('FilterExpanded', function () {
   const filters = [{ field: USER_AGENT_NAME, values: ['Chrome'] }];

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { ReactWrapper } from 'enzyme';
-import React from 'react';
 import { LoadingSpinner } from './loading_spinner';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 describe('loading spinner', function () {
   let component: ReactWrapper;

@@ -9,8 +9,8 @@ import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
 import { useAlertsLocalStorage } from '.';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { TestProviders } from '../../../../../common/mock';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
 jest.mock('../../../../../common/hooks/use_experimental_features');

@@ -9,13 +9,13 @@
 import React, { FC, PropsWithChildren } from 'react';
 
 import {
-  NoDataConfigPageKibanaProvider,
   NoDataConfigPageProvider,
+  NoDataConfigPageKibanaProvider,
 } from '@kbn/shared-ux-page-no-data-config';
 
 import {
-  KibanaPageTemplateKibanaDependencies,
   KibanaPageTemplateServices,
+  KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template-types';
 
 /**

@@ -9,25 +9,25 @@ import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
-import { RouterProvider } from '@kbn/typed-react-router-config';
 import { createMemoryHistory } from 'history';
 import { merge } from 'lodash';
 import React, { ReactNode } from 'react';
 import { Observable } from 'rxjs';
-import { profilingRouter } from '../../../routing';
-import { getServices } from '../../../services';
-import { TimeRangeContextProvider } from '../time_range_context';
+import { RouterProvider } from '@kbn/typed-react-router-config';
 import {
   ProfilingDependencies,
   ProfilingDependenciesContextProvider,
 } from './profiling_dependencies_context';
+import { profilingRouter } from '../../../routing';
+import { TimeRangeContextProvider } from '../time_range_context';
+import { getServices } from '../../../services';
 
 const urlService = new UrlService({
   navigate: async () => {},
   getUrl: async ({ app, path }, { absolute }) => {
     return `${absolute ? 'http://localhost:8888' : ''}/app/${app}${path}`;
   },
-  shortUrls: () => ({ get: () => {} }) as any,
+  shortUrls: () => ({ get: () => {} } as any),
 });
 const locator = urlService.locators.create(new MlLocatorDefinition());
 

@@ -11,13 +11,13 @@ import {
   createFieldFormatsSetupMock,
   createFieldFormatsStartMock,
 } from '@kbn/field-formats-plugin/server/mocks';
-import { createIndexPatternsStartMock } from './data_views/mocks';
-import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
 import {
-  createSearchRequestHandlerContext,
   createSearchSetupMock,
   createSearchStartMock,
+  createSearchRequestHandlerContext,
 } from './search/mocks';
+import { createIndexPatternsStartMock } from './data_views/mocks';
+import { createDatatableUtilitiesMock } from './datatable_utilities/mock';
 
 function createSetupContract() {
   return {

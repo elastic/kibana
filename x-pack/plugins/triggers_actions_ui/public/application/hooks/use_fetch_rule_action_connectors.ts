@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { useEffect, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useState } from 'react';
 import type { ActionConnector } from '../..';
-import { useKibana } from '../../common/lib/kibana';
 import { loadAllActions } from '../lib/action_connector_api';
+import { useKibana } from '../../common/lib/kibana';
 
 const ACTIONS_LOAD_ERROR = (errorMessage: string) =>
   i18n.translate('xpack.triggersActionsUI.ruleDetails.connectorsLoadError', {

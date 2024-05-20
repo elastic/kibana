@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsExportResultDetails } from '@kbn/core/server';
-import type { SavedObject } from '@kbn/core/types';
 import expect from '@kbn/expect';
+import type { SavedObject } from '@kbn/core/types';
+import type { SavedObjectsExportResultDetails } from '@kbn/core/server';
 import { PluginFunctionalProviderContext } from '../../services';
 
 function parseNdJson(input: string): Array<SavedObject<any>> {

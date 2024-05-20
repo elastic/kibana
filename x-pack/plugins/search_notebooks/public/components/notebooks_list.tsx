@@ -1,4 +1,3 @@
-import {} from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import {} from '@elastic/eui';
  * 2.0.
  */
 import React from 'react';
+import {} from '@elastic/eui';
 
 import { NotebookInformation } from '../../common/types';
 import { LoadingPanel } from './loading_panel';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_SPACES_ID, SPACES } from './spaces';
+import { SPACES, ALL_SPACES_ID } from './spaces';
 import { TestCase } from './types';
 
 const {

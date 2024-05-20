@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { omit, sortBy } from 'lodash';
 import expect from '@kbn/expect';
 import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
-import { omit, sortBy } from 'lodash';
 import { INSTALLED_VERSION } from '../services/private_location_test_service';
 import { commonVars } from './test_project_monitor_policy';
 

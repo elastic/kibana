@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { filter, reduce } from 'lodash';
-import markdown from 'remark-parse-no-trim';
 import unified from 'unified';
+import markdown from 'remark-parse-no-trim';
+import { filter, reduce } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import type { RuleResponseAction } from '../../../common/api/detection_engine/model/rule_response_actions';

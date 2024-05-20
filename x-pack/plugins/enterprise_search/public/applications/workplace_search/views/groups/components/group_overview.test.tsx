@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiFieldText } from '@elastic/eui';
+import { EuiFieldText, EuiEmptyPrompt } from '@elastic/eui';
 
 import { ContentSection } from '../../../components/shared/content_section';
 import { SourcesTable } from '../../../components/shared/sources_table';

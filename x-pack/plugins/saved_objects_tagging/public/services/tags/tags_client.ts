@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { AnalyticsServiceStart, HttpSetup } from '@kbn/core/public';
+import { HttpSetup, AnalyticsServiceStart } from '@kbn/core/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
-  GetAllTagsOptions,
-  ITagsClient,
   Tag,
   TagAttributes,
+  GetAllTagsOptions,
+  ITagsClient,
   TagWithRelations,
 } from '../../../common/types';
 import { ITagsChangeListener } from './tags_cache';

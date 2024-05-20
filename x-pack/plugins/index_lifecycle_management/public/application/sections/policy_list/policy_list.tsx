@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiButton, EuiPageHeader, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { EuiButton, EuiSpacer, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PolicyFromES } from '../../../../common/types';
+import { PolicyTable } from './components/policy_table';
 import { getPolicyCreatePath } from '../../services/navigation';
 import { ListActionHandler } from './components/list_action_handler';
-import { PolicyTable } from './components/policy_table';
 
 interface Props {
   policies: PolicyFromES[];

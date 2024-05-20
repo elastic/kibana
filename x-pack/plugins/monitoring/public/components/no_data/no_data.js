@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import React, { Fragment, useState } from 'react';
+import PropTypes from 'prop-types';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiPage,
   EuiPageBody,
+  EuiHorizontalRule,
   EuiPageTemplate,
-  EuiScreenReaderOnly,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
   EuiText,
   EuiTextColor,
+  EuiButtonEmpty,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React, { Fragment, useState } from 'react';
-import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 import { toggleSetupMode } from '../../lib/setup_mode';
-import { CloudDeployment } from './blurbs';
-import { CheckerErrors } from './checker_errors';
 import { CheckingSettings } from './checking_settings';
 import { ReasonFound, WeTried } from './reasons';
+import { CheckerErrors } from './checker_errors';
+import { CloudDeployment } from './blurbs';
+import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
 function NoDataMessage(props) {
   const { isLoading, reason, checkMessage, isCollectionEnabledUpdated } = props;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { History, Href, LocationDescriptorObject } from 'history';
+import type { History, LocationDescriptorObject, Href } from 'history';
 
 /**
  * A wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves

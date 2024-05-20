@@ -6,8 +6,8 @@
  */
 
 import type { ExternalEdrServerEmulatorRouteHandlerMethod } from '../../..';
-import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
 import { buildSentinelOneRoutePath } from './utils';
+import type { EmulatorServerRouteDefinition } from '../../../lib/emulator_server.types';
 
 export const getAgentActionConnectRouteDefinition = (): EmulatorServerRouteDefinition => {
   return {

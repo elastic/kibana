@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 
-import type { HttpStart, ToastsStart } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { setFullTimeRange } from './full_time_range_selector_service';
 

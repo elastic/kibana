@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
-import React, { useEffect } from 'react';
 import { EDIT_DASHBOARD_TITLE } from '../pages/details/translations';
 
 const DashboardTitleComponent = ({

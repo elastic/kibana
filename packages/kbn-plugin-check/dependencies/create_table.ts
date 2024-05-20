@@ -12,8 +12,8 @@ import colors from 'colors/safe';
 
 import { ToolingLog } from '@kbn/tooling-log';
 
+import { PluginLayer, PluginLifecycle, PluginInfo, PluginStatuses, PluginState } from '../types';
 import { PLUGIN_LAYERS, PLUGIN_LIFECYCLES } from '../const';
-import { PluginInfo, PluginLayer, PluginLifecycle, PluginState, PluginStatuses } from '../types';
 import { borders } from './table_borders';
 
 // A lot of this logic is brute-force and ugly. It's a quick and dirty way to get the

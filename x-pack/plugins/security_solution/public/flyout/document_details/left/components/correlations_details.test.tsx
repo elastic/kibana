@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
+import { CorrelationsDetails } from './correlations_details';
 import { TestProviders } from '../../../../common/mock';
-import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
-import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
-import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
-import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
-import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
-import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { LeftPanelContext } from '../context';
 import { useShowRelatedAlertsByAncestry } from '../../shared/hooks/use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_show_related_alerts_by_same_source_event';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { useShowSuppressedAlerts } from '../../shared/hooks/use_show_suppressed_alerts';
-import { LeftPanelContext } from '../context';
-import { mockContextValue } from '../mocks/mock_context';
-import { CorrelationsDetails } from './correlations_details';
 import {
   CORRELATIONS_DETAILS_BY_ANCESTRY_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_BY_SESSION_SECTION_TABLE_TEST_ID,
@@ -29,6 +22,13 @@ import {
   CORRELATIONS_DETAILS_CASES_SECTION_TABLE_TEST_ID,
   CORRELATIONS_DETAILS_SUPPRESSED_ALERTS_SECTION_TEST_ID,
 } from './test_ids';
+import { useFetchRelatedAlertsBySession } from '../../shared/hooks/use_fetch_related_alerts_by_session';
+import { useFetchRelatedAlertsByAncestry } from '../../shared/hooks/use_fetch_related_alerts_by_ancestry';
+import { useFetchRelatedAlertsBySameSourceEvent } from '../../shared/hooks/use_fetch_related_alerts_by_same_source_event';
+import { useFetchRelatedCases } from '../../shared/hooks/use_fetch_related_cases';
+import { mockContextValue } from '../mocks/mock_context';
+import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID } from '../../../shared/components/test_ids';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

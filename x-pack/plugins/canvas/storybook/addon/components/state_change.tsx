@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { FC } from 'react';
 import { EuiAccordion } from '@elastic/eui';
 import { formatters } from 'jsondiffpatch';
-import React, { FC } from 'react';
 
 import { RecordedAction } from '../types';
 

@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { IAggConfig, IAggConfigs } from '@kbn/data-plugin/public';
+import React from 'react';
+import { mount, shallow } from 'enzyme';
+import { act } from 'react-dom/test-utils';
+import type { IAggConfigs, IAggConfig } from '@kbn/data-plugin/public';
 import { ISchemas } from '@kbn/visualizations-plugin/public';
 import { createMockedVisEditorSchemas } from '@kbn/visualizations-plugin/public/mocks';
-import { mount, shallow } from 'enzyme';
-import React from 'react';
-import { act } from 'react-dom/test-utils';
 
+import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
-import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
 import type { EditorVisState } from './sidebar/state/reducers';
 
 jest.mock('@elastic/eui', () => {

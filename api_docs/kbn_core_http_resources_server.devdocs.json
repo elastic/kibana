@@ -137,7 +137,9 @@
         "type": "Interface",
         "tags": [],
         "label": "HttpResourcesRenderOptions",
-        "description": ["\nAllows to configure HTTP response parameters"],
+        "description": [
+          "\nAllows to configure HTTP response parameters"
+        ],
         "path": "packages/core/http/core-http-resources-server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -148,7 +150,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "headers",
-            "description": ["\nHTTP Headers with additional information about response."],
+            "description": [
+              "\nHTTP Headers with additional information about response."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -185,7 +189,9 @@
             "type": "Function",
             "tags": [],
             "label": "renderCoreApp",
-            "description": ["To respond with HTML page bootstrapping Kibana application."],
+            "description": [
+              "To respond with HTML page bootstrapping Kibana application."
+            ],
             "signature": [
               "(options?: ",
               {
@@ -297,7 +303,9 @@
             "type": "Function",
             "tags": [],
             "label": "renderHtml",
-            "description": ["To respond with a custom HTML page."],
+            "description": [
+              "To respond with a custom HTML page."
+            ],
             "signature": [
               "(options: ",
               {
@@ -351,7 +359,9 @@
             "type": "Function",
             "tags": [],
             "label": "renderJs",
-            "description": ["To respond with a custom JS script file."],
+            "description": [
+              "To respond with a custom JS script file."
+            ],
             "signature": [
               "(options: ",
               {
@@ -405,7 +415,9 @@
             "type": "Function",
             "tags": [],
             "label": "renderCss",
-            "description": ["To respond with a custom CSS script file."],
+            "description": [
+              "To respond with a custom CSS script file."
+            ],
             "signature": [
               "(options: ",
               {
@@ -601,7 +613,9 @@
             "description": [
               "{@link RequestHandlerContext } - the core context exposed for this request."
             ],
-            "signature": ["Context"],
+            "signature": [
+              "Context"
+            ],
             "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -638,7 +652,9 @@
             "description": [
               "{@link KibanaResponseFactory } {@libk HttpResourcesServiceToolkit} - a set of helper functions used to respond to a request."
             ],
-            "signature": ["ResponseFactory"],
+            "signature": [
+              "ResponseFactory"
+            ],
             "path": "packages/core/http/core-http-server/src/router/request_handler.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -652,7 +668,9 @@
         "type": "Type",
         "tags": [],
         "label": "HttpResourcesResponseOptions",
-        "description": ["\nHTTP Resources response parameters"],
+        "description": [
+          "\nHTTP Resources response parameters"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-http-server",

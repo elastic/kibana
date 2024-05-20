@@ -27,13 +27,13 @@ import connectionIllustration from '../../../../assets/connection_illustration.s
 
 import {
   CONFIG_INTRO_ALT_TEXT,
-  CONFIG_INTRO_STEP1_BADGE,
+  CONFIG_INTRO_STEPS_TEXT,
   CONFIG_INTRO_STEP1_HEADING,
   CONFIG_INTRO_STEP1_TEXT,
+  CONFIG_INTRO_STEP1_BADGE,
   CONFIG_INTRO_STEP2_HEADING,
-  CONFIG_INTRO_STEP2_TEXT,
   CONFIG_INTRO_STEP2_TITLE,
-  CONFIG_INTRO_STEPS_TEXT,
+  CONFIG_INTRO_STEP2_TEXT,
 } from './constants';
 
 interface ConfigurationIntroProps {

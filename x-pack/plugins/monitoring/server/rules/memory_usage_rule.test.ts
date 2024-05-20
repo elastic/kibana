@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { MemoryUsageRule } from './memory_usage_rule';
+import { RULE_MEMORY_USAGE } from '../../common/constants';
+import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { RULE_MEMORY_USAGE } from '../../common/constants';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
-import { MemoryUsageRule } from './memory_usage_rule';
 
 const RealDate = Date;
 

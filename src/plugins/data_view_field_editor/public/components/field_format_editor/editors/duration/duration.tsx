@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { DurationFormat } from '@kbn/field-formats-plugin/common';
 import React, { Fragment } from 'react';
+import { DurationFormat } from '@kbn/field-formats-plugin/common';
 
 import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DefaultFormatEditor, FormatEditorState, defaultState } from '../default/default';
+import { i18n } from '@kbn/i18n';
+import { DefaultFormatEditor, defaultState, FormatEditorState } from '../default/default';
 
 import { FormatEditorSamples } from '../../samples';
-import { FormatEditorProps } from '../types';
 import { formatId } from './constants';
+import { FormatEditorProps } from '../types';
 
 interface DurationFormatEditorState {
   hasDecimalError: boolean;

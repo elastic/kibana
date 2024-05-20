@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import React, { ComponentType } from 'react';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 import {
   AppMountParameters,
   AppUpdater,
@@ -17,48 +17,48 @@ import {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
-import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
+import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
+import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import React, { ComponentType } from 'react';
-import { BehaviorSubject, Observable, map } from 'rxjs';
+import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import { PLUGIN_ID } from '../common';
-import {
-  DiscoverAppLocator,
-  DiscoverAppLocatorDefinition,
-  DiscoverESQLLocatorDefinition,
-} from '../common';
-import { ConfigSchema, ExperimentalFeatures } from '../common/config';
+import { registerFeature } from './register_feature';
+import { buildServices, UrlTracker } from './build_services';
+import { SearchEmbeddableFactory } from './embeddable';
+import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
+import { injectTruncateStyles } from './utils/truncate_styles';
+import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
   DiscoverContextAppLocator,
   DiscoverContextAppLocatorDefinition,
@@ -67,20 +67,20 @@ import {
   DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
-import { UrlTracker, buildServices } from './build_services';
+import {
+  DiscoverAppLocator,
+  DiscoverAppLocatorDefinition,
+  DiscoverESQLLocatorDefinition,
+} from '../common';
+import { defaultCustomizationContext, DiscoverCustomizationContext } from './customizations';
+import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
   DiscoverContainerInternal,
   type DiscoverContainerProps,
 } from './components/discover_container';
-import { DiscoverCustomizationContext, defaultCustomizationContext } from './customizations';
-import { SearchEmbeddableFactory } from './embeddable';
-import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
-import { ViewSavedSearchAction } from './embeddable/view_saved_search_action';
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
-import { registerFeature } from './register_feature';
-import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-import { injectTruncateStyles } from './utils/truncate_styles';
+import { ConfigSchema, ExperimentalFeatures } from '../common/config';
 
 /**
  * @public

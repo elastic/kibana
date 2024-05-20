@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { APM_SERVER_FEATURE_ID } from '@kbn/apm-plugin/server';
-import type { ObservabilityAIAssistantRoutes } from '@kbn/observability-ai-assistant-app-plugin/public/routes/config';
-import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '@kbn/observability-ai-assistant-plugin/common/feature';
-import type { Role } from '@kbn/security-plugin-types-common';
 import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
+import type { ObservabilityAIAssistantRoutes } from '@kbn/observability-ai-assistant-app-plugin/public/routes/config';
 import qs from 'query-string';
+import type { Role } from '@kbn/security-plugin-types-common';
+import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '@kbn/observability-ai-assistant-plugin/common/feature';
+import { APM_SERVER_FEATURE_ID } from '@kbn/apm-plugin/server';
 import type { InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 export interface ObservabilityAIAssistantUIService {

@@ -10,15 +10,15 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type { ESSearchResponse, SearchHit } from '@kbn/es-types';
+import type { SearchHit, ESSearchResponse } from '@kbn/es-types';
 
-import { newArtifactToElasticsearchProperties } from './mappings';
 import type {
   Artifact,
   ArtifactElasticsearchProperties,
   ArtifactsClientInterface,
   NewArtifact,
 } from './types';
+import { newArtifactToElasticsearchProperties } from './mappings';
 
 export const createArtifactsClientMock = (): jest.Mocked<ArtifactsClientInterface> => {
   return {

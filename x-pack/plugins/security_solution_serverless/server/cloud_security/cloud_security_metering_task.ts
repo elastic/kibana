@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type { Tier, UsageRecord } from '../types';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   AGGREGATION_PRECISION_THRESHOLD,
   ASSETS_SAMPLE_GRANULARITY,
-  BILLABLE_ASSETS_CONFIG,
   CLOUD_DEFEND,
   CLOUD_SECURITY_TASK_TYPE,
   CNVM,
@@ -19,12 +17,14 @@ import {
   KSPM,
   METERING_CONFIGS,
   THRESHOLD_MINUTES,
+  BILLABLE_ASSETS_CONFIG,
 } from './constants';
+import type { Tier, UsageRecord } from '../types';
 import type {
-  AssetCountAggregation,
-  CloudDefendAssetCountAggregation,
   CloudSecurityMeteringCallbackInput,
   CloudSecuritySolutions,
+  AssetCountAggregation,
+  CloudDefendAssetCountAggregation,
 } from './types';
 
 export const getUsageRecords = (

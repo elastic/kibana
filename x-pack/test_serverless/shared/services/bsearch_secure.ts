@@ -8,13 +8,13 @@
 // NOTE: This is pretty much a copy/paste from test/common/services/bsearch.ts but with the ability
 // to provide custom auth
 
-import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import expect from '@kbn/expect';
-import type { IEsSearchResponse } from '@kbn/search-types';
 import { GenericFtrService } from '@kbn/test';
 import request from 'superagent';
 import type SuperTest from 'supertest';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 const parseBfetchResponse = (resp: request.Response): Array<Record<string, any>> => {

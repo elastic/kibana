@@ -7,18 +7,17 @@
 
 import React, { useState } from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiListGroup,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTable,
@@ -30,13 +29,14 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CANCEL_BUTTON_LABEL, START_BUTTON_LABEL } from '../../../../shared/constants';
 import { docLinks } from '../../../../shared/doc_links';
-import { EuiLinkTo, EuiListGroupItemTo } from '../../../../shared/react_router_helpers';
+import { EuiListGroupItemTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 import { AppLogic } from '../../../app_logic';
 import aclImage from '../../../assets/supports_acl.svg';
 import { ComponentLoader } from '../../../components/shared/component_loader';
@@ -45,41 +45,41 @@ import { StatusItem } from '../../../components/shared/status_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
 import { RECENT_ACTIVITY_TITLE } from '../../../constants';
 import {
-  BLOCKED_TIME_WINDOWS_PATH,
   SYNC_FREQUENCY_PATH,
-  getContentSourcePath,
+  BLOCKED_TIME_WINDOWS_PATH,
   getGroupPath,
+  getContentSourcePath,
 } from '../../../routes';
 import {
-  ADDITIONAL_CONFIG_HEADING,
-  CONFIGURATION_TITLE,
-  CONTENT_SUMMARY_LOADING_TEXT,
-  CONTENT_SUMMARY_TITLE,
-  CONTENT_TYPE_HEADER,
-  DOCUMENT_PERMISSIONS_DISABLED_TEXT,
-  DOCUMENT_PERMISSIONS_TEXT,
-  DOCUMENT_PERMISSIONS_TITLE,
-  DOC_PERMISSIONS_DESCRIPTION,
-  EMPTY_ACTIVITY_TITLE,
-  EVENT_HEADER,
-  EXTERNAL_IDENTITIES_LINK,
-  GROUP_ACCESS_TITLE,
-  ITEMS_HEADER,
-  LEARN_CUSTOM_FEATURES_BUTTON,
-  LEARN_MORE_LINK,
   SOURCES_NO_CONTENT_TITLE,
-  SOURCE_BLOCKED_TIME_WINDOWS_LINK_LABEL,
   SOURCE_OVERVIEW_TITLE,
-  SOURCE_SYNCHRONIZATION_BUTTON_LABEL,
-  SOURCE_SYNCHRONIZATION_TITLE,
-  SOURCE_SYNC_CONFIRM_MESSAGE,
-  SOURCE_SYNC_CONFIRM_TITLE,
-  SOURCE_SYNC_FREQUENCY_LINK_LABEL,
+  CONTENT_SUMMARY_TITLE,
+  CONTENT_SUMMARY_LOADING_TEXT,
+  CONTENT_TYPE_HEADER,
+  ITEMS_HEADER,
+  EVENT_HEADER,
   STATUS_HEADER,
-  STATUS_HEADING,
-  STATUS_TEXT,
   TIME_HEADER,
   TOTAL_DOCUMENTS_LABEL,
+  EMPTY_ACTIVITY_TITLE,
+  GROUP_ACCESS_TITLE,
+  CONFIGURATION_TITLE,
+  DOCUMENT_PERMISSIONS_TITLE,
+  DOCUMENT_PERMISSIONS_TEXT,
+  DOCUMENT_PERMISSIONS_DISABLED_TEXT,
+  LEARN_MORE_LINK,
+  STATUS_HEADING,
+  STATUS_TEXT,
+  ADDITIONAL_CONFIG_HEADING,
+  EXTERNAL_IDENTITIES_LINK,
+  LEARN_CUSTOM_FEATURES_BUTTON,
+  DOC_PERMISSIONS_DESCRIPTION,
+  SOURCE_SYNCHRONIZATION_TITLE,
+  SOURCE_SYNC_FREQUENCY_LINK_LABEL,
+  SOURCE_BLOCKED_TIME_WINDOWS_LINK_LABEL,
+  SOURCE_SYNCHRONIZATION_BUTTON_LABEL,
+  SOURCE_SYNC_CONFIRM_TITLE,
+  SOURCE_SYNC_CONFIRM_MESSAGE,
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 

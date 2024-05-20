@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiI18nNumber,
-  EuiIcon,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedPlural } from '@kbn/i18n-react';
-import React, { FunctionComponent } from 'react';
+import {
+  EuiLoadingSpinner,
+  EuiEmptyPrompt,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiI18nNumber,
+  EuiText,
+  EuiBadge,
+  EuiButton,
+  EuiLink,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { Index } from '@kbn/index-management-plugin/common/types/indices';
 
@@ -30,9 +30,9 @@ import { docLinks } from '../../../../common/doc_links';
 import { useIndex } from '../../hooks/api/use_index';
 
 import { BadgeList } from '../badge_list';
-import { IndexAliasesFlyout } from './index_aliases_flyout';
 import { OverviewEmptyPrompt } from './overview_empty_prompt';
 import { IndexOverviewPanel, IndexOverviewPanelStat } from './overview_panel';
+import { IndexAliasesFlyout } from './index_aliases_flyout';
 
 export interface IndexDetailOverviewProps {
   index: Index;

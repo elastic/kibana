@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import getSeries from './get_series';
 import getSeriesList from './get_series_list';
+import _ from 'lodash';
 
 export default function (name, data) {
   return getSeriesList([getSeries(name, _.map(data, 0), _.map(data, 1))]);

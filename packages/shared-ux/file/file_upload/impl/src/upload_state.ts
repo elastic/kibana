@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import * as Rx from 'rxjs';
+import { ImageMetadataFactory, getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
 import type {
-  FileJSON,
   FileKindBrowser,
+  FileJSON,
   BaseFilesClient as FilesClient,
 } from '@kbn/shared-ux-file-types';
-import { ImageMetadataFactory, getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
-import * as Rx from 'rxjs';
 import { i18nTexts } from './i18n_texts';
 
-import { type SimpleStateSubject, createStateSubject, parseFileName } from './util';
+import { createStateSubject, type SimpleStateSubject, parseFileName } from './util';
 
 interface FileState {
   file: File;

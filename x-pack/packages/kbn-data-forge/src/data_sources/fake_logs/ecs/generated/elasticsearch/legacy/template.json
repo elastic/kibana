@@ -1,5 +1,7 @@
 {
-  "index_patterns": ["kbn-data-forge-fake_logs.fake_logs-*"],
+  "index_patterns": [
+    "kbn-data-forge-fake_logs.fake_logs-*"
+  ],
   "mappings": {
     "_meta": {
       "version": "1.6.0"

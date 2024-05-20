@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { memo, useMemo } from 'react';
-import { APP_UI_ID } from '../../../../../../common';
-import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { i18n } from '@kbn/i18n';
 import { useAppUrl } from '../../../../../common/lib/kibana';
-import { getPoliciesPath } from '../../../../common/routing';
 import type { BackToExternalAppButtonProps } from '../../../../components/back_to_external_app_button/back_to_external_app_button';
 import { BackToExternalAppButton } from '../../../../components/back_to_external_app_button/back_to_external_app_button';
+import { getPoliciesPath } from '../../../../common/routing';
+import { APP_UI_ID } from '../../../../../../common';
+import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
 
 export const BackToPolicyListButton = memo<{ backLink?: PolicyDetailsRouteState['backLink'] }>(
   ({ backLink }) => {

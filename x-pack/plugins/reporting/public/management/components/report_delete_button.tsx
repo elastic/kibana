@@ -7,8 +7,8 @@
 
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Job } from '@kbn/reporting-public';
 import React, { Fragment, PureComponent } from 'react';
+import { Job } from '@kbn/reporting-public';
 
 type DeleteFn = () => Promise<void>;
 

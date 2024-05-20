@@ -7,7 +7,7 @@
 
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter } from '../../services';
-import { CLOSE_DETAIL_PANEL, OPEN_DETAIL_PANEL } from '../action_types';
+import { OPEN_DETAIL_PANEL, CLOSE_DETAIL_PANEL } from '../action_types';
 
 export const openDetailPanel =
   ({ name }) =>

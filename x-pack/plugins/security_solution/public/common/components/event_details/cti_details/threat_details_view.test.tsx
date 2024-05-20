@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
 
-import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { TestProviders } from '../../../mock';
+import { buildEventEnrichmentMock } from '../../../../../common/search_strategy/security_solution/cti/index.mock';
 import { ThreatDetailsView } from './threat_details_view';
 
 describe('ThreatDetailsView', () => {

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 
-import { getDeleteFieldProvider } from './components/delete_field_provider';
-import { initApi } from './lib/api';
-import { getFieldDeleteModalOpener } from './open_delete_modal';
+import type { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
 import { getFieldEditorOpener } from './open_editor';
 import { FormatEditorService } from './service/format_editor_service';
-import type { PluginSetup, PluginStart, SetupPlugins, StartPlugins } from './types';
+import { getDeleteFieldProvider } from './components/delete_field_provider';
+import { getFieldDeleteModalOpener } from './open_delete_modal';
+import { initApi } from './lib/api';
 
 export class IndexPatternFieldEditorPlugin
   implements Plugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins>

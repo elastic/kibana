@@ -7,19 +7,19 @@
 
 import './flyout_container.scss';
 
+import React, { useState, useEffect, useCallback } from 'react';
+import { css } from '@emotion/react';
 import {
-  EuiButtonEmpty,
+  EuiFlyoutHeader,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiButtonIcon,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
   EuiFocusTrap,
-  EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useCallback } from 'react';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
 
 function fromExcludedClickTarget(event: Event) {

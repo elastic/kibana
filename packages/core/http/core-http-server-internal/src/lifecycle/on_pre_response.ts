@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import Boom from '@hapi/boom';
 import {
-  ResponseToolkit as HapiResponseToolkit,
   Lifecycle,
   Request,
   ResponseObject,
+  ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
-import { CoreKibanaRequest, HapiResponseAdapter } from '@kbn/core-http-router-server-internal';
+import Boom from '@hapi/boom';
+import type { Logger } from '@kbn/logging';
 import type {
-  OnPreResponseExtensions,
-  OnPreResponseHandler,
+  ResponseHeaders,
   OnPreResponseRender,
   OnPreResponseResult,
-  OnPreResponseResultNext,
-  OnPreResponseResultRender,
   OnPreResponseToolkit,
-  ResponseHeaders,
+  OnPreResponseResultRender,
+  OnPreResponseResultNext,
+  OnPreResponseExtensions,
+  OnPreResponseHandler,
 } from '@kbn/core-http-server';
 import { OnPreResponseResultType } from '@kbn/core-http-server';
-import type { Logger } from '@kbn/logging';
+import { HapiResponseAdapter, CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 
 const preResponseResult = {
   render(responseRender: OnPreResponseRender): OnPreResponseResult {

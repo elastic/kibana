@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import React, { memo } from 'react';
-import { ExceptionsViewer } from '../rule_exceptions/components/all_exception_items_table';
 import type { Rule } from '../rule_management/logic';
 import { useGetEndpointExceptionsUnavailableComponent } from './use_get_endpoint_exceptions_unavailablle_component';
+import { ExceptionsViewer } from '../rule_exceptions/components/all_exception_items_table';
 
 const RULE_ENDPOINT_EXCEPTION_LIST_TYPE = [ExceptionListTypeEnum.ENDPOINT];
 

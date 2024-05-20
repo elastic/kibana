@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import React from 'react';
+import { css } from '@emotion/react';
 
 const LINE_CLAMP = 3;
 

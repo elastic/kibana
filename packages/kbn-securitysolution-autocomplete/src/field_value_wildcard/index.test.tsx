@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/eui';
-import { FILEPATH_WARNING, WILDCARD_WARNING } from '@kbn/securitysolution-utils';
-import { act, waitFor } from '@testing-library/react';
-import { ReactWrapper, mount } from 'enzyme';
 import React from 'react';
+import { ReactWrapper, mount } from 'enzyme';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFormHelpText } from '@elastic/eui';
+import { act, waitFor } from '@testing-library/react';
 import { AutocompleteFieldWildcardComponent } from '.';
-import { autocompleteStartMock } from '../autocomplete/index.mock';
-import { fields, getField } from '../fields/index.mock';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
+import { fields, getField } from '../fields/index.mock';
+import { autocompleteStartMock } from '../autocomplete/index.mock';
+import { WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils';
 
 jest.mock('../hooks/use_field_value_autocomplete');
 jest.mock('../translations', () => ({

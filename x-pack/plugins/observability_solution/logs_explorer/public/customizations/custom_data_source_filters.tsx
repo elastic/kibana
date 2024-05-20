@@ -1,7 +1,3 @@
-import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { Query } from '@kbn/es-query';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,6 +5,10 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
  * 2.0.
  */
 import React from 'react';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import { Query } from '@kbn/es-query';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '../hooks/use_control_panels';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 

@@ -6,20 +6,20 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
-import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { EndpointSortableField } from '../../../../common/endpoint/types';
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
   ENDPOINT_DEFAULT_SORT_DIRECTION,
   ENDPOINT_DEFAULT_SORT_FIELD,
-  METADATA_UNITED_INDEX,
   metadataCurrentIndexPattern,
+  METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
-import { EndpointSortableField } from '../../../../common/endpoint/types';
 import { buildStatusesKuery } from './support/agent_status';
+import type { GetMetadataListRequestQuery } from '../../../../common/api/endpoint';
 
 /**
  * 00000000-0000-0000-0000-000000000000 is initial Elastic Agent id sent by Endpoint before policy is configured
@@ -68,8 +68,8 @@ const getUnitedMetadataSortMethod = (
     sortField === EndpointSortableField.HOST_STATUS
       ? 'status'
       : sortField === EndpointSortableField.ENROLLED_AT
-        ? 'united.agent.enrolled_at'
-        : sortField.replace('metadata.', 'united.endpoint.');
+      ? 'united.agent.enrolled_at'
+      : sortField.replace('metadata.', 'united.endpoint.');
 
   if (DATE_FIELDS.includes(sortField)) {
     return [{ [mappedUnitedMetadataSortField]: { order: sortDirection, unmapped_type: 'date' } }];

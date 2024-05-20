@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { ControlFactory } from '..';
 import { OptionsListEmbeddableFactory } from '../options_list';
 import { RangeSliderEmbeddableFactory } from '../range_slider';
-import { ControlsServiceType } from '../services/controls/types';
 import { TimeSliderEmbeddableFactory } from '../time_slider';
+import { ControlsServiceType } from '../services/controls/types';
+import { ControlFactory } from '..';
 
 export const populateStorybookControlFactories = (controlsServiceStub: ControlsServiceType) => {
   const optionsListFactoryStub = new OptionsListEmbeddableFactory();

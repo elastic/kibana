@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 import alter from '../lib/alter';
 import Chainable from '../lib/classes/chainable';
+import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 export default new Chainable('legend', {
   args: [

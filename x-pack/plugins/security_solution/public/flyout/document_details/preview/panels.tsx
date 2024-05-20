@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { PreviewPanelPaths } from '.';
 import { AlertReasonPreview } from './components/alert_reason_preview';
+import type { PreviewPanelPaths } from '.';
 import { RulePreview } from './components/rule_preview';
 import { RulePreviewFooter } from './components/rule_preview_footer';
 

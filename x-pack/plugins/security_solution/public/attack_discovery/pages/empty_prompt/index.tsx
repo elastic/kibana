@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AssistantAvatar } from '@kbn/elastic-assistant';
 import {
   EuiButton,
   EuiEmptyPrompt,
@@ -18,7 +19,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import React, { useMemo } from 'react';
 
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';

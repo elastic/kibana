@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GithubLink } from './github_link';
 

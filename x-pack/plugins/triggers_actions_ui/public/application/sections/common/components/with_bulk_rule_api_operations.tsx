@@ -8,55 +8,55 @@
 import React from 'react';
 
 import {
+  IExecutionLogResult,
   IExecutionErrorsResult,
   IExecutionKPIResult,
-  IExecutionLogResult,
 } from '@kbn/alerting-plugin/common';
 import {
-  AlertingFrameworkHealth,
-  BulkDisableParamsWithoutHttp,
-  BulkEditResponse,
-  BulkOperationAttributesWithoutHttp,
-  BulkOperationResponse,
-  ResolvedRule,
   Rule,
-  RuleSummary,
-  RuleTaskState,
   RuleType,
+  RuleTaskState,
+  RuleSummary,
+  AlertingFrameworkHealth,
+  ResolvedRule,
   SnoozeSchedule,
+  BulkEditResponse,
+  BulkOperationResponse,
+  BulkOperationAttributesWithoutHttp,
+  BulkDisableParamsWithoutHttp,
 } from '../../../../types';
 import type {
-  BulkSnoozeRulesProps,
-  BulkUnsnoozeRulesProps,
-  LoadActionErrorLogProps,
-  LoadExecutionKPIAggregationsProps,
   LoadExecutionLogAggregationsProps,
-  LoadGlobalExecutionKPIAggregationsProps,
   LoadGlobalExecutionLogAggregationsProps,
+  LoadActionErrorLogProps,
+  BulkSnoozeRulesProps,
+  LoadExecutionKPIAggregationsProps,
+  LoadGlobalExecutionKPIAggregationsProps,
+  BulkUnsnoozeRulesProps,
 } from '../../../lib/rule_api';
-import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
-import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
-import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
+import { alertingFrameworkHealth } from '../../../lib/rule_api/health';
 import { cloneRule } from '../../../lib/rule_api/clone';
 import { loadRule } from '../../../lib/rule_api/get_rule';
-import { alertingFrameworkHealth } from '../../../lib/rule_api/health';
-import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
-import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_execution_kpi_aggregations';
+import { loadRuleSummary } from '../../../lib/rule_api/rule_summary';
+import { muteAlertInstance } from '../../../lib/rule_api/mute_alert';
+import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
 import {
   loadExecutionLogAggregations,
   loadGlobalExecutionLogAggregations,
 } from '../../../lib/rule_api/load_execution_log_aggregations';
-import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
-import { muteRule, muteRules } from '../../../lib/rule_api/mute';
-import { muteAlertInstance } from '../../../lib/rule_api/mute_alert';
-import { resolveRule } from '../../../lib/rule_api/resolve_rule';
-import { loadRuleSummary } from '../../../lib/rule_api/rule_summary';
-import { loadRuleTypes } from '../../../lib/rule_api/rule_types';
-import { bulkSnoozeRules, snoozeRule } from '../../../lib/rule_api/snooze';
+import { muteRules, muteRule } from '../../../lib/rule_api/mute';
+import { unmuteRules, unmuteRule } from '../../../lib/rule_api/unmute';
 import { loadRuleState } from '../../../lib/rule_api/state';
-import { unmuteRule, unmuteRules } from '../../../lib/rule_api/unmute';
+import { loadExecutionKPIAggregations } from '../../../lib/rule_api/load_execution_kpi_aggregations';
+import { loadGlobalExecutionKPIAggregations } from '../../../lib/rule_api/load_global_execution_kpi_aggregations';
+import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 import { unmuteAlertInstance } from '../../../lib/rule_api/unmute_alert';
-import { bulkUnsnoozeRules, unsnoozeRule } from '../../../lib/rule_api/unsnooze';
+import { resolveRule } from '../../../lib/rule_api/resolve_rule';
+import { snoozeRule, bulkSnoozeRules } from '../../../lib/rule_api/snooze';
+import { unsnoozeRule, bulkUnsnoozeRules } from '../../../lib/rule_api/unsnooze';
+import { bulkDeleteRules } from '../../../lib/rule_api/bulk_delete';
+import { bulkEnableRules } from '../../../lib/rule_api/bulk_enable';
+import { bulkDisableRules } from '../../../lib/rule_api/bulk_disable';
 
 import { useKibana } from '../../../../common/lib/kibana';
 

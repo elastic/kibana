@@ -6,9 +6,9 @@
  */
 
 import {
-  ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
+  ERROR_GROUP_ID,
 } from '@kbn/apm-plugin/common/es_fields/apm';
 import type { PreviewChartResponseItem } from '@kbn/apm-plugin/server/routes/alerts/route';
 import { getErrorGroupingKey } from '@kbn/apm-synthtrace-client/src/lib/apm/instance';

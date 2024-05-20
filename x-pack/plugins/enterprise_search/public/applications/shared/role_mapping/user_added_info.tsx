@@ -9,12 +9,12 @@ import React from 'react';
 
 import { EuiCallOut, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
-import { EMAIL_LABEL, USERNAME_LABEL } from '../constants';
+import { USERNAME_LABEL, EMAIL_LABEL } from '../constants';
 
 import {
+  KIBANA_ACCESS_WARNING_TITLE,
   KIBANA_ACCESS_WARNING_DESCRIPTION,
   KIBANA_ACCESS_WARNING_ERROR_MESSAGE,
-  KIBANA_ACCESS_WARNING_TITLE,
   ROLE_LABEL,
 } from './constants';
 

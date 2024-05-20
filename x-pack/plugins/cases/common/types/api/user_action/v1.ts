@@ -6,13 +6,13 @@
  */
 
 import * as rt from 'io-ts';
-import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
 import { paginationSchema } from '../../../schema';
+import { MAX_USER_ACTIONS_PER_PAGE } from '../../../constants';
 import { UserActionTypes } from '../../domain/user_action/action/v1';
 import type { CaseUserActionInjectedIdsRt } from '../../domain/user_action/v1';
 import {
-  CaseUserActionBasicRt,
   CaseUserActionInjectedDeprecatedIdsRt,
+  CaseUserActionBasicRt,
   UserActionsRt,
 } from '../../domain/user_action/v1';
 

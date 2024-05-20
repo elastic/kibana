@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import * as rt from 'io-ts';
+import type { InventoryMapBounds } from '../../common/inventory_views';
 import type {
   InfraTimerangeInput,
   SnapshotGroupBy,
@@ -14,7 +15,6 @@ import type {
   SnapshotNodeMetric,
   SnapshotNodePath,
 } from '../../common/http_api/snapshot_api';
-import type { InventoryMapBounds } from '../../common/inventory_views';
 import type { WaffleSortOption } from '../pages/metrics/inventory_view/hooks/use_waffle_options';
 export type { InventoryColorPalette } from '../../common/inventory_views';
 

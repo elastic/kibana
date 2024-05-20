@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
+import { render, fireEvent } from '@testing-library/react';
 
-import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 import AttachmentContentEvent from './external_reference_event';
+import { useNavigation } from '@kbn/security-solution-navigation/src/navigation';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation', () => {
   return {

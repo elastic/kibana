@@ -7,8 +7,8 @@
 
 import pMap from 'p-map';
 
-import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { PostPackagePolicyPostDeleteCallback } from '@kbn/fleet-plugin/server';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../common/endpoint/service/artifacts/constants';
 
 /**

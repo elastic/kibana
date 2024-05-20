@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { LoginState } from '@kbn/security-plugin/common/login_state';
 import { request } from '@kbn/security-solution-plugin/public/management/cypress/tasks/common';
+import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { ServerlessRoleName } from '../../../../../shared/lib';
-import { STANDARD_HTTP_HEADERS } from '../../../../../shared/lib/security/default_http_headers';
 import { ServerlessRoleName as RoleName } from '../../../../../shared/lib/security/types';
+import { STANDARD_HTTP_HEADERS } from '../../../../../shared/lib/security/default_http_headers';
 
 /**
  * Send login via API

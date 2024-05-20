@@ -10,7 +10,7 @@ import { relative } from 'path';
 
 import * as Rx from 'rxjs';
 
-import { Task, scan$ } from '../lib';
+import { scan$, Task } from '../lib';
 
 export const AssertPathLength: Task = {
   description: 'Checking Windows for paths > 200 characters',
@@ -21,8 +21,8 @@ export const AssertPathLength: Task = {
     const buildRoot = process.env.CI
       ? build.resolvePath()
       : win
-        ? build.resolvePathForPlatform(win)
-        : undefined;
+      ? build.resolvePathForPlatform(win)
+      : undefined;
 
     if (!buildRoot) {
       return;

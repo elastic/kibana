@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { snapshot } from './snapshot';
+import { source } from './source';
 import { archive } from './archive';
 import { buildSnapshots } from './build_snapshots';
 import { docker } from './docker';
 import { serverless } from './serverless';
-import { snapshot } from './snapshot';
-import { source } from './source';
 
 export const commands = {
   snapshot,

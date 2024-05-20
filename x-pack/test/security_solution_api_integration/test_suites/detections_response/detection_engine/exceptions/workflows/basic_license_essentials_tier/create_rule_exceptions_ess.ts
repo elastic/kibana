@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { CreateRuleExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import {
-  checkInvestigationFieldSoValue,
-  createRuleThroughAlertingEndpoint,
   getRuleSOById,
+  createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
+  checkInvestigationFieldSoValue,
 } from '../../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
+import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',

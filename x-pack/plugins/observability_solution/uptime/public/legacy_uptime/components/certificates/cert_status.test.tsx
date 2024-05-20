@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import React from 'react';
-import * as redux from 'react-redux';
 import { renderWithRouter, shallowWithRouter } from '../../lib';
 import { CertStatus } from './cert_status';
+import * as redux from 'react-redux';
+import moment from 'moment';
 
 describe('CertStatus', () => {
   beforeEach(() => {

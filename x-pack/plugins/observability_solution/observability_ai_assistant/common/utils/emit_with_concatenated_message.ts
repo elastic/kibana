@@ -6,15 +6,16 @@
  */
 
 import {
-  Observable,
-  OperatorFunction,
   concat,
   from,
   last,
   mergeMap,
+  Observable,
+  OperatorFunction,
   shareReplay,
   withLatestFrom,
 } from 'rxjs';
+import { withoutTokenCountEvents } from './without_token_count_events';
 import {
   ChatCompletionChunkEvent,
   ChatEvent,
@@ -22,10 +23,9 @@ import {
   StreamingChatResponseEventType,
 } from '../conversation_complete';
 import {
-  ConcatenatedMessage,
   concatenateChatCompletionChunks,
+  ConcatenatedMessage,
 } from './concatenate_chat_completion_chunks';
-import { withoutTokenCountEvents } from './without_token_count_events';
 
 type ConcatenateMessageCallback = (
   concatenatedMessage: ConcatenatedMessage

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useMemo } from 'react';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 
 /**
  * This hook behaves like a `useState` hook in that it provides a requested
@@ -36,7 +36,7 @@ export function useKibanaUiSetting(
   defaultValue?: TimePickerQuickRange[]
 ): [
   TimePickerQuickRange[],
-  (key: 'timepicker:quickRanges', value: TimePickerQuickRange[]) => Promise<boolean>,
+  (key: 'timepicker:quickRanges', value: TimePickerQuickRange[]) => Promise<boolean>
 ];
 
 export function useKibanaUiSetting(

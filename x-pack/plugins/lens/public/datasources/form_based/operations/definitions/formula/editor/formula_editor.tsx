@@ -5,58 +5,58 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormLabel,
-  EuiIcon,
-  EuiLink,
-  EuiPopover,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
-import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   LanguageDocumentationPopover,
   LanguageDocumentationPopoverContent,
 } from '@kbn/language-documentation-popover';
+import { css } from '@emotion/react';
+import {
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiFormLabel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
+import useUnmount from 'react-use/lib/useUnmount';
 import { monaco } from '@kbn/monaco';
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
-import useUnmount from 'react-use/lib/useUnmount';
-import { ParamEditorProps } from '../..';
+import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
+import { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
 import { ErrorWrapper, runASTValidation, tryToParse } from '../validation';
 import {
   LensMathSuggestions,
-  MARKER,
   SUGGESTION_TYPE,
-  createEditOperation,
-  getHover,
-  getSignatureHelp,
-  getSuggestion,
-  getTokenInfo,
-  monacoPositionToOffset,
-  offsetToRowColumn,
   suggest,
+  getSuggestion,
+  getSignatureHelp,
+  getHover,
+  getTokenInfo,
+  offsetToRowColumn,
+  monacoPositionToOffset,
+  createEditOperation,
+  MARKER,
 } from './math_completion';
 import { LANGUAGE_ID } from './math_tokenization';
 
 import './formula.scss';
-import { nonNullable } from '../../../../../../utils';
-import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 import { FormulaIndexPatternColumn } from '../formula';
 import { insertOrReplaceFormulaColumn } from '../parse';
 import { filterByVisibleOperation } from '../util';
+import { getColumnTimeShiftWarnings, getDateHistogramInterval } from '../../../../time_shift_utils';
 import { getDocumentationSections } from './formula_help';
+import { nonNullable } from '../../../../../../utils';
 
 function tableHasData(
   activeData: ParamEditorProps<FormulaIndexPatternColumn>['activeData'],

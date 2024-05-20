@@ -6,12 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '../../../../common/constants';
-import type { userApiV1 } from '../../../../common/types/api';
-import { createCaseError } from '../../../common/error';
 import type { UserProfileService } from '../../../services';
+import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '../../../../common/constants';
+import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { escapeHatch } from '../utils';
+import type { userApiV1 } from '../../../../common/types/api';
 
 export const suggestUserProfilesRoute = (userProfileService: UserProfileService) =>
   createCasesRoute({

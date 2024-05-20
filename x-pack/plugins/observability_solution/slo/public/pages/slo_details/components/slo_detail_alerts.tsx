@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { Fragment } from 'react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 
-import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface Props {

@@ -47,8 +47,12 @@
             "type": "Function",
             "tags": [],
             "label": "areAPIKeysEnabled",
-            "description": ["\nDetermines if API Keys are currently enabled."],
-            "signature": ["() => Promise<boolean>"],
+            "description": [
+              "\nDetermines if API Keys are currently enabled."
+            ],
+            "signature": [
+              "() => Promise<boolean>"
+            ],
             "path": "x-pack/packages/security/plugin_types_public/src/authentication/authentication_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -75,8 +79,12 @@
             "type": "Function",
             "tags": [],
             "label": "isRoleManagementEnabled",
-            "description": ["\nDetermines if role management is enabled."],
-            "signature": ["() => boolean | undefined"],
+            "description": [
+              "\nDetermines if role management is enabled."
+            ],
+            "signature": [
+              "() => boolean | undefined"
+            ],
             "path": "x-pack/packages/security/plugin_types_public/src/authorization/authorization_service.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -287,7 +295,9 @@
             "type": "Object",
             "tags": [],
             "label": "authz",
-            "description": ["\nExposes authorization configuration."],
+            "description": [
+              "\nExposes authorization configuration."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/security-plugin-types-public",
@@ -387,7 +397,9 @@
             "type": "Object",
             "tags": [],
             "label": "authz",
-            "description": ["\nExposes authorization configuration."],
+            "description": [
+              "\nExposes authorization configuration."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/security-plugin-types-public",
@@ -407,7 +419,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "userProfiles",
-            "description": ["\nA set of methods to work with Kibana user profiles."],
+            "description": [
+              "\nA set of methods to work with Kibana user profiles."
+            ],
             "signature": [
               "Omit<",
               {
@@ -479,7 +493,9 @@
             "tags": [],
             "label": "iconType",
             "description": [],
-            "signature": ["string | React.ComponentType<{}>"],
+            "signature": [
+              "string | React.ComponentType<{}>"
+            ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -502,7 +518,9 @@
             "tags": [],
             "label": "order",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -514,7 +532,9 @@
             "tags": [],
             "label": "setAsProfile",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/packages/security/plugin_types_public/src/nav_control/nav_control_service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -544,7 +564,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileBulkGetParams",
-        "description": ["\nParameters for the bulk get API."],
+        "description": [
+          "\nParameters for the bulk get API."
+        ],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -555,8 +577,12 @@
             "type": "Object",
             "tags": [],
             "label": "uids",
-            "description": ["\nList of user profile identifiers."],
-            "signature": ["Set<string>"],
+            "description": [
+              "\nList of user profile identifiers."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -570,7 +596,9 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -584,7 +612,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileGetCurrentParams",
-        "description": ["\nParameters for the get user profile for the current user API."],
+        "description": [
+          "\nParameters for the get user profile for the current user API."
+        ],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -611,7 +641,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileSuggestParams",
-        "description": ["\nParameters for the suggest API."],
+        "description": [
+          "\nParameters for the suggest API."
+        ],
         "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -635,8 +667,12 @@
             "type": "number",
             "tags": [],
             "label": "size",
-            "description": ["\nDesired number of suggestions to return. The default value is 10."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nDesired number of suggestions to return. The default value is 10."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -650,7 +686,9 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-browser/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -667,7 +705,9 @@
         "type": "Type",
         "tags": [],
         "label": "AuthenticationServiceStart",
-        "description": ["\nStart has the same contract as Setup for now."],
+        "description": [
+          "\nStart has the same contract as Setup for now."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/security-plugin-types-public",
@@ -688,7 +728,9 @@
         "type": "Type",
         "tags": [],
         "label": "AuthorizationServiceStart",
-        "description": ["\nStart has the same contract as Setup for now."],
+        "description": [
+          "\nStart has the same contract as Setup for now."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/security-plugin-types-public",

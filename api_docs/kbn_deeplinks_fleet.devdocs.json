@@ -29,7 +29,9 @@
         "tags": [],
         "label": "AppId",
         "description": [],
-        "signature": ["\"fleet\""],
+        "signature": [
+          "\"fleet\""
+        ],
         "path": "packages/deeplinks/fleet/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,

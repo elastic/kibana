@@ -7,15 +7,16 @@
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { map } from 'fp-ts/lib/Array';
-import { flow } from 'fp-ts/lib/function';
-import { groupBy as _groupBy, map as _map } from 'lodash';
 import React, { FunctionComponent, ReactNode, useMemo } from 'react';
+import { flow } from 'fp-ts/lib/function';
+import { map } from 'fp-ts/lib/Array';
+import { map as _map, groupBy as _groupBy } from 'lodash';
 
 import {
   FieldValidateResponse,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { ILicense } from '../../../../../../../types';
 import {
   FIELD_TYPES,
   FieldConfig,
@@ -23,7 +24,6 @@ import {
   fieldValidators,
   useKibana,
 } from '../../../../../../../shared_imports';
-import { ILicense } from '../../../../../../../types';
 
 import { getProcessorDescriptor, mapProcessorTypeToDescriptor } from '../../../shared';
 

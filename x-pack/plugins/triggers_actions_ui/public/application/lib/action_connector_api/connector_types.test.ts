@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ActionType } from '../../../types';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { loadActionTypes } from '.';
-import { ActionType } from '../../../types';
 
 const http = httpServiceMock.createStartContract();
 

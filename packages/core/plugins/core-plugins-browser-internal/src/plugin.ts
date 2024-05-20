@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom, Subject } from 'rxjs';
 import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
-import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
+import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
 import type {
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core-plugins-browser';
-import { Subject, firstValueFrom } from 'rxjs';
 import { read } from './plugin_reader';
 
 /**
@@ -26,7 +26,7 @@ export class PluginWrapper<
   TSetup = unknown,
   TStart = unknown,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object,
+  TPluginsStart extends object = object
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { OverlayStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { OverlayStart } from '@kbn/core/public';
 import { SAVE_DUPLICATE_REJECTED } from '../../constants';
-import { SavedObject, StartServices } from '../../types';
 import { confirmModalPromise } from './confirm_modal_promise';
+import { SavedObject, StartServices } from '../../types';
 
 export function displayDuplicateTitleConfirmModal(
   savedObject: Pick<SavedObject, 'title' | 'getDisplayName'>,

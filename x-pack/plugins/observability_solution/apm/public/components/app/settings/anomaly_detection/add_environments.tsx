@@ -5,28 +5,28 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
+  EuiTitle,
+  EuiText,
+  EuiSpacer,
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
+  EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { ML_ERRORS } from '../../../../../common/anomaly_detection';
+import { useFetcher, FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import { createJobs } from './create_jobs';
 import { getEnvironmentLabel } from '../../../../../common/environment_filter_values';
 import { useAnomalyDetectionJobsContext } from '../../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { createJobs } from './create_jobs';
 
 interface Props {
   currentEnvironments: string[];

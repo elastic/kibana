@@ -1,6 +1,3 @@
-import { EuiCodeBlock, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { NotebookRenderer } from '@kbn/ipynb';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { NotebookRenderer } from '@kbn/ipynb';
  * 2.0.
  */
 import React from 'react';
+import { EuiPanel, EuiEmptyPrompt, EuiCodeBlock } from '@elastic/eui';
+import { NotebookRenderer } from '@kbn/ipynb';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useNotebook } from '../hooks/use_notebook';
 import { LoadingPanel } from './loading_panel';

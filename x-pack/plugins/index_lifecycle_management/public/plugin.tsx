@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { firstValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
+import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/public';
 import { PLUGIN } from '../common/constants';
-import { BreadcrumbService } from './application/services/breadcrumbs';
 import { init as initHttp } from './application/services/http';
-import { init as initNotification } from './application/services/notification';
 import { init as initUiMetric } from './application/services/ui_metric';
+import { init as initNotification } from './application/services/notification';
+import { BreadcrumbService } from './application/services/breadcrumbs';
 import { addAllExtensions } from './extend_index_management';
-import { IlmLocatorDefinition } from './locator';
 import { ClientConfigType, SetupDependencies, StartDependencies } from './types';
+import { IlmLocatorDefinition } from './locator';
 
 export class IndexLifecycleManagementPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>

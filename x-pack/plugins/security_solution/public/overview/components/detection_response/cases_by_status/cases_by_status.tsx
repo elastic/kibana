@@ -5,22 +5,17 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import type { AxisStyle, Rotation } from '@elastic/charts';
 import { ScaleType } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { FormattedNumber } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import { SecurityPageName } from '../../../../../common/constants';
+import { FormattedNumber } from '@kbn/i18n-react';
+import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
-import { HeaderSection } from '../../../../common/components/header_section';
 import { LastUpdatedAt } from '../../../../common/components/last_updated_at';
-import { useFormatUrl } from '../../../../common/components/link_to';
-import { appendSearch } from '../../../../common/components/link_to/helpers';
-import { LinkButton } from '../../../../common/components/links';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useNavigation } from '../../../../common/lib/kibana';
+import { HeaderSection } from '../../../../common/components/header_section';
 import {
   CASES,
   CASES_BY_STATUS_SECTION_TITLE,
@@ -30,7 +25,12 @@ import {
   STATUS_OPEN,
   VIEW_CASES,
 } from '../translations';
+import { LinkButton } from '../../../../common/components/links';
 import { useCasesByStatus } from './use_cases_by_status';
+import { SecurityPageName } from '../../../../../common/constants';
+import { useFormatUrl } from '../../../../common/components/link_to';
+import { appendSearch } from '../../../../common/components/link_to/helpers';
+import { useNavigation } from '../../../../common/lib/kibana';
 
 const CASES_BY_STATUS_ID = 'casesByStatus';
 

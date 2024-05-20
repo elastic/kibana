@@ -11,25 +11,25 @@ import { Operation, OperationWithReferences, OperationWithSourceField } from './
 import {
   AvgParams,
   CardinalityParams,
-  CountParams,
-  CounterRateParams,
-  CumulativeSumParams,
   DateHistogramParams,
-  DerivativeParams,
   FiltersParams,
-  FormulaParams,
-  LastValueParams,
   MaxParams,
   MedianParams,
   MinParams,
-  MovingAverageParams,
-  PercentileParams,
-  PercentileRanksParams,
   RangeParams,
   StandardDeviationParams,
-  StaticValueParams,
   SumParams,
   TermsParams,
+  PercentileParams,
+  PercentileRanksParams,
+  CountParams,
+  LastValueParams,
+  CumulativeSumParams,
+  CounterRateParams,
+  DerivativeParams,
+  MovingAverageParams,
+  FormulaParams,
+  StaticValueParams,
 } from './params';
 
 export interface BaseColumn<OperationType extends Operation, Params = undefined> {
@@ -111,7 +111,7 @@ export type Column = AnyColumnWithReferences | AnyColumnWithSourceField | Filter
 
 export type GenericColumnWithMeta<
   Col extends Column | {},
-  Meta extends {} | unknown = undefined,
+  Meta extends {} | unknown = undefined
 > = Col & (Meta extends undefined ? undefined : { meta: Meta });
 
 export type ColumnWithMeta = GenericColumnWithMeta<Column, unknown>;

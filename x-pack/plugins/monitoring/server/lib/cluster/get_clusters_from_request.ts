@@ -6,42 +6,42 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
-import { set } from '@kbn/safer-lodash-set';
 import { get, omit } from 'lodash';
-import {
-  CCS_REMOTE_PATTERN,
-  CODE_PATH_ALERTS,
-  CODE_PATH_APM,
-  CODE_PATH_BEATS,
-  CODE_PATH_ENTERPRISE_SEARCH,
-  CODE_PATH_KIBANA,
-  CODE_PATH_LOGS,
-  CODE_PATH_LOGSTASH,
-  CODE_PATH_ML,
-  STANDALONE_CLUSTER_CLUSTER_UUID,
-} from '../../../common/constants';
-import { getBeatsForClusters } from '../beats';
+import { set } from '@kbn/safer-lodash-set';
+import { i18n } from '@kbn/i18n';
+import { getClustersStats } from './get_clusters_stats';
+import { flagSupportedClusters } from './flag_supported_clusters';
 import { getMlJobsForCluster } from '../elasticsearch';
-import { getEnterpriseSearchForClusters } from '../enterprise_search';
 import { getKibanasForClusters } from '../kibana';
+import { getEnterpriseSearchForClusters } from '../enterprise_search';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
-import { flagSupportedClusters } from './flag_supported_clusters';
-import { getClustersStats } from './get_clusters_stats';
-import { EnhancedClusters, getClustersSummary } from './get_clusters_summary';
+import { getBeatsForClusters } from '../beats';
+import { getClustersSummary, EnhancedClusters } from './get_clusters_summary';
+import {
+  STANDALONE_CLUSTER_CLUSTER_UUID,
+  CODE_PATH_ML,
+  CODE_PATH_ALERTS,
+  CODE_PATH_LOGS,
+  CODE_PATH_KIBANA,
+  CODE_PATH_LOGSTASH,
+  CODE_PATH_BEATS,
+  CODE_PATH_APM,
+  CODE_PATH_ENTERPRISE_SEARCH,
+  CCS_REMOTE_PATTERN,
+} from '../../../common/constants';
 
-import { RulesByType } from '../../../common/types/alerts';
-import { Globals } from '../../static_globals';
-import { Cluster, LegacyRequest } from '../../types';
-import { fetchStatus } from '../alerts/fetch_status';
 import { getApmsForClusters } from '../apm/get_apms_for_clusters';
 import { checkCcrEnabled } from '../elasticsearch/ccr';
-import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '../kibana/rules';
-import { getLogTypes } from '../logs';
+import { fetchStatus } from '../alerts/fetch_status';
 import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
-import { getIndexPatterns } from './get_index_patterns';
+import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
+import { LegacyRequest, Cluster } from '../../types';
+import { RulesByType } from '../../../common/types/alerts';
+import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '../kibana/rules';
+import { Globals } from '../../static_globals';
+import { getIndexPatterns } from './get_index_patterns';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.

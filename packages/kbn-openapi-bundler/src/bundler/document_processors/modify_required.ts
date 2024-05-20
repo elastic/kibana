@@ -8,10 +8,10 @@
 
 import chalk from 'chalk';
 import { logger } from '../../logger';
-import { hasProp } from '../../utils/has_prop';
 import { isPlainObjectType } from '../../utils/is_plain_object_type';
-import { X_MODIFY } from '../known_custom_props';
 import { DocumentNodeProcessor } from '../types';
+import { hasProp } from '../../utils/has_prop';
+import { X_MODIFY } from '../known_custom_props';
 import { inlineRef } from './utils/inline_ref';
 
 /**

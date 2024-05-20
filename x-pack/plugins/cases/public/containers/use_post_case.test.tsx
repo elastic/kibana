@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { act, renderHook } from '@testing-library/react-hooks';
-import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { renderHook, act } from '@testing-library/react-hooks';
+import * as api from './api';
 import { ConnectorTypes } from '../../common/types/domain';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
 import { createAppMockRenderer } from '../common/mock';
-import * as api from './api';
-import { casesQueriesKeys } from './constants';
 import { usePostCase } from './use_post_case';
+import { casesQueriesKeys } from './constants';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');

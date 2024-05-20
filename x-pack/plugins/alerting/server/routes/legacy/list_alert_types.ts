@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
-import { verifyApiAccess } from '../../lib/license_api_access';
-import { ILicenseState } from '../../lib/license_state';
-import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 import type { AlertingRouter } from '../../types';
+import { ILicenseState } from '../../lib/license_state';
+import { verifyApiAccess } from '../../lib/license_api_access';
+import { LEGACY_BASE_ALERT_API_PATH } from '../../../common';
+import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
 
 export const listAlertTypesRoute = (
   router: AlertingRouter,

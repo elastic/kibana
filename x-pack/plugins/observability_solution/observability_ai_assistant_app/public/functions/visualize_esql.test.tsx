@@ -1,10 +1,3 @@
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks/lens_plugin_mock';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,6 +5,13 @@ import userEvent from '@testing-library/user-event';
  * 2.0.
  */
 import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks/lens_plugin_mock';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { VisualizeESQL } from './visualize_esql';
 
 describe('VisualizeESQL', () => {

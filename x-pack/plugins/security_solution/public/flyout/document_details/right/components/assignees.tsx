@@ -20,15 +20,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AssigneesApplyPanel } from '../../../../common/components/assignees/assignees_apply_panel';
-import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
+import { AssigneesApplyPanel } from '../../../../common/components/assignees/assignees_apply_panel';
+import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
+import { useLicense } from '../../../../common/hooks/use_license';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/users_avatars_panel';
-import { useLicense } from '../../../../common/hooks/use_license';
-import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
-import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
   ASSIGNEES_HEADER_TEST_ID,

@@ -8,8 +8,8 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { ChartSettingsPopover } from '.';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from './translations';
+import { ChartSettingsPopover } from '.';
 
 describe('ChartSettingsPopover', () => {
   const setIsPopoverOpen = jest.fn();

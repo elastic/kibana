@@ -16,8 +16,8 @@ import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
 import {
-  LICENSING_FEATURE,
   LicensingCallout,
+  LICENSING_FEATURE,
 } from '../../../../shared/licensing_callout/licensing_callout';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 

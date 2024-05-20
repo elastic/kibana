@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { euiPaletteColorBlind } from '@elastic/eui';
-import { COLOR_MAP_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../../../common/constants';
+import { extractColorFromStyleProperty } from './extract_color_from_style_property';
 import {
   ColorDynamicOptions,
   ColorDynamicStylePropertyDescriptor,
   ColorStaticOptions,
   ColorStaticStylePropertyDescriptor,
 } from '../../../../../../common/descriptor_types';
-import { extractColorFromStyleProperty } from './extract_color_from_style_property';
+import { COLOR_MAP_TYPE, FIELD_ORIGIN, STYLE_TYPE } from '../../../../../../common/constants';
+import { euiPaletteColorBlind } from '@elastic/eui';
 
 const blue = '#0000ff';
 const yellow = '#ffff00';

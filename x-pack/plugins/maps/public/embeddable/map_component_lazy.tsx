@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import type { Props } from './map_component';
 
 const Component = dynamic(async () => {

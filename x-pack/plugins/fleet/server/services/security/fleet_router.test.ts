@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandler } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   CheckPrivilegesDynamically,
-  CheckPrivilegesPayload,
   CheckPrivilegesResponse,
+  CheckPrivilegesPayload,
 } from '@kbn/security-plugin/server';
+import type { RequestHandler } from '@kbn/core/server';
+import type { VersionedRouter } from '@kbn/core-http-server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 
@@ -20,9 +20,9 @@ import { coreMock } from '@kbn/core/server/mocks';
 
 import { API_VERSIONS } from '../../../common/constants';
 
-import { appContextService } from '..';
 import type { FleetRequestHandlerContext } from '../..';
 import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '..';
 
 import { makeRouterWithFleetAuthz } from './fleet_router';
 

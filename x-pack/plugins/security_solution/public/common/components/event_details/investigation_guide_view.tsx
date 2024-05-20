@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiText } from '@elastic/eui';
 import React, { createContext } from 'react';
 import styled from 'styled-components';
 import type { GetBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
-import { LineClamp } from '../line_clamp';
-import { MarkdownRenderer } from '../markdown_editor';
 import * as i18n from './translations';
+import { MarkdownRenderer } from '../markdown_editor';
+import { LineClamp } from '../line_clamp';
 
 export const Indent = styled.div`
   padding: 0 8px;

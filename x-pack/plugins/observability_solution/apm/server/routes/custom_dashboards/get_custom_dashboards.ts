@@ -8,8 +8,8 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
-  ApmCustomDashboard,
   SavedApmCustomDashboard,
+  ApmCustomDashboard,
 } from '../../../common/custom_dashboards';
 
 interface Props {

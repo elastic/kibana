@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import React, { FunctionComponent, memo, useRef, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import List from 'react-virtualized/dist/commonjs/List';
 import WindowScroller from 'react-virtualized/dist/commonjs/WindowScroller';
 
@@ -15,7 +15,7 @@ import { ProcessorInternal, ProcessorSelector } from '../../types';
 import { selectorToDataTestSubject } from '../../utils';
 import { AddProcessorButton } from '../add_processor_button';
 
-import { DropZoneButton, PrivateTree } from './components';
+import { PrivateTree, DropZoneButton } from './components';
 
 import './processors_tree.scss';
 

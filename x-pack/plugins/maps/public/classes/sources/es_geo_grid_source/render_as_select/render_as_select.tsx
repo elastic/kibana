@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiFormRow } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { RENDER_AS } from '../../../../../common/constants';
 import { getIsCloud } from '../../../../kibana_services';
 import { getIsGoldPlus } from '../../../../licensed_features';

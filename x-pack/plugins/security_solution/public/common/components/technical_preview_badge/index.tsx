@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiBetaBadge } from '@elastic/eui';
 import React from 'react';
+import { EuiBetaBadge } from '@elastic/eui';
 
 import * as i18n from './translations';
 

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ExceptionsListPreDeleteItemServerExtension } from '@kbn/lists-plugin/server';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionsListPreDeleteItemServerExtension } from '@kbn/lists-plugin/server';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   BlocklistValidator,

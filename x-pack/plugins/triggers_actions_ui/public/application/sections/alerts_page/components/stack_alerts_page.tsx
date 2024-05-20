@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiBetaBadge,
   EuiFlexGroup,
@@ -13,9 +15,6 @@ import {
   EuiPageTemplate,
   EuiSpacer,
 } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -24,28 +23,29 @@ import {
   AlertConsumers,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
-import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
-import { nonNullable } from '../../../../../common/utils';
+import { BoolQuery } from '@kbn/es-query';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
 import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../../constants';
-import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
+import { useRuleStats } from '../hooks/use_rule_stats';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
+import { NON_SIEM_FEATURE_IDS } from '../../alerts_search_bar/constants';
+import { alertProducersData } from '../../alerts_table/constants';
+import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
+import { useKibana } from '../../../../common/lib/kibana';
+import { alertsTableQueryClient } from '../../alerts_table/query_client';
+import {
+  alertSearchBarStateContainer,
+  Provider,
+} from '../../alerts_search_bar/use_alert_search_bar_state_container';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { createMatchPhraseFilter, createRuleTypesFilter } from '../../../lib/search_filters';
-import { NON_SIEM_FEATURE_IDS } from '../../alerts_search_bar/constants';
-import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
-import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
-import {
-  Provider,
-  alertSearchBarStateContainer,
-} from '../../alerts_search_bar/use_alert_search_bar_state_container';
-import { alertProducersData } from '../../alerts_table/constants';
-import { alertsTableQueryClient } from '../../alerts_table/query_client';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
-import { useRuleStats } from '../hooks/use_rule_stats';
+import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
+import { nonNullable } from '../../../../../common/utils';
 import { useRuleTypeIdsByFeatureId } from '../hooks/use_rule_type_ids_by_feature_id';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
 /**

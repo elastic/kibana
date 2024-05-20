@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
+import { schema, TypeOf } from '@kbn/config-schema';
 import {
-  AlertsClientError,
-  RuleExecutorOptions as BaseRuleExecutorOptions,
   RuleType as BaseRuleType,
-  DEFAULT_AAD_CONFIG,
   RuleTypeState,
+  RuleExecutorOptions as BaseRuleExecutorOptions,
+  DEFAULT_AAD_CONFIG,
+  AlertsClientError,
 } from '@kbn/alerting-plugin/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { TypeOf, schema } from '@kbn/config-schema';
+import { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
 
 type Params = TypeOf<typeof Params>;
 const Params = schema.object(

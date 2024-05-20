@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiResizableContainer,
-  EuiTitle,
-} from '@elastic/eui';
-import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
 import { i18n } from '@kbn/i18n';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
-import { ExpViewActionMenu } from './components/action_menu';
-import { EmptyView } from './components/empty_view';
-import { useExploratoryView } from './contexts/exploratory_view_config';
-import { useAppDataViewContext } from './hooks/use_app_data_view';
+import {
+  EuiButtonEmpty,
+  EuiResizableContainer,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { PanelDirection } from '@elastic/eui/src/components/resizable_container/types';
+import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useKibana } from './hooks/use_kibana';
-import { useLensAttributes } from './hooks/use_lens_attributes';
 import { useSeriesStorage } from './hooks/use_series_storage';
-import { useExpViewTimeRange } from './hooks/use_time_range';
-import { LensEmbeddable } from './lens_embeddable';
+import { useLensAttributes } from './hooks/use_lens_attributes';
+import { useAppDataViewContext } from './hooks/use_app_data_view';
 import { SeriesViews } from './views/series_views';
+import { LensEmbeddable } from './lens_embeddable';
+import { EmptyView } from './components/empty_view';
+import { useExpViewTimeRange } from './hooks/use_time_range';
+import { ExpViewActionMenu } from './components/action_menu';
+import { useExploratoryView } from './contexts/exploratory_view_config';
 
 export type PanelId = 'seriesPanel' | 'chartPanel';
 

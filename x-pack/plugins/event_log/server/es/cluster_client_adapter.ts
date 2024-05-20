@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
+import { bufferTime, filter as rxFilter, concatMap } from 'rxjs';
+import { reject, isUndefined, isNumber, pick } from 'lodash';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { KueryNode, fromKueryExpression, nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { isNumber, isUndefined, pick, reject } from 'lodash';
-import { Subject } from 'rxjs';
-import { bufferTime, concatMap, filter as rxFilter } from 'rxjs';
-import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
+import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
+import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
 import { EsNames } from './names';
 

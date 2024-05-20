@@ -10,12 +10,12 @@ import React from 'react';
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 
 import {
-  EuiBadge,
+  EuiTextColor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
-  EuiTextColor,
   EuiToolTip,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

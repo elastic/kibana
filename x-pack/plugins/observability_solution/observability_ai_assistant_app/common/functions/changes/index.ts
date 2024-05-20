@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ChangePointType } from '@kbn/es-types/src';
 import { FromSchema } from 'json-schema-to-ts';
+import { ChangePointType } from '@kbn/es-types/src';
 
 export const changesFunctionParameters = {
   type: 'object',

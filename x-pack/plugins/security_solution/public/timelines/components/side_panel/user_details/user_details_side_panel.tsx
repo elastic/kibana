@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { AssetCriticalityAccordion } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import {
-  ExpandableUserDetails,
-  ExpandableUserDetailsPageLink,
   ExpandableUserDetailsTitle,
+  ExpandableUserDetailsPageLink,
+  ExpandableUserDetails,
 } from './expandable_user';
 import type { UserDetailsProps } from './types';
 

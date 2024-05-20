@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { TaskRunnerFactory } from './task_runner';
+import { RuleTypeRegistry, ConstructorOptions } from './rule_type_registry';
+import { ActionGroup, RuleType } from './types';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { RecoveredActionGroupId } from '../common';
-import { alertsServiceMock } from './alerts_service/alerts_service.mock';
-import { AlertingConfig } from './config';
 import { ILicenseState } from './lib/license_state';
 import { licenseStateMock } from './lib/license_state.mock';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
-import { ConstructorOptions, RuleTypeRegistry } from './rule_type_registry';
-import { TaskRunnerFactory } from './task_runner';
-import { ActionGroup, RuleType } from './types';
+import { alertsServiceMock } from './alerts_service/alerts_service.mock';
+import { schema } from '@kbn/config-schema';
+import { RecoveredActionGroupId } from '../common';
+import { AlertingConfig } from './config';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;

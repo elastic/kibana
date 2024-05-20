@@ -7,9 +7,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { LayoutConfigType } from '@kbn/core-logging-server';
 import { Layout } from '@kbn/logging';
 import { assertNever } from '@kbn/std';
+import type { LayoutConfigType } from '@kbn/core-logging-server';
 
 import { JsonLayout } from './json_layout';
 import { PatternLayout } from './pattern_layout';

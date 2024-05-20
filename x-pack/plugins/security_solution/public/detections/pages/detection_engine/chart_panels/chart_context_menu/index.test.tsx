@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { fireEvent, render, screen } from '@testing-library/react';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import React from 'react';
 
-import { ChartContextMenu } from '.';
 import { RESET_GROUP_BY_FIELDS } from '../../../../../common/components/chart_settings_popover/configurations/default/translations';
 import { CHART_SETTINGS_POPOVER_ARIA_LABEL } from '../../../../../common/components/chart_settings_popover/translations';
 import { INSPECT } from '../../../../../common/components/inspect/translations';
-import { TestProviders } from '../../../../../common/mock';
 import {
   DEFAULT_STACK_BY_FIELD,
   DEFAULT_STACK_BY_FIELD1,
 } from '../../../../components/alerts_kpis/common/config';
+import { TestProviders } from '../../../../../common/mock';
+import { ChartContextMenu } from '.';
 
 describe('ChartContextMenu', () => {
   const queryId = 'abcd';

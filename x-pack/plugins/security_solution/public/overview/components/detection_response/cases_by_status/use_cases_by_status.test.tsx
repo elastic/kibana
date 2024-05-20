@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { renderHook, act } from '@testing-library/react-hooks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
-import { act, renderHook } from '@testing-library/react-hooks';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders } from '../../../../common/mock';
 import type { UseCasesByStatusProps, UseCasesByStatusResults } from './use_cases_by_status';

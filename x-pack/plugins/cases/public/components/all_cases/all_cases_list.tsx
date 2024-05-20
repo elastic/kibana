@@ -5,33 +5,33 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiTableSelectionType } from '@elastic/eui';
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
 import deepEqual from 'react-fast-compare';
 
-import type { CaseUI, CasesUI, FilterOptions } from '../../../common/ui/types';
+import type { CaseUI, FilterOptions, CasesUI } from '../../../common/ui/types';
 import type { EuiBasicTableOnChange } from './types';
 
-import type { CaseStatuses } from '../../../common/types/domain';
 import { SortFieldCase } from '../../../common/ui/types';
+import type { CaseStatuses } from '../../../common/types/domain';
+import { useCasesColumns } from './use_cases_columns';
+import { CasesTableFilters } from './table_filters';
+import { CASES_TABLE_PER_PAGE_VALUES } from './types';
+import { CasesTable } from './table';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { CasesMetrics } from './cases_metrics';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
-import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
 import { initialData, useGetCases } from '../../containers/use_get_cases';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/permissions';
-import { useAvailableCasesOwners } from '../app/use_available_owners';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { CasesMetrics } from './cases_metrics';
-import { CasesTable } from './table';
-import { CasesTableFilters } from './table_filters';
-import { CASES_TABLE_PER_PAGE_VALUES } from './types';
-import { useAllCasesState } from './use_all_cases_state';
-import { useCasesColumns } from './use_cases_columns';
-import { useCasesColumnsSelection } from './use_cases_columns_selection';
 import { useIsLoadingCases } from './use_is_loading_cases';
+import { useAllCasesState } from './use_all_cases_state';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useCasesColumnsSelection } from './use_cases_columns_selection';
+import { DEFAULT_CASES_TABLE_STATE } from '../../containers/constants';
 import { CasesTableUtilityBar } from './utility_bar';
 
 const getSortField = (field: string): SortFieldCase =>

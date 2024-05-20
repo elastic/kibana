@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 import type { ComponentProps } from 'react';
+import { AbstractStorybookMock } from '@kbn/shared-ux-storybook-mock';
 
 import { TabbedModal } from '..';
 

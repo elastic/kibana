@@ -6,18 +6,18 @@
  */
 
 import React from 'react';
+import { ENTRY_LEADER_ENTITY_ID, CONTAINER_IMAGE_NAME } from '../../../common/constants';
+import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { GlobalFilter } from '../../types';
 import {
-  CONTAINER_NAME_TABLE_TEST_ID,
-  COUNT_COLUMN_TEST_ID,
   ContainerNameWidget,
   LOADING_TEST_ID,
   NAME_COLUMN_TEST_ID,
+  COUNT_COLUMN_TEST_ID,
+  CONTAINER_NAME_TABLE_TEST_ID,
 } from '.';
-import { CONTAINER_IMAGE_NAME, ENTRY_LEADER_ENTITY_ID } from '../../../common/constants';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { GlobalFilter } from '../../types';
-import { ROW_TEST_ID } from './container_name_row';
 import { useFetchContainerNameData } from './hooks';
+import { ROW_TEST_ID } from './container_name_row';
 
 const TABLE_SORT_BUTTON_ID = 'tableHeaderSortButton';
 

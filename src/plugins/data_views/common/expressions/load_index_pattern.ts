@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { DataViewSpec } from '..';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { DataViewsContract } from '../data_views';
+import { DataViewSpec } from '..';
 
 const name = 'indexPatternLoad';
 const type = 'index_pattern';

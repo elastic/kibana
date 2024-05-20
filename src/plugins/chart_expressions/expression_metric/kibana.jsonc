@@ -15,7 +15,11 @@
       "presentationUtil",
       "data"
     ],
-    "optionalPlugins": ["usageCollection"],
-    "requiredBundles": ["kibanaUtils"]
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ]
   }
 }

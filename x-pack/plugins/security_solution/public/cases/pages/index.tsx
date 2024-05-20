@@ -5,41 +5,41 @@
  * 2.0.
  */
 
-import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
-import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
-import { TimelineId } from '../../../common/types/timeline';
+import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
+import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
   AlertsCasesTourSteps,
   SecurityStepId,
 } from '../../common/components/guided_onboarding_tour/tour_config';
-import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/shared/constants/panel_keys';
+import { TimelineId } from '../../../common/types/timeline';
 
 import { getRuleDetailsUrl, useFormatUrl } from '../../common/components/link_to';
 
+import { useKibana, useNavigation } from '../../common/lib/kibana';
 import {
   APP_ID,
   CASES_PATH,
   ENABLE_EXPANDABLE_FLYOUT_SETTING,
   SecurityPageName,
 } from '../../../common/constants';
-import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
-import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { useSourcererDataView } from '../../common/containers/sourcerer';
-import { useUpsellingMessage } from '../../common/hooks/use_upselling';
-import { useKibana, useNavigation } from '../../common/lib/kibana';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { getEndpointDetailsPath } from '../../management/common/routing';
-import { DetailsPanel } from '../../timelines/components/side_panel';
 import { timelineActions } from '../../timelines/store';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../common/store/sourcerer/model';
+import { CaseDetailsRefreshContext } from '../../common/components/endpoint/host_isolation/endpoint_host_isolation_cases_context';
+import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
+import { getEndpointDetailsPath } from '../../management/common/routing';
+import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { useInsertTimeline } from '../components/use_insert_timeline';
+import * as timelineMarkdownPlugin from '../../common/components/markdown_editor/plugins/timeline';
+import { DetailsPanel } from '../../timelines/components/side_panel';
 import { useFetchAlertData } from './use_fetch_alert_data';
+import { useUpsellingMessage } from '../../common/hooks/use_upselling';
 
 const TimelineDetailsPanel = () => {
   const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);

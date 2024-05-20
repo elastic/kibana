@@ -9,7 +9,7 @@
 import type { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
 
-import { InputControlConfig, configSchema } from '../config';
+import { configSchema, InputControlConfig } from '../config';
 
 export const config: PluginConfigDescriptor<InputControlConfig> = {
   exposeToBrowser: {

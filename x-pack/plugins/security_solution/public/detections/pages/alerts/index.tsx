@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
@@ -15,11 +15,11 @@ import {
   SecurityPageName,
 } from '../../../../common/constants';
 import { NotFoundPage } from '../../../app/404';
+import * as i18n from './translations';
+import { DetectionEnginePage } from '../detection_engine/detection_engine';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useReadonlyHeader } from '../../../use_readonly_header';
-import { DetectionEnginePage } from '../detection_engine/detection_engine';
 import { AlertDetailsRedirect } from './alert_details_redirect';
-import * as i18n from './translations';
 
 const AlertsRoute = () => (
   <TrackApplicationView viewId={SecurityPageName.alerts}>

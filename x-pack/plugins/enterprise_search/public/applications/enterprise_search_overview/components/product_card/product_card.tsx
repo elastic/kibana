@@ -18,11 +18,11 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  IconSize,
   IconType,
+  IconSize,
 } from '@elastic/eui';
 
-import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
+import { EuiButtonTo, EuiButtonEmptyTo } from '../../../shared/react_router_helpers';
 import { TelemetryLogic } from '../../../shared/telemetry';
 
 import './product_card.scss';

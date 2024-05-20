@@ -7,16 +7,16 @@
 
 import React from 'react';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import {
-  EuiFlexGrid,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
+  EuiPanel,
+  EuiIcon,
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,7 +26,7 @@ import { TelemetryLogic } from '../../../shared/telemetry';
 import { AppLogic } from '../../app_logic';
 import orgSourcesIcon from '../../components/shared/assets/source_icons/share_circle.svg';
 import { ContentSection } from '../../components/shared/content_section';
-import { ADD_SOURCE_PATH, ORG_SETTINGS_PATH, USERS_AND_ROLES_PATH } from '../../routes';
+import { ADD_SOURCE_PATH, USERS_AND_ROLES_PATH, ORG_SETTINGS_PATH } from '../../routes';
 
 import { OnboardingCard } from './onboarding_card';
 import { OverviewLogic } from './overview_logic';

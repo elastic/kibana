@@ -1,7 +1,10 @@
 {
   "nodes.usage": {
     "url_components": {
-      "metrics": ["_all", "rest_actions"]
+      "metrics": [
+        "_all",
+        "rest_actions"
+      ]
     }
   }
 }

@@ -11,46 +11,46 @@
  * rescheduling, middleware application, etc.
  */
 
-import { withSpan } from '@kbn/apm-utils';
-import { ExecutionContextStart, Logger } from '@kbn/core/server';
 import apm from 'elastic-apm-node';
-import { identity } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
+import { withSpan } from '@kbn/apm-utils';
+import { identity } from 'lodash';
+import { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import { intervalFromDate } from '../lib/intervals';
 import { Middleware } from '../lib/middleware';
-import { Result, asErr, asOk, eitherAsync } from '../lib/result_type';
+import { asOk, asErr, eitherAsync, Result } from '../lib/result_type';
+import {
+  TaskRun,
+  TaskMarkRunning,
+  asTaskRunEvent,
+  asTaskMarkRunningEvent,
+  startTaskTimer,
+  TaskTiming,
+  TaskPersistence,
+} from '../task_events';
+import { intervalFromDate } from '../lib/intervals';
 import {
   CancellableTask,
   ConcreteTaskInstance,
-  EphemeralTaskInstance,
-  FailedRunResult,
-  SuccessfulRunResult,
-  TaskStatus,
   isFailedRunResult,
+  SuccessfulRunResult,
+  FailedRunResult,
+  TaskStatus,
+  EphemeralTaskInstance,
 } from '../task';
-import {
-  TaskMarkRunning,
-  TaskPersistence,
-  TaskRun,
-  TaskTiming,
-  asTaskMarkRunningEvent,
-  asTaskRunEvent,
-  startTaskTimer,
-} from '../task_events';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 import {
+  asPending,
+  asReadyToRun,
   EMPTY_RUN_RESULT,
+  isPending,
+  isReadyToRun,
+  TaskRunner,
+  TaskRunningInstance,
+  TaskRunResult,
   TASK_MANAGER_RUN_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE,
   TASK_MANAGER_TRANSACTION_TYPE_MARK_AS_RUNNING,
-  TaskRunResult,
-  TaskRunner,
-  TaskRunningInstance,
-  asPending,
-  asReadyToRun,
-  isPending,
-  isReadyToRun,
 } from './task_runner';
 
 type Opts = {

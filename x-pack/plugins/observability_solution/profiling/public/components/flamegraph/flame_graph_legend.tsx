@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { Legend, LegendItem } from '../legend';
 

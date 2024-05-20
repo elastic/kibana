@@ -14,10 +14,10 @@ import {
 } from '../../../../objects/rule';
 
 import {
-  ALERTS_COUNT,
-  ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
+  ALERT_RISK_SCORE,
   ALERT_SEVERITY,
+  ALERTS_COUNT,
 } from '../../../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
@@ -27,12 +27,6 @@ import {
   RULE_SWITCH,
   SEVERITY,
 } from '../../../../screens/alerts_detection_rules';
-import {
-  SCHEDULE_INTERVAL_AMOUNT_INPUT,
-  SCHEDULE_INTERVAL_UNITS_INPUT,
-  SCHEDULE_LOOKBACK_AMOUNT_INPUT,
-  SCHEDULE_LOOKBACK_UNITS_INPUT,
-} from '../../../../screens/create_new_rule';
 import {
   ABOUT_DETAILS,
   ABOUT_INVESTIGATION_NOTES,
@@ -51,6 +45,7 @@ import {
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
   REFERENCE_URLS_DETAILS,
+  removeExternalLinkText,
   RISK_SCORE_DETAILS,
   RULE_NAME_HEADER,
   RULE_TYPE_DETAILS,
@@ -59,20 +54,19 @@ import {
   SEVERITY_DETAILS,
   TAGS_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
-  removeExternalLinkText,
 } from '../../../../screens/rule_details';
 import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../../../screens/timeline';
 import { investigateFirstAlertInTimeline } from '../../../../tasks/alerts';
 import {
-  checkDuplicatedRule,
-  disableAutoRefresh,
   duplicateFirstRule,
   duplicateRuleFromMenu,
+  checkDuplicatedRule,
   expectNumberOfRules,
-  goToRuleDetailsOf,
   selectAllRules,
+  goToRuleDetailsOf,
+  disableAutoRefresh,
 } from '../../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { duplicateSelectedRulesWithExceptions } from '../../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { loadPrepackagedTimelineTemplates } from '../../../../tasks/api_calls/timelines';
 import {
@@ -91,28 +85,34 @@ import {
   getIndicatorAndButton,
   getIndicatorAtLeastOneInvalidationText,
   getIndicatorDeleteButton,
+  getRuleIndexInput,
   getIndicatorIndexComboField,
   getIndicatorIndicatorIndex,
   getIndicatorInvalidationText,
   getIndicatorMappingComboField,
   getIndicatorOrButton,
-  getRuleIndexInput,
   selectIndicatorMatchType,
   waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
+import {
+  SCHEDULE_INTERVAL_AMOUNT_INPUT,
+  SCHEDULE_INTERVAL_UNITS_INPUT,
+  SCHEDULE_LOOKBACK_AMOUNT_INPUT,
+  SCHEDULE_LOOKBACK_UNITS_INPUT,
+} from '../../../../screens/create_new_rule';
 import { goBackToRuleDetails } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import {
-  getDetails,
   goBackToRulesTable,
-  visitRuleDetailsPage,
+  getDetails,
   waitForTheRuleToBeExecuted,
+  visitRuleDetailsPage,
 } from '../../../../tasks/rule_details';
-import { duplicateSelectedRulesWithExceptions } from '../../../../tasks/rules_bulk_actions';
-import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
+import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 

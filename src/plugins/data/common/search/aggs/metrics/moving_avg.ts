@@ -7,12 +7,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
-import { makeNestedLabel } from './lib/make_nested_label';
-import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
 import { MetricAggType } from './metric_agg_type';
-import { METRIC_TYPES } from './metric_agg_types';
 import { aggMovingAvgFnName } from './moving_avg_fn';
+import { parentPipelineAggHelper } from './lib/parent_pipeline_agg_helper';
+import { makeNestedLabel } from './lib/make_nested_label';
+import { METRIC_TYPES } from './metric_agg_types';
+import { AggConfigSerialized, BaseAggParams, IAggConfig } from '../types';
 
 export interface CommonAggParamsMovingAvg extends BaseAggParams {
   buckets_path?: string;

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
-import { isLeftClickEvent, isModifiedEvent, useKibana } from '../common/lib/kibana';
 
 const ManageIntegrationLinkComponent = () => {
   const {

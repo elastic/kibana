@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
-import React from 'react';
 import type { SnakeToCamelCase } from '../../../common/types';
-import type { CaseStatuses, StatusUserAction } from '../../../common/types/domain';
-import { statuses } from '../status';
-import { createCommonUpdateUserActionBuilder } from './common';
-import * as i18n from './translations';
+import type { StatusUserAction, CaseStatuses } from '../../../common/types/domain';
 import type { UserActionBuilder } from './types';
+import { createCommonUpdateUserActionBuilder } from './common';
+import { statuses } from '../status';
+import * as i18n from './translations';
 
 const isStatusValid = (status: string): status is CaseStatuses =>
   Object.prototype.hasOwnProperty.call(statuses, status);

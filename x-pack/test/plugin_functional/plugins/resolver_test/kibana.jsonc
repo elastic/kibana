@@ -6,8 +6,15 @@
     "id": "resolverTest",
     "server": false,
     "browser": true,
-    "configPath": ["xpack", "resolverTest"],
-    "requiredPlugins": ["securitySolution"],
-    "requiredBundles": ["kibanaReact"]
+    "configPath": [
+      "xpack",
+      "resolverTest"
+    ],
+    "requiredPlugins": [
+      "securitySolution"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
   }
 }

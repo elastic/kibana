@@ -1,47 +1,47 @@
-import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse, stringify } from 'query-string';
+import { stringify, parse } from 'query-string';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { Redirect, useHistory, useLocation } from 'react-router-dom';
+import { Redirect, useLocation, useHistory } from 'react-router-dom';
+import type { CriteriaWithPagination, EuiTableFieldDataColumnType } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButton,
+  EuiIcon,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
 import { policyHasFleetServer } from '../../../../../../../../common/services';
 
+import { InstallStatus } from '../../../../../types';
+import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
+import {
+  useLink,
+  useUrlPagination,
+  useGetPackageInstallStatus,
+  AgentPolicyRefreshContext,
+  useIsPackagePolicyUpgradable,
+  useAuthz,
+} from '../../../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
 import {
   AgentEnrollmentFlyout,
   AgentPolicySummaryLine,
   PackagePolicyActionsMenu,
 } from '../../../../../components';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../../constants';
-import {
-  AgentPolicyRefreshContext,
-  useAuthz,
-  useGetPackageInstallStatus,
-  useIsPackagePolicyUpgradable,
-  useLink,
-  useUrlPagination,
-} from '../../../../../hooks';
-import { InstallStatus } from '../../../../../types';
-import type { GetAgentPoliciesResponseItem, InMemoryPackagePolicy } from '../../../../../types';
 
 import { PackagePolicyAgentsCell } from './components/package_policy_agents_cell';
-import { Persona } from './persona';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
+import { Persona } from './persona';
 
 interface PackagePoliciesPanelProps {
   name: string;

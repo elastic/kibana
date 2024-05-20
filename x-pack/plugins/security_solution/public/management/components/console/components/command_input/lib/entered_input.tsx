@@ -7,10 +7,10 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import type { ParsedCommandInterface } from '../../../service/types';
-import type { ArgSelectorState, EnteredCommand } from '../../console_state/types';
 import type { ArgumentSelectorWrapperProps } from '../components/argument_selector_wrapper';
 import { ArgumentSelectorWrapper } from '../components/argument_selector_wrapper';
+import type { ParsedCommandInterface } from '../../../service/types';
+import type { ArgSelectorState, EnteredCommand } from '../../console_state/types';
 
 interface InputCharacter {
   value: string;

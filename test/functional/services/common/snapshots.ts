@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { mkdir, readFileSync, writeFile } from 'fs';
 import { dirname, resolve } from 'path';
+import { writeFile, readFileSync, mkdir } from 'fs';
 import { promisify } from 'util';
 
 import expect from '@kbn/expect';

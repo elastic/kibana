@@ -9,14 +9,14 @@ import Boom from '@hapi/boom';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 
 import {
-  GetInfraMetricsRequestBodyPayload,
   GetInfraMetricsRequestBodyPayloadRT,
+  GetInfraMetricsRequestBodyPayload,
   GetInfraMetricsResponsePayloadRT,
 } from '../../../common/http_api/infra';
-import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client';
-import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { InfraBackendLibs } from '../../lib/infra_types';
+import { getInfraAlertsClient } from '../../lib/helpers/get_infra_alerts_client';
 import { getHosts } from './lib/host/get_hosts';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 export const initInfraMetricsRoute = (libs: InfraBackendLibs) => {
   const validateBody = createRouteValidationFunction(GetInfraMetricsRequestBodyPayloadRT);

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { EuiFieldNumber } from '@elastic/eui';
-import { EuiFormRow } from '@elastic/eui';
-import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { percentileRanksOperation } from '.';
-import { IndexPattern } from '../../../../types';
+import { EuiFieldNumber } from '@elastic/eui';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import { EuiFormRow } from '@elastic/eui';
+import { shallow, mount } from 'enzyme';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
+import { percentileRanksOperation } from '.';
 import { FormBasedLayer } from '../../types';
 import type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
 import { TermsIndexPatternColumn } from './terms';
+import { IndexPattern } from '../../../../types';
 
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');

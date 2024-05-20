@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
 import { useController, useFormContext } from 'react-hook-form';
-import { AnalyticsEvents } from '../analytics/constants';
+import { IndexName } from '@elastic/elasticsearch/lib/api/types';
+import { useEffect, useState } from 'react';
+import { useKibana } from './use_kibana';
 import { APIRoutes, IndicesQuerySourceFields } from '../types';
 import { ChatForm, ChatFormFields } from '../types';
 import {
-  IndexFields,
   createQuery,
   getDefaultQueryFields,
   getDefaultSourceFields,
+  IndexFields,
 } from '../utils/create_query';
-import { useKibana } from './use_kibana';
 import { useUsageTracker } from './use_usage_tracker';
+import { AnalyticsEvents } from '../analytics/constants';
 
 export const getIndicesWithNoSourceFields = (
   defaultSourceFields: IndexFields

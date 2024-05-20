@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { ClientPluginsStart } from '../../../../../../plugin';
-import { getConnectorsAction } from '../../../../state/settings/actions';
-import { fetchActionTypes } from '../../../../state/settings/api';
 import { selectDynamicSettings } from '../../../../state/settings/selectors';
+import { fetchActionTypes } from '../../../../state/settings/api';
+import { getConnectorsAction } from '../../../../state/settings/actions';
 
 export const useAlertingDefaults = () => {
   const { data: actionTypes } = useFetcher(() => fetchActionTypes(), []);

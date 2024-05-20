@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
-import React from 'react';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
+import PropTypes from 'prop-types';
+import React from 'react';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const SplitByEverything = (props) => {
   const { onChange, model, uiRestrictions } = props;

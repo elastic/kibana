@@ -24,28 +24,28 @@ import {
   getExploreSeriesLink,
   isLabelLengthAboveThreshold,
 } from '../../util/chart_utils';
-import { ExplorerChartLabel } from './components/explorer_chart_label';
 import { ExplorerChartDistribution } from './explorer_chart_distribution';
 import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
+import { ExplorerChartLabel } from './components/explorer_chart_label';
 
-import { BarSeries, Chart, LEGACY_LIGHT_THEME, Settings } from '@elastic/charts';
-import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { CHART_TYPE } from '../explorer_constants';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
+import { useMlKibana } from '../../contexts/kibana';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import { getInitialAnomaliesLayers } from '../../../maps/util';
 import { APP_ID as MAPS_APP_ID } from '@kbn/maps-plugin/common';
 import { MAPS_APP_LOCATOR } from '@kbn/maps-plugin/public';
-import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import useObservable from 'react-use/lib/useObservable';
-import { getInitialAnomaliesLayers } from '../../../maps/util';
-import { MlTooltipComponent } from '../../components/chart_tooltip';
-import { useMlKibana } from '../../contexts/kibana';
-import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
-import { escapeKueryForFieldValuePair } from '../../util/string_utils';
-import { CHART_TYPE } from '../explorer_constants';
-import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { ExplorerChartsErrorCallOuts } from './explorer_charts_error_callouts';
+import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
+import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { BarSeries, Chart, Settings, LEGACY_LIGHT_THEME } from '@elastic/charts';
+import useObservable from 'react-use/lib/useObservable';
+import { escapeKueryForFieldValuePair } from '../../util/string_utils';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:

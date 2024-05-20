@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface InstructionsFieldProps {
   value?: string;

@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import userEvent from '@testing-library/user-event';
-import { cloneDeep } from 'lodash';
 import React from 'react';
-import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
-import { AntivirusRegistrationModes } from '../../../../../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
 import { expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
 import type { AntivirusRegistrationCardProps } from './antivirus_registration_card';
 import { AntivirusRegistrationCard } from './antivirus_registration_card';
+import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
+import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import userEvent from '@testing-library/user-event';
+import { cloneDeep } from 'lodash';
+import { AntivirusRegistrationModes } from '../../../../../../../../common/endpoint/types';
 
 describe('Policy Form Antivirus Registration Card', () => {
   const antivirusTestSubj = getPolicySettingsFormTestSubjects('test').antivirusRegistration;

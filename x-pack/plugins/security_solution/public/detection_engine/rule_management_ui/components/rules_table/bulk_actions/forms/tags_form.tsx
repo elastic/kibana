@@ -9,17 +9,17 @@ import { EuiCallOut, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
 
+import { useRuleManagementFilters } from '../../../../../rule_management/logic/use_rule_management_filters';
 import type { BulkActionEditPayload } from '../../../../../../../common/api/detection_engine/rule_management';
 import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import * as i18n from '../../../../../../detections/pages/detection_engine/rules/translations';
-import { useRuleManagementFilters } from '../../../../../rule_management/logic/use_rule_management_filters';
 import { caseInsensitiveSort } from '../../helpers';
 
 import type { FormSchema } from '../../../../../../shared_imports';
 import {
-  FIELD_TYPES,
   Field,
   fieldValidators,
+  FIELD_TYPES,
   getUseField,
   useForm,
   useFormData,

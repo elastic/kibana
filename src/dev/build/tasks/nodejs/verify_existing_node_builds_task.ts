@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GlobalTask, getFileHash } from '../../lib';
+import { getFileHash, GlobalTask } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
 import { getNodeShasums } from './node_shasums';
 

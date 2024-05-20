@@ -9,8 +9,8 @@
 import { get } from 'lodash';
 
 import {
-  OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortingType,
+  OPTIONS_LIST_DEFAULT_SORT,
 } from '../../../common/options_list/suggestions_sorting';
 import { EsBucket } from '../types';
 

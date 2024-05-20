@@ -14,24 +14,24 @@ import React, {
   useContext,
 } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTourStep,
+  EuiTourStepProps,
   EuiImage,
   EuiSpacer,
   EuiText,
-  EuiTourStep,
-  EuiTourStepProps,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { ApplicationStart } from '@kbn/core/public';
-import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public/types';
-import { i18n } from '@kbn/i18n';
 import { useLocation } from 'react-router-dom';
+import { ApplicationStart } from '@kbn/core/public';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
+import type { GuidedOnboardingApi } from '@kbn/guided-onboarding-plugin/public/types';
 import { observabilityAppId } from '../../../common';
 import { tourStepsConfig } from './steps_config';
 

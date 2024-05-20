@@ -13,12 +13,12 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
-import { useCurrentUser } from '../../../../common/lib/kibana';
-import type { Note } from '../../../../common/lib/note';
 import { appActions } from '../../../../common/store/app';
+import type { Note } from '../../../../common/lib/note';
+import { useCurrentUser } from '../../../../common/lib/kibana';
 import type { AssociateNote, UpdateInternalNewNote } from '../helpers';
 import { updateAndAssociateNode } from '../helpers';
 import * as i18n from '../translations';

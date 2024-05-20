@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { memo } from 'react';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useHttp } from '../../../../common/lib/kibana';
 import { ArtifactListPage } from '../../../components/artifact_list_page';
 import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
-import { SEARCHABLE_FIELDS } from '../constants';
 import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_api_client';
+import { SEARCHABLE_FIELDS } from '../constants';
 import { HostIsolationExceptionsForm } from './components/form';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object.freeze({
   pageTitle: i18n.translate('xpack.securitySolution.hostIsolationExceptions.pageTitle', {

@@ -8,9 +8,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { EcsAllowedValues } from '.';
 import { mockAllowedValues } from '../../mock/allowed_values/mock_allowed_values';
 import { TestProviders } from '../../mock/test_providers/test_providers';
+import { EcsAllowedValues } from '.';
 
 describe('EcsAllowedValues', () => {
   describe('when `allowedValues` exists', () => {

@@ -6,11 +6,11 @@
  */
 
 import type { ClientMessage } from '../../assistant_context/types';
-import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
-import { mockAlertPromptContext } from '../../mock/prompt_context';
-import { mockSystemPrompt } from '../../mock/system_prompt';
-import type { SelectedPromptContext } from '../prompt_context/types';
 import { getCombinedMessage, getSystemMessages } from './helpers';
+import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
+import { mockSystemPrompt } from '../../mock/system_prompt';
+import { mockAlertPromptContext } from '../../mock/prompt_context';
+import type { SelectedPromptContext } from '../prompt_context/types';
 
 const mockSelectedAlertPromptContext: SelectedPromptContext = {
   contextAnonymizationFields: { total: 0, page: 1, perPage: 1000, data: [] },
@@ -72,7 +72,8 @@ describe('helpers', () => {
         selectedSystemPrompt: mockSystemPrompt,
       });
 
-      expect(message.content).toEqual(`You are a helpful, expert assistant who answers questions about Elastic Security.
+      expect(message.content)
+        .toEqual(`You are a helpful, expert assistant who answers questions about Elastic Security.
 
 CONTEXT:
 """

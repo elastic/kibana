@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { SUPPORTED_PYTORCH_TASKS, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 
 export const NLP_CONFIG_KEYS: string[] = Object.values(SUPPORTED_PYTORCH_TASKS);
 export const RECOMMENDED_FIELDS = ['body', 'body_content', 'title'];

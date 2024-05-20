@@ -1,4 +1,3 @@
-import { TelemetryEventTypes } from '../constants';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,34 +5,35 @@ import { TelemetryEventTypes } from '../constants';
  * 2.0.
  */
 import type { TelemetryEvent } from '../types';
-import {
-  assistantInvokedEvent,
-  assistantMessageSentEvent,
-  assistantQuickPrompt,
-  assistantSettingToggledEvent,
-} from './ai_assistant';
+import { TelemetryEventTypes } from '../constants';
 import {
   alertsGroupingChangedEvent,
   alertsGroupingTakeActionEvent,
   alertsGroupingToggledEvent,
 } from './alerts_grouping';
+import {
+  entityAlertsClickedEvent,
+  entityClickedEvent,
+  entityRiskFilteredEvent,
+  addRiskInputToTimelineClickedEvent,
+  RiskInputsExpandedFlyoutOpenedEvent,
+  toggleRiskSummaryClickedEvent,
+  assetCriticalityCsvPreviewGeneratedEvent,
+  assetCriticalityFileSelectedEvent,
+  assetCriticalityCsvImportedEvent,
+} from './entity_analytics';
+import {
+  assistantInvokedEvent,
+  assistantSettingToggledEvent,
+  assistantMessageSentEvent,
+  assistantQuickPrompt,
+} from './ai_assistant';
 import { insightsGeneratedEvent } from './attack_discovery';
-import { dataQualityCheckAllClickedEvent, dataQualityIndexCheckedEvent } from './data_quality';
+import { dataQualityIndexCheckedEvent, dataQualityCheckAllClickedEvent } from './data_quality';
 import {
   DocumentDetailsFlyoutOpenedEvent,
   DocumentDetailsTabClickedEvent,
 } from './document_details';
-import {
-  RiskInputsExpandedFlyoutOpenedEvent,
-  addRiskInputToTimelineClickedEvent,
-  assetCriticalityCsvImportedEvent,
-  assetCriticalityCsvPreviewGeneratedEvent,
-  assetCriticalityFileSelectedEvent,
-  entityAlertsClickedEvent,
-  entityClickedEvent,
-  entityRiskFilteredEvent,
-  toggleRiskSummaryClickedEvent,
-} from './entity_analytics';
 import {
   onboardingHubStepFinishedEvent,
   onboardingHubStepLinkClickedEvent,

@@ -18,11 +18,11 @@ import { KibanaLogic } from '../../../../../shared/kibana';
 import { LicensingLogic } from '../../../../../shared/licensing';
 import { AppLogic } from '../../../../app_logic';
 import {
-  PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV } from '../../../../constants';
-import { ADD_SOURCE_PATH, SOURCES_PATH, getAddPath, getSourcesPath } from '../../../../routes';
+import { SOURCES_PATH, getSourcesPath, getAddPath, ADD_SOURCE_PATH } from '../../../../routes';
 
 import { getSourceData } from '../../source_data';
 

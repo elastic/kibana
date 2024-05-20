@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SnapshotRestoreShardEs } from '../../common/types';
 import { deserializeRestoreShard } from './restore_serialization';
+import { SnapshotRestoreShardEs } from '../../common/types';
 
 describe('restore_serialization', () => {
   describe('deserializeRestoreShard()', () => {

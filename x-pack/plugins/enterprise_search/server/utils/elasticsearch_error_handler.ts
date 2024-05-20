@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ErrorCode } from '../../common/types/error_codes';
 
-import { EnterpriseSearchError, createError } from './create_error';
+import { createError, EnterpriseSearchError } from './create_error';
 import { isUnauthorizedException } from './identify_exceptions';
 
 export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType>(

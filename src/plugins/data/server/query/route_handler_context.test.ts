@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { FilterStateStore, Query } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
@@ -15,6 +14,7 @@ import {
   InternalSavedQueryAttributes,
   registerSavedQueryRouteHandlerContext,
 } from './route_handler_context';
+import { SavedObjectsFindResponse, SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 const mockContext = {
   core: coreMock.createRequestHandlerContext(),

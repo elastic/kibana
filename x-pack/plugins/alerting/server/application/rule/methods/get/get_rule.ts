@@ -7,22 +7,22 @@
 
 import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
-import { getRuleSo } from '../../../../data/rule';
-import { RuleAuditAction, ruleAuditEvent } from '../../../../rules_client/common/audit_events';
-import { formatLegacyActions } from '../../../../rules_client/lib';
-import { RulesClientContext } from '../../../../rules_client/types';
-import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import {
-  Rule as DeprecatedRule,
   SanitizedRule,
   SanitizedRuleWithLegacyId,
+  Rule as DeprecatedRule,
 } from '../../../../types';
-import { ruleDomainSchema } from '../../schemas';
+import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
+import { RulesClientContext } from '../../../../rules_client/types';
+import { formatLegacyActions } from '../../../../rules_client/lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { GetRuleParams } from './types';
+import { getRuleParamsSchema } from './schemas';
+import { getRuleSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { RuleParams } from '../../types';
-import { getRuleParamsSchema } from './schemas';
-import { GetRuleParams } from './types';
+import { ruleDomainSchema } from '../../schemas';
 
 export async function getRule<Params extends RuleParams = never>(
   context: RulesClientContext,

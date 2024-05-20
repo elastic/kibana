@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { readFileSync } from 'fs';
 import { util, asn1, pkcs12, pki } from 'node-forge';
+import { readFileSync } from 'fs';
 
 export interface Pkcs12ReadResult {
   ca?: string[];

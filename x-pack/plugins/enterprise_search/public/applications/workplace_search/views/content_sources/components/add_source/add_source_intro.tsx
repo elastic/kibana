@@ -16,11 +16,11 @@ import { LicensingLogic } from '../../../../../shared/licensing';
 
 import { AppLogic } from '../../../../app_logic';
 import {
-  PersonalDashboardLayout,
   WorkplaceSearchPageTemplate,
+  PersonalDashboardLayout,
 } from '../../../../components/layout';
 import { NAV } from '../../../../constants';
-import { ADD_SOURCE_PATH, getAddPath, getSourcesPath } from '../../../../routes';
+import { getSourcesPath, ADD_SOURCE_PATH, getAddPath } from '../../../../routes';
 
 import { getSourceData, hasMultipleConnectorOptions } from '../../source_data';
 

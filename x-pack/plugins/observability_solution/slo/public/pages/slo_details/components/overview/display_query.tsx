@@ -6,12 +6,12 @@
  */
 import React from 'react';
 
-import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { injectI18n } from '@kbn/i18n-react';
 import { QuerySchema } from '@kbn/slo-schema';
+import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FilterItem } from '@kbn/unified-search-plugin/public';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { injectI18n } from '@kbn/i18n-react';
 import { useKibana } from '../../../../utils/kibana_react';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 
 const FilterItemI18n = injectI18n(FilterItem);
 

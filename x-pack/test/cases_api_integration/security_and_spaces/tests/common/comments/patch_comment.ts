@@ -5,28 +5,37 @@
  * 2.0.
  */
 
-import {
-  AlertAttachmentAttributes,
-  AttachmentType,
-  CaseStatuses,
-  UserCommentAttachmentAttributes,
-} from '@kbn/cases-plugin/common/types/domain';
-import expect from '@kbn/expect';
 import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash/fp';
+import expect from '@kbn/expect';
+import {
+  AlertAttachmentAttributes,
+  UserCommentAttachmentAttributes,
+  AttachmentType,
+  CaseStatuses,
+} from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
-  createCase,
-  createComment,
+  defaultUser,
+  postCaseReq,
+  postCommentUserReq,
+  postCommentAlertReq,
+  getPostCaseRequest,
+  getFilesAttachmentReq,
+  fileAttachmentMetadata,
+} from '../../../../common/lib/mock';
+import {
   deleteAllCaseItems,
   deleteCasesByESQuery,
   deleteCasesUserActions,
   deleteComments,
-  removeServerGeneratedPropertiesFromSavedObject,
-  superUserSpace1Auth,
-  updateCase,
+  createCase,
+  createComment,
   updateComment,
+  superUserSpace1Auth,
+  removeServerGeneratedPropertiesFromSavedObject,
+  updateCase,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -38,15 +47,6 @@ import {
   secOnlyRead,
   superUser,
 } from '../../../../common/lib/authentication/users';
-import {
-  defaultUser,
-  fileAttachmentMetadata,
-  getFilesAttachmentReq,
-  getPostCaseRequest,
-  postCaseReq,
-  postCommentAlertReq,
-  postCommentUserReq,
-} from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

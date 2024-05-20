@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React, { useRef, useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { ErrorBoundary } from '../enhance/error_boundary';
-import { AdvancedFailure } from './advanced_failure';
-import { ArgLabel } from './arg_label';
 import { ArgSimpleForm } from './arg_simple_form';
 import { ArgTemplateForm } from './arg_template_form';
-import { PendingArgValue } from './pending_arg_value';
 import { SimpleFailure } from './simple_failure';
+import { AdvancedFailure } from './advanced_failure';
+import { ArgLabel } from './arg_label';
+import { PendingArgValue } from './pending_arg_value';
 
 const isPending = (argTypeInstance, resolvedArgValue) => {
   const { argType } = argTypeInstance;

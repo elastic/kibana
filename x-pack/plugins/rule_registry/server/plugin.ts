@@ -5,36 +5,36 @@
  * 2.0.
  */
 
+import { type Subject, ReplaySubject } from 'rxjs';
 import type {
+  PluginInitializerContext,
+  Plugin,
   CoreSetup,
+  Logger,
+  KibanaRequest,
   CoreStart,
   IContextProvider,
-  KibanaRequest,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
 } from '@kbn/core/server';
-import { ReplaySubject, type Subject } from 'rxjs';
 
 import type {
   PluginSetupContract as AlertingSetup,
   PluginStartContract as AlertingStart,
 } from '@kbn/alerting-plugin/server';
-import type {
-  PluginSetup as DataPluginSetup,
-  PluginStart as DataPluginStart,
-} from '@kbn/data-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  PluginStart as DataPluginStart,
+  PluginSetup as DataPluginSetup,
+} from '@kbn/data-plugin/server';
 
-import type { AlertsClient } from './alert_data_client/alerts_client';
-import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
-import type { RuleRegistryPluginConfig } from './config';
-import { defineRoutes } from './routes';
-import { Dataset, type IRuleDataService, RuleDataService } from './rule_data_plugin_service';
-import { RULE_SEARCH_STRATEGY_NAME, ruleRegistrySearchStrategyProvider } from './search_strategy';
-import type { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
 import { createLifecycleRuleTypeFactory } from './utils/create_lifecycle_rule_type_factory';
+import type { RuleRegistryPluginConfig } from './config';
+import { type IRuleDataService, RuleDataService, Dataset } from './rule_data_plugin_service';
+import { AlertsClientFactory } from './alert_data_client/alerts_client_factory';
+import type { AlertsClient } from './alert_data_client/alerts_client';
+import type { RacApiRequestHandlerContext, RacRequestHandlerContext } from './types';
+import { defineRoutes } from './routes';
+import { ruleRegistrySearchStrategyProvider, RULE_SEARCH_STRATEGY_NAME } from './search_strategy';
 
 export interface RuleRegistryPluginSetupDependencies {
   security?: SecurityPluginSetup;

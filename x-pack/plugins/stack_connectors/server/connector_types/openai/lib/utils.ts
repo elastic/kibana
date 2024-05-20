@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { IncomingMessage } from 'http';
 import { AxiosResponse, ResponseType } from 'axios';
+import { IncomingMessage } from 'http';
 import { OpenAiProviderType } from '../../../../common/openai/constants';
 import {
-  getRequestWithStreamOption as azureAiGetRequestWithStreamOption,
-  sanitizeRequest as azureAiSanitizeRequest,
-} from './azure_openai_utils';
-import {
-  getRequestWithStreamOption as openAiGetRequestWithStreamOption,
   sanitizeRequest as openAiSanitizeRequest,
+  getRequestWithStreamOption as openAiGetRequestWithStreamOption,
 } from './openai_utils';
+import {
+  sanitizeRequest as azureAiSanitizeRequest,
+  getRequestWithStreamOption as azureAiGetRequestWithStreamOption,
+} from './azure_openai_utils';
 
 export const sanitizeRequest = (
   provider: string,

@@ -6,7 +6,7 @@
  */
 
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-plugin/public';
-import { getLensCaseAttachment, hasInput, isLensEmbeddable } from './utils';
+import { isLensEmbeddable, hasInput, getLensCaseAttachment } from './utils';
 
 describe('utils', () => {
   describe('isLensEmbeddable', () => {

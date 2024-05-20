@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import { CONTENT_TEST_ID, ExpandableSection, HEADER_TEST_ID } from './expandable_section';
 
 const title = <p>{'title'}</p>;

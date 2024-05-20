@@ -6,8 +6,8 @@
  */
 
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
-import { isEmpty, isString } from 'lodash/fp';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { isString, isEmpty } from 'lodash/fp';
 import type { SyntheticEvent } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -17,16 +17,16 @@ import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
 
-import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg';
 import { isUrlInvalid } from '../../../../../common/utils/validators';
+import endPointSvg from '../../../../../common/utils/logo_endpoint/64_color.svg';
 
-import { APP_UI_ID } from '../../../../../../common/constants';
+import * as i18n from './translations';
 import { SecurityPageName } from '../../../../../app/types';
 import { useFormatUrl } from '../../../../../common/components/link_to';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { APP_UI_ID } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
 import { GenericLinkButton } from '../../../../../common/components/links/helpers';
-import { useKibana } from '../../../../../common/lib/kibana';
-import * as i18n from './translations';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;

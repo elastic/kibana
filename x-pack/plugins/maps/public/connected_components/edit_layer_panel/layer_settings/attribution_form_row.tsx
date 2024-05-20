@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButtonEmpty, EuiLink, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { Attribution } from '../../../../common/descriptor_types';
 import { ILayer } from '../../../classes/layers/layer';
-import { panelStrings } from '../../panel_strings';
 import { AttributionPopover } from './attribution_popover';
+import { panelStrings } from '../../panel_strings';
 
 interface Props {
   layer: ILayer;

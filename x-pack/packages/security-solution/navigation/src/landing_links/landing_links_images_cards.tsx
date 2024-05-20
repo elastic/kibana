@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiImage, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import { css } from '@emotion/react';
 import { withLink } from '../links';
 import type { NavigationLink } from '../types';
 import { BetaBadge } from './beta_badge';

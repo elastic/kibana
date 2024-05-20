@@ -1,21 +1,21 @@
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ProgressiveLoadingQuality,
-  apmProgressiveLoading,
-  getProbabilityFromProgressiveLoadingQuality,
-} from '@kbn/observability-plugin/common';
-import type { ClientRequestParamsOf, EndpointOf, ReturnOf } from '@kbn/server-route-repository';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Assign, OmitByValue } from 'utility-types';
+import type { OmitByValue, Assign } from 'utility-types';
+import type { ClientRequestParamsOf, EndpointOf, ReturnOf } from '@kbn/server-route-repository';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  apmProgressiveLoading,
+  getProbabilityFromProgressiveLoadingQuality,
+  ProgressiveLoadingQuality,
+} from '@kbn/observability-plugin/common';
 import type { APMServerRouteRepository } from '../../server';
 
 import type { APMClient, APMClientOptions } from '../services/rest/create_call_apm_api';
-import { FETCH_STATUS, FetcherResult, useFetcher } from './use_fetcher';
+import { FetcherResult, FETCH_STATUS, useFetcher } from './use_fetcher';
 
 type APMProgressivelyLoadingServerRouteRepository = OmitByValue<
   {
@@ -43,7 +43,7 @@ type WithoutProbabilityParameter<T extends Record<string, any>> = {
 >;
 
 type APMProgressiveAPIClient = <
-  TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>,
+  TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>
 >(
   endpoint: TEndpoint,
   options: Omit<APMClientOptions, 'signal'> &

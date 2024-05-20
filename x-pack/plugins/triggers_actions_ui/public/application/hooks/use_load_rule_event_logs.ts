@@ -1,5 +1,3 @@
-import datemath from '@kbn/datemath';
-import { useQuery } from '@tanstack/react-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { useQuery } from '@tanstack/react-query';
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import datemath from '@kbn/datemath';
 import { useKibana } from '../../common/lib/kibana';
 import {
-  LoadExecutionLogAggregationsProps,
-  LoadGlobalExecutionLogAggregationsProps,
   loadExecutionLogAggregations,
   loadGlobalExecutionLogAggregations,
+  LoadExecutionLogAggregationsProps,
+  LoadGlobalExecutionLogAggregationsProps,
 } from '../lib/rule_api/load_execution_log_aggregations';
 
 const getParsedDate = (date: string) => {

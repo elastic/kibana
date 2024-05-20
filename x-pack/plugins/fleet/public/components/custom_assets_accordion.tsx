@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { Fragment } from 'react';
+import type { FunctionComponent } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiLink,
+  EuiText,
   EuiNotificationBadge,
   EuiSpacer,
   EuiSplitPanel,
-  EuiText,
+  EuiLink,
+  EuiHorizontalRule,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
-import type { FunctionComponent } from 'react';
 
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 

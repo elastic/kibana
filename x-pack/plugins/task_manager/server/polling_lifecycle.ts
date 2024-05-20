@@ -5,44 +5,44 @@
  * 2.0.
  */
 
-import type { ExecutionContextStart, Logger } from '@kbn/core/server';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { map as mapOptional } from 'fp-ts/lib/Option';
+import { Subject, Observable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { Observable, Subject } from 'rxjs';
+import { map as mapOptional } from 'fp-ts/lib/Option';
 import { tap } from 'rxjs';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import { TaskManagerConfig } from './config';
+import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { Result, asErr, asOk, map, mapErr, mapOk } from './lib/result_type';
+import { TaskManagerConfig } from './config';
 
-import { BufferedTaskStore } from './buffered_task_store';
-import { FillPoolResult, TimedFillPoolResult, fillPool } from './lib/fill_pool';
-import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
-import { intervalFromNow } from './lib/intervals';
-import { Middleware } from './lib/middleware';
-import { PollingError, PollingErrorType, createTaskPoller } from './polling';
-import { delayOnClaimConflicts } from './polling';
-import { TaskClaiming } from './queries/task_claiming';
-import { ConcreteTaskInstance } from './task';
-import { ClaimOwnershipResult } from './task_claimers';
 import {
-  EphemeralTaskRejectedDueToCapacity,
-  TaskClaim,
-  TaskManagerMetric,
-  TaskManagerStat,
   TaskMarkRunning,
-  TaskPollingCycle,
   TaskRun,
+  TaskClaim,
   TaskRunRequest,
-  asTaskManagerStatEvent,
-  asTaskPollingCycleEvent,
   asTaskRunRequestEvent,
+  TaskPollingCycle,
+  asTaskPollingCycleEvent,
+  TaskManagerStat,
+  asTaskManagerStatEvent,
+  EphemeralTaskRejectedDueToCapacity,
+  TaskManagerMetric,
 } from './task_events';
+import { fillPool, FillPoolResult, TimedFillPoolResult } from './lib/fill_pool';
+import { Middleware } from './lib/middleware';
+import { intervalFromNow } from './lib/intervals';
+import { ConcreteTaskInstance } from './task';
+import { createTaskPoller, PollingError, PollingErrorType } from './polling';
 import { TaskPool } from './task_pool';
 import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore } from './task_store';
+import { identifyEsError, isEsCannotExecuteScriptError } from './lib/identify_es_error';
+import { BufferedTaskStore } from './buffered_task_store';
 import { TaskTypeDictionary } from './task_type_dictionary';
+import { delayOnClaimConflicts } from './polling';
+import { TaskClaiming } from './queries/task_claiming';
+import { ClaimOwnershipResult } from './task_claimers';
 
 export interface ITaskEventEmitter<T> {
   get events(): Observable<T>;

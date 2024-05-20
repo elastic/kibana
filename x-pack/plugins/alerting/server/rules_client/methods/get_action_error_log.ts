@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { KueryNode } from '@kbn/es-query';
-import { IExecutionErrorsResult } from '../../../common';
-import { getRule } from '../../application/rule/methods/get/get_rule';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SanitizedRuleWithLegacyId } from '../../types';
+import { convertEsSortToEventLogSort } from '../../lib';
 import {
+  ReadOperations,
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
-  ReadOperations,
 } from '../../authorization';
-import { convertEsSortToEventLogSort } from '../../lib';
+import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
+import { IExecutionErrorsResult } from '../../../common';
 import { formatExecutionErrorsResult } from '../../lib/format_execution_log_errors';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { SanitizedRuleWithLegacyId } from '../../types';
 import { parseDate } from '../common';
-import { RuleAuditAction, ruleAuditEvent } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { getRule } from '../../application/rule/methods/get/get_rule';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const actionErrorLogDefaultFilter =
   'event.provider:actions AND ((event.action:execute AND (event.outcome:failure OR kibana.alerting.status:warning)) OR (event.action:execute-timeout))';

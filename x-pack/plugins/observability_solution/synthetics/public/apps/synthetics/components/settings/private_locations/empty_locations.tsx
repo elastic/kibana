@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';
-import { useSyntheticsSettingsContext } from '../../../contexts';
-import { setAddingNewPrivateLocation, setManageFlyoutOpen } from '../../../state/private_locations';
+import { EuiEmptyPrompt, EuiButton, EuiLink, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useDispatch } from 'react-redux';
 import { NoPermissionsTooltip } from '../../common/components/permissions';
+import { useSyntheticsSettingsContext } from '../../../contexts';
+import { PRIVATE_LOCATIOSN_ROUTE } from '../../../../../../common/constants';
+import { setAddingNewPrivateLocation, setManageFlyoutOpen } from '../../../state/private_locations';
 
 export const EmptyLocations = ({
   inFlyout = true,

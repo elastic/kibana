@@ -1,26 +1,3 @@
-import {
-  ALERT_ACTION_GROUP,
-  ALERT_CONSECUTIVE_MATCHES,
-  ALERT_DURATION,
-  ALERT_FLAPPING,
-  ALERT_FLAPPING_HISTORY,
-  ALERT_INSTANCE_ID,
-  ALERT_MAINTENANCE_WINDOW_IDS,
-  ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_RULE_NAME,
-  ALERT_RULE_PARAMETERS,
-  ALERT_START,
-  ALERT_STATUS,
-  ALERT_TIME_RANGE,
-  ALERT_UUID,
-  ALERT_WORKFLOW_STATUS,
-  EVENT_ACTION,
-  EVENT_KIND,
-  SPACE_IDS,
-  TAGS,
-  TIMESTAMP,
-  VERSION,
-} from '@kbn/rule-data-utils';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -29,7 +6,30 @@ import {
  */
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { buildOngoingAlert } from './build_ongoing_alert';
-import { alertRule, existingExpandedNewAlert, existingFlattenedNewAlert } from './test_fixtures';
+import {
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  SPACE_IDS,
+  ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
+  TAGS,
+  TIMESTAMP,
+  VERSION,
+  ALERT_TIME_RANGE,
+  ALERT_CONSECUTIVE_MATCHES,
+  ALERT_RULE_EXECUTION_TIMESTAMP,
+} from '@kbn/rule-data-utils';
+import { alertRule, existingFlattenedNewAlert, existingExpandedNewAlert } from './test_fixtures';
 
 for (const flattened of [true, false]) {
   const existingAlert = flattened ? existingFlattenedNewAlert : existingExpandedNewAlert;

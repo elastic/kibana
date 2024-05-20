@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { AggConfigs } from '../agg_configs';
-import { mockAggTypesRegistry } from '../test_helpers';
-import { getCumulativeSumMetricAgg } from './cumulative_sum';
 import { getDerivativeMetricAgg } from './derivative';
-import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
+import { getCumulativeSumMetricAgg } from './cumulative_sum';
 import { getMovingAvgMetricAgg } from './moving_avg';
 import { getSerialDiffMetricAgg } from './serial_diff';
+import { AggConfigs } from '../agg_configs';
+import { mockAggTypesRegistry } from '../test_helpers';
+import { IMetricAggConfig, MetricAggType } from './metric_agg_type';
 
 describe('parent pipeline aggs', function () {
   const typesRegistry = mockAggTypesRegistry();

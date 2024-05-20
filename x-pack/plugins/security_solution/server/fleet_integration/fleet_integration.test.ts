@@ -7,66 +7,22 @@
 
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type {
-  GetAgentPoliciesResponseItem,
-  PostDeletePackagePoliciesResponse,
-} from '@kbn/fleet-plugin/common';
 import {
   createNewPackagePolicyMock,
   deletePackagePolicyMock,
 } from '@kbn/fleet-plugin/common/mocks';
-import type {
-  NewPackagePolicy,
-  PackagePolicy,
-  UpdatePackagePolicy,
-} from '@kbn/fleet-plugin/common/types/models';
-import type {
-  PostAgentPolicyCreateCallback,
-  PutPackagePolicyUpdateCallback,
-} from '@kbn/fleet-plugin/server/types';
-import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
-import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
-import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
-import {
-  ALL_PRODUCT_FEATURE_KEYS,
-  ProductFeatureSecurityKey,
-} from '@kbn/security-solution-features/keys';
-import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
-import * as moment from 'moment';
-import { Subject } from 'rxjs';
-import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
+import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
 } from '../../common/endpoint/models/policy_config';
-import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
-import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
-import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
-import { AntivirusRegistrationModes, ProtectionModes } from '../../common/endpoint/types';
-import { LicenseService } from '../../common/license';
-import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
-import { Manifest } from '../endpoint/lib/artifacts';
-import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/mocks';
-import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
-import type { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
-import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
 import { buildManifestManagerMock } from '../endpoint/services/artifacts/manifest_manager/manifest_manager.mock';
-import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
-import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
-import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
-import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
-import { requestContextFactoryMock } from '../request_context_factory.mock';
 import {
   getAgentPolicyCreateCallback,
   getAgentPolicyUpdateCallback,
@@ -75,6 +31,50 @@ import {
   getPackagePolicyPostCreateCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  ALL_PRODUCT_FEATURE_KEYS,
+  ProductFeatureSecurityKey,
+} from '@kbn/security-solution-features/keys';
+import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { requestContextFactoryMock } from '../request_context_factory.mock';
+import type { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
+import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { LicenseService } from '../../common/license';
+import { Subject } from 'rxjs';
+import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
+import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
+import { AntivirusRegistrationModes, ProtectionModes } from '../../common/endpoint/types';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
+import type { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
+import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
+import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/mocks';
+import { Manifest } from '../endpoint/lib/artifacts';
+import type {
+  NewPackagePolicy,
+  PackagePolicy,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common/types/models';
+import type { ManifestSchema } from '../../common/endpoint/schema/manifest';
+import type {
+  GetAgentPoliciesResponseItem,
+  PostDeletePackagePoliciesResponse,
+} from '@kbn/fleet-plugin/common';
+import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
+import { ENDPOINT_EVENT_FILTERS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { disableProtections } from '../../common/endpoint/models/policy_config_helpers';
+import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
+import { createProductFeaturesServiceMock } from '../lib/product_features_service/mocks';
+import * as moment from 'moment';
+import type {
+  PostAgentPolicyCreateCallback,
+  PutPackagePolicyUpdateCallback,
+} from '@kbn/fleet-plugin/server/types';
 
 jest.mock('uuid', () => ({
   v4: (): string => 'NEW_UUID',

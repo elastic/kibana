@@ -10,8 +10,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 import { TestProviders } from '../../../../common/mock';
-import { CasesTable } from './cases_table';
 import { parsedCasesItems } from './mock_data';
+import { CasesTable } from './cases_table';
 import type { UseCaseItems } from './use_case_items';
 
 const mockGetAppUrl = jest.fn();

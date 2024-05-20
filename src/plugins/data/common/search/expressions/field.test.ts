@@ -7,8 +7,8 @@
  */
 
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { fieldFunction } from './field';
 import { functionWrapper } from './utils';
+import { fieldFunction } from './field';
 
 describe('interpreter/functions#field', () => {
   const fn = functionWrapper(fieldFunction);

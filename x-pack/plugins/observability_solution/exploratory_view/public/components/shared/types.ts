@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ReactNode } from 'react';
 import { AppMountParameters } from '@kbn/core/public';
 import { UXMetrics } from '@kbn/observability-shared-plugin/public';
-import { ReactNode } from 'react';
 
 export interface HeaderMenuPortalProps {
   children: ReactNode;

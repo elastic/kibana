@@ -7,18 +7,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
-  createOptionsSchemas,
-  createResultSchema,
-  objectTypeToGetResultSchema,
-  savedObjectSchema,
-  searchOptionsSchemas,
-  updateOptionsSchema,
-} from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
+import {
+  savedObjectSchema,
+  objectTypeToGetResultSchema,
+  createOptionsSchemas,
+  updateOptionsSchema,
+  createResultSchema,
+  searchOptionsSchemas,
+} from '@kbn/content-management-utils';
 import { DataViewType } from '../..';
 import { MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH } from '../../constants';
-import { fieldSpecSchema, serializedFieldFormatSchema } from '../../schemas';
+import { serializedFieldFormatSchema, fieldSpecSchema } from '../../schemas';
 
 const dataViewAttributesSchema = schema.object(
   {

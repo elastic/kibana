@@ -7,29 +7,19 @@
 
 /* eslint-disable max-classes-per-file */
 
+import type seedrandom from 'seedrandom';
+import { assertNever } from '@kbn/std';
 import type {
-  AssetsGroupedByServiceByType,
-  EsAssetReference,
   GetAgentPoliciesResponseItem,
-  GetInfoResponse,
   GetPackagesResponse,
+  GetInfoResponse,
+  EsAssetReference,
   KibanaAssetReference,
+  AssetsGroupedByServiceByType,
 } from '@kbn/fleet-plugin/common';
 import { agentPolicyStatuses } from '@kbn/fleet-plugin/common';
-import { assertNever } from '@kbn/std';
 import { clone } from 'lodash';
-import type seedrandom from 'seedrandom';
-import { BaseDataGenerator } from './data_generators/base_data_generator';
 import { EndpointMetadataGenerator } from './data_generators/endpoint_metadata_generator';
-import { firstNonNullValue } from './models/ecs_safety_helpers';
-import {
-  ancestryArray,
-  entityIDSafeVersion,
-  parentEntityIDSafeVersion,
-  processNameSafeVersion,
-  timestampSafeVersion,
-} from './models/event';
-import { policyFactory } from './models/policy_config';
 import type {
   AlertEvent,
   DataStream,
@@ -40,7 +30,17 @@ import type {
   SafeEndpointEvent,
 } from './types';
 import { HostPolicyResponseActionStatus } from './types';
+import { policyFactory } from './models/policy_config';
+import {
+  ancestryArray,
+  entityIDSafeVersion,
+  parentEntityIDSafeVersion,
+  processNameSafeVersion,
+  timestampSafeVersion,
+} from './models/event';
+import { firstNonNullValue } from './models/ecs_safety_helpers';
 import type { EventOptions } from './types/generator';
+import { BaseDataGenerator } from './data_generators/base_data_generator';
 
 export type Event = AlertEvent | SafeEndpointEvent;
 /**

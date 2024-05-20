@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { testEventStreamClient } from '../tests/test_event_stream_client';
 import { MemoryEventStreamClient } from './memory_event_stream_client';
+import { testEventStreamClient } from '../tests/test_event_stream_client';
 
 const client = new MemoryEventStreamClient();
 

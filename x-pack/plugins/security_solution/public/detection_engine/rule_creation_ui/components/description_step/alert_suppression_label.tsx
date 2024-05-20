@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import React from 'react';
 import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/utils';
 
 import { TechnicalPreviewBadge } from '../../../../common/components/technical_preview_badge';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { useEffect, useState } from 'react';
+import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { prefixIndexPatternWithCcs } from '../../../../common/ccs_utils';
 import {
   CCS_REMOTE_PATTERN,

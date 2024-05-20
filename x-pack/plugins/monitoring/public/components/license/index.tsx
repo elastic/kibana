@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { Fragment, FunctionComponent } from 'react';
 import {
-  EuiButton,
-  EuiCard,
-  EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
   EuiPage,
   EuiPageBody,
-  EuiPanel,
-  EuiScreenReaderOnly,
   EuiSpacer,
+  EuiCodeBlock,
+  EuiPanel,
   EuiText,
-  EuiTextAlign,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+  EuiCard,
+  EuiButton,
+  EuiIcon,
   EuiTitle,
+  EuiTextAlign,
 } from '@elastic/eui';
-import React, { Fragment, FunctionComponent } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../../legacy_shims';

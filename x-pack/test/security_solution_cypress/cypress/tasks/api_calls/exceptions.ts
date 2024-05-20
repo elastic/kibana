@@ -7,9 +7,9 @@
 
 import { CreateEndpointListItemResponse } from '@kbn/lists-plugin/common/api';
 import type {
-  CreateEndpointListItemSchema,
-  ExceptionListItemSchema,
   ExceptionListSchema,
+  ExceptionListItemSchema,
+  CreateEndpointListItemSchema,
   FoundAllListItemsSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ITEM_URL, ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';

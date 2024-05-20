@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiBetaBadge,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIcon,
-  EuiIconTip,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { useKibana } from '../../../common/lib/kibana';
-import { ActionConnector, ActionTypeIndex, RuleUiAction } from '../../../types';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
-import { getValidConnectors } from '../common/connectors';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+  EuiAccordion,
+  EuiButtonIcon,
+  EuiEmptyPrompt,
+  EuiCallOut,
+  EuiText,
+  EuiFormRow,
+  EuiButtonEmpty,
+  EuiIconTip,
+  EuiBetaBadge,
+} from '@elastic/eui';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { RuleUiAction, ActionTypeIndex, ActionConnector } from '../../../types';
+import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
+import { useKibana } from '../../../common/lib/kibana';
+import { getValidConnectors } from '../common/connectors';
 import { ConnectorsSelection } from './connectors_selection';
 
 export type AddConnectorInFormProps = {

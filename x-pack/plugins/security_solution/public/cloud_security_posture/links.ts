@@ -8,10 +8,10 @@ import { getSecuritySolutionLink } from '@kbn/cloud-security-posture-plugin/publ
 import { i18n } from '@kbn/i18n';
 import type { SecurityPageName } from '../../common/constants';
 import { SERVER_APP_ID } from '../../common/constants';
-import { IconEndpoints } from '../common/icons/endpoints';
-import cloudNativeVulnerabilityManagementDashboardImage from '../common/images/cloud_native_vulnerability_management_dashboard_page.png';
 import cloudSecurityPostureDashboardImage from '../common/images/cloud_security_posture_dashboard_page.png';
+import cloudNativeVulnerabilityManagementDashboardImage from '../common/images/cloud_native_vulnerability_management_dashboard_page.png';
 import type { LinkItem } from '../common/links/types';
+import { IconEndpoints } from '../common/icons/endpoints';
 
 const commonLinkProperties: Partial<LinkItem> = {
   hideTimeline: true,

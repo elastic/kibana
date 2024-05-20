@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import deepmerge from 'deepmerge';
+import { createTestServers, createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 
 export async function setupTestServers(settings = {}) {
   const { startES } = createTestServers({

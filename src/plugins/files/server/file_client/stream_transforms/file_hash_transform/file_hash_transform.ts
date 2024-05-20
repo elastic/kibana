@@ -1,4 +1,3 @@
-import { type Hash, createHash } from 'crypto';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import { type Hash, createHash } from 'crypto';
  * Side Public License, v 1.
  */
 import { Transform, type TransformCallback } from 'stream';
+import { createHash, type Hash } from 'crypto';
 import { SupportedFileHashAlgorithm } from '../../../saved_objects/file';
 
 class FileHashTransform extends Transform {

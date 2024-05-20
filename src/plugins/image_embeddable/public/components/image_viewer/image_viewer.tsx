@@ -17,7 +17,7 @@ import {
   useIsWithinBreakpoints,
   useResizeObserver,
 } from '@elastic/eui';
-import { SerializedStyles, css } from '@emotion/react';
+import { css, SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FileImage } from '@kbn/shared-ux-file-image';

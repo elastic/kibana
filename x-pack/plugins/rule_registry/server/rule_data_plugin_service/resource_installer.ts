@@ -5,27 +5,27 @@
  * 2.0.
  */
 
+import { type Observable } from 'rxjs';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  DEFAULT_ALERTS_ILM_POLICY,
-  DEFAULT_ALERTS_ILM_POLICY_NAME,
-  type DataStreamAdapter,
-  ECS_COMPONENT_TEMPLATE_NAME,
-  type PublicFrameworkAlertsService,
-  TOTAL_FIELDS_LIMIT,
-  VALID_ALERT_INDEX_PREFIXES,
   createConcreteWriteIndex,
   createOrUpdateComponentTemplate,
   createOrUpdateIlmPolicy,
   createOrUpdateIndexTemplate,
+  DEFAULT_ALERTS_ILM_POLICY,
+  DEFAULT_ALERTS_ILM_POLICY_NAME,
+  ECS_COMPONENT_TEMPLATE_NAME,
   getIndexTemplate,
   installWithTimeout,
+  TOTAL_FIELDS_LIMIT,
+  type PublicFrameworkAlertsService,
+  type DataStreamAdapter,
+  VALID_ALERT_INDEX_PREFIXES,
 } from '@kbn/alerting-plugin/server';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { type Observable } from 'rxjs';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
-import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
+import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 import type { IndexInfo } from './index_info';
 
 interface ConstructorOptions {

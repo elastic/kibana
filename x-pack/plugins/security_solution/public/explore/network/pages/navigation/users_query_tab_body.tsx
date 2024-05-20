@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../../common/components/page/manage_query';
-import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { UsersTable } from '../../components/users_table';
-import { ID, useNetworkUsers } from '../../containers/users';
+import { useNetworkUsers, ID } from '../../containers/users';
 import type { IPQueryTabBodyProps } from './types';
+import { UsersTable } from '../../components/users_table';
+import { useQueryToggle } from '../../../../common/containers/query_toggle';
 
 const UsersTableManage = manageQuery(UsersTable);
 

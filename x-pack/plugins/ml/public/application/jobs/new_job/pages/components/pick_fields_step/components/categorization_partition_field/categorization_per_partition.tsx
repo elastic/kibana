@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { EuiFormRow } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useContext, useEffect, useState } from 'react';
+import { EuiFormRow } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { JobCreatorContext } from '../../../job_creator_context';
 import type {
   AdvancedJobCreator,
   CategorizationJobCreator,
 } from '../../../../../common/job_creator';
 import { isCategorizationJobCreator } from '../../../../../common/job_creator';
-import { JobCreatorContext } from '../../../job_creator_context';
 
 import { Description } from './description';
 
-import { CategorizationPerPartitionFieldDropdown } from './categorization_per_partition_dropdown';
 import { CategorizationPerPartitionSwitch } from './categorization_per_partition_switch';
 import { CategorizationPerPartitionStopOnWarnSwitch } from './categorization_stop_on_warn_switch';
+import { CategorizationPerPartitionFieldDropdown } from './categorization_per_partition_dropdown';
 
 export const CategorizationPerPartitionField: FC = () => {
   const { jobCreator: jc, jobCreatorUpdated } = useContext(JobCreatorContext);

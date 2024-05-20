@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
+import { omit } from 'lodash';
 
-import { EuiCheckboxGroup } from '@elastic/eui';
-import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
-import type { Capabilities } from '@kbn/core/public';
-import { QueryState } from '@kbn/data-plugin/common';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { EuiCheckboxGroup } from '@elastic/eui';
+import { QueryState } from '@kbn/data-plugin/common';
+import type { Capabilities } from '@kbn/core/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
 
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { dashboardUrlParams } from '../../dashboard_router';
+import { shareModalStrings } from '../../_dashboard_app_strings';
+import { pluginServices } from '../../../services/plugin_services';
 import { convertPanelMapToSavedPanels } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
-import { pluginServices } from '../../../services/plugin_services';
-import { shareModalStrings } from '../../_dashboard_app_strings';
-import { dashboardUrlParams } from '../../dashboard_router';
 
 const showFilterBarId = 'showFilterBar';
 

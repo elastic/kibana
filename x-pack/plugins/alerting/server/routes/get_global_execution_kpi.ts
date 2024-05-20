@@ -1,4 +1,3 @@
-import { schema } from '@kbn/config-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,10 +5,11 @@ import { schema } from '@kbn/config-schema';
  * 2.0.
  */
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
-import { GetGlobalExecutionKPIParams } from '../rules_client';
+import { schema } from '@kbn/config-schema';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { RewriteRequestCase, rewriteNamespaces, verifyAccessAndContext } from './lib';
+import { RewriteRequestCase, verifyAccessAndContext, rewriteNamespaces } from './lib';
+import { GetGlobalExecutionKPIParams } from '../rules_client';
+import { ILicenseState } from '../lib';
 
 const querySchema = schema.object({
   date_start: schema.string(),

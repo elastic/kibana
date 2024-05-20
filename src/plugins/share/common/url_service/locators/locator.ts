@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
-import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { SavedObjectReference } from '@kbn/core/server';
 import { DependencyList } from 'react';
-import { FormatSearchParamsOptions, RedirectOptions, formatSearchParams } from './redirect';
-import type {
-  KibanaLocation,
-  LocatorDefinition,
-  LocatorGetUrlParams,
-  LocatorNavigationParams,
-  LocatorPublic,
-} from './types';
+import type { PersistableState } from '@kbn/kibana-utils-plugin/common';
 import { useLocatorUrl } from './use_locator_url';
+import type {
+  LocatorDefinition,
+  LocatorPublic,
+  KibanaLocation,
+  LocatorNavigationParams,
+  LocatorGetUrlParams,
+} from './types';
+import { formatSearchParams, FormatSearchParamsOptions, RedirectOptions } from './redirect';
 
 export interface LocatorDependencies {
   /**

@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { documentationService } from '../../../../../services/documentation';
 import { getFieldConfig } from '../../../lib';
-import { Field, UseField } from '../../../shared_imports';
+import { UseField, Field } from '../../../shared_imports';
 import { EditFieldFormRow } from '../fields/edit_field';
 
 interface Props {

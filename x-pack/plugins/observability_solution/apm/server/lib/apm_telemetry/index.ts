@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   CoreSetup,
   Logger,
@@ -16,16 +16,16 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import {
   APM_TELEMETRY_SAVED_OBJECT_ID,
   APM_TELEMETRY_SAVED_OBJECT_TYPE,
 } from '../../../common/apm_saved_object_constants';
 import { getInternalSavedObjectsClient } from '../helpers/get_internal_saved_objects_client';
 import { collectDataTelemetry } from './collect_data_telemetry';
+import { APMUsage } from './types';
 import { apmSchema } from './schema';
 import { getTelemetryClient } from './telemetry_client';
-import { APMUsage } from './types';
 
 export const APM_TELEMETRY_TASK_NAME = 'apm-telemetry-task';
 

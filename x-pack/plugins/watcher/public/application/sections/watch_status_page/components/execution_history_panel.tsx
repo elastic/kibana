@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import React, { Fragment, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Moment } from 'moment';
-import React, { Fragment, useState, useContext } from 'react';
 
 import {
   EuiCodeBlock,
   EuiFlexGroup,
+  EuiToolTip,
+  EuiIcon,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiTitle,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
-import { ActionStateBadge, Error, SectionError, WatchStateBadge } from '../../../components';
+import { ActionStateBadge, WatchStateBadge, SectionError, Error } from '../../../components';
 import { useLoadWatchHistory, useLoadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 

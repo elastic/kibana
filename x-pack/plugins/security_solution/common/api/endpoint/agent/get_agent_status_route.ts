@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { type TypeOf, schema } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { AgentTypeSchemaLiteral } from '..';
 
 const AgentStatusAgentIdSchema = schema.string({

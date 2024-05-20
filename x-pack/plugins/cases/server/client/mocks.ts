@@ -5,26 +5,26 @@
  * 2.0.
  */
 
-import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
-import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { PublicContract, PublicMethodsOf } from '@kbn/utility-types';
+import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { ISavedObjectsSerializer } from '@kbn/core-saved-objects-server';
 
-import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
-import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import {
   createFileServiceFactoryMock,
   createFileServiceMock,
 } from '@kbn/files-plugin/server/mocks';
-import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
+import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import type { CasesClient, CasesClientInternal } from '.';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { notificationsMock } from '@kbn/notifications-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import type { CasesSearchRequest } from '../../common/types/api';
+import type { CasesClient, CasesClientInternal } from '.';
 import type { AttachmentsSubClient } from './attachments/client';
 import type { CasesSubClient } from './cases/client';
 import type { ConfigureSubClient, InternalConfigureSubClient } from './configure/client';
@@ -46,8 +46,8 @@ import {
   createCaseServiceMock,
   createConfigureServiceMock,
   createLicensingServiceMock,
-  createNotificationServiceMock,
   createUserActionServiceMock,
+  createNotificationServiceMock,
 } from '../services/mocks';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;

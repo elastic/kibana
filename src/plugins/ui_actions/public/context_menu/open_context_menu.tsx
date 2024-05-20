@@ -8,10 +8,10 @@
 
 import React from 'react';
 
-import { EventEmitter } from 'events';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor, EuiPopover } from '@elastic/eui';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme } from '../services';
 
 let activeSession: ContextMenuSession | null = null;

@@ -7,20 +7,20 @@
  */
 
 import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
+  readLog,
   clearLog,
+  nextMinor,
   createBaseline,
   currentVersion,
   defaultKibanaIndex,
+  startElasticsearch,
   getCompatibleMappingsMigrator,
   getIdenticalMappingsMigrator,
   getIncompatibleMappingsMigrator,
   getNonDeprecatedMappingsMigrator,
-  nextMinor,
-  readLog,
-  startElasticsearch,
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 

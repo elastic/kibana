@@ -7,12 +7,12 @@
 
 import { Observable } from 'rxjs';
 import { TagsCapabilities } from '../../../common';
-import { ITagAssignmentService, ITagInternalClient, ITagsCache } from '../../services';
+import { ITagInternalClient, ITagAssignmentService, ITagsCache } from '../../services';
 import { StartServices } from '../../types';
-import { getAssignAction } from './assign';
+import { TagAction } from './types';
 import { getDeleteAction } from './delete';
 import { getEditAction } from './edit';
-import { TagAction } from './types';
+import { getAssignAction } from './assign';
 
 export type { TagAction } from './types';
 

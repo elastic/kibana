@@ -11,10 +11,10 @@ import { Logger } from '@kbn/logging';
 import type { HttpConfig } from './http_config';
 import type { LifecycleRegistrar } from './http_server';
 import {
-  createBuildNrMismatchLoggerPreResponseHandler,
   createCustomHeadersPreResponseHandler,
   createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
+  createBuildNrMismatchLoggerPreResponseHandler,
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
 

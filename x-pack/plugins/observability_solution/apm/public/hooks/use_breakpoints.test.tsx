@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiProvider } from '@elastic/eui';
-import { renderHook } from '@testing-library/react-hooks';
 import React, { FC, PropsWithChildren } from 'react';
+import { renderHook } from '@testing-library/react-hooks';
+import { EuiProvider } from '@elastic/eui';
 import { useBreakpoints } from './use_breakpoints';
 
 const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (

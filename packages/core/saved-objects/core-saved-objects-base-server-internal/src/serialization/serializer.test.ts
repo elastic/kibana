@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { ISavedObjectTypeRegistry, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import _ from 'lodash';
-import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
-import { encodeVersion } from '../version';
+import type { SavedObjectsRawDoc, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 import { SavedObjectsSerializer } from './serializer';
+import { encodeVersion } from '../version';
+import { LEGACY_URL_ALIAS_TYPE } from '../legacy_alias';
 
 const createMockedTypeRegistry = ({
   isNamespaceAgnostic,

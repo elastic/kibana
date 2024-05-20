@@ -8,14 +8,14 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
+import type { ScopedFilesClient, FilesClient } from '../types';
+import { FileKindsRegistryImpl } from '../../common/file_kinds_registry';
 import {
   API_BASE_PATH,
   FILES_API_BASE_PATH,
   FILES_PUBLIC_API_BASE_PATH,
   FILES_SHARE_API_BASE_PATH,
 } from '../../common/api_routes';
-import { FileKindsRegistryImpl } from '../../common/file_kinds_registry';
-import type { FilesClient, ScopedFilesClient } from '../types';
 
 /**
  * @internal

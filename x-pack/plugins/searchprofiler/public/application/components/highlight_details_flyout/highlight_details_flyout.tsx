@@ -5,20 +5,20 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiCodeBlock,
   EuiFlyout,
-  EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiFlyoutBody,
   EuiIconTip,
   EuiText,
+  EuiCodeBlock,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 import { msToPretty } from '../../lib';
-import { Operation } from '../../types';
 import { HighlightDetailsTable } from './highlight_details_table';
+import { Operation } from '../../types';
 
 export interface Props {
   operation: Omit<Operation, 'children' | 'parent'>;

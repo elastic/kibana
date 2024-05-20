@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Task, read } from '../lib';
+import { read, Task } from '../lib';
 
 export const AssertNoUUID: Task = {
   description: 'Verify that no UUID file is baked into the build',

@@ -8,7 +8,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { ComponentType } from 'react';
 import { ObservabilityAIAssistantChatServiceContext } from '../context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantProvider } from '../context/observability_ai_assistant_provider';
-import { createStorybookChatService, createStorybookService } from '../storybook_mock';
+import { createStorybookService, createStorybookChatService } from '../storybook_mock';
 
 const mockService = createStorybookService();
 const mockChatService = createStorybookChatService();

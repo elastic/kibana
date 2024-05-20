@@ -6,9 +6,9 @@
  */
 
 import { ChromeBreadcrumb } from '@kbn/core/public';
+import { useBreadcrumbs } from './use_breadcrumbs';
 import { LOGS_APP } from '../../common/constants';
 import { logsTitle } from '../translations';
-import { useBreadcrumbs } from './use_breadcrumbs';
 
 export const useLogsBreadcrumbs = (extraCrumbs: ChromeBreadcrumb[]) => {
   useBreadcrumbs(LOGS_APP, logsTitle, extraCrumbs);

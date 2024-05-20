@@ -11,10 +11,10 @@ import React from 'react';
 import { TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
 import {
-  DraggableSignatureId,
-  SURICATA_SIGNATURE_ID_FIELD_NAME,
   SuricataSignature,
   Tokens,
+  DraggableSignatureId,
+  SURICATA_SIGNATURE_ID_FIELD_NAME,
 } from './suricata_signature';
 
 jest.mock('../../../../../../common/lib/kibana');

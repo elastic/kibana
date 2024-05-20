@@ -6,7 +6,7 @@
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { ByTypeTaggingUsageData, TaggingUsageData } from './types';
+import { TaggingUsageData, ByTypeTaggingUsageData } from './types';
 
 const perTypeSchema: MakeSchemaFrom<ByTypeTaggingUsageData> = {
   usedTags: { type: 'integer' },

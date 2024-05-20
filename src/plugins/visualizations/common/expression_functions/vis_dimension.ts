@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
-  Datatable,
-  DatatableColumn,
   ExpressionFunctionDefinition,
   ExpressionValueBoxed,
+  Datatable,
+  DatatableColumn,
 } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { findAccessorOrFail } from '../utils/accessors';
 
 export interface Arguments {

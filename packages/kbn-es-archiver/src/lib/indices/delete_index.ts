@@ -8,8 +8,8 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ES_CLIENT_HEADERS } from '../../client_headers';
 import { Stats } from '../stats';
+import { ES_CLIENT_HEADERS } from '../../client_headers';
 
 // see https://github.com/elastic/elasticsearch/blob/99f88f15c5febbca2d13b5b5fda27b844153bf1a/server/src/main/java/org/elasticsearch/cluster/SnapshotsInProgress.java#L313-L319
 const PENDING_SNAPSHOT_STATUSES = ['INIT', 'STARTED', 'WAITING'];

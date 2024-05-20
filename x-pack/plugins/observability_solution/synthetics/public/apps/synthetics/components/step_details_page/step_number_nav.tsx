@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { times } from 'lodash';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiDescriptionList,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
   EuiPopover,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { times } from 'lodash';
-import React, { useState } from 'react';
 import { useStepDetailPage } from './hooks/use_step_detail_page';
 
 interface Props {

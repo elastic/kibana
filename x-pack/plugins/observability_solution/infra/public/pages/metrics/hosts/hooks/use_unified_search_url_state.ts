@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
-import { enumeration } from '@kbn/securitysolution-io-ts-types';
+import { useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
+import * as rt from 'io-ts';
+import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as rt from 'io-ts';
-import { useReducer } from 'react';
+import { enumeration } from '@kbn/securitysolution-io-ts-types';
+import { FilterStateStore } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { useUrlState } from '../../../../utils/use_url_state';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
-import { useUrlState } from '../../../../utils/use_url_state';
 import { DEFAULT_HOST_LIMIT, LOCAL_STORAGE_HOST_LIMIT_KEY } from '../constants';
 
 const DEFAULT_QUERY = {

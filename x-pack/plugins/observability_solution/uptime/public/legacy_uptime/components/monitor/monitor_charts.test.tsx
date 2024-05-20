@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import DateMath from '@kbn/datemath';
 import React from 'react';
-import { shallowWithRouter } from '../../lib';
+import DateMath from '@kbn/datemath';
 import { MonitorCharts } from './monitor_charts';
+import { shallowWithRouter } from '../../lib';
 
 describe('MonitorCharts component', () => {
   let dateMathSpy: any;

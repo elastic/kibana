@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { CaseStatuses } from '@kbn/cases-components';
 import { safeDecode } from '@kbn/rison';
 import { isPlainObject } from 'lodash';
-import { stringToIntegerWithDefault } from '.';
+import type { CaseStatuses } from '@kbn/cases-components';
 import type { CaseSeverity } from '../../../../common';
-import { SortFieldCase } from '../../../../common/ui';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
-import { ALL_CASES_STATE_URL_KEY, LEGACY_SUPPORTED_STATE_KEYS } from '../constants';
+import { stringToIntegerWithDefault } from '.';
+import { SortFieldCase } from '../../../../common/ui';
+import { LEGACY_SUPPORTED_STATE_KEYS, ALL_CASES_STATE_URL_KEY } from '../constants';
 import { AllCasesURLQueryParamsRt, validateSchema } from '../schema';
 import type { AllCasesURLQueryParams } from '../types';
 
-type LegacySupportedKeys = (typeof LEGACY_SUPPORTED_STATE_KEYS)[number];
+type LegacySupportedKeys = typeof LEGACY_SUPPORTED_STATE_KEYS[number];
 
 const legacyDefaultState: Record<LegacySupportedKeys, string | number | string[]> = {
   page: 1,

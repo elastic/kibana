@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expectedDsl, mockOptions } from './__mocks__';
 import { buildHostDetailsQuery } from './query.host_details.dsl';
+import { mockOptions, expectedDsl } from './__mocks__';
 
 // Failing with rule registry enabled
 describe('buildHostDetailsQuery', () => {

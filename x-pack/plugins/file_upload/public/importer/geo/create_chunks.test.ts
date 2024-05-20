@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { Feature } from 'geojson';
 import { createChunks, toEsDoc } from './create_chunks';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 
 const FEATURE_COLLECTION = {
   type: 'FeatureCollection',

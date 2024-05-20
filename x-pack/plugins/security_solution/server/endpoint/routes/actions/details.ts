@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 import { ActionDetailsRequestSchema } from '../../../../common/api/endpoint';
-import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
-import { getActionDetailsById } from '../../services';
 import type { EndpointAppContext } from '../../types';
-import { errorHandler } from '../error_handler';
+import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { getActionDetailsById } from '../../services';
+import { errorHandler } from '../error_handler';
 
 /**
  * Registers the route for handling retrieval of Action Details
@@ -62,7 +62,9 @@ export const getActionDetailsRequestHandler = (
       return res.ok({
         body: {
           data: await getActionDetailsById(
-            (await context.core).elasticsearch.client.asInternalUser,
+            (
+              await context.core
+            ).elasticsearch.client.asInternalUser,
             endpointContext.service.getEndpointMetadataService(),
             req.params.action_id
           ),

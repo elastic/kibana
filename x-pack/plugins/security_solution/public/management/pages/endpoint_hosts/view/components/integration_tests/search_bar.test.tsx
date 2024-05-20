@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
-import { getEndpointListPath } from '../../../../../common/routing';
 import { endpointPageHttpMock } from '../../../mocks';
+import { act, waitFor, cleanup, fireEvent } from '@testing-library/react';
+import { getEndpointListPath } from '../../../../../common/routing';
+import { AdminSearchBar } from '../search_bar';
 import { uiQueryParams } from '../../../store/selectors';
 import type { EndpointIndexUIQueryParams } from '../../../types';
-import { AdminSearchBar } from '../search_bar';
 
 jest.mock('rxjs', () => {
   const actual = jest.requireActual('rxjs');

@@ -10,7 +10,7 @@ import { run } from '@kbn/dev-cli-runner';
 
 import { initLogsDir } from '../lib/logs_dir';
 
-import { FLAG_OPTIONS, parseFlags } from './flags';
+import { parseFlags, FLAG_OPTIONS } from './flags';
 import { startServers } from './start_servers';
 
 /**

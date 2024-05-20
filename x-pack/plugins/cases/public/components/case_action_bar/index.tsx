@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiIconTip, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
-import { CaseMetricsFeature } from '../../../common/types/api';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
-import { useCasesFeatures } from '../../common/use_cases_features';
-import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
-import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
+import { CaseMetricsFeature } from '../../../common/types/api';
+import { ActionBarStatusItem } from './action_bar_status_item';
 import * as i18n from '../case_view/translations';
+import { Actions } from './actions';
+import { StatusContextMenu } from './status_context_menu';
+import { SyncAlertsSwitch } from '../case_settings/sync_alerts_switch';
 import type { OnUpdateFields } from '../case_view/types';
+import { FormattedRelativePreferenceDate } from '../formatted_date';
+import { getStatusDate, getStatusTitle } from './helpers';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import { FormattedRelativePreferenceDate } from '../formatted_date';
-import { ActionBarStatusItem } from './action_bar_status_item';
-import { Actions } from './actions';
-import { getStatusDate, getStatusTitle } from './helpers';
-import { StatusContextMenu } from './status_context_menu';
+import { useCasesFeatures } from '../../common/use_cases_features';
+import { useGetCaseConnectors } from '../../containers/use_get_case_connectors';
 
 export interface CaseActionBarProps {
   caseData: CaseUI;

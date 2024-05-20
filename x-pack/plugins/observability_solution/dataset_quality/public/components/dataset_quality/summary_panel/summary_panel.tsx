@@ -9,8 +9,8 @@ import React from 'react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { useSummaryPanelContext } from '../../../hooks';
-import { DatasetsActivity } from './datasets_activity';
 import { DatasetsQualityIndicators } from './datasets_quality_indicators';
+import { DatasetsActivity } from './datasets_activity';
 import { EstimatedData } from './estimated_data';
 
 // Allow for lazy loading

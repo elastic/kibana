@@ -6,44 +6,44 @@
  * Side Public License, v 1.
  */
 
-import type {
-  CoreSetup,
-  CoreStart,
-  CoreUsageDataStart,
-  ISavedObjectsRepository,
-  IUiSettingsClient,
-  Logger,
-  OpsMetrics,
-  Plugin,
-  PluginInitializerContext,
-  SavedObjectsServiceSetup,
-} from '@kbn/core/server';
-import { EventLoopDelaysMonitor, SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { ReplaySubject, Subject, type Subscription } from 'rxjs';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  Plugin,
+  ISavedObjectsRepository,
+  IUiSettingsClient,
+  CoreStart,
+  SavedObjectsServiceSetup,
+  OpsMetrics,
+  Logger,
+  CoreUsageDataStart,
+} from '@kbn/core/server';
+import { SavedObjectsClient, EventLoopDelaysMonitor } from '@kbn/core/server';
+import { registerEbtCounters } from './ebt_counters';
+import {
+  startTrackingEventLoopDelaysUsage,
+  startTrackingEventLoopDelaysThreshold,
+  SAVED_OBJECTS_DAILY_TYPE,
+} from './collectors/event_loop_delays';
 import {
   registerApplicationUsageCollector,
-  registerCloudProviderUsageCollector,
-  registerConfigUsageCollector,
-  registerCoreUsageCollector,
-  registerCspCollector,
-  registerEventLoopDelaysCollector,
   registerKibanaUsageCollector,
-  registerLocalizationUsageCollector,
   registerManagementUsageCollector,
   registerOpsStatsCollector,
-  registerSavedObjectsCountUsageCollector,
-  registerUiCountersUsageCollector,
   registerUiMetricUsageCollector,
+  registerCloudProviderUsageCollector,
+  registerCspCollector,
+  registerCoreUsageCollector,
+  registerLocalizationUsageCollector,
+  registerUiCountersUsageCollector,
+  registerConfigUsageCollector,
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
+  registerSavedObjectsCountUsageCollector,
+  registerEventLoopDelaysCollector,
 } from './collectors';
-import {
-  SAVED_OBJECTS_DAILY_TYPE,
-  startTrackingEventLoopDelaysThreshold,
-  startTrackingEventLoopDelaysUsage,
-} from './collectors/event_loop_delays';
-import { registerEbtCounters } from './ebt_counters';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;

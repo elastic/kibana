@@ -7,9 +7,9 @@
 
 import type { TableId } from '@kbn/securitysolution-data-table';
 import {
-  dataTableActions,
-  dataTableSelectors,
   tableDefaults,
+  dataTableSelectors,
+  dataTableActions,
 } from '@kbn/securitysolution-data-table';
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';

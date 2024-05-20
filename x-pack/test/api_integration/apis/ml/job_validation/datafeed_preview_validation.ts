@@ -11,11 +11,11 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import expect from '@kbn/expect';
-import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
-import { USER } from '../../../../functional/services/ml/security_common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../../functional/services/ml/security_common';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 const farequoteMappings: estypes.MappingTypeMapping = {
   properties: {

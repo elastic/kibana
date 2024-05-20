@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { first } from 'rxjs';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { first } from 'rxjs';
 import { SEARCH_EVENT_TYPE, SearchUsageCollector } from './types';
 
 export const createUsageCollector = (

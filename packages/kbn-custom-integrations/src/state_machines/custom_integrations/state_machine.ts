@@ -6,15 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
 import { OmitDeprecatedState } from '@kbn/xstate-utils';
-import { ActorRefFrom, EmittedFrom, createMachine } from 'xstate';
-import { DEFAULT_CONTEXT as DEFAULT_CREATE_CONTEXT } from '../create/defaults';
-import { executeFieldsPipeline, normalizeDatasetNames } from '../create/pipelines/fields';
-import { createCreateCustomIntegrationStateMachine } from '../create/state_machine';
-import { CreateInitialState } from '../create/types';
-import { IIntegrationsClient } from '../services/integrations_client';
 import { DEFAULT_CONTEXT } from './defaults';
-import { CustomIntegrationsNotificationChannel } from './notifications';
+import { DEFAULT_CONTEXT as DEFAULT_CREATE_CONTEXT } from '../create/defaults';
 import {
   CustomIntegrationsContext,
   CustomIntegrationsEvent,
@@ -22,6 +17,11 @@ import {
   DefaultCustomIntegrationsContext,
   InitialState,
 } from './types';
+import { createCreateCustomIntegrationStateMachine } from '../create/state_machine';
+import { IIntegrationsClient } from '../services/integrations_client';
+import { CustomIntegrationsNotificationChannel } from './notifications';
+import { executeFieldsPipeline, normalizeDatasetNames } from '../create/pipelines/fields';
+import { CreateInitialState } from '../create/types';
 
 export const createPureCustomIntegrationsStateMachine = (
   initialContext: DefaultCustomIntegrationsContext = DEFAULT_CONTEXT

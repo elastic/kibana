@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PassThrough, Readable } from 'stream';
+import { Readable, PassThrough } from 'stream';
 import { SavedObjectsImportError } from '../errors';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createLimitStream } from './create_limit_stream';

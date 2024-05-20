@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import type { HttpSetup } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { AutoCompleteEntitiesApiResponse } from '../lib/autocomplete_entities/types';
 import { API_BASE_PATH } from '../../common/constants';
 import {
   Alias,
-  ComponentTemplate,
   DataStream,
-  IndexTemplate,
-  LegacyTemplate,
   Mapping,
+  LegacyTemplate,
+  IndexTemplate,
+  ComponentTemplate,
 } from '../lib/autocomplete_entities';
-import type { AutoCompleteEntitiesApiResponse } from '../lib/autocomplete_entities/types';
 import { DevToolsSettings, Settings } from './settings';
 
 export enum ENTITIES {

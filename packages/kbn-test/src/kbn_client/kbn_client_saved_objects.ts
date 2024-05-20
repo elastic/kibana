@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { chunk } from 'lodash';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type {
   SavedObjectsBulkDeleteResponse,
   SavedObjectsFindResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { chunk } from 'lodash';
 
 import { KbnClientRequester, uriencode } from './kbn_client_requester';
 
@@ -136,10 +136,7 @@ const STANDARD_LIST_TYPES = [
  * @remarks: Leverage the `ftrApis` plugin under the hood.
  */
 export class KbnClientSavedObjects {
-  constructor(
-    private readonly log: ToolingLog,
-    private readonly requester: KbnClientRequester
-  ) {}
+  constructor(private readonly log: ToolingLog, private readonly requester: KbnClientRequester) {}
 
   /**
    * Run the saved objects migration

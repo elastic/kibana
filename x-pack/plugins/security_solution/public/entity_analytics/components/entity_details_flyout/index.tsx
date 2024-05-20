@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EntityDetailsLeftPanelTab } from '../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { PREFIX } from '../../../flyout/shared/test_ids';
 import type { RiskInputsTabProps } from './tabs/risk_inputs/risk_inputs_tab';

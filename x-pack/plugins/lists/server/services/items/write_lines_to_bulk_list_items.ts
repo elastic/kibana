@@ -8,7 +8,6 @@
 import { Readable } from 'stream';
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
 import type {
   DeserializerOrUndefined,
   ListIdOrUndefined,
@@ -19,9 +18,10 @@ import type {
   Type,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Version } from '@kbn/securitysolution-io-ts-types';
+import { i18n } from '@kbn/i18n';
 
-import { ConfigType } from '../../config';
 import { createListIfItDoesNotExist } from '../lists/create_list_if_it_does_not_exist';
+import { ConfigType } from '../../config';
 
 import { BufferLines } from './buffer_lines';
 import { createListItemsBulk } from './create_list_items_bulk';

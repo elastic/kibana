@@ -6,8 +6,8 @@
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { AggregatedTransactionsCounts, APMUsage, APMPerService, DataStreamCombined } from './types';
 import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import { APMPerService, APMUsage, AggregatedTransactionsCounts, DataStreamCombined } from './types';
 
 const aggregatedTransactionCountSchema: MakeSchemaFrom<AggregatedTransactionsCounts, true> = {
   expected_metric_document_count: {

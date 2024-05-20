@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
-import { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { IAggType } from '@kbn/data-plugin/public';
+import { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
 import type {
   Datatable,
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
-import type { DatatableProps } from '../../../common/expressions';
-import type { FormatFactory } from '../../../common/types';
 import type {
   GetCompatibleCellValueActions,
   ILensInterpreterRenderHandlers,
   LensCellValueAction,
 } from '../../types';
+import type { FormatFactory } from '../../../common/types';
+import type { DatatableProps } from '../../../common/expressions';
 
 export async function getColumnsFilterable(table: Datatable, handlers: IInterpreterRenderHandlers) {
   if (!table.rows.length) {

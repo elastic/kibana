@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { useEffect, useMemo, useState } from 'react';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { omit } from 'lodash/fp';
-import { useEffect, useMemo, useState } from 'react';
-import type { NavTab } from '../../../../common/components/navigation/types';
-import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import { useEndpointExceptionsCapability } from '../../../../exceptions/hooks/use_endpoint_exceptions_capability';
-import type { Rule } from '../../../rule_management/logic';
-import { useRuleExecutionSettings } from '../../../rule_monitoring';
+import * as detectionI18n from '../../../../detections/pages/detection_engine/translations';
 import * as i18n from './translations';
+import type { Rule } from '../../../rule_management/logic';
+import type { NavTab } from '../../../../common/components/navigation/types';
+import { useRuleExecutionSettings } from '../../../rule_monitoring';
 
 export enum RuleDetailTabs {
   alerts = 'alerts',

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import axios from 'axios';
+import { Logger } from '@kbn/core/server';
+import { sendEmail } from './send_email';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import nodemailer from 'nodemailer';
+import { ProxySettings } from '@kbn/actions-plugin/server/types';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { CustomHostSettings } from '@kbn/actions-plugin/server/config';
-import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
-import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
-import { ProxySettings } from '@kbn/actions-plugin/server/types';
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import axios from 'axios';
-import nodemailer from 'nodemailer';
-import { sendEmail } from './send_email';
 import { sendEmailGraphApi } from './send_email_graph_api';
+import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
+import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 
 jest.mock('nodemailer', () => ({
   createTransport: jest.fn(),

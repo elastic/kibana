@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { DiscoverTopNavInline } from './discover_topnav_inline';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { render, screen, waitFor } from '@testing-library/react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),

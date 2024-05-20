@@ -7,10 +7,10 @@
 
 import type { GetResponseActionsClientConstructorOptions } from '../..';
 import { getResponseActionsClient } from '../..';
-import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/service/response_actions/constants';
-import { UnsupportedResponseActionsAgentTypeError } from './errors';
-import { ResponseActionsClientImpl } from './lib/base_response_actions_client';
 import { responseActionsClientMock } from './mocks';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/service/response_actions/constants';
+import { ResponseActionsClientImpl } from './lib/base_response_actions_client';
+import { UnsupportedResponseActionsAgentTypeError } from './errors';
 
 describe('getResponseActionsClient()', () => {
   let options: GetResponseActionsClientConstructorOptions;

@@ -11,7 +11,7 @@ import { resolve, sep } from 'path';
 import { uniq } from 'lodash';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { InstalledPackage, getInstalledPackages } from '../installed_packages';
+import { getInstalledPackages, InstalledPackage } from '../installed_packages';
 
 const FIXTURE1_ROOT = resolve(__dirname, '__fixtures__/fixture1');
 

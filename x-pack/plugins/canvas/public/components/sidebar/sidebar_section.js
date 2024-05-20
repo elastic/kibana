@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
 
 export const SidebarSection = ({ children }) => (
   <div className="canvasSidebar__panel">{children}</div>

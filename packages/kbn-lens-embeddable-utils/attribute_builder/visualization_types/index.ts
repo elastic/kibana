@@ -8,13 +8,13 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   METRIC_ID,
+  XY_ID,
   METRIC_TREND_LINE_ID,
   XY_DATA_ID,
-  XY_ID,
   XY_REFERENCE_LINE_ID,
 } from './constants';
-import type { MetricLayerConfig, XYDataLayerConfig, XYReferenceLinesLayerConfig } from './layers';
 import type { XYVisualOptions } from './xy_chart';
+import type { MetricLayerConfig, XYDataLayerConfig, XYReferenceLinesLayerConfig } from './layers';
 
 export { XYChart, type XYVisualOptions } from './xy_chart';
 export { MetricChart } from './metric_chart';

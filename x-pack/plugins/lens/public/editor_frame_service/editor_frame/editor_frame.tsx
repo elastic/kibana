@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { type DragDropAction, DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import React, { useCallback, useRef } from 'react';
-import { IndexPatternServiceAPI } from '../../data_views_service/service';
-import type { LensInspector } from '../../lens_inspector_service';
-import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
+import { CoreStart } from '@kbn/core/public';
+import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import { type DragDropAction, DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import {
-  selectActiveDatasourceId,
-  selectAreDatasourcesLoaded,
-  selectDatasourceStates,
-  selectFramePublicAPI,
-  selectVisualization,
-  useLensDispatch,
-  useLensSelector,
-} from '../../state_management';
-import {
-  AddUserMessages,
   DatasourceMap,
   FramePublicAPI,
+  VisualizationMap,
   Suggestion,
   UserMessagesGetter,
-  VisualizationMap,
+  AddUserMessages,
 } from '../../types';
-import { EditorFrameStartPlugins } from '../service';
+import { DataPanelWrapper } from './data_panel_wrapper';
 import { BannerWrapper } from './banner_wrapper';
 import { ConfigPanelWrapper } from './config_panel';
-import { DataPanelWrapper } from './data_panel_wrapper';
 import { FrameLayout } from './frame_layout';
-import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
 import { SuggestionPanelWrapper } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
+import { EditorFrameStartPlugins } from '../service';
+import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
+import {
+  useLensSelector,
+  useLensDispatch,
+  selectAreDatasourcesLoaded,
+  selectFramePublicAPI,
+  selectActiveDatasourceId,
+  selectDatasourceStates,
+  selectVisualization,
+} from '../../state_management';
+import type { LensInspector } from '../../lens_inspector_service';
+import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
+import { IndexPatternServiceAPI } from '../../data_views_service/service';
 
 export interface EditorFrameProps {
   datasourceMap: DatasourceMap;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
-import React, { memo } from 'react';
 import type { ActionsContextMenuProps } from '../../actions_context_menu';
 import { ActionsContextMenu } from '../../actions_context_menu';
 

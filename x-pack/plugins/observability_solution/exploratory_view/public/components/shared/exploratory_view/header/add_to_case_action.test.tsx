@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public';
-import { fireEvent } from '@testing-library/react';
-import moment from 'moment';
 import React from 'react';
-import * as datePicker from '../components/date_range_picker';
-import * as useCaseHook from '../hooks/use_add_to_case';
-import { forNearestButton, render } from '../rtl_helpers';
+import { render, forNearestButton } from '../rtl_helpers';
+import { fireEvent } from '@testing-library/react';
 import { AddToCaseAction } from './add_to_case_action';
+import * as useCaseHook from '../hooks/use_add_to_case';
+import * as datePicker from '../components/date_range_picker';
+import moment from 'moment';
+import { noCasesPermissions as mockUseGetCasesPermissions } from '@kbn/observability-shared-plugin/public';
 
 describe('AddToCaseAction', function () {
   const coreRenderProps = {

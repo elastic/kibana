@@ -5,7 +5,6 @@
  * 2.0.
  */
 import {
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiDescribedFormGroup,
   EuiFlexGroup,
@@ -15,6 +14,7 @@ import {
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';

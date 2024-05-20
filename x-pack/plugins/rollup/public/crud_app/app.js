@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { Redirect, withRouter } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { UIM_APP_LOAD } from '../../common';
+import { registerRouter, setUserHasLeftApp, METRIC_TYPE } from './services';
 import { trackUiMetric } from '../kibana_services';
-import { JobCreate, JobList } from './sections';
-import { METRIC_TYPE, registerRouter, setUserHasLeftApp } from './services';
+import { JobList, JobCreate } from './sections';
 
 class ShareRouterComponent extends Component {
   static propTypes = {

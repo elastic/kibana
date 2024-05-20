@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import * as path from 'path';
 import ts from 'typescript';
-import { extractCollectors, getProgramPaths } from '../extract_collectors';
+import * as path from 'path';
 import { TaskContext } from './task_context';
+import { extractCollectors, getProgramPaths } from '../extract_collectors';
 
 export function extractCollectorsTask(
   { roots }: TaskContext,

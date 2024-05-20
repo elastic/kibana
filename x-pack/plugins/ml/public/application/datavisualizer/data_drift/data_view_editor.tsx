@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChangeEvent, ReactNode } from 'react';
-import React, { useMemo, useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
+import type { ChangeEvent, ReactNode } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
   EuiBasicTable,
   EuiCallOut,
   EuiFieldText,
-  EuiFlexGrid,
   EuiFlexItem,
   EuiFormRow,
+  EuiFlexGrid,
   useEuiTheme,
 } from '@elastic/eui';
 import type { DataViewEditorService } from '@kbn/data-view-editor-plugin/public';

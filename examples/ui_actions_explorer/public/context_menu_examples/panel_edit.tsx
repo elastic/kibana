@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 import * as React from 'react';
+import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
+import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 import { sampleAction } from './util';
 
 export const PanelEdit: React.FC = () => {

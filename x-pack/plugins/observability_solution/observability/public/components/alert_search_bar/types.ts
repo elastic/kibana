@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ToastsStart } from '@kbn/core-notifications-browser';
-import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { type SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
-import { BoolQuery, Filter, Query } from '@kbn/es-query';
-import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
 import { ReactElement } from 'react';
+import { ToastsStart } from '@kbn/core-notifications-browser';
+import { type SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
+import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
+import { BoolQuery, Filter, Query } from '@kbn/es-query';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { AlertStatus } from '../../../common/typings';
 export interface AlertStatusFilterProps {
   status: AlertStatus;

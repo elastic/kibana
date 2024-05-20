@@ -8,25 +8,25 @@
 import React from 'react';
 
 import {
-  EuiBadge,
-  EuiBadgeProps,
+  EuiLink,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonEmptyProps,
   EuiButtonIcon,
   EuiButtonIconProps,
   EuiButtonProps,
-  EuiCard,
-  EuiCardProps,
-  EuiLink,
   EuiLinkAnchorProps,
   EuiListGroupItem,
   EuiListGroupItemProps,
   EuiPanel,
+  EuiCard,
+  EuiCardProps,
+  EuiBadge,
+  EuiBadgeProps,
 } from '@elastic/eui';
 import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
-import { ReactRouterProps, generateReactRouterProps } from '.';
+import { generateReactRouterProps, ReactRouterProps } from '.';
 
 /**
  * Correctly typed component helpers with React-Router-friendly `href` and `onClick` props

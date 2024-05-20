@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { HttpStart, ToastsStart } from '@kbn/core/public';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { fetchAadFields } from '../apis/fetch_aad_fields';
+import { useQuery } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
+import type { ToastsStart, HttpStart } from '@kbn/core/public';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { EMPTY_AAD_FIELDS } from '../constants';
+import { fetchAadFields } from '../apis/fetch_aad_fields';
 
 export interface UseRuleAADFieldsProps {
   ruleTypeId?: string;

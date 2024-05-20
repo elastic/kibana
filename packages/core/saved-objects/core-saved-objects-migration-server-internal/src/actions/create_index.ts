@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  ElasticsearchCapabilities,
-  ElasticsearchClient,
-} from '@kbn/core-elasticsearch-server';
-import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { pipe } from 'fp-ts/lib/pipeable';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import {
-  type RetryableEsClientError,
   catchRetryableEsClientErrors,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import {
   DEFAULT_TIMEOUT,
@@ -25,8 +25,8 @@ import {
   INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
-import { isClusterShardLimitExceeded } from './es_errors';
 import { type IndexNotGreenTimeout, waitForIndexStatus } from './wait_for_index_status';
+import { isClusterShardLimitExceeded } from './es_errors';
 
 function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
   const result: Record<string, estypes.IndicesAlias> = {};

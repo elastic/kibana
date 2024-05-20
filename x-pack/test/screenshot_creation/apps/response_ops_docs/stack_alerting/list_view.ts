@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { indexThresholdRuleName } from '.';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { indexThresholdRuleName } from '.';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');

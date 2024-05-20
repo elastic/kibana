@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { cloneDeep } from 'lodash/fp';
 import moment from 'moment';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fireEvent, screen, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import '../../../../common/mock/formatted_relative';
-import { NotePreviews } from '.';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { TestProviders, createReactQueryWrapper } from '../../../../common/mock';
 import { mockTimelineResults } from '../../../../common/mock/timeline_results';
+import { createReactQueryWrapper, TestProviders } from '../../../../common/mock';
 import type { OpenTimelineResult, TimelineResultNote } from '../types';
+import { NotePreviews } from '.';
 import { useDeleteNote } from './hooks/use_delete_note';
 
 jest.mock('../../../../common/lib/kibana');

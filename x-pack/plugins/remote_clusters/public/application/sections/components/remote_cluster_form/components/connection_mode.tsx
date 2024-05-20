@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FunctionComponent } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiDescribedFormGroup, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiTitle, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
-import { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 import { useAppContext } from '../../../../app_context';
 
-import { FormFields } from '../remote_cluster_form';
 import { ClusterErrors } from '../validators';
 import { ConnectionModeCloud } from './connection_mode_cloud';
-import { ProxyConnection } from './proxy_connection';
 import { SniffConnection } from './sniff_connection';
+import { ProxyConnection } from './proxy_connection';
+import { FormFields } from '../remote_cluster_form';
 
 export interface Props {
   fields: FormFields;

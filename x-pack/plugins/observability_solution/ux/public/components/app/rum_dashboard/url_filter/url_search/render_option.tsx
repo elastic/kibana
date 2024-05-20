@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiHighlight, EuiSelectableOption } from '@elastic/eui';
-import { euiLightVars } from '@kbn/ui-theme';
 import React, { ReactNode } from 'react';
+import { EuiHighlight, EuiSelectableOption } from '@elastic/eui';
 import styled from 'styled-components';
+import { euiLightVars } from '@kbn/ui-theme';
 
 const StyledSpan = styled.span`
   color: ${euiLightVars.euiColorSuccessText};

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFormLabel, EuiFormRow, EuiFormRowProps } from '@elastic/eui';
 import React from 'react';
+import { EuiFormLabel, EuiFormRow, EuiFormRowProps } from '@elastic/eui';
 import './form_row.scss';
 
 type FormRowProps = EuiFormRowProps & { isInline?: boolean };

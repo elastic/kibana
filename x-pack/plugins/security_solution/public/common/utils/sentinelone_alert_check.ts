@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { find, getOr, some } from 'lodash/fp';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getFieldValue } from '../../detections/components/host_isolation/helpers';
 
 /**

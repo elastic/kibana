@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { addBasePath } from '..';
-import { ComponentTemplateFromEs } from '../../../../common';
 import {
   deserializeComponentTemplate,
   deserializeComponentTemplateList,
 } from '../../../../common/lib';
+import { ComponentTemplateFromEs } from '../../../../common';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '..';
 
 const paramsSchema = schema.object({
   name: schema.string(),

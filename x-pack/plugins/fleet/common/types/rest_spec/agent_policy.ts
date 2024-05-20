@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { AgentPolicy, FullAgentPolicy, NewAgentPolicy } from '../models';
+import type { AgentPolicy, NewAgentPolicy, FullAgentPolicy } from '../models';
 
-import type { BulkGetResult, ListResult, ListWithKuery } from './common';
+import type { ListResult, ListWithKuery, BulkGetResult } from './common';
 
 export interface GetAgentPoliciesRequest {
   query: ListWithKuery & {

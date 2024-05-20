@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
 import React from 'react';
+import { isEmpty } from 'lodash/fp';
 import { getEntries } from '../get_entries';
 
 export const createKeyAndValue = (influencer: Record<string, string>): string => {

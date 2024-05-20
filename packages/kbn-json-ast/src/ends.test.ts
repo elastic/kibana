@@ -7,8 +7,8 @@
  */
 
 import { getAst } from './ast';
-import { getEnds, getExpandedEnds } from './ends';
 import { getProp } from './props';
+import { getEnds, getExpandedEnds } from './ends';
 
 const source = `{
   "foo": "bar",

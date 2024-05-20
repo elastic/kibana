@@ -6,8 +6,8 @@
  */
 
 import { EuiTextArea } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React, { useCallback, forwardRef } from 'react';
+import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 

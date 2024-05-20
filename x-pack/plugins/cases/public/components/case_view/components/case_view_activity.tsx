@@ -11,42 +11,42 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiScreenReaderOnly,
   EuiSpacer,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { CaseUI } from '../../../../common';
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { isEqual } from 'lodash';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
+import { useGetCaseUsers } from '../../../containers/use_get_case_users';
+import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
+import { useCasesFeatures } from '../../../common/use_cases_features';
+import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
+import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
-import { useCasesFeatures } from '../../../common/use_cases_features';
-import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
-import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
-import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
-import { useGetCaseUsers } from '../../../containers/use_get_case_users';
-import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
-import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
-import { useCasesContext } from '../../cases_context/use_cases_context';
-import { Description } from '../../description';
+import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
-import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { StatusActionButton } from '../../status/button';
-import { UserActions } from '../../user_actions';
-import { UserActionsActivityBar } from '../../user_actions_activity_bar';
-import type { UserActivityParams } from '../../user_actions_activity_bar/types';
-import type { Assignee } from '../../user_profiles/types';
-import { parseCaseUsers } from '../../utils';
-import { CaseViewTabs } from '../case_view_tabs';
-import * as i18n from '../translations';
-import { useOnUpdateField } from '../use_on_update_field';
-import { AssignUsers } from './assign_users';
-import { CustomFields } from './custom_fields';
-import { EditCategory } from './edit_category';
 import { EditTags } from './edit_tags';
+import { UserActions } from '../../user_actions';
 import { UserList } from './user_list';
+import { useOnUpdateField } from '../use_on_update_field';
+import { useCasesContext } from '../../cases_context/use_cases_context';
+import * as i18n from '../translations';
+import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
+import { useGetCaseUserActionsStats } from '../../../containers/use_get_case_user_actions_stats';
+import { AssignUsers } from './assign_users';
+import { UserActionsActivityBar } from '../../user_actions_activity_bar';
+import type { Assignee } from '../../user_profiles/types';
+import type { UserActivityParams } from '../../user_actions_activity_bar/types';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
+import { CaseViewTabs } from '../case_view_tabs';
+import { Description } from '../../description';
+import { EditCategory } from './edit_category';
+import { parseCaseUsers } from '../../utils';
+import { CustomFields } from './custom_fields';
+import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,

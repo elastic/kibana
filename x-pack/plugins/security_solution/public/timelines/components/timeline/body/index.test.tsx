@@ -5,39 +5,39 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
-import { mount } from 'enzyme';
 import React from 'react';
+import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/react';
 
-import { Direction } from '../../../../../common/search_strategy';
+import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
+import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
-import { useCurrentUser, useKibana } from '../../../../common/lib/kibana';
+import { Direction } from '../../../../../common/search_strategy';
 import {
-  TestProviders,
-  createMockStore,
   defaultHeaders,
   mockGlobalState,
   mockTimelineData,
+  createMockStore,
+  TestProviders,
 } from '../../../../common/mock';
-import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+import { useAppToastsMock } from '../../../../common/hooks/use_app_toasts.mock';
 
+import type { Props } from '.';
+import { StatefulBody } from '.';
+import type { Sort } from './sort';
+import { getDefaultControlColumn } from './control_columns';
+import { timelineActions } from '../../../store';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
+import { defaultRowRenderers } from './renderers';
+import type { State } from '../../../../common/store';
+import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
 import type {
   DraggableProvided,
   DraggableStateSnapshot,
   DroppableProvided,
   DroppableStateSnapshot,
 } from '@hello-pangea/dnd';
-import type { Props } from '.';
-import { StatefulBody } from '.';
-import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
-import type { State } from '../../../../common/store';
-import { timelineActions } from '../../../store';
-import type { UseFieldBrowserOptionsProps } from '../../fields_browser';
-import { getDefaultControlColumn } from './control_columns';
-import { defaultRowRenderers } from './renderers';
-import type { Sort } from './sort';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock(

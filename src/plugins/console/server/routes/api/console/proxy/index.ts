@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createHandler } from './create_handler';
 import { routeValidationConfig } from './validation_config';
+import { createHandler } from './create_handler';
 
 import { RouteDependencies } from '../../..';
 

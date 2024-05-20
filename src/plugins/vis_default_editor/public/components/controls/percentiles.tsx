@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import React, { useState, useCallback } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback } from 'react';
 
-import { AggParamEditorProps } from '../agg_param_props';
 import { NumberList } from './components/number_list';
+import { AggParamEditorProps } from '../agg_param_props';
 
 function PercentilesEditor({
   agg,

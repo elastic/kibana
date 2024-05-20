@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { EmbeddableStackTraces } from '@kbn/observability-shared-plugin/public';
+import React from 'react';
+import { TopNType } from '@kbn/profiling-utils';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableStackTraces } from '@kbn/observability-shared-plugin/public';
-import { TopNType } from '@kbn/profiling-utils';
-import React from 'react';
-import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { ProfilingLinks } from './profiling_links';
 
 interface Props {

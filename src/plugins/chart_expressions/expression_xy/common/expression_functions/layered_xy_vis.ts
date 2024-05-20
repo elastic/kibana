@@ -7,15 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { LayeredXyVisFn } from '../types';
 import {
   EXTENDED_DATA_LAYER,
+  REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
   REFERENCE_LINE,
-  REFERENCE_LINE_LAYER,
 } from '../constants';
-import { strings } from '../i18n';
-import { LayeredXyVisFn } from '../types';
 import { commonXYArgs } from './common_xy_args';
+import { strings } from '../i18n';
 
 export const layeredXyVisFunction: LayeredXyVisFn = {
   name: LAYERED_XY_VIS,

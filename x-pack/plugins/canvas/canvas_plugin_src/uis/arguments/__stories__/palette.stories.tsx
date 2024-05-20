@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { action } from '@storybook/addon-actions';
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { paulTor14 } from '../../../../common/lib/palettes';
+import { action } from '@storybook/addon-actions';
 import { PaletteArgInput } from '../palette';
+import { paulTor14 } from '../../../../common/lib/palettes';
 
 storiesOf('arguments/Palette', module).add('default', () => (
   <div className="canvasContainerWrapper" style={{ width: '200px' }}>

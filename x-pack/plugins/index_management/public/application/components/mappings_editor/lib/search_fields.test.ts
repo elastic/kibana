@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { getUniqueId } from '.';
-import { NormalizedField } from '../types';
 import { searchFields } from './search_fields';
+import { NormalizedField } from '../types';
+import { getUniqueId } from '.';
 
 const irrelevantProps = {
   canHaveChildFields: false,

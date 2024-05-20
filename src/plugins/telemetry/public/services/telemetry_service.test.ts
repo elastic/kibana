@@ -9,6 +9,7 @@
 // ESLint disabled dot-notation we can access the private key telemetryService['http']
 /* eslint-disable dot-notation */
 
+import { mockTelemetryService } from '../mocks';
 import {
   FetchSnapshotTelemetry,
   INTERNAL_VERSION,
@@ -16,7 +17,6 @@ import {
   OptInRoute,
   UserHasSeenNoticeRoute,
 } from '../../common/routes';
-import { mockTelemetryService } from '../mocks';
 
 describe('TelemetryService', () => {
   describe('fetchTelemetry', () => {
@@ -276,8 +276,8 @@ describe('TelemetryService', () => {
   });
 
   describe('reportOptInStatus', () => {
-    let originalFetch: (typeof window)['fetch'];
-    let mockFetch: jest.Mock<(typeof window)['fetch']>;
+    let originalFetch: typeof window['fetch'];
+    let mockFetch: jest.Mock<typeof window['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { METRIC_TYPE, TELEMETRY_EVENT } from './constants';
 import { track } from './track';
+import { METRIC_TYPE, TELEMETRY_EVENT } from './constants';
 
 export const trackLandingLinkClick = (pageId: string) => {
   track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.LANDING_CARD}${pageId}`);

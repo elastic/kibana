@@ -8,8 +8,8 @@
 import type { Output } from '../../../common/types';
 
 import {
-  _getFieldsToIncludeEncryptedSO,
   patchUpdateDataWithRequireEncryptedAADFields,
+  _getFieldsToIncludeEncryptedSO,
 } from './so_helpers';
 
 describe(`_getFieldsToIncludeEncryptedSO`, () => {

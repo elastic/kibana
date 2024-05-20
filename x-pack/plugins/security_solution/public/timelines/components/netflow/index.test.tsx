@@ -5,17 +5,23 @@
  * 2.0.
  */
 
-import { render, screen, within } from '@testing-library/react';
 import { get } from 'lodash/fp';
 import React from 'react';
+import { render, screen, within } from '@testing-library/react';
 
-import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { TestProviders } from '../../../common/mock/test_providers';
+import {
+  TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
+  TLS_SERVER_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
+} from '../certificate_fingerprint';
+import { EVENT_DURATION_FIELD_NAME } from '../duration';
+import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
 import {
   DESTINATION_IP_FIELD_NAME,
   SOURCE_IP_FIELD_NAME,
 } from '../../../explore/network/components/ip';
+import { JA3_HASH_FIELD_NAME } from '../ja3_fingerprint';
 import {
   DESTINATION_PORT_FIELD_NAME,
   SOURCE_PORT_FIELD_NAME,
@@ -38,29 +44,23 @@ import {
   SOURCE_BYTES_FIELD_NAME,
   SOURCE_PACKETS_FIELD_NAME,
 } from '../../../explore/network/components/source_destination/source_destination_arrows';
-import {
-  TLS_CLIENT_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
-  TLS_SERVER_CERTIFICATE_FINGERPRINT_SHA1_FIELD_NAME,
-} from '../certificate_fingerprint';
-import { EVENT_DURATION_FIELD_NAME } from '../duration';
-import { JA3_HASH_FIELD_NAME } from '../ja3_fingerprint';
 import * as i18n from '../timeline/body/renderers/translations';
 
 import { Netflow } from '.';
-import { getMockNetflowData } from '../../../common/mock/netflow';
-import {
-  NETWORK_BYTES_FIELD_NAME,
-  NETWORK_COMMUNITY_ID_FIELD_NAME,
-  NETWORK_DIRECTION_FIELD_NAME,
-  NETWORK_PACKETS_FIELD_NAME,
-  NETWORK_PROTOCOL_FIELD_NAME,
-  NETWORK_TRANSPORT_FIELD_NAME,
-} from '../../../explore/network/components/source_destination/field_names';
 import {
   EVENT_END_FIELD_NAME,
   EVENT_START_FIELD_NAME,
 } from './netflow_columns/duration_event_start_end';
 import { PROCESS_NAME_FIELD_NAME, USER_NAME_FIELD_NAME } from './netflow_columns/user_process';
+import {
+  NETWORK_BYTES_FIELD_NAME,
+  NETWORK_DIRECTION_FIELD_NAME,
+  NETWORK_COMMUNITY_ID_FIELD_NAME,
+  NETWORK_PACKETS_FIELD_NAME,
+  NETWORK_PROTOCOL_FIELD_NAME,
+  NETWORK_TRANSPORT_FIELD_NAME,
+} from '../../../explore/network/components/source_destination/field_names';
+import { getMockNetflowData } from '../../../common/mock/netflow';
 
 jest.mock('../../../common/lib/kibana');
 

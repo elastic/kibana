@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
 import { ArgumentStrings } from '../../../../../i18n';
 
 const { ImageUpload: strings } = ArgumentStrings;
@@ -17,7 +17,7 @@ export const LinkForm = ({ url, inputRef, onSubmit }) => (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem>
         <EuiFieldText
-          compressed={true}
+          compressed
           defaultValue={url}
           inputRef={inputRef}
           placeholder={strings.getUrlFieldPlaceholder()}

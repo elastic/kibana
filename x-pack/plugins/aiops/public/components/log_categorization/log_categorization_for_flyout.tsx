@@ -8,49 +8,49 @@ import type { FC } from 'react';
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import {
+  EuiTitle,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiIcon,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  EuiToolTip,
   useEuiTheme,
+  EuiTabs,
+  EuiTab,
+  EuiSpacer,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { Filter } from '@kbn/es-query';
+import { buildEmptyFilter } from '@kbn/es-query';
+import { usePageUrlState } from '@kbn/ml-url-state';
+import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { CategorizationAdditionalFilter } from '@kbn/aiops-log-pattern-analysis/create_category_request';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type { Filter } from '@kbn/es-query';
-import { buildEmptyFilter } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { FieldValidationResults } from '@kbn/ml-category-validator';
-import { usePageUrlState } from '@kbn/ml-url-state';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 import {
   type LogCategorizationPageUrlState,
   getDefaultLogCategorizationAppState,
 } from '../../application/url_state/log_pattern_analysis';
 import { createMergedEsQuery } from '../../application/utils/search_utils';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
-import { CategoryTable } from './category_table';
-import { FieldValidationCallout } from './category_validation_callout';
-import { CreateCategorizationJobButton } from './create_categorization_job';
-import { InformationText } from './information_text';
-import { LoadingCategorization } from './loading_categorization';
-import { SamplingMenu } from './sampling_menu';
 import { useCategorizeRequest } from './use_categorize_request';
 import type { EventRate } from './use_categorize_request';
+import { CategoryTable } from './category_table';
+import { InformationText } from './information_text';
+import { SamplingMenu } from './sampling_menu';
+import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
+import { FieldValidationCallout } from './category_validation_callout';
+import { CreateCategorizationJobButton } from './create_categorization_job';
 
 enum SELECTED_TAB {
   BUCKET,

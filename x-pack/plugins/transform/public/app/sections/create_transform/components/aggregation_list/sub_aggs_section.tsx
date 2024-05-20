@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React, { useCallback, useContext, useMemo } from 'react';
-import type { PivotAggsConfig } from '../../../../common';
-import { MAX_NESTING_SUB_AGGS } from '../../../../common/pivot_aggs';
-import { DropDown } from '../aggregation_dropdown';
-import { PivotConfigurationContext } from '../pivot_configuration/pivot_configuration';
 import { AggListForm } from './list_form';
+import { DropDown } from '../aggregation_dropdown';
+import type { PivotAggsConfig } from '../../../../common';
+import { PivotConfigurationContext } from '../pivot_configuration/pivot_configuration';
+import { MAX_NESTING_SUB_AGGS } from '../../../../common/pivot_aggs';
 
 /**
  * Component for managing sub-aggregation of the provided

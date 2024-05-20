@@ -1,4 +1,3 @@
-import { Readable } from 'stream';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,18 +5,19 @@ import { Readable } from 'stream';
  * 2.0.
  */
 import { notImplemented } from '@hapi/boom';
-import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { KibanaRequest } from '@kbn/core/server';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { Readable } from 'stream';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { aiAssistantSimulatedFunctionCalling } from '../..';
 import { flushBuffer } from '../../service/util/flush_buffer';
 import { observableIntoOpenAIStream } from '../../service/util/observable_into_openai_stream';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
-import { withAssistantSpan } from '../../service/util/with_assistant_span';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { functionRt, messageRt, screenContextRt } from '../runtime_types';
+import { screenContextRt, messageRt, functionRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+import { withAssistantSpan } from '../../service/util/with_assistant_span';
 
 const chatCompleteBaseRt = t.type({
   body: t.intersection([
@@ -180,9 +180,9 @@ async function chatComplete(
   const [client, cloudStart, simulateFunctionCalling] = await Promise.all([
     service.getClient({ request }),
     resources.plugins.cloud?.start() || Promise.resolve(undefined),
-    (await resources.context.core).uiSettings.client.get<boolean>(
-      aiAssistantSimulatedFunctionCalling
-    ),
+    (
+      await resources.context.core
+    ).uiSettings.client.get<boolean>(aiAssistantSimulatedFunctionCalling),
   ]);
 
   if (!client) {

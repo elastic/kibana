@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { combineLatest, Observable, timer, of } from 'rxjs';
+import { map, catchError, filter, mergeMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Observable, combineLatest, of, timer } from 'rxjs';
-import { catchError, filter, map, mergeMap, tap } from 'rxjs';
 import { FetchResult, NewsfeedPluginBrowserConfig } from '../types';
 import { NewsfeedApiDriver } from './driver';
 import { NeverFetchNewsfeedApiDriver } from './never_fetch_driver';

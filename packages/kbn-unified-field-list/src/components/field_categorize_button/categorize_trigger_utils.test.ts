@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { canCategorize } from './categorize_trigger_utils';
 

@@ -11,19 +11,19 @@ import { API_VERSIONS } from '../../../common/constants';
 
 import { DOWNLOAD_SOURCE_API_ROUTES } from '../../constants';
 import {
-  DeleteDownloadSourcesRequestSchema,
-  GetOneDownloadSourcesRequestSchema,
-  PostDownloadSourcesRequestSchema,
-  PutDownloadSourcesRequestSchema,
   getDownloadSourcesRequestSchema,
+  GetOneDownloadSourcesRequestSchema,
+  PutDownloadSourcesRequestSchema,
+  PostDownloadSourcesRequestSchema,
+  DeleteDownloadSourcesRequestSchema,
 } from '../../types';
 
 import {
-  deleteDownloadSourcesHandler,
   getDownloadSourcesHandler,
   getOneDownloadSourcesHandler,
-  postDownloadSourcesHandler,
   putDownloadSourcesHandler,
+  postDownloadSourcesHandler,
+  deleteDownloadSourcesHandler,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {

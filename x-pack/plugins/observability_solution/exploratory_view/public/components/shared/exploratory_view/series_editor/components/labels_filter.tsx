@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiFilterButton,
-  EuiIcon,
-  EuiPopover,
   EuiPopoverTitle,
+  EuiFilterButton,
+  EuiPopover,
+  EuiIcon,
+  EuiButtonEmpty,
   EuiSelectableOption,
 } from '@elastic/eui';
-import React, { useState } from 'react';
 
 import { EuiSelectable } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { FilterProps } from '../columns/filter_expanded';
-import { useFilterValues } from '../use_filter_values';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { FilterValuesList } from './filter_values_list';
+import { useFilterValues } from '../use_filter_values';
 
 export function LabelsFieldFilter(props: FilterProps) {
   const { series } = props;

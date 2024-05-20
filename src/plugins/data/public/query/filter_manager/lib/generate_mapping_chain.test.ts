@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { buildEmptyFilter } from '@kbn/es-query';
 import sinon from 'sinon';
 import { generateMappingChain } from './generate_mapping_chain';
+import { buildEmptyFilter } from '@kbn/es-query';
 
 describe('filter manager utilities', () => {
   let mapping: any;

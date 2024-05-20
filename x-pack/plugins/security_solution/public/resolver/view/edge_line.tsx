@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import styled from 'styled-components';
-import { angle, applyMatrix3, distance } from '../models/vector2';
-import type { EdgeLineMetadata, Matrix3, Vector2 } from '../types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { applyMatrix3, distance, angle } from '../models/vector2';
+import type { Vector2, Matrix3, EdgeLineMetadata } from '../types';
 import { fontSize } from './font_size';
 import { useColors } from './use_colors';
 

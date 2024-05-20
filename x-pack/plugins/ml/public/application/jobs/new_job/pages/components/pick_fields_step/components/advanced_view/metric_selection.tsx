@@ -9,13 +9,13 @@ import type { FC } from 'react';
 import React, { Fragment, useContext, useState, useEffect } from 'react';
 
 import type { Aggregation, Field } from '@kbn/ml-anomaly-utils';
-import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import type { AdvancedJobCreator } from '../../../../../common/job_creator';
-import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { JobCreatorContext } from '../../../job_creator_context';
-import type { ModalPayload } from '../advanced_detector_modal/advanced_detector_modal';
-import { DetectorList } from './detector_list';
+import type { AdvancedJobCreator } from '../../../../../common/job_creator';
+import { newJobCapsService } from '../../../../../../../services/new_job_capabilities/new_job_capabilities_service';
 import { MetricSelector } from './metric_selector';
+import type { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
+import { DetectorList } from './detector_list';
+import type { ModalPayload } from '../advanced_detector_modal/advanced_detector_modal';
 
 interface Props {
   setIsValid: (na: boolean) => void;

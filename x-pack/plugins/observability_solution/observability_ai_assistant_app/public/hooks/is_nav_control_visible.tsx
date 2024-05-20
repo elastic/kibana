@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
-import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
+import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
+import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 import { useKibana } from './use_kibana';
 
 function getVisibility(

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { Component, Fragment, ReactNode } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
+  EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiTextColor,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { Component, Fragment, ReactNode } from 'react';
 import { IVectorLayer } from '../../../../classes/layers/vector_layer';
 
 interface Props {

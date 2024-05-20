@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { EuiAccordion, EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiAccordion } from '@elastic/eui';
 
 import type { Statuses } from '../import_progress';
 import { IMPORT_STATUS } from '../import_progress';

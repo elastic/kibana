@@ -14,12 +14,12 @@ import { ToolingLog } from '@kbn/tooling-log';
 import Mocha from 'mocha';
 
 import { Suite } from '../../fake_mocha_types';
-import { Config } from '../config';
-import { EsVersion } from '../es_version';
-import { Lifecycle } from '../lifecycle';
-import { ProviderCollection } from '../providers';
-import { filterSuites } from './filter_suites';
 import { loadTests } from './load_tests';
+import { filterSuites } from './filter_suites';
+import { Lifecycle } from '../lifecycle';
+import { Config } from '../config';
+import { ProviderCollection } from '../providers';
+import { EsVersion } from '../es_version';
 
 import { MochaReporterProvider } from './reporter';
 import { validateCiGroupTags } from './validate_ci_group_tags';

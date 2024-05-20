@@ -6,11 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
 import {
   ALERT_END,
@@ -20,6 +16,10 @@ import {
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import React, { useEffect } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
+import { EuiCallOut } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -28,13 +28,13 @@ import {
 } from '../../../../../common/es_fields/apm';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
-import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
 import FailedTransactionChart from './failed_transaction_chart';
 import { getAggsTypeFromRule } from './helpers';
 import LatencyChart from './latency_chart';
 import ThroughputChart from './throughput_chart';
 import { AlertDetailsAppSectionProps } from './types';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
 export function AlertDetailsAppSection({
   rule,

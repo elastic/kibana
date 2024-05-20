@@ -15,16 +15,16 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiPanel,
   EuiSpacer,
+  EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ConnectorConfiguration } from '../../types';
 import { isCategoryEntry } from '../../utils';
 import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
+import { ConnectorConfiguration } from '../../types';
 import { ConfigView } from './connector_configuration';
 import { ConnectorConfigurationFormItems } from './connector_configuration_form_items';
 

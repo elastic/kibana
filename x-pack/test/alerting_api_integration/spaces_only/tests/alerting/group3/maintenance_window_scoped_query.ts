@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { Alert } from '@kbn/alerts-as-data-utils';
 import expect from '@kbn/expect';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover } from '../../../../common/lib';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  createRule,
   createAction,
   createMaintenanceWindow,
-  createRule,
-  expectNoActionsFired,
   getRuleEvents,
+  expectNoActionsFired,
   runSoon,
 } from './test_helpers';
 

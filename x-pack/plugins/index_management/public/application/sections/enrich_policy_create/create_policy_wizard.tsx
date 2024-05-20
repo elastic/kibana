@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer, EuiStepStatus, EuiSteps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useState, useMemo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiSteps, EuiStepStatus, EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import type { SerializedEnrichPolicy } from '@kbn/index-management';
-import type { Error } from '../../../shared_imports';
 import { useAppContext } from '../../app_context';
-import { createEnrichPolicy } from '../../services/api';
+import { ConfigurationStep, FieldSelectionStep, CreateStep } from './steps';
 import { useCreatePolicyContext } from './create_policy_context';
-import { ConfigurationStep, CreateStep, FieldSelectionStep } from './steps';
+import { createEnrichPolicy } from '../../services/api';
+import type { Error } from '../../../shared_imports';
 
 const CONFIGURATION = 1;
 const FIELD_SELECTION = 2;

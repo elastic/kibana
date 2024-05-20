@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
+import type { CaseConnector, ConfigurationAttributes } from '../../../common/types/domain';
+import { CustomFieldTypes, ConnectorTypes } from '../../../common/types/domain';
+import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
   SavedObjectReference,
@@ -14,19 +17,16 @@ import type {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { unset } from 'lodash';
 import { CaseConfigureService } from '.';
-import { CASE_CONFIGURE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import type { ConfigurationPatchRequest } from '../../../common/types/api';
-import type { CaseConnector, ConfigurationAttributes } from '../../../common/types/domain';
-import { ConnectorTypes, CustomFieldTypes } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import { getNoneCaseConnector } from '../../common/utils';
 import type { ESCaseConnectorWithId } from '../test_utils';
 import { createESJiraConnector, createJiraConnector } from '../test_utils';
+import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
+import { unset } from 'lodash';
+import type { ConfigurationPatchRequest } from '../../../common/types/api';
 
 const basicConfigFields = {
   closure_type: 'close-by-pushing' as const,

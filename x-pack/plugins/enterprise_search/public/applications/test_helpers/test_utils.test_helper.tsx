@@ -27,7 +27,7 @@ import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 import { mountHttpLogic } from '../shared/http';
-import { KibanaLogicProps, mountKibanaLogic } from '../shared/kibana';
+import { mountKibanaLogic, KibanaLogicProps } from '../shared/kibana';
 
 export const mockKibanaProps: KibanaLogicProps = {
   application: {

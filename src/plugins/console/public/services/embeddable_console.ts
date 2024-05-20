@@ -1,4 +1,3 @@
-import { debounce } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +6,13 @@ import { debounce } from 'lodash';
  * Side Public License, v 1.
  */
 import type { Dispatch } from 'react';
+import { debounce } from 'lodash';
 
-import { Storage } from '.';
 import {
   EmbeddedConsoleAction as EmbeddableConsoleAction,
   EmbeddedConsoleView,
 } from '../types/embeddable_console';
+import { Storage } from '.';
 
 const CONSOLE_HEIGHT_KEY = 'embeddedConsoleHeight';
 const CONSOLE_HEIGHT_LOCAL_STORAGE_DEBOUNCE_WAIT_TIME = 500;

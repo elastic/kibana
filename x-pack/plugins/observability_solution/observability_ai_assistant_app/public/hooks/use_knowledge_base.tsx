@@ -1,7 +1,3 @@
-import type {
-  MlDeploymentAllocationState,
-  MlDeploymentState,
-} from '@elastic/elasticsearch/lib/api/types';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,11 +5,15 @@ import type {
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
+import type {
+  MlDeploymentAllocationState,
+  MlDeploymentState,
+} from '@elastic/elasticsearch/lib/api/types';
+import { useMemo, useState } from 'react';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { useMemo, useState } from 'react';
 import { useKibana } from './use_kibana';
 import { useObservabilityAIAssistantAppService } from './use_observability_ai_assistant_app_service';
 

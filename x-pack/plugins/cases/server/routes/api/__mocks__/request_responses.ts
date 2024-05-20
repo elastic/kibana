@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import type { CasePostRequest } from '../../../../common/types/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../../common/constants';
 import { ConnectorTypes } from '../../../../common/types/domain';
 
 export const newCase: CasePostRequest = {

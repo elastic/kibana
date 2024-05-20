@@ -1,6 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiPanel } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
  * 2.0.
  */
 import React, { useEffect, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiPanel } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 interface MainContent {
   content: JSX.Element;

@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { uniq, difference } from 'lodash';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import {
+  SavedObjectsClientContract,
   ISavedObjectTypeRegistry,
   KibanaRequest,
   SavedObjectsBulkGetObject,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { difference, uniq } from 'lodash';
 import {
   AssignableObject,
-  FindAssignableObjectsOptions,
-  ObjectReference,
   UpdateTagAssignmentsOptions,
+  FindAssignableObjectsOptions,
   getKey,
+  ObjectReference,
 } from '../../../common/assignments';
-import { taggableTypes } from '../../../common/constants';
 import { updateTagReferences } from '../../../common/references';
-import { AssignmentError } from './errors';
+import { taggableTypes } from '../../../common/constants';
 import { getUpdatableSavedObjectTypes } from './get_updatable_types';
+import { AssignmentError } from './errors';
 import { toAssignableObject } from './utils';
 
 interface AssignmentServiceOptions {

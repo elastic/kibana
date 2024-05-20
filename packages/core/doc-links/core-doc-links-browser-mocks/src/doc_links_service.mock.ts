@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createStartContractMock = (): DocLinksStart => {
   // This service is so simple that we actually use the real implementation

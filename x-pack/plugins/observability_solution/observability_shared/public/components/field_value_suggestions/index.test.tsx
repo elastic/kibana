@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import React from 'react';
 import { FieldValueSuggestions } from '.';
+import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import * as obsHooks from '../../hooks/use_es_search';
 
 jest.setTimeout(30000);

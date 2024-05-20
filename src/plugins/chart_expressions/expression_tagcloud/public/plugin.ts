@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { StartServicesGetter, createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { tagcloudFunction } from '../common/expression_functions';
+import { createStartServicesGetter, StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { tagcloudRenderer } from './expression_renderers';
+import { tagcloudFunction } from '../common/expression_functions';
 import { setFormatService } from './format_service';
 
 interface SetupDeps {

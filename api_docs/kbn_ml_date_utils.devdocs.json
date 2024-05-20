@@ -25,8 +25,12 @@
         "type": "Function",
         "tags": [],
         "label": "formatHumanReadableDate",
-        "description": ["\nFormat a timestamp as human readable date.\n"],
-        "signature": ["(ts: number) => string"],
+        "description": [
+          "\nFormat a timestamp as human readable date.\n"
+        ],
+        "signature": [
+          "(ts: number) => string"
+        ],
         "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -37,8 +41,12 @@
             "type": "number",
             "tags": [],
             "label": "ts",
-            "description": ["- The timestamp to be formatted."],
-            "signature": ["number"],
+            "description": [
+              "- The timestamp to be formatted."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -57,7 +65,9 @@
         "description": [
           "\nFormat a timestamp as human readable date including hours and minutes.\n"
         ],
-        "signature": ["(ts: number) => string"],
+        "signature": [
+          "(ts: number) => string"
+        ],
         "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -68,8 +78,12 @@
             "type": "number",
             "tags": [],
             "label": "ts",
-            "description": ["- The timestamp to be formatted."],
-            "signature": ["number"],
+            "description": [
+              "- The timestamp to be formatted."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -88,7 +102,9 @@
         "description": [
           "\nFormat a timestamp as human readable date including hours, minutes and seconds.\n"
         ],
-        "signature": ["(ts: number) => string"],
+        "signature": [
+          "(ts: number) => string"
+        ],
         "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -99,8 +115,12 @@
             "type": "number",
             "tags": [],
             "label": "ts",
-            "description": ["- The timestamp to be formatted."],
-            "signature": ["number"],
+            "description": [
+              "- The timestamp to be formatted."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -119,7 +139,9 @@
         "description": [
           "\nFormat a timestamp into a human readable date based on the `TIME_FORMAT` spec.\n"
         ],
-        "signature": ["(value: number) => string"],
+        "signature": [
+          "(value: number) => string"
+        ],
         "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -130,8 +152,12 @@
             "type": "number",
             "tags": [],
             "label": "value",
-            "description": ["- The timestamp to be formatted."],
-            "signature": ["number"],
+            "description": [
+              "- The timestamp to be formatted."
+            ],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -171,7 +197,9 @@
             "type": "Object",
             "tags": [],
             "label": "time",
-            "description": ["- The time range to be validated."],
+            "description": [
+              "- The time range to be validated."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/es-query",
@@ -201,8 +229,12 @@
         "type": "string",
         "tags": [],
         "label": "TIME_FORMAT",
-        "description": ["\nTime format spec for string parsing."],
-        "signature": ["\"YYYY-MM-DD HH:mm:ss\""],
+        "description": [
+          "\nTime format spec for string parsing."
+        ],
+        "signature": [
+          "\"YYYY-MM-DD HH:mm:ss\""
+        ],
         "path": "x-pack/packages/ml/date_utils/src/time_format.ts",
         "deprecated": false,
         "trackAdoption": false,

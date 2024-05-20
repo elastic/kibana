@@ -7,6 +7,8 @@
 
 import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 import { requiredOptional } from '@kbn/zod-helpers';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
+import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type {
   EqlRule,
   EqlRuleCreateProps,
@@ -26,6 +28,7 @@ import type {
   ThresholdRule,
   ThresholdRuleCreateProps,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 import type {
   DiffableCommonFields,
   DiffableCustomQueryFields,
@@ -38,9 +41,6 @@ import type {
   DiffableThreatMatchFields,
   DiffableThresholdFields,
 } from '../../../../../../../common/api/detection_engine/prebuilt_rules';
-import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
-import { assertUnreachable } from '../../../../../../../common/utility_types';
-import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 import { extractBuildingBlockObject } from './extract_building_block_object';
 import {
   extractInlineKqlQuery,

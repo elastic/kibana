@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render } from '@testing-library/react';
 import React from 'react';
-import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
-import { mockedAlertSummaryTimeRange, mockedChartProps } from '../../mock/alert_summary_widget';
+import { render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertSummaryWidget } from './alert_summary_widget';
+import { AlertSummaryWidgetDependencies, AlertSummaryWidgetProps } from './types';
+import { mockedAlertSummaryTimeRange, mockedChartProps } from '../../mock/alert_summary_widget';
+import { useLoadAlertSummary } from '../../hooks/use_load_alert_summary';
 import {
   ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ,
   TOTAL_ALERT_COUNT_DATA_TEST_SUBJ,
 } from './components/constants';
-import { AlertSummaryWidgetDependencies, AlertSummaryWidgetProps } from './types';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation(() => true),

@@ -69,8 +69,12 @@
             "type": "Object",
             "tags": [],
             "label": "query",
-            "description": ["The aggregate type query"],
-            "signature": ["{ esql: string; }"],
+            "description": [
+              "The aggregate type query"
+            ],
+            "signature": [
+              "{ esql: string; }"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -81,7 +85,9 @@
             "type": "Function",
             "tags": [],
             "label": "onTextLangQueryChange",
-            "description": ["Callback running everytime the query changes"],
+            "description": [
+              "Callback running everytime the query changes"
+            ],
             "signature": [
               "(query: ",
               {
@@ -127,7 +133,9 @@
             "type": "Function",
             "tags": [],
             "label": "onTextLangQuerySubmit",
-            "description": ["Callback running when the user submits the query"],
+            "description": [
+              "Callback running when the user submits the query"
+            ],
             "signature": [
               "(query?: ",
               {
@@ -172,7 +180,9 @@
                 "tags": [],
                 "label": "abortController",
                 "description": [],
-                "signature": ["AbortController | undefined"],
+                "signature": [
+                  "AbortController | undefined"
+                ],
                 "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -187,8 +197,12 @@
             "type": "Function",
             "tags": [],
             "label": "expandCodeEditor",
-            "description": ["Can be used to expand/minimize the editor"],
-            "signature": ["(status: boolean) => void"],
+            "description": [
+              "Can be used to expand/minimize the editor"
+            ],
+            "signature": [
+              "(status: boolean) => void"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -200,7 +214,9 @@
                 "tags": [],
                 "label": "status",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -231,7 +247,9 @@
             "description": [
               "If it is true, the editor displays the message @timestamp found\nThe text based queries are relying on adhoc dataviews which\ncan have an @timestamp timefield or nothing"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -242,8 +260,12 @@
             "type": "Array",
             "tags": [],
             "label": "errors",
-            "description": ["Array of errors"],
-            "signature": ["Error[] | undefined"],
+            "description": [
+              "Array of errors"
+            ],
+            "signature": [
+              "Error[] | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -254,8 +276,12 @@
             "type": "string",
             "tags": [],
             "label": "warning",
-            "description": ["Warning string as it comes from ES"],
-            "signature": ["string | undefined"],
+            "description": [
+              "Warning string as it comes from ES"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -269,7 +295,9 @@
             "description": [
               "Disables the editor and displays loading icon in run button\nIt is also used for hiding the history component if it is not defined"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -280,8 +308,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isDisabled",
-            "description": ["Disables the editor"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Disables the editor"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -292,8 +324,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "isDarkMode",
-            "description": ["Indicator if the editor is on dark mode"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Indicator if the editor is on dark mode"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -305,7 +341,9 @@
             "tags": [],
             "label": "dataTestSubj",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -319,7 +357,9 @@
             "description": [
               "If true it hides the minimize button and the user can't return to the minimized version\nUseful when the application doesn't want to give this capability"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -330,8 +370,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideRunQueryText",
-            "description": ["Hide the Run query information which appears on the footer"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Hide the Run query information which appears on the footer"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -345,7 +389,9 @@
             "description": [
               "This is used for applications (such as the inline editing flyout in dashboards)\nwhich want to add the editor without being part of the Unified search component\nIt renders a submit query button inside the editor"
             ],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -356,8 +402,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "disableSubmitAction",
-            "description": ["Disables the submit query action"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "Disables the submit query action"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -368,8 +418,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "allowQueryCancellation",
-            "description": ["when set to true enables query cancellation"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "when set to true enables query cancellation"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -380,8 +434,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideTimeFilterInfo",
-            "description": ["hide @timestamp info"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "hide @timestamp info"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -392,8 +450,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hideQueryHistory",
-            "description": ["hide query history"],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "hide query history"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
             "trackAdoption": false

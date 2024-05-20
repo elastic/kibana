@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
 import React, { Suspense, type FC } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import type { Props as NavigationProps } from './side_navigation';
 

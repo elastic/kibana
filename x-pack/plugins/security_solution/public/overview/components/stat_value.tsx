@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSkeletonText, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiProgress, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';

@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
+import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
-import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
-import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 import {
-  ServerShortUrlClientFactory,
   ServerUrlService,
+  ServerShortUrlClientFactory,
   registerUrlServiceRoutes,
   registerUrlServiceSavedObjectType,
 } from './url_service';
+import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
+import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 
 /** @public */
 export interface SharePublicSetup {

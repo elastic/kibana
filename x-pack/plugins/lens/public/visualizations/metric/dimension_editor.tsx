@@ -5,42 +5,42 @@
  * 2.0.
  */
 
-import { LayoutDirection } from '@elastic/charts';
 import {
-  EuiButtonGroup,
-  EuiColorPicker,
-  EuiFieldNumber,
   EuiFormRow,
+  EuiButtonGroup,
+  EuiFieldNumber,
+  htmlIdGenerator,
+  EuiColorPicker,
+  euiPaletteColorBlind,
   EuiSpacer,
   EuiText,
-  euiPaletteColorBlind,
-  htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { LayoutDirection } from '@elastic/charts';
+import React, { useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
+  PaletteRegistry,
   CustomizablePalette,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
-  PaletteRegistry,
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { DebouncedInput, IconSelect, useDebouncedValue } from '@kbn/visualization-ui-components';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import React, { useCallback } from 'react';
+import { css } from '@emotion/react';
+import { DebouncedInput, useDebouncedValue, IconSelect } from '@kbn/visualization-ui-components';
 import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import { PalettePanelContainer, applyPaletteParams } from '../../shared_components';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { applyPaletteParams, PalettePanelContainer } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { iconsSet } from './icon_set';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import {
   DEFAULT_MAX_COLUMNS,
-  MetricVisualizationState,
   getDefaultColor,
+  MetricVisualizationState,
   showingBar,
 } from './visualization';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { iconsSet } from './icon_set';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -183,8 +183,8 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
             state.secondaryPrefix === undefined
               ? 'auto'
               : state.secondaryPrefix === ''
-                ? 'none'
-                : 'custom'
+              ? 'none'
+              : 'custom'
           }`}
           onChange={(_id, secondaryPrefix) => {
             setState({
@@ -453,16 +453,16 @@ export function DimensionEditorAdditionalSection({
               'Line visualizations require use of a data view with a default time field.',
           })
         : metricHasReducedTimeRange
-          ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
-              defaultMessage:
-                'Line visualizations cannot be used when a reduced time range is applied to the primary metric.',
-            })
-          : secondaryMetricHasReducedTimeRange
-            ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
-                defaultMessage:
-                  'Line visualizations cannot be used when a reduced time range is applied to the secondary metric.',
-              })
-            : ''
+        ? i18n.translate('xpack.lens.metric.supportingVis.metricHasReducedTimeRange', {
+            defaultMessage:
+              'Line visualizations cannot be used when a reduced time range is applied to the primary metric.',
+          })
+        : secondaryMetricHasReducedTimeRange
+        ? i18n.translate('xpack.lens.metric.supportingVis.secondaryMetricHasReducedTimeRange', {
+            defaultMessage:
+              'Line visualizations cannot be used when a reduced time range is applied to the secondary metric.',
+          })
+        : ''
     );
   }
 
@@ -498,7 +498,9 @@ export function DimensionEditorAdditionalSection({
           label={i18n.translate('xpack.lens.metric.supportingVis.type', {
             defaultMessage: 'Type',
           })}
-          helpText={supportingVisHelpTexts.map((text) => <p>{text}</p>)}
+          helpText={supportingVisHelpTexts.map((text) => (
+            <p>{text}</p>
+          ))}
         >
           <EuiButtonGroup
             isFullWidth

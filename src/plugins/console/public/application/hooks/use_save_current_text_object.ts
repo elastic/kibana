@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { useRef, useCallback } from 'react';
 import { throttle } from 'lodash';
-import { useCallback, useRef } from 'react';
 import { useEditorReadContext, useServicesContext } from '../contexts';
 
 const WAIT_MS = 500;

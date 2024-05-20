@@ -10,8 +10,8 @@ import React from 'react';
 
 import { EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import type { GeoPointExample } from '../../../../../common/types/field_request_config';
 import { ExpandedRowFieldHeader } from '../stats_table/components/expanded_row_field_header';
 import { ExpandedRowPanel } from '../stats_table/components/field_data_expanded_row/expanded_row_panel';

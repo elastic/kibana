@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { useQuery } from '@tanstack/react-query';
+import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchConnectorTypes } from '../api';
 import * as i18n from './translations';

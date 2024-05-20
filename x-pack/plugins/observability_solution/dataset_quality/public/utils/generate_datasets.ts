@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
-import { Integration } from '../../common/data_streams_stats/integration';
-import { DegradedDocsStat } from '../../common/data_streams_stats/malformed_docs_stat';
 import { DataStreamStatType } from '../../common/data_streams_stats/types';
 import { mapPercentageToQuality } from '../../common/utils';
+import { Integration } from '../../common/data_streams_stats/integration';
+import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
+import { DegradedDocsStat } from '../../common/data_streams_stats/malformed_docs_stat';
 
 export function generateDatasets(
   dataStreamStats: DataStreamStatType[] = [],

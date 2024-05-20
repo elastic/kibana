@@ -1,5 +1,3 @@
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,18 +5,20 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
+import { ListMetric } from '../list_metric';
+import { ITableColumn } from '../managed_table';
+import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 import { Coordinate } from '../../../../typings/timeseries';
-import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
-import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ImpactBar } from '../impact_bar';
-import { ListMetric } from '../list_metric';
-import { ITableColumn } from '../managed_table';
+import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 
 export interface SpanMetricGroup {
   latency: number | null;

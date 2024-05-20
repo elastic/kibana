@@ -1,5 +1,3 @@
-import { withSpan } from '@kbn/apm-utils';
-import type { CoreSetup } from '@kbn/core/server';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,10 +6,12 @@ import type { CoreSetup } from '@kbn/core/server';
  */
 import type {
   ConcreteTaskInstance,
-  TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import type { CoreSetup } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 
 import type { FleetUsage } from '../../collectors/register';
 

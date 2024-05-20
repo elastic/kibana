@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTextColor } from '@elastic/eui';
-import { type Filter, type Query, fromKueryExpression } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
-import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
+import { i18n } from '@kbn/i18n';
+import { type Filter, fromKueryExpression, type Query } from '@kbn/es-query';
+import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
+import { EuiSpacer, EuiTextColor } from '@elastic/eui';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useDataSource } from '../../hooks/use_data_source';
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export interface SearchBarProps {
   query: Query;

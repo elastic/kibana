@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React, { memo, useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,15 +19,14 @@ import {
   EuiSteps,
   EuiTitle,
 } from '@elastic/eui';
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useCallback } from 'react';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
-import { ApplicationRequiredCallout } from './application_required_callout';
-import { CredentialsAuth, OAuth } from './auth_types';
 import { CredentialsApiUrl } from './credentials_api_url';
+import { CredentialsAuth, OAuth } from './auth_types';
 import { SNStoreLink } from './sn_store_button';
+import { ApplicationRequiredCallout } from './application_required_callout';
 import { ServiceNowConfig, ServiceNowSecrets } from './types';
 
 const title = i18n.translate('xpack.stackConnectors.components.serviceNow.updateFormTitle', {

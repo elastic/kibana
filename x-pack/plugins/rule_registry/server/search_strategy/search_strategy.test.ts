@@ -1,12 +1,3 @@
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
-import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
-import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { loggerMock } from '@kbn/logging-mocks';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import { merge } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -14,10 +5,19 @@ import { merge } from 'lodash';
  * 2.0.
  */
 import { of } from 'rxjs';
+import { merge } from 'lodash';
+import { loggerMock } from '@kbn/logging-mocks';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_EVENTS_FIELDS } from '@kbn/alerts-as-data-utils';
+import { ruleRegistrySearchStrategyProvider, EMPTY_RESPONSE } from './search_strategy';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { SearchStrategyDependencies } from '@kbn/data-plugin/server';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { RuleRegistrySearchRequest } from '../../common/search_strategy';
 import * as getAuthzFilterImport from '../lib/get_authz_filter';
 import { getIsKibanaRequest } from '../lib/get_is_kibana_request';
-import { EMPTY_RESPONSE, ruleRegistrySearchStrategyProvider } from './search_strategy';
 
 jest.mock('../lib/get_is_kibana_request');
 

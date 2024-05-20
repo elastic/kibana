@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import type { MaybePromise } from '@kbn/utility-types';
+import type { CoreStart, CoreSetup } from '@kbn/core-lifecycle-browser';
 
 /**
  * The interface that should be returned by a `PluginInitializer`.
@@ -18,7 +18,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object,
+  TPluginsStart extends object = object
 > {
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 

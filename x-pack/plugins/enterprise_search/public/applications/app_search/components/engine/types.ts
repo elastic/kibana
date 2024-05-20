@@ -6,10 +6,10 @@
  */
 
 import {
-  AdvancedSchema,
-  IIndexingStatus,
   Schema,
   SchemaConflicts,
+  IIndexingStatus,
+  AdvancedSchema,
 } from '../../../shared/schema/types';
 import { ApiToken } from '../credentials/types';
 

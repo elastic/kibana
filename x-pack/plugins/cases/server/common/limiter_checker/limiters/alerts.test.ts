@@ -6,8 +6,8 @@
  */
 
 import { createAttachmentServiceMock } from '../../../services/mocks';
-import { createAlertRequests, createUserRequests } from '../test_utils';
 import { AlertLimiter } from './alerts';
+import { createAlertRequests, createUserRequests } from '../test_utils';
 
 describe('AlertLimiter', () => {
   const attachmentService = createAttachmentServiceMock();

@@ -7,7 +7,7 @@
  */
 
 import { useMemo } from 'react';
-import type { CellAction, PartitionedActions } from '../types';
+import type { PartitionedActions, CellAction } from '../types';
 
 export const partitionActions = (actions: CellAction[], visibleCellActions: number) => {
   if (visibleCellActions <= 1) return { extraActions: actions, visibleActions: [] };

@@ -1,7 +1,3 @@
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
-import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -9,8 +5,12 @@ import userEvent from '@testing-library/user-event';
  * 2.0.
  */
 import React from 'react';
-import { INTEGRATION_DEPRECATION_SESSION_STORAGE_KEY, IntegrationDeprecation } from '.';
+import userEvent from '@testing-library/user-event';
+import { StubBrowserStorage } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 import { render } from '../../../lib/helper/rtl_helpers';
+import { IntegrationDeprecation, INTEGRATION_DEPRECATION_SESSION_STORAGE_KEY } from '.';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 
 export const mockStorage = new StubBrowserStorage();
 jest.mock('@kbn/observability-shared-plugin/public');

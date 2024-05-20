@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { PluginType } from '@kbn/core-base-common';
 import { PluginPackageManifest } from '@kbn/repo-packages';
+import { PluginType } from '@kbn/core-base-common';
 import { pluginManifestFromPluginPackage } from './plugin_manifest_from_plugin_package';
 
 const kibanaVersion = `1.${Math.round(10 * Math.random())}.1`;

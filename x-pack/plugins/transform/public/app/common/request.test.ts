@@ -15,17 +15,17 @@ import type { PivotGroupByConfig } from '.';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details';
 
-import type { LatestFunctionConfigUI } from '../../../common/types/transform';
-import type { PivotAggsConfig } from './pivot_aggs';
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
+import type { PivotAggsConfig } from './pivot_aggs';
 import {
+  getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
   getCreateTransformSettingsRequestBody,
-  getMissingBucketConfig,
-  getPreviewTransformRequestBody,
-  getRequestPayload,
   getTransformConfigQuery,
+  getMissingBucketConfig,
+  getRequestPayload,
 } from './request';
+import type { LatestFunctionConfigUI } from '../../../common/types/transform';
 
 const groupByTerms: PivotGroupByConfig = {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,

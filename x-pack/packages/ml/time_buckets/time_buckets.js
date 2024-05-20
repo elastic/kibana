@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import dateMath from '@kbn/datemath';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { ary, assign, isPlainObject, isString, sortBy } from 'lodash';
 import moment from 'moment';
-import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
+import dateMath from '@kbn/datemath';
 import { parseInterval } from './parse_interval';
+import { timeBucketsCalcAutoIntervalProvider } from './calc_auto_interval';
 
 const unitsDesc = dateMath.unitsDesc;
 

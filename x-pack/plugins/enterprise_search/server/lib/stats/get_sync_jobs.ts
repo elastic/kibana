@@ -15,8 +15,8 @@ import {
   getConnectedCountQuery,
   getErrorCountQuery,
   getIdleJobsCountQuery,
-  getInProgressJobsCountQuery,
   getIncompleteCountQuery,
+  getInProgressJobsCountQuery,
   getOrphanedJobsCountQuery,
 } from '../../utils/get_sync_jobs_queries';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';

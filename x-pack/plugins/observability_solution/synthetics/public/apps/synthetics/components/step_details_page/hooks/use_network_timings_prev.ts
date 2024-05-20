@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import {
   NETWORK_TIMINGS_FIELDS,
@@ -18,10 +19,9 @@ import {
   SYNTHETICS_WAIT_TIMINGS,
 } from '@kbn/observability-shared-plugin/common';
 import moment from 'moment';
-import { useParams } from 'react-router-dom';
+import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
-import { useJourneySteps } from '../../monitor_details/hooks/use_journey_steps';
 import { getTimingWithLabels } from './use_network_timings';
 
 export const useStepFilters = (checkGroupId: string, stepIndex: number) => {

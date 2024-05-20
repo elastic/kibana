@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { SavedObjectAttribute } from '@kbn/core/server';
 import { snakeCase } from 'lodash';
-import { MappedParams, MappedParamsProperties, RuleTypeParams } from '../../types';
+import { SavedObjectAttribute } from '@kbn/core/server';
+import { RuleTypeParams, MappedParams, MappedParamsProperties } from '../../types';
 import {
-  IterateActionProps,
-  IterateFilterKureyNodeParams,
-  getFieldNameAttribute,
   iterateFilterKureyNode,
+  IterateFilterKureyNodeParams,
+  IterateActionProps,
+  getFieldNameAttribute,
 } from './validate_attributes';
 
 export const MAPPED_PARAMS_PROPERTIES: Array<keyof MappedParamsProperties> = [

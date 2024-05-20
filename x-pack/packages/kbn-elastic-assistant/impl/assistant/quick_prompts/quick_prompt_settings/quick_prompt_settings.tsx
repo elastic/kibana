@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import {
-  EuiColorPicker,
   EuiFormRow,
-  EuiHorizontalRule,
-  EuiSpacer,
-  EuiText,
+  EuiColorPicker,
   EuiTextArea,
   EuiTitle,
+  EuiText,
+  EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
 
 import { EuiSetColorMethod } from '@elastic/eui/src/services/color_picker/color_picker';
 import { css } from '@emotion/react';
 import { PromptContextTemplate } from '../../../..';
-import { useAssistantContext } from '../../../assistant_context';
-import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';
-import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
-import { QuickPrompt } from '../types';
 import * as i18n from './translations';
+import { QuickPrompt } from '../types';
+import { QuickPromptSelector } from '../quick_prompt_selector/quick_prompt_selector';
+import { PromptContextSelector } from '../prompt_context_selector/prompt_context_selector';
+import { useAssistantContext } from '../../../assistant_context';
 
 const DEFAULT_COLOR = '#D36086';
 

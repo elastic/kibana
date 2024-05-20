@@ -6,13 +6,13 @@
  */
 
 import { Agent as HttpAgent } from 'http';
-import { AgentOptions, Agent as HttpsAgent } from 'https';
-import { Logger } from '@kbn/core/server';
+import { Agent as HttpsAgent, AgentOptions } from 'https';
 import { HttpProxyAgent } from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
+import { Logger } from '@kbn/core/server';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { SSLSettings } from '../types';
 import { getNodeSSLOptions, getSSLSettingsFromConfig } from './get_node_ssl_options';
+import { SSLSettings } from '../types';
 
 interface GetCustomAgentsResponse {
   httpAgent: HttpAgent | undefined;

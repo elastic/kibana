@@ -6,22 +6,22 @@
  * Side Public License, v 1.
  */
 
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
 import Util from 'util';
 import { Env } from '@kbn/config';
-import { getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
-import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
-import { Root } from '@kbn/core-root-server-internal';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { getEnvOptions } from '@kbn/config-mocks';
+import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
+import { Root } from '@kbn/core-root-server-internal';
 import {
-  type TestElasticsearchUtils,
   createRootWithCorePlugins,
   createTestServers,
+  type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const logFilePath = Path.join(__dirname, 'saved_object_type_validation.log');

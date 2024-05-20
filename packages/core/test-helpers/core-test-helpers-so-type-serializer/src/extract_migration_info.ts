@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
+import { compare as semverCompare } from 'semver';
+import { getFlattenedObject } from '@kbn/std';
 import type { SavedObjectsNamespaceType } from '@kbn/core-saved-objects-common';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { aggregateMappingAdditions } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsModelChange } from '@kbn/core-saved-objects-server';
-import { getFlattenedObject } from '@kbn/std';
-import { compare as semverCompare } from 'semver';
 
 export interface SavedObjectTypeMigrationInfo {
   name: string;

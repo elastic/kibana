@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Action } from 'redux-actions';
 import {
-  setAlertFlyoutVisible,
   setBasePath,
-  setSearchTextAction,
   toggleIntegrationsPopover,
+  setAlertFlyoutVisible,
+  setSearchTextAction,
 } from '../actions';
 import { uiReducer } from './ui';
+import { Action } from 'redux-actions';
 
 describe('ui reducer', () => {
   it(`sets the application's base path`, () => {

@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import React, { forwardRef } from 'react';
+import classNames from 'classnames';
 import {
-  EuiBadge,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiBadge,
+  EuiButtonIcon,
   EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
-import React, { forwardRef } from 'react';
 
-import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
-import { getTypeLabelFromField } from '../../../lib';
 import { NormalizedField, NormalizedFields, State } from '../../../types';
+import { getTypeLabelFromField } from '../../../lib';
+import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
 
+import { FieldsList } from './fields_list';
 import { CreateField } from './create_field';
 import { DeleteFieldProvider } from './delete_field_provider';
-import { FieldsList } from './fields_list';
 
 const i18nTexts = {
   addMultiFieldButtonLabel: i18n.translate(

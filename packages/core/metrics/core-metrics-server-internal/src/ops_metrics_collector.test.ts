@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
-import { httpServiceMock } from '@kbn/core-http-server-mocks';
-import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { OpsMetricsCollector } from './ops_metrics_collector';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import { AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
+import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import {
   mockEsClientCollector,
   mockOsCollector,
   mockProcessCollector,
   mockServerCollector,
 } from './ops_metrics_collector.test.mocks';
+import { OpsMetricsCollector } from './ops_metrics_collector';
 
 export const sampleEsClientMetrics: ElasticsearchClientsMetrics = {
   totalActiveSockets: 25,

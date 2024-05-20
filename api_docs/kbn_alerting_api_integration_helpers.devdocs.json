@@ -36,7 +36,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -48,7 +50,9 @@
                 "tags": [],
                 "label": "es",
                 "description": [],
-                "signature": ["default"],
+                "signature": [
+                  "default"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -61,7 +65,9 @@
                 "tags": [],
                 "label": "retry",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -74,7 +80,9 @@
                 "tags": [],
                 "label": "index",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -126,7 +134,9 @@
                 "tags": [],
                 "label": "source",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -139,7 +149,9 @@
                 "tags": [],
                 "label": "reference",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -195,7 +207,9 @@
                 "tags": [],
                 "label": "source",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -208,7 +222,9 @@
                 "tags": [],
                 "label": "reference",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -244,7 +260,9 @@
                 "tags": [],
                 "label": "size",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -260,7 +278,11 @@
             "tags": [],
             "label": "removeAll",
             "description": [],
-            "signature": ["() => Promise<", "DeleteByQueryResponse", ">"],
+            "signature": [
+              "() => Promise<",
+              "DeleteByQueryResponse",
+              ">"
+            ],
             "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -274,7 +296,9 @@
             "tags": [],
             "label": "waitForDocs",
             "description": [],
-            "signature": ["(source: string, reference: string, numDocs?: number) => Promise<any>"],
+            "signature": [
+              "(source: string, reference: string, numDocs?: number) => Promise<any>"
+            ],
             "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -286,7 +310,9 @@
                 "tags": [],
                 "label": "source",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -299,7 +325,9 @@
                 "tags": [],
                 "label": "reference",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -312,7 +340,9 @@
                 "tags": [],
                 "label": "numDocs",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -349,7 +379,9 @@
             "tags": [],
             "label": "targetUrl",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -362,7 +394,9 @@
             "tags": [],
             "label": "kbnTestServerConfig",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -375,7 +409,9 @@
             "tags": [],
             "label": "onProxyResHandler",
             "description": [],
-            "signature": ["(proxyRes?: unknown, req?: unknown, res?: unknown) => void"],
+            "signature": [
+              "(proxyRes?: unknown, req?: unknown, res?: unknown) => void"
+            ],
             "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -392,7 +428,9 @@
         "tags": [],
         "label": "getProxyPort",
         "description": [],
-        "signature": ["(kbnTestServerConfig: any) => number"],
+        "signature": [
+          "(kbnTestServerConfig: any) => number"
+        ],
         "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -404,7 +442,9 @@
             "tags": [],
             "label": "kbnTestServerConfig",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/test/alerting_api_integration/packages/helpers/get_proxy_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -425,7 +465,9 @@
         "tags": [],
         "label": "ES_TEST_INDEX_NAME",
         "description": [],
-        "signature": ["\".kibana-alerting-test-data\""],
+        "signature": [
+          "\".kibana-alerting-test-data\""
+        ],
         "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -9,11 +9,11 @@ import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@e
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { SortConfig } from '../../types';
-import { useDataQualityContext } from '../data_quality_context';
-import { MIN_PAGE_SIZE, defaultSort } from '../pattern/helpers';
 import type { IndexSummaryTableItem } from './helpers';
 import { getShowPagination } from './helpers';
+import { defaultSort, MIN_PAGE_SIZE } from '../pattern/helpers';
+import { SortConfig } from '../../types';
+import { useDataQualityContext } from '../data_quality_context';
 
 export interface Props {
   formatBytes: (value: number | undefined) => string;

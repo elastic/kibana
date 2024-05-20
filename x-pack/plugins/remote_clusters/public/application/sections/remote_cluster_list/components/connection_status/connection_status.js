@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 
-import { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
+import { SNIFF_MODE, PROXY_MODE } from '../../../../../../common/constants';
 
 export function ConnectionStatus({ isConnected, mode }) {
   const seedNodeTooltip = i18n.translate(

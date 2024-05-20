@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { ApmBase } from '@elastic/apm-rum';
+import { ReactElement } from 'react';
 import type { SensorAPI } from '@hello-pangea/dnd';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { Store } from 'redux';
 import { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ReactElement } from 'react';
-import { Store } from 'redux';
+import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import { ApmBase } from '@elastic/apm-rum';
+import type { UseAddToTimelineProps, UseAddToTimeline } from './hooks/use_add_to_timeline';
 import { HoverActionsConfig } from './components/hover_actions';
 import { LastUpdatedAtProps } from './components/last_updated';
 import { LoadingPanelProps } from './components/loading';
-import type { UseAddToTimeline, UseAddToTimelineProps } from './hooks/use_add_to_timeline';
 export interface TimelinesUIStart {
   /**
    * @deprecated Use cell-actions package instead

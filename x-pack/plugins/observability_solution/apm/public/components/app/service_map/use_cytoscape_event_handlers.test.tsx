@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import lodash from 'lodash';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
+import lodash from 'lodash';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 
@@ -41,8 +41,8 @@ describe('useCytoscapeEventHandlers', () => {
         jest.spyOn(cy, 'elements').mockReturnValueOnce({
           difference: () =>
             ({
-              layout: () => ({ run: () => {} }) as unknown as cytoscape.Layouts,
-            }) as unknown as cytoscape.CollectionReturnValue,
+              layout: () => ({ run: () => {} } as unknown as cytoscape.Layouts),
+            } as unknown as cytoscape.CollectionReturnValue),
         } as unknown as cytoscape.CollectionReturnValue);
 
         renderHook(() => useCytoscapeEventHandlers({ serviceName: 'test', cy, theme }));
@@ -62,8 +62,8 @@ describe('useCytoscapeEventHandlers', () => {
       jest.spyOn(cy, 'elements').mockReturnValueOnce({
         difference: () =>
           ({
-            layout: () => ({ run }) as unknown as cytoscape.Layouts,
-          }) as unknown as cytoscape.CollectionReturnValue,
+            layout: () => ({ run } as unknown as cytoscape.Layouts),
+          } as unknown as cytoscape.CollectionReturnValue),
       } as unknown as cytoscape.CollectionReturnValue);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));

@@ -7,8 +7,8 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
+import { EndpointError } from '../../../../common/endpoint/errors';
 
 export class EndpointHostNotFoundError extends NotFoundError {}
 

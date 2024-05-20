@@ -6,9 +6,9 @@
  */
 
 import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import React from 'react';
+import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 import { SuggestionItem } from './suggestion_item';
 export type StateUpdater<State, Props = {}> = (
@@ -261,8 +261,8 @@ const withPreviousSuggestionSelected = (
     props.suggestions.length === 0
       ? null
       : state.selectedIndex !== null
-        ? (state.selectedIndex + props.suggestions.length - 1) % props.suggestions.length
-        : Math.max(props.suggestions.length - 1, 0),
+      ? (state.selectedIndex + props.suggestions.length - 1) % props.suggestions.length
+      : Math.max(props.suggestions.length - 1, 0),
 });
 
 const withNextSuggestionSelected = (
@@ -274,8 +274,8 @@ const withNextSuggestionSelected = (
     props.suggestions.length === 0
       ? null
       : state.selectedIndex !== null
-        ? (state.selectedIndex + 1) % props.suggestions.length
-        : 0,
+      ? (state.selectedIndex + 1) % props.suggestions.length
+      : 0,
 });
 
 const withSuggestionAtIndexSelected =
@@ -286,8 +286,8 @@ const withSuggestionAtIndexSelected =
       props.suggestions.length === 0
         ? null
         : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
-          ? suggestionIndex
-          : 0,
+        ? suggestionIndex
+        : 0,
   });
 
 const withSuggestionsVisible = (state: AutocompleteFieldState) => ({

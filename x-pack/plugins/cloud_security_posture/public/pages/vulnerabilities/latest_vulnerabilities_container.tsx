@@ -1,4 +1,3 @@
-import { EuiSpacer } from '@elastic/eui';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,14 +6,15 @@ import { EuiSpacer } from '@elastic/eui';
  */
 import { Filter } from '@kbn/es-query';
 import React, { useEffect } from 'react';
-import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../common/constants';
-import { CloudSecurityGrouping } from '../../components/cloud_security_grouping';
-import { EmptyState } from '../../components/empty_state';
-import { ErrorCallout } from '../configurations/layout/error_callout';
-import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
+import { EuiSpacer } from '@elastic/eui';
 import { useLatestVulnerabilitiesGrouping } from './hooks/use_latest_vulnerabilities_grouping';
-import { groupPanelRenderer, groupStatsRenderer } from './latest_vulnerabilities_group_renderer';
 import { LatestVulnerabilitiesTable } from './latest_vulnerabilities_table';
+import { groupPanelRenderer, groupStatsRenderer } from './latest_vulnerabilities_group_renderer';
+import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
+import { ErrorCallout } from '../configurations/layout/error_callout';
+import { EmptyState } from '../../components/empty_state';
+import { CloudSecurityGrouping } from '../../components/cloud_security_grouping';
+import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../common/constants';
 
 export const LatestVulnerabilitiesContainer = () => {
   const SubGrouping = ({

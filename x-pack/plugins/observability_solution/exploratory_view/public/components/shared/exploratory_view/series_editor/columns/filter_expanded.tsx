@@ -9,8 +9,8 @@ import React, { useState } from 'react';
 
 import { EuiFilterButton, EuiPopover } from '@elastic/eui';
 import { SeriesConfig, SeriesUrl } from '../../types';
-import { FilterValuesList } from '../components/filter_values_list';
 import { useFilterValues } from '../use_filter_values';
+import { FilterValuesList } from '../components/filter_values_list';
 
 export interface FilterProps {
   seriesId: number;

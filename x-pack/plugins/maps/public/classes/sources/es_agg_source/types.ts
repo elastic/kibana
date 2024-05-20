@@ -7,8 +7,8 @@
 
 import { DataView } from '@kbn/data-plugin/common';
 import { AGG_TYPE } from '../../../../common/constants';
-import { IESAggField } from '../../fields/agg';
 import type { IESSource } from '../es_source/types';
+import { IESAggField } from '../../fields/agg';
 
 export function hasESAggSourceMethod(
   source: IESSource,

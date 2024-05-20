@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { nodeBuilder } from '@kbn/es-query';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 
 import { i18n } from '@kbn/i18n';
 
-import { type Installation, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../../common';
 import { auditLoggingService } from '../../../../audit_logging';
+import { PACKAGES_SAVED_OBJECT_TYPE, type Installation } from '../../../../../../common';
 import * as Registry from '../../../registry';
 
 export const checkForNamingCollision = async (
@@ -26,8 +26,9 @@ export const checkForRegistryNamingCollision = async (
   savedObjectsClient: SavedObjectsClientContract,
   integrationName: string
 ) => {
-  const registryOrBundledPackage =
-    await Registry.fetchFindLatestPackageOrUndefined(integrationName);
+  const registryOrBundledPackage = await Registry.fetchFindLatestPackageOrUndefined(
+    integrationName
+  );
   if (registryOrBundledPackage) {
     const registryConflictMessage = i18n.translate(
       'xpack.fleet.customIntegrations.namingCollisionError.registryOrBundle',

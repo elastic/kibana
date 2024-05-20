@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { deleteUnknownTypeObjects } from '../../deprecations';
-import type { InternalSavedObjectRouter } from '../../internal_types';
 import { catchAndReturnBoomErrors } from '../utils';
+import type { InternalSavedObjectRouter } from '../../internal_types';
+import { deleteUnknownTypeObjects } from '../../deprecations';
 
 interface RouteDependencies {
   kibanaIndex: string;

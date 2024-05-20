@@ -8,35 +8,35 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import React, { Component } from 'react';
 import {
+  htmlIdGenerator,
   EuiComboBox,
-  EuiFieldNumber,
-  EuiFieldText,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormLabel,
   EuiFormRow,
-  EuiHorizontalRule,
-  EuiPanel,
+  EuiFormLabel,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
+  EuiFieldText,
   EuiTitle,
-  htmlIdGenerator,
+  EuiHorizontalRule,
+  EuiFieldNumber,
 } from '@elastic/eui';
-import React, { Component } from 'react';
 
-import { TOOLTIP_MODES } from '../../../../common/enums';
-import { TimeseriesVisParams } from '../../../types';
-import { AnnotationsEditor } from '../annotations_editor';
-import { ColorPicker } from '../color_picker';
+import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
+import { AnnotationsEditor } from '../annotations_editor';
 import { createSelectHandler } from '../lib/create_select_handler';
+import { ColorPicker } from '../color_picker';
+import { YesNo } from '../yes_no';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
-import { SeriesEditor } from '../series_editor';
-import { YesNo } from '../yes_no';
-import { PANEL_CONFIG_TABS, PanelConfigProps } from './types';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { TimeseriesVisParams } from '../../../types';
+import { TOOLTIP_MODES } from '../../../../common/enums';
 
 const positionOptions = [
   {

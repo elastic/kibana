@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import fs from 'fs';
 import path from 'path';
+import type SuperTest from 'supertest';
 import { format as formatUrl } from 'url';
 import { promisify } from 'util';
-import expect from '@kbn/expect';
-import type SuperTest from 'supertest';
 
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 import { FtrService } from '../ftr_provider_context';

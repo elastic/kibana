@@ -1,5 +1,3 @@
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,17 +5,19 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import { debounce } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import { debounce } from 'lodash';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
-  ENVIRONMENT_ALL,
-  ENVIRONMENT_NOT_DEFINED,
   getEnvironmentLabel,
+  ENVIRONMENT_NOT_DEFINED,
+  ENVIRONMENT_ALL,
 } from '../../../../common/environment_filter_values';
-import { Environment } from '../../../../common/environment_rt';
 import { SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { Environment } from '../../../../common/environment_rt';
 
 function getEnvironmentOptions(environments: Environment[]) {
   const environmentOptions = environments

@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo } from 'react';
 
 import {
-  type DataFrameAnalysisConfigType,
   getAnalysisType,
+  type DataFrameAnalysisConfigType,
 } from '@kbn/ml-data-frame-analytics-utils';
 
 import { useMlLocator, useNavigateToPath } from '../../../../../contexts/kibana';
@@ -19,9 +19,9 @@ import type {
   DataFrameAnalyticsListRow,
 } from '../analytics_list/common';
 
-import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { getViewLinkStatus } from './get_view_link_status';
-import { ViewButton, viewActionButtonText } from './view_button';
+import { viewActionButtonText, ViewButton } from './view_button';
+import { ML_PAGES } from '../../../../../../../common/constants/locator';
 
 export type ViewAction = ReturnType<typeof useViewAction>;
 export const useViewAction = () => {

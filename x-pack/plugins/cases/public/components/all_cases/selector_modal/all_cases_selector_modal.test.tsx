@@ -7,13 +7,13 @@
 
 import React from 'react';
 
-import { act, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { AllCasesSelectorModal } from '.';
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
-import { useGetCategories } from '../../../containers/use_get_categories';
+import userEvent from '@testing-library/user-event';
+import { act, waitFor } from '@testing-library/react';
 import { useGetTags } from '../../../containers/use_get_tags';
+import { useGetCategories } from '../../../containers/use_get_categories';
 
 jest.mock('../../../containers/api');
 jest.mock('../../../containers/user_profiles/api');

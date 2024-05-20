@@ -22,7 +22,9 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "signature": ["\"observability-logs-ai-assistant\""],
+            "signature": [
+              "\"observability-logs-ai-assistant\""
+            ],
             "path": "src/plugins/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -156,7 +158,9 @@
           "tags": [],
           "label": "features",
           "description": [],
-          "signature": ["DiscoverFeaturesServiceSetup"],
+          "signature": [
+            "DiscoverFeaturesServiceSetup"
+          ],
           "path": "src/plugins/discover_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -183,7 +187,9 @@
           "tags": [],
           "label": "features",
           "description": [],
-          "signature": ["DiscoverFeaturesServiceStart"],
+          "signature": [
+            "DiscoverFeaturesServiceStart"
+          ],
           "path": "src/plugins/discover_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -231,7 +237,9 @@
             "tags": [],
             "label": "register",
             "description": [],
-            "signature": ["(feature: Feature) => void"],
+            "signature": [
+              "(feature: Feature) => void"
+            ],
             "path": "src/plugins/discover_shared/common/features_registry/features_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -243,7 +251,9 @@
                 "tags": [],
                 "label": "feature",
                 "description": [],
-                "signature": ["Feature"],
+                "signature": [
+                  "Feature"
+                ],
                 "path": "src/plugins/discover_shared/common/features_registry/features_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -273,7 +283,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["Id"],
+                "signature": [
+                  "Id"
+                ],
                 "path": "src/plugins/discover_shared/common/features_registry/features_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,

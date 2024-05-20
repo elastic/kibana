@@ -26,7 +26,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileBulkGetParams",
-        "description": ["\nParameters for the bulk get API."],
+        "description": [
+          "\nParameters for the bulk get API."
+        ],
         "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -37,8 +39,12 @@
             "type": "Object",
             "tags": [],
             "label": "uids",
-            "description": ["\nList of user profile identifiers."],
-            "signature": ["Set<string>"],
+            "description": [
+              "\nList of user profile identifiers."
+            ],
+            "signature": [
+              "Set<string>"
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -52,7 +58,9 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -66,7 +74,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileGetCurrentParams",
-        "description": ["\nParameters for the get user profile for the current user API."],
+        "description": [
+          "\nParameters for the get user profile for the current user API."
+        ],
         "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -77,7 +87,9 @@
             "type": "Object",
             "tags": [],
             "label": "request",
-            "description": ["\nUser request instance to get user profile for."],
+            "description": [
+              "\nUser request instance to get user profile for."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/core-http-server",
@@ -101,7 +113,9 @@
             "description": [
               "\nBy default, get API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -176,7 +190,9 @@
                     "tags": [],
                     "label": "dataPath",
                     "description": [],
-                    "signature": ["string | undefined"],
+                    "signature": [
+                      "string | undefined"
+                    ],
                     "path": "packages/core/user-profile/core-user-profile-server/src/request_handler_context.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -208,7 +224,9 @@
             "type": "string",
             "tags": [],
             "label": "spaceId",
-            "description": ["\nThe id of the Kibana Space."],
+            "description": [
+              "\nThe id of the Kibana Space."
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -219,8 +237,12 @@
             "type": "Object",
             "tags": [],
             "label": "privileges",
-            "description": ["\nThe set of the Kibana specific application privileges."],
-            "signature": ["{ kibana: string[]; }"],
+            "description": [
+              "\nThe set of the Kibana specific application privileges."
+            ],
+            "signature": [
+              "{ kibana: string[]; }"
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -234,7 +256,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileService",
-        "description": ["\nA set of methods to work with Kibana user profiles."],
+        "description": [
+          "\nA set of methods to work with Kibana user profiles."
+        ],
         "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -293,7 +317,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["Get current user profile operation parameters."],
+                "description": [
+                  "Get current user profile operation parameters."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-server",
@@ -317,7 +343,9 @@
             "type": "Function",
             "tags": [],
             "label": "bulkGet",
-            "description": ["\nRetrieves multiple user profiles by their identifiers."],
+            "description": [
+              "\nRetrieves multiple user profiles by their identifiers."
+            ],
             "signature": [
               "<D extends ",
               {
@@ -355,7 +383,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["Bulk get operation parameters."],
+                "description": [
+                  "Bulk get operation parameters."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-server",
@@ -379,7 +409,9 @@
             "type": "Function",
             "tags": [],
             "label": "suggest",
-            "description": ["\nSuggests multiple user profiles by search criteria."],
+            "description": [
+              "\nSuggests multiple user profiles by search criteria."
+            ],
             "signature": [
               "<D extends ",
               {
@@ -417,7 +449,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "params",
-                "description": ["Suggest operation parameters."],
+                "description": [
+                  "Suggest operation parameters."
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-user-profile-server",
@@ -444,7 +478,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileServiceSetup",
-        "description": ["\nSetup contract for Core's userProfile service.\n"],
+        "description": [
+          "\nSetup contract for Core's userProfile service.\n"
+        ],
         "path": "packages/core/user-profile/core-user-profile-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -506,7 +542,9 @@
         "type": "Interface",
         "tags": [],
         "label": "UserProfileSuggestParams",
-        "description": ["\nParameters for the suggest API."],
+        "description": [
+          "\nParameters for the suggest API."
+        ],
         "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -520,7 +558,9 @@
             "description": [
               "\nQuery string used to match name-related fields in user profiles. The following fields are treated as\nname-related: username, full_name and email."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -534,7 +574,9 @@
             "description": [
               "\nExtra search criteria to improve relevance of the suggestion result. A profile matching the\nspecified hint is ranked higher in the response. But not-matching the hint does not exclude a\nprofile from the response as long as it matches the `name` field query."
             ],
-            "signature": ["{ uids: string[]; } | undefined"],
+            "signature": [
+              "{ uids: string[]; } | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -545,8 +587,12 @@
             "type": "number",
             "tags": [],
             "label": "size",
-            "description": ["\nDesired number of suggestion to return. The default value is 10."],
-            "signature": ["number | undefined"],
+            "description": [
+              "\nDesired number of suggestion to return. The default value is 10."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -560,7 +606,9 @@
             "description": [
               "\nBy default, suggest API returns user information, but does not return any user data. The optional \"dataPath\"\nparameter can be used to return personal data for this user (within `kibana` namespace only)."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/core/user-profile/core-user-profile-server/src/service.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -630,7 +678,9 @@
         "type": "Type",
         "tags": [],
         "label": "UserProfileServiceStart",
-        "description": ["\nStart contract for Core's userProfile service.\n"],
+        "description": [
+          "\nStart contract for Core's userProfile service.\n"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/core-user-profile-server",

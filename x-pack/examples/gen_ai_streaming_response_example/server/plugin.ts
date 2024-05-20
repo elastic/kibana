@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
 import Boom from '@hapi/boom';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { schema } from '@kbn/config-schema';
-import { CoreSetup, Plugin } from '@kbn/core/server';
 import type OpenAI from 'openai';
+import { Readable } from 'stream';
+import { Plugin, CoreSetup } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 
 interface GenAiStreamingResponseExamplePluginStart {
   actions: ActionsPluginStart;

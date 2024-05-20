@@ -1,5 +1,3 @@
-import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +6,8 @@ import { i18n } from '@kbn/i18n';
  * Side Public License, v 1.
  */
 import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useStateSelector } from '../../state_utils';
 import { PreviewState } from './types';
 

@@ -9,11 +9,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import type { JobType } from '../../../common/types/saved_objects';
 import type { MLSavedObjectService } from '../../saved_objects';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
+import type { JobType } from '../../../common/types/saved_objects';
 
-import type { Datafeed, Job } from '../../../common/types/anomaly_detection_jobs';
+import type { Job, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { searchProvider } from './search';
 
 import { MLJobNotFound, MLModelNotFound } from './errors';

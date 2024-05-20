@@ -6,34 +6,34 @@
  * Side Public License, v 1.
  */
 
+import React, { Component, ReactElement } from 'react';
 import {
   EuiButton,
   EuiCopy,
   EuiFlexGroup,
+  EuiSpacer,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
-  EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import React, { Component, ReactElement } from 'react';
 
 import { format as formatUrl, parse as parseUrl } from 'url';
 
-import type { Capabilities } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import type { Capabilities } from '@kbn/core/public';
 
 import type { LocatorPublic } from '../../common';
+import { UrlParamExtension } from '../types';
 import {
   AnonymousAccessServiceContract,
   AnonymousAccessState,
 } from '../../common/anonymous_access';
-import { UrlParamExtension } from '../types';
 import type { BrowserUrlService } from '../types';
 
 export interface UrlPanelContentProps {

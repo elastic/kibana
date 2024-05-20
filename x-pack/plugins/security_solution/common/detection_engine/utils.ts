@@ -8,8 +8,8 @@
 import { isEmpty } from 'lodash';
 
 import type {
-  CreateExceptionListItemSchema,
   EntriesArray,
+  CreateExceptionListItemSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -55,9 +55,9 @@ export const normalizeThresholdField = (
   return Array.isArray(thresholdField)
     ? thresholdField
     : isEmpty(thresholdField)
-      ? []
-      : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        [thresholdField!];
+    ? []
+    : // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      [thresholdField!];
 };
 
 export const isEqlSequenceQuery = (ruleQuery: string | undefined): boolean =>

@@ -8,19 +8,19 @@
 
 import * as t from 'io-ts';
 
+import { _versionOrUndefined } from '../../common/underscore_version';
+import { deserializerOrUndefined } from '../../common/deserializer';
+import { metaOrUndefined } from '../../common/meta';
+import { timestampOrUndefined } from '../../common/timestamp';
+import { serializerOrUndefined } from '../../common/serializer';
 import { created_at } from '../../common/created_at';
 import { created_by } from '../../common/created_by';
-import { deserializerOrUndefined } from '../../common/deserializer';
 import { id } from '../../common/id';
-import { list_id } from '../../common/list_id';
-import { metaOrUndefined } from '../../common/meta';
-import { serializerOrUndefined } from '../../common/serializer';
 import { tie_breaker_id } from '../../common/tie_breaker_id';
-import { timestampOrUndefined } from '../../common/timestamp';
 import { type } from '../../common/type';
-import { _versionOrUndefined } from '../../common/underscore_version';
 import { updated_at } from '../../common/updated_at';
 import { updated_by } from '../../common/updated_by';
+import { list_id } from '../../common/list_id';
 import { value } from '../../common/value';
 
 export const listItemSchema = t.exact(

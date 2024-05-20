@@ -22,7 +22,7 @@ import type {
 export interface NodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id,
+  ChildrenId extends string = Id
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   /**
    * Children of the node. For Navigation.Item (only) it allows a function to be set.

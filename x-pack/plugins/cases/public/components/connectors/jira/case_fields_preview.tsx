@@ -11,9 +11,9 @@ import * as i18n from './translations';
 import type { JiraFieldsType } from '../../../../common/types/domain';
 import { ConnectorTypes } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
-import { ConnectorCard } from '../card';
 import type { ConnectorFieldsPreviewProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
+import { ConnectorCard } from '../card';
 
 const JiraFieldsPreviewComponent: React.FunctionComponent<
   ConnectorFieldsPreviewProps<JiraFieldsType>

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiBadge } from '@elastic/eui';
 
 import { getStatusConfiguration } from './config';
 import { CaseStatuses } from './types';

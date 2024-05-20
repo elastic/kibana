@@ -12,9 +12,9 @@ import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_t
 import { HostsTableType, HostsType } from '../../../explore/hosts/store/model';
 
 import { RiskScoreEntity } from '../../../../common/search_strategy/security_solution/risk_score';
-import { SecurityPageName } from '../../../app/types';
-import { hostsActions } from '../../../explore/hosts/store';
 import { usersActions } from '../../../explore/users/store';
+import { hostsActions } from '../../../explore/hosts/store';
+import { SecurityPageName } from '../../../app/types';
 
 const HOST_RISK_TABLE_QUERY_ID = 'hostRiskDashboardTable';
 const HOST_RISK_KPI_QUERY_ID = 'headerHostRiskScoreKpiQuery';

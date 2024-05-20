@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mockGetFlattenedObject, mockStreamWrite } from './logging_system.test.mocks';
+import { mockStreamWrite, mockGetFlattenedObject } from './logging_system.test.mocks';
 
 const dynamicProps = { process: { pid: expect.any(Number) }, ecs: { version: EcsVersion } };
 
@@ -16,9 +16,9 @@ let mockConsoleLog: jest.SpyInstance;
 import { createWriteStream } from 'fs';
 const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof createWriteStream>;
 
+import { LoggingSystem, config } from '..';
 import { EcsVersion } from '@elastic/ecs';
 import { unsafeConsole } from '@kbn/security-hardening';
-import { LoggingSystem, config } from '..';
 
 let system: LoggingSystem;
 beforeEach(() => {

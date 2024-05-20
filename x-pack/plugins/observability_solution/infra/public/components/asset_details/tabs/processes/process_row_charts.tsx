@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { Axis, Chart, Position, Settings, Tooltip, niceTimeFormatter } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
   EuiEmptyPrompt,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingChart,
   EuiText,
+  EuiFlexGroup,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { IconChartLine } from '@kbn/chart-icons';
-import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import { IconChartLine } from '@kbn/chart-icons';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
+import { useProcessListRowChart } from '../../hooks/use_process_list_row_chart';
+import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
+import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
 import { Color } from '../../../../../common/color_palette';
 import { createFormatter } from '../../../../../common/formatters';
 import { MetricsExplorerAggregation } from '../../../../../common/http_api';
-import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
-import { calculateDomain } from '../../../../pages/metrics/metrics_explorer/components/helpers/calculate_domain';
-import { MetricExplorerSeriesChart } from '../../../../pages/metrics/metrics_explorer/components/series_chart';
-import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
-import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
-import { useProcessListRowChart } from '../../hooks/use_process_list_row_chart';
-import { useRequestObservable } from '../../hooks/use_request_observable';
 import { Process } from './types';
+import { MetricsExplorerChartType } from '../../../../../common/metrics_explorer_views/types';
+import { useRequestObservable } from '../../hooks/use_request_observable';
+import { MetricNotAvailableExplanationTooltip } from '../../components/metric_not_available_explanation';
 
 interface Props {
   command: string;

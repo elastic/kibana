@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import path from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { getPkgDirMap } from '@kbn/repo-packages';
 import { camelCase } from 'lodash';
+import path from 'path';
+import { getPkgDirMap } from '@kbn/repo-packages';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 export function getAppName(fileName: string, cwd: string) {
   const { dir } = path.parse(fileName);

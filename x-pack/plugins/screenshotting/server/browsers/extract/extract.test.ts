@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import crypto from 'crypto';
 import fs from 'fs';
+import crypto from 'crypto';
 import { resolve as pathResolve } from 'path';
 
-import { promisify } from 'util';
 import { extract } from './extract';
 import { ExtractError } from './extract_error';
+import { promisify } from 'util';
 
 const FIXTURES_FOLDER = pathResolve(__dirname, '__fixtures__');
 const SRC_FILE_UNCOMPRESSED = pathResolve(FIXTURES_FOLDER, 'file.md');

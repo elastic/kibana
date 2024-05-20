@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import moment from 'moment';
+import type { IKibanaResponse, KibanaResponseFactory, Logger } from '@kbn/core/server';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
+  PromptResponse,
   BulkActionSkipResult,
   BulkCrudActionResponse,
   BulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionRequestBody,
   PerformBulkActionResponse,
-  PromptResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
+import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { PROMPTS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
+import { ElasticAssistantPluginRouter } from '../../types';
+import { buildResponse } from '../utils';
 import {
   getUpdateScript,
-  transformESSearchToPrompts,
-  transformESToPrompts,
   transformToCreateScheme,
   transformToUpdateScheme,
+  transformESToPrompts,
+  transformESSearchToPrompts,
 } from '../../ai_assistant_data_clients/prompts/helpers';
 import { EsPromptsSchema, UpdatePromptSchema } from '../../ai_assistant_data_clients/prompts/types';
-import { ElasticAssistantPluginRouter } from '../../types';
 import { UPGRADE_LICENSE_MESSAGE, hasAIAssistantLicense } from '../helpers';
-import { buildResponse } from '../utils';
 
 export interface BulkOperationError {
   message: string;

@@ -23,10 +23,10 @@ import { first, range, xor } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { Controller, useFieldArray, useFormContext } from 'react-hook-form';
 import {
-  CUSTOM_METRIC_AGGREGATION_OPTIONS,
   aggValueToLabel,
+  CUSTOM_METRIC_AGGREGATION_OPTIONS,
 } from '../../helpers/aggregation_options';
-import { Option, createOptionsFromFields } from '../../helpers/create_options';
+import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
 

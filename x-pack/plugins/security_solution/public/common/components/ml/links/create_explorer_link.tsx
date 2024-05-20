@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { useMlHref } from '@kbn/ml-plugin/public';
-import React from 'react';
-import { useKibana } from '../../../lib/kibana';
 import type { Anomaly } from '../types';
+import { useKibana } from '../../../lib/kibana';
 
 interface ExplorerLinkProps {
   score: Anomaly;

@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React, { forwardRef, useCallback, useMemo } from 'react';
 import { EuiIcon, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { Filter } from '@kbn/es-query';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Filter } from '@kbn/es-query';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { SHOW_MULTIFIELDS, getShouldShowFieldHandler } from '@kbn/discover-utils';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import React, { forwardRef, useCallback, useMemo } from 'react';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { TableHeader } from './components/table_header/table_header';
 import { TableRow } from './components/table_row';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface DocTableProps {
   /**

@@ -8,8 +8,8 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import moment from 'moment';
 import fetch from 'node-fetch';
+import moment from 'moment';
 import Datasource from '../lib/classes/datasource';
 
 export default new Datasource('worldbank', {

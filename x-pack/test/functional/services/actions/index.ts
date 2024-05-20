@@ -6,11 +6,11 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { ActionsAPIServiceProvider } from './api';
 import { ActionsCommonServiceProvider } from './common';
 import { ActionsOpsgenieServiceProvider } from './opsgenie';
-import { ActionsSlackServiceProvider } from './slack';
 import { ActionsTinesServiceProvider } from './tines';
+import { ActionsAPIServiceProvider } from './api';
+import { ActionsSlackServiceProvider } from './slack';
 
 export function ActionsServiceProvider(context: FtrProviderContext) {
   const common = ActionsCommonServiceProvider(context);

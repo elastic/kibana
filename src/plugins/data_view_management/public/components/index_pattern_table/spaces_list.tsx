@@ -8,10 +8,10 @@
 
 import React, { FC, useState } from 'react';
 
-import type { Capabilities } from '@kbn/core/public';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { ShareToSpaceFlyoutProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { Capabilities } from '@kbn/core/public';
+import type { SpacesPluginStart, ShareToSpaceFlyoutProps } from '@kbn/spaces-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 
 interface Props {
   spacesApi: SpacesPluginStart;

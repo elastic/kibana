@@ -1,4 +1,3 @@
-import expect from '@kbn/expect';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,13 +5,14 @@ import expect from '@kbn/expect';
  * 2.0.
  */
 import { cleanup } from '@kbn/infra-forge';
-import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
+import expect from '@kbn/expect';
 import type { CreateSLOInput } from '@kbn/slo-schema';
+import { SO_SLO_TYPE } from '@kbn/slo-plugin/server/saved_objects';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { sloData } from './fixtures/create_slo';
-import { SloEsClient } from './helper/es';
 import { loadTestData } from './helper/load_test_data';
+import { SloEsClient } from './helper/es';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('Delete SLOs', function () {

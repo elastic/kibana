@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { DataViewFieldBase } from '@kbn/es-query';
 import { renderHook } from '@testing-library/react-hooks';
+import type { DataViewFieldBase } from '@kbn/es-query';
 
 import { useInvestigationFields } from './use_investigation_fields';
 
 import { createQueryWrapperMock } from '../../../common/__mocks__/query_wrapper';
 
-import { getESQLQueryColumns } from '@kbn/esql-utils';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
 
 jest.mock('@kbn/securitysolution-utils', () => ({
   computeIsESQLQueryAggregating: jest.fn(),

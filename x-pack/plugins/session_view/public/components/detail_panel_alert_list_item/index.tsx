@@ -1,16 +1,3 @@
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  formatDate,
-} from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -18,14 +5,27 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React from 'react';
-import type { ProcessEvent, ProcessEventAlertCategory } from '../../../common';
-import { ALERT_ICONS } from '../../../common/constants';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiIcon,
+  EuiText,
+  EuiAccordion,
+  EuiPanel,
+  EuiHorizontalRule,
+  formatDate,
+  EuiToolTip,
+} from '@elastic/eui';
 import { getAlertIconTooltipContent } from '../../../common/utils/alert_icon_tooltip_content';
+import { ALERT_ICONS } from '../../../common/constants';
+import type { ProcessEvent, ProcessEventAlertCategory } from '../../../common';
+import { useStyles } from './styles';
+import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
+import { dataOrDash } from '../../utils/data_or_dash';
 import { useDateFormat } from '../../hooks';
 import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
-import { dataOrDash } from '../../utils/data_or_dash';
-import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
-import { useStyles } from './styles';
 export const ALERT_LIST_ITEM_TEST_ID = 'sessionView:detailPanelAlertListItem';
 export const ALERT_LIST_ITEM_ARGS_TEST_ID = 'sessionView:detailPanelAlertListItemArgs';
 export const ALERT_LIST_ITEM_FILE_PATH_TEST_ID = 'sessionView:detailPanelAlertListItemFilePath';

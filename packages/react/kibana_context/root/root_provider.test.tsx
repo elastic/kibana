@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { useEuiTheme } from '@elastic/eui';
-import type { UseEuiTheme } from '@elastic/eui';
-import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
-import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
-import { I18nStart } from '@kbn/core-i18n-browser';
-import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import type { KibanaTheme } from '@kbn/react-kibana-context-common';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { ReactWrapper } from 'enzyme';
 import React, { FC, useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
-import { BehaviorSubject, of } from 'rxjs';
+import type { ReactWrapper } from 'enzyme';
+import { of, BehaviorSubject } from 'rxjs';
+import { useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { KibanaTheme } from '@kbn/react-kibana-context-common';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { KibanaRootContextProvider } from './root_provider';
+import { I18nStart } from '@kbn/core-i18n-browser';
 
 describe('KibanaRootContextProvider', () => {
   let euiTheme: UseEuiTheme | undefined;

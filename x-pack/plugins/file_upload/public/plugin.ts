@@ -8,17 +8,17 @@
 import { CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
-  FileUploadComponent,
   FileUploadStartApi,
+  FileUploadComponent,
+  importerFactory,
+  hasImportPermission,
   IndexNameFormComponent,
-  analyzeFile,
   checkIndexExists,
   getTimeFieldRange,
-  hasImportPermission,
-  importerFactory,
+  analyzeFile,
 } from './api';
-import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 import { setStartServices } from './kibana_services';
+import { getMaxBytes, getMaxBytesFormatted } from './importer/get_max_bytes';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FileUploadSetupDependencies {}

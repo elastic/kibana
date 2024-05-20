@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo, useState, useRef } from 'react';
+import { isEmpty, sortBy } from 'lodash';
 import {
-  EuiButtonEmpty,
+  EuiSelectable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHighlight,
   EuiHorizontalRule,
+  EuiTextColor,
+  EuiHighlight,
   EuiIcon,
-  EuiLoadingSpinner,
-  EuiSelectable,
   EuiSpacer,
   EuiText,
-  EuiTextColor,
   useEuiTheme,
+  EuiButtonEmpty,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
-import { isEmpty, sortBy } from 'lodash';
-import React, { useCallback, useMemo, useState, useRef } from 'react';
 
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { getUserDisplayName } from '@kbn/user-profile-components';
-import type { CasesUI } from '../../../../common';
-import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useBulkGetUserProfiles } from '../../../containers/user_profiles/use_bulk_get_user_profiles';
+import { useIsUserTyping } from '../../../common/use_is_user_typing';
 import { useSuggestUserProfiles } from '../../../containers/user_profiles/use_suggest_user_profiles';
+import type { CasesUI } from '../../../../common';
+import * as i18n from './translations';
+import { useItemsState } from '../use_items_state';
+import type { ItemSelectableOption, ItemsSelectionState } from '../types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import { EmptyMessage } from '../../user_profiles/empty_message';
 import { NoMatches } from '../../user_profiles/no_matches';
 import { SmallUserAvatar } from '../../user_profiles/small_user_avatar';
-import type { ItemSelectableOption, ItemsSelectionState } from '../types';
-import { useItemsState } from '../use_items_state';
 import { NoSelectedAssignees } from './no_selected_assignees';
-import * as i18n from './translations';
 
 interface Props {
   selectedCases: CasesUI;

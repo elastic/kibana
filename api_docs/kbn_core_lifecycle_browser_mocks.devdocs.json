@@ -551,7 +551,9 @@
                 "tags": [],
                 "label": "__0",
                 "description": [],
-                "signature": ["{ basePath?: string | undefined; }"],
+                "signature": [
+                  "{ basePath?: string | undefined; }"
+                ],
                 "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_start.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false

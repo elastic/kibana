@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { resolve } from 'path';
 import { ReportingAPIProvider } from '../reporting_api_integration/services';
 import { ReportingFunctionalProvider } from './services';
 

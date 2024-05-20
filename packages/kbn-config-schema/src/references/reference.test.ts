@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '../..';
 import { Reference } from './reference';
+import { schema } from '../..';
 
 describe('Reference.isReference', () => {
   it('handles primitives', () => {

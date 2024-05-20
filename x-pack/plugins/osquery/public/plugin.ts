@@ -8,37 +8,37 @@
 import type {
   AppMountParameters,
   CoreSetup,
-  CoreStart,
   Plugin,
   PluginInitializerContext,
+  CoreStart,
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
 import { useAllLiveQueries } from './actions/use_all_live_queries';
-import {
-  LazyOsqueryManagedCustomButtonExtension,
-  LazyOsqueryManagedPolicyCreateImportExtension,
-  LazyOsqueryManagedPolicyEditExtension,
-} from './fleet_integration';
-import { useFetchStatus } from './fleet_integration/use_fetch_status';
-import {
-  getExternalReferenceAttachmentRegular,
-  getLazyLiveQueryField,
-  getLazyOsqueryAction,
-  useIsOsqueryAvailableSimple,
-} from './shared_components';
 import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
+import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { getLazyOsqueryResult } from './shared_components/lazy_osquery_result';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
-import type { ServicesWrapperProps } from './shared_components/services_wrapper';
 import type {
-  AppPluginStartDependencies,
   OsqueryPluginSetup,
   OsqueryPluginStart,
-  SetupPlugins,
   StartPlugins,
+  AppPluginStartDependencies,
+  SetupPlugins,
 } from './types';
+import { OSQUERY_INTEGRATION_NAME, PLUGIN_NAME } from '../common';
+import {
+  LazyOsqueryManagedPolicyCreateImportExtension,
+  LazyOsqueryManagedPolicyEditExtension,
+  LazyOsqueryManagedCustomButtonExtension,
+} from './fleet_integration';
+import {
+  getLazyOsqueryAction,
+  getLazyLiveQueryField,
+  useIsOsqueryAvailableSimple,
+  getExternalReferenceAttachmentRegular,
+} from './shared_components';
+import type { ServicesWrapperProps } from './shared_components/services_wrapper';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;

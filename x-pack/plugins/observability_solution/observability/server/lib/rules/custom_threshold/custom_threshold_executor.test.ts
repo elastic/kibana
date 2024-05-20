@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import type { ISearchSource } from '@kbn/data-plugin/common';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import { createCustomThresholdExecutor } from './custom_threshold_executor';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
-import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import {
   Aggregators,
   Comparator,
   CustomMetricExpressionParams,
   CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
-import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
-import { createCustomThresholdExecutor } from './custom_threshold_executor';
-import { Evaluation } from './lib/evaluate_rule';
+import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
 jest.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => ({

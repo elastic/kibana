@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 import { FLEET } from '../tasks/navigation';
 import {
+  deleteUsers,
   FleetAgentsReadIntegrNoneRole,
   FleetAgentsReadIntegrNoneUser,
   createUsersAndRoles,
-  deleteUsers,
 } from '../tasks/privileges';
+import { login, loginWithUserAndWaitForPage, logout } from '../tasks/login';
 
 import {
+  MISSING_PRIVILEGES,
+  AGENTS_TAB,
   ADD_AGENT_BUTTON,
   ADD_FLEET_SERVER_HEADER,
-  AGENTS_TAB,
   AGENT_POLICIES_TAB,
-  MISSING_PRIVILEGES,
   SETTINGS_TAB,
   UNINSTALL_TOKENS_TAB,
 } from '../screens/fleet';

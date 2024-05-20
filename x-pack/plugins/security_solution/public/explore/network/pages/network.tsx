@@ -11,43 +11,43 @@ import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { TableId, dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { isTab } from '@kbn/timelines-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { SecurityPageName } from '../../../app/types';
+import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
 import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
-import { InputsModelId } from '../../../common/store/inputs/constants';
-import { EmbeddedMap } from '../components/embeddables/embedded_map';
 
-import { LastEventIndexKey } from '../../../../common/search_strategy';
-import { EmptyPrompt } from '../../../common/components/empty_prompt';
-import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../../common/components/search_bar';
-import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
-import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { useKibana } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/kuery';
 import { inputsSelectors } from '../../../common/store';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import { Display } from '../../hosts/pages/display';
+import { networkModel } from '../store';
+import { navTabsNetwork, NetworkRoutes, NetworkRoutesLoading } from './navigation';
+import * as i18n from './translations';
+import type { NetworkComponentProps } from './types';
+import { NetworkRouteType } from './navigation/types';
 import {
   onTimelineTabKeyPressed,
   resetKeyboardFocus,
   showGlobalFilters,
 } from '../../../timelines/components/timeline/helpers';
-import { Display } from '../../hosts/pages/display';
-import { NetworkKpiComponent } from '../components/kpi_network';
-import { networkModel } from '../store';
-import { NetworkRoutes, NetworkRoutesLoading, navTabsNetwork } from './navigation';
-import { NetworkRouteType } from './navigation/types';
-import * as i18n from './translations';
-import type { NetworkComponentProps } from './types';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
+import { sourceOrDestinationIpExistsFilter } from '../../../common/components/visualization_actions/utils';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */

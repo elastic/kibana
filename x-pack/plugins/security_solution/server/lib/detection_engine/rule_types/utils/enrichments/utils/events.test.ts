@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { createAlert } from '../__mocks__/alerts';
 import { getEventValue } from './events';
+import { createAlert } from '../__mocks__/alerts';
 
 describe('getEventValue', () => {
   it('return value if field present in event in object notation', () => {

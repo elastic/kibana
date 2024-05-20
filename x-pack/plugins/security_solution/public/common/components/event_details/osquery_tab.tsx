@@ -7,10 +7,9 @@
 
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
-import type { Ecs } from '@kbn/cases-plugin/common';
 import React from 'react';
 import styled from 'styled-components';
-import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import type { Ecs } from '@kbn/cases-plugin/common';
 import type { SearchHit } from '../../../../common/search_strategy';
 import type {
   ExpandedEventFieldsObject,
@@ -21,6 +20,7 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
+import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;

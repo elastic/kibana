@@ -31,7 +31,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/file_upload/public/importer/message_importer.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -43,7 +45,9 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["ImportFactoryOptions"],
+                "signature": [
+                  "ImportFactoryOptions"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/message_importer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -77,7 +81,9 @@
                 "tags": [],
                 "label": "text",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/message_importer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -90,7 +96,9 @@
                 "tags": [],
                 "label": "isLastPart",
                 "description": [],
-                "signature": ["boolean"],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/message_importer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -103,7 +111,9 @@
                 "tags": [],
                 "label": "lineLimit",
                 "description": [],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/message_importer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -176,7 +186,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -189,7 +201,9 @@
                 "tags": [],
                 "label": "previewCoverage",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -205,7 +219,9 @@
             "tags": [],
             "label": "onFileClear",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -219,7 +235,9 @@
             "tags": [],
             "label": "enableImportBtn",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -233,7 +251,9 @@
             "tags": [],
             "label": "disableImportBtn",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -293,7 +313,9 @@
             "tags": [],
             "label": "onUploadError",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/file_upload/public/lazy_load_bundle/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -397,7 +419,9 @@
             "tags": [],
             "label": "read",
             "description": [],
-            "signature": ["(data: ArrayBuffer) => { success: boolean; }"],
+            "signature": [
+              "(data: ArrayBuffer) => { success: boolean; }"
+            ],
             "path": "x-pack/plugins/file_upload/public/importer/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -409,7 +433,9 @@
                 "tags": [],
                 "label": "data",
                 "description": [],
-                "signature": ["ArrayBuffer"],
+                "signature": [
+                  "ArrayBuffer"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -453,7 +479,9 @@
                 "tags": [],
                 "label": "index",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -466,7 +494,9 @@
                 "tags": [],
                 "label": "settings",
                 "description": [],
-                "signature": ["IndicesIndexSettings"],
+                "signature": [
+                  "IndicesIndexSettings"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -479,7 +509,9 @@
                 "tags": [],
                 "label": "mappings",
                 "description": [],
-                "signature": ["MappingTypeMapping"],
+                "signature": [
+                  "MappingTypeMapping"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -532,7 +564,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -545,7 +579,9 @@
                 "tags": [],
                 "label": "index",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -558,7 +594,9 @@
                 "tags": [],
                 "label": "pipelineId",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -571,7 +609,9 @@
                 "tags": [],
                 "label": "setImportProgress",
                 "description": [],
-                "signature": ["(progress: number) => void"],
+                "signature": [
+                  "(progress: number) => void"
+                ],
                 "path": "x-pack/plugins/file_upload/public/importer/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -587,7 +627,9 @@
             "tags": [],
             "label": "initialized",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "x-pack/plugins/file_upload/public/importer/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -601,7 +643,9 @@
             "tags": [],
             "label": "getIndex",
             "description": [],
-            "signature": ["() => string | undefined"],
+            "signature": [
+              "() => string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/public/importer/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -615,7 +659,9 @@
             "tags": [],
             "label": "getTimeField",
             "description": [],
-            "signature": ["() => string | undefined"],
+            "signature": [
+              "() => string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/public/importer/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -629,7 +675,9 @@
             "tags": [],
             "label": "previewIndexTimeRange",
             "description": [],
-            "signature": ["() => Promise<{ start: number | null; end: number | null; }>"],
+            "signature": [
+              "() => Promise<{ start: number | null; end: number | null; }>"
+            ],
             "path": "x-pack/plugins/file_upload/public/importer/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -668,7 +716,9 @@
             "tags": [],
             "label": "indexNameError",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -680,7 +730,9 @@
             "tags": [],
             "label": "onIndexNameChange",
             "description": [],
-            "signature": ["(name: string, error?: string | undefined) => void"],
+            "signature": [
+              "(name: string, error?: string | undefined) => void"
+            ],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -692,7 +744,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -705,7 +759,9 @@
                 "tags": [],
                 "label": "error",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -721,7 +777,9 @@
             "tags": [],
             "label": "onIndexNameValidationStart",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -735,7 +793,9 @@
             "tags": [],
             "label": "onIndexNameValidationEnd",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "x-pack/plugins/file_upload/public/components/geo_upload_form/index_name_form.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -756,7 +816,9 @@
       "tags": [],
       "label": "FileUploadPluginStart",
       "description": [],
-      "signature": ["FileUploadStartApi"],
+      "signature": [
+        "FileUploadStartApi"
+      ],
       "path": "x-pack/plugins/file_upload/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -814,7 +876,10 @@
             "tags": [],
             "label": "overrides",
             "description": [],
-            "signature": ["FormattedOverrides", " | undefined"],
+            "signature": [
+              "FormattedOverrides",
+              " | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1281,7 +1346,9 @@
             "tags": [],
             "label": "column_names",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1293,7 +1360,9 @@
             "tags": [],
             "label": "explanation",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1305,7 +1374,9 @@
             "tags": [],
             "label": "grok_pattern",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1317,7 +1388,9 @@
             "tags": [],
             "label": "multiline_start_pattern",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1329,7 +1402,9 @@
             "tags": [],
             "label": "exclude_lines_pattern",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1341,7 +1416,9 @@
             "tags": [],
             "label": "java_timestamp_formats",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1353,7 +1430,9 @@
             "tags": [],
             "label": "joda_timestamp_formats",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1365,7 +1444,9 @@
             "tags": [],
             "label": "timestamp_field",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1377,7 +1458,9 @@
             "tags": [],
             "label": "should_trim_fields",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1389,7 +1472,9 @@
             "tags": [],
             "label": "ecs_compatibility",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1426,7 +1511,9 @@
             "tags": [],
             "label": "processors",
             "description": [],
-            "signature": ["any[]"],
+            "signature": [
+              "any[]"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1452,7 +1539,9 @@
             "tags": [],
             "label": "[key: string]: string | undefined",
             "description": [],
-            "signature": ["[key: string]:  string | undefined"],
+            "signature": [
+              "[key: string]:  string | undefined"
+            ],
             "path": "x-pack/plugins/file_upload/common/types.ts",
             "deprecated": false,
             "trackAdoption": false

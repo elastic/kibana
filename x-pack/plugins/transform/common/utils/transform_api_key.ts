@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { GrantAPIKeyResult } from '@kbn/security-plugin/server';
 import type { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { GrantAPIKeyResult } from '@kbn/security-plugin/server';
 
 export interface TransformAPIKey extends GrantAPIKeyResult {
   /**

@@ -64,9 +64,8 @@ describe('getElementPositionAndAttributes', () => {
       />
     `;
 
-    await expect(
-      getElementPositionAndAttributes(browser, eventLogger, layout)
-    ).resolves.toMatchInlineSnapshot(`
+    await expect(getElementPositionAndAttributes(browser, eventLogger, layout)).resolves
+      .toMatchInlineSnapshot(`
             Array [
               Object {
                 "attributes": Object {

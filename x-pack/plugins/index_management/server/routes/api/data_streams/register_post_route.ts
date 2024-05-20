@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
 import { IScopedClusterClient } from '@kbn/core/server';
-import { addBasePath } from '..';
 import { RouteDependencies } from '../../../types';
+import { addBasePath } from '..';
 
 const getDataStreams = (client: IScopedClusterClient, name = '*') => {
   return client.asCurrentUser.indices.getDataStream({

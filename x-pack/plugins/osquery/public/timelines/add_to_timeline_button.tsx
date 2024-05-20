@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
-import { isArray } from 'lodash';
 import React, { useCallback } from 'react';
+import { isArray } from 'lodash';
+import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useKibana } from '../common/lib/kibana';
 
 const TimelineComponent = React.memo((props) => <EuiButtonEmpty {...props} size="xs" />);

@@ -6,13 +6,13 @@
  */
 
 import { isUndefined } from 'lodash';
-import {
-  ElasticsearchMetricbeatNode,
-  ElasticsearchModifiedSource,
-  ElasticsearchResponseHit,
-} from '../../../../../common/types/es';
 import { calculateNodeType } from '../calculate_node_type';
 import { getNodeTypeClassLabel } from '../get_node_type_class_label';
+import {
+  ElasticsearchResponseHit,
+  ElasticsearchModifiedSource,
+  ElasticsearchMetricbeatNode,
+} from '../../../../../common/types/es';
 
 /**
  * @param {Array} nodeHits: info about each node from the hits in the get_nodes query

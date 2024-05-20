@@ -8,12 +8,12 @@
 
 import * as t from 'io-ts';
 
-import { id } from '../../common/id';
-import { meta } from '../../common/meta';
-import { refresh } from '../../common/refresh';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { _version } from '../../common/underscore_version';
+import { id } from '../../common/id';
+import { meta } from '../../common/meta';
 import { value } from '../../common/value';
+import { refresh } from '../../common/refresh';
 
 export const patchListItemSchema = t.intersection([
   t.exact(

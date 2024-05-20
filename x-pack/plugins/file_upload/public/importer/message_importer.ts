@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ImportDocMessage } from '../../common/types';
 import { Importer } from './importer';
+import type { ImportDocMessage } from '../../common/types';
 import type { CreateDocsResponse, ImportFactoryOptions } from './types';
 
 export class MessageImporter extends Importer {

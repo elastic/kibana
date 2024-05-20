@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonIcon, EuiIcon, EuiToolTip, formatDate } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { chain } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -24,18 +20,22 @@ import React, {
   RefObject,
   ReactElement,
 } from 'react';
+import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { chain } from 'lodash';
 import type { AlertTypeCount, Process, ProcessEventAlertCategory } from '../../../common';
-import { useDateFormat } from '../../hooks';
-import { useVisible } from '../../hooks/use_visible';
-import { SessionViewTelemetryKey } from '../../types';
 import { dataOrDash } from '../../utils/data_or_dash';
+import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
 import { AlertButton, ChildrenProcessesButton, OutputButton } from './buttons';
-import { Nbsp } from './nbsp';
-import { SplitText } from './split_text';
-import { useStyles } from './styles';
-import { TextHighlight } from './text_highlight';
 import { useButtonStyles } from './use_button_styles';
+import { useStyles } from './styles';
+import { SplitText } from './split_text';
+import { Nbsp } from './nbsp';
+import { useDateFormat } from '../../hooks';
+import { TextHighlight } from './text_highlight';
+import { SessionViewTelemetryKey } from '../../types';
 
 export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
   defaultMessage: 'Exec user change',

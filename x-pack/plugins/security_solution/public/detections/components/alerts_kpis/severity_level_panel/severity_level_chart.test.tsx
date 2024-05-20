@@ -7,8 +7,8 @@
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
-import { parsedAlerts } from './mock_data';
 import { SeverityLevelChart } from './severity_level_chart';
+import { parsedAlerts } from './mock_data';
 
 jest.mock('../../../../common/lib/kibana');
 

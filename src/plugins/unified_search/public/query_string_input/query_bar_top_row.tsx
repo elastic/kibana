@@ -6,52 +6,52 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconProps,
-  EuiSuperDatePicker,
-  EuiSuperUpdateButton,
-  EuiToolTip,
-  OnRefreshProps,
-  useIsWithinBreakpoints,
-  usePrettyDuration,
-} from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
-import type { PersistedLog } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import dateMath from '@kbn/datemath';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import classNames from 'classnames';
+import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
+import useObservable from 'react-use/lib/useObservable';
+import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
 import {
   getAggregateQueryMode,
-  getLanguageDisplayName,
-  isOfAggregateQueryType,
   isOfQueryType,
+  isOfAggregateQueryType,
+  getLanguageDisplayName,
 } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
-import classNames from 'classnames';
-import deepEqual from 'fast-deep-equal';
-import { throttle } from 'lodash';
-import React, { ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
+import { throttle } from 'lodash';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSuperDatePicker,
+  EuiFieldText,
+  usePrettyDuration,
+  EuiIconProps,
+  OnRefreshProps,
+  useIsWithinBreakpoints,
+  EuiSuperUpdateButton,
+  EuiToolTip,
+  EuiButton,
+  EuiButtonIcon,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { PersistedLog } from '@kbn/data-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import type { IUnifiedSearchPluginServices } from '../types';
+import QueryStringInputUI from './query_string_input';
+import { NoDataPopover } from './no_data_popover';
+import { shallowEqual } from '../utils/shallow_equal';
+import { AddFilterPopover } from './add_filter_popover';
 import {
   DataViewPicker,
   DataViewPickerProps,
   OnSaveTextLanguageQueryProps,
 } from '../dataview_picker';
-import type { IUnifiedSearchPluginServices } from '../types';
-import { shallowEqual } from '../utils/shallow_equal';
-import { AddFilterPopover } from './add_filter_popover';
-import { NoDataPopover } from './no_data_popover';
-import QueryStringInputUI from './query_string_input';
 
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
 import type {
@@ -781,8 +781,8 @@ export const QueryBarTopRow = React.memo(
                 {!isQueryLangSelected
                   ? renderQueryInput()
                   : !codeEditorIsExpanded
-                    ? renderTextLangEditor()
-                    : null}
+                  ? renderTextLangEditor()
+                  : null}
               </EuiFlexItem>
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}

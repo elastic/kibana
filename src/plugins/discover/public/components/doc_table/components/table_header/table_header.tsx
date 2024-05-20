@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import React, { useMemo } from 'react';
-import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { getDefaultSort } from '../../../../utils/sorting';
-import { getDisplayedColumns } from './helpers';
+import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { TableHeaderColumn } from './table_header_column';
+import { getDisplayedColumns } from './helpers';
+import { getDefaultSort } from '../../../../utils/sorting';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 interface Props {
   columns: string[];

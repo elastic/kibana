@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import type { AppContextTestRender } from '../../../../common/mock/endpoint';
 import type { trustedAppsAllHttpMocks } from '../../../mocks';
-import { getDeferred } from '../../../mocks/utils';
-import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 import type { ArtifactListPageProps } from '../artifact_list_page';
+import { act, fireEvent, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import type { ArtifactListPageRenderingSetup } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
+import { getDeferred } from '../../../mocks/utils';
+import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
 
 jest.mock('../../../services/policies/hooks', () => ({
   useGetEndpointSpecificPolicies: jest.fn(),

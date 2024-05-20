@@ -6,16 +6,16 @@
  */
 
 import {
-  EuiAccordion,
   EuiButton,
-  EuiCallOut,
-  EuiCodeBlock,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiCallOut,
   EuiSpacer,
+  EuiCodeBlock,
+  EuiModalFooter,
+  EuiAccordion,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';

@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
-import type { Query } from '@kbn/es-query';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type {
-  ChartInfo,
-  DataType,
   LensPublicStart,
+  DataType,
+  ChartInfo,
   LensSavedObjectAttributes,
 } from '@kbn/lens-plugin/public';
-import { layerTypes } from '@kbn/lens-plugin/public';
-import type { LensApi } from '@kbn/lens-plugin/public';
-import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { Query } from '@kbn/es-query';
 import { apiIsOfType } from '@kbn/presentation-publishing';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { layerTypes } from '@kbn/lens-plugin/public';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
+import type { LensApi } from '@kbn/lens-plugin/public';
+import type { DashboardAPI } from '@kbn/dashboard-plugin/public';
+import { ML_PAGES, ML_APP_LOCATOR } from '../../../../../common/constants/locator';
 
 export const COMPATIBLE_SERIES_TYPES = [
   'line',

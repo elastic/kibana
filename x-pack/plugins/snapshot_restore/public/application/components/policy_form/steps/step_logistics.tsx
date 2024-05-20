@@ -5,34 +5,34 @@
  * 2.0.
  */
 
+import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCode,
   EuiDescribedFormGroup,
+  EuiTitle,
+  EuiFormRow,
   EuiFieldText,
+  EuiSelect,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiButtonEmpty,
   EuiLink,
-  EuiSelect,
   EuiSpacer,
   EuiText,
-  EuiTitle,
+  EuiCallOut,
+  EuiCode,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState } from 'react';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { StepProps } from '.';
-import { InlineLoading } from '../..';
 import { Repository } from '../../../../../common/types';
-import { CronEditor, Frequency, SectionError } from '../../../../shared_imports';
+import { Frequency, CronEditor, SectionError } from '../../../../shared_imports';
 import { useCore, useServices } from '../../../app_context';
-import { DEFAULT_POLICY_FREQUENCY, DEFAULT_POLICY_SCHEDULE } from '../../../constants';
+import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';
 import { useLoadRepositories } from '../../../services/http';
 import { linkToAddRepository } from '../../../services/navigation';
+import { InlineLoading } from '../..';
+import { StepProps } from '.';
 
 export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
   policy,

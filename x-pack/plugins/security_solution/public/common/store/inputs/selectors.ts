@@ -8,10 +8,10 @@
 import { createSelector } from 'reselect';
 
 import type { Filter, Query } from '@kbn/es-query';
-import type { State } from '../types';
 import type { InputsState } from './reducer';
+import type { State } from '../types';
 
-import type { GlobalQuery, InputsModel, InputsRange } from './model';
+import type { InputsModel, InputsRange, GlobalQuery } from './model';
 
 const defaultQuery = {
   id: 'kql',

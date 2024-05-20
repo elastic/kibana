@@ -111,44 +111,45 @@ export interface ContentEditorKibanaDependencies {
 /**
  * Kibana-specific Provider that maps to known dependency types.
  */
-export const ContentEditorKibanaProvider: FC<PropsWithChildren<ContentEditorKibanaDependencies>> =
-  ({ children, ...services }) => {
-    const { core, savedObjectsTagging } = services;
-    const { overlays, notifications, ...startServices } = core;
-    const { openFlyout: coreOpenFlyout } = overlays;
+export const ContentEditorKibanaProvider: FC<
+  PropsWithChildren<ContentEditorKibanaDependencies>
+> = ({ children, ...services }) => {
+  const { core, savedObjectsTagging } = services;
+  const { overlays, notifications, ...startServices } = core;
+  const { openFlyout: coreOpenFlyout } = overlays;
 
-    const TagList = useMemo(() => {
-      const Comp: Services['TagList'] = ({ references }) => {
-        if (!savedObjectsTagging?.ui.components.TagList) {
-          return null;
-        }
-        const PluginTagList = savedObjectsTagging.ui.components.TagList;
-        return <PluginTagList object={{ references }} />;
-      };
+  const TagList = useMemo(() => {
+    const Comp: Services['TagList'] = ({ references }) => {
+      if (!savedObjectsTagging?.ui.components.TagList) {
+        return null;
+      }
+      const PluginTagList = savedObjectsTagging.ui.components.TagList;
+      return <PluginTagList object={{ references }} />;
+    };
 
-      return Comp;
-    }, [savedObjectsTagging?.ui.components.TagList]);
+    return Comp;
+  }, [savedObjectsTagging?.ui.components.TagList]);
 
-    const openFlyout = useCallback(
-      (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
-        return coreOpenFlyout(toMountPoint(node, startServices), options);
-      },
-      [coreOpenFlyout, startServices]
-    );
+  const openFlyout = useCallback(
+    (node: ReactNode, options: OverlayFlyoutOpenOptions) => {
+      return coreOpenFlyout(toMountPoint(node, startServices), options);
+    },
+    [coreOpenFlyout, startServices]
+  );
 
-    return (
-      <ContentEditorProvider
-        openFlyout={openFlyout}
-        notifyError={(title, text) => {
-          notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
-        }}
-        TagList={TagList}
-        TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}
-      >
-        {children}
-      </ContentEditorProvider>
-    );
-  };
+  return (
+    <ContentEditorProvider
+      openFlyout={openFlyout}
+      notifyError={(title, text) => {
+        notifications.toasts.addDanger({ title: toMountPoint(title, startServices), text });
+      }}
+      TagList={TagList}
+      TagSelector={savedObjectsTagging?.ui.components.SavedObjectSaveModalTagSelector}
+    >
+      {children}
+    </ContentEditorProvider>
+  );
+};
 
 /**
  * React hook for accessing pre-wired services.

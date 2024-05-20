@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { StartServicesAccessor } from '@kbn/core/public';
 import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs';
+import { StartServicesAccessor } from '@kbn/core/public';
 import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,

@@ -11,12 +11,6 @@ import type { Filter } from '@kbn/es-query';
 import { escapeDataProviderId } from '@kbn/securitysolution-t-grid';
 import { isArray, isEmpty, isString } from 'lodash/fp';
 import { useMemo } from 'react';
-import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
-import type { DataProvider, DataProvidersAnd, QueryOperator } from '../../../../../common/types';
-import { IS_OPERATOR } from '../../../../../common/types';
-import { PORT_NAMES } from '../../../../explore/network/components/port/helpers';
-import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
-import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/renderers/bytes';
 import {
   AGENT_STATUS_FIELD_NAME,
   EVENT_MODULE_FIELD_NAME,
@@ -30,8 +24,14 @@ import {
   SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
+import { BYTES_FORMAT } from '../../../../timelines/components/timeline/body/renderers/bytes';
+import { EVENT_DURATION_FIELD_NAME } from '../../../../timelines/components/duration';
 import { getDisplayValue } from '../../../../timelines/components/timeline/data_providers/helpers';
+import { PORT_NAMES } from '../../../../explore/network/components/port/helpers';
+import { INDICATOR_REFERENCE } from '../../../../../common/cti/constants';
 import type { BrowserField } from '../../../containers/source';
+import type { DataProvider, DataProvidersAnd, QueryOperator } from '../../../../../common/types';
+import { IS_OPERATOR } from '../../../../../common/types';
 
 export interface UseActionCellDataProvider {
   contextId?: string;

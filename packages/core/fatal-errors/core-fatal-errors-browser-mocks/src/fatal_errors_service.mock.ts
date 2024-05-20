@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import { FatalErrorsService } from '@kbn/core-fatal-errors-browser-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 const createSetupContractMock = () => {
   const setupContract: jest.Mocked<FatalErrorsSetup> = {

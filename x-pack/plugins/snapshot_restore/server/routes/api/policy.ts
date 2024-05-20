@@ -5,12 +5,12 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TypeOf, schema } from '@kbn/config-schema';
+import { schema, TypeOf } from '@kbn/config-schema';
 
+import { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
-import { PolicyIndicesResponse, SlmPolicyEs } from '../../../common/types';
 import { getManagedPolicyNames } from '../../lib';
-import { ResolveIndexResponseFromES, RouteDependencies } from '../../types';
+import { RouteDependencies, ResolveIndexResponseFromES } from '../../types';
 import { addBasePath } from '../helpers';
 import { nameParameterSchema, policySchema } from './validate_schemas';
 

@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { Subject, of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { LoggerContextConfigType } from './logging_config';
 import {
-  InternalLoggingServicePreboot,
-  InternalLoggingServiceSetup,
   LoggingService,
+  InternalLoggingServiceSetup,
+  InternalLoggingServicePreboot,
 } from './logging_service';
+import { LoggerContextConfigType } from './logging_config';
 import type { ILoggingSystem } from './logging_system';
 
 const createLoggingSystemMock = () => {

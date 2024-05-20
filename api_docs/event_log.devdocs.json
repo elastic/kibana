@@ -38,7 +38,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -50,7 +52,9 @@
                 "tags": [],
                 "label": "opts",
                 "description": [],
-                "signature": ["ConstructorOpts"],
+                "signature": [
+                  "ConstructorOpts"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -66,7 +70,9 @@
             "tags": [],
             "label": "shutdown",
             "description": [],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -80,7 +86,9 @@
             "tags": [],
             "label": "indexDocument",
             "description": [],
-            "signature": ["(doc: TDoc) => void"],
+            "signature": [
+              "(doc: TDoc) => void"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -92,7 +100,9 @@
                 "tags": [],
                 "label": "doc",
                 "description": [],
-                "signature": ["TDoc"],
+                "signature": [
+                  "TDoc"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -108,7 +118,9 @@
             "tags": [],
             "label": "indexDocuments",
             "description": [],
-            "signature": ["(docs: TDoc[]) => Promise<void>"],
+            "signature": [
+              "(docs: TDoc[]) => Promise<void>"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -120,7 +132,9 @@
                 "tags": [],
                 "label": "docs",
                 "description": [],
-                "signature": ["TDoc[]"],
+                "signature": [
+                  "TDoc[]"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -136,7 +150,9 @@
             "tags": [],
             "label": "doesIndexTemplateExist",
             "description": [],
-            "signature": ["(name: string) => Promise<boolean>"],
+            "signature": [
+              "(name: string) => Promise<boolean>"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -148,7 +164,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -164,7 +182,9 @@
             "tags": [],
             "label": "createIndexTemplate",
             "description": [],
-            "signature": ["(name: string, template: Record<string, unknown>) => Promise<void>"],
+            "signature": [
+              "(name: string, template: Record<string, unknown>) => Promise<void>"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -176,7 +196,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -189,7 +211,9 @@
                 "tags": [],
                 "label": "template",
                 "description": [],
-                "signature": ["Record<string, unknown>"],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -221,7 +245,9 @@
                 "tags": [],
                 "label": "indexTemplatePattern",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -253,7 +279,9 @@
                 "tags": [],
                 "label": "indexTemplateName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -266,7 +294,9 @@
                 "tags": [],
                 "label": "currentIndexTemplate",
                 "description": [],
-                "signature": ["IndicesTemplateMapping"],
+                "signature": [
+                  "IndicesTemplateMapping"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -282,7 +312,11 @@
             "tags": [],
             "label": "getExistingIndices",
             "description": [],
-            "signature": ["(indexPattern: string) => Promise<", "IndicesGetSettingsResponse", ">"],
+            "signature": [
+              "(indexPattern: string) => Promise<",
+              "IndicesGetSettingsResponse",
+              ">"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -294,7 +328,9 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -310,7 +346,9 @@
             "tags": [],
             "label": "setIndexToHidden",
             "description": [],
-            "signature": ["(indexName: string) => Promise<void>"],
+            "signature": [
+              "(indexName: string) => Promise<void>"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -322,7 +360,9 @@
                 "tags": [],
                 "label": "indexName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -338,7 +378,11 @@
             "tags": [],
             "label": "getExistingIndexAliases",
             "description": [],
-            "signature": ["(indexPattern: string) => Promise<", "IndicesGetAliasResponse", ">"],
+            "signature": [
+              "(indexPattern: string) => Promise<",
+              "IndicesGetAliasResponse",
+              ">"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -350,7 +394,9 @@
                 "tags": [],
                 "label": "indexPattern",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -382,7 +428,9 @@
                 "tags": [],
                 "label": "aliasName",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -395,7 +443,10 @@
                 "tags": [],
                 "label": "currentAliasData",
                 "description": [],
-                "signature": ["ParsedIndexAlias", "[]"],
+                "signature": [
+                  "ParsedIndexAlias",
+                  "[]"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -411,7 +462,9 @@
             "tags": [],
             "label": "doesDataStreamExist",
             "description": [],
-            "signature": ["(name: string) => Promise<boolean>"],
+            "signature": [
+              "(name: string) => Promise<boolean>"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -423,7 +476,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -439,7 +494,9 @@
             "tags": [],
             "label": "createDataStream",
             "description": [],
-            "signature": ["(name: string, body?: Record<string, unknown>) => Promise<void>"],
+            "signature": [
+              "(name: string, body?: Record<string, unknown>) => Promise<void>"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -451,7 +508,9 @@
                 "tags": [],
                 "label": "name",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -464,7 +523,9 @@
                 "tags": [],
                 "label": "body",
                 "description": [],
-                "signature": ["Record<string, unknown>"],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -504,7 +565,9 @@
                 "tags": [],
                 "label": "queryOptions",
                 "description": [],
-                "signature": ["FindEventsOptionsBySavedObjectFilter"],
+                "signature": [
+                  "FindEventsOptionsBySavedObjectFilter"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -544,7 +607,9 @@
                 "tags": [],
                 "label": "queryOptions",
                 "description": [],
-                "signature": ["FindEventsOptionsWithAuthFilter"],
+                "signature": [
+                  "FindEventsOptionsWithAuthFilter"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -584,7 +649,9 @@
                 "tags": [],
                 "label": "queryOptions",
                 "description": [],
-                "signature": ["AggregateEventsOptionsBySavedObjectFilter"],
+                "signature": [
+                  "AggregateEventsOptionsBySavedObjectFilter"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -624,7 +691,9 @@
                 "tags": [],
                 "label": "queryOptions",
                 "description": [],
-                "signature": ["AggregateEventsWithAuthFilter"],
+                "signature": [
+                  "AggregateEventsWithAuthFilter"
+                ],
                 "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -645,7 +714,11 @@
         "tags": [],
         "label": "createReadySignal",
         "description": [],
-        "signature": ["() => ", "ReadySignal", "<T>"],
+        "signature": [
+          "() => ",
+          "ReadySignal",
+          "<T>"
+        ],
         "path": "x-pack/plugins/event_log/server/lib/ready_signal.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -660,7 +733,9 @@
         "tags": [],
         "label": "millisToNanos",
         "description": [],
-        "signature": ["(millis: number) => string"],
+        "signature": [
+          "(millis: number) => string"
+        ],
         "path": "x-pack/plugins/event_log/common/lib/millis_to_nanos.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -672,7 +747,9 @@
             "tags": [],
             "label": "millis",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/event_log/common/lib/millis_to_nanos.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -689,7 +766,9 @@
         "tags": [],
         "label": "nanosToMillis",
         "description": [],
-        "signature": ["(nanos: string | number) => number"],
+        "signature": [
+          "(nanos: string | number) => number"
+        ],
         "path": "x-pack/plugins/event_log/common/lib/nanos_to_millis.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -701,7 +780,9 @@
             "tags": [],
             "label": "nanos",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "x-pack/plugins/event_log/common/lib/nanos_to_millis.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -731,7 +812,10 @@
             "tags": [],
             "label": "hits",
             "description": [],
-            "signature": ["SearchHitsMetadata", "<unknown> | undefined"],
+            "signature": [
+              "SearchHitsMetadata",
+              "<unknown> | undefined"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -743,7 +827,11 @@
             "tags": [],
             "label": "aggregations",
             "description": [],
-            "signature": ["Record<string, ", "AggregationsAggregate", "> | undefined"],
+            "signature": [
+              "Record<string, ",
+              "AggregationsAggregate",
+              "> | undefined"
+            ],
             "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -793,7 +881,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -806,7 +896,9 @@
                 "tags": [],
                 "label": "ids",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -819,7 +911,11 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["Partial<", "FindOptionsType", "> | undefined"],
+                "signature": [
+                  "Partial<",
+                  "FindOptionsType",
+                  "> | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -832,7 +928,9 @@
                 "tags": [],
                 "label": "legacyIds",
                 "description": [],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -880,7 +978,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -893,7 +993,9 @@
                 "tags": [],
                 "label": "ids",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -927,7 +1029,9 @@
                 "tags": [],
                 "label": "namespace",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -940,7 +1044,11 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["Partial<", "FindOptionsType", "> | undefined"],
+                "signature": [
+                  "Partial<",
+                  "FindOptionsType",
+                  "> | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -980,7 +1088,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -993,7 +1103,9 @@
                 "tags": [],
                 "label": "ids",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1006,7 +1118,11 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["Partial<", "AggregateOptionsType", "> | undefined"],
+                "signature": [
+                  "Partial<",
+                  "AggregateOptionsType",
+                  "> | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1019,7 +1135,9 @@
                 "tags": [],
                 "label": "legacyIds",
                 "description": [],
-                "signature": ["string[] | undefined"],
+                "signature": [
+                  "string[] | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1067,7 +1185,9 @@
                 "tags": [],
                 "label": "type",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1101,7 +1221,11 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "signature": ["Partial<", "AggregateOptionsType", "> | undefined"],
+                "signature": [
+                  "Partial<",
+                  "AggregateOptionsType",
+                  "> | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1114,7 +1238,9 @@
                 "tags": [],
                 "label": "namespaces",
                 "description": [],
-                "signature": ["(string | undefined)[] | undefined"],
+                "signature": [
+                  "(string | undefined)[] | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1127,7 +1253,9 @@
                 "tags": [],
                 "label": "includeSpaceAgnostic",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1157,7 +1285,11 @@
             "tags": [],
             "label": "logEvent",
             "description": [],
-            "signature": ["(properties: ", "IEvent", ") => void"],
+            "signature": [
+              "(properties: ",
+              "IEvent",
+              ") => void"
+            ],
             "path": "x-pack/plugins/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1169,7 +1301,9 @@
                 "tags": [],
                 "label": "properties",
                 "description": [],
-                "signature": ["IEvent"],
+                "signature": [
+                  "IEvent"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1185,7 +1319,11 @@
             "tags": [],
             "label": "startTiming",
             "description": [],
-            "signature": ["(event: ", "IEvent", ", startTime?: Date | undefined) => void"],
+            "signature": [
+              "(event: ",
+              "IEvent",
+              ", startTime?: Date | undefined) => void"
+            ],
             "path": "x-pack/plugins/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1197,7 +1335,9 @@
                 "tags": [],
                 "label": "event",
                 "description": [],
-                "signature": ["IEvent"],
+                "signature": [
+                  "IEvent"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1210,7 +1350,9 @@
                 "tags": [],
                 "label": "startTime",
                 "description": [],
-                "signature": ["Date | undefined"],
+                "signature": [
+                  "Date | undefined"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1226,7 +1368,11 @@
             "tags": [],
             "label": "stopTiming",
             "description": [],
-            "signature": ["(event: ", "IEvent", ") => void"],
+            "signature": [
+              "(event: ",
+              "IEvent",
+              ") => void"
+            ],
             "path": "x-pack/plugins/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1238,7 +1384,9 @@
                 "tags": [],
                 "label": "event",
                 "description": [],
-                "signature": ["IEvent"],
+                "signature": [
+                  "IEvent"
+                ],
                 "path": "x-pack/plugins/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1351,7 +1499,9 @@
         "tags": [],
         "label": "SAVED_OBJECT_REL_PRIMARY",
         "description": [],
-        "signature": ["\"primary\""],
+        "signature": [
+          "\"primary\""
+        ],
         "path": "x-pack/plugins/event_log/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1377,7 +1527,9 @@
           "tags": [],
           "label": "isLoggingEntries",
           "description": [],
-          "signature": ["() => boolean"],
+          "signature": [
+            "() => boolean"
+          ],
           "path": "x-pack/plugins/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1391,7 +1543,9 @@
           "tags": [],
           "label": "isIndexingEntries",
           "description": [],
-          "signature": ["() => boolean"],
+          "signature": [
+            "() => boolean"
+          ],
           "path": "x-pack/plugins/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1405,7 +1559,9 @@
           "tags": [],
           "label": "registerProviderActions",
           "description": [],
-          "signature": ["(provider: string, actions: string[]) => void"],
+          "signature": [
+            "(provider: string, actions: string[]) => void"
+          ],
           "path": "x-pack/plugins/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1417,7 +1573,9 @@
               "tags": [],
               "label": "provider",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1430,7 +1588,9 @@
               "tags": [],
               "label": "actions",
               "description": [],
-              "signature": ["string[]"],
+              "signature": [
+                "string[]"
+              ],
               "path": "x-pack/plugins/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1446,7 +1606,9 @@
           "tags": [],
           "label": "isProviderActionRegistered",
           "description": [],
-          "signature": ["(provider: string, action: string) => boolean"],
+          "signature": [
+            "(provider: string, action: string) => boolean"
+          ],
           "path": "x-pack/plugins/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1458,7 +1620,9 @@
               "tags": [],
               "label": "provider",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1471,7 +1635,9 @@
               "tags": [],
               "label": "action",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1487,7 +1653,9 @@
           "tags": [],
           "label": "getProviderActions",
           "description": [],
-          "signature": ["() => Map<string, Set<string>>"],
+          "signature": [
+            "() => Map<string, Set<string>>"
+          ],
           "path": "x-pack/plugins/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1501,7 +1669,11 @@
           "tags": [],
           "label": "registerSavedObjectProvider",
           "description": [],
-          "signature": ["(type: string, provider: ", "SavedObjectProvider", ") => void"],
+          "signature": [
+            "(type: string, provider: ",
+            "SavedObjectProvider",
+            ") => void"
+          ],
           "path": "x-pack/plugins/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1513,7 +1685,9 @@
               "tags": [],
               "label": "type",
               "description": [],
-              "signature": ["string"],
+              "signature": [
+                "string"
+              ],
               "path": "x-pack/plugins/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1526,7 +1700,9 @@
               "tags": [],
               "label": "provider",
               "description": [],
-              "signature": ["SavedObjectProvider"],
+              "signature": [
+                "SavedObjectProvider"
+              ],
               "path": "x-pack/plugins/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1565,7 +1741,9 @@
               "tags": [],
               "label": "properties",
               "description": [],
-              "signature": ["IEvent"],
+              "signature": [
+                "IEvent"
+              ],
               "path": "x-pack/plugins/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -1581,7 +1759,9 @@
           "tags": [],
           "label": "getIndexPattern",
           "description": [],
-          "signature": ["() => string"],
+          "signature": [
+            "() => string"
+          ],
           "path": "x-pack/plugins/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1595,7 +1775,9 @@
           "tags": [],
           "label": "isEsContextReady",
           "description": [],
-          "signature": ["() => Promise<boolean>"],
+          "signature": [
+            "() => Promise<boolean>"
+          ],
           "path": "x-pack/plugins/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -1686,7 +1868,9 @@
         "tags": [],
         "label": "millisToNanos",
         "description": [],
-        "signature": ["(millis: number) => string"],
+        "signature": [
+          "(millis: number) => string"
+        ],
         "path": "x-pack/plugins/event_log/common/lib/millis_to_nanos.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1698,7 +1882,9 @@
             "tags": [],
             "label": "millis",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "x-pack/plugins/event_log/common/lib/millis_to_nanos.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1715,7 +1901,9 @@
         "tags": [],
         "label": "nanosToMillis",
         "description": [],
-        "signature": ["(nanos: string | number) => number"],
+        "signature": [
+          "(nanos: string | number) => number"
+        ],
         "path": "x-pack/plugins/event_log/common/lib/nanos_to_millis.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1727,7 +1915,9 @@
             "tags": [],
             "label": "nanos",
             "description": [],
-            "signature": ["string | number"],
+            "signature": [
+              "string | number"
+            ],
             "path": "x-pack/plugins/event_log/common/lib/nanos_to_millis.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1748,7 +1938,9 @@
         "tags": [],
         "label": "BASE_EVENT_LOG_API_PATH",
         "description": [],
-        "signature": ["\"/internal/event_log\""],
+        "signature": [
+          "\"/internal/event_log\""
+        ],
         "path": "x-pack/plugins/event_log/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,

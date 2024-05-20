@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiInMemoryTable } from '@elastic/eui';
 
 import { HeaderSection } from '../../../common/components/header_section';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';

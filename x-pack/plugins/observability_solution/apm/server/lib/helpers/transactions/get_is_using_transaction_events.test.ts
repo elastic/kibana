@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
-import { SearchParamsMock, inspectSearchParams } from '../../../utils/test_helpers';
 import { getIsUsingTransactionEvents } from './get_is_using_transaction_events';
+import { SearchParamsMock, inspectSearchParams } from '../../../utils/test_helpers';
+import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
 
 const mockResponseNoHits = {
   took: 398,

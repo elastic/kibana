@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { DocumentationLink } from './documentation_link';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { NoDataViewsPrompt } from './no_data_views.component';
+import { DocumentationLink } from './documentation_link';
 
 describe('<NoDataViewsPromptComponent />', () => {
   test('is rendered correctly', () => {

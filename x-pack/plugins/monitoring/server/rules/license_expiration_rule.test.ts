@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { LicenseExpirationRule } from './license_expiration_rule';
+import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
+import { fetchLicenses } from '../lib/alerts/fetch_licenses';
+import { fetchClusters } from '../lib/alerts/fetch_clusters';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { RULE_LICENSE_EXPIRATION } from '../../common/constants';
-import { fetchClusters } from '../lib/alerts/fetch_clusters';
-import { fetchLicenses } from '../lib/alerts/fetch_licenses';
-import { LicenseExpirationRule } from './license_expiration_rule';
 
 const RealDate = Date;
 

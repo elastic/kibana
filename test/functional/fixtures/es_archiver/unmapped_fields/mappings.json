@@ -5,7 +5,7 @@
     "mappings": {
       "dynamic": "false",
       "properties": {
-        "timestamp": { "type": "date" },
+        "timestamp": {"type": "date"},
         "message": { "type": "text" },
         "address": { "type": "text" }
       }

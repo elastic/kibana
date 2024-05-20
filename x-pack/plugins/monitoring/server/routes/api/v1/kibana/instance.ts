@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import { getKibanaInfo } from '../../../../lib/kibana/get_kibana_info';
+import { handleError } from '../../../../lib/errors';
+import { getMetrics } from '../../../../lib/details/get_metrics';
+import { metricSet } from './metric_set_instance';
+import { LegacyRequest } from '../../../../types';
+import { MonitoringCore } from '../../../../types';
 import {
   postKibanaInstanceRequestParamsRT,
   postKibanaInstanceRequestPayloadRT,
   postKibanaInstanceResponsePayloadRT,
 } from '../../../../../common/http_api/kibana';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import { getMetrics } from '../../../../lib/details/get_metrics';
-import { handleError } from '../../../../lib/errors';
-import { getKibanaInfo } from '../../../../lib/kibana/get_kibana_info';
-import { LegacyRequest } from '../../../../types';
-import { MonitoringCore } from '../../../../types';
-import { metricSet } from './metric_set_instance';
 
 export function kibanaInstanceRoute(server: MonitoringCore) {
   const validateParams = createValidationFunction(postKibanaInstanceRequestParamsRT);

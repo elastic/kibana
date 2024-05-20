@@ -8,7 +8,6 @@
 
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { CapabilitiesSetup } from '@kbn/core-capabilities-server';
-import type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
 import type { DeprecationsServiceSetup } from '@kbn/core-deprecations-server';
 import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import type { ElasticsearchServiceSetup } from '@kbn/core-elasticsearch-server';
@@ -19,14 +18,15 @@ import type { HttpServiceSetup } from '@kbn/core-http-server';
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { LoggingServiceSetup } from '@kbn/core-logging-server';
 import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
-import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
 import type { SavedObjectsServiceSetup } from '@kbn/core-saved-objects-server';
-import type { SecurityServiceSetup } from '@kbn/core-security-server';
 import type { StatusServiceSetup } from '@kbn/core-status-server';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import type { CoreUsageDataSetup } from '@kbn/core-usage-data-server';
-import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
+import type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
 import type { UserSettingsServiceSetup } from '@kbn/core-user-settings-server';
+import type { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
+import type { SecurityServiceSetup } from '@kbn/core-security-server';
+import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
 import type { CoreStart } from './core_start';
 
 /**
@@ -94,5 +94,5 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
  */
 export type StartServicesAccessor<
   TPluginsStart extends object = object,
-  TStart = unknown,
+  TStart = unknown
 > = () => Promise<[CoreStart, TPluginsStart, TStart]>;

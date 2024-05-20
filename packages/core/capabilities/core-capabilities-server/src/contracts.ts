@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { CapabilitiesProvider, CapabilitiesSwitcher } from './capabilities';
+import type { Capabilities } from '@kbn/core-capabilities-common';
+import type { CapabilitiesSwitcher, CapabilitiesProvider } from './capabilities';
 
 /**
  * APIs to manage the {@link Capabilities} that will be used by the application.

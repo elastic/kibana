@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
+import { useMemo } from 'react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
-import { Ping } from '../../../../../../common/runtime_types';
 import { asMutableArray } from '../../../../../../common/utils/as_mutable_array';
+import { Ping } from '../../../../../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 
 export function useErrorFailedStep(checkGroups: string[]) {

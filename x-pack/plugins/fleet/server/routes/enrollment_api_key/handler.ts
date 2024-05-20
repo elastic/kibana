@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { type RequestHandler, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import type {
-  DeleteEnrollmentAPIKeyResponse,
+  GetEnrollmentAPIKeysRequestSchema,
+  PostEnrollmentAPIKeyRequestSchema,
+  DeleteEnrollmentAPIKeyRequestSchema,
+  GetOneEnrollmentAPIKeyRequestSchema,
+} from '../../types';
+import type {
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
+  DeleteEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
 } from '../../../common/types';
-import { AgentPolicyNotFoundError, defaultFleetErrorHandler } from '../../errors';
-import { agentPolicyService } from '../../services/agent_policy';
 import * as APIKeyService from '../../services/api_keys';
-import type {
-  DeleteEnrollmentAPIKeyRequestSchema,
-  GetEnrollmentAPIKeysRequestSchema,
-  GetOneEnrollmentAPIKeyRequestSchema,
-  PostEnrollmentAPIKeyRequestSchema,
-} from '../../types';
+import { agentPolicyService } from '../../services/agent_policy';
+import { defaultFleetErrorHandler, AgentPolicyNotFoundError } from '../../errors';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,

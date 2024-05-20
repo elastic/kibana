@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import del from 'del';
 import { access } from 'fs/promises';
+import del from 'del';
+import type { Logger } from '@kbn/core/server';
 import type { ChromiumArchivePaths, PackageInfo } from '../chromium';
 import { sha256 } from './checksum';
 import { fetch } from './fetch';

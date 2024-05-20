@@ -15,19 +15,19 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
 import { PLUGIN_NAME, sloAppId } from '../common';
-import { ExperimentalFeatures, SloConfig } from '../common/config';
-import { SLOS_BASE_PATH } from '../common/locators/paths';
-import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
-import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
-import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
+import type { SloPublicSetup, SloPublicStart } from './types';
 import { SloDetailsLocatorDefinition } from './locators/slo_details';
 import { SloEditLocatorDefinition } from './locators/slo_edit';
 import { SloListLocatorDefinition } from './locators/slo_list';
+import { SLOS_BASE_PATH } from '../common/locators/paths';
 import { getCreateSLOFlyoutLazy } from './pages/slo_edit/shared_flyout/get_create_slo_flyout';
 import { registerBurnRateRuleType } from './rules/register_burn_rate_rule_type';
-import { SloPublicPluginsSetup, SloPublicPluginsStart } from './types';
-import type { SloPublicSetup, SloPublicStart } from './types';
+import { ExperimentalFeatures, SloConfig } from '../common/config';
+import { SLO_OVERVIEW_EMBEDDABLE_ID } from './embeddable/slo/overview/constants';
+import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
+import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {

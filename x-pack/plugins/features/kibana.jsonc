@@ -6,8 +6,15 @@
     "id": "features",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "features"],
-    "requiredPlugins": ["licensing"],
-    "extraPublicDirs": ["common"]
+    "configPath": [
+      "xpack",
+      "features"
+    ],
+    "requiredPlugins": [
+      "licensing"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

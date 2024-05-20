@@ -5,17 +5,17 @@
  * 2.0.
  */
 import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import moment from 'moment';
+import { takeUntil, distinctUntilChanged, skip } from 'rxjs';
+import { from } from 'rxjs';
+import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import moment from 'moment';
-import React from 'react';
-import { distinctUntilChanged, skip, takeUntil } from 'rxjs';
-import { from } from 'rxjs';
-import type { JobId } from '../../../common/types/anomaly_detection_jobs';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
-import { getMlGlobalServices } from '../../application/util/get_services';
+import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { JobSelectorFlyout } from './components/job_selector_flyout';
+import { getMlGlobalServices } from '../../application/util/get_services';
 
 /**
  * Handles Anomaly detection jobs selection by a user.

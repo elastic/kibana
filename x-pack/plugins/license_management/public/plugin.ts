@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { firstValueFrom } from 'rxjs';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { PLUGIN } from '../common/constants';
+import { ClientConfigType } from './types';
 import { AppDependencies } from './application';
 import { BreadcrumbService } from './application/breadcrumbs';
 import { LicenseManagementLocator, LicenseManagementLocatorDefinition } from './locator';
-import { ClientConfigType } from './types';
 
 interface PluginsDependenciesSetup {
   management: ManagementSetup;

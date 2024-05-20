@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { createHash } from 'crypto';
-import Fs from 'fs';
 import Path from 'path';
+import Fs from 'fs';
+import { createHash } from 'crypto';
 
+import globby from 'globby';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { escape } from 'he';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 import { JourneyScreenshots } from '@kbn/journeys';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
-import globby from 'globby';
-import { escape } from 'he';
 
 import { BuildkiteMetadata } from './buildkite_metadata';
 import { TestFailure } from './get_failures';

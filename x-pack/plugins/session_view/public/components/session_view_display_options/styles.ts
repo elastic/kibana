@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CSSObject } from '@emotion/react';
 import { useMemo } from 'react';
+import { CSSObject } from '@emotion/react';
 
 export const useStyles = () => {
   const cached = useMemo(() => {

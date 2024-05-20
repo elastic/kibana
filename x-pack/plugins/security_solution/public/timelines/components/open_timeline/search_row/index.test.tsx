@@ -14,8 +14,8 @@ import { TimelineType } from '../../../../../common/api/timeline';
 
 import { SearchRow } from '.';
 
-import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import * as i18n from '../translations';
+import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({
   eui: {

@@ -6,6 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { FunctionComponent } from 'react';
 import {
   EuiAvatar,
   EuiCheckableCard,
@@ -15,12 +18,9 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { FunctionComponent } from 'react';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { OnboardingFlowPackageList } from '../packages_list';

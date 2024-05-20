@@ -38,10 +38,10 @@ export const RuleExecutionStatusValues = [
   'unknown',
   'warning',
 ] as const;
-export type RuleExecutionStatuses = (typeof RuleExecutionStatusValues)[number];
+export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 
 export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
-export type RuleLastRunOutcomes = (typeof RuleLastRunOutcomeValues)[number];
+export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
 
 export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
   succeeded: 0,

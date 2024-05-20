@@ -9,10 +9,10 @@
 import Path from 'path';
 import Fsp from 'fs/promises';
 
+import { run } from '../../lib/spawn.mjs';
 import { isFile } from '../../lib/fs.mjs';
 import { dedent } from '../../lib/indent.mjs';
 import { REPO_ROOT } from '../../lib/paths.mjs';
-import { run } from '../../lib/spawn.mjs';
 
 async function isElasticCommitter() {
   try {

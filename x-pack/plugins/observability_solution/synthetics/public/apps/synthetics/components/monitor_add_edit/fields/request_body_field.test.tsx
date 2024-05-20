@@ -7,12 +7,12 @@
 
 import 'jest-canvas-mock';
 
-import { fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React, { useState, useCallback } from 'react';
+import userEvent from '@testing-library/user-event';
+import { fireEvent, waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { CodeEditorMode } from '../types';
 import { RequestBodyField } from './request_body_field';
+import { CodeEditorMode } from '../types';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,

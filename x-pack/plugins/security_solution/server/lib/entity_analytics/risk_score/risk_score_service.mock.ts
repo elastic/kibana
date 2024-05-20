@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { RiskScoreService } from './risk_score_service';
 import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
 import { EntityRiskLevelsEnum } from '../../../../common/api/entity_analytics/common';
-import type { RiskScoreService } from './risk_score_service';
 
 const createRiskScoreMock = (
   overrides: Partial<EntityRiskScoreRecord> = {}

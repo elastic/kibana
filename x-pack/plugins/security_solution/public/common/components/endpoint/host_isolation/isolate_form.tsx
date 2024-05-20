@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ChangeEventHandler, ReactNode } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,8 +18,6 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChangeEventHandler, ReactNode } from 'react';
-import React, { memo, useCallback } from 'react';
 import { MissingEncryptionKeyCallout } from '../../../../management/components/missing_encryption_key_callout';
 import { CANCEL, COMMENT, COMMENT_PLACEHOLDER, CONFIRM } from './translations';
 

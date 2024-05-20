@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { TRACE_ID } from '../../../common/es_fields/apm';
 import {
   ConnectionNode,

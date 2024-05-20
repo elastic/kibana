@@ -9,8 +9,8 @@ import { getDevToolsOptions } from '@kbn/xstate-utils';
 import { useInterpret } from '@xstate/react';
 import createContainer from 'constate';
 import {
-  ObservabilityLogsExplorerStateMachineDependencies,
   createObservabilityLogsExplorerStateMachine,
+  ObservabilityLogsExplorerStateMachineDependencies,
 } from './state_machine';
 
 export const useObservabilityLogsExplorerPageState = (

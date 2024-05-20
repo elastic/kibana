@@ -12,6 +12,7 @@
  * 2.0.
  */
 
+import React, { ChangeEvent } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,12 +21,11 @@ import {
   EuiSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
-import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
-import React, { ChangeEvent } from 'react';
-import { ToolbarPopover } from '../../../shared_components';
+import { Orientation } from '@kbn/expression-tagcloud-plugin/common';
 import type { VisualizationToolbarProps } from '../../../types';
+import { ToolbarPopover } from '../../../shared_components';
 import type { TagcloudState } from '../types';
 import { FontSizeInput } from './font_size_input';
 

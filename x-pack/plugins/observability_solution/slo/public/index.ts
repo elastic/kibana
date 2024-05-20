@@ -7,10 +7,10 @@
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { SloPlugin } from './plugin';
 import type {
-  SloPublicPluginsSetup,
-  SloPublicPluginsStart,
   SloPublicSetup,
   SloPublicStart,
+  SloPublicPluginsSetup,
+  SloPublicPluginsStart,
 } from './types';
 
 export const plugin: PluginInitializer<

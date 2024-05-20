@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { CoreStart, SimpleSavedObject } from '@kbn/core/public';
+import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { getEventAnnotationService } from './service';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import { EventAnnotationGroupSavedObjectAttributes } from '../../common';
-import { getEventAnnotationService } from './service';
 
 // TODO - I think applying this saved object type is no longer correct - since we migrated to content management,
 // there is no longer a single interchange format. Instead, the tests should use the operation-specific
@@ -475,9 +475,8 @@ describe('Event Annotation Service', () => {
   });
   describe('loadAnnotationGroup', () => {
     it('should throw error when loading group doesnt exist', async () => {
-      expect(() =>
-        eventAnnotationService.loadAnnotationGroup('nonExistingGroup')
-      ).rejects.toMatchInlineSnapshot(`
+      expect(() => eventAnnotationService.loadAnnotationGroup('nonExistingGroup')).rejects
+        .toMatchInlineSnapshot(`
         Object {
           "error": "Saved object not found",
           "message": "Not found",
@@ -486,9 +485,8 @@ describe('Event Annotation Service', () => {
       `);
     });
     it('should properly load an annotation group with no annotation', async () => {
-      expect(
-        await eventAnnotationService.loadAnnotationGroup('noAnnotations')
-      ).toMatchInlineSnapshot(`
+      expect(await eventAnnotationService.loadAnnotationGroup('noAnnotations'))
+        .toMatchInlineSnapshot(`
         Object {
           "annotations": Array [],
           "dataViewSpec": undefined,

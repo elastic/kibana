@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
 import {
   EuiFlexGroup,
+  EuiText,
   EuiFlexItem,
+  EuiTextColor,
   EuiSwitch,
   EuiSwitchEvent,
-  EuiText,
-  EuiTextColor,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
 
 import * as i18n from '../translations';
 

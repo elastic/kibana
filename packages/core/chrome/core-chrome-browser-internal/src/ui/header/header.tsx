@@ -15,39 +15,39 @@ import {
   EuiShowFor,
   htmlIdGenerator,
 } from '@elastic/eui';
-import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import type {
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeBreadcrumbsAppendExtension,
-  ChromeGlobalHelpExtensionMenuLink,
-  ChromeHelpExtension,
-  ChromeHelpMenuLink,
-  ChromeNavControl,
-  ChromeNavLink,
-  ChromeRecentlyAccessedHistoryItem,
-  ChromeUserBanner,
-} from '@kbn/core-chrome-browser';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import React, { createRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
+import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import type {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeNavControl,
+  ChromeNavLink,
+  ChromeHelpMenuLink,
+  ChromeRecentlyAccessedHistoryItem,
+  ChromeBreadcrumbsAppendExtension,
+  ChromeHelpExtension,
+  ChromeGlobalHelpExtensionMenuLink,
+  ChromeUserBanner,
+} from '@kbn/core-chrome-browser';
+import { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { OnIsLockedUpdate } from './types';
 import { CollapsibleNav } from './collapsible_nav';
-import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { HeaderExtension } from './header_extension';
 import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderLogo } from './header_logo';
-import { HeaderMenuButton } from './header_menu_button';
 import { HeaderNavControls } from './header_nav_controls';
+import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_menu';
+import { HeaderExtension } from './header_extension';
 import { HeaderTopBanner } from './header_top_banner';
+import { HeaderMenuButton } from './header_menu_button';
 import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
-import type { OnIsLockedUpdate } from './types';
 
 export interface HeaderProps {
   kibanaVersion: string;

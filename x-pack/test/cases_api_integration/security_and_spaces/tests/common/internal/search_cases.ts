@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import { CASES_INTERNAL_URL } from '@kbn/cases-plugin/common/constants';
-import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
-import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
+import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { CASES_INTERNAL_URL } from '@kbn/cases-plugin/common/constants';
+import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { postCaseReq, findCasesResp, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
+  ensureSavedObjectIsAuthorized,
+  deleteAllCaseItems,
+  searchCases,
   createCase,
   createConfiguration,
-  deleteAllCaseItems,
-  ensureSavedObjectIsAuthorized,
   getConfigurationRequest,
-  searchCases,
 } from '../../../../common/lib/api';
 import {
-  globalRead,
-  noKibanaPrivileges,
   obsOnly,
-  obsOnlyRead,
-  obsSec,
-  obsSecRead,
   secOnly,
+  obsOnlyRead,
   secOnlyRead,
+  noKibanaPrivileges,
   superUser,
+  globalRead,
+  obsSecRead,
+  obsSec,
 } from '../../../../common/lib/authentication/users';
-import { findCasesResp, getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

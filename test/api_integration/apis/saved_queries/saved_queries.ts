@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { SAVED_QUERY_BASE_URL, SavedQueryAttributes } from '@kbn/data-plugin/common';
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { SavedQueryAttributes, SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // node scripts/functional_tests --config test/api_integration/config.js --grep="search session"

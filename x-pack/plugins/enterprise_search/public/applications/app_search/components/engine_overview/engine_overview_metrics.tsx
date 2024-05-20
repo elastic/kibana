@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
 
-import { RecentApiLogs, TotalCharts, TotalStats } from './components';
+import { TotalStats, TotalCharts, RecentApiLogs } from './components';
 
 import { SuggestedCurationsCallout } from './components/suggested_curations_callout';
 

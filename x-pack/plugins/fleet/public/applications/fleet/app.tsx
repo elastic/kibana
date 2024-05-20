@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import { EuiPortal } from '@elastic/eui';
+import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPortal } from '@elastic/eui';
+import type { History } from 'history';
+import { Redirect, useRouteMatch } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { History } from 'history';
-import React, { memo, useEffect, useState } from 'react';
-import { Redirect, useRouteMatch } from 'react-router-dom';
-import useObservable from 'react-use/lib/useObservable';
 
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
@@ -31,37 +31,37 @@ import { PackageInstallProvider } from '../integrations/hooks';
 import { type FleetStatusProviderProps, useAuthz, useFleetStatus, useFlyoutContext } from './hooks';
 
 import {
-  AgentEnrollmentFlyout,
-  Error,
-  FleetServerFlyout,
-  FleetSetupLoading,
-  Loading,
-} from './components';
-import {
   ConfigContext,
   FleetStatusProvider,
-  FlyoutContextProvider,
   KibanaVersionContext,
-  UIExtensionsContext,
   sendGetPermissionsCheck,
   sendSetup,
   useBreadcrumbs,
   useStartServices,
+  UIExtensionsContext,
+  FlyoutContextProvider,
 } from './hooks';
+import {
+  Error,
+  Loading,
+  FleetSetupLoading,
+  AgentEnrollmentFlyout,
+  FleetServerFlyout,
+} from './components';
 import type { UIExtensionsStorage } from './types';
 
 import { FLEET_ROUTING_PATHS } from './constants';
 
-import { ErrorLayout, PermissionsError } from './layouts';
 import { AgentPolicyApp } from './sections/agent_policy';
-import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
+import { DataStreamApp } from './sections/data_stream';
 import { AgentsApp } from './sections/agents';
+import { CreatePackagePolicyPage } from './sections/agent_policy/create_package_policy_page';
 import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list_page';
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
-import { DataStreamApp } from './sections/data_stream';
-import { DebugPage } from './sections/debug';
 import { SettingsApp } from './sections/settings';
+import { DebugPage } from './sections/debug';
 import { ExperimentalFeaturesService } from './services';
+import { ErrorLayout, PermissionsError } from './layouts';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -330,8 +330,8 @@ export const AppRoutes = memo(
                 const redirectTo = authz.fleet.readAgents
                   ? FLEET_ROUTING_PATHS.agents
                   : authz.fleet.readAgentPolicies
-                    ? FLEET_ROUTING_PATHS.policies
-                    : FLEET_ROUTING_PATHS.settings;
+                  ? FLEET_ROUTING_PATHS.policies
+                  : FLEET_ROUTING_PATHS.settings;
 
                 return <Redirect to={redirectTo} />;
               }

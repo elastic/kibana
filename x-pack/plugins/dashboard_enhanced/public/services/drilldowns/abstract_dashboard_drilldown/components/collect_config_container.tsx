@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { debounce, findIndex } from 'lodash';
 import { SimpleSavedObject } from '@kbn/core/public';
 import { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
-import { debounce, findIndex } from 'lodash';
-import React from 'react';
-import { Params } from '../abstract_dashboard_drilldown';
-import { Config } from '../types';
 import { DashboardDrilldownConfig } from './dashboard_drilldown_config';
 import { txtDestinationDashboardNotFound } from './i18n';
+import { Config } from '../types';
+import { Params } from '../abstract_dashboard_drilldown';
 
 const mergeDashboards = (
   dashboards: Array<EuiComboBoxOptionOption<string>>,

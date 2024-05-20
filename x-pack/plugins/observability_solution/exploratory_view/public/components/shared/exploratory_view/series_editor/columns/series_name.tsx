@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { useState, ChangeEvent, useEffect, useRef, KeyboardEventHandler } from 'react';
+import styled from 'styled-components';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonIcon,
   EuiFieldText,
+  EuiText,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
-  EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState, ChangeEvent, useEffect, useRef, KeyboardEventHandler } from 'react';
-import styled from 'styled-components';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesUrl } from '../../types';
 

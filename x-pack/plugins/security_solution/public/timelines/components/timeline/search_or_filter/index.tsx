@@ -5,32 +5,32 @@
  * 2.0.
  */
 
-import type { Filter } from '@kbn/es-query';
-import deepEqual from 'fast-deep-equal';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch } from 'react-redux';
+import { useDispatch, connect } from 'react-redux';
 import type { Dispatch } from 'redux';
+import deepEqual from 'fast-deep-equal';
+import type { Filter } from '@kbn/es-query';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
-import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import type { State, inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
-import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { timelineActions, timelineSelectors } from '../../../store';
-import { setDataProviderVisibility } from '../../../store/actions';
-import { timelineDefaults } from '../../../store/defaults';
 import type { KqlMode, TimelineModel } from '../../../store/model';
-import { getNonDropAreaFilters } from '../helpers';
+import { timelineDefaults } from '../../../store/defaults';
+import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
+import { setDataProviderVisibility } from '../../../store/actions';
+import { getNonDropAreaFilters } from '../helpers';
 import * as i18n from './translations';
 
 interface OwnProps {

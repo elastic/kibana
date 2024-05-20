@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from '@kbn/core/server';
-import { ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
+import { isEqual, uniqBy } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { Filter, fromCombinedFilter } from '@kbn/es-query';
 import { Query, uniqFilters } from '@kbn/es-query';
-import { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { isEqual, uniqBy } from 'lodash';
+import { SavedObjectReference } from '@kbn/core/server';
+import { ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
 import { SavedSearch } from '../types';
 
 export interface KibanaContextStartDependencies {

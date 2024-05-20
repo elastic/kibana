@@ -160,8 +160,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async function () {
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
             const detailsEl = await docTable.getDetailsRows();
-            const defaultMessageEl =
-              await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+            const defaultMessageEl = await detailsEl[0].findByTestSubject(
+              'docTableRowDetailsTitle'
+            );
             expect(defaultMessageEl).to.be.ok();
           });
         });
@@ -185,14 +186,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const nrOfFetches = await PageObjects.discover.getNrOfFetches();
             await docTable.clickRowToggle({ isAnchorRow: false, rowIndex: rowToInspect - 1 });
             const detailsEl = await docTable.getDetailsRows();
-            const defaultMessageEl =
-              await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+            const defaultMessageEl = await detailsEl[0].findByTestSubject(
+              'docTableRowDetailsTitle'
+            );
             expect(defaultMessageEl).to.be.ok();
             await queryBar.submitQuery();
             const nrOfFetchesResubmit = await PageObjects.discover.getNrOfFetches();
             expect(nrOfFetchesResubmit).to.be.above(nrOfFetches);
-            const defaultMessageElResubmit =
-              await detailsEl[0].findByTestSubject('docTableRowDetailsTitle');
+            const defaultMessageElResubmit = await detailsEl[0].findByTestSubject(
+              'docTableRowDetailsTitle'
+            );
 
             expect(defaultMessageElResubmit).to.be.ok();
           });

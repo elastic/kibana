@@ -7,14 +7,14 @@
  */
 
 import type {
-  SavedObjectsImportAmbiguousConflictError,
-  SavedObjectsImportConflictError,
-  SavedObjectsImportFailure,
-  SavedObjectsImportMissingReferencesError,
   SavedObjectsImportResponse,
-  SavedObjectsImportSuccess,
-  SavedObjectsImportUnknownError,
+  SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
+  SavedObjectsImportMissingReferencesError,
+  SavedObjectsImportUnknownError,
+  SavedObjectsImportFailure,
+  SavedObjectsImportSuccess,
   SavedObjectsImportWarning,
 } from '@kbn/core/public';
 

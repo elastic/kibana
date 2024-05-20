@@ -5,30 +5,29 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import { get, isEqual, omit } from 'lodash';
 import expect from '@kbn/expect';
 import {
   ALERT_REASON,
-  ALERT_RULE_NAMESPACE,
-  ALERT_RULE_UPDATED_AT,
   ALERT_RULE_UUID,
   ALERT_STATUS,
+  ALERT_RULE_NAMESPACE,
+  ALERT_RULE_UPDATED_AT,
   ALERT_UUID,
-  ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_STATUS,
-  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   VERSION,
+  ALERT_WORKFLOW_TAGS,
+  ALERT_WORKFLOW_ASSIGNEE_IDS,
 } from '@kbn/rule-data-utils';
-import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
-import { get, isEqual, omit } from 'lodash';
-import { v4 as uuidv4 } from 'uuid';
+import { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
-import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
-import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -37,22 +36,23 @@ import {
   ALERT_ORIGINAL_EVENT_MODULE,
   ALERT_ORIGINAL_TIME,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { ENABLE_ASSET_CRITICALITY_SETTING } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../../common/utils/security_solution';
-import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
-import {
-  dataGeneratorFactory,
+  previewRule,
   getAlerts,
   getPreviewAlerts,
+  dataGeneratorFactory,
   getThreatMatchRuleForAlertTesting,
-  previewRule,
 } from '../../../../utils';
+import {
+  deleteAllAlerts,
+  deleteAllRules,
+  createRule,
+} from '../../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 

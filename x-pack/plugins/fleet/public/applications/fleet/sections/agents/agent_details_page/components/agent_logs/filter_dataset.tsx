@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { EuiSelectableOption } from '@elastic/eui';
-import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
-import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
 import React, { memo, useState, useEffect, useCallback } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
 
 import { useStartServices } from '../../../../../hooks';
 
-import { AGENT_DATASET, AGENT_LOG_INDEX_PATTERN, DATASET_FIELD } from './constants';
+import { AGENT_LOG_INDEX_PATTERN, DATASET_FIELD, AGENT_DATASET } from './constants';
 
 export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useMemo, useState } from 'react';
+import styled from 'styled-components';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButton,
@@ -15,9 +18,6 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
-import styled from 'styled-components';
 
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
@@ -27,8 +27,8 @@ import {
   isStuckInUpdating,
 } from '../../../../../../common/services/agent_status';
 
-import { useStartServices } from '../../../hooks';
 import type { Agent } from '../../../types';
+import { useStartServices } from '../../../hooks';
 
 import { useAgentRefresh } from '../agent_details_page/hooks';
 

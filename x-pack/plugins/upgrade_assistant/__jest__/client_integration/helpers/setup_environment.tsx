@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
 import React from 'react';
 import SemVer from 'semver/classes/semver';
+import { merge } from 'lodash';
 
 import { HttpSetup } from '@kbn/core/public';
+import { AuthorizationContext, Authorization, Privileges } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { apiService } from '../../../public/application/lib/api';
 import { breadcrumbService } from '../../../public/application/lib/breadcrumbs';
-import { Authorization, AuthorizationContext, Privileges } from '../../../public/shared_imports';
 import { GlobalFlyout } from '../../../public/shared_imports';
 import { AppDependencies } from '../../../public/types';
 import { getAppContextMock } from './app_context.mock';

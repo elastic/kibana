@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { lineCurveDefinitions } from './line_curve_definitions';
 import { LineCurveOption } from './line_curve_option';
+import { lineCurveDefinitions } from './line_curve_definitions';
+import { render, screen } from '@testing-library/react';
 
 describe('Line curve option', () => {
   it.each(lineCurveDefinitions.map((v) => ({ type: v.type, title: v.title })))(

@@ -7,9 +7,9 @@
 
 import { mockHttpRequest, pageHelpers } from './helpers';
 
-import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 import moment from 'moment-timezone';
-import { init as initDocumentation, setHttp } from '../../crud_app/services';
+import { setHttp, init as initDocumentation } from '../../crud_app/services';
+import { docLinksServiceMock, coreMock } from '@kbn/core/public/mocks';
 
 const { setup } = pageHelpers.jobCreate;
 

@@ -4,23 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiText, RIGHT_ALIGNMENT } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { RIGHT_ALIGNMENT, EuiText } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ValuesType } from 'utility-types';
-import {
-  asMillisecondDuration,
-  asPercent,
-  asTransactionRate,
-} from '../../../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
 import {
   ChartType,
   getTimeSeriesColor,
 } from '../../../../../shared/charts/helper/get_timeseries_color';
 import { SparkPlot } from '../../../../../shared/charts/spark_plot';
-import { ITableColumn } from '../../../../../shared/managed_table';
 import { isTimeComparison } from '../../../../../shared/time_comparison/get_comparison_options';
+import {
+  asMillisecondDuration,
+  asPercent,
+  asTransactionRate,
+} from '../../../../../../../common/utils/formatters';
+import { ITableColumn } from '../../../../../shared/managed_table';
 
 type MobileMainStatisticsByField =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/main_statistics'>;

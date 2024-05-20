@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { listOperator as operator } from '@kbn/securitysolution-io-ts-list-types';
 import * as t from 'io-ts';
+import { listOperator as operator } from '@kbn/securitysolution-io-ts-list-types';
 
 export const translatedEntryMatchAnyMatcher = t.keyof({
   exact_cased_any: null,

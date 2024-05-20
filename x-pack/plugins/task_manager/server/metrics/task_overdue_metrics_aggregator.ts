@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { set } from '@kbn/safer-lodash-set';
 import { JsonObject } from '@kbn/utility-types';
 import { keys } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { isOk, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskManagerMetric } from '../task_events';
-import { type SerializedHistogram, SimpleHistogram, getTaskTypeGroup } from './lib';
+import { getTaskTypeGroup, type SerializedHistogram, SimpleHistogram } from './lib';
 import { TaskManagerMetrics } from './task_metrics_collector';
 import { ITaskMetricsAggregator } from './types';
 

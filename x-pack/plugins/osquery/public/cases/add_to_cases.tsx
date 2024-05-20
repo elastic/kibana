@@ -7,8 +7,8 @@
 
 import React, { useContext } from 'react';
 
-import { useKibana } from '../common/lib/kibana';
 import { CasesAttachmentWrapperContext } from '../shared_components/attachments/pack_queries_attachment_wrapper';
+import { useKibana } from '../common/lib/kibana';
 import type { AddToCaseButtonProps } from './add_to_cases_button';
 import { AddToCaseButton } from './add_to_cases_button';
 

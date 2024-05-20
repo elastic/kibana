@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiText } from '@elastic/eui';
 import React from 'react';
+import { EuiText } from '@elastic/eui';
 
 interface Props {
   onClick: () => void;

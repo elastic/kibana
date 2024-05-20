@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { mount, render, shallow } from 'enzyme';
 import React from 'react';
+import { mount, render, shallow } from 'enzyme';
 import { ReactElement, ReactNode } from 'react';
 
-import { MountPoint } from '@kbn/core-mount-utils-browser';
+import { deduplicateToasts, TitleWithBadge, ToastWithRichTitle } from './deduplicate_toasts';
 import { Toast } from '@kbn/core-notifications-browser';
-import { TitleWithBadge, ToastWithRichTitle, deduplicateToasts } from './deduplicate_toasts';
+import { MountPoint } from '@kbn/core-mount-utils-browser';
 
 function toast(title: string | MountPoint, text?: string | MountPoint, id = Math.random()): Toast {
   return {

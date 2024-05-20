@@ -12,21 +12,21 @@ import {
   ENTITY_ANALYTICS_PATH,
   LANDING_PATH,
   OVERVIEW_PATH,
-  SERVER_APP_ID,
   SecurityPageName,
+  SERVER_APP_ID,
 } from '../../common/constants';
 import {
   DATA_QUALITY,
   DETECTION_RESPONSE,
-  ENTITY_ANALYTICS,
   GETTING_STARTED,
   OVERVIEW,
+  ENTITY_ANALYTICS,
 } from '../app/translations';
+import type { LinkItem } from '../common/links/types';
+import overviewPageImg from '../common/images/overview_page.png';
 import dataQualityDashboardPageImg from '../common/images/data_quality_dashboard_page.png';
 import detectionResponsePageImg from '../common/images/detection_response_page.png';
 import entityAnalyticsDashboard from '../common/images/entity_analytics_dashboard.png';
-import overviewPageImg from '../common/images/overview_page.png';
-import type { LinkItem } from '../common/links/types';
 
 export const overviewLinks: LinkItem = {
   id: SecurityPageName.overview,

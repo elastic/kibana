@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+import { EuiBadge } from '@elastic/eui';
 
 interface TimestampProps {
   timestamp?: string;

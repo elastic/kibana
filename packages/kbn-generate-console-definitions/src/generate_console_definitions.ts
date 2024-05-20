@@ -8,17 +8,17 @@
 
 import fs from 'fs';
 import Path, { join } from 'path';
+import { ToolingLog } from '@kbn/tooling-log';
 import type {
   DefinitionUrlParams,
   EndpointDefinition,
   EndpointDescription,
 } from '@kbn/console-plugin/common/types';
-import { ToolingLog } from '@kbn/tooling-log';
-import { generateAvailability } from './generate_availability';
 import { generateQueryParams } from './generate_query_params';
-import { generateUrlComponents } from './generate_url_components';
-import { findTypeDefinition } from './helpers';
+import { generateAvailability } from './generate_availability';
 import type { SpecificationTypes } from './types';
+import { findTypeDefinition } from './helpers';
+import { generateUrlComponents } from './generate_url_components';
 
 const generateMethods = (endpoint: SpecificationTypes.Endpoint): string[] => {
   // this array consists of arrays of strings

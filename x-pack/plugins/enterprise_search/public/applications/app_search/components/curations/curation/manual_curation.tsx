@@ -8,7 +8,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 
-import { useActions, useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -16,12 +16,12 @@ import { AppSearchPageTemplate } from '../../layout';
 import { MANAGE_CURATION_TITLE } from '../constants';
 import { getCurationsBreadcrumbs } from '../utils';
 
-import { HIDDEN_DOCUMENTS_TITLE, PROMOTED_DOCUMENTS_TITLE } from './constants';
+import { PROMOTED_DOCUMENTS_TITLE, HIDDEN_DOCUMENTS_TITLE } from './constants';
 import { CurationLogic } from './curation_logic';
 import { DeleteCurationButton } from './delete_curation_button';
-import { HiddenDocuments, OrganicDocuments, PromotedDocuments } from './documents';
+import { PromotedDocuments, OrganicDocuments, HiddenDocuments } from './documents';
 import { ActiveQuerySelect, ManageQueriesModal } from './queries';
-import { AddResultFlyout, AddResultLogic } from './results';
+import { AddResultLogic, AddResultFlyout } from './results';
 import { SuggestedDocumentsCallout } from './suggested_documents_callout';
 
 export const ManualCuration: React.FC = () => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 import '../../../../../shared/doc_links/__mocks__/doc_links.mock';
 
 import React from 'react';
 
-import { ShallowWrapper, shallow } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiContextMenuItem, EuiContextMenuPanel } from '@elastic/eui';
 

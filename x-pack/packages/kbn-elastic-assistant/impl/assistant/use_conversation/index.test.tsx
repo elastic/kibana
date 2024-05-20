@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { httpServiceMock } from '@kbn/core/public/mocks';
-import { MessageRole } from '@kbn/elastic-assistant-common';
-import { act, renderHook } from '@testing-library/react-hooks';
-import React from 'react';
 import { useConversation } from '.';
+import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import {
-  createConversation as _createConversationApi,
-  getConversationById as _getConversationById,
-  deleteConversation,
-} from '../api/conversations';
+import React from 'react';
+import { MessageRole } from '@kbn/elastic-assistant-common';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { WELCOME_CONVERSATION } from './sample_conversations';
+import {
+  deleteConversation,
+  getConversationById as _getConversationById,
+  createConversation as _createConversationApi,
+} from '../api/conversations';
 
 jest.mock('../api/conversations');
 const message = {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { flatten, map, max, min } from 'lodash';
+import { min, max, map, flatten } from 'lodash';
 
 /*
  * The MIT License

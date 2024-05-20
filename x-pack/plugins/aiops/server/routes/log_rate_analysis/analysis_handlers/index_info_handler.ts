@@ -7,12 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 import {
-  setZeroDocsFallback,
   updateLoadingStateAction,
+  setZeroDocsFallback,
 } from '@kbn/aiops-log-rate-analysis/api/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '@kbn/aiops-log-rate-analysis/api/schema';
+import { isRequestAbortedError } from '@kbn/aiops-common/is_request_aborted_error';
 
 import { fetchIndexInfo } from '@kbn/aiops-log-rate-analysis/queries/fetch_index_info';
 

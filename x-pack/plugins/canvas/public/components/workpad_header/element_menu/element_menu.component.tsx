@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiContextMenu, EuiContextMenuPanelItemDescriptor, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import { sortBy } from 'lodash';
-import PropTypes from 'prop-types';
 import React, { FunctionComponent, useState } from 'react';
+import PropTypes from 'prop-types';
+import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
+import { i18n } from '@kbn/i18n';
+import { getId } from '../../../lib/get_id';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
 import { flattenPanelTree } from '../../../lib/flatten_panel_tree';
-import { getId } from '../../../lib/get_id';
 import { AssetManager } from '../../asset_manager';
 import { ClosePopoverFn } from '../../popover';
 import { SavedElementsModal } from '../../saved_elements_modal';

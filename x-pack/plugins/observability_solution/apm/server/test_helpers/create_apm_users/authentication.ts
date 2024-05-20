@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ClusterPrivilegeType, PrivilegeType } from '../../../common/privilege_type';
+import { PrivilegeType, ClusterPrivilegeType } from '../../../common/privilege_type';
 
 export enum ApmUsername {
   noAccessUser = 'no_access_user',

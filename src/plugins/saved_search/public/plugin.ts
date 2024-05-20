@@ -6,37 +6,37 @@
  * Side Public License, v 1.
  */
 
+import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { i18n } from '@kbn/i18n';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
-import { i18n } from '@kbn/i18n';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { SpacesApi } from '@kbn/spaces-plugin/public';
-import { LATEST_VERSION, SavedSearchType } from '../common';
-import { kibanaContext } from '../common/expressions';
-import { SavedSearch, SavedSearchAttributes } from '../common/types';
-import { getKibanaContext } from './expressions/kibana_context';
 import {
-  SaveSavedSearchOptions,
-  SavedSearchUnwrapResult,
-  SearchByValueInput,
-  getNewSavedSearch,
   getSavedSearch,
   saveSavedSearch,
+  SaveSavedSearchOptions,
+  getNewSavedSearch,
+  SavedSearchUnwrapResult,
+  SearchByValueInput,
 } from './services/saved_searches';
+import { SavedSearch, SavedSearchAttributes } from '../common/types';
+import { SavedSearchType, LATEST_VERSION } from '../common';
+import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
+import { kibanaContext } from '../common/expressions';
+import { getKibanaContext } from './expressions/kibana_context';
 import {
   type SavedSearchAttributeService,
   getSavedSearchAttributeService,
   toSavedSearch,
 } from './services/saved_searches';
 import { savedObjectToEmbeddableAttributes } from './services/saved_searches/saved_search_attribute_service';
-import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
 
 /**
  * Saved search plugin public Setup contract

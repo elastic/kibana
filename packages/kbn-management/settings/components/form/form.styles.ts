@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { euiBreakpoint, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, euiBreakpoint } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 /**

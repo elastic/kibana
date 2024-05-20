@@ -6,8 +6,8 @@
  */
 import { act, render } from '@testing-library/react';
 import React from 'react';
-import { AlertsByTypePanel } from '.';
 import { TestProviders } from '../../../../common/mock';
+import { AlertsByTypePanel } from '.';
 
 jest.mock('../../../../common/lib/kibana');
 

@@ -11,8 +11,8 @@ import {
   SavedObjectsCollectMultiNamespaceReferencesOptions,
   SavedObjectsCollectMultiNamespaceReferencesResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { collectMultiNamespaceReferences } from './internals/collect_multi_namespace_references';
 import { ApiExecutionContext } from './types';
+import { collectMultiNamespaceReferences } from './internals/collect_multi_namespace_references';
 
 export interface PerformCreateParams<T = unknown> {
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];

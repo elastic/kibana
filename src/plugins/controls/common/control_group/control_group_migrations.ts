@@ -7,7 +7,7 @@
  */
 
 import { ControlGroupInput, ControlPanelState, ControlsPanels } from '..';
-import { OPTIONS_LIST_CONTROL, OptionsListEmbeddableInput } from '../options_list/types';
+import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from '../options_list/types';
 
 export const makeControlOrdersZeroBased = (input: ControlGroupInput) => {
   if (

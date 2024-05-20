@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiCheckbox, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
+import { EuiCheckbox, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { NumericField, useKibana } from '../../../../../../shared_imports';
 import { i18nTexts } from '../../../i18n_texts';
 
@@ -17,7 +17,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { UseField } from '../../../form';
 
-import { DescribedFormRow, LearnMoreLink } from '../..';
+import { LearnMoreLink, DescribedFormRow } from '../..';
 
 interface Props {
   phase: 'hot' | 'warm';

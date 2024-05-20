@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { disableExpandableFlyout } from '../../../../../tasks/api_calls/kibana_advanced_settings';
 import { getNewThreatIndicatorRule, indicatorRuleMatchingDoc } from '../../../../../objects/rule';
+import { login } from '../../../../../tasks/login';
 import {
-  ENRICHMENT_COUNT_NOTIFICATION,
-  INDICATOR_MATCH_ENRICHMENT_SECTION,
-  INVESTIGATION_TIME_ENRICHMENT_SECTION,
   JSON_TEXT,
   TABLE_CELL,
   TABLE_ROWS,
-  THREAT_DETAILS_ACCORDION,
   THREAT_DETAILS_VIEW,
+  ENRICHMENT_COUNT_NOTIFICATION,
+  INDICATOR_MATCH_ENRICHMENT_SECTION,
+  INVESTIGATION_TIME_ENRICHMENT_SECTION,
+  THREAT_DETAILS_ACCORDION,
 } from '../../../../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../../../../screens/rule_details';
 import {
@@ -22,10 +24,8 @@ import {
   setEnrichmentDates,
   viewThreatIntelTab,
 } from '../../../../../tasks/alerts';
-import { openJsonView, openThreatIndicatorDetails } from '../../../../../tasks/alerts_details';
-import { disableExpandableFlyout } from '../../../../../tasks/api_calls/kibana_advanced_settings';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { login } from '../../../../../tasks/login';
+import { openJsonView, openThreatIndicatorDetails } from '../../../../../tasks/alerts_details';
 import { addsFieldsToTimeline, visitRuleDetailsPage } from '../../../../../tasks/rule_details';
 
 // TODO: https://github.com/elastic/kibana/issues/161539

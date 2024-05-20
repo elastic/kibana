@@ -91,7 +91,9 @@
             "tags": [],
             "label": "keywords",
             "description": [],
-            "signature": ["string[]"],
+            "signature": [
+              "string[]"
+            ],
             "path": "src/plugins/management/public/utils/management_app.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -103,7 +105,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/management/public/utils/management_app.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -185,7 +189,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/management/public/utils/management_section.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -197,7 +203,9 @@
                 "tags": [],
                 "label": "args",
                 "description": [],
-                "signature": ["RegisterManagementSectionArgs"],
+                "signature": [
+                  "RegisterManagementSectionArgs"
+                ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -290,7 +298,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/management/public/utils/management_section.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -492,7 +502,9 @@
             "tags": [],
             "label": "element",
             "description": [],
-            "signature": ["HTMLElement"],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "src/plugins/management/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -589,7 +601,9 @@
             "parentPluginId": "management",
             "id": "def-public.ManagementAppMountParams.theme$",
             "type": "Object",
-            "tags": ["deprecated"],
+            "tags": [
+              "deprecated"
+            ],
             "label": "theme$",
             "description": [],
             "signature": [
@@ -706,7 +720,9 @@
             "tags": [],
             "label": "keywords",
             "description": [],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "src/plugins/management/public/utils/management_app.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -724,7 +740,9 @@
         "tags": [],
         "label": "MANAGEMENT_APP_ID",
         "description": [],
-        "signature": ["\"management\""],
+        "signature": [
+          "\"management\""
+        ],
         "path": "src/plugins/management/common/contants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -750,7 +768,9 @@
           "tags": [],
           "label": "sections",
           "description": [],
-          "signature": ["SectionsServiceSetup"],
+          "signature": [
+            "SectionsServiceSetup"
+          ],
           "path": "src/plugins/management/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
@@ -816,7 +836,9 @@
               "tags": [],
               "label": "{\n    enabled,\n    hideLinksTo,\n    extendCardNavDefinitions,\n  }",
               "description": [],
-              "signature": ["NavigationCardsSubject"],
+              "signature": [
+                "NavigationCardsSubject"
+              ],
               "path": "src/plugins/management/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,

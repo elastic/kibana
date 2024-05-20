@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginA, SearchSpec, Setup, Start } from './plugin';
+import { PluginA, Setup, Start, SearchSpec } from './plugin';
 export { Setup, Start, SearchSpec };
 
 export { doTheFooFnThing, FooType } from './foo';

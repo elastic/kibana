@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { HttpHandler } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { IdFormat } from '../../../../../../common/http_api/latest';
 import {
-  DatasetFilter,
-  LogEntryRateJobType,
   bucketSpan,
+  DatasetFilter,
   getJobId,
   logEntryRateJobType,
+  LogEntryRateJobType,
   logEntryRateJobTypes,
   partitionField,
 } from '../../../../../../common/log_analysis';
+import { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
+import { cleanUpJobsAndDatafeeds } from '../../log_analysis_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
 import { callSetupMlModuleAPI } from '../../api/ml_setup_module_api';
 import { callValidateDatasetsAPI } from '../../api/validate_datasets';
 import { callValidateIndicesAPI } from '../../api/validate_indices';
-import { cleanUpJobsAndDatafeeds } from '../../log_analysis_cleanup';
-import { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
 
 const moduleId = 'logs_ui_analysis';
 const moduleName = i18n.translate('xpack.infra.logs.analysis.logEntryRateModuleName', {

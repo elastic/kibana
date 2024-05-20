@@ -7,10 +7,10 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { IClusterClientAdapter } from './cluster_client_adapter';
-import { clusterClientAdapterMock } from './cluster_client_adapter.mock';
 import { EsContext } from './context';
 import { namesMock } from './names.mock';
+import { IClusterClientAdapter } from './cluster_client_adapter';
+import { clusterClientAdapterMock } from './cluster_client_adapter.mock';
 
 export const MOCK_RETRY_DELAY = 20;
 

@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { Readable } from 'stream';
 import { ApmFields, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
+import { Readable } from 'stream';
 import semver from 'semver';
 import { Scenario } from '../cli/scenario';
+import { withClient } from '../lib/utils/with_client';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { Logger } from '../lib/utils/create_logger';
-import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<ApmFields> = async ({
   logger,

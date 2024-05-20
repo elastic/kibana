@@ -5,32 +5,32 @@
  * 2.0.
  */
 
+import React, { memo, useCallback, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
+  EuiButtonEmpty,
+  EuiHorizontalRule,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { useSelector, useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { memo, useCallback, Fragment } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { StyledPanel } from '../styles';
+import { BoldCode, StyledTime } from './styles';
+import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
+import * as selectors from '../../store/selectors';
+import { PanelLoading } from './panel_loading';
+import { DescriptiveName } from './descriptive_name';
+import { useLinkProps } from '../use_link_props';
+import { useFormattedDate } from './use_formatted_date';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
 import type { State } from '../../../common/store/types';
 import { userRequestedAdditionalRelatedEvents } from '../../store/data/action';
-import * as selectors from '../../store/selectors';
-import { StyledPanel } from '../styles';
-import { useLinkProps } from '../use_link_props';
-import { Breadcrumbs } from './breadcrumbs';
-import { DescriptiveName } from './descriptive_name';
-import { PanelLoading } from './panel_loading';
-import { BoldCode, StyledTime } from './styles';
-import { useFormattedDate } from './use_formatted_date';
 
 /**
  * Render a list of events that are related to `nodeID` and that have a category of `eventType`.

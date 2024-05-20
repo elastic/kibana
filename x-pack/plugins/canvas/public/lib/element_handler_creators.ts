@@ -6,12 +6,12 @@
  */
 
 import { camelCase } from 'lodash';
-import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
-import { PositionedElement } from '../../types';
-import { pluginServices } from '../services';
 import { getClipboardData, setClipboardData } from './clipboard';
 import { cloneSubgraphs } from './clone_subgraphs';
+import { pluginServices } from '../services';
 import { getId } from './get_id';
+import { PositionedElement } from '../../types';
+import { ELEMENT_NUDGE_OFFSET, ELEMENT_SHIFT_OFFSET } from '../../common/lib/constants';
 
 const extractId = (node: { id: string }): string => node.id;
 

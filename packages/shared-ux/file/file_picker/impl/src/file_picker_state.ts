@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import * as Rx from 'rxjs';
+import type { FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 
 function naivelyFuzzify(query: string): string {
   return query.includes('*') ? query : `*${query}*`;

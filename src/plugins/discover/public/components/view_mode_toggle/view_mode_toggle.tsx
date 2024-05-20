@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { SHOW_FIELD_STATISTICS, isLegacyTableEnabled } from '@kbn/discover-utils';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, ReactElement } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
+import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { VIEW_MODE } from '../../../common/constants';
-import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
 
 export const DocumentViewModeToggle = ({

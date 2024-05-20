@@ -13,9 +13,9 @@ import type {
   AppLinkItems,
   LinkInfo,
   LinkItem,
-  LinksPermissions,
   NormalizedLink,
   NormalizedLinks,
+  LinksPermissions,
 } from './types';
 
 /**

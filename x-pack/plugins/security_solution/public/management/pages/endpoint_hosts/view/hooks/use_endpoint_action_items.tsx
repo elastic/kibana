@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { APP_UI_ID } from '../../../../../../common/constants';
-import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
-import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
-import type { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
-import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
-import { getEndpointDetailsPath, getEndpointListPath } from '../../../../common/routing';
-import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import type { Platform } from '../../../../components/endpoint_responder/components/header_info/platforms';
+import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useWithShowResponder } from '../../../../hooks';
-import { agentPolicies, uiQueryParams } from '../../store/selectors';
+import { APP_UI_ID } from '../../../../../../common/constants';
+import { getEndpointDetailsPath, getEndpointListPath } from '../../../../common/routing';
+import type { HostMetadata, MaybeImmutable } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from './hooks';
+import { agentPolicies, uiQueryParams } from '../../store/selectors';
+import { useAppUrl } from '../../../../../common/lib/kibana/hooks';
+import type { ContextMenuItemNavByRouterProps } from '../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
+import { isEndpointHostIsolated } from '../../../../../common/utils/validators';
+import { isIsolationSupported } from '../../../../../../common/endpoint/service/host_isolation/utils';
 
 interface Options {
   isEndpointList: boolean;

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { useMemo, useCallback } from 'react';
 import { useAssistantOverlay } from '@kbn/elastic-assistant';
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import { useCallback, useMemo } from 'react';
 import { useAssistantAvailability } from '../../../assistant/use_assistant_availability';
 import { getAttackDiscoveryMarkdown } from '../../get_attack_discovery_markdown/get_attack_discovery_markdown';
 import type { AttackDiscovery } from '../../types';

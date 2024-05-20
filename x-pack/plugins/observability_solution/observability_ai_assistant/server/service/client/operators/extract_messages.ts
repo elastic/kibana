@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OperatorFunction, filter, last, map, toArray } from 'rxjs';
+import { filter, last, map, OperatorFunction, toArray } from 'rxjs';
 import { Message, MessageAddEvent, StreamingChatResponseEventType } from '../../../../common';
 import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
 

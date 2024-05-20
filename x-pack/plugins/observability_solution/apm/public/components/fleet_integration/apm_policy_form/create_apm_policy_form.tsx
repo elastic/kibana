@@ -7,9 +7,9 @@
 import React from 'react';
 import { APMPolicyForm } from '.';
 import {
+  PackagePolicyVars,
   NewPackagePolicy,
   PackagePolicyCreateExtensionComponentProps,
-  PackagePolicyVars,
 } from './typings';
 
 interface Props {

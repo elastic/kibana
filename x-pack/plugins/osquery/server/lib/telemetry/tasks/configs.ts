@@ -8,8 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import { TELEMETRY_EBT_CONFIG_EVENT } from '../constants';
 import { templateConfigs } from '../helpers';
-import type { TelemetryReceiver } from '../receiver';
 import type { TelemetryEventsSender } from '../sender';
+import type { TelemetryReceiver } from '../receiver';
 
 export function createTelemetryConfigsTaskConfig() {
   return {

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import PropTypes from 'prop-types';
 import React, { Suspense, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { Content } from './content';
 
-import { EuiCodeBlock, EuiErrorBoundary, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 
 import { getServices } from '../../kibana_services';
 

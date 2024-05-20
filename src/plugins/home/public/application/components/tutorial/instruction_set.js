@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiSplitPanel,
-  EuiSteps,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-} from '@elastic/eui';
-import PropTypes from 'prop-types';
 import React, { Fragment } from 'react';
-import { getDisplayText } from '../../../../common/instruction_variant';
-import { Content } from './content';
+import PropTypes from 'prop-types';
 import { Instruction } from './instruction';
 import { ParameterForm } from './parameter_form';
+import { Content } from './content';
+import { getDisplayText } from '../../../../common/instruction_variant';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiSpacer,
+  EuiSteps,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiCallOut,
+  EuiTitle,
+  EuiSplitPanel,
+} from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
 
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 class InstructionSetUi extends React.Component {

@@ -7,16 +7,16 @@
 
 import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
+import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetcher';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_url_params';
-import { useEnvironmentsFetcher } from '../../../../hooks/use_environments_fetcher';
 
 function updateEnvironmentUrl(
   history: History,

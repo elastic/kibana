@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IconChartMetric } from '@kbn/chart-icons';
-import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getSuggestions } from './suggestions';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { MetricVisualizationState } from './visualization';
+import { IconChartMetric } from '@kbn/chart-icons';
 
 const metricColumn = {
   columnId: 'metric-column',

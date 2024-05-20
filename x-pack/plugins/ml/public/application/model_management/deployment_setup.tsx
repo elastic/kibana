@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -24,20 +28,16 @@ import {
   EuiSelect,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { CoreStart, OverlayStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import { getNewJobLimits, isCloudTrial } from '../services/ml_server_info';
 import {
   composeValidators,
   dictionaryValidator,
   requiredValidator,
 } from '../../../common/util/validators';
-import { getNewJobLimits, isCloudTrial } from '../services/ml_server_info';
 import type { ModelItem } from './models_list';
 
 interface DeploymentSetupProps {

@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import dateMath from '@kbn/datemath';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
-import type { ExperimentalFeatures } from '../../../../../common';
-import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import type { ThresholdRuleParams } from '../../rule_schema';
-import { getCompleteRuleMock, getThresholdRuleParams } from '../../rule_schema/mocks';
-import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
-import type { RunOpts } from '../types';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { thresholdExecutor } from './threshold';
+import { getThresholdRuleParams, getCompleteRuleMock } from '../../rule_schema/mocks';
+import { sampleEmptyAggsSearchResults } from '../__mocks__/es_results';
 import { getThresholdTermsHash } from './utils';
+import type { ThresholdRuleParams } from '../../rule_schema';
+import { createRuleDataClientMock } from '@kbn/rule-registry-plugin/server/rule_data_client/rule_data_client.mock';
+import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
+import type { RunOpts } from '../types';
+import type { ExperimentalFeatures } from '../../../../../common';
 
 describe('threshold_executor', () => {
   let alertServices: RuleExecutorServicesMock;

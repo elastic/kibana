@@ -122,7 +122,9 @@
                 "tags": [],
                 "label": "scoped",
                 "description": [],
-                "signature": ["boolean | undefined"],
+                "signature": [
+                  "boolean | undefined"
+                ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -134,7 +136,9 @@
                 "tags": [],
                 "label": "getExecutionContext",
                 "description": [],
-                "signature": ["(() => string | undefined) | undefined"],
+                "signature": [
+                  "(() => string | undefined) | undefined"
+                ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -148,7 +152,9 @@
                 "tags": [],
                 "label": "agentFactoryProvider",
                 "description": [],
-                "signature": ["AgentFactoryProvider"],
+                "signature": [
+                  "AgentFactoryProvider"
+                ],
                 "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/configure_client.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -179,7 +185,11 @@
         "description": [
           "\nReturns a debug message from an Elasticsearch error in the following format:\n[error type] error reason"
         ],
-        "signature": ["(error: ", "ElasticsearchClientError", ") => string"],
+        "signature": [
+          "(error: ",
+          "ElasticsearchClientError",
+          ") => string"
+        ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -191,7 +201,9 @@
             "tags": [],
             "label": "error",
             "description": [],
-            "signature": ["ElasticsearchClientError"],
+            "signature": [
+              "ElasticsearchClientError"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -241,7 +253,10 @@
             "tags": [],
             "label": "event",
             "description": [],
-            "signature": ["DiagnosticResult", "<unknown, unknown>"],
+            "signature": [
+              "DiagnosticResult",
+              "<unknown, unknown>"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -281,7 +296,9 @@
         "type": "Interface",
         "tags": [],
         "label": "AgentStatsProvider",
-        "description": ["\nExposes the APIs to fetch stats of the existing agents."],
+        "description": [
+          "\nExposes the APIs to fetch stats of the existing agents."
+        ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -320,7 +337,9 @@
         "type": "Interface",
         "tags": [],
         "label": "RequestDebugMeta",
-        "description": ["\nThe logger-relevant request meta of an ES request"],
+        "description": [
+          "\nThe logger-relevant request meta of an ES request"
+        ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -331,7 +350,9 @@
             "type": "string",
             "tags": [],
             "label": "method",
-            "description": ["\nThe requested method"],
+            "description": [
+              "\nThe requested method"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -342,7 +363,9 @@
             "type": "string",
             "tags": [],
             "label": "url",
-            "description": ["\nThe requested endpoint + querystring"],
+            "description": [
+              "\nThe requested endpoint + querystring"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -353,7 +376,9 @@
             "type": "string",
             "tags": [],
             "label": "body",
-            "description": ["\nThe request body (it may be redacted)"],
+            "description": [
+              "\nThe request body (it may be redacted)"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -364,8 +389,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "statusCode",
-            "description": ["\nThe status code of the response"],
-            "signature": ["number | null"],
+            "description": [
+              "\nThe status code of the response"
+            ],
+            "signature": [
+              "number | null"
+            ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/log_query_and_deprecation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -383,7 +412,11 @@
         "tags": [],
         "label": "NetworkAgent",
         "description": [],
-        "signature": ["Agent", " | ", "Agent"],
+        "signature": [
+          "Agent",
+          " | ",
+          "Agent"
+        ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
         "deprecated": false,
         "trackAdoption": false,

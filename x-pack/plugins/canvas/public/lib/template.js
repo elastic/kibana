@@ -6,8 +6,8 @@
  */
 
 import { getDefaultWorkpad } from '../state/defaults';
-import { getId } from './get_id';
 import { tagsRegistry } from './tags_registry';
+import { getId } from './get_id';
 
 const defaultWorkpad = getDefaultWorkpad();
 

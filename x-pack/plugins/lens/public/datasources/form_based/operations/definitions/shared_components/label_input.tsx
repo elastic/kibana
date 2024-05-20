@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import React, { useRef } from 'react';
 import { EuiFieldText, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import React, { useRef } from 'react';
 
 export const LabelInput = ({
   value,

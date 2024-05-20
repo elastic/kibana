@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { AppDeepLinkId, GroupDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
-import { i18n } from '@kbn/i18n';
-import { SECURITY_UI_APP_ID, SecurityPageName } from '@kbn/security-solution-navigation';
-import produce from 'immer';
 import { map } from 'rxjs';
+import produce from 'immer';
+import { i18n } from '@kbn/i18n';
+import { SecurityPageName, SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
+import type { AppDeepLinkId, GroupDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import { type Services } from '../common/services';
 
 export const SOLUTION_NAME = i18n.translate('xpack.securitySolutionEss.nav.solutionName', {

@@ -7,7 +7,7 @@
 
 import type { APIConnector, SortDirection } from '@elastic/search-ui';
 
-import { AdvancedSchema, SchemaType } from '../../../../shared/schema/types';
+import { SchemaType, AdvancedSchema } from '../../../../shared/schema/types';
 
 import { Fields } from './types';
 

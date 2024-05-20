@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { baseFlamegraph } from './__fixtures__/base_flamegraph';
 import { createFlameGraph } from './flamegraph';
+import { baseFlamegraph } from './__fixtures__/base_flamegraph';
 
 describe('Flamegraph', () => {
   const flamegraph = createFlameGraph(baseFlamegraph, false);

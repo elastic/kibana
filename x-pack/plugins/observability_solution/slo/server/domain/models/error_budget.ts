@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { errorBudgetSchema } from '@kbn/slo-schema';
 import * as t from 'io-ts';
+import { errorBudgetSchema } from '@kbn/slo-schema';
 
 type ErrorBudget = t.TypeOf<typeof errorBudgetSchema>;
 

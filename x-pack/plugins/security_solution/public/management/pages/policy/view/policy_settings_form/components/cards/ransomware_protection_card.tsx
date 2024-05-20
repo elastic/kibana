@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
+import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
+import { NotifyUserOption } from '../notify_user_option';
+import { DetectPreventProtectionLevel } from '../detect_prevent_protection_level';
+import { SettingCard } from '../setting_card';
+import type { PolicyFormComponentCommonProps } from '../../types';
 import type { Immutable } from '../../../../../../../../common/endpoint/types';
 import {
   PolicyOperatingSystem,
   ProtectionModes,
 } from '../../../../../../../../common/endpoint/types';
-import { useLicense } from '../../../../../../../common/hooks/use_license';
-import { useTestIdGenerator } from '../../../../../../hooks/use_test_id_generator';
 import type { RansomwareProtectionOSes } from '../../../../types';
-import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
-import type { PolicyFormComponentCommonProps } from '../../types';
-import { DetectPreventProtectionLevel } from '../detect_prevent_protection_level';
-import { NotifyUserOption } from '../notify_user_option';
-import { ProtectionSettingCardSwitch } from '../protection_setting_card_switch';
-import { SettingCard } from '../setting_card';
+import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
+import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
 
 const RANSOMEWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
   PolicyOperatingSystem.windows,

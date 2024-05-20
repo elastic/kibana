@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { sample, times } from 'lodash';
+import { times, sample } from 'lodash';
 
 export const weightedSample = <F>(collection: Array<[F, number]>) => {
   const samples = collection.reduce((acc, row) => {

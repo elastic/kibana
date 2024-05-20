@@ -1,19 +1,3 @@
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
-import numeral from '@elastic/numeral';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -21,19 +5,35 @@ import { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
  * 2.0.
  */
 import React, { useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+  EuiSpacer,
+  EuiSelect,
+  EuiFormRow,
+  EuiText,
+  EuiTitle,
+  EuiSwitch,
+} from '@elastic/eui';
+import { CreateSLOInput, SLODefinitionResponse } from '@kbn/slo-schema';
+import { i18n } from '@kbn/i18n';
+import numeral from '@elastic/numeral';
 import { v4 } from 'uuid';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Duration, WindowSchema } from '../../typings';
+import { BurnRate } from './burn_rate';
+import { LongWindowDuration } from './long_window_duration';
+import { toMinutes, toDuration } from '../../utils/slo/duration';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../common/constants';
-import { Duration, WindowSchema } from '../../typings';
-import { toDuration, toMinutes } from '../../utils/slo/duration';
-import { BudgetConsumed } from './budget_consumed';
-import { BurnRate } from './burn_rate';
-import { LongWindowDuration } from './long_window_duration';
 import { WindowResult } from './validation';
+import { BudgetConsumed } from './budget_consumed';
 
 interface WindowProps extends WindowSchema {
   slo?: SLODefinitionResponse;

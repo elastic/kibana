@@ -5,22 +5,22 @@
  * 2.0.
  */
 
-import {
-  EuiButtonGroup,
-  EuiComboBox,
-  EuiDatePicker,
-  EuiDatePickerRange,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiSwitch,
-} from '@elastic/eui';
-import { AlertsFilterTimeframe, ISO_WEEKDAYS, IsoWeekday } from '@kbn/alerting-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { useUiSetting } from '@kbn/kibana-react-plugin/public';
-import deepEqual from 'fast-deep-equal';
 import moment, { Moment } from 'moment';
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiButtonGroup,
+  EuiSpacer,
+  EuiDatePickerRange,
+  EuiDatePicker,
+  EuiComboBox,
+} from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
+import { AlertsFilterTimeframe, ISO_WEEKDAYS, IsoWeekday } from '@kbn/alerting-plugin/common';
 import { I18N_WEEKDAY_OPTIONS_DDD } from '../../../common/constants';
 
 interface ActionAlertsFilterTimeframeProps {

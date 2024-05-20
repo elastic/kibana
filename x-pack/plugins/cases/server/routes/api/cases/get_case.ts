@@ -7,12 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { CASE_DETAILS_URL } from '../../../../common/constants';
 import type { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
+import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
+import { CASE_DETAILS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import { getWarningHeader, logDeprecatedEndpoint } from '../utils';
 
 const params = {
   params: schema.object({

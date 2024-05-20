@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { defaultState, pureTransitions, TodoActions, TodoState } from '../state_containers/todomvc';
 import { BaseState, BaseStateContainer, createStateContainer } from '../../common/state_containers';
 import {
-  INullableBaseStateContainer,
   createKbnUrlStateStorage,
   syncState,
+  INullableBaseStateContainer,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../public/state_sync';
-import { TodoActions, TodoState, defaultState, pureTransitions } from '../state_containers/todomvc';
 
 const tick = () => new Promise((resolve) => setTimeout(resolve));
 

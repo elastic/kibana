@@ -120,7 +120,9 @@
         "tags": [],
         "label": "runCli",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-openapi-generator/src/cli.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -148,7 +150,9 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -182,7 +186,9 @@
             "tags": [],
             "label": "templateName",
             "description": [],
-            "signature": ["\"zod_operation_schema\""],
+            "signature": [
+              "\"zod_operation_schema\""
+            ],
             "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -194,7 +200,9 @@
             "tags": [],
             "label": "skipLinting",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -206,7 +214,9 @@
             "tags": [],
             "label": "bundle",
             "description": [],
-            "signature": ["{ outFile: string; } | undefined"],
+            "signature": [
+              "{ outFile: string; } | undefined"
+            ],
             "path": "packages/kbn-openapi-generator/src/openapi_generator.ts",
             "deprecated": false,
             "trackAdoption": false

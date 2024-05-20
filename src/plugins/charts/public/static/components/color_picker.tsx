@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import React, { BaseSyntheticEvent, useMemo } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiButtonEmpty,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiScreenReaderOnly,
   euiPaletteColorBlind,
+  EuiScreenReaderOnly,
+  EuiFlexGroup,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { BaseSyntheticEvent, useMemo } from 'react';
 import { lightenColor } from '../../services/palettes/lighten_color';
 
 export const legacyColors: string[] = [

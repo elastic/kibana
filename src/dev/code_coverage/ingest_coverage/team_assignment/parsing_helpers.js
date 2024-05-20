@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import * as Either from '../either';
 import { always } from '../utils';
+import * as Either from '../either';
 
 const coverageDelimRe = /^#CC#\s/;
 

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -15,9 +17,7 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
-import React, { useMemo } from 'react';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';

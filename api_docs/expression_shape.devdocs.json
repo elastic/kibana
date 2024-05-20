@@ -201,7 +201,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -311,7 +313,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P"],
+            "signature": [
+              "P"
+            ],
             "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -403,7 +407,9 @@
             "tags": [],
             "label": "r",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -415,7 +421,9 @@
             "tags": [],
             "label": "cx",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -427,7 +435,9 @@
             "tags": [],
             "label": "cy",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -535,7 +545,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"shape\""],
+            "signature": [
+              "\"shape\""
+            ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -608,7 +620,9 @@
             "tags": [],
             "label": "d",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -620,7 +634,9 @@
             "tags": [],
             "label": "strokeLinecap",
             "description": [],
-            "signature": ["\"inherit\" | \"butt\" | \"round\" | \"square\" | undefined"],
+            "signature": [
+              "\"inherit\" | \"butt\" | \"round\" | \"square\" | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -646,7 +662,9 @@
             "tags": [],
             "label": "points",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -658,7 +676,9 @@
             "tags": [],
             "label": "strokeLinejoin",
             "description": [],
-            "signature": ["\"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined"],
+            "signature": [
+              "\"inherit\" | \"round\" | \"miter\" | \"bevel\" | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -726,7 +746,9 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "signature": ["string | boolean"],
+            "signature": [
+              "string | boolean"
+            ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -805,7 +827,9 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -817,7 +841,9 @@
             "tags": [],
             "label": "y",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -829,7 +855,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -841,7 +869,9 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -867,7 +897,9 @@
             "tags": [],
             "label": "fill",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -879,7 +911,9 @@
             "tags": [],
             "label": "stroke",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -891,7 +925,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -903,7 +939,9 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -936,7 +974,9 @@
             "tags": [],
             "label": "overflow",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -948,7 +988,9 @@
             "tags": [],
             "label": "preserveAspectRatio",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -991,7 +1033,9 @@
             "tags": [],
             "label": "onLoaded",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "src/plugins/expression_shape/public/components/shape/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1005,7 +1049,9 @@
             "tags": [],
             "label": "parentNode",
             "description": [],
-            "signature": ["HTMLElement"],
+            "signature": [
+              "HTMLElement"
+            ],
             "path": "src/plugins/expression_shape/public/components/shape/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1031,7 +1077,9 @@
             "tags": [],
             "label": "strokeWidth",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1043,7 +1091,9 @@
             "tags": [],
             "label": "stroke",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1055,7 +1105,9 @@
             "tags": [],
             "label": "fill",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1067,7 +1119,9 @@
             "tags": [],
             "label": "vectorEffect",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1079,7 +1133,9 @@
             "tags": [],
             "label": "strokeMiterlimit",
             "description": [],
-            "signature": ["string | number | undefined"],
+            "signature": [
+              "string | number | undefined"
+            ],
             "path": "src/plugins/expression_shape/public/components/reusable/types.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1526,7 +1582,9 @@
         "tags": [],
         "label": "OriginString",
         "description": [],
-        "signature": ["\"right\" | \"left\" | \"top\" | \"bottom\""],
+        "signature": [
+          "\"right\" | \"left\" | \"top\" | \"bottom\""
+        ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1849,7 +1907,9 @@
       "tags": [],
       "label": "ExpressionShapePluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "src/plugins/expression_shape/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1871,7 +1931,9 @@
       "tags": [],
       "label": "ExpressionShapePluginStart",
       "description": [],
-      "signature": ["void"],
+      "signature": [
+        "void"
+      ],
       "path": "src/plugins/expression_shape/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -1998,7 +2060,9 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "signature": ["\"shape\""],
+            "signature": [
+              "\"shape\""
+            ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2113,7 +2177,9 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "signature": ["string | boolean"],
+            "signature": [
+              "string | boolean"
+            ],
             "path": "src/plugins/expression_shape/common/types/expression_functions.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2345,7 +2411,9 @@
         "tags": [],
         "label": "BOOLEAN_FALSE",
         "description": [],
-        "signature": ["\"`false`\""],
+        "signature": [
+          "\"`false`\""
+        ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2358,7 +2426,9 @@
         "tags": [],
         "label": "BOOLEAN_TRUE",
         "description": [],
-        "signature": ["\"`true`\""],
+        "signature": [
+          "\"`true`\""
+        ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2371,7 +2441,9 @@
         "tags": [],
         "label": "CSS",
         "description": [],
-        "signature": ["\"CSS\""],
+        "signature": [
+          "\"CSS\""
+        ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2498,7 +2570,9 @@
         "tags": [],
         "label": "FONT_FAMILY",
         "description": [],
-        "signature": ["\"`font-family`\""],
+        "signature": [
+          "\"`font-family`\""
+        ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2511,7 +2585,9 @@
         "tags": [],
         "label": "FONT_WEIGHT",
         "description": [],
-        "signature": ["\"`font-weight`\""],
+        "signature": [
+          "\"`font-weight`\""
+        ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2524,7 +2600,9 @@
         "tags": [],
         "label": "OriginString",
         "description": [],
-        "signature": ["\"right\" | \"left\" | \"top\" | \"bottom\""],
+        "signature": [
+          "\"right\" | \"left\" | \"top\" | \"bottom\""
+        ],
         "path": "src/plugins/expression_shape/common/types/expression_renderers.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2537,7 +2615,9 @@
         "tags": [],
         "label": "PLUGIN_ID",
         "description": [],
-        "signature": ["\"expressionShape\""],
+        "signature": [
+          "\"expressionShape\""
+        ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2550,7 +2630,9 @@
         "tags": [],
         "label": "PLUGIN_NAME",
         "description": [],
-        "signature": ["\"expressionShape\""],
+        "signature": [
+          "\"expressionShape\""
+        ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -2607,7 +2689,9 @@
         "tags": [],
         "label": "SVG",
         "description": [],
-        "signature": ["\"SVG\""],
+        "signature": [
+          "\"SVG\""
+        ],
         "path": "src/plugins/expression_shape/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,

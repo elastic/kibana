@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { ResultsDataStream } from './results_data_stream';
+import { Subject } from 'rxjs';
 import type { InstallParams } from '@kbn/data-stream-adapter';
 import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Subject } from 'rxjs';
-import { ResultsDataStream } from './results_data_stream';
 
 jest.mock('@kbn/data-stream-adapter');
 

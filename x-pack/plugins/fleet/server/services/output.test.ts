@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { savedObjectsClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 
@@ -13,13 +13,13 @@ import type { Logger } from '@kbn/logging';
 
 import { RESERVED_CONFIG_YML_KEYS } from '../../common/constants';
 
-import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 import type { OutputSOAttributes } from '../types';
+import { OUTPUT_SAVED_OBJECT_TYPE } from '../constants';
 
-import { agentPolicyService } from './agent_policy';
+import { outputService, outputIdToUuid } from './output';
 import { appContextService } from './app_context';
+import { agentPolicyService } from './agent_policy';
 import { auditLoggingService } from './audit_logging';
-import { outputIdToUuid, outputService } from './output';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');

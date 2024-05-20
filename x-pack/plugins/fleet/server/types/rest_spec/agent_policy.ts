@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { NewAgentPolicySchema } from '../models';
 
-import { AGENT_POLICY_MAPPINGS, AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../constants';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, AGENT_POLICY_MAPPINGS } from '../../constants';
 
 import { validateKuery } from '../../routes/utils/filter_utils';
 

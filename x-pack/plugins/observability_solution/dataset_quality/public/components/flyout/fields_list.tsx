@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React, { ReactNode, Fragment } from 'react';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiPanel,
-  EuiSkeletonRectangle,
-  EuiSkeletonText,
-  EuiSkeletonTitle,
+  EuiFlexItem,
   EuiSpacer,
   EuiTitle,
+  EuiHorizontalRule,
+  EuiSkeletonTitle,
+  EuiSkeletonText,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
-import React, { ReactNode, Fragment } from 'react';
 
 export function FieldsList({
   title,

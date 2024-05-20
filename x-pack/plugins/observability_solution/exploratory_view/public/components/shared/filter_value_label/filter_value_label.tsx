@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { Filter, buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
-import { injectI18n } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FilterItem } from '@kbn/unified-search-plugin/public';
 import React from 'react';
+import { injectI18n } from '@kbn/i18n-react';
+import { Filter, buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
+import { FilterItem } from '@kbn/unified-search-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAppServices } from '../../../application/types';
 
 export function buildFilterLabel({

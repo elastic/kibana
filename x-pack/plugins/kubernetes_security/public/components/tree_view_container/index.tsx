@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiSplitPanel, EuiText } from '@elastic/eui';
 import React from 'react';
-import { GlobalFilter, IndexPattern } from '../../types';
+import { EuiSplitPanel, EuiText } from '@elastic/eui';
+import { useStyles } from './styles';
+import { IndexPattern, GlobalFilter } from '../../types';
+import { TreeNav } from './tree_nav';
 import { Breadcrumb } from './breadcrumb';
 import { TreeViewContextProvider, useTreeViewContext } from './contexts';
 import { EmptyState } from './empty_state';
-import { useStyles } from './styles';
-import { TreeNav } from './tree_nav';
 
 export interface TreeViewContainerComponentDeps {
   renderSessionsView: (sessionsFilterQuery: string | undefined) => JSX.Element;

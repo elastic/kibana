@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import React, { Fragment, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
-  EuiPopover,
   EuiSkeletonText,
-  EuiSpacer,
+  EuiPanel,
   EuiText,
+  EuiButton,
+  EuiButtonIcon,
+  EuiSpacer,
   EuiToolTip,
+  EuiCallOut,
+  EuiContextMenu,
+  EuiPopover,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Fragment, useState } from 'react';
 
 import { useServices } from '../../../../app_context';
 import {
-  ExecuteRetention,
-  RetentionExecuteModalProvider,
   RetentionSettingsUpdateModalProvider,
   UpdateRetentionSettings,
+  RetentionExecuteModalProvider,
+  ExecuteRetention,
 } from '../../../../components';
 
 interface Props {

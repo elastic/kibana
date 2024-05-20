@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { useComponentTemplatesContext } from '../component_templates_context';
 import { AuthorizationProvider } from '../shared_imports';
+import { useComponentTemplatesContext } from '../component_templates_context';
 
 export const ComponentTemplatesAuthProvider: React.FunctionComponent<{
   children?: React.ReactNode;

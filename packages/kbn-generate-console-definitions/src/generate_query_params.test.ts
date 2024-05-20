@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { SpecificationTypes } from './types';
 import { generateQueryParams } from './generate_query_params';
 import { getMockProperty, mockRequestType, mockSchema } from './helpers/test_helpers';
-import { SpecificationTypes } from './types';
 
 describe('generateQueryParams', () => {
   it('iterates over attachedBehaviours', () => {

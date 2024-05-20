@@ -6,23 +6,15 @@
  */
 
 import type {
-  IBasePath,
+  SavedObjectsFindResult,
+  SavedObjectsFindResponse,
   SavedObject,
   SavedObjectReference,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
+  IBasePath,
 } from '@kbn/core/server';
+import { flatMap, uniqWith, xorWith } from 'lodash';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { flatMap, uniqWith, xorWith } from 'lodash';
-import {
-  CASE_VIEW_COMMENT_PATH,
-  CASE_VIEW_PATH,
-  CASE_VIEW_TAB_PATH,
-  GENERAL_CASES_OWNER,
-  OWNER_INFO,
-} from '../../common/constants';
-import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type {
   ActionsAttachmentPayload,
   AlertAttachmentPayload,
@@ -34,28 +26,36 @@ import type {
 } from '../../common/types/domain';
 import {
   AttachmentType,
+  ExternalReferenceSOAttachmentPayloadRt,
+  FileAttachmentMetadataRt,
   CaseSeverity,
   CaseStatuses,
   ConnectorTypes,
-  ExternalReferenceSOAttachmentPayloadRt,
-  FileAttachmentMetadataRt,
 } from '../../common/types/domain';
 import { isValidOwner } from '../../common/utils/owner';
+import {
+  CASE_VIEW_COMMENT_PATH,
+  CASE_VIEW_PATH,
+  CASE_VIEW_TAB_PATH,
+  GENERAL_CASES_OWNER,
+  OWNER_INFO,
+} from '../../common/constants';
+import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
 import type { AlertInfo, FileAttachmentRequest } from './types';
 
+import type { UpdateAlertStatusRequest } from '../client/alerts/types';
+import {
+  parseCommentString,
+  getLensVisualizations,
+} from '../../common/utils/markdown_plugins/utils';
+import { dedupAssignees } from '../client/cases/utils';
+import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 import type {
   AttachmentRequest,
   AttachmentsFindResponse,
   CasePostRequest,
   CasesFindResponse,
 } from '../../common/types/api';
-import {
-  getLensVisualizations,
-  parseCommentString,
-} from '../../common/utils/markdown_plugins/utils';
-import type { UpdateAlertStatusRequest } from '../client/alerts/types';
-import { dedupAssignees } from '../client/cases/utils';
-import type { CaseSavedObjectTransformed, CaseTransformedAttributes } from './types/case';
 
 /**
  * Default sort field for querying saved objects.

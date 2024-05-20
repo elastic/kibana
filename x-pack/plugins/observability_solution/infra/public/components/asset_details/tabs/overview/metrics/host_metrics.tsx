@@ -1,6 +1,3 @@
-import { EuiFlexGrid, EuiFlexGroup } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,8 +5,11 @@ import type { TimeRange } from '@kbn/es-query';
  * 2.0.
  */
 import React from 'react';
-import { HostCharts, KubernetesNodeCharts } from '../../../charts';
+import { EuiFlexGroup, EuiFlexGrid } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useTabSwitcherContext } from '../../../hooks/use_tab_switcher';
+import { HostCharts, KubernetesNodeCharts } from '../../../charts';
 import { ContentTabIds } from '../../../types';
 
 interface Props {

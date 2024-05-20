@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
 import React from 'react';
+import { OpenAILogo } from '@kbn/stack-connectors-plugin/public/common';
+import { EuiFlexGroup, EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 export interface SetupConnectorProps {
   setIsConnectorModalVisible: React.Dispatch<React.SetStateAction<boolean>>;

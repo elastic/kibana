@@ -7,10 +7,10 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  actionRequestSchema,
   actionSchema,
-  systemActionRequestSchema,
+  actionRequestSchema,
   systemActionSchema,
+  systemActionRequestSchema,
 } from '../schemas';
 
 export type ActionRequest = TypeOf<typeof actionRequestSchema>;

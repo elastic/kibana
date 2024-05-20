@@ -7,8 +7,8 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import d3 from 'd3';
 import _ from 'lodash';
+import d3 from 'd3';
 import { SCALE_MODES } from './scale_modes';
 
 const defaults = {

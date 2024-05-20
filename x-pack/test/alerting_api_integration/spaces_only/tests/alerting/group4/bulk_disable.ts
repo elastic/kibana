@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import expect from '@kbn/expect';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { ObjectRemover, getTestRuleData, getUrlPrefix } from '../../../../common/lib';
 import { Spaces } from '../../../scenarios';
+import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 
 const alertAsDataIndex = '.internal.alerts-observability.test.alerts.alerts-default-000001';
 

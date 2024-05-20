@@ -9,7 +9,6 @@
 import { dropdownControl } from './dropdownControl';
 // @ts-expect-error untyped local
 import { getCell } from './getCell';
-import { heatmap } from './heatmap';
 // @ts-expect-error untyped local
 import { image } from './image';
 // @ts-expect-error untyped local
@@ -17,23 +16,24 @@ import { markdown } from './markdown';
 import { metricInitializer } from './metric';
 // @ts-expect-error untyped local
 import { pie } from './pie';
-import { pieVis } from './pie_vis';
 // @ts-expect-error untyped local
 import { plot } from './plot';
 // @ts-expect-error untyped local
 import { progress } from './progress';
 // @ts-expect-error untyped local
-import { render } from './render';
-// @ts-expect-error untyped local
 import { repeatImage } from './repeatImage';
 // @ts-expect-error untyped local
 import { revealImage } from './revealImage';
+// @ts-expect-error untyped local
+import { render } from './render';
 // @ts-expect-error untyped local
 import { shape } from './shape';
 // @ts-expect-error untyped local
 import { table } from './table';
 // @ts-expect-error untyped local
 import { timefilterControl } from './timefilterControl';
+import { heatmap } from './heatmap';
+import { pieVis } from './pie_vis';
 
 import { SetupInitializer } from '../../plugin';
 

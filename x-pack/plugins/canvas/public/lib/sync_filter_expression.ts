@@ -6,8 +6,8 @@
  */
 
 import { fromExpression } from '@kbn/interpreter';
-import { get } from 'lodash';
 import immutable from 'object-path-immutable';
+import { get } from 'lodash';
 
 const { set, del } = immutable;
 

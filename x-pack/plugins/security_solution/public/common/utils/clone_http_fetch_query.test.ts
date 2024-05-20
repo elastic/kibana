@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { cloneHttpFetchQuery } from './clone_http_fetch_query';
 import type { HttpFetchQuery } from '@kbn/core/public';
 import type { Immutable } from '../../../common/endpoint/types';
-import { cloneHttpFetchQuery } from './clone_http_fetch_query';
 
 describe('cloneHttpFetchQuery', () => {
   it('can clone complex queries', () => {

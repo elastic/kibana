@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useState, FunctionComponent } from 'react';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
 interface Props {
   label: string;

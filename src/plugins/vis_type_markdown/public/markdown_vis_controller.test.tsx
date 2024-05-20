@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { waitFor, render } from '@testing-library/react';
 import MarkdownVisComponent from './markdown_vis_controller';
 
 describe('markdown vis controller', () => {

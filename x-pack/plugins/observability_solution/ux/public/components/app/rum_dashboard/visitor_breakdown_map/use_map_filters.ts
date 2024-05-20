@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getStaticDataViewId } from '@kbn/apm-data-view';
-import { FieldFilter as Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
+import { FieldFilter as Filter } from '@kbn/es-query';
+import { getStaticDataViewId } from '@kbn/apm-data-view';
+import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   SERVICE_NAME,
@@ -16,7 +17,6 @@ import {
   USER_AGENT_NAME,
   USER_AGENT_OS,
 } from '../../../../../common/elasticsearch_fieldnames';
-import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useUxPluginContext } from '../../../../context/use_ux_plugin_context';
 
 const getWildcardFilter = (field: string, value: string, spaceId: string): Filter => {

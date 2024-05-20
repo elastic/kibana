@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { CanvasSetup } from '../public';
 
-import { typeFunctions } from './expression_types';
 import { functions } from './functions/browser';
 import { initFunctions } from './functions/external';
-import { renderFunctionFactories, renderFunctions } from './renderers';
+import { typeFunctions } from './expression_types';
+import { renderFunctions, renderFunctionFactories } from './renderers';
 
 interface SetupDeps {
   canvas: CanvasSetup;

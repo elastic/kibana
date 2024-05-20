@@ -67,7 +67,9 @@
                 "tags": [],
                 "label": "duration",
                 "description": [],
-                "signature": ["moment.Duration"],
+                "signature": [
+                  "moment.Duration"
+                ],
                 "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -107,7 +109,9 @@
                 "tags": [],
                 "label": "duration",
                 "description": [],
-                "signature": ["moment.Duration"],
+                "signature": [
+                  "moment.Duration"
+                ],
                 "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -147,7 +151,9 @@
                 "tags": [],
                 "label": "duration",
                 "description": [],
-                "signature": ["moment.Duration"],
+                "signature": [
+                  "moment.Duration"
+                ],
                 "path": "packages/kbn-calculate-auto/src/calculate_auto.ts",
                 "deprecated": false,
                 "trackAdoption": false

@@ -5,21 +5,21 @@
  * 2.0.
  */
 
+import React, { useCallback, useMemo } from 'react';
 import { htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  useDebouncedValue,
   DragDropBuckets,
-  DraggableBucketContainer,
   FieldsBucketContainer,
   NewBucketButton,
-  useDebouncedValue,
+  DraggableBucketContainer,
 } from '@kbn/visualization-ui-components';
-import React, { useCallback, useMemo } from 'react';
 import { IndexPattern } from '../../../../../types';
-import type { OperationSupportMatrix } from '../../../dimension_panel';
 import { FieldSelect } from '../../../dimension_panel/field_select';
-import { supportedTypes } from './constants';
 import type { TermsIndexPatternColumn } from './types';
+import type { OperationSupportMatrix } from '../../../dimension_panel';
+import { supportedTypes } from './constants';
 
 const generateId = htmlIdGenerator();
 export const MAX_MULTI_FIELDS_SIZE = 3;

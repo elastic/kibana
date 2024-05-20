@@ -7,11 +7,11 @@
 
 import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { useAllHost, ID } from '../../containers/hosts';
+import type { HostsComponentsQueryProps } from './types';
+import { HostsTable } from '../../components/hosts_table';
 import { manageQuery } from '../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { HostsTable } from '../../components/hosts_table';
-import { ID, useAllHost } from '../../containers/hosts';
-import type { HostsComponentsQueryProps } from './types';
 
 const HostsTableManage = manageQuery(HostsTable);
 

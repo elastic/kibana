@@ -8,17 +8,17 @@
 
 import * as Path from 'path';
 
+import { REPO_ROOT } from '@kbn/repo-info';
 import {
-  CiStatsReportTestsOptions,
   CiStatsReporter,
+  CiStatsReportTestsOptions,
   CiStatsTestType,
 } from '@kbn/ci-stats-reporter';
-import { REPO_ROOT } from '@kbn/repo-info';
 
-import { getSnapshotOfRunnableLogs } from '../../../../mocha';
-import { Runnable, Runner } from '../../../fake_mocha_types';
 import { Config } from '../../config';
+import { Runner, Runnable } from '../../../fake_mocha_types';
 import { Lifecycle } from '../../lifecycle';
+import { getSnapshotOfRunnableLogs } from '../../../../mocha';
 
 function getHookType(hook: Runnable): CiStatsTestType {
   if (hook.parent?._afterAll.includes(hook)) {

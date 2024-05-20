@@ -9,13 +9,13 @@ import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@k
 
 import type { EsAssetReference } from '../../../../types';
 
-import type { PackageInstallContext } from '../../../../../common/types';
-import { PackageInvalidArchiveError } from '../../../../errors';
 import { ElasticsearchAssetType } from '../../../../types';
 import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import { PackageInvalidArchiveError } from '../../../../errors';
+import type { PackageInstallContext } from '../../../../../common/types';
 
 export async function installILMPolicy(
   packageInstallContext: PackageInstallContext,

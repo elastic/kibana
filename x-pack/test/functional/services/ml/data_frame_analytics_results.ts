@@ -9,8 +9,8 @@ import expect from '@kbn/expect';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import type { CanvasElementColorStats } from '../canvas_element';
-import type { MlCommonDataGrid } from './common_data_grid';
 import type { MlCommonUI } from './common_ui';
+import type { MlCommonDataGrid } from './common_data_grid';
 
 export function MachineLearningDataFrameAnalyticsResultsProvider(
   { getPageObject, getService }: FtrProviderContext,

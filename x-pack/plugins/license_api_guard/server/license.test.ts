@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, RequestHandlerContext } from '@kbn/core/server';
-import { httpServerMock } from '@kbn/core/server/mocks';
 import { of } from 'rxjs';
+import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
+import { httpServerMock } from '@kbn/core/server/mocks';
 import { License } from './license';
-import { LicenseCheckState, LicenseType, licensingMock } from './shared_imports';
+import { LicenseCheckState, licensingMock, LicenseType } from './shared_imports';
 
 describe('License API guard', () => {
   const pluginName = 'testPlugin';

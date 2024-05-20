@@ -8,11 +8,15 @@
 import type {
   ClusterPutComponentTemplateRequest,
   IndicesPutIndexTemplateRequest,
-  IngestPipeline,
   IngestPutPipelineRequest,
+  IngestPipeline,
   Metadata,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { getSLOMappingsTemplate } from '../assets/component_templates/slo_mappings_template';
+import { getSLOSettingsTemplate } from '../assets/component_templates/slo_settings_template';
+import { getSLOSummaryMappingsTemplate } from '../assets/component_templates/slo_summary_mappings_template';
+import { getSLOSummarySettingsTemplate } from '../assets/component_templates/slo_summary_settings_template';
 import {
   SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
@@ -28,10 +32,6 @@ import {
   SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
-import { getSLOMappingsTemplate } from '../assets/component_templates/slo_mappings_template';
-import { getSLOSettingsTemplate } from '../assets/component_templates/slo_settings_template';
-import { getSLOSummaryMappingsTemplate } from '../assets/component_templates/slo_summary_mappings_template';
-import { getSLOSummarySettingsTemplate } from '../assets/component_templates/slo_summary_settings_template';
 import { getSLOIndexTemplate } from '../assets/index_templates/slo_index_templates';
 import { getSLOSummaryIndexTemplate } from '../assets/index_templates/slo_summary_index_templates';
 import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
@@ -44,10 +44,7 @@ export interface ResourceInstaller {
 type IngestPipelineWithMetadata = IngestPipeline & { _meta?: Metadata };
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  constructor(
-    private esClient: ElasticsearchClient,
-    private logger: Logger
-  ) {}
+  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   public async ensureCommonResourcesInstalled(): Promise<void> {
     try {

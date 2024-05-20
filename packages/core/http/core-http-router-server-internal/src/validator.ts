@@ -7,13 +7,13 @@
  */
 
 import { Stream } from 'stream';
-import { ValidationError, isConfigSchema, schema } from '@kbn/config-schema';
+import { ValidationError, schema, isConfigSchema } from '@kbn/config-schema';
 import type {
-  RouteValidationFunction,
-  RouteValidationResultFactory,
   RouteValidationSpec,
+  RouteValidationFunction,
   RouteValidatorConfig,
   RouteValidatorFullConfigRequest,
+  RouteValidationResultFactory,
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';

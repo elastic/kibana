@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { Writable } from 'stream';
-import {
-  OptimizerConfig,
-  OptimizerUpdate,
-  logOptimizerProgress,
-  logOptimizerState,
-  runOptimizer,
-} from '@kbn/optimizer';
-import {
-  ToolingLog,
-  ToolingLogTextWriter,
-  parseLogLevel,
-  pickLevelFromFlags,
-} from '@kbn/tooling-log';
 import Chalk from 'chalk';
 import moment from 'moment';
+import { Writable } from 'stream';
 import { tap } from 'rxjs';
+import {
+  ToolingLog,
+  pickLevelFromFlags,
+  ToolingLogTextWriter,
+  parseLogLevel,
+} from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
 import { ignoreElements } from 'rxjs';
+import {
+  runOptimizer,
+  OptimizerConfig,
+  logOptimizerState,
+  logOptimizerProgress,
+  OptimizerUpdate,
+} from '@kbn/optimizer';
 
 export interface Options {
   enabled: boolean;

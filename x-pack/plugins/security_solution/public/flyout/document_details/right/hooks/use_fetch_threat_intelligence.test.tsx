@@ -7,12 +7,12 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
 import type {
   UseThreatIntelligenceParams,
   UseThreatIntelligenceResult,
 } from './use_fetch_threat_intelligence';
 import { useFetchThreatIntelligence } from './use_fetch_threat_intelligence';
+import { useInvestigationTimeEnrichment } from '../../../../common/containers/cti/event_enrichment';
 
 jest.mock('../../../../common/containers/cti/event_enrichment');
 

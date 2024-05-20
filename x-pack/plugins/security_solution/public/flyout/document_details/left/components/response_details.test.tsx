@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { TestProviders, rawEventData } from '../../../../common/mock';
 import { LeftPanelContext } from '../context';
-import { ResponseDetails } from './response_details';
+import { rawEventData, TestProviders } from '../../../../common/mock';
 import { RESPONSE_DETAILS_TEST_ID } from './test_ids';
+import { ResponseDetails } from './response_details';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/lib/kibana', () => {

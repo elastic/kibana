@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
-import type { DataView, DataViewField } from '@kbn/data-plugin/common';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment, Component } from 'react';
-import type { AggDescriptor } from '../../../../common/descriptor_types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';
-import type { OnSourceChangeArgs } from '../source';
 import { GeoLineForm } from './geo_line_form';
+import type { AggDescriptor } from '../../../../common/descriptor_types';
+import type { OnSourceChangeArgs } from '../source';
 
 interface Props {
   bucketsName: string;

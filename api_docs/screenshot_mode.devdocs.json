@@ -12,7 +12,9 @@
         "description": [
           "\nUse this function to set the current browser to screenshot mode.\n\nThis function should be called as early as possible to ensure that screenshot mode is\ncorrectly detected for the first page load. It is not suitable for use inside any plugin\ncode unless the plugin code is guaranteed to, somehow, load before any other code.\n\nAdditionally, we don't know what environment this code will run in so we remove as many external\nreferences as possible to make it portable. For instance, running inside puppeteer."
         ],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -31,7 +33,9 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_ENABLED_KEY",
         "description": [],
-        "signature": ["\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""],
+        "signature": [
+          "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
+        ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -86,7 +90,9 @@
         "description": [
           "\nUse this function to set the current browser to screenshot mode.\n\nThis function should be called as early as possible to ensure that screenshot mode is\ncorrectly detected for the first page load. It is not suitable for use inside any plugin\ncode unless the plugin code is guaranteed to, somehow, load before any other code.\n\nAdditionally, we don't know what environment this code will run in so we remove as many external\nreferences as possible to make it portable. For instance, running inside puppeteer."
         ],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -105,7 +111,9 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_ENABLED_KEY",
         "description": [],
-        "signature": ["\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""],
+        "signature": [
+          "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
+        ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -181,8 +189,12 @@
           "type": "Function",
           "tags": [],
           "label": "setScreenshotContext",
-          "description": ["\nStores a value in the screenshotting context."],
-          "signature": ["<T = unknown>(key: string, value: T) => void"],
+          "description": [
+            "\nStores a value in the screenshotting context."
+          ],
+          "signature": [
+            "<T = unknown>(key: string, value: T) => void"
+          ],
           "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -193,8 +205,12 @@
               "type": "string",
               "tags": [],
               "label": "key",
-              "description": ["Context key to set."],
-              "signature": ["string"],
+              "description": [
+                "Context key to set."
+              ],
+              "signature": [
+                "string"
+              ],
               "path": "src/plugins/screenshot_mode/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -206,8 +222,12 @@
               "type": "Uncategorized",
               "tags": [],
               "label": "value",
-              "description": ["Value to set."],
-              "signature": ["T"],
+              "description": [
+                "Value to set."
+              ],
+              "signature": [
+                "T"
+              ],
               "path": "src/plugins/screenshot_mode/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
@@ -225,7 +245,9 @@
           "description": [
             "\nSet the current environment to screenshot mode. Intended to run in a browser-environment, before any other scripts\non the page have run to ensure that screenshot mode is detected as early as possible."
           ],
-          "signature": ["() => void"],
+          "signature": [
+            "() => void"
+          ],
           "path": "src/plugins/screenshot_mode/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
@@ -308,10 +330,16 @@
         "parentPluginId": "screenshotMode",
         "id": "def-common.getScreenshotContext",
         "type": "Function",
-        "tags": ["return"],
+        "tags": [
+          "return"
+        ],
         "label": "getScreenshotContext",
-        "description": ["\nRetrieves a value from the screenshotting context."],
-        "signature": ["(key: string, defaultValue: T | undefined) => T | undefined"],
+        "description": [
+          "\nRetrieves a value from the screenshotting context."
+        ],
+        "signature": [
+          "(key: string, defaultValue: T | undefined) => T | undefined"
+        ],
         "path": "src/plugins/screenshot_mode/common/context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -322,8 +350,12 @@
             "type": "string",
             "tags": [],
             "label": "key",
-            "description": ["Context key to get."],
-            "signature": ["string"],
+            "description": [
+              "Context key to get."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/screenshot_mode/common/context.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -335,15 +367,21 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "defaultValue",
-            "description": ["Value to return if the key is not found."],
-            "signature": ["T | undefined"],
+            "description": [
+              "Value to return if the key is not found."
+            ],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "src/plugins/screenshot_mode/common/context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": ["The value stored in the screenshotting context."],
+        "returnComment": [
+          "The value stored in the screenshotting context."
+        ],
         "initialIsOpen": false
       },
       {
@@ -355,7 +393,9 @@
         "description": [
           "\nThis function is responsible for detecting whether we are currently in screenshot mode.\n\nWe check in the current window context whether screenshot mode is enabled, otherwise we check\nlocalStorage. The ability to set a value in localStorage enables more convenient development and testing\nin functionality that needs to detect screenshot mode."
         ],
-        "signature": ["() => boolean"],
+        "signature": [
+          "() => boolean"
+        ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -369,8 +409,12 @@
         "type": "Function",
         "tags": [],
         "label": "setScreenshotContext",
-        "description": ["\nStores a value in the screenshotting context."],
-        "signature": ["(key: string, value: T) => void"],
+        "description": [
+          "\nStores a value in the screenshotting context."
+        ],
+        "signature": [
+          "(key: string, value: T) => void"
+        ],
         "path": "src/plugins/screenshot_mode/common/context.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -381,8 +425,12 @@
             "type": "string",
             "tags": [],
             "label": "key",
-            "description": ["Context key to set."],
-            "signature": ["string"],
+            "description": [
+              "Context key to set."
+            ],
+            "signature": [
+              "string"
+            ],
             "path": "src/plugins/screenshot_mode/common/context.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -394,8 +442,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
-            "description": ["Value to set."],
-            "signature": ["T"],
+            "description": [
+              "Value to set."
+            ],
+            "signature": [
+              "T"
+            ],
             "path": "src/plugins/screenshot_mode/common/context.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -412,7 +464,9 @@
         "tags": [],
         "label": "setScreenshotModeDisabled",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -429,7 +483,9 @@
         "description": [
           "\nUse this function to set the current browser to screenshot mode.\n\nThis function should be called as early as possible to ensure that screenshot mode is\ncorrectly detected for the first page load. It is not suitable for use inside any plugin\ncode unless the plugin code is guaranteed to, somehow, load before any other code.\n\nAdditionally, we don't know what environment this code will run in so we remove as many external\nreferences as possible to make it portable. For instance, running inside puppeteer."
         ],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -448,7 +504,9 @@
         "tags": [],
         "label": "KBN_SCREENSHOT_MODE_ENABLED_KEY",
         "description": [],
-        "signature": ["\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""],
+        "signature": [
+          "\"__KBN_SCREENSHOT_MODE_ENABLED_KEY__\""
+        ],
         "path": "src/plugins/screenshot_mode/common/mode.ts",
         "deprecated": false,
         "trackAdoption": false,

@@ -7,13 +7,13 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
-import { ValidateJob } from '../../../../../components/validate_job';
-import { ml } from '../../../../../services/ml_api_service';
-import { JobCreatorContext } from '../job_creator_context';
+import { WizardNav } from '../wizard_nav';
 import type { StepProps } from '../step_types';
 import { WIZARD_STEPS } from '../step_types';
-import { WizardNav } from '../wizard_nav';
+import { JobCreatorContext } from '../job_creator_context';
+import { ml } from '../../../../../services/ml_api_service';
+import { ValidateJob } from '../../../../../components/validate_job';
+import { JOB_TYPE } from '../../../../../../../common/constants/new_job';
 import { SkipValidationButton } from './skip_validatoin';
 
 const idFilterList = [

@@ -6,14 +6,14 @@
  */
 
 import { isBoom } from '@hapi/boom';
+import { createValidationFunction } from '../../../common/runtime_types';
 import {
-  INVENTORY_VIEW_URL_ENTITY,
   inventoryViewRequestParamsRT,
   inventoryViewRequestQueryRT,
   inventoryViewResponsePayloadRT,
+  INVENTORY_VIEW_URL_ENTITY,
   updateInventoryViewRequestPayloadRT,
 } from '../../../common/http_api/latest';
-import { createValidationFunction } from '../../../common/runtime_types';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 
 export const initUpdateInventoryViewRoute = ({

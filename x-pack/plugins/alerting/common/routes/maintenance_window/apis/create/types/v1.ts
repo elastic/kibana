@@ -6,8 +6,8 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { createBodySchemaV1 } from '..';
 import { MaintenanceWindowResponseV1 } from '../../../response';
+import { createBodySchemaV1 } from '..';
 
 export type CreateMaintenanceWindowRequestBody = TypeOf<typeof createBodySchemaV1>;
 

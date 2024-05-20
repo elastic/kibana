@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type {
   IUiSettingsClient,
   UiSettingsServiceSetup,
   UiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import type { Logger } from '@kbn/logging';
 
 /** @internal */

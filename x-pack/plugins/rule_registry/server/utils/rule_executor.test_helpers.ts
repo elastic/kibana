@@ -1,12 +1,3 @@
-import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
-import {
-  AlertInstanceContext,
-  AlertInstanceState,
-  RuleExecutorOptions,
-  RuleTypeParams,
-  RuleTypeState,
-} from '@kbn/alerting-plugin/server';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -18,17 +9,26 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import {
+  RuleExecutorOptions,
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
+import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { Logger } from '@kbn/logging';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_settings';
 
 export const createDefaultAlertExecutorOptions = <
   Params extends RuleTypeParams = never,
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = {},
   InstanceContext extends AlertInstanceContext = {},
-  ActionGroupIds extends string = '',
+  ActionGroupIds extends string = ''
 >({
   alertId = 'ALERT_INSTANCE_ID',
   ruleName = 'ALERT_RULE_NAME',

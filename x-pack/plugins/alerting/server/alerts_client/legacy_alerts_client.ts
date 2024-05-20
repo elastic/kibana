@@ -6,36 +6,36 @@
  */
 import { Logger } from '@kbn/core/server';
 import { cloneDeep, keys, merge } from 'lodash';
-import {
-  DEFAULT_FLAPPING_SETTINGS,
-  RulesSettingsFlappingProperties,
-} from '../../common/rules_settings';
 import { Alert } from '../alert/alert';
 import {
   AlertFactory,
   createAlertFactory,
   getPublicAlertFactory,
 } from '../alert/create_alert_factory';
-import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { DEFAULT_MAX_ALERTS } from '../config';
 import {
   determineAlertsToReturn,
-  getAlertsForNotification,
   processAlerts,
   setFlapping,
+  getAlertsForNotification,
 } from '../lib';
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
-import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { logAlerts } from '../task_runner/log_alerts';
 import { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import {
+  DEFAULT_FLAPPING_SETTINGS,
+  RulesSettingsFlappingProperties,
+} from '../../common/rules_settings';
 import {
   IAlertsClient,
   InitializeExecutionOpts,
-  LogAlertsOpts,
-  ProcessAlertsOpts,
   ProcessAndLogAlertsOpts,
+  ProcessAlertsOpts,
+  LogAlertsOpts,
   TrackedAlerts,
 } from './types';
+import { DEFAULT_MAX_ALERTS } from '../config';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 export interface LegacyAlertsClientParams {
   logger: Logger;
@@ -46,7 +46,7 @@ export class LegacyAlertsClient<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string,
+  RecoveryActionGroupId extends string
 > implements IAlertsClient<{}, State, Context, ActionGroupIds, RecoveryActionGroupId>
 {
   private maxAlerts: number = DEFAULT_MAX_ALERTS;

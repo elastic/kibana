@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
+import { createOrUpdateIndex } from '../utils/create_or_update_index';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 type MockInternalEsClient = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient

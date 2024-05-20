@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import React, { useState } from 'react';
+import type { ComponentMeta } from '@storybook/react';
+import { action } from '@storybook/addon-actions';
 import { EuiPanel } from '@elastic/eui';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
-import { action } from '@storybook/addon-actions';
-import type { ComponentMeta } from '@storybook/react';
-import React, { useState } from 'react';
 
-import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import {
   KnownTypeToMetadata,
-  OnFieldChangeFn,
   UiSettingMetadata,
+  OnFieldChangeFn,
 } from '@kbn/management-settings-types';
 import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
+import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { FieldRow as Component, FieldRow } from '../field_row';
 import { FieldRowProvider } from '../services';
 
@@ -92,7 +92,7 @@ export const getStory = (
         </FieldRowProvider>
       ),
     ],
-  }) as ComponentMeta<typeof Component>;
+  } as ComponentMeta<typeof Component>);
 
 /**
  * Default argument values for a {@link FieldInput} Storybook story.

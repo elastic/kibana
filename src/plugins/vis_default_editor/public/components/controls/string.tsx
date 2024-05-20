@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import React, { useEffect, useCallback } from 'react';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { AggParamEditorProps } from '../agg_param_props';
 

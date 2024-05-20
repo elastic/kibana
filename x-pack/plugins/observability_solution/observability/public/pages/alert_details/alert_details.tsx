@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useParams } from 'react-router-dom';
 import {
   EuiEmptyPrompt,
   EuiPanel,
@@ -13,40 +16,37 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
-import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import {
+  AlertStatus,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_UNTRACKED,
-  AlertStatus,
 } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
+import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
+import { css } from '@emotion/react';
 import { omit } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { observabilityFeatureId } from '../../../common';
-import { paths } from '../../../common/locators/paths';
-import { AlertOverview } from '../../components/alert_overview/alert_overview';
-import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
-import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
-import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
+import { AlertData, useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
+import { PageTitle, pageTitleContent } from './components/page_title';
+import { HeaderActions } from './components/header_actions';
+import { AlertSummary, AlertSummaryField } from './components/alert_summary';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
-import { useKibana } from '../../utils/kibana_react';
+import { observabilityFeatureId } from '../../../common';
+import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
+import { AlertOverview } from '../../components/alert_overview/alert_overview';
+import { CustomThresholdRule } from '../../components/custom_threshold/components/types';
 import { AlertDetailContextualInsights } from './alert_details_contextual_insights';
 import { AlertHistoryChart } from './components/alert_history';
-import { AlertSummary, AlertSummaryField } from './components/alert_summary';
-import { HeaderActions } from './components/header_actions';
-import { PageTitle, pageTitleContent } from './components/page_title';
 
 interface AlertDetailsPathParams {
   alertId: string;

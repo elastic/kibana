@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { Map as MbMap } from '@kbn/mapbox-gl';
 import React from 'react';
+import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { DynamicStyleProperty } from '../dynamic_style_property';
+import { MarkerSizeLegend, OrdinalLegend } from '../../components/legend/size';
+import { makeMbClampedNumberExpression } from '../../style_util';
 import {
   FieldFormatter,
   HALF_MAKI_ICON_SIZE,
@@ -16,9 +19,6 @@ import {
 import type { SizeDynamicOptions } from '../../../../../../common/descriptor_types';
 import type { IField } from '../../../../fields/field';
 import type { IVectorLayer } from '../../../../layers/vector_layer';
-import { MarkerSizeLegend, OrdinalLegend } from '../../components/legend/size';
-import { makeMbClampedNumberExpression } from '../../style_util';
-import { DynamicStyleProperty } from '../dynamic_style_property';
 
 export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions> {
   private readonly _isSymbolizedAsIcon: boolean;

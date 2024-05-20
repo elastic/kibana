@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import type {
   CoreSetup,
-  CoreStart,
   CustomRequestHandlerContext,
+  CoreStart,
+  RouteConfigOptions,
   IScopedClusterClient,
   IUiSettingsClient,
-  RouteConfigOptions,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 
 export type ApmPluginRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: Pick<LicensingApiRequestHandlerContext, 'license' | 'featureUsage'>;

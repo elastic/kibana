@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { skip } from 'rxjs';
-import { isErrorEmbeddable } from '../lib';
-import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
+import { testPlugin } from './test_plugin';
 import {
+  MockFilter,
   FILTERABLE_EMBEDDABLE,
   FilterableEmbeddableInput,
-  MockFilter,
 } from '../lib/test_samples/embeddables/filterable_embeddable';
 import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
-import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
+import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
 import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from './fixtures';
-import { testPlugin } from './test_plugin';
+import { FilterableContainer } from '../lib/test_samples/embeddables/filterable_container';
+import { isErrorEmbeddable } from '../lib';
+import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
+import { coreMock } from '@kbn/core/public/mocks';
 
 const { setup, doStart, uiActions } = testPlugin(coreMock.createSetup(), coreMock.createStart());
 

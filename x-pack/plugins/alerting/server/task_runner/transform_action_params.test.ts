@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
 import {
   actionsMock,
   renderActionParameterTemplatesDefault,
 } from '@kbn/actions-plugin/server/mocks';
 import { SanitizedRule } from '../types';
 import { mockAAD } from './fixtures';
-import { transformActionParams, transformSummaryActionParams } from './transform_action_params';
 
 const actionsPlugin = actionsMock.createStart();
 const actionTypeId = 'test-actionTypeId';

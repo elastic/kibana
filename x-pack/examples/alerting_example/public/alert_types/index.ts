@@ -7,8 +7,8 @@
 
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 import { registerNavigation as registerPeopleInSpaceNavigation } from './astros';
+import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
 
 export function registerNavigation(alerting: AlertingSetup) {
   // register default navigation

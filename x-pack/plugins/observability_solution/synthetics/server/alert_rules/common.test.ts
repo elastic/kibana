@@ -6,8 +6,8 @@
  */
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { IBasePath } from '@kbn/core/server';
+import { updateState, setRecoveredAlertsContext } from './common';
 import { SyntheticsCommonState } from '../../common/runtime_types/alert_rules/common';
-import { setRecoveredAlertsContext, updateState } from './common';
 import { StaleDownConfig } from './status_rule/status_rule_executor';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';

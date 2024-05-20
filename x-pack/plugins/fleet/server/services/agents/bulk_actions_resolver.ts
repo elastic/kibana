@@ -8,22 +8,22 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
-  TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 
 import { appContextService } from '../app_context';
 
-import type { ActionParams } from './action_runner';
-import { BulkActionTaskType } from './bulk_action_types';
 import { ReassignActionRunner } from './reassign_action_runner';
+import { UpgradeActionRunner } from './upgrade_action_runner';
+import { UpdateAgentTagsActionRunner } from './update_agent_tags_action_runner';
+import { UnenrollActionRunner } from './unenroll_action_runner';
+import type { ActionParams } from './action_runner';
 import { RequestDiagnosticsActionRunner } from './request_diagnostics_action_runner';
 import type { RetryParams } from './retry_helper';
 import { getRetryParams } from './retry_helper';
-import { UnenrollActionRunner } from './unenroll_action_runner';
-import { UpdateAgentTagsActionRunner } from './update_agent_tags_action_runner';
-import { UpgradeActionRunner } from './upgrade_action_runner';
+import { BulkActionTaskType } from './bulk_action_types';
 
 /**
  * Create and run retry tasks of agent bulk actions

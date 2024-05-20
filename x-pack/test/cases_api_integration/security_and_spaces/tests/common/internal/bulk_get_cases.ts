@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { MAX_BULK_GET_CASES } from '@kbn/cases-plugin/common/constants';
-import expect from '@kbn/expect';
+import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
+  deleteAllCaseItems,
   bulkGetCases,
   createCase,
   createComment,
-  deleteAllCaseItems,
   ensureSavedObjectIsAuthorized,
 } from '../../../../common/lib/api';
 import {
+  secOnly,
+  obsOnly,
+  superUser,
+  secOnlyRead,
+  obsOnlyRead,
+  obsSecRead,
   globalRead,
   noKibanaPrivileges,
-  obsOnly,
-  obsOnlyRead,
   obsSec,
-  obsSecRead,
-  secOnly,
-  secOnlyRead,
-  superUser,
 } from '../../../../common/lib/authentication/users';
-import { getPostCaseRequest, postCaseReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

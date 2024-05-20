@@ -8,14 +8,14 @@
 
 import { readFile } from 'fs';
 import { resolve } from 'path';
-import { promisify } from 'util';
-import { PackageInfo, isConfigPath } from '@kbn/config';
+import { coerce } from 'semver';
+import { snakeCase } from 'lodash';
+import { isConfigPath, PackageInfo } from '@kbn/config';
 import { PluginType } from '@kbn/core-base-common';
 import { PluginManifest } from '@kbn/core-plugins-server';
-import { snakeCase } from 'lodash';
-import { coerce } from 'semver';
-import { isCamelCase } from './is_camel_case';
+import { promisify } from 'util';
 import { PluginDiscoveryError } from './plugin_discovery_error';
+import { isCamelCase } from './is_camel_case';
 
 const fsReadFileAsync = promisify(readFile);
 /**

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonIcon,
   EuiCallOut,
@@ -16,13 +19,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/code-editor';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import React, { Component, Fragment } from 'react';
+import { CodeEditor } from '@kbn/code-editor';
+import { getDocLinks, getHttp, getUiSettings, getSettings, getTheme } from '../kibana_services';
 import { ImportResults } from '../importer';
-import { getDocLinks, getHttp, getSettings, getTheme, getUiSettings } from '../kibana_services';
 import { getPartialImportMessage } from './utils';
 
 const services = {

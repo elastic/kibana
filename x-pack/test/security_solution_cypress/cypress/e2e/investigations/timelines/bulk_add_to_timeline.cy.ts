@@ -18,8 +18,8 @@ import {
 } from '../../../tasks/common/event_table';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import {
-  waitForEventsDataGridToBeLoaded,
   waitsForEventsToBeLoaded,
+  waitForEventsDataGridToBeLoaded,
 } from '../../../tasks/hosts/events';
 import { openEvents, openSessions } from '../../../tasks/hosts/main';
 import { login } from '../../../tasks/login';

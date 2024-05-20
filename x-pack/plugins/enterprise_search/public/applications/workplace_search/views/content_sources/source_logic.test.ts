@@ -11,7 +11,7 @@ import {
   mockHttpValues,
   mockKibanaValues,
 } from '../../../__mocks__/kea_logic';
-import { contentItems, fullContentSources } from '../../__mocks__/content_sources.mock';
+import { fullContentSources, contentItems } from '../../__mocks__/content_sources.mock';
 import { meta } from '../../__mocks__/meta.mock';
 
 import { DEFAULT_META } from '../../../shared/constants';

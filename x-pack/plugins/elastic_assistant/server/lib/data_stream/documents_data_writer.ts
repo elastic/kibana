@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
 import type {
   BulkOperationContainer,
   BulkOperationType,
   BulkResponseItem,
   Script,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { UUID } from '@kbn/elastic-assistant-common';
 import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import { v4 as uuidV4 } from 'uuid';
 
 export interface BulkOperationError {
   message: string;
@@ -281,22 +281,22 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               },
             }
           : item.update?.error
-            ? {
-                message: item.update.error?.reason,
-                status: item.update.status,
-                document: {
-                  id: item.update._id,
-                },
-              }
-            : item.delete?.error
-              ? {
-                  message: item.delete?.error?.reason,
-                  status: item.delete?.status,
-                  document: {
-                    id: item.delete?._id,
-                  },
-                }
-              : undefined
+          ? {
+              message: item.update.error?.reason,
+              status: item.update.status,
+              document: {
+                id: item.update._id,
+              },
+            }
+          : item.delete?.error
+          ? {
+              message: item.delete?.error?.reason,
+              status: item.delete?.status,
+              document: {
+                id: item.delete?._id,
+              },
+            }
+          : undefined
       )
       .filter((e) => e !== undefined);
   };

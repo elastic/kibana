@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback } from 'react';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiButton,
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiSpacer,
-  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiTitle,
+  EuiText,
+  EuiCallOut,
+  EuiSpacer,
 } from '@elastic/eui';
 
-import { UIM_KIBANA_QUICK_RESOLVE_CLICK, uiMetricService } from '../../lib/ui_metric';
-import { DeprecationBadge, DeprecationFlyoutLearnMoreLink } from '../shared';
+import { uiMetricService, UIM_KIBANA_QUICK_RESOLVE_CLICK } from '../../lib/ui_metric';
+import { DeprecationFlyoutLearnMoreLink, DeprecationBadge } from '../shared';
 import type { DeprecationResolutionState, KibanaDeprecationDetails } from './kibana_deprecations';
 
 import './_deprecation_details_flyout.scss';

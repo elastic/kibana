@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { SavedObjectsFindResponse } from '@kbn/core/server';
-import { loggerMock } from '@kbn/logging-mocks';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { omit } from 'lodash';
 import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { UserActionFinder } from './find';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
-import { createSOFindResponse, mockPointInTimeFinder } from '../../test_utils';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import {
   createConnectorUserAction,
   createUserActionFindSO,
   createUserActionSO,
 } from '../test_utils';
-import { UserActionFinder } from './find';
+import { createSOFindResponse, mockPointInTimeFinder } from '../../test_utils';
+import { omit } from 'lodash';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
 
 describe('UserActionsService: Finder', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

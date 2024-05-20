@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import DiscoverTabContent from '.';
-import { TimelineId } from '../../../../../../common/types';
 import { TestProviders } from '../../../../../common/mock';
+import DiscoverTabContent from '.';
+import { render, screen, waitFor } from '@testing-library/react';
+import { TimelineId } from '../../../../../../common/types';
 
 const TestComponent = () => {
   return (

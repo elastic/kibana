@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { noop } from 'lodash/fp';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
-  EuiCallOut,
   EuiComboBox,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { noop } from 'lodash/fp';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
 
 import type { BrowserFields } from '../../../common/containers/source';
 import type { PrimitiveOrArrayOfPrimitives } from '../../../common/lib/kuery';
+import type { OnDataProviderEdited } from '../timeline/events';
 import type { QueryOperator } from '../timeline/data_providers/data_provider';
 import { DataProviderType } from '../timeline/data_providers/data_provider';
-import type { OnDataProviderEdited } from '../timeline/events';
 
 import {
   getCategorizedFieldNames,

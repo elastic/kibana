@@ -19,7 +19,7 @@ import { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useEffect, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
-import { Option, createOptionsFromFields } from '../../helpers/create_options';
+import { createOptionsFromFields, Option } from '../../helpers/create_options';
 import { CreateSLOForm } from '../../types';
 import { QueryBuilder } from '../common/query_builder';
 

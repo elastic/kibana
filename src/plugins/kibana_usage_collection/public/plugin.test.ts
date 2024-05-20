@@ -8,8 +8,8 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
-import { plugin } from '.';
 import { registerEbtCountersMock } from './plugin.test.mocks';
+import { plugin } from '.';
 
 describe('kibana_usage_collection/public', () => {
   const pluginInstance = plugin();

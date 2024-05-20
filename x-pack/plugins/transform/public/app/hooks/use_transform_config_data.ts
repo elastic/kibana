@@ -16,31 +16,31 @@ import { getFlattenedObject } from '@kbn/std';
 import { difference } from 'lodash';
 
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import {
-  INDEX_STATUS,
-  type RenderCellValue,
-  type UseIndexDataReturnType,
-  getDataGridSchemaFromESFieldType,
-  getNestedOrEscapedVal,
-  multiColumnSortFactory,
-  useDataGrid,
-} from '@kbn/ml-data-grid';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { ES_CLIENT_TOTAL_HITS_RELATION } from '@kbn/ml-query-utils';
+import {
+  getDataGridSchemaFromESFieldType,
+  multiColumnSortFactory,
+  getNestedOrEscapedVal,
+  useDataGrid,
+  type RenderCellValue,
+  type UseIndexDataReturnType,
+  INDEX_STATUS,
+} from '@kbn/ml-data-grid';
 
 import type { PreviewMappingsProperties } from '../../../common/api_schemas/transforms';
 
 import { getErrorMessage } from '../../../common/utils/errors';
 
-import { type TransformConfigQuery, getPreviewTransformRequestBody } from '../common';
+import { getPreviewTransformRequestBody, type TransformConfigQuery } from '../common';
 
+import type { SearchItems } from './use_search_items';
+import { useGetTransformsPreview } from './use_get_transforms_preview';
 import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
 import {
   isLatestPartialRequest,
   isPivotPartialRequest,
 } from '../sections/create_transform/components/step_define/common/types';
-import { useGetTransformsPreview } from './use_get_transforms_preview';
-import type { SearchItems } from './use_search_items';
 
 function sortColumns(groupByArr: string[]) {
   return (a: string, b: string) => {

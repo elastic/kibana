@@ -6,9 +6,9 @@
  */
 
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DiscoverCustomization } from '@kbn/discover-plugin/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
+import type { DiscoverCustomization } from '@kbn/discover-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export type WithPreventableEvent<T> = T & {
   preventDefault(): void;

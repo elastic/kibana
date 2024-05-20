@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import type { FilterSpecification, GeoJSONSource, Map as MbMap } from '@kbn/mapbox-gl';
-import { Feature, FeatureCollection } from 'geojson';
 import _ from 'lodash';
 import React from 'react';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import { i18n } from '@kbn/i18n';
+import { EuiIcon } from '@elastic/eui';
+import { Feature, FeatureCollection } from 'geojson';
+import type { FilterSpecification, Map as MbMap, GeoJSONSource } from '@kbn/mapbox-gl';
 import {
   EMPTY_FEATURE_COLLECTION,
   FEATURE_VISIBLE_PROPERTY_NAME,
@@ -24,18 +24,18 @@ import {
   Timeslice,
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
+import { TimesliceMaskConfig } from '../../../util/mb_filter_expressions';
 import { DataRequestContext } from '../../../../actions';
+import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
-import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
-import { TimesliceMaskConfig } from '../../../util/mb_filter_expressions';
-import { AbstractLayer, LayerIcon, LayerMessage } from '../../layer';
+import { AbstractLayer, LayerMessage, LayerIcon } from '../../layer';
 import {
   AbstractVectorLayer,
-  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   noResultsIcon,
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
 } from '../vector_layer';
+import { getFeatureCollectionBounds } from '../../../util/get_feature_collection_bounds';
 import { syncGeojsonSourceData } from './geojson_source_data';
 import { performInnerJoins } from './perform_inner_joins';
 import { pluckStyleMetaFromFeatures } from './pluck_style_meta_from_features';

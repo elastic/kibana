@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { PublicContract } from '@kbn/utility-types';
-import type { VisualizeEmbeddable, VisualizeEmbeddableFactory } from './embeddable';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { VisualizationsPlugin, VisualizationsSetup, VisualizationsStart } from './plugin';
+import type { VisualizeEmbeddableFactory, VisualizeEmbeddable } from './embeddable';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new VisualizationsPlugin(initializerContext);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { EuiFlexItem, EuiFlexGroup, EuiText, EuiSpacer } from '@elastic/eui';
 
 export interface AlertSummaryField {
   label: ReactNode | string;

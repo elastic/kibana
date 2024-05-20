@@ -31,13 +31,13 @@ import registerCypressGrep from '@cypress/grep';
 
 registerCypressGrep();
 
-import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
 import type { SecuritySolutionDescribeBlockFtrConfig } from '@kbn/security-solution-plugin/scripts/run_cypress/utils';
+import { login } from '@kbn/security-solution-plugin/public/management/cypress/tasks/login';
 
 import type { ServerlessRoleName } from './roles';
 
-import { isServerless } from '../tasks/serverless';
 import { waitUntil } from '../tasks/wait_until';
+import { isServerless } from '../tasks/serverless';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

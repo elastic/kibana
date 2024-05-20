@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { LoggerConfigType, LoggerContextConfigInput } from '@kbn/core-logging-server';
-import { DisposableAppender, LogLevel, LogMeta, Logger, LoggerFactory } from '@kbn/logging';
 import { getFlattenedObject, merge } from '@kbn/std';
+import { DisposableAppender, LogLevel, Logger, LoggerFactory, LogMeta } from '@kbn/logging';
+import type { LoggerConfigType, LoggerContextConfigInput } from '@kbn/core-logging-server';
 import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
 import {
-  LoggerContextConfigType,
-  LoggingConfig,
   LoggingConfigType,
+  LoggingConfig,
+  LoggerContextConfigType,
   loggerContextConfigSchema,
   config as loggingConfig,
 } from './logging_config';

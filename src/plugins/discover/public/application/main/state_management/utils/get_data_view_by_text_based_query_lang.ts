@@ -1,4 +1,3 @@
-import { DataView } from '@kbn/data-views-plugin/common';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +7,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
  */
 import type { AggregateQuery } from '@kbn/es-query';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../../build_services';
 
 export async function getDataViewByTextBasedQueryLang(

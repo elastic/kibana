@@ -41,7 +41,9 @@
             "tags": [],
             "label": "create",
             "description": [],
-            "signature": ["() => jest.Mocked<ChromeServiceContract>"],
+            "signature": [
+              "() => jest.Mocked<ChromeServiceContract>"
+            ],
             "path": "packages/core/chrome/core-chrome-browser-mocks/src/chrome_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

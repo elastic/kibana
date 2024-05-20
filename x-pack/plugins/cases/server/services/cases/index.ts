@@ -7,76 +7,76 @@
 
 import type {
   Logger,
-  SavedObjectsBulkDeleteObject,
-  SavedObjectsBulkDeleteOptions,
-  SavedObjectsBulkUpdateResponse,
   SavedObjectsClientContract,
-  SavedObjectsFindOptions,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-  SavedObjectsResolveResponse,
+  SavedObjectsBulkUpdateResponse,
   SavedObjectsUpdateResponse,
+  SavedObjectsResolveResponse,
+  SavedObjectsFindOptions,
+  SavedObjectsBulkDeleteObject,
+  SavedObjectsBulkDeleteOptions,
 } from '@kbn/core/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import { caseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import type { Case, CaseStatuses, User } from '../../../common/types/domain';
-import { caseStatuses } from '../../../common/types/domain';
-import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
-import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
-import { combineFilters } from '../../client/utils';
-import { createCaseError, isSOError } from '../../common/error';
 import { decodeOrThrow } from '../../common/runtime_types';
 import type {
-  SOWithErrors,
   SavedObjectFindOptionsKueryNode,
   SavedObjectsBulkResponseWithErrors,
+  SOWithErrors,
 } from '../../common/types';
-import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
+import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
+import { combineFilters } from '../../client/utils';
+import { includeFieldsRequiredForAuthentication } from '../../authorization/utils';
+import {
+  transformSavedObjectToExternalModel,
+  transformAttributesToESModel,
+  transformUpdateResponseToExternalModel,
+  transformFindResponseToExternalModel,
+} from './transform';
+import type { AttachmentService } from '../attachments';
+import type { AggregationBuilder, AggregationResponse } from '../../client/metrics/types';
+import { createCaseError, isSOError } from '../../common/error';
 import type {
   CasePersistedAttributes,
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import {
-  CasePersistedStatus,
   CaseTransformedAttributesRt,
-  OwnerRt,
+  CasePersistedStatus,
   getPartialCaseTransformedAttributesRt,
+  OwnerRt,
 } from '../../common/types/case';
-import { defaultSortField, flattenCaseSavedObject } from '../../common/utils';
-import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
-import type { AttachmentService } from '../attachments';
-import { bulkDecodeSOAttributes } from '../utils';
-import {
-  transformAttributesToESModel,
-  transformFindResponseToExternalModel,
-  transformSavedObjectToExternalModel,
-  transformUpdateResponseToExternalModel,
-} from './transform';
 import type {
-  BulkCreateCasesArgs,
-  CasesMapWithPageInfo,
-  CreateCaseArgs,
-  DeleteCaseArgs,
-  FindCaseCommentsArgs,
-  FindCommentsArgs,
-  GetCaseArgs,
-  GetCaseIdsByAlertIdAggs,
   GetCaseIdsByAlertIdArgs,
+  GetCaseIdsByAlertIdAggs,
+  CasesMapWithPageInfo,
+  DeleteCaseArgs,
+  GetCaseArgs,
   GetCasesArgs,
-  GetCategoryArgs,
+  FindCommentsArgs,
+  FindCaseCommentsArgs,
   GetReportersArgs,
   GetTagsArgs,
+  CreateCaseArgs,
   PatchCaseArgs,
   PatchCasesArgs,
+  GetCategoryArgs,
+  BulkCreateCasesArgs,
 } from './types';
+import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
+import { bulkDecodeSOAttributes } from '../utils';
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
@@ -729,26 +729,20 @@ export class CasesService {
           refresh,
         });
 
-      const res = updatedCases.saved_objects.reduce(
-        (acc, theCase) => {
-          if (isSOError(theCase)) {
-            acc.push(theCase);
-            return acc;
-          }
-
-          const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
-          const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
-          const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
-
-          acc.push(soWithDecodedRes);
-
+      const res = updatedCases.saved_objects.reduce((acc, theCase) => {
+        if (isSOError(theCase)) {
+          acc.push(theCase);
           return acc;
-        },
-        [] as Array<
-          | SavedObjectsUpdateResponse<CaseTransformedAttributes>
-          | SOWithErrors<CaseTransformedAttributes>
-        >
-      );
+        }
+
+        const so = Object.assign(theCase, transformUpdateResponseToExternalModel(theCase));
+        const decodeRes = decodeOrThrow(PartialCaseTransformedAttributesRt)(so.attributes);
+        const soWithDecodedRes = Object.assign(so, { attributes: decodeRes });
+
+        acc.push(soWithDecodedRes);
+
+        return acc;
+      }, [] as Array<SavedObjectsUpdateResponse<CaseTransformedAttributes> | SOWithErrors<CaseTransformedAttributes>>);
 
       return Object.assign(updatedCases, {
         saved_objects: res,

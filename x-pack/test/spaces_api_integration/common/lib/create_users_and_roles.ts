@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { SuperTest } from 'supertest';
+import type { Client } from '@elastic/elasticsearch';
 import { AUTHENTICATION } from './authentication';
 
 export const createUsersAndRoles = async (es: Client, supertest: SuperTest<any>) => {

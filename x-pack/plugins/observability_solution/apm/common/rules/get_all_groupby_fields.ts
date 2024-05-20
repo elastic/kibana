@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ApmRuleType } from '@kbn/rule-data-utils';
 import { union } from 'lodash';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME, TRANSACTION_TYPE } from '../es_fields/apm';
 
 export const getAllGroupByFields = (

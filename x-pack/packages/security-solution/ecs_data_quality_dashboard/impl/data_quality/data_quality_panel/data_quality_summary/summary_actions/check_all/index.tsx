@@ -12,11 +12,11 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import { v4 as uuidv4 } from 'uuid';
 
+import { checkIndex } from './check_index';
+import { useDataQualityContext } from '../../../data_quality_context';
+import { getAllIndicesToCheck } from './helpers';
 import * as i18n from '../../../../translations';
 import type { EcsMetadata, IndexToCheck, OnCheckCompleted } from '../../../../types';
-import { useDataQualityContext } from '../../../data_quality_context';
-import { checkIndex } from './check_index';
-import { getAllIndicesToCheck } from './helpers';
 
 const CheckAllButton = styled(EuiButton)`
   width: 112px;

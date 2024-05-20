@@ -14,20 +14,20 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-import { EuiButton, EuiDataGridColumnCellActionProps } from '@elastic/eui';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { DataViewField } from '@kbn/data-views-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import { servicesMock } from '../../__mocks__/services';
-import { dataTableContextMock } from '../../__mocks__/table_context';
-import { UnifiedDataTableContext } from '../table_context';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   FilterInBtn,
   FilterOutBtn,
   buildCellActions,
   buildCopyValueButton,
 } from './default_cell_actions';
+import { servicesMock } from '../../__mocks__/services';
+import { UnifiedDataTableContext } from '../table_context';
+import { EuiButton, EuiDataGridColumnCellActionProps } from '@elastic/eui';
+import { dataTableContextMock } from '../../__mocks__/table_context';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 describe('Default cell actions ', function () {
   const CopyBtn = buildCopyValueButton(

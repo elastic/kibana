@@ -10,13 +10,13 @@ import {
   ChromeStart,
   CoreStart,
   OverlayStart,
+  SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-  SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { ISearchSource, ISearchStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 /**
  * @deprecated

@@ -17,23 +17,23 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiCard,
   EuiLink,
+  EuiButton,
+  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiListGroupItem,
   EuiPanel,
+  EuiCard,
 } from '@elastic/eui';
 
 import {
+  EuiLinkTo,
+  EuiButtonTo,
   EuiButtonEmptyTo,
   EuiButtonIconTo,
-  EuiButtonTo,
-  EuiCardTo,
-  EuiLinkTo,
   EuiListGroupItemTo,
   EuiPanelTo,
+  EuiCardTo,
 } from './eui_components';
 
 describe('React Router EUI component helpers', () => {

@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
 import {
   EuiExpression,
+  EuiPopover,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiPopover,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { IErrorObject } from '../../types';
 import { ClosablePopoverTitle } from './components';
+import { IErrorObject } from '../../types';
 
 export interface ValueExpressionProps {
   description: string;

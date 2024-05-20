@@ -8,8 +8,8 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { KueryNode } from '@kbn/es-query';
-import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 import { setupGetConjunctionSuggestions } from './conjunction';
+import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 

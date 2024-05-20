@@ -10,12 +10,12 @@ import React from 'react';
 import { useActions, useValues } from 'kea';
 
 import {
-  EuiAccordion,
-  EuiFieldSearch,
-  EuiHealth,
-  EuiPanel,
-  EuiSpacer,
   EuiTitle,
+  EuiFieldSearch,
+  EuiSpacer,
+  EuiAccordion,
+  EuiPanel,
+  EuiHealth,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

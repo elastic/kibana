@@ -1,6 +1,3 @@
-import { Logger } from '@kbn/core/server';
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { asyncForEach } from '@kbn/std';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,6 +5,9 @@ import { asyncForEach } from '@kbn/std';
  * 2.0.
  */
 import sinon from 'sinon';
+import { Logger } from '@kbn/core/server';
+import { asyncForEach } from '@kbn/std';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { connectorTokenClientMock } from './connector_token_client.mock';
 import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credentials_access_token';

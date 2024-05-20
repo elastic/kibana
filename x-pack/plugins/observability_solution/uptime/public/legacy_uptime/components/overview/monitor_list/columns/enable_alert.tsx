@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { EuiLoadingSpinner, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { EuiLoadingSpinner, EuiToolTip, EuiSwitch } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
-import { MONITOR_ROUTE } from '../../../../../../common/constants';
-import { Ping } from '../../../../../../common/runtime_types/ping';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectDynamicSettings } from '../../../../state/selectors';
 import {
   alertsSelector,
   connectorsSelector,
@@ -19,9 +18,10 @@ import {
   isAlertDeletedSelector,
   newAlertSelector,
 } from '../../../../state/alerts/alerts';
-import { selectDynamicSettings } from '../../../../state/selectors';
+import { MONITOR_ROUTE } from '../../../../../../common/constants';
 import { DefineAlertConnectors } from './define_connectors';
 import { DISABLE_STATUS_ALERT, ENABLE_STATUS_ALERT } from './translations';
+import { Ping } from '../../../../../../common/runtime_types/ping';
 
 interface Props {
   monitorId: string;

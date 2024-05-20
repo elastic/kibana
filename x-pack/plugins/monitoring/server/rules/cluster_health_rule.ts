@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
-import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { RuleExecutorServices } from '@kbn/alerting-plugin/server';
+import { AlertInstanceContext, SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { LEGACY_RULE_DETAILS, RULE_CLUSTER_HEALTH } from '../../common/constants';
-import { AlertClusterHealthType, AlertMessageTokenType, AlertSeverity } from '../../common/enums';
+import { BaseRule } from './base_rule';
 import {
-  AlertCluster,
-  AlertClusterHealth,
   AlertData,
-  AlertInstanceState,
+  AlertCluster,
+  AlertState,
   AlertMessage,
   AlertMessageLinkToken,
-  AlertState,
   CommonAlertParams,
+  AlertClusterHealth,
+  AlertInstanceState,
 } from '../../common/types/alerts';
-import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
+import { RULE_CLUSTER_HEALTH, LEGACY_RULE_DETAILS } from '../../common/constants';
+import { AlertMessageTokenType, AlertClusterHealthType, AlertSeverity } from '../../common/enums';
 import { AlertingDefaults } from './alert_helpers';
-import { BaseRule } from './base_rule';
+import { fetchClusterHealth } from '../lib/alerts/fetch_cluster_health';
 
 const RED_STATUS_MESSAGE = i18n.translate('xpack.monitoring.alerts.clusterHealth.redMessage', {
   defaultMessage: 'Allocate missing primary and replica shards',

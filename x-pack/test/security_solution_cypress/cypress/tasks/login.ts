@@ -7,13 +7,13 @@
 import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
+import { LOGOUT_URL } from '../urls/navigation';
 import {
   CLOUD_SERVERLESS,
   ELASTICSEARCH_PASSWORD,
   ELASTICSEARCH_USERNAME,
   IS_SERVERLESS,
 } from '../env_var_names_constants';
-import { LOGOUT_URL } from '../urls/navigation';
 import { API_HEADERS, rootRequest } from './api_calls/common';
 
 export interface User {

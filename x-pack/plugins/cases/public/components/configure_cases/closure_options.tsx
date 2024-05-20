@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 import React from 'react';
+import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 import type { ClosureType } from '../../containers/configure/types';
 import { ClosureOptionsRadio } from './closure_options_radio';

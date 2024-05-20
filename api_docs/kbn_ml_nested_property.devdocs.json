@@ -26,7 +26,9 @@
         "tags": [],
         "label": "getNestedProperty",
         "description": [],
-        "signature": ["(obj: Record<string, any>, accessor: string, defaultValue: any) => any"],
+        "signature": [
+          "(obj: Record<string, any>, accessor: string, defaultValue: any) => any"
+        ],
         "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -38,7 +40,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["Record<string, any>"],
+            "signature": [
+              "Record<string, any>"
+            ],
             "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -51,7 +55,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -64,7 +70,9 @@
             "tags": [],
             "label": "defaultValue",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/nested_property/src/get_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -95,7 +103,9 @@
             "tags": [],
             "label": "obj",
             "description": [],
-            "signature": ["Record<string, any>"],
+            "signature": [
+              "Record<string, any>"
+            ],
             "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -108,7 +118,9 @@
             "tags": [],
             "label": "accessor",
             "description": [],
-            "signature": ["string"],
+            "signature": [
+              "string"
+            ],
             "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -121,7 +133,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "x-pack/packages/ml/nested_property/src/set_nested_property.ts",
             "deprecated": false,
             "trackAdoption": false,

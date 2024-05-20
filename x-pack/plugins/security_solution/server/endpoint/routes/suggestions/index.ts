@@ -5,25 +5,25 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
+import type { RequestHandler, Logger } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { Logger, RequestHandler } from '@kbn/core/server';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
-import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
 } from '../../../../common/api/endpoint';
-import { SUGGESTIONS_ROUTE, eventsIndexPattern } from '../../../../common/endpoint/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
-import { errorHandler } from '../error_handler';
+import { eventsIndexPattern, SUGGESTIONS_ROUTE } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
+import { errorHandler } from '../error_handler';
 
 export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
   return endpointAppContext.logFactory.get('suggestions');

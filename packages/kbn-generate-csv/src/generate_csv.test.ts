@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { Writable } from 'stream';
-import { type Duration, add } from 'date-fns';
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
+import type { Writable } from 'stream';
+import { add, type Duration } from 'date-fns';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -20,17 +20,17 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
+import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
+import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
+import type { ISearchClient, IKibanaSearchResponse } from '@kbn/search-types';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
-import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import type { IKibanaSearchResponse, ISearchClient } from '@kbn/search-types';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
@@ -54,7 +54,7 @@ const getMockConfig = (opts: Partial<CsvConfigType> = {}): CsvConfigType => ({
 const createMockJob = (baseObj: Partial<JobParamsCSV> = {}): JobParamsCSV =>
   ({
     ...baseObj,
-  }) as JobParamsCSV;
+  } as JobParamsCSV);
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
 describe('CsvGenerator', () => {
@@ -237,7 +237,7 @@ describe('CsvGenerator', () => {
                 fields: {
                   message: ['this is a great message'],
                 },
-              }) as unknown as estypes.SearchHit
+              } as unknown as estypes.SearchHit)
           )
         ),
       })
@@ -288,7 +288,7 @@ describe('CsvGenerator', () => {
                     ip: ['110.135.176.89'],
                     message: ['super cali fragile istic XPLA docious'],
                   },
-                }) as unknown as estypes.SearchHit
+                } as unknown as estypes.SearchHit)
             )
           ),
         })
@@ -330,7 +330,7 @@ describe('CsvGenerator', () => {
                       ip: ['110.135.176.89'],
                       message: ['hit from the initial search'],
                     },
-                  }) as unknown as estypes.SearchHit
+                  } as unknown as estypes.SearchHit)
               ),
               HITS_TOTAL
             ),
@@ -347,7 +347,7 @@ describe('CsvGenerator', () => {
                       ip: ['110.135.176.89'],
                       message: ['hit from a subsequent scroll'],
                     },
-                  }) as unknown as estypes.SearchHit
+                  } as unknown as estypes.SearchHit)
               )
             ),
           })
@@ -791,7 +791,7 @@ describe('CsvGenerator', () => {
                       ip: ['110.135.176.89'],
                       message: ['hit from the initial search'],
                     },
-                  }) as unknown as estypes.SearchHit
+                  } as unknown as estypes.SearchHit)
               ),
               HITS_TOTAL
             ),
@@ -808,7 +808,7 @@ describe('CsvGenerator', () => {
                       ip: ['110.135.176.89'],
                       message: ['hit from a subsequent scroll'],
                     },
-                  }) as unknown as estypes.SearchHit
+                  } as unknown as estypes.SearchHit)
               )
             ),
           })

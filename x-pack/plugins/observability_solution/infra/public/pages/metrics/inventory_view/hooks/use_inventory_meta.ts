@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
-import {
-  InventoryMetaResponse,
-  InventoryMetaResponseRT,
-} from '../../../../../common/http_api/inventory_meta_api';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
+import {
+  InventoryMetaResponseRT,
+  InventoryMetaResponse,
+} from '../../../../../common/http_api/inventory_meta_api';
 
 export function useInventoryMeta(
   sourceId: string,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
 
@@ -15,23 +15,23 @@ import { isEqual } from 'lodash';
 import { SERVERLESS_DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
 
 import type {
-  DeleteOutputResponse,
-  GetOneOutputResponse,
-  GetOutputsResponse,
-  Output,
-  PostLogstashApiKeyResponse,
-} from '../../../common/types';
-import { FleetUnauthorizedError, defaultFleetErrorHandler } from '../../errors';
-import { agentPolicyService, appContextService } from '../../services';
-import { canCreateLogstashApiKey, generateLogstashApiKey } from '../../services/api_keys';
-import { outputService } from '../../services/output';
-import type {
   DeleteOutputRequestSchema,
   GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
   PostOutputRequestSchema,
   PutOutputRequestSchema,
 } from '../../types';
+import type {
+  DeleteOutputResponse,
+  GetOneOutputResponse,
+  GetOutputsResponse,
+  Output,
+  PostLogstashApiKeyResponse,
+} from '../../../common/types';
+import { outputService } from '../../services/output';
+import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
+import { agentPolicyService, appContextService } from '../../services';
+import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
 
 function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
@@ -71,27 +71,28 @@ export const getOutputsHandler: RequestHandler = async (context, request, respon
   }
 };
 
-export const getOneOuputHandler: RequestHandler<TypeOf<typeof GetOneOutputRequestSchema.params>> =
-  async (context, request, response) => {
-    const soClient = (await context.core).savedObjects.client;
-    try {
-      const output = await outputService.get(soClient, request.params.outputId);
+export const getOneOuputHandler: RequestHandler<
+  TypeOf<typeof GetOneOutputRequestSchema.params>
+> = async (context, request, response) => {
+  const soClient = (await context.core).savedObjects.client;
+  try {
+    const output = await outputService.get(soClient, request.params.outputId);
 
-      const body: GetOneOutputResponse = {
-        item: output,
-      };
+    const body: GetOneOutputResponse = {
+      item: output,
+    };
 
-      return response.ok({ body });
-    } catch (error) {
-      if (error.isBoom && error.output.statusCode === 404) {
-        return response.notFound({
-          body: { message: `Output ${request.params.outputId} not found` },
-        });
-      }
-
-      return defaultFleetErrorHandler({ error, response });
+    return response.ok({ body });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
     }
-  };
+
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
 
 export const putOutputHandler: RequestHandler<
   TypeOf<typeof PutOutputRequestSchema.params>,
@@ -186,27 +187,28 @@ async function validateOutputServerless(
   }
 }
 
-export const deleteOutputHandler: RequestHandler<TypeOf<typeof DeleteOutputRequestSchema.params>> =
-  async (context, request, response) => {
-    const soClient = (await context.core).savedObjects.client;
-    try {
-      await outputService.delete(soClient, request.params.outputId);
+export const deleteOutputHandler: RequestHandler<
+  TypeOf<typeof DeleteOutputRequestSchema.params>
+> = async (context, request, response) => {
+  const soClient = (await context.core).savedObjects.client;
+  try {
+    await outputService.delete(soClient, request.params.outputId);
 
-      const body: DeleteOutputResponse = {
-        id: request.params.outputId,
-      };
+    const body: DeleteOutputResponse = {
+      id: request.params.outputId,
+    };
 
-      return response.ok({ body });
-    } catch (error) {
-      if (error.isBoom && error.output.statusCode === 404) {
-        return response.notFound({
-          body: { message: `Output ${request.params.outputId} not found` },
-        });
-      }
-
-      return defaultFleetErrorHandler({ error, response });
+    return response.ok({ body });
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
+      return response.notFound({
+        body: { message: `Output ${request.params.outputId} not found` },
+      });
     }
-  };
+
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
 
 export const postLogstashApiKeyHandler: RequestHandler = async (context, request, response) => {
   const esClient = (await context.core).elasticsearch.client.asCurrentUser;

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
+import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 
 export type BehaviorObservable<T> = Omit<BehaviorSubject<T>, 'next'>;
 

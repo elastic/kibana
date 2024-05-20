@@ -6,13 +6,13 @@
  */
 
 import type { QuickPrompt } from '@kbn/elastic-assistant';
+import * as i18n from './translations';
 import {
   KNOWLEDGE_BASE_CATEGORY,
   PROMPT_CONTEXT_ALERT_CATEGORY,
   PROMPT_CONTEXT_DETECTION_RULES_CATEGORY,
   PROMPT_CONTEXT_EVENT_CATEGORY,
 } from '../prompt_contexts';
-import * as i18n from './translations';
 
 /**
  * Global list of QuickPrompts intended to be used throughout Security Solution.

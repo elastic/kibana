@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { docLinks } from '../../../shared/doc_links';
 
 import {
-  GITHUB_LINK_TITLE,
   SOURCE_CATEGORIES,
   SOURCE_NAMES,
   SOURCE_OBJ_TYPES,
+  GITHUB_LINK_TITLE,
 } from '../../constants';
 import { FeatureIds, SourceDataItem } from '../../types';
 

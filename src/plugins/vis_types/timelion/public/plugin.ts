@@ -6,36 +6,36 @@
  * Side Public License, v 1.
  */
 
-import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type {
   CoreSetup,
   CoreStart,
-  HttpSetup,
-  IUiSettingsClient,
   Plugin,
   PluginInitializerContext,
+  IUiSettingsClient,
+  HttpSetup,
 } from '@kbn/core/public';
+import type { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
 import type {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import {
-  setCharts,
-  setCoreStart,
-  setDataSearch,
-  setFieldFormats,
-  setIndexPatterns,
-  setUsageCollection,
-} from './helpers/plugin_services';
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
+import {
+  setIndexPatterns,
+  setDataSearch,
+  setCharts,
+  setCoreStart,
+  setFieldFormats,
+  setUsageCollection,
+} from './helpers/plugin_services';
 
 import { getArgValueSuggestions } from './helpers/arg_value_suggestions';
 import { getTimelionVisRenderer } from './timelion_vis_renderer';

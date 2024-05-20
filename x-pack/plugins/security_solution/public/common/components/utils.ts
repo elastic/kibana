@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { throttle } from 'lodash/fp';
+import { useEffect, useMemo, useState } from 'react';
+import useResizeObserver from 'use-resize-observer/polyfilled';
 import { niceTimeFormatByDay, timeFormatter } from '@elastic/charts';
+import moment from 'moment-timezone';
 import type {
   CloudExperimentsFeatureFlagNames,
   CloudExperimentsPluginStart,
 } from '@kbn/cloud-experiments-plugin/common';
-import { throttle } from 'lodash/fp';
-import moment from 'moment-timezone';
-import { useEffect, useMemo, useState } from 'react';
-import useResizeObserver from 'use-resize-observer/polyfilled';
 
 export const getDaysDiff = (minDate: moment.Moment, maxDate: moment.Moment) => {
   const diff = maxDate.diff(minDate, 'days');

@@ -18,7 +18,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import axios from 'axios';
 import * as t from 'io-ts';
 import { ObservabilityConfig } from '..';
-import { ObservabilityError, getHTTPResponseCode } from '../errors';
+import { getHTTPResponseCode, ObservabilityError } from '../errors';
 import { AlertDetailsContextualInsightsService } from '../services';
 import { ObservabilityRequestHandlerContext } from '../types';
 import { AbstractObservabilityServerRouteRepository } from './types';

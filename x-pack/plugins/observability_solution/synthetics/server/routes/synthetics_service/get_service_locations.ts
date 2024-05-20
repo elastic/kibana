@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { getAllLocations } from '../../synthetics_service/get_all_locations';
-import { getPrivateLocationsAndAgentPolicies } from '../settings/private_locations/get_private_locations';
 import { toClientContract } from '../settings/private_locations/helpers';
+import { getPrivateLocationsAndAgentPolicies } from '../settings/private_locations/get_private_locations';
 import { SyntheticsRestApiRouteFactory } from '../types';
+import { getAllLocations } from '../../synthetics_service/get_all_locations';
+import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const getServiceLocationsRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',

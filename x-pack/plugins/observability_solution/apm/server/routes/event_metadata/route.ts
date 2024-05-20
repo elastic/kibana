@@ -6,11 +6,11 @@
  */
 
 import * as t from 'io-ts';
+import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import { getEventMetadata } from './get_event_metadata';
 import { processorEventRt } from '../../../common/processor_event';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
-import { getEventMetadata } from './get_event_metadata';
 
 const eventMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/event_metadata/{processorEvent}/{id}',

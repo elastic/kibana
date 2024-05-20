@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import { BarStyleAccessor, DomainRange, TickFormatter } from '@elastic/charts';
-import { EuiFlexGroup } from '@elastic/eui';
 import React, { useEffect, useRef, useState } from 'react';
+import { EuiFlexGroup } from '@elastic/eui';
+import { TickFormatter, DomainRange, BarStyleAccessor } from '@elastic/charts';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import { useWaterfallContext } from '../context/waterfall_chart';
-import { CHART_LEGEND_PADDING, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
-import { Legend } from './legend';
-import { NetworkRequestsTotal } from './network_requests_total';
-import { Sidebar } from './sidebar';
 import {
-  RelativeContainer,
-  WaterfallChartAxisOnlyContainer,
-  WaterfallChartFilterContainer,
+  WaterfallChartOuterContainer,
   WaterfallChartFixedTopContainer,
   WaterfallChartFixedTopContainerSidebarCover,
-  WaterfallChartLegendContainer,
-  WaterfallChartOuterContainer,
   WaterfallChartSidebarWrapper,
   WaterfallChartTopContainer,
+  RelativeContainer,
+  WaterfallChartFilterContainer,
+  WaterfallChartAxisOnlyContainer,
+  WaterfallChartLegendContainer,
 } from './styles';
+import { CHART_LEGEND_PADDING, MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from './constants';
+import { Sidebar } from './sidebar';
+import { Legend } from './legend';
 import { useBarCharts } from './use_bar_charts';
 import { WaterfallBarChart } from './waterfall_bar_chart';
 import { WaterfallChartFixedAxis } from './waterfall_chart_fixed_axis';
+import { NetworkRequestsTotal } from './network_requests_total';
 
 export type RenderItem<I = any> = (
   item: I,

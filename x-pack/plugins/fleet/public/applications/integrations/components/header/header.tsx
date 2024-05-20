@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiHeaderLinks, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import React from 'react';
+import { EuiHeaderSectionItem, EuiHeaderSection, EuiHeaderLinks } from '@elastic/eui';
 
 import type { AppMountParameters } from '@kbn/core/public';
 
 import type { FleetStartServices } from '../../../../plugin';
 
-import { DeploymentDetails } from './deployment_details';
 import { HeaderPortal } from './header_portal';
+import { DeploymentDetails } from './deployment_details';
 
 export const IntegrationsHeader = ({
   setHeaderActionMenu,

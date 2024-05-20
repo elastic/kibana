@@ -7,12 +7,12 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { findTestSubject, registerTestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 
-import { RemoteClusterList } from '../../../public/application/sections/remote_cluster_list';
-import { registerRouter } from '../../../public/application/services/routing';
-import { createRemoteClustersStore } from '../../../public/application/store';
 import { WithAppDependencies } from '../helpers';
+import { RemoteClusterList } from '../../../public/application/sections/remote_cluster_list';
+import { createRemoteClustersStore } from '../../../public/application/store';
+import { registerRouter } from '../../../public/application/services/routing';
 
 const testBedConfig = {
   store: createRemoteClustersStore,

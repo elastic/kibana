@@ -7,8 +7,8 @@
 
 import * as rt from 'io-ts';
 
-import { ImportTimelinesSchemaRt, TimelineSavedToReturnObjectRuntimeType } from '..';
 import { unionWithNullType } from '../../../utility_types';
+import { ImportTimelinesSchemaRt, TimelineSavedToReturnObjectRuntimeType } from '..';
 
 export const checkTimelineStatusRt = rt.type({
   timelinesToInstall: rt.array(unionWithNullType(ImportTimelinesSchemaRt)),

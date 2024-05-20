@@ -14,11 +14,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEmpty } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogEntry } from '@kbn/logs-shared-plugin/common';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import { isEmpty } from 'lodash';
-import React, { useCallback, useMemo } from 'react';
 import { useViewLogInProviderContext } from '../../../containers/logs/view_log_in_context';
 import { useViewportDimensions } from '../../../utils/use_viewport_dimensions';
 

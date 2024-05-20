@@ -6,11 +6,11 @@
  */
 import { schema } from '@kbn/config-schema';
 import { IRouter, Logger } from '@kbn/core/server';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
 } from '@kbn/rule-registry-plugin/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ALERT_STATUS_ROUTE,
   ALERT_UUID_PROPERTY,

@@ -28,11 +28,9 @@ export const PanelHeaderItems: FC<PanelHeaderItems> = ({ headerItems, compressed
                 i < headerItems?.length - 1
                   ? css`
                       border-right: ${euiTheme.euiBorderWidthThin} solid ${euiTheme.euiBorderColor};
-                      padding-right: ${
-                        compressed
-                          ? euiTheme.euiPanelPaddingModifiers.paddingSmall
-                          : euiTheme.euiPanelPaddingModifiers.paddingLarge
-                      };
+                      padding-right: ${compressed
+                        ? euiTheme.euiPanelPaddingModifiers.paddingSmall
+                        : euiTheme.euiPanelPaddingModifiers.paddingLarge};
                     `
                   : null
               }

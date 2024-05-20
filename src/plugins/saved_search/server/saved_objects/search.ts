@@ -9,13 +9,13 @@
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { getAllMigrations } from './search_migrations';
 import {
+  SCHEMA_SEARCH_V8_8_0,
   SCHEMA_SEARCH_MODEL_VERSION_1,
   SCHEMA_SEARCH_MODEL_VERSION_2,
   SCHEMA_SEARCH_MODEL_VERSION_3,
-  SCHEMA_SEARCH_V8_8_0,
 } from './schema';
-import { getAllMigrations } from './search_migrations';
 
 export function getSavedSearchObjectType(
   getSearchSourceMigrations: () => MigrateFunctionsObject

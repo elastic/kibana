@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { type Query } from '@kbn/es-query';
 import { useCallback } from 'react';
+import { type Query } from '@kbn/es-query';
 import { FindingsBaseURLQuery } from '../../types';
 import { useKibana } from '../use_kibana';
 

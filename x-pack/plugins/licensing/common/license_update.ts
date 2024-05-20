@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { type Observable, Subject, firstValueFrom, merge } from 'rxjs';
+import { type Observable, Subject, merge, firstValueFrom } from 'rxjs';
 
 import {
-  exhaustMap,
   filter,
-  finalize,
   map,
   pairwise,
+  exhaustMap,
   share,
   shareReplay,
-  startWith,
   takeUntil,
+  finalize,
+  startWith,
 } from 'rxjs';
 import { hasLicenseInfoChanged } from './has_license_info_changed';
 import type { ILicense } from './types';

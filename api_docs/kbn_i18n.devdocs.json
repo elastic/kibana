@@ -133,7 +133,9 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-i18n/src/core/i18n.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -158,8 +160,12 @@
             "type": "Object",
             "tags": [],
             "label": "messages",
-            "description": ["\nActual translated messages."],
-            "signature": ["{ [x: string]: string; }"],
+            "description": [
+              "\nActual translated messages."
+            ],
+            "signature": [
+              "{ [x: string]: string; }"
+            ],
             "path": "packages/kbn-i18n/src/translation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -170,8 +176,12 @@
             "type": "string",
             "tags": [],
             "label": "locale",
-            "description": ["\nLocale of the translated messages."],
-            "signature": ["string | undefined"],
+            "description": [
+              "\nLocale of the translated messages."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-i18n/src/translation.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -182,7 +192,9 @@
             "type": "Object",
             "tags": [],
             "label": "formats",
-            "description": ["\nSet of options to the underlying formatter."],
+            "description": [
+              "\nSet of options to the underlying formatter."
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/i18n",
@@ -285,7 +297,9 @@
                 "tags": [],
                 "label": "locale",
                 "description": [],
-                "signature": ["string | undefined"],
+                "signature": [
+                  "string | undefined"
+                ],
                 "path": "packages/kbn-i18n/src/core/i18n.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -322,7 +336,9 @@
             "tags": [],
             "label": "setLocale",
             "description": [],
-            "signature": ["(locale: string) => void"],
+            "signature": [
+              "(locale: string) => void"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -348,7 +364,9 @@
             "tags": [],
             "label": "getLocale",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -362,7 +380,9 @@
             "tags": [],
             "label": "setDefaultLocale",
             "description": [],
-            "signature": ["(locale: string) => void"],
+            "signature": [
+              "(locale: string) => void"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -388,7 +408,9 @@
             "tags": [],
             "label": "getDefaultLocale",
             "description": [],
-            "signature": ["() => string"],
+            "signature": [
+              "() => string"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -470,7 +492,9 @@
             "tags": [],
             "label": "getRegisteredLocales",
             "description": [],
-            "signature": ["() => string[]"],
+            "signature": [
+              "() => string[]"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -586,7 +610,9 @@
             "tags": [],
             "label": "load",
             "description": [],
-            "signature": ["(translationsUrl: string) => Promise<void>"],
+            "signature": [
+              "(translationsUrl: string) => Promise<void>"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -612,7 +638,9 @@
             "tags": [],
             "label": "isPseudoLocale",
             "description": [],
-            "signature": ["(locale: string) => boolean"],
+            "signature": [
+              "(locale: string) => boolean"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -638,7 +666,9 @@
             "tags": [],
             "label": "translateUsingPseudoLocale",
             "description": [],
-            "signature": ["(message: string) => string"],
+            "signature": [
+              "(message: string) => string"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -678,7 +708,9 @@
             "tags": [],
             "label": "registerTranslationFile",
             "description": [],
-            "signature": ["(translationFilePath: string) => void"],
+            "signature": [
+              "(translationFilePath: string) => void"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -704,7 +736,9 @@
             "tags": [],
             "label": "registerTranslationFiles",
             "description": [],
-            "signature": ["(arrayOfPaths?: string[]) => void"],
+            "signature": [
+              "(arrayOfPaths?: string[]) => void"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -717,7 +751,9 @@
                 "tags": [],
                 "label": "arrayOfPaths",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/kbn-i18n/src/loader.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -814,7 +850,9 @@
                 "tags": [],
                 "label": "paths",
                 "description": [],
-                "signature": ["string[]"],
+                "signature": [
+                  "string[]"
+                ],
                 "path": "packages/kbn-i18n/src/loader.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -828,7 +866,9 @@
             "tags": [],
             "label": "getRegisteredLocales",
             "description": [],
-            "signature": ["() => string[]"],
+            "signature": [
+              "() => string[]"
+            ],
             "path": "packages/kbn-i18n/index.ts",
             "deprecated": false,
             "trackAdoption": false,

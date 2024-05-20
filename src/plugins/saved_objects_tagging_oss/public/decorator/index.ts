@@ -7,7 +7,7 @@
  */
 
 import { SavedObjectDecoratorConfig } from '@kbn/saved-objects-plugin/public';
-import { decoratorId, tagDecoratorFactory } from './factory';
+import { tagDecoratorFactory, decoratorId } from './factory';
 import { InternalTagDecoratedSavedObject } from './types';
 
 export type { TagDecoratedSavedObject } from './types';

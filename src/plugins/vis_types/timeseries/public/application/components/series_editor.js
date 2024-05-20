@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiDragDropContext, EuiDraggable, EuiDroppable } from '@elastic/eui';
-import { find } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { handleAdd, handleChange, handleDelete } from './lib/collection_actions';
-import { newSeriesFn } from './lib/new_series_fn';
+import { find } from 'lodash';
 import { reIdSeries } from './lib/re_id_series';
-import { reorder } from './lib/reorder';
 import { Series } from './series';
+import { handleAdd, handleDelete, handleChange } from './lib/collection_actions';
+import { newSeriesFn } from './lib/new_series_fn';
+import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import { reorder } from './lib/reorder';
 
 import './_series_editor.scss';
 

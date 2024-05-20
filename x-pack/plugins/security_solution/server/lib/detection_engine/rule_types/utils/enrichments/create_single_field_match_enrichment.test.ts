@@ -7,10 +7,10 @@
 
 import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
-import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
-import { createAlert } from './__mocks__/alerts';
 import { createSingleFieldMatchEnrichment } from './create_single_field_match_enrichment';
 import { searchEnrichments } from './search_enrichments';
+import { ruleExecutionLogMock } from '../../../rule_monitoring/mocks';
+import { createAlert } from './__mocks__/alerts';
 import type { EnrichmentFunction } from './types';
 
 jest.mock('./search_enrichments', () => ({

@@ -13,8 +13,8 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
+import { css } from '@emotion/react';
 import { LinkAnchor } from '../links';
 import type { NavigationLink } from '../types';
 import { BetaBadge } from './beta_badge';

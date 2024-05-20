@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
-import { ESQL_TYPE } from '@kbn/data-view-utils';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { DataViewSelector } from '@kbn/unified-search-plugin/public';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { DataViewSelectPopover, DataViewSelectPopoverProps } from './data_view_select_popover';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { DataViewSelector } from '@kbn/unified-search-plugin/public';
+import { act } from 'react-dom/test-utils';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 
 const selectedDataView = {
   id: 'mock-data-logs-id',

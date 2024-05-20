@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
+import { Filter } from '@kbn/es-query';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
-import { useCloudPostureDataTable } from '../../../common/hooks/use_cloud_posture_data_table';
 import { FindingsBaseURLQuery } from '../../../common/types';
+import { useCloudPostureDataTable } from '../../../common/hooks/use_cloud_posture_data_table';
 import { useLatestVulnerabilities } from './use_latest_vulnerabilities';
 
 const columnsLocalStorageKey = 'cloudPosture:latestVulnerabilities:columns';

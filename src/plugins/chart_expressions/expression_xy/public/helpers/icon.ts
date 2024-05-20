@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IconCircle, IconTriangle } from '@kbn/chart-icons';
 import { i18n } from '@kbn/i18n';
+import { IconTriangle, IconCircle } from '@kbn/chart-icons';
 import { AvailableReferenceLineIcons } from '../../common/constants';
 
 export function hasIcon(icon: string | undefined): icon is string {

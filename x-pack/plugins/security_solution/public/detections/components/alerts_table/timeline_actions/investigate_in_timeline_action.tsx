@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React from 'react';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { ActionIconItem } from '../../../../common/components/header_actions/action_icon_item';
 
 import {

@@ -9,12 +9,12 @@ import React from 'react';
 
 import {
   EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiText,
   EuiTextColor,
+  EuiPageTemplate,
 } from '@elastic/eui';
 
 interface Props {

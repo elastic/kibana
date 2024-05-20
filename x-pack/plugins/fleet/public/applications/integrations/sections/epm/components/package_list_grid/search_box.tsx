@@ -8,13 +8,13 @@
 import type { FunctionComponent } from 'react';
 import React, { useMemo } from 'react';
 
-import { EuiFieldSearch, EuiIcon, EuiScreenReaderOnly, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFieldSearch, EuiText, useEuiTheme, EuiIcon, EuiScreenReaderOnly } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import type {
-  CategoryFacet,
   ExtendedIntegrationCategory,
+  CategoryFacet,
 } from '../../screens/home/category_facets';
 
 import type { IntegrationsURLParameters } from '../../screens/home/hooks/use_available_packages';

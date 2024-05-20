@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { UserActionCopyLink } from './copy_link';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import React, { useContext } from 'react';
-import { MONITOR_TYPES, STATUS } from '../../../../../../common/constants';
+import { EuiBadge, EuiSpacer, EuiText } from '@elastic/eui';
 import { Ping } from '../../../../../../common/runtime_types/ping';
+import { MONITOR_TYPES, STATUS } from '../../../../../../common/constants';
+import { UptimeThemeContext } from '../../../../contexts';
 import {
   STATUS_COMPLETE_LABEL,
   STATUS_DOWN_LABEL,
   STATUS_FAILED_LABEL,
   STATUS_UP_LABEL,
 } from '../../../../../../common/translations/translations';
-import { UptimeThemeContext } from '../../../../contexts';
 
 interface Props {
   pingStatus: string;

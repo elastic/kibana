@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiExpression, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiSelect } from '@elastic/eui';
-import { EuiButtonIcon, EuiPopoverTitle } from '@elastic/eui';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import React, { useState } from 'react';
 
 interface WhenExpressionProps {
   value: InventoryItemType;

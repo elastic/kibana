@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle, EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment } from 'react';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';

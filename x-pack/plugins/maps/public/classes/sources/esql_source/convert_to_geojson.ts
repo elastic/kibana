@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ESQLSearchReponse } from '@kbn/es-types';
-import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
 // @ts-ignore
 import { parse } from 'wellknown';
+import { Feature, FeatureCollection, GeoJsonProperties } from 'geojson';
+import type { ESQLSearchReponse } from '@kbn/es-types';
 import { EMPTY_FEATURE_COLLECTION } from '../../../../common/constants';
 import { isGeometryColumn } from './esql_utils';
 

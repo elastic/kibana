@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPagination,
-  EuiPopover,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiContextMenuPanel,
+  EuiPagination,
+  EuiContextMenuItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 interface SwimLanePaginationProps {
   fromPage: number;

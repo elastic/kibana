@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { dirname, join } from 'path';
+import { join, dirname } from 'path';
 import { bin } from 'eslint/package.json';
 
 // Since eslint 8.0 we can't resolve `eslint/bin/eslint` directly since it's

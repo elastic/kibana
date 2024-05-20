@@ -5,24 +5,24 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import {
   SolutionSideNav,
-  type SolutionSideNavItem,
   SolutionSideNavItemPosition,
+  type SolutionSideNavItem,
 } from '@kbn/security-solution-side-nav';
-import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { SecurityPageName } from '../../../../app/types';
-import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
-import { useKibana } from '../../../lib/kibana';
-import { track } from '../../../lib/telemetry';
 import type { SecurityNavLink } from '../../../links';
 import { getAncestorLinksInfo } from '../../../links';
-import { useSecurityInternalNavLinks } from '../../../links/nav_links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { useGetSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from '../../links';
+import { useSecurityInternalNavLinks } from '../../../links/nav_links';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
-import { type GetSecuritySolutionLinkProps, useGetSecuritySolutionLinkProps } from '../../links';
+import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
+import { track } from '../../../lib/telemetry';
+import { useKibana } from '../../../lib/kibana';
 import { CATEGORIES } from './categories';
 
 export const EUI_HEADER_HEIGHT = '93px';

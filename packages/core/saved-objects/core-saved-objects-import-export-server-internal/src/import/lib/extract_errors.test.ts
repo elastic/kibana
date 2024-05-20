@@ -7,15 +7,15 @@
  */
 
 import {
-  LEGACY_URL_ALIAS_TYPE,
-  LegacyUrlAlias,
-} from '@kbn/core-saved-objects-base-server-internal';
-import {
-  type CreatedObject,
   type SavedObject,
+  type CreatedObject,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import { extractErrors } from './extract_errors';
+import {
+  LEGACY_URL_ALIAS_TYPE,
+  LegacyUrlAlias,
+} from '@kbn/core-saved-objects-base-server-internal';
 
 describe('extractErrors()', () => {
   test('returns empty array when no errors exist', () => {

@@ -15,22 +15,22 @@ import {
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createAlertsIndex,
-  createRule,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '../../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
-import {
   binaryToString,
-  checkInvestigationFieldSoValue,
-  createRuleThroughAlertingEndpoint,
-  getCustomQueryRuleParams,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
+  createRuleThroughAlertingEndpoint,
+  checkInvestigationFieldSoValue,
+  getCustomQueryRuleParams,
 } from '../../../utils';
-import { createConnector } from '../../../utils/connectors';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
+import { createConnector } from '../../../utils/connectors';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

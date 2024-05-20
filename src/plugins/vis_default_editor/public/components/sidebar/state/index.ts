@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { useReducer, useCallback } from 'react';
 import { EventEmitter } from 'events';
-import { useCallback, useReducer } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Vis } from '@kbn/visualizations-plugin/public';
-import { VisDefaultEditorKibanaServices } from '../../../types';
-import { EditorAction } from './actions';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createEditorStateReducer, initEditorState, EditorVisState } from './reducers';
 import { EditorStateActionTypes } from './constants';
-import { EditorVisState, createEditorStateReducer, initEditorState } from './reducers';
+import { EditorAction } from './actions';
+import { VisDefaultEditorKibanaServices } from '../../../types';
 
 export * from './editor_form_state';
 export * from './actions';

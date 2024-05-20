@@ -7,7 +7,7 @@
  */
 
 import { isFunction } from 'lodash';
-import { FieldFormatsContentType, IFieldFormat, TextContextTypeConvert } from '../types';
+import { IFieldFormat, TextContextTypeConvert, FieldFormatsContentType } from '../types';
 import { asPrettyString } from '../utils';
 
 export const TEXT_CONTEXT_TYPE: FieldFormatsContentType = 'text';

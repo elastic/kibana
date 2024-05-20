@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { RouteOptions } from '..';
 import { createAlertRoute } from './create';
 import { deleteAlertRoute } from './delete';
-import { disableAlertRoute } from './disable';
-import { enableAlertRoute } from './enable';
 import { findAlertRoute } from './find';
 import { getAlertRoute } from './get';
-import { getAlertInstanceSummaryRoute } from './get_alert_instance_summary';
 import { getAlertStateRoute } from './get_alert_state';
-import { healthRoute } from './health';
+import { getAlertInstanceSummaryRoute } from './get_alert_instance_summary';
 import { listAlertTypesRoute } from './list_alert_types';
-import { muteAllAlertRoute } from './mute_all';
-import { muteAlertInstanceRoute } from './mute_instance';
-import { unmuteAllAlertRoute } from './unmute_all';
-import { unmuteAlertInstanceRoute } from './unmute_instance';
 import { updateAlertRoute } from './update';
+import { enableAlertRoute } from './enable';
+import { disableAlertRoute } from './disable';
 import { updateApiKeyRoute } from './update_api_key';
+import { muteAlertInstanceRoute } from './mute_instance';
+import { unmuteAlertInstanceRoute } from './unmute_instance';
+import { muteAllAlertRoute } from './mute_all';
+import { unmuteAllAlertRoute } from './unmute_all';
+import { healthRoute } from './health';
+import { RouteOptions } from '..';
 
 export function defineLegacyRoutes(opts: RouteOptions) {
   const { router, licenseState, encryptedSavedObjects, usageCounter } = opts;

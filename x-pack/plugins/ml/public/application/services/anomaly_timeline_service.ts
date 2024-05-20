@@ -6,20 +6,20 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
+import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
-import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { InfluencersFilterQuery, MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { TimeBucketsInterval, TimeRangeBounds } from '@kbn/ml-time-buckets';
-import { TimeBuckets, getBoundsRoundedToInterval } from '@kbn/ml-time-buckets';
-import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
+import { getBoundsRoundedToInterval, TimeBuckets } from '@kbn/ml-time-buckets';
 import type {
   ExplorerJob,
   OverallSwimlaneData,
   SwimlaneData,
   ViewBySwimLaneData,
 } from '../explorer/explorer_utils';
+import { OVERALL_LABEL, VIEW_BY_JOB_LABEL } from '../explorer/explorer_constants';
 import type { MlResultsService } from './results_service';
 
 /**

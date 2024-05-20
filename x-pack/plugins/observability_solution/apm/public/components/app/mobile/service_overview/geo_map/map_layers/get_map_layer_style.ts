@@ -6,13 +6,13 @@
  */
 
 import {
+  VectorStyleDescriptor,
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,
   LABEL_BORDER_SIZES,
   LABEL_POSITIONS,
   STYLE_TYPE,
   SYMBOLIZE_AS_TYPES,
-  VectorStyleDescriptor,
 } from '@kbn/maps-plugin/common';
 
 export enum PalleteColors {

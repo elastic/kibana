@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 // Test helpers to simplify mocking logs and collecting all their outputs
 import type { LoggerFactory } from '@kbn/logging';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 
 const createLoggingSystemMock = () => {
   const mockLog = loggerMock.create();

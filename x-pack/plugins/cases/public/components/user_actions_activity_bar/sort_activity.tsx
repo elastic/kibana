@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiSelect } from '@elastic/eui';
-import type { EuiSelectOption, EuiSelectProps } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { EuiSelect } from '@elastic/eui';
+import type { EuiSelectProps, EuiSelectOption } from '@elastic/eui';
 
 import * as i18n from './translations';
 import type { UserActivitySortOrder } from './types';

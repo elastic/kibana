@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import type { IncomingMessage } from 'http';
 import type { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import type { IncomingMessage } from 'http';
 import { pick } from 'lodash';
 import {
-  Observable,
   concatMap,
   delay,
   filter,
   from,
   map,
+  Observable,
   of,
   scan,
   shareReplay,
@@ -25,9 +25,9 @@ import {
 import { Message, MessageRole } from '../../common';
 import {
   type BufferFlushEvent,
-  type StreamingChatResponseEvent,
   StreamingChatResponseEventType,
   type StreamingChatResponseEventWithoutError,
+  type StreamingChatResponseEvent,
 } from '../../common/conversation_complete';
 import {
   FunctionRegistry,

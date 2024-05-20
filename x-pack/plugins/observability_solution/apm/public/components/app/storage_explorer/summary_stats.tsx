@@ -5,31 +5,31 @@
  * 2.0.
  */
 
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiText,
+  useEuiFontSize,
   EuiLink,
-  EuiPanel,
+  EuiToolTip,
+  EuiIcon,
   EuiProgress,
   EuiSkeletonText,
   EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiFontSize,
 } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { asDynamicBytes, asPercent } from '../../../../common/utils/formatters';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { asDynamicBytes, asPercent } from '../../../../common/utils/formatters';
 import { useApmRouter } from '../../../hooks/use_apm_router';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 import { asTransactionRate } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { getIndexManagementHref } from './get_storage_explorer_links';
+import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 interface Props {
   data?: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'>;

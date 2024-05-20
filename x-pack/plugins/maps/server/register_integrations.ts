@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
-import { i18n } from '@kbn/i18n';
-import { APP_ID, OPEN_LAYER_WIZARD, WIZARD_ID, getFullPath } from '../common/constants';
+import { APP_ID, OPEN_LAYER_WIZARD, getFullPath, WIZARD_ID } from '../common/constants';
 
 export function registerIntegrations(
   core: CoreSetup,

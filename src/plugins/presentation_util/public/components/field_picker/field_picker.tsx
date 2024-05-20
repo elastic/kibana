@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import classNames from 'classnames';
 import { sortBy, uniq } from 'lodash';
+import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+import { FieldIcon } from '@kbn/react-field';
 import {
   EuiFormRow,
   EuiSelectable,
@@ -19,8 +21,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FieldIcon } from '@kbn/react-field';
 
 import { FieldTypeFilter } from './field_type_filter';
 

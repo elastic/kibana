@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { ControlsEmbeddableService } from './types';
 
 export type EmbeddableServiceFactory = PluginServiceFactory<ControlsEmbeddableService>;

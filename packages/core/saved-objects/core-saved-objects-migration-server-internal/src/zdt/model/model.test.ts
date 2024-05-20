@@ -8,11 +8,11 @@
 
 import './model.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
+import { createContextMock, MockedMigratorContext } from '../test_helpers';
 import type { RetryableEsClientError } from '../../actions';
-import type { AllActionStates, BaseState, FatalState, State } from '../state';
-import { MockedMigratorContext, createContextMock } from '../test_helpers';
-import { model, modelStageMap } from './model';
+import type { State, BaseState, FatalState, AllActionStates } from '../state';
 import type { StateActionResponse } from './types';
+import { model, modelStageMap } from './model';
 
 describe('model', () => {
   let context: MockedMigratorContext;
@@ -118,7 +118,7 @@ describe('model', () => {
       ({
         ...baseState,
         controlState,
-      }) as unknown as State;
+      } as unknown as State);
 
     const createStubResponse = () =>
       Either.right({

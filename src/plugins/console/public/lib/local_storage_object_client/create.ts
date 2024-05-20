@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { TextObject, textObjectTypeName } from '../../../common/text_object';
-import { ObjectStorageClient } from '../../../common/types';
 import { Storage } from '../../services';
+import { ObjectStorageClient } from '../../../common/types';
+import { TextObject, textObjectTypeName } from '../../../common/text_object';
 import { LocalObjectStorage } from './local_storage_object_client';
 
 export const create = (storage: Storage): ObjectStorageClient => {

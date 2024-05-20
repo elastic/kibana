@@ -7,7 +7,7 @@
 
 import { login } from '../../tasks/login';
 
-import { CRAWLER_INDEX, INDEX_OVERVIEW, NEW_INDEX_CARD, ROUTES, getIndexRoute } from './selectors';
+import { NEW_INDEX_CARD, CRAWLER_INDEX, INDEX_OVERVIEW, ROUTES, getIndexRoute } from './selectors';
 
 describe('Enterprise Search Crawler', () => {
   it('test', () => {

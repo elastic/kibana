@@ -7,22 +7,22 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiComboBox,
-  EuiDescribedFormGroup,
-  EuiFieldNumber,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiSpacer,
   EuiSwitch,
+  EuiDescribedFormGroup,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+  EuiButton,
+  EuiSpacer,
+  EuiFieldNumber,
 } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { isEqual } from 'lodash';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../common/constants';
 import { useGetSettings } from './use_get_settings';
 import { usePutSloSettings } from './use_put_slo_settings';

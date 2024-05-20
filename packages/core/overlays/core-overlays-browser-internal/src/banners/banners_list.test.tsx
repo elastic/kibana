@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { mount } from 'enzyme';
 
-import { BehaviorSubject } from 'rxjs';
 import { BannersList } from './banners_list';
+import { BehaviorSubject } from 'rxjs';
 import type { OverlayBanner } from './banners_service';
 
 describe('BannersList', () => {

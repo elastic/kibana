@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type {
-  DeleteIndexedHostsAndAlertsResponse,
-  IndexedHostsAndAlertsResponse,
-} from '../../../../common/endpoint/index_data';
 import type { IndexEndpointHostsCyTaskOptions } from '../types';
+import type {
+  IndexedHostsAndAlertsResponse,
+  DeleteIndexedHostsAndAlertsResponse,
+} from '../../../../common/endpoint/index_data';
 
 export interface CyIndexEndpointHosts {
   data: IndexedHostsAndAlertsResponse;

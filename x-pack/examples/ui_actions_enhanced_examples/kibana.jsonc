@@ -6,7 +6,9 @@
     "id": "uiActionsEnhancedExamples",
     "server": false,
     "browser": true,
-    "configPath": ["ui_actions_enhanced_examples"],
+    "configPath": [
+      "ui_actions_enhanced_examples"
+    ],
     "requiredPlugins": [
       "uiActions",
       "uiActionsEnhanced",
@@ -17,6 +19,10 @@
       "developerExamples",
       "unifiedSearch"
     ],
-    "requiredBundles": ["dashboardEnhanced", "embeddable", "kibanaUtils"]
+    "requiredBundles": [
+      "dashboardEnhanced",
+      "embeddable",
+      "kibanaUtils"
+    ]
   }
 }

@@ -8,27 +8,27 @@
 
 import React, { useCallback, useState, useMemo } from 'react';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
 import { OpenContentEditorParams } from '@kbn/content-management-content-editor';
 import { TableListViewTableProps } from '@kbn/content-management-table-list-view-table';
-import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainerInput } from '../../../common';
-import { DashboardItem } from '../../../common/content_management';
 import {
   DASHBOARD_CONTENT_ID,
   SAVED_OBJECT_DELETE_TIME,
   SAVED_OBJECT_LOADED_TIME,
 } from '../../dashboard_constants';
-import { pluginServices } from '../../services/plugin_services';
 import {
   dashboardListingErrorStrings,
   dashboardListingTableStrings,
 } from '../_dashboard_listing_strings';
-import { confirmCreateWithUnsaved } from '../confirm_overlays';
-import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
+import { DashboardContainerInput } from '../../../common';
 import { DashboardSavedObjectUserContent } from '../types';
+import { confirmCreateWithUnsaved } from '../confirm_overlays';
+import { pluginServices } from '../../services/plugin_services';
+import { DashboardItem } from '../../../common/content_management';
+import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { Observable } from 'rxjs';
 import { getTableActions } from '.';
-import { TagsCapabilities } from '../../../common/capabilities';
+import { coreMock } from '@kbn/core/public/mocks';
 import { createTagCapabilities } from '../../../common/test_utils';
-import { assignmentServiceMock } from '../../services/assignments/assignment_service.mock';
-import { tagsCacheMock } from '../../services/tags/tags_cache.mock';
+import { TagsCapabilities } from '../../../common/capabilities';
 import { tagClientMock } from '../../services/tags/tags_client.mock';
+import { tagsCacheMock } from '../../services/tags/tags_cache.mock';
+import { assignmentServiceMock } from '../../services/assignments/assignment_service.mock';
 import { TagAction } from './types';
 
 describe('getTableActions', () => {

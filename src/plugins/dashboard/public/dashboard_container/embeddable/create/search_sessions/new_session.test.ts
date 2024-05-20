@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewBase, DataViewFieldBase, Filter, TimeRange } from '@kbn/es-query';
+import type { DataViewFieldBase, DataViewBase, TimeRange, Filter } from '@kbn/es-query';
 import { buildExistsFilter, disableFilter, pinFilter, toggleFilterNegated } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import { newSession$ } from './new_session';

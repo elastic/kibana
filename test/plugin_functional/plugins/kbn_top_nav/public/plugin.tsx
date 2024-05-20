@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import { CoreSetup, Plugin, AppMountParameters } from '@kbn/core/public';
 import { NavigationPublicPluginSetup } from '@kbn/navigation-plugin/public';
 import { AppPluginDependencies } from './types';
 

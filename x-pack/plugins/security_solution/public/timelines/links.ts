@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SERVER_APP_ID, SecurityPageName, TIMELINES_PATH } from '../../common/constants';
+import { SecurityPageName, SERVER_APP_ID, TIMELINES_PATH } from '../../common/constants';
 import { TIMELINES } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 

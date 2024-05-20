@@ -8,17 +8,17 @@
 import React, { useMemo, useState } from 'react';
 
 import {
-  EuiButton,
-  EuiButtonGroup,
-  EuiFieldSearch,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSpacer,
   EuiSuperDatePicker,
   EuiSuperDatePickerCommonRange,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiButtonGroup,
   useEuiTheme,
+  EuiButton,
+  EuiFieldSearch,
 } from '@elastic/eui';
 
 import { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';

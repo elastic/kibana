@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import * as util from '../unsafe_utils';
-import { breakdown, normalized } from './fixtures/breakdown';
-import { inputIndices, normalizedIndices } from './fixtures/normalize_indices';
+import { normalized, breakdown } from './fixtures/breakdown';
 import { inputTimes, normalizedTimes } from './fixtures/normalize_times';
+import { inputIndices, normalizedIndices } from './fixtures/normalize_indices';
 
 describe('normalizeBreakdown', function () {
   it('returns correct breakdown', function () {

@@ -7,12 +7,12 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { CommonProps } from '@elastic/eui';
 import type { ComponentType, ReactNode } from 'react';
-import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
-import type { CommandExecutionResultComponent } from './components/command_execution_result';
-import type { ArgSelectorState, CommandExecutionState } from './components/console_state/types';
+import type { CommonProps } from '@elastic/eui';
 import type { ParsedArgData, ParsedCommandInterface, PossibleArgDataTypes } from './service/types';
+import type { CommandExecutionResultComponent } from './components/command_execution_result';
+import type { CommandExecutionState, ArgSelectorState } from './components/console_state/types';
+import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
 
 /**
  * Definition interface for a Command argument
@@ -153,7 +153,7 @@ export interface SupportedArguments {
  */
 export interface Command<
   TDefinition extends CommandDefinition = CommandDefinition,
-  TArgs extends SupportedArguments = any,
+  TArgs extends SupportedArguments = any
 > {
   /** The raw input entered by the user */
   input: string;
@@ -174,7 +174,7 @@ export interface CommandExecutionComponentProps<
   /** Internal store for the Command execution */
   TStore extends object = Record<string, unknown>,
   /** The metadata defined on the Command Definition */
-  TMeta = any,
+  TMeta = any
 > {
   command: Command<CommandDefinition<TMeta>, TArgs>;
 
@@ -220,7 +220,7 @@ export type CommandExecutionComponent<
   /** Internal store for the Command execution */
   TStore extends object = any,
   /** The metadata defined on the Command Definition */
-  TMeta = any,
+  TMeta = any
 > = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;
 
 /**

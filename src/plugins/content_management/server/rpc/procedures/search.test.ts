@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import type { ContentManagementServiceDefinitionVersioned } from '@kbn/object-versioning';
-import { omit } from 'lodash';
 
 import type { SearchQuery } from '../../../common';
-import { EventBus } from '../../core/event_bus';
-import { createMockedStorage } from '../../core/mocks';
+import { validate, disableTransformsCache } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
-import { disableTransformsCache, validate } from '../../utils';
+import { createMockedStorage } from '../../core/mocks';
+import { EventBus } from '../../core/event_bus';
 import { search } from './search';
 
 disableTransformsCache();

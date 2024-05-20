@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import moment from 'moment';
-import React from 'react';
-import { Ping } from '../../../../../../common/runtime_types/ping/ping';
-import { JourneyStep } from '../../../../../../common/runtime_types/ping/synthetics';
-import { fetchLastSuccessfulCheck } from '../../../../state/api/journey';
-import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 import { StepScreenshotDisplay } from '../../step_screenshot_display';
+import { JourneyStep } from '../../../../../../common/runtime_types/ping/synthetics';
+import { Ping } from '../../../../../../common/runtime_types/ping/ping';
+import { fetchLastSuccessfulCheck } from '../../../../state/api/journey';
 import { ScreenshotLink } from './screenshot_link';
+import { getShortTimeStamp } from '../../../overview/monitor_list/columns/monitor_status_column';
 
 const Label = euiStyled.div`
   margin-bottom: ${(props) => props.theme.eui.euiSizeXS};

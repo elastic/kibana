@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import {
-  Style as ChartStyle,
-  ColorMode,
-  CustomPaletteState,
-  Labels,
-} from '@kbn/charts-plugin/common';
-import { Style } from '@kbn/expressions-plugin/common';
 import { $Values } from '@kbn/utility-types';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import {
+  ColorMode,
+  Labels,
+  CustomPaletteState,
+  Style as ChartStyle,
+} from '@kbn/charts-plugin/common';
+import { Style } from '@kbn/expressions-plugin/common';
 import { LabelPosition } from '../constants';
 
 export const visType = 'metric';

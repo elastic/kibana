@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
-import { TopNodesRequest } from '../../../../common/http_api/overview_api';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
+import { TopNodesRequest } from '../../../../common/http_api/overview_api';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 
 export const createTopNodesQuery = (
   options: TopNodesRequest,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
+import { render } from '@testing-library/react';
 
 import type { PivotGroupByConfig } from '../../../../common';
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../common';

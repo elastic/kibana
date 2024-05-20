@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { Indicator, generateMockIndicator } from '../../../../common/types/indicator';
+import { render } from '@testing-library/react';
+import { generateMockIndicator, Indicator } from '../../../../common/types/indicator';
 import { EMPTY_VALUE } from '../../../constants/common';
-import { TestProvidersComponent } from '../../../mocks/test_providers';
 import {
   AddToTimelineButtonEmpty,
   AddToTimelineButtonIcon,
   AddToTimelineContextMenu,
 } from './add_to_timeline';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
 
 const TEST_ID = 'test';
 const TIMELINE_TEST_ID = 'test-add-to-timeline';

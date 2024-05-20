@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { formattedSearchStrategyResponse, mockSearchStrategyResponse } from './__mocks__';
 import { getUsersEdges } from './helpers';
+import { mockSearchStrategyResponse, formattedSearchStrategyResponse } from './__mocks__';
 
 describe('#getUsers', () => {
   test('will format edges correctly', () => {

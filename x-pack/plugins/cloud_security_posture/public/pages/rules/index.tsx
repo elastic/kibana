@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { Link, type RouteComponentProps, generatePath } from 'react-router-dom';
-import { PageUrlParams } from '../../../common/types/latest';
-import { getBenchmarkCisName } from '../../../common/utils/helpers';
-import { useSecuritySolutionContext } from '../../application/security_solution_context';
-import { cloudPosturePages } from '../../common/navigation/constants';
-import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
-import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { generatePath, Link, type RouteComponentProps } from 'react-router-dom';
+import { EuiButtonEmpty, EuiFlexGroup, EuiPageHeader, EuiSpacer, EuiFlexItem } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
-import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
 import { RulesContainer } from './rules_container';
+import { cloudPosturePages } from '../../common/navigation/constants';
+import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { useSecuritySolutionContext } from '../../application/security_solution_context';
+import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
+import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
+import { getBenchmarkCisName } from '../../../common/utils/helpers';
+import { PageUrlParams } from '../../../common/types/latest';
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const benchmarksInfo = useCspBenchmarkIntegrationsV2();

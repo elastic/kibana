@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiCheckbox, EuiRadio } from '@elastic/eui';
+import { EuiRadio, EuiCheckbox } from '@elastic/eui';
 
 import { rerender } from '../../../../../test_helpers';
 
-import { EngineSelection, FormKeyEngineAccess } from './key_engine_access';
+import { FormKeyEngineAccess, EngineSelection } from './key_engine_access';
 
 describe('FormKeyEngineAccess', () => {
   const values = {

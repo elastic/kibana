@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import * as React from 'react';
 import {
   DrilldownTemplateTable,

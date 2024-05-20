@@ -25,7 +25,7 @@ import type { RequestHandlerContextBase } from './request_handler_context';
  */
 export type IContextProvider<
   Context extends RequestHandlerContextBase,
-  ContextName extends keyof Context,
+  ContextName extends keyof Context
 > = (
   // context.core will always be available, but plugin contexts are typed as optional
   context: Omit<Context, ContextName>,

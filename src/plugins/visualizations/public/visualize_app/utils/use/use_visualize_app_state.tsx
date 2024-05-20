@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { EventEmitter } from 'events';
-import { FilterStateStore } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
-import { cloneDeep, isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
+import { cloneDeep, isEqual } from 'lodash';
 import { map } from 'rxjs';
+import { EventEmitter } from 'events';
+import { i18n } from '@kbn/i18n';
+import { FilterStateStore } from '@kbn/es-query';
 
-import { connectToQueryState } from '@kbn/data-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Markdown } from '@kbn/shared-ux-markdown';
-import { VisualizeConstants } from '../../../../common/constants';
+import { connectToQueryState } from '@kbn/data-plugin/public';
+import { migrateLegacyQuery } from '../migrate_legacy_query';
 import {
+  VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
-  VisualizeServices,
 } from '../../types';
-import { createVisualizeAppState } from '../create_visualize_app_state';
-import { migrateLegacyQuery } from '../migrate_legacy_query';
 import { visStateToEditorState } from '../utils';
+import { createVisualizeAppState } from '../create_visualize_app_state';
+import { VisualizeConstants } from '../../../../common/constants';
 /**
  * This effect is responsible for instantiating the visualize app state container,
  * which is in sync with "_a" url param

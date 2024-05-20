@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import { Summary } from '.';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { ColdStartBadge } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/badge/cold_start_badge';
+import { Summary } from '.';
 import { TimestampTooltip } from '../timestamp_tooltip';
 import { DurationSummaryItem } from './duration_summary_item';
 import { ErrorCountSummaryItemBadge } from './error_count_summary_item_badge';
 import { HttpInfoSummaryItem } from './http_info_summary_item';
 import { TransactionResultSummaryItem } from './transaction_result_summary_item';
 import { UserAgentSummaryItem } from './user_agent_summary_item';
+import { ColdStartBadge } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/badge/cold_start_badge';
 
 interface Props {
   transaction: Transaction;

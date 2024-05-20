@@ -5,34 +5,34 @@
  * 2.0.
  */
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
-  EuiBadge,
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiTitle,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiFlyoutHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
   EuiSpacer,
-  EuiTitle,
+  EuiCallOut,
+  EuiBadge,
 } from '@elastic/eui';
 
-import { useComponentTemplatesContext } from '../component_templates_context';
-import { DeprecatedBadge } from '../components';
 import {
   SectionLoading,
+  TabSettings,
   TabAliases,
   TabMappings,
-  TabSettings,
   attemptToURIDecode,
 } from '../shared_imports';
-import { ManageAction, ManageButton } from './manage_button';
+import { useComponentTemplatesContext } from '../component_templates_context';
+import { DeprecatedBadge } from '../components';
 import { TabSummary } from './tab_summary';
 import { ComponentTemplateTabs, TabType } from './tabs';
+import { ManageButton, ManageAction } from './manage_button';
 
 export interface Props {
   componentTemplateName: string;

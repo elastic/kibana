@@ -7,8 +7,8 @@
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
-import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { ApplicationStart, Capabilities } from '@kbn/core/public';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 

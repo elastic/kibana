@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { schema } from '@kbn/config-schema';
 import { ActionTypeRegistry, ActionTypeRegistryOpts } from './action_type_registry';
-import { ActionsConfigurationUtilities } from './actions_config';
-import { actionsConfigMock } from './actions_config.mock';
-import { ActionExecutor, ILicenseState, TaskRunnerFactory } from './lib';
-import { licenseStateMock } from './lib/license_state.mock';
-import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { ActionType, ExecutorType } from './types';
+import { ActionExecutor, ILicenseState, TaskRunnerFactory } from './lib';
+import { actionsConfigMock } from './actions_config.mock';
+import { licenseStateMock } from './lib/license_state.mock';
+import { ActionsConfigurationUtilities } from './actions_config';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 
 const mockTaskManager = taskManagerMock.createSetup();
 const inMemoryMetrics = inMemoryMetricsMock.create();

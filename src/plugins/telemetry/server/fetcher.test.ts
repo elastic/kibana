@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
-import {
-  Setup,
-  telemetryCollectionManagerPluginMock,
-} from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 /* eslint-disable dot-notation */
 import { fakeSchedulers } from 'rxjs-marbles/jest';
+import { coreMock } from '@kbn/core/server/mocks';
+import {
+  telemetryCollectionManagerPluginMock,
+  Setup,
+} from '@kbn/telemetry-collection-manager-plugin/server/mocks';
 
 jest.mock('rxjs', () => {
   const RxJs = jest.requireActual('rxjs');
@@ -24,8 +24,8 @@ jest.mock('rxjs', () => {
   };
 });
 
-import { FetcherTask } from './fetcher';
 import { fetchMock, getNextAttemptDateMock } from './fetcher.test.mock';
+import { FetcherTask } from './fetcher';
 
 describe('FetcherTask', () => {
   beforeEach(() => jest.useFakeTimers({ legacyFakeTimers: true }));

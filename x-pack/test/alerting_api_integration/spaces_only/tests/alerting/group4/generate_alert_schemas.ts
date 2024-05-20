@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { contextToSchemaName } from '@kbn/alerting-plugin/common';
+import expect from '@kbn/expect';
+import execa from 'execa';
 import { RuleType } from '@kbn/alerting-plugin/server';
 import {
   alertFieldMap,
-  createSchemaFromFieldMap,
   ecsFieldMap,
   legacyAlertFieldMap,
+  createSchemaFromFieldMap,
 } from '@kbn/alerts-as-data-utils';
-import expect from '@kbn/expect';
-import execa from 'execa';
+import { contextToSchemaName } from '@kbn/alerting-plugin/common';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

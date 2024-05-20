@@ -6,10 +6,10 @@
  */
 
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { responseMock } from './__mocks__';
 import type { BulkError } from './utils';
-import { SiemResponseFactory, convertToSnakeCase, transformBulkError } from './utils';
+import { transformBulkError, convertToSnakeCase, SiemResponseFactory } from './utils';
+import { responseMock } from './__mocks__';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 describe('utils', () => {
   describe('transformBulkError', () => {

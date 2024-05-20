@@ -6,27 +6,27 @@
  * Side Public License, v 1.
  */
 
+import { groupBy } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
-import { groupBy } from 'lodash';
-import { useEffect, useMemo, useState } from 'react';
+import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
 import {
-  ExistenceFetchStatus,
   type FieldListGroups,
-  type FieldListItem,
   type FieldsGroup,
-  FieldsGroupNames,
+  type FieldListItem,
   type OverrideFieldGroupDetails,
+  FieldsGroupNames,
+  ExistenceFetchStatus,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {
-  type FieldFiltersParams,
-  type FieldFiltersResult,
   useFieldFilters,
+  type FieldFiltersResult,
+  type FieldFiltersParams,
 } from './use_field_filters';
-import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
 
 export interface GroupedFieldsParams<T extends FieldListItem> {
   dataViewId: string | null; // `null` is for text-based queries

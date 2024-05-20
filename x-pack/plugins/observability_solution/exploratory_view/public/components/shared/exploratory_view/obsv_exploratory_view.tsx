@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { EuiErrorBoundary } from '@elastic/eui';
 import * as React from 'react';
-import { ExploratoryViewPage } from '.';
-import { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';
+import { EuiErrorBoundary } from '@elastic/eui';
 import { getAlertsSingleMetricConfig } from './configurations/alerts_configs/single_metric_config';
+import { getAlertsKPIConfig } from './configurations/alerts_configs/kpi_over_time_config';
+import { DataTypes, DataTypesLabels } from './labels';
 import { getSyntheticsHeatmapConfig } from './configurations/synthetics/heatmap_config';
 import { getSyntheticsSingleMetricConfig } from './configurations/synthetics/single_metric_config';
+import { ExploratoryViewPage } from '.';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
-import { DataTypes, DataTypesLabels } from './labels';
 import { AppDataType, ReportViewType } from './types';
 
-import { StartServices } from '../../../application';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import {
   CORE_WEB_VITALS_LABEL,
   DEVICE_DISTRIBUTION_LABEL,
@@ -26,17 +24,19 @@ import {
   PERF_DIST_LABEL,
   SINGLE_METRIC_LABEL,
 } from './configurations/constants/labels';
-import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
-import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
-import { getMobileKPIDistributionConfig } from './configurations/mobile/distribution_config';
-import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config';
-import { getCoreWebVitalsConfig } from './configurations/rum/core_web_vitals_config';
+import { SELECT_REPORT_TYPE } from './series_editor/series_editor';
 import { getRumDistributionConfig } from './configurations/rum/data_distribution_config';
 import { getKPITrendsLensConfig } from './configurations/rum/kpi_over_time_config';
-import { getSingleMetricConfig } from './configurations/rum/single_metric_config';
-import { getSyntheticsDistributionConfig } from './configurations/synthetics/data_distribution_config';
+import { getCoreWebVitalsConfig } from './configurations/rum/core_web_vitals_config';
 import { getSyntheticsKPIConfig } from './configurations/synthetics/kpi_over_time_config';
-import { SELECT_REPORT_TYPE } from './series_editor/series_editor';
+import { getSyntheticsDistributionConfig } from './configurations/synthetics/data_distribution_config';
+import { getMobileKPIDistributionConfig } from './configurations/mobile/distribution_config';
+import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config';
+import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
+import { getSingleMetricConfig } from './configurations/rum/single_metric_config';
+import { StartServices } from '../../../application';
 
 export const dataTypes: Array<{ id: AppDataType; label: string }> = [
   {

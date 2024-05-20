@@ -5,22 +5,22 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
-  EuiIcon,
-  EuiLink,
   EuiScreenReaderOnly,
-  EuiText,
   EuiToolTip,
+  EuiLink,
+  EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { useMemo } from 'react';
-import { formatTooltipHeading } from '../../common/network_data/data_formatting';
-import { FIXED_AXIS_HEIGHT, RESOURCE_TITLE_FONT_SIZE } from './constants';
-import { WaterfallChartTooltip } from './styles';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
+import { WaterfallChartTooltip } from './styles';
+import { FIXED_AXIS_HEIGHT, RESOURCE_TITLE_FONT_SIZE } from './constants';
+import { formatTooltipHeading } from '../../common/network_data/data_formatting';
 
 interface Props {
   index: number;

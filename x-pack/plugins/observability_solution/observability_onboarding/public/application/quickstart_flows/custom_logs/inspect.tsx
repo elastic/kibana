@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { EuiTitle, EuiSpacer } from '@elastic/eui';
+import { StepModal } from '../shared/step_panel';
 import { useWizard } from '.';
 import { BackButton } from '../../shared/back_button';
-import { StepModal } from '../shared/step_panel';
 
 export function Inspect() {
   const { getState, getPath, getUsage } = useWizard();

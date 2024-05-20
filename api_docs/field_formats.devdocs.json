@@ -120,7 +120,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(val: string | number) => any"],
+            "signature": [
+              "(val: string | number) => any"
+            ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -132,7 +134,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/public/lib/converters/date.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -224,7 +228,9 @@
             "tags": [],
             "label": "memoizedConverter",
             "description": [],
-            "signature": ["Function"],
+            "signature": [
+              "Function"
+            ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -298,7 +304,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(val: string | number) => any"],
+            "signature": [
+              "(val: string | number) => any"
+            ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -310,7 +318,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -473,7 +483,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -603,7 +615,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -644,7 +658,11 @@
         "tags": [],
         "label": "DateNanosFormatServer",
         "description": [],
-        "signature": ["DateNanosFormat", " extends ", "DateNanosFormat"],
+        "signature": [
+          "DateNanosFormat",
+          " extends ",
+          "DateNanosFormat"
+        ],
         "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -678,7 +696,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/server/lib/converters/date_nanos_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -735,7 +755,9 @@
           "type": "Function",
           "tags": [],
           "label": "register",
-          "description": ["\nRegister a server side field formatter"],
+          "description": [
+            "\nRegister a server side field formatter"
+          ],
           "signature": [
             "(fieldFormat: ",
             {
@@ -757,7 +779,9 @@
               "type": "CompoundType",
               "tags": [],
               "label": "fieldFormat",
-              "description": ["{@link FieldFormatInstanceType }"],
+              "description": [
+                "{@link FieldFormatInstanceType }"
+              ],
               "signature": [
                 {
                   "pluginId": "fieldFormats",
@@ -796,7 +820,9 @@
           "type": "Function",
           "tags": [],
           "label": "fieldFormatServiceFactory",
-          "description": ["\nCreate a field format registry"],
+          "description": [
+            "\nCreate a field format registry"
+          ],
           "signature": [
             "(uiSettings: ",
             {
@@ -826,7 +852,9 @@
               "type": "Object",
               "tags": [],
               "label": "uiSettings",
-              "description": ["- {@link IUiSettingsClient }"],
+              "description": [
+                "- {@link IUiSettingsClient }"
+              ],
               "signature": [
                 {
                   "pluginId": "@kbn/core-ui-settings-server",
@@ -960,7 +988,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string | number | boolean"],
+                "signature": [
+                  "string | number | boolean"
+                ],
                 "path": "src/plugins/field_formats/common/converters/boolean.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1195,7 +1225,9 @@
             "tags": [],
             "label": "findColorRuleForVal",
             "description": [],
-            "signature": ["(val: string | number) => any"],
+            "signature": [
+              "(val: string | number) => any"
+            ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1207,7 +1239,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/color.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1245,7 +1279,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/color.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1365,7 +1401,9 @@
             "tags": [],
             "label": "inputFormats",
             "description": [],
-            "signature": ["{ text: string; kind: string; }[]"],
+            "signature": [
+              "{ text: string; kind: string; }[]"
+            ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1402,7 +1440,9 @@
             "tags": [],
             "label": "isHuman",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1416,7 +1456,9 @@
             "tags": [],
             "label": "isHumanPrecise",
             "description": [],
-            "signature": ["() => boolean"],
+            "signature": [
+              "() => boolean"
+            ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1446,7 +1488,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(val: number) => any"],
+            "signature": [
+              "(val: number) => any"
+            ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1458,7 +1502,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/duration.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1485,7 +1531,10 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.id",
             "type": "string",
-            "tags": ["property", "static"],
+            "tags": [
+              "property",
+              "static"
+            ],
             "label": "id",
             "description": [],
             "path": "src/plugins/field_formats/common/field_format.ts",
@@ -1496,7 +1545,10 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.hidden",
             "type": "boolean",
-            "tags": ["property", "static"],
+            "tags": [
+              "property",
+              "static"
+            ],
             "label": "hidden",
             "description": [
               "\nHidden field formats can only be accessed directly by id,\nThey won't appear in field format editor UI,\nBut they can be accessed and used from code internally.\n"
@@ -1509,7 +1561,10 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.title",
             "type": "string",
-            "tags": ["property", "static"],
+            "tags": [
+              "property",
+              "static"
+            ],
             "label": "title",
             "description": [],
             "path": "src/plugins/field_formats/common/field_format.ts",
@@ -1520,10 +1575,15 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.fieldType",
             "type": "CompoundType",
-            "tags": ["property", "private"],
+            "tags": [
+              "property",
+              "private"
+            ],
             "label": "fieldType",
             "description": [],
-            "signature": ["string | string[]"],
+            "signature": [
+              "string | string[]"
+            ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1532,7 +1592,10 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.convertObject",
             "type": "Object",
-            "tags": ["property", "private"],
+            "tags": [
+              "property",
+              "private"
+            ],
             "label": "convertObject",
             "description": [],
             "signature": [
@@ -1553,7 +1616,10 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.htmlConvert",
             "type": "Function",
-            "tags": ["property", "protected"],
+            "tags": [
+              "property",
+              "protected"
+            ],
             "label": "htmlConvert",
             "description": [],
             "signature": [
@@ -1574,7 +1640,10 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.textConvert",
             "type": "Function",
-            "tags": ["property", "protected"],
+            "tags": [
+              "property",
+              "protected"
+            ],
             "label": "textConvert",
             "description": [],
             "signature": [
@@ -1595,7 +1664,10 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.type",
             "type": "Object",
-            "tags": ["property", "private"],
+            "tags": [
+              "property",
+              "private"
+            ],
             "label": "type",
             "description": [],
             "signature": [
@@ -1619,7 +1691,9 @@
             "tags": [],
             "label": "allowsNumericalAggregations",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1688,7 +1762,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1759,9 +1835,13 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.convert",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "convert",
-            "description": ["\nConvert a raw value to a formatted string"],
+            "description": [
+              "\nConvert a raw value to a formatted string"
+            ],
             "signature": [
               "(value: unknown, contentType?: ",
               {
@@ -1800,7 +1880,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["unknown"],
+                "signature": [
+                  "unknown"
+                ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1868,9 +1950,13 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.getConverterFor",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getConverterFor",
-            "description": ["\nGet a convert function that is bound to a specific contentType"],
+            "description": [
+              "\nGet a convert function that is bound to a specific contentType"
+            ],
             "signature": [
               "(contentType?: ",
               {
@@ -1915,15 +2001,21 @@
                 "isRequired": true
               }
             ],
-            "returnComment": ["- a bound converter function"]
+            "returnComment": [
+              "- a bound converter function"
+            ]
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.getParamDefaults",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getParamDefaults",
-            "description": ["\nGet parameter defaults"],
+            "description": [
+              "\nGet parameter defaults"
+            ],
             "signature": [
               "() => ",
               {
@@ -1938,16 +2030,24 @@
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": ["- parameter defaults"]
+            "returnComment": [
+              "- parameter defaults"
+            ]
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.param",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "param",
-            "description": ["\nGet the value of a param. This value may be a default value.\n"],
-            "signature": ["(name: string) => any"],
+            "description": [
+              "\nGet the value of a param. This value may be a default value.\n"
+            ],
+            "signature": [
+              "(name: string) => any"
+            ],
             "path": "src/plugins/field_formats/common/field_format.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1958,23 +2058,33 @@
                 "type": "string",
                 "tags": [],
                 "label": "name",
-                "description": ["- the param name to fetch"],
-                "signature": ["string"],
+                "description": [
+                  "- the param name to fetch"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
-            "returnComment": ["TODO: https://github.com/elastic/kibana/issues/108158"]
+            "returnComment": [
+              "TODO: https://github.com/elastic/kibana/issues/108158"
+            ]
           },
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.params",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "params",
-            "description": ["\nGet all of the params in a single object"],
+            "description": [
+              "\nGet all of the params in a single object"
+            ],
             "signature": [
               "() => ",
               {
@@ -2003,7 +2113,9 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormat.toJSON",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "toJSON",
             "description": [
               "\nSerialize this format to a simple POJO, with only the params\nthat are not default\n"
@@ -2137,7 +2249,9 @@
                 "tags": [],
                 "label": "fieldFormat",
                 "description": [],
-                "signature": ["unknown"],
+                "signature": [
+                  "unknown"
+                ],
                 "path": "src/plugins/field_formats/common/field_format.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2431,7 +2545,9 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getDefaultConfig",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getDefaultConfig",
             "description": [
               "\nGet the id of the default type for this field type\nusing the format:defaultTypeMap config map\n"
@@ -2472,7 +2588,9 @@
                 "type": "Enum",
                 "tags": [],
                 "label": "fieldType",
-                "description": ["- the field type"],
+                "description": [
+                  "- the field type"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/field-types",
@@ -2493,7 +2611,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": ["- Array of ES data types"],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/field-types",
@@ -2516,9 +2636,13 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getType",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getType",
-            "description": ["\nGet a derived FieldFormat class by its id.\n"],
+            "description": [
+              "\nGet a derived FieldFormat class by its id.\n"
+            ],
             "signature": [
               "(formatId: string) => ",
               {
@@ -2540,8 +2664,12 @@
                 "type": "string",
                 "tags": [],
                 "label": "formatId",
-                "description": ["- the format id"],
-                "signature": ["string"],
+                "description": [
+                  "- the format id"
+                ],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2579,7 +2707,9 @@
                 "tags": [],
                 "label": "formatId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2592,7 +2722,9 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getDefaultType",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getDefaultType",
             "description": [
               "\nGet the default FieldFormat type (class) for\na field type, using the format:defaultTypeMap.\nused by the field editor\n"
@@ -2655,7 +2787,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": ["- Array of ES data types"],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/field-types",
@@ -2678,7 +2812,9 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getTypeNameByEsTypes",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getTypeNameByEsTypes",
             "description": [
               "\nGet the name of the default type for ES types like date_nanos\nusing the format:defaultTypeMap config map\n"
@@ -2712,7 +2848,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "esTypes",
-                "description": ["- Array of ES data types"],
+                "description": [
+                  "- Array of ES data types"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/field-types",
@@ -2735,7 +2873,9 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getDefaultTypeName",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getDefaultTypeName",
             "description": [
               "\nGet the default FieldFormat type name for\na field type, using the format:defaultTypeMap.\n"
@@ -2828,9 +2968,13 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getInstance",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getInstance",
-            "description": ["\nGet the singleton instance of the FieldFormat type by its id.\n"],
+            "description": [
+              "\nGet the singleton instance of the FieldFormat type by its id.\n"
+            ],
             "signature": [
               "(formatId: string, params?: ",
               {
@@ -2860,7 +3004,9 @@
                 "tags": [],
                 "label": "formatId",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -2894,9 +3040,13 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getDefaultInstancePlain",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getDefaultInstancePlain",
-            "description": ["\nGet the default fieldFormat instance for a field format.\n"],
+            "description": [
+              "\nGet the default fieldFormat instance for a field format.\n"
+            ],
             "signature": [
               "(fieldType: ",
               {
@@ -3006,7 +3156,9 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getDefaultInstanceCacheResolver",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getDefaultInstanceCacheResolver",
             "description": [
               "\nReturns a cache key built by the given variables for caching in memoized\nWhere esType contains fieldType, fieldType is returned\n-> kibana types have a higher priority in that case\n-> would lead to failing tests that match e.g. date format with/without esTypes\nhttps://lodash.com/docs#memoize\n"
@@ -3084,7 +3236,9 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getByFieldType",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getByFieldType",
             "description": [
               "\nGet filtered list of field formats by format type,\nSkips hidden field formats\n"
@@ -3140,7 +3294,9 @@
             "parentPluginId": "fieldFormats",
             "id": "def-common.FieldFormatsRegistry.getDefaultInstance",
             "type": "Function",
-            "tags": ["return"],
+            "tags": [
+              "return"
+            ],
             "label": "getDefaultInstance",
             "description": [
               "\nGet the default fieldFormat instance for a field format.\nIt's a memoized function that builds and reads a cache\n"
@@ -3351,8 +3507,12 @@
             "type": "Function",
             "tags": [],
             "label": "has",
-            "description": ["\nChecks if field format with id already registered"],
-            "signature": ["(id: string) => boolean"],
+            "description": [
+              "\nChecks if field format with id already registered"
+            ],
+            "signature": [
+              "(id: string) => boolean"
+            ],
             "path": "src/plugins/field_formats/common/field_formats_registry.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3364,7 +3524,9 @@
                 "tags": [],
                 "label": "id",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/field_formats_registry.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3463,7 +3625,9 @@
             "tags": [],
             "label": "transformOptions",
             "description": [],
-            "signature": ["{ kind: string; text: string; }[]"],
+            "signature": [
+              "{ kind: string; text: string; }[]"
+            ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3475,7 +3639,9 @@
             "tags": [],
             "label": "getParamDefaults",
             "description": [],
-            "signature": ["() => { transform: string; }"],
+            "signature": [
+              "() => { transform: string; }"
+            ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3511,7 +3677,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | GeoJSON.Point | { lat: number; lon: number; }"],
+                "signature": [
+                  "string | GeoJSON.Point | { lat: number; lon: number; }"
+                ],
                 "path": "src/plugins/field_formats/common/converters/geo_point.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3673,7 +3841,9 @@
             "tags": [],
             "label": "getParamDefaults",
             "description": [],
-            "signature": ["() => { id: string; params: {}; }"],
+            "signature": [
+              "() => { id: string; params: {}; }"
+            ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3709,7 +3879,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/histogram.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3829,7 +4001,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(val: number) => string"],
+            "signature": [
+              "(val: number) => string"
+            ],
             "path": "src/plugins/field_formats/common/converters/ip.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -3841,7 +4015,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/ip.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4077,7 +4253,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(val: string | number) => string"],
+            "signature": [
+              "(val: string | number) => string"
+            ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4089,7 +4267,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/percent.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4187,7 +4367,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(val: string | number) => string"],
+            "signature": [
+              "(val: string | number) => string"
+            ],
             "path": "src/plugins/field_formats/common/converters/relative_date.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4199,7 +4381,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/relative_date.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4298,7 +4482,9 @@
             "tags": [],
             "label": "getParamDefaults",
             "description": [],
-            "signature": ["() => { lookupEntries: {}[]; unknownKeyValue: null; }"],
+            "signature": [
+              "() => { lookupEntries: {}[]; unknownKeyValue: null; }"
+            ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4312,7 +4498,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(val: string) => any"],
+            "signature": [
+              "(val: string) => any"
+            ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4324,7 +4512,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4423,7 +4613,9 @@
             "tags": [],
             "label": "transformOptions",
             "description": [],
-            "signature": ["({ kind: boolean; text: string; } | { kind: string; text: string; })[]"],
+            "signature": [
+              "({ kind: boolean; text: string; } | { kind: string; text: string; })[]"
+            ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4435,7 +4627,9 @@
             "tags": [],
             "label": "getParamDefaults",
             "description": [],
-            "signature": ["() => { transform: boolean; }"],
+            "signature": [
+              "() => { transform: boolean; }"
+            ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4471,7 +4665,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string | number"],
+                "signature": [
+                  "string | number"
+                ],
                 "path": "src/plugins/field_formats/common/converters/string.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4531,7 +4727,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/field_formats/common/converters/string.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4651,7 +4849,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(val: string) => string"],
+            "signature": [
+              "(val: string) => string"
+            ],
             "path": "src/plugins/field_formats/common/converters/truncate.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4663,7 +4863,9 @@
                 "tags": [],
                 "label": "val",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/converters/truncate.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4762,7 +4964,9 @@
             "tags": [],
             "label": "urlTypes",
             "description": [],
-            "signature": ["{ kind: string; text: string; }[]"],
+            "signature": [
+              "{ kind: string; text: string; }[]"
+            ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4774,7 +4978,9 @@
             "tags": [],
             "label": "Constructor",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4834,7 +5040,9 @@
             "tags": [],
             "label": "textConvert",
             "description": [],
-            "signature": ["(value: string) => string"],
+            "signature": [
+              "(value: string) => string"
+            ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4846,7 +5054,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/converters/url.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4884,7 +5094,9 @@
                 "tags": [],
                 "label": "rawValue",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "src/plugins/field_formats/common/converters/url.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -4941,7 +5153,9 @@
             "tags": [],
             "label": "shouldHighlight",
             "description": [],
-            "signature": ["boolean"],
+            "signature": [
+              "boolean"
+            ],
             "path": "src/plugins/field_formats/common/utils/highlight/highlight_request.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -4994,7 +5208,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/field_formats/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5052,7 +5268,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "src/plugins/field_formats/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -5089,7 +5307,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FieldFormatMetaParams",
-        "description": ["\nParams provided by the registry to every field formatter\n"],
+        "description": [
+          "\nParams provided by the registry to every field formatter\n"
+        ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5117,7 +5337,9 @@
         "type": "Interface",
         "tags": [],
         "label": "HtmlContextTypeOptions",
-        "description": ["\nHtml converter options"],
+        "description": [
+          "\nHtml converter options"
+        ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5129,7 +5351,9 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "signature": ["{ name: string; } | undefined"],
+            "signature": [
+              "{ name: string; } | undefined"
+            ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5141,7 +5365,9 @@
             "tags": [],
             "label": "hit",
             "description": [],
-            "signature": ["{ highlight?: Record<string, string[]> | undefined; } | undefined"],
+            "signature": [
+              "{ highlight?: Record<string, string[]> | undefined; } | undefined"
+            ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5153,7 +5379,9 @@
             "tags": [],
             "label": "skipFormattingInStringifiedJSON",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5167,7 +5395,9 @@
         "type": "Interface",
         "tags": [],
         "label": "TextContextTypeOptions",
-        "description": ["\nPlain text converter options"],
+        "description": [
+          "\nPlain text converter options"
+        ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5179,7 +5409,9 @@
             "tags": [],
             "label": "skipFormattingInStringifiedJSON",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5191,7 +5423,9 @@
             "tags": [],
             "label": "timezone",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5244,7 +5478,9 @@
         "tags": [],
         "label": "DURATION_INPUT_FORMATS",
         "description": [],
-        "signature": ["{ text: string; kind: string; }[]"],
+        "signature": [
+          "{ text: string; kind: string; }[]"
+        ],
         "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5294,7 +5530,9 @@
         "type": "Type",
         "tags": [],
         "label": "FieldFormatConvertFunction",
-        "description": ["\nConverter function"],
+        "description": [
+          "\nConverter function"
+        ],
         "signature": [
           {
             "pluginId": "fieldFormats",
@@ -5323,10 +5561,14 @@
         "parentPluginId": "fieldFormats",
         "id": "def-common.FieldFormatId",
         "type": "Type",
-        "tags": ["string"],
+        "tags": [
+          "string"
+        ],
         "label": "FieldFormatId",
         "description": [],
-        "signature": ["string"],
+        "signature": [
+          "string"
+        ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5338,7 +5580,9 @@
         "type": "Type",
         "tags": [],
         "label": "FieldFormatInstanceType",
-        "description": ["\nAlternative to typeof {@link FieldFormat} but with specified ids"],
+        "description": [
+          "\nAlternative to typeof {@link FieldFormat} but with specified ids"
+        ],
         "signature": [
           "(new (params?: ",
           {
@@ -5410,7 +5654,9 @@
         "tags": [],
         "label": "FieldFormatsContentType",
         "description": [],
-        "signature": ["\"text\" | \"html\""],
+        "signature": [
+          "\"text\" | \"html\""
+        ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5425,7 +5671,9 @@
         "description": [
           "\nIf a service is being shared on both the client and the server, and\nthe client code requires synchronous access to uiSettings, both client\nand server should wrap the core uiSettings services in a function\nmatching this signature.\n\nThis matches the signature of the public `core.uiSettings.get`, and\nshould only be used in scenarios where async access to uiSettings is\nnot possible.\n"
         ],
-        "signature": ["(key: string, defaultOverride?: T | undefined) => T"],
+        "signature": [
+          "(key: string, defaultOverride?: T | undefined) => T"
+        ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5449,7 +5697,9 @@
             "tags": [],
             "label": "defaultOverride",
             "description": [],
-            "signature": ["T | undefined"],
+            "signature": [
+              "T | undefined"
+            ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5789,7 +6039,9 @@
         "tags": [],
         "label": "HTML_CONTEXT_TYPE",
         "description": [],
-        "signature": ["\"text\" | \"html\""],
+        "signature": [
+          "\"text\" | \"html\""
+        ],
         "path": "src/plugins/field_formats/common/content_types/html_content_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -5801,7 +6053,9 @@
         "type": "Type",
         "tags": [],
         "label": "HtmlContextTypeConvert",
-        "description": ["\nTo html converter function"],
+        "description": [
+          "\nTo html converter function"
+        ],
         "signature": [
           "(value: any, options?: ",
           {
@@ -5825,7 +6079,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6179,7 +6435,9 @@
         "description": [
           "\nJSON representation of a field formatter configuration.\nIs used to carry information about how to format data in\na data table as part of the column definition.\n"
         ],
-        "signature": ["{ id?: string | undefined; params?: TParams | undefined; }"],
+        "signature": [
+          "{ id?: string | undefined; params?: TParams | undefined; }"
+        ],
         "path": "src/plugins/field_formats/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6192,7 +6450,9 @@
         "tags": [],
         "label": "TEXT_CONTEXT_TYPE",
         "description": [],
-        "signature": ["\"text\" | \"html\""],
+        "signature": [
+          "\"text\" | \"html\""
+        ],
         "path": "src/plugins/field_formats/common/content_types/text_content_type.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6204,7 +6464,9 @@
         "type": "Type",
         "tags": [],
         "label": "TextContextTypeConvert",
-        "description": ["\nTo plain text converter function"],
+        "description": [
+          "\nTo plain text converter function"
+        ],
         "signature": [
           "(value: any, options?: ",
           {
@@ -6228,7 +6490,9 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "src/plugins/field_formats/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6324,7 +6588,9 @@
         "tags": [],
         "label": "DEFAULT_DURATION_INPUT_FORMAT",
         "description": [],
-        "signature": ["{ text: string; kind: string; }"],
+        "signature": [
+          "{ text: string; kind: string; }"
+        ],
         "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6337,7 +6603,9 @@
         "tags": [],
         "label": "DEFAULT_DURATION_OUTPUT_FORMAT",
         "description": [],
-        "signature": ["{ text: string; method: string; }"],
+        "signature": [
+          "{ text: string; method: string; }"
+        ],
         "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
         "deprecated": false,
         "trackAdoption": false,

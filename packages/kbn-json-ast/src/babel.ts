@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { parseExpression } from '@babel/parser';
 import * as T from '@babel/types';
+import { parseExpression } from '@babel/parser';
 export { T, parseExpression };

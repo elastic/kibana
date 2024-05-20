@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiLink, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { EuiLink, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ColorSchema, ColorSchemaParams } from '@kbn/charts-plugin/public';
+import { ColorSchemaParams, ColorSchema } from '@kbn/charts-plugin/public';
 import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { SelectOption } from './select';
 import { SwitchOption } from './switch';

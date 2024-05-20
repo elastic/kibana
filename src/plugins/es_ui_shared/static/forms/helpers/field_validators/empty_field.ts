@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { isEmptyArray } from '../../../validators/array';
-import { isEmptyString } from '../../../validators/string';
 import { ValidationFunc } from '../../hook_form_lib';
+import { isEmptyString } from '../../../validators/string';
+import { isEmptyArray } from '../../../validators/array';
 import { ERROR_CODE } from './types';
 
 export const emptyField =

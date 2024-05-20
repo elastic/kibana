@@ -6,6 +6,9 @@
     "id": "kibanaCorsTest",
     "server": true,
     "browser": false,
-    "configPath": ["test", "cors"]
+    "configPath": [
+      "test",
+      "cors"
+    ]
   }
 }

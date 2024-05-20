@@ -1,5 +1,7 @@
 {
-  "index_patterns": ["kbn-data-forge-fake_hosts.fake_hosts-*"],
+  "index_patterns": [
+    "kbn-data-forge-fake_hosts.fake_hosts-*"
+  ],
   "mappings": {
     "_meta": {
       "version": "1.6.0"

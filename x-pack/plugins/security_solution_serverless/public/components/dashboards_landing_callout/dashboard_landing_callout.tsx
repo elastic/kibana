@@ -6,11 +6,11 @@
  */
 
 import { EuiCallOut } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ExternalPageName } from '@kbn/security-solution-navigation';
-import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { LinkAnchor } from '@kbn/security-solution-navigation/links';
+import { css } from '@emotion/react';
+import { ExternalPageName } from '@kbn/security-solution-navigation';
 
 const linkAnchorCss = css`
   text-decoration: underline;

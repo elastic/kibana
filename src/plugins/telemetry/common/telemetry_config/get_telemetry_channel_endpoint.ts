@@ -7,9 +7,9 @@
  */
 
 import {
-  ENDPOINT_PROD,
-  ENDPOINT_STAGING,
   ENDPOINT_VERSION,
+  ENDPOINT_STAGING,
+  ENDPOINT_PROD,
   TELEMETRY_CHANNELS,
 } from '../constants';
 

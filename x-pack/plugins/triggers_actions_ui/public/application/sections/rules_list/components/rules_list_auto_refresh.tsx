@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiAutoRefreshButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
+import moment from 'moment';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiAutoRefreshButton } from '@elastic/eui';
 
 interface RulesListAutoRefreshProps {
   lastUpdate: string;

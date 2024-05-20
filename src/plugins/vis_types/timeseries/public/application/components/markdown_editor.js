@@ -11,18 +11,18 @@
 
 import PropTypes from 'prop-types';
 
-import _ from 'lodash';
 import React, { Component } from 'react';
-import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import { createTickFormatter } from './lib/tick_formatter';
+import { convertSeriesToVars } from './lib/convert_series_to_vars';
+import _ from 'lodash';
 
 import { CodeEditor, MarkdownLang } from '@kbn/code-editor';
 
-import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 import { getDataViewsStart } from '../../services';
+import { fetchIndexPattern } from '../../../common/index_patterns_utils';
 
 import './_markdown_editor.scss';
 

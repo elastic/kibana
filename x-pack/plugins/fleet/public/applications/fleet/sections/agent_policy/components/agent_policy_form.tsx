@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   EuiAccordion,
   EuiDescribedFormGroup,
@@ -14,12 +15,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import styled from 'styled-components';
 
 import { AGENT_POLICY_ADVANCED_SETTINGS } from '../../../../../../common/settings';
+import type { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { useAuthz } from '../../../../../hooks';
-import type { AgentPolicy, NewAgentPolicy } from '../../../types';
 
 import { ConfiguredSettings } from '../../../components/form_settings';
 

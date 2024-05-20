@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CloudServiceResponse } from './cloud_response';
 import { CloudService } from './cloud_service';
+import { CloudServiceResponse } from './cloud_response';
 
 describe('CloudService', () => {
   // @ts-expect-error Creating an instance of an abstract class for testing

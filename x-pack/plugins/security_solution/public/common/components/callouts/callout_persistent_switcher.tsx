@@ -8,8 +8,8 @@
 import type { FC } from 'react';
 import React, { memo } from 'react';
 
-import { CallOut } from './callout';
 import type { CallOutMessage } from './callout_types';
+import { CallOut } from './callout';
 
 export interface CallOutPersistentSwitcherProps {
   condition: boolean;

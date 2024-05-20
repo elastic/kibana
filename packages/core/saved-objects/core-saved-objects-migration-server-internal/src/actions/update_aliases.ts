@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { DEFAULT_TIMEOUT, IndexNotFound } from '.';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
-  type RetryableEsClientError,
   catchRetryableEsClientErrors,
+  type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+import { DEFAULT_TIMEOUT, IndexNotFound } from '.';
 
 export interface AliasNotFound {
   type: 'alias_not_found_exception';

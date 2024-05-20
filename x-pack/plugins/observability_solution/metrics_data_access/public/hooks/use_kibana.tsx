@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import {
-  KibanaReactContextValue,
   createKibanaReactContext,
+  KibanaReactContextValue,
   useKibana,
 } from '@kbn/kibana-react-plugin/public';
-import { useMemo } from 'react';
 
 export type PluginKibanaContextValue = CoreStart;
 

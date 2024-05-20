@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
-import React from 'react';
 import { getAddControlButtonTitle } from '../../_dashboard_app_strings';
 import { useDashboardAPI } from '../../dashboard_app';
 

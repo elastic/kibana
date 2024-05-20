@@ -1,13 +1,3 @@
-import { EuiEmptyPrompt } from '@elastic/eui';
-import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import type { DatePickerDependencies } from '@kbn/ml-date-picker';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { dynamic } from '@kbn/shared-ux-utility';
-import { pick } from 'lodash';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -15,11 +5,21 @@ import { pick } from 'lodash';
  * 2.0.
  */
 import React from 'react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { dynamic } from '@kbn/shared-ux-utility';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { DatePickerContextProvider } from '@kbn/ml-date-picker';
+import type { DatePickerDependencies } from '@kbn/ml-date-picker';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { pick } from 'lodash';
 import { getCoreStart, getPluginsStart } from '../../../../kibana_services';
 import type {
-  ESQLDataVisualizerGridEmbeddableState,
   FieldStatisticTableEmbeddableProps,
+  ESQLDataVisualizerGridEmbeddableState,
 } from './types';
 
 const EmbeddableESQLFieldStatsTableWrapper = dynamic(

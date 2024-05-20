@@ -37,19 +37,19 @@ import {
   ML_DETECTOR_RULE_CONDITIONS_NOT_SUPPORTED_FUNCTIONS,
 } from '@kbn/ml-anomaly-utils';
 
-import { checkPermission } from '../../capabilities/check_capabilities';
-import { ActionsSection } from './actions_section';
 import { DetectorDescriptionList } from './components/detector_description_list';
+import { ActionsSection } from './actions_section';
+import { checkPermission } from '../../capabilities/check_capabilities';
 import { ConditionsSection } from './conditions_section';
 import { ScopeSection } from './scope_section';
 import { SelectRuleAction } from './select_rule_action';
 import {
-  addItemToFilter,
-  deleteJobRule,
-  getNewConditionDefaults,
   getNewRuleDefaults,
+  getNewConditionDefaults,
   isValidRule,
   saveJobRule,
+  deleteJobRule,
+  addItemToFilter,
 } from './utils';
 
 import { getPartitioningFieldNames } from '../../../../common/util/job_utils';

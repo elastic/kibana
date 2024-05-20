@@ -6,6 +6,8 @@
     "id": "kibanaUsageCollection",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["usageCollection"]
+    "requiredPlugins": [
+      "usageCollection"
+    ]
   }
 }

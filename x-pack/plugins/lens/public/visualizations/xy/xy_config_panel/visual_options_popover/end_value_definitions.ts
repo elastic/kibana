@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { EndValue } from '@kbn/expression-xy-plugin/common';
 import { i18n } from '@kbn/i18n';
+import type { EndValue } from '@kbn/expression-xy-plugin/common';
 
 export const endValueDefinitions: Array<{ id: EndValue } & Record<string, string>> = [
   {

@@ -8,11 +8,11 @@
 import { wrapSuppressedAlerts } from './wrap_suppressed_alerts';
 
 import {
-  ALERT_INSTANCE_ID,
   ALERT_SUPPRESSION_DOCS_COUNT,
-  ALERT_SUPPRESSION_END,
-  ALERT_SUPPRESSION_START,
+  ALERT_INSTANCE_ID,
   ALERT_SUPPRESSION_TERMS,
+  ALERT_SUPPRESSION_START,
+  ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
 
 import type { CompleteRule, ThreatRuleParams } from '../../rule_schema';

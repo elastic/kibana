@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
-import { getIndexForESQLQuery, getInitialESQLQuery } from '@kbn/esql-utils';
 import { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
+import { getIndexForESQLQuery, getInitialESQLQuery } from '@kbn/esql-utils';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 export type DiscoverESQLLocatorParams = SerializableRecord;
 

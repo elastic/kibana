@@ -6,16 +6,29 @@
       "human": "__flag__",
       "pretty": "__flag__",
       "desc": "__flag__",
-      "end": ["-1"],
+      "end": [
+        "-1"
+      ],
       "exclude_interim": "__flag__",
       "from": "",
       "record_score": "",
-      "size": ["100"],
-      "sort": ["record_score"],
-      "start": ["-1"]
+      "size": [
+        "100"
+      ],
+      "sort": [
+        "record_score"
+      ],
+      "start": [
+        "-1"
+      ]
     },
-    "methods": ["GET", "POST"],
-    "patterns": ["_ml/anomaly_detectors/{job_id}/results/records"],
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/results/records"
+    ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-record.html",
     "availability": {
       "stack": true,

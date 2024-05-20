@@ -7,26 +7,26 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FC } from 'react';
 
-import { EuiSkeletonText } from '@elastic/eui';
 import {
   EmptyViewerState,
   ExceptionListHeader,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
-import { NotFoundPage } from '../../../app/404';
-import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
 import type { Rule } from '../../../detection_engine/rule_management/logic/types';
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
-import { ReferenceErrorModal } from '../../../detections/components/value_lists_management_flyout/reference_error_modal';
-import { LinkToRuleDetails, ListWithSearch, ManageRules } from '../../components';
-import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
-import { IncludeExpiredExceptionsModal } from '../../components/expired_exceptions_list_items_modal';
+import { NotFoundPage } from '../../../app/404';
+import { AutoDownload } from '../../../common/components/auto_download/auto_download';
+import { ListWithSearch, ManageRules, LinkToRuleDetails } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
+import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
+import { IncludeExpiredExceptionsModal } from '../../components/expired_exceptions_list_items_modal';
 
 export const ListsDetailViewComponent: FC = () => {
   const { detailName: exceptionListId } = useParams<{

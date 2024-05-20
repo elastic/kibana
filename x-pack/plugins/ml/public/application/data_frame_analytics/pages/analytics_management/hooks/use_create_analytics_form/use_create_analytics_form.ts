@@ -9,12 +9,12 @@ import { useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { extractErrorProperties } from '@kbn/ml-error-utils';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import type { DeepReadonly } from '../../../../../../../common/types/common';
 import { useMlKibana } from '../../../../../contexts/kibana';
+import type { DeepReadonly } from '../../../../../../../common/types/common';
 import { ml } from '../../../../../services/ml_api_service';
 
 import { useRefreshAnalyticsList } from '../../../../common';
@@ -23,8 +23,8 @@ import { extractCloningConfig, isAdvancedConfig } from '../../components/action_
 import type { ActionDispatchers } from './actions';
 import { ACTION } from './actions';
 import { reducer } from './reducer';
-import type { FormMessage, SourceIndexMap, State } from './state';
-import { getFormStateFromJobConfig, getInitialState, getJobConfigFromFormState } from './state';
+import type { FormMessage, State, SourceIndexMap } from './state';
+import { getInitialState, getJobConfigFromFormState, getFormStateFromJobConfig } from './state';
 
 import type { ANALYTICS_STEPS } from '../../../analytics_creation/page';
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFormRow,
   EuiSuperSelect,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { useController, useFormState } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
 import deepEqual from 'fast-deep-equal';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useController, useFormState } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 
 const SNAPSHOT_OPTION = {
   value: 'snapshot',

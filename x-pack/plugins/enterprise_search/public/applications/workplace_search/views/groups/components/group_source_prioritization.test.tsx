@@ -12,7 +12,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiEmptyPrompt, EuiRange, EuiTable } from '@elastic/eui';
+import { EuiTable, EuiEmptyPrompt, EuiRange } from '@elastic/eui';
 
 import { GroupSourcePrioritization } from './group_source_prioritization';
 

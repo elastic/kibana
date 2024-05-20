@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { ElasticsearchConfig } from '@kbn/core/server';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 export class EsLegacyConfigService {
   /**

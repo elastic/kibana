@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from './config';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {

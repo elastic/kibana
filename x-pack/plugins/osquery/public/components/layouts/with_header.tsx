@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 import React, { Fragment } from 'react';
+import { EuiPage, EuiPageBody, EuiSpacer } from '@elastic/eui';
 
 import type { HeaderProps } from './header';
 import { Header } from './header';

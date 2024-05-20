@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { EuiTabs, EuiTab, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useLazyRef } from '../../../../../hooks/use_lazy_ref';
-import { AlertsTabContent } from './alerts';
 import { MetricsGrid } from './metrics/metrics_grid';
+import { AlertsTabContent } from './alerts';
 
-import { TabIds, useTabId } from '../../hooks/use_tab_id';
 import { AlertsTabBadge } from './alerts_tab_badge';
+import { TabIds, useTabId } from '../../hooks/use_tab_id';
 import { LogsTabContent } from './logs';
 
 const tabs = [

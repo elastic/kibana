@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
-import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { EndpointEntryMatch, endpointEntryMatch } from '.';
-import { getEntryMatchMock } from '../../entry_match/index.mock';
+import { left } from 'fp-ts/lib/Either';
 import { getEndpointEntryMatchMock } from './index.mock';
+import { EndpointEntryMatch, endpointEntryMatch } from '.';
+import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
+import { getEntryMatchMock } from '../../entry_match/index.mock';
 
 describe('endpointEntryMatch', () => {
   test('it should validate an entry', () => {

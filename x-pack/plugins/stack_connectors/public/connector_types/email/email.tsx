@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
+import { lazy } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiSelectOption } from '@elastic/eui';
 import { InvalidEmailReason } from '@kbn/actions-plugin/common';
-import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { uniq } from 'lodash';
-import { lazy } from 'react';
-import { RegistrationServices } from '..';
 import { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
+import { RegistrationServices } from '..';
 
 const emailServices: EuiSelectOption[] = [
   {

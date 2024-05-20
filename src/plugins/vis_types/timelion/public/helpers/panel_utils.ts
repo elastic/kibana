@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { AxisSpec, Position } from '@elastic/charts';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import type { TimefilterContract } from '@kbn/data-plugin/public';
 import moment from 'moment-timezone';
+import { Position, AxisSpec } from '@elastic/charts';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 
 import { calculateInterval } from '../../common/lib';
-import { tickFormatters } from './tick_formatters';
 import { xaxisFormatterProvider } from './xaxis_formatter';
+import { tickFormatters } from './tick_formatters';
 
 import type { Series } from './timelion_request_handler';
 
@@ -70,7 +70,7 @@ export const withStaticPadding = (domain: AxisSpec['domain']): AxisSpec['domain'
     ...domain,
     padding: 20,
     paddingUnit: 'pixel',
-  }) as unknown as AxisSpec['domain'];
+  } as unknown as AxisSpec['domain']);
 
 const adaptYaxisParams = (yaxis: IAxis) => {
   const y = { ...yaxis };
@@ -109,30 +109,27 @@ const extractYAxisForSeries = (series: Series) => {
 };
 
 export const extractAllYAxis = (series: Series[]) => {
-  return series.reduce(
-    (acc, data, index) => {
-      const yaxis = extractYAxisForSeries(data);
-      const groupId = `${data.yaxis ? data.yaxis : MAIN_GROUP_ID}`;
+  return series.reduce((acc, data, index) => {
+    const yaxis = extractYAxisForSeries(data);
+    const groupId = `${data.yaxis ? data.yaxis : MAIN_GROUP_ID}`;
 
-      if (acc.every((axis) => axis.groupId !== groupId)) {
-        acc.push({
-          groupId,
-          domain: withStaticPadding({
-            fit: false,
-            min: NaN,
-            max: NaN,
-          }),
-          id: (yaxis?.position || Position.Left) + index,
-          position: Position.Left,
-          ...yaxis,
-        });
-      } else if (yaxis) {
-        const axisOptionIndex = acc.findIndex((axis) => axis.groupId === groupId);
-        acc[axisOptionIndex] = { ...acc[axisOptionIndex], ...yaxis };
-      }
+    if (acc.every((axis) => axis.groupId !== groupId)) {
+      acc.push({
+        groupId,
+        domain: withStaticPadding({
+          fit: false,
+          min: NaN,
+          max: NaN,
+        }),
+        id: (yaxis?.position || Position.Left) + index,
+        position: Position.Left,
+        ...yaxis,
+      });
+    } else if (yaxis) {
+      const axisOptionIndex = acc.findIndex((axis) => axis.groupId === groupId);
+      acc[axisOptionIndex] = { ...acc[axisOptionIndex], ...yaxis };
+    }
 
-      return acc;
-    },
-    [] as Array<Partial<AxisSpec>>
-  );
+    return acc;
+  }, [] as Array<Partial<AxisSpec>>);
 };

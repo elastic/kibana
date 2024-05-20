@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiIcon, EuiLink, EuiSpacer } from '@elastic/eui';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 interface RulesListErrorBannerProps {

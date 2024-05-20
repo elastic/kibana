@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { KbnClient } from '@kbn/test';
 import type { AllConnectorsResponseV1 } from '@kbn/actions-plugin/common/routes/connector/response';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { bodySchema } from '@kbn/actions-plugin/server/routes/create';
 import type { TypeOf } from '@kbn/config-schema';
-import type { KbnClient } from '@kbn/test';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 
 /**

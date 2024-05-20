@@ -6,14 +6,14 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { isContinuousTransform } from '../../../../../../common/types/transform';
-import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
-import type { TransformListAction, TransformListRow } from '../../../../common';
 import { useTransformCapabilities } from '../../../../hooks';
+import type { TransformListAction, TransformListRow } from '../../../../common';
 import {
-  CreateAlertRuleActionName,
   crateAlertRuleActionNameText,
+  CreateAlertRuleActionName,
 } from './create_alert_rule_action_name';
+import { useAlertRuleFlyout } from '../../../../../alerting/transform_alerting_flyout';
+import { isContinuousTransform } from '../../../../../../common/types/transform';
 
 export type CreateAlertRuleAction = ReturnType<typeof useCreateAlertRuleAction>;
 export const useCreateAlertRuleAction = (forceDisable: boolean) => {

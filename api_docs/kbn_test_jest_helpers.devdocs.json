@@ -57,7 +57,9 @@
             "tags": [],
             "label": "key",
             "description": [],
-            "signature": ["(i: number) => string"],
+            "signature": [
+              "(i: number) => string"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -69,7 +71,9 @@
                 "tags": [],
                 "label": "i",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -85,7 +89,9 @@
             "tags": [],
             "label": "getItem",
             "description": [],
-            "signature": ["(key: string) => string | null"],
+            "signature": [
+              "(key: string) => string | null"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -97,7 +103,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -113,7 +121,9 @@
             "tags": [],
             "label": "setItem",
             "description": [],
-            "signature": ["(key: string, value: string) => void"],
+            "signature": [
+              "(key: string, value: string) => void"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -125,7 +135,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -138,7 +150,9 @@
                 "tags": [],
                 "label": "value",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -154,7 +168,9 @@
             "tags": [],
             "label": "removeItem",
             "description": [],
-            "signature": ["(key: string) => void"],
+            "signature": [
+              "(key: string) => void"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -166,7 +182,9 @@
                 "tags": [],
                 "label": "key",
                 "description": [],
-                "signature": ["string"],
+                "signature": [
+                  "string"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -182,7 +200,9 @@
             "tags": [],
             "label": "clear",
             "description": [],
-            "signature": ["() => void"],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -196,7 +216,9 @@
             "tags": [],
             "label": "setStubbedSizeLimit",
             "description": [],
-            "signature": ["(sizeLimit: number) => void"],
+            "signature": [
+              "(sizeLimit: number) => void"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -208,7 +230,9 @@
                 "tags": [],
                 "label": "sizeLimit",
                 "description": [],
-                "signature": ["number"],
+                "signature": [
+                  "number"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -224,7 +248,9 @@
             "tags": [],
             "label": "getStubbedSizeLimit",
             "description": [],
-            "signature": ["() => number"],
+            "signature": [
+              "() => number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -238,7 +264,9 @@
             "tags": [],
             "label": "getStubbedSize",
             "description": [],
-            "signature": ["() => number"],
+            "signature": [
+              "() => number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/stub_browser_storage.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -256,8 +284,12 @@
         "type": "Function",
         "tags": [],
         "label": "clearBroadcastChannelInstances",
-        "description": ["\nRemoves all BroadcastChannel instances."],
-        "signature": ["() => void"],
+        "description": [
+          "\nRemoves all BroadcastChannel instances."
+        ],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -272,7 +304,9 @@
         "tags": [],
         "label": "delay",
         "description": [],
-        "signature": ["(time?: number) => Promise<unknown>"],
+        "signature": [
+          "(time?: number) => Promise<unknown>"
+        ],
         "path": "packages/kbn-test-jest-helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -284,7 +318,9 @@
             "tags": [],
             "label": "time",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/index.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -322,8 +358,13 @@
             "type": "Object",
             "tags": [],
             "label": "reactWrapper",
-            "description": ["The React wrapper to search in"],
-            "signature": ["ReactWrapper", "<{}, {}, React.Component<{}, {}, any>>"],
+            "description": [
+              "The React wrapper to search in"
+            ],
+            "signature": [
+              "ReactWrapper",
+              "<{}, {}, React.Component<{}, {}, any>>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -335,8 +376,12 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "testSubjectSelector",
-            "description": ["The data test subject selector"],
-            "signature": ["T"],
+            "description": [
+              "The data test subject selector"
+            ],
+            "signature": [
+              "T"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -348,8 +393,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "matcher",
-            "description": ["optional matcher"],
-            "signature": ["Matcher"],
+            "description": [
+              "optional matcher"
+            ],
+            "signature": [
+              "Matcher"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/find_test_subject.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -365,13 +414,19 @@
         "type": "Function",
         "tags": [],
         "label": "getBroadcastChannelInstances",
-        "description": ["\nReturns all BroadcastChannel instances."],
-        "signature": ["() => BroadcastChannel[]"],
+        "description": [
+          "\nReturns all BroadcastChannel instances."
+        ],
+        "signature": [
+          "() => BroadcastChannel[]"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
-        "returnComment": ["BroadcastChannel[]"],
+        "returnComment": [
+          "BroadcastChannel[]"
+        ],
         "initialIsOpen": false
       },
       {
@@ -381,7 +436,9 @@
         "tags": [],
         "label": "getRandomNumber",
         "description": [],
-        "signature": ["(range?: { min: number; max: number; }) => number"],
+        "signature": [
+          "(range?: { min: number; max: number; }) => number"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/random.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -432,7 +489,9 @@
         "tags": [],
         "label": "getRandomString",
         "description": [],
-        "signature": ["(options?: {}) => string"],
+        "signature": [
+          "(options?: {}) => string"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/random.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -444,7 +503,9 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "signature": ["{}"],
+            "signature": [
+              "{}"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/random.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -458,7 +519,9 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.mountHook",
         "type": "Function",
-        "tags": ["return"],
+        "tags": [
+          "return"
+        ],
         "label": "mountHook",
         "description": [
           "\nAllows for execution of hooks inside of a test component which records the\nreturned values.\n"
@@ -476,8 +539,12 @@
             "type": "Function",
             "tags": [],
             "label": "body",
-            "description": ["A function that calls the hook and returns data derived from it"],
-            "signature": ["(args: Args) => HookValue"],
+            "description": [
+              "A function that calls the hook and returns data derived from it"
+            ],
+            "signature": [
+              "(args: Args) => HookValue"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -492,7 +559,9 @@
             "description": [
               "A component that, if provided, will be wrapped\naround the test component. This can be useful to provide context values."
             ],
-            "signature": ["React.ComponentType<{}> | undefined"],
+            "signature": [
+              "React.ComponentType<{}> | undefined"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -505,7 +574,9 @@
             "tags": [],
             "label": "initialArgs",
             "description": [],
-            "signature": ["Args"],
+            "signature": [
+              "Args"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -542,7 +613,9 @@
             "tags": [],
             "label": "child",
             "description": [],
-            "signature": ["React.ReactElement<T, string | React.JSXElementConstructor<any>>"],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -556,7 +629,9 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.mountWithIntl",
         "type": "Function",
-        "tags": ["return"],
+        "tags": [
+          "return"
+        ],
         "label": "mountWithIntl",
         "description": [
           "\n Creates the wrapper instance using mount with provided intl object into context\n"
@@ -578,8 +653,12 @@
             "type": "Object",
             "tags": [],
             "label": "node",
-            "description": ["The React element or cheerio wrapper"],
-            "signature": ["React.ReactElement<T, string | React.JSXElementConstructor<any>>"],
+            "description": [
+              "The React element or cheerio wrapper"
+            ],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -603,7 +682,9 @@
                 "tags": [],
                 "label": "attachTo",
                 "description": [],
-                "signature": ["HTMLElement | undefined"],
+                "signature": [
+                  "HTMLElement | undefined"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -615,7 +696,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -627,7 +710,10 @@
                 "tags": [],
                 "label": "childContextTypes",
                 "description": [],
-                "signature": ["ValidationMap", "<any> | undefined"],
+                "signature": [
+                  "ValidationMap",
+                  "<any> | undefined"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -639,7 +725,9 @@
                 "tags": [],
                 "label": "wrappingComponent",
                 "description": [],
-                "signature": ["React.ComponentType<any> | undefined"],
+                "signature": [
+                  "React.ComponentType<any> | undefined"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -651,7 +739,9 @@
                 "tags": [],
                 "label": "wrappingComponentProps",
                 "description": [],
-                "signature": ["{} | undefined"],
+                "signature": [
+                  "{} | undefined"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -671,7 +761,9 @@
         "tags": [],
         "label": "nextTick",
         "description": [],
-        "signature": ["() => Promise<unknown>"],
+        "signature": [
+          "() => Promise<unknown>"
+        ],
         "path": "packages/kbn-test-jest-helpers/index.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -702,7 +794,9 @@
             "tags": [],
             "label": "node",
             "description": [],
-            "signature": ["React.ReactElement<T, string | React.JSXElementConstructor<any>>"],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -718,7 +812,9 @@
         "type": "Function",
         "tags": [],
         "label": "registerTestBed",
-        "description": ["\nRegister a new Testbed to test a React Component.\n"],
+        "description": [
+          "\nRegister a new Testbed to test a React Component.\n"
+        ],
         "signature": [
           "(Component: ",
           "ComponentType",
@@ -750,8 +846,13 @@
             "type": "CompoundType",
             "tags": [],
             "label": "Component",
-            "description": ["The component under test"],
-            "signature": ["ComponentType", "<P>"],
+            "description": [
+              "The component under test"
+            ],
+            "signature": [
+              "ComponentType",
+              "<P>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -763,7 +864,9 @@
             "type": "Object",
             "tags": [],
             "label": "config",
-            "description": ["An optional configuration object for the Testbed"],
+            "description": [
+              "An optional configuration object for the Testbed"
+            ],
             "signature": [
               {
                 "pluginId": "@kbn/test-jest-helpers",
@@ -822,7 +925,10 @@
             "tags": [],
             "label": "Component",
             "description": [],
-            "signature": ["ComponentType", "<P>"],
+            "signature": [
+              "ComponentType",
+              "<P>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -901,7 +1007,10 @@
             "tags": [],
             "label": "Component",
             "description": [],
-            "signature": ["ComponentType", "<P>"],
+            "signature": [
+              "ComponentType",
+              "<P>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/testbed.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -945,7 +1054,9 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.renderWithIntl",
         "type": "Function",
-        "tags": ["return"],
+        "tags": [
+          "return"
+        ],
         "label": "renderWithIntl",
         "description": [
           "\n Creates the wrapper instance using render with provided intl object into context\n"
@@ -965,8 +1076,12 @@
             "type": "Object",
             "tags": [],
             "label": "node",
-            "description": ["The React element or cheerio wrapper"],
-            "signature": ["React.ReactElement<T, string | React.JSXElementConstructor<any>>"],
+            "description": [
+              "The React element or cheerio wrapper"
+            ],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -990,7 +1105,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1002,7 +1119,10 @@
                 "tags": [],
                 "label": "childContextTypes",
                 "description": [],
-                "signature": ["ValidationMap", "<any> | undefined"],
+                "signature": [
+                  "ValidationMap",
+                  "<any> | undefined"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1022,7 +1142,9 @@
         "tags": [],
         "label": "setHTMLElementClientSizes",
         "description": [],
-        "signature": ["(width: number, height: number) => { mockRestore: () => void; }"],
+        "signature": [
+          "(width: number, height: number) => { mockRestore: () => void; }"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1034,7 +1156,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1047,7 +1171,9 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1064,7 +1190,9 @@
         "tags": [],
         "label": "setHTMLElementOffset",
         "description": [],
-        "signature": ["(width: number, height: number) => { mockRestore: () => void; }"],
+        "signature": [
+          "(width: number, height: number) => { mockRestore: () => void; }"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1076,7 +1204,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1089,7 +1219,9 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1120,7 +1252,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1133,7 +1267,9 @@
             "tags": [],
             "label": "height",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1146,7 +1282,9 @@
             "tags": [],
             "label": "x",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1159,7 +1297,9 @@
             "tags": [],
             "label": "y",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1176,7 +1316,9 @@
         "tags": [],
         "label": "setSVGElementGetComputedTextLength",
         "description": [],
-        "signature": ["(width: number) => { mockRestore: () => void; }"],
+        "signature": [
+          "(width: number) => { mockRestore: () => void; }"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1188,7 +1330,9 @@
             "tags": [],
             "label": "width",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/jsdom_svg_mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1221,7 +1365,9 @@
             "tags": [],
             "label": "child",
             "description": [],
-            "signature": ["React.ReactElement<T, string | React.JSXElementConstructor<any>>"],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1235,7 +1381,9 @@
         "parentPluginId": "@kbn/test-jest-helpers",
         "id": "def-common.shallowWithIntl",
         "type": "Function",
-        "tags": ["return"],
+        "tags": [
+          "return"
+        ],
         "label": "shallowWithIntl",
         "description": [
           "\n Creates the wrapper instance using shallow with provided intl object into context\n"
@@ -1257,8 +1405,12 @@
             "type": "Object",
             "tags": [],
             "label": "node",
-            "description": ["The React element or cheerio wrapper"],
-            "signature": ["React.ReactElement<T, string | React.JSXElementConstructor<any>>"],
+            "description": [
+              "The React element or cheerio wrapper"
+            ],
+            "signature": [
+              "React.ReactElement<T, string | React.JSXElementConstructor<any>>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1282,7 +1434,9 @@
                 "tags": [],
                 "label": "context",
                 "description": [],
-                "signature": ["any"],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1294,7 +1448,10 @@
                 "tags": [],
                 "label": "childContextTypes",
                 "description": [],
-                "signature": ["ValidationMap", "<any> | undefined"],
+                "signature": [
+                  "ValidationMap",
+                  "<any> | undefined"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/enzyme_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1313,8 +1470,12 @@
         "type": "Function",
         "tags": [],
         "label": "stubBroadcastChannel",
-        "description": ["\nStubs the global window.BroadcastChannel for use in jest tests."],
-        "signature": ["() => void"],
+        "description": [
+          "\nStubs the global window.BroadcastChannel for use in jest tests."
+        ],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/stub_broadcast_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1329,7 +1490,9 @@
         "tags": [],
         "label": "stubWebWorker",
         "description": [],
-        "signature": ["() => void"],
+        "signature": [
+          "() => void"
+        ],
         "path": "packages/kbn-test-jest-helpers/src/stub_web_worker.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1360,7 +1523,10 @@
             "tags": [],
             "label": "initialEntries",
             "description": [],
-            "signature": ["LocationDescriptor", "<unknown>[]"],
+            "signature": [
+              "LocationDescriptor",
+              "<unknown>[]"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1373,7 +1539,9 @@
             "tags": [],
             "label": "initialIndex",
             "description": [],
-            "signature": ["number"],
+            "signature": [
+              "number"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1426,7 +1594,9 @@
             "tags": [],
             "label": "onRouter",
             "description": [],
-            "signature": ["(router: any) => void"],
+            "signature": [
+              "(router: any) => void"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1457,7 +1627,9 @@
             "tags": [],
             "label": "store",
             "description": [],
-            "signature": ["any"],
+            "signature": [
+              "any"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/redux_helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -1499,7 +1671,9 @@
             "tags": [],
             "label": "doMountAsync",
             "description": [],
-            "signature": ["true"],
+            "signature": [
+              "true"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1547,7 +1721,9 @@
             "description": [
               "A 2 dimensional array of rows & columns containing\nthe text content of each cell of the table"
             ],
-            "signature": ["string[][]"],
+            "signature": [
+              "string[][]"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1582,8 +1758,13 @@
             "type": "Object",
             "tags": [],
             "label": "component",
-            "description": ["The component under test"],
-            "signature": ["ReactWrapper", "<any, {}, React.Component<{}, {}, any>>"],
+            "description": [
+              "The component under test"
+            ],
+            "signature": [
+              "ReactWrapper",
+              "<any, {}, React.Component<{}, {}, any>>"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1597,7 +1778,9 @@
             "description": [
               "\nPass it a `data-test-subj` and it will return true if it exists or false if it does not exist.\n"
             ],
-            "signature": ["(testSubject: T, count?: number | undefined) => boolean"],
+            "signature": [
+              "(testSubject: T, count?: number | undefined) => boolean"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1611,7 +1794,9 @@
                 "description": [
                   "The data test subject to look for (can be a nested path. e.g. \"detailPanel.mySection\")."
                 ],
-                "signature": ["T"],
+                "signature": [
+                  "T"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1626,7 +1811,9 @@
                 "description": [
                   "The number of times the subject needs to appear in order to return \"true\""
                 ],
-                "signature": ["number | undefined"],
+                "signature": [
+                  "number | undefined"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1660,8 +1847,12 @@
                 "type": "Uncategorized",
                 "tags": [],
                 "label": "testSubject",
-                "description": ["The data test subject to look for"],
-                "signature": ["T"],
+                "description": [
+                  "The data test subject to look for"
+                ],
+                "signature": [
+                  "T"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1674,7 +1865,10 @@
                 "tags": [],
                 "label": "reactWrapper",
                 "description": [],
-                "signature": ["ReactWrapper", " | undefined"],
+                "signature": [
+                  "ReactWrapper",
+                  " | undefined"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1689,8 +1883,12 @@
             "type": "Function",
             "tags": [],
             "label": "setProps",
-            "description": ["\nUpdate the props of the mounted component\n"],
-            "signature": ["(updatedProps: any) => void"],
+            "description": [
+              "\nUpdate the props of the mounted component\n"
+            ],
+            "signature": [
+              "(updatedProps: any) => void"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -1701,8 +1899,12 @@
                 "type": "Any",
                 "tags": [],
                 "label": "updatedProps",
-                "description": ["The updated prop object"],
-                "signature": ["any"],
+                "description": [
+                  "The updated prop object"
+                ],
+                "signature": [
+                  "any"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1760,7 +1962,9 @@
             "tags": [],
             "label": "router",
             "description": [],
-            "signature": ["{ navigateTo: (url: string) => void; }"],
+            "signature": [
+              "{ navigateTo: (url: string) => void; }"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1798,7 +2002,9 @@
             "tags": [],
             "label": "doMountAsync",
             "description": [],
-            "signature": ["false | undefined"],
+            "signature": [
+              "false | undefined"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1839,7 +2045,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P | undefined"],
+            "signature": [
+              "P | undefined"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1885,7 +2093,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P | undefined"],
+            "signature": [
+              "P | undefined"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1923,7 +2133,9 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "signature": ["P | undefined"],
+            "signature": [
+              "P | undefined"
+            ],
             "path": "packages/kbn-test-jest-helpers/src/testbed/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1962,7 +2174,9 @@
                 "tags": [],
                 "label": "push",
                 "description": [],
-                "signature": ["() => void"],
+                "signature": [
+                  "() => void"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1976,7 +2190,11 @@
                 "tags": [],
                 "label": "createHref",
                 "description": [],
-                "signature": ["(location: ", "LocationDescriptorObject", "<unknown>) => string"],
+                "signature": [
+                  "(location: ",
+                  "LocationDescriptorObject",
+                  "<unknown>) => string"
+                ],
                 "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1988,7 +2206,10 @@
                     "tags": [],
                     "label": "location",
                     "description": [],
-                    "signature": ["LocationDescriptorObject", "<unknown>"],
+                    "signature": [
+                      "LocationDescriptorObject",
+                      "<unknown>"
+                    ],
                     "path": "packages/kbn-test-jest-helpers/src/router_helpers.tsx",
                     "deprecated": false,
                     "trackAdoption": false,

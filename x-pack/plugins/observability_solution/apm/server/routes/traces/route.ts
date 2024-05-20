@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { nonEmptyStringRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { nonEmptyStringRt, toNumberRt } from '@kbn/io-ts-utils';
 import { TraceSearchType } from '../../../common/trace_explorer';
-import { Span } from '../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../typings/es_schemas/ui/transaction';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
-import { getSpan } from '../transactions/get_span';
 import { getTransaction } from '../transactions/get_transaction';
-import { getTransactionByName } from '../transactions/get_transaction_by_name';
 import { getRootTransactionByTraceId } from '../transactions/get_transaction_by_trace';
-import { CriticalPathResponse, getAggregatedCriticalPath } from './get_aggregated_critical_path';
 import {
-  TopTracesPrimaryStatsResponse,
   getTopTracesPrimaryStats,
+  TopTracesPrimaryStatsResponse,
 } from './get_top_traces_primary_stats';
-import { TraceItems, getTraceItems } from './get_trace_items';
-import { TraceSamplesResponse, getTraceSamplesByQuery } from './get_trace_samples_by_query';
+import { getTraceItems, TraceItems } from './get_trace_items';
+import { getTraceSamplesByQuery, TraceSamplesResponse } from './get_trace_samples_by_query';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { CriticalPathResponse, getAggregatedCriticalPath } from './get_aggregated_critical_path';
+import { getSpan } from '../transactions/get_span';
+import { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import { Span } from '../../../typings/es_schemas/ui/span';
+import { getTransactionByName } from '../transactions/get_transaction_by_name';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',

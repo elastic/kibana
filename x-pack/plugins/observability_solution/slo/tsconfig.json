@@ -3,8 +3,15 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
-  "exclude": ["target/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/i18n-react",

@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { render } from '@testing-library/react';
-import React from 'react';
 import { TestProviders } from '../../../../common/mock';
+import { RightPanelContext } from '../context';
+import { PREVALENCE_TEST_ID } from './test_ids';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
+import React from 'react';
+import { PrevalenceOverview } from './prevalence_overview';
+import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
@@ -16,14 +21,9 @@ import {
   EXPANDABLE_PANEL_LOADING_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
-import { LeftPanelInsightsTab } from '../../left';
-import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
-import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
-import { RightPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
-import { PrevalenceOverview } from './prevalence_overview';
-import { PREVALENCE_TEST_ID } from './test_ids';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../shared/hooks/use_prevalence');
 

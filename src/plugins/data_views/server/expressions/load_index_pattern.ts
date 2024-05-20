@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 
 import {
+  getIndexPatternLoadMeta,
   IndexPatternLoadExpressionFunctionDefinition,
   IndexPatternLoadStartDependencies,
-  getIndexPatternLoadMeta,
 } from '../../common/expressions';
-import { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from '../types';
+import { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed

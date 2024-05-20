@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import React, { ChangeEvent, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButton,
   EuiButtonEmpty,
-  EuiFieldNumber,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFieldNumber,
   EuiFormRow,
   EuiPopoverFooter,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useState } from 'react';
 import { panelStrings } from '../../../../../connected_components/panel_strings';
 
 export const KM_ABBREVIATION = i18n.translate(

@@ -8,9 +8,8 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { Operations, PercentileRanksParams } from '@kbn/visualizations-plugin/common';
-import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { Metric } from '../../../../common/types';
 import { createSeries } from '../__mocks__';
+import { Metric } from '../../../../common/types';
 import {
   convertToPercentileRankColumn,
   convertToPercentileRankColumns,
@@ -22,6 +21,7 @@ import {
   PercentileRanksColumnWithCommonMeta,
   PercentileRanksColumnWithExtendedMeta,
 } from './types';
+import { TSVB_METRIC_TYPES } from '../../../../common/enums';
 
 describe('isPercentileRanksColumnWithMeta', () => {
   const percentileRankColumnWithoutMeta = {
@@ -85,7 +85,7 @@ describe('convertToPercentileRankColumn', () => {
         | Partial<PercentileRanksColumnWithCommonMeta>
         | Partial<PercentileRanksColumnWithExtendedMeta>
         | null
-      ),
+      )
     ]
   >([
     ['null if value is undefined', [undefined, series, metric, dataView], null],
@@ -152,7 +152,7 @@ describe('convertToPercentileRankColumns', () => {
     [
       string,
       Parameters<typeof convertToPercentileRankColumns>,
-      Array<Partial<PercentileRanksColumnWithExtendedMeta> | null> | null,
+      Array<Partial<PercentileRanksColumnWithExtendedMeta> | null> | null
     ]
   >([
     ['null if values arr is empty', [{ series, metric, dataView }, {}], null],

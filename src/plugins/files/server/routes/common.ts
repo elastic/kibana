@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { ResponseHeaders } from '@kbn/core/server';
 import mime from 'mime';
+import type { ResponseHeaders } from '@kbn/core/server';
 import type { File } from '../../common/types';
 
 interface Args {

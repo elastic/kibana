@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiTourStep } from '@elastic/eui';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { EuiTourStep, EuiButton } from '@elastic/eui';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
-import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
-import { useDiscoverTourContext } from './discover_tour_context';
 import { DiscoverTourProvider } from './discover_tour_provider';
+import { useDiscoverTourContext } from './discover_tour_context';
+import { DISCOVER_TOUR_STEP_ANCHORS } from './discover_tour_anchors';
 
 describe('Discover tour', () => {
   const mountComponent = (innerContent: JSX.Element) => {

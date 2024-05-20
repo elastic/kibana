@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGrid, EuiFlexItem, EuiPage, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { MonitoringTimeseriesContainer } from '../../chart';
-import { Logs } from '../../logs/logs';
 import { ClusterStatus } from '../cluster_status';
 import { ShardActivity } from '../shard_activity';
+import { MonitoringTimeseriesContainer } from '../../chart';
+import { EuiPage, EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiPageBody } from '@elastic/eui';
+import { Logs } from '../../logs/logs';
 
 export function ElasticsearchOverview({
   clusterStatus,

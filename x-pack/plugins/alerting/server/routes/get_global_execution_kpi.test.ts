@@ -7,8 +7,8 @@
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
-import { rulesClientMock } from '../rules_client.mock';
 import { mockHandlerArguments } from './_mock_handler_arguments';
+import { rulesClientMock } from '../rules_client.mock';
 import { getGlobalExecutionKPIRoute } from './get_global_execution_kpi';
 
 const rulesClient = rulesClientMock.create();

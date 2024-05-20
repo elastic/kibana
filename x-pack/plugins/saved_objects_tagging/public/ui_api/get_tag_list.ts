@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ITagsCache } from '../services';
 import { byNameTagSorter } from '../utils';
+import type { ITagsCache } from '../services';
 
 export const buildGetTagList = (cache: ITagsCache) => () => cache.getState().sort(byNameTagSorter);

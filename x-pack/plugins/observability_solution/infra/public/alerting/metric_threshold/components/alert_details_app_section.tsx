@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useEffect, useMemo } from 'react';
+import moment from 'moment';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,29 +19,25 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { AlertActiveTimeRangeAnnotation, AlertAnnotation } from '@kbn/observability-alert-details';
-import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { AlertSummaryField, TopAlert } from '@kbn/observability-plugin/public';
 import {
   ALERT_END,
+  ALERT_START,
   ALERT_EVALUATION_VALUES,
   ALERT_GROUP,
-  ALERT_START,
   TAGS,
 } from '@kbn/rule-data-utils';
-import moment from 'moment';
-import React, { useEffect, useMemo } from 'react';
-import { MetricThresholdRuleTypeParams } from '..';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
+import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
-import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { Threshold } from '../../common/components/threshold';
 import { TIME_LABELS } from '../../common/criterion_preview_chart/criterion_preview_chart';
+import { Threshold } from '../../common/components/threshold';
+import { useSourceContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
+import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { MetricThresholdRuleTypeParams } from '..';
 import { ExpressionChart } from './expression_chart';
 import { Groups } from './groups';
 import { Tags } from './tags';

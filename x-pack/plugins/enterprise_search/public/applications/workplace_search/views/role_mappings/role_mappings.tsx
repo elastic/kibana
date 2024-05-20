@@ -14,12 +14,12 @@ import { EuiSpacer } from '@elastic/eui';
 import { WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { docLinks } from '../../../shared/doc_links';
 import {
-  RoleMappingsHeading,
   RoleMappingsTable,
+  RoleMappingsHeading,
   RolesEmptyPrompt,
-  UsersEmptyPrompt,
-  UsersHeading,
   UsersTable,
+  UsersHeading,
+  UsersEmptyPrompt,
 } from '../../../shared/role_mapping';
 import { ROLE_MAPPINGS_TITLE } from '../../../shared/role_mapping/constants';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';

@@ -7,13 +7,13 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
-import type { LineChartData } from '../../../../../common/chart_loader';
+import { JobCreatorContext } from '../../../job_creator_context';
 import type { SingleMetricJobCreator } from '../../../../../common/job_creator';
-import type { Anomaly, ModelItem, Results } from '../../../../../common/results_loader';
+import type { Results, ModelItem, Anomaly } from '../../../../../common/results_loader';
+import type { LineChartData } from '../../../../../common/chart_loader';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
-import { JobCreatorContext } from '../../../job_creator_context';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 const DTR_IDX = 0;
 

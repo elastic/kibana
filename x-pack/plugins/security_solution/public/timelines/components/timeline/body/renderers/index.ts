@@ -8,17 +8,17 @@
 import type { RowRenderer } from '../../../../../../common/types';
 import { auditdRowRenderers } from './auditd/generic_row_renderer';
 import type { ColumnRenderer } from './column_renderer';
-import { threatMatchRowRenderer } from './cti/threat_match_row_renderer';
 import { emptyColumnRenderer } from './empty_column_renderer';
-import { eventSummaryColumnRenderer } from './event_summary_column_renderer';
 import { netflowRowRenderer } from './netflow/netflow_row_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
-import { reasonColumnRenderer } from './reason_column_renderer';
 import { suricataRowRenderer } from './suricata/suricata_row_renderer';
-import { systemRowRenderers } from './system/generic_row_renderer';
 import { unknownColumnRenderer } from './unknown_column_renderer';
-import { userProfileColumnRenderer } from './user_profile_renderer';
 import { zeekRowRenderer } from './zeek/zeek_row_renderer';
+import { systemRowRenderers } from './system/generic_row_renderer';
+import { threatMatchRowRenderer } from './cti/threat_match_row_renderer';
+import { reasonColumnRenderer } from './reason_column_renderer';
+import { eventSummaryColumnRenderer } from './event_summary_column_renderer';
+import { userProfileColumnRenderer } from './user_profile_renderer';
 
 // The row renderers are order dependent and will return the first renderer
 // which returns true from its isInstance call. The bottom renderers which

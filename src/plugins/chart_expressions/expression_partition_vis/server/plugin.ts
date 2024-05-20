@@ -7,10 +7,10 @@
  */
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import {
-  mosaicVisFunction,
   partitionLabelsFunction,
   pieVisFunction,
   treemapVisFunction,
+  mosaicVisFunction,
   waffleVisFunction,
 } from '../common';
 import {

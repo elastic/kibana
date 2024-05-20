@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import PropTypes from 'prop-types';
 import React from 'react';
-import { DatasourceComponent } from './datasource_component';
+import PropTypes from 'prop-types';
 import { NoDatasource } from './no_datasource';
+import { DatasourceComponent } from './datasource_component';
 
 export const Datasource = (props) => {
   const { datasource, stateDatasource } = props;

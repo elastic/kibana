@@ -6,15 +6,15 @@
  * Side Public License, v 1.
  */
 
+import React, { Component } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import React, { Component } from 'react';
 import {
-  getDeprecatedScriptingLanguages,
   getSupportedScriptingLanguages,
+  getDeprecatedScriptingLanguages,
 } from '../../../scripting_languages';
 
-import { CallOuts, DeleteScritpedFieldConfirmationModal, Header, Table } from './components';
+import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';
 
 interface ScriptedFieldsTableProps {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { fireEvent } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { SessionViewSearchBar } from '.';
 import { processMock } from '../../../common/mocks/constants/session_view_process.mock';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import { SessionViewSearchBar } from '.';
+import userEvent from '@testing-library/user-event';
+import { fireEvent } from '@testing-library/react';
 
 describe('SessionViewSearchBar component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;

@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  isClassificationAnalysis,
-  isOutlierAnalysis,
   isRegressionAnalysis,
+  isOutlierAnalysis,
+  isClassificationAnalysis,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { DataFrameAnalyticsListRow } from '../analytics_list/common';
 import {
-  getDataFrameAnalyticsProgressPhase,
-  isDataFrameAnalyticsFailed,
   isDataFrameAnalyticsStopped,
+  isDataFrameAnalyticsFailed,
+  getDataFrameAnalyticsProgressPhase,
 } from '../analytics_list/common';
 
 const unknownJobTypeMessage = i18n.translate(

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import {
-  SavedObjectTypeRegistry,
-  SavedObjectsFindResponse,
-  SavedObjectsFindResult,
-  SavedObjectsType,
-} from '@kbn/core/server';
-import {
-  GlobalSearchProviderFindOptions,
-  GlobalSearchResultProvider,
-} from '@kbn/global-search-plugin/server';
-import { globalSearchPluginMock } from '@kbn/global-search-plugin/server/mocks';
 import { EMPTY } from 'rxjs';
 import { toArray } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import {
+  SavedObjectsFindResponse,
+  SavedObjectsFindResult,
+  SavedObjectsType,
+  SavedObjectTypeRegistry,
+} from '@kbn/core/server';
+import { globalSearchPluginMock } from '@kbn/global-search-plugin/server/mocks';
+import {
+  GlobalSearchResultProvider,
+  GlobalSearchProviderFindOptions,
+} from '@kbn/global-search-plugin/server';
 import { createSavedObjectsResultProvider } from './provider';
 
 const getTestScheduler = () =>

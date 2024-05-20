@@ -7,17 +7,17 @@
  */
 
 import { XY_VIS_RENDERER } from '../constants';
-import { appendLayerIds, getDataLayers } from '../helpers';
 import { LayeredXyVisFn, type XYRender } from '../types';
-import { logDatatable, logDatatables } from '../utils';
+import { logDatatables, logDatatable } from '../utils';
 import {
-  errors,
-  hasBarLayer,
-  validateAddTimeMarker,
-  validateAxes,
   validateMarkSizeRatioLimits,
+  validateAddTimeMarker,
   validateMinTimeBarInterval,
+  hasBarLayer,
+  errors,
+  validateAxes,
 } from './validate';
+import { appendLayerIds, getDataLayers } from '../helpers';
 
 export const layeredXyVisFn: LayeredXyVisFn['fn'] = async (data, args, handlers) => {
   const layers = appendLayerIds(args.layers ?? [], 'layers');

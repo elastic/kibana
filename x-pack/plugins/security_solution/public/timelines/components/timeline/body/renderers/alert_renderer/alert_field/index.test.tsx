@@ -8,9 +8,9 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
+import { TestProviders } from '../../../../../../../common/mock';
 import { AlertField } from '.';
 import { TimelineId } from '../../../../../../../../common/types/timeline';
-import { TestProviders } from '../../../../../../../common/mock';
 
 const contextId = 'test';
 const eventId = 'abcd';

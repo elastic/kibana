@@ -16,7 +16,7 @@ import { z } from 'zod';
  *   version: 1
  */
 
-import { Replacements, UUID } from '../conversations/common_attributes.gen';
+import { UUID, Replacements } from '../conversations/common_attributes.gen';
 
 export type ExecuteConnectorRequestParams = z.infer<typeof ExecuteConnectorRequestParams>;
 export const ExecuteConnectorRequestParams = z.object({

@@ -7,15 +7,15 @@
 
 import type { RenderHookResult } from '@testing-library/react-hooks';
 import { renderHook } from '@testing-library/react-hooks';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { licenseService } from '../../../../common/hooks/use_license';
-import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
-import { mockDataAsNestedObject } from '../mocks/mock_data_as_nested_object';
 import type {
   UseShowRelatedAlertsByAncestryParams,
   UseShowRelatedAlertsByAncestryResult,
 } from './use_show_related_alerts_by_ancestry';
 import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_ancestry';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { licenseService } from '../../../../common/hooks/use_license';
+import { mockDataAsNestedObject } from '../mocks/mock_data_as_nested_object';
+import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../../../common/hooks/use_license', () => {

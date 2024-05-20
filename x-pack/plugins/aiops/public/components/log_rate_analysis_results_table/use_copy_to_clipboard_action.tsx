@@ -9,12 +9,12 @@ import React from 'react';
 
 import { EuiCopy, EuiToolTip } from '@elastic/eui';
 
-import type { GroupTableItem, TableItemAction } from '@kbn/aiops-components';
 import { i18n } from '@kbn/i18n';
-import { type SignificantItem, isSignificantItem } from '@kbn/ml-agg-utils';
+import { isSignificantItem, type SignificantItem } from '@kbn/ml-agg-utils';
+import type { GroupTableItem, TableItemAction } from '@kbn/aiops-components';
 
-import { getTableItemAsKQL } from './get_table_item_as_kql';
 import { TableActionButton } from './table_action_button';
+import { getTableItemAsKQL } from './get_table_item_as_kql';
 
 const copyToClipboardButtonLabel = i18n.translate(
   'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardButtonLabel',

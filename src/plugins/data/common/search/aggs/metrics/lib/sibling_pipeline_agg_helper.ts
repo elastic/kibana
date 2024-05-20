@@ -7,9 +7,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
-import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
 import { siblingPipelineAggWriter } from './sibling_pipeline_agg_writer';
+import { forwardModifyAggConfigOnSearchRequestStart } from './nested_agg_helpers';
+import { IMetricAggConfig, MetricAggParam } from '../metric_agg_type';
 
 const metricAggFilter: string[] = [
   '!top_hits',

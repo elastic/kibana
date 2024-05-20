@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { screen, render } from '@testing-library/react';
+import { TestProviders } from '../../../../common/mock';
+import { useTimelineKpis } from '../../../containers/kpis';
 import { TimelineKpi } from '.';
 import { TimelineId } from '../../../../../common/types';
 import { getEmptyValue } from '../../../../common/components/empty_value';
-import { TestProviders } from '../../../../common/mock';
-import { useTimelineKpis } from '../../../containers/kpis';
 
 jest.mock('../../../containers/kpis', () => ({
   useTimelineKpis: jest.fn(),

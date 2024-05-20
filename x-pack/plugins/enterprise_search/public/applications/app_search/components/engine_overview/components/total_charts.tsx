@@ -15,11 +15,11 @@ import { EngineOverviewLogic } from '..';
 import { EuiButtonEmptyTo } from '../../../../shared/react_router_helpers';
 import { ENGINE_ANALYTICS_PATH, ENGINE_API_LOGS_PATH } from '../../../routes';
 import { AnalyticsChart, convertToChartData } from '../../analytics';
-import { TOTAL_API_OPERATIONS, TOTAL_QUERIES } from '../../analytics/constants';
+import { TOTAL_QUERIES, TOTAL_API_OPERATIONS } from '../../analytics/constants';
 import { DataPanel } from '../../data_panel';
 import { generateEnginePath } from '../../engine';
 
-import { LAST_7_DAYS, VIEW_ANALYTICS, VIEW_API_LOGS } from '../constants';
+import { VIEW_ANALYTICS, VIEW_API_LOGS, LAST_7_DAYS } from '../constants';
 
 export const TotalCharts: React.FC = () => {
   const { startDate, queriesPerDay, operationsPerDay } = useValues(EngineOverviewLogic);

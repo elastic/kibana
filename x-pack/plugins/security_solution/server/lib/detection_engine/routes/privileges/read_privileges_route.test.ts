@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { requestContextMock, serverMock } from '../__mocks__';
-import { getMockPrivilegesResult, getPrivilegeRequest } from '../__mocks__/request_responses';
 import { readPrivilegesRoute } from './read_privileges_route';
+import { serverMock, requestContextMock } from '../__mocks__';
+import { getPrivilegeRequest, getMockPrivilegesResult } from '../__mocks__/request_responses';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 describe('read_privileges route', () => {
   let server: ReturnType<typeof serverMock.create>;

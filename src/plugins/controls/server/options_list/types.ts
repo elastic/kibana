@@ -8,8 +8,8 @@
 
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import {
-  OptionsListParsedSuggestions,
   OptionsListRequestBody,
+  OptionsListParsedSuggestions,
 } from '../../common/options_list/types';
 
 export interface EsBucket {

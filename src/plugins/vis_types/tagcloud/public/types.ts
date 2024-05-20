@@ -1,4 +1,3 @@
-import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,6 +6,7 @@ import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
  * Side Public License, v 1.
  */
 import type { PaletteOutput } from '@kbn/coloring';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
 
 interface TagCloudCommonParams {

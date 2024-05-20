@@ -11,8 +11,8 @@ import React, { Fragment, useMemo } from 'react';
 import {
   EuiButton,
   EuiCard,
-  EuiFlexGrid,
   EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
@@ -21,14 +21,14 @@ import {
   EuiTextAlign,
 } from '@elastic/eui';
 
-import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { ML_PAGES } from '../../locator';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import { isFullLicense } from '../license';
+import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
-import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
-import { isFullLicense } from '../license';
+import { ML_PAGES } from '../../locator';
 
 function startTrialDescription() {
   return (

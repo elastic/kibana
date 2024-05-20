@@ -6,14 +6,14 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { MetricFieldVisConfig, TestData } from './types';
+import { TestData, MetricFieldVisConfig } from './types';
 
 const SHOW_FIELD_STATISTICS = 'discover:showFieldStatistics';
 import {
   farequoteDataViewTestData,
-  farequoteKQLFiltersSearchTestData,
   farequoteKQLSearchTestData,
   farequoteLuceneFiltersSearchTestData,
+  farequoteKQLFiltersSearchTestData,
   farequoteLuceneSearchTestData,
   sampleLogTestData,
 } from './index_test_data';

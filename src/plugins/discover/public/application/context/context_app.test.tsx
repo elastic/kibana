@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
-import { themeServiceMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { waitFor } from '@testing-library/react';
 import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { dataViewsMock } from '../../__mocks__/data_views';
-import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
-import { createSearchSessionMock } from '../../__mocks__/search_session';
-import { uiSettingsMock } from '../../__mocks__/ui_settings';
-import { DiscoverServices } from '../../build_services';
-import type { HistoryLocationState } from '../../build_services';
+import { waitFor } from '@testing-library/react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { mockTopNavMenu } from './__mocks__/top_nav_menu';
-import { ContextApp } from './context_app';
 import { ContextAppContent } from './context_app_content';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { ContextApp } from './context_app';
+import { DiscoverServices } from '../../build_services';
+import { dataViewsMock } from '../../__mocks__/data_views';
+import { act } from 'react-dom/test-utils';
+import { uiSettingsMock } from '../../__mocks__/ui_settings';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { LocalStorageMock } from '../../__mocks__/local_storage_mock';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { HistoryLocationState } from '../../build_services';
+import { createSearchSessionMock } from '../../__mocks__/search_session';
 
 const mockFilterManager = createFilterManagerMock();
 const mockNavigationPlugin = {

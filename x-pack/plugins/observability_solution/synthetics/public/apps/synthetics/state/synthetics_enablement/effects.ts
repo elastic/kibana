@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { takeLeading } from 'redux-saga/effects';
-import { fetchEffectFactory } from '../utils/fetch_effect';
+import { i18n } from '@kbn/i18n';
 import {
   getSyntheticsEnablement,
-  getSyntheticsEnablementFailure,
   getSyntheticsEnablementSuccess,
+  getSyntheticsEnablementFailure,
 } from './actions';
+import { fetchEffectFactory } from '../utils/fetch_effect';
 import { fetchGetSyntheticsEnablement } from './api';
 
 export function* fetchSyntheticsEnablementEffect() {

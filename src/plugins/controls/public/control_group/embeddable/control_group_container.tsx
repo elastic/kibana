@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { COMPARE_ALL_OPTIONS, Filter, compareFilters, uniqFilters } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { Provider, TypedUseSelectorHook, batch, useSelector } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription, merge } from 'rxjs';
+import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
+import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip } from 'rxjs';
 
 import { OverlayRef } from '@kbn/core/public';
@@ -32,18 +32,17 @@ import { ControlGroup } from '../component/control_group_component';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
 import {
-  type AddDataControlProps,
-  type AddOptionsListControlProps,
-  type AddRangeSliderControlProps,
   getDataControlPanelState,
   getOptionsListPanelState,
   getRangeSliderPanelState,
   getTimeSliderPanelState,
+  type AddDataControlProps,
+  type AddOptionsListControlProps,
+  type AddRangeSliderControlProps,
 } from '../external_api/control_group_input_builder';
 import { startDiffingControlGroupState } from '../state/control_group_diffing_integration';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import {
-  CONTROL_GROUP_TYPE,
   ControlGroupComponentState,
   ControlGroupFilterOutput,
   ControlGroupInput,
@@ -51,11 +50,12 @@ import {
   ControlGroupReduxState,
   ControlPanelState,
   ControlsPanels,
+  CONTROL_GROUP_TYPE,
   FieldFilterPredicate,
 } from '../types';
 import {
-  ControlGroupChainingSystems,
   cachedChildEmbeddableOrder,
+  ControlGroupChainingSystems,
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
 import { getNextPanelOrder } from './control_group_helpers';

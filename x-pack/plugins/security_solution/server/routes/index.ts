@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, StartServicesAccessor } from '@kbn/core/server';
+import type { StartServicesAccessor, Logger } from '@kbn/core/server';
 import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 
 import type { SecuritySolutionPluginRouter } from '../types';
@@ -20,30 +20,27 @@ import { registerRuleMonitoringRoutes } from '../lib/detection_engine/rule_monit
 import { registerRulePreviewRoutes } from '../lib/detection_engine/rule_preview';
 
 import { createIndexRoute } from '../lib/detection_engine/routes/index/create_index_route';
-import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
 import { readIndexRoute } from '../lib/detection_engine/routes/index/read_index_route';
-import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
 import { createSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/create_signals_migration_route';
 import { deleteSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/delete_signals_migration_route';
 import { finalizeSignalsMigrationRoute } from '../lib/detection_engine/routes/signals/finalize_signals_migration_route';
 import { getSignalsMigrationStatusRoute } from '../lib/detection_engine/routes/signals/get_signals_migration_status_route';
-import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
 import { querySignalsRoute } from '../lib/detection_engine/routes/signals/query_signals_route';
+import { setSignalsStatusRoute } from '../lib/detection_engine/routes/signals/open_close_signals_route';
+import { deleteIndexRoute } from '../lib/detection_engine/routes/index/delete_index_route';
+import { readPrivilegesRoute } from '../lib/detection_engine/routes/privileges/read_privileges_route';
 
+import type { SetupPlugins, StartPlugins } from '../plugin';
 import type { ConfigType } from '../config';
-import { registerResolverRoutes } from '../endpoint/routes/resolver';
-import { registerDashboardsRoutes } from '../lib/dashboards/routes';
-import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
-import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
-import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
-import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
-import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
+import type { ITelemetryEventsSender } from '../lib/telemetry/sender';
 import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
 } from '../lib/detection_engine/rule_types/types';
-import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
-import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
+import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
+import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
+import { readAlertsIndexExistsRoute } from '../lib/detection_engine/routes/index/read_alerts_index_exists_route';
+import { registerResolverRoutes } from '../endpoint/routes/resolver';
 import {
   createEsIndexRoute,
   createPrebuiltSavedObjectsRoute,
@@ -55,12 +52,15 @@ import {
   installRiskScoresRoute,
   readPrebuiltDevToolContentRoute,
 } from '../lib/risk_score/routes';
-import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
+import { registerManageExceptionsRoutes } from '../lib/exceptions/api/register_routes';
+import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
-import type { ITelemetryReceiver } from '../lib/telemetry/receiver';
-import type { ITelemetryEventsSender } from '../lib/telemetry/sender';
+import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
+import { setAlertAssigneesRoute } from '../lib/detection_engine/routes/signals/set_alert_assignees_route';
+import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/suggest_user_profiles_route';
 import { registerTimelineRoutes } from '../lib/timeline/routes';
-import type { SetupPlugins, StartPlugins } from '../plugin';
+import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
+import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,

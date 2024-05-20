@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { EuiAccordion, EuiFormRow, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
-import { monaco } from '@kbn/monaco';
 import React, { useRef } from 'react';
+import { EuiFormRow, EuiLink, EuiAccordion, EuiSpacer, EuiPanel } from '@elastic/eui';
+import { monaco } from '@kbn/monaco';
+import { UrlTemplateEditor, UrlTemplateEditorVariable } from '@kbn/kibana-react-plugin/public';
 import { UrlDrilldownConfig } from '../../types';
 import './index.scss';
-import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '../../constants';
-import { VariablePopover } from '../variable_popover';
 import {
-  txtUrlTemplateAdditionalOptions,
-  txtUrlTemplateLabel,
   txtUrlTemplateSyntaxHelpLinkText,
+  txtUrlTemplateLabel,
+  txtUrlTemplateAdditionalOptions,
 } from './i18n';
+import { VariablePopover } from '../variable_popover';
 import { UrlDrilldownOptionsComponent } from './lazy';
+import { DEFAULT_URL_DRILLDOWN_OPTIONS } from '../../constants';
 
 export interface UrlDrilldownCollectConfigProps {
   config: UrlDrilldownConfig;

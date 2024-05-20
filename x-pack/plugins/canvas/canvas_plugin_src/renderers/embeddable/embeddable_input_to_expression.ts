@@ -6,11 +6,11 @@
  */
 
 import type { PaletteRegistry } from '@kbn/coloring';
-import { EmbeddableInput, EmbeddableTypes } from '../../expression_types';
-import { toExpression as genericToExpression } from './input_type_to_expression/embeddable';
-import { toExpression as lensToExpression } from './input_type_to_expression/lens';
+import { EmbeddableTypes, EmbeddableInput } from '../../expression_types';
 import { toExpression as mapToExpression } from './input_type_to_expression/map';
 import { toExpression as visualizationToExpression } from './input_type_to_expression/visualization';
+import { toExpression as lensToExpression } from './input_type_to_expression/lens';
+import { toExpression as genericToExpression } from './input_type_to_expression/embeddable';
 
 export const inputToExpressionTypeMap = {
   [EmbeddableTypes.map]: mapToExpression,
@@ -23,7 +23,7 @@ export const inputToExpressionTypeMap = {
 */
 export function embeddableInputToExpression<
   UseGenericEmbeddable extends boolean,
-  ConditionalReturnType = UseGenericEmbeddable extends true ? string : string | undefined,
+  ConditionalReturnType = UseGenericEmbeddable extends true ? string : string | undefined
 >(
   input: Omit<EmbeddableInput, 'id'>,
   embeddableType: string,

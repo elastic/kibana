@@ -16,9 +16,9 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { isFinite, isNumber } from 'lodash';
 import React, { useState } from 'react';
+import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   Comparator,
   ComparatorToi18nMap,

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createFailError } from '@kbn/dev-cli-errors';
 import dedent from 'dedent';
+import { createFailError } from '@kbn/dev-cli-errors';
 
 interface Options {
   packages: Array<{

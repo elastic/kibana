@@ -7,8 +7,8 @@
 
 import type { EuiSelectableOption, IconType } from '@elastic/eui';
 import { assertNever } from '@elastic/eui';
-import { useCallback, useMemo, useReducer } from 'react';
-import type { CaseUI, CasesUI } from '../../../common';
+import { useCallback, useReducer, useMemo } from 'react';
+import type { CasesUI, CaseUI } from '../../../common';
 import type { ItemSelectableOption, ItemsSelectionState } from './types';
 
 interface UseItemsStateProps {
@@ -168,8 +168,8 @@ const getInitialItemsState = ({
     const itemState = isCheckedItem
       ? ItemState.CHECKED
       : isPartialItem
-        ? ItemState.PARTIAL
-        : ItemState.UNCHECKED;
+      ? ItemState.PARTIAL
+      : ItemState.UNCHECKED;
 
     const icon = getSelectionIcon(itemState);
 

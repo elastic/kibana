@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLoadingChart, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { JourneyStep } from '../../../../../../../common/runtime_types';
+import { useSelector, useDispatch } from 'react-redux';
 import { getNetworkEvents } from '../../../../../state/actions/network_events';
 import { networkEventsSelector } from '../../../../../state/selectors';
-import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
-import { extractItems } from './data_formatting';
 import { WaterfallChartWrapper } from './waterfall_chart_wrapper';
+import { extractItems } from './data_formatting';
+import { useStepWaterfallMetrics } from '../use_step_waterfall_metrics';
+import { JourneyStep } from '../../../../../../../common/runtime_types';
 
 export const NO_DATA_TEXT = i18n.translate('xpack.uptime.synthetics.stepDetail.waterfallNoData', {
   defaultMessage: 'No waterfall data could be found for this step',

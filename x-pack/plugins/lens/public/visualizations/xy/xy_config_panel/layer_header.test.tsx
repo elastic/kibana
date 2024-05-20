@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { FramePublicAPI } from '../../../types';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { LayerHeader } from './layer_header';
 import {
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
   XYLayerConfig,
   XYState,
 } from '../types';
-import { LayerHeader } from './layer_header';
 
 describe('layer header', () => {
   describe('annotation layer header', () => {

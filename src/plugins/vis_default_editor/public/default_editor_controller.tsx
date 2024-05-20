@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EventEmitter } from 'events';
-import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 import React, { Suspense, lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { EventEmitter } from 'events';
+import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
-import { EditorRenderProps, IEditorController } from '@kbn/visualizations-plugin/public';
+import { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme } from './services';
 
 // @ts-ignore

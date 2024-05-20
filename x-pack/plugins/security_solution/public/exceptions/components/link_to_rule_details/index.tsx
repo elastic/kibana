@@ -8,10 +8,10 @@
 import React from 'react';
 import type { FC } from 'react';
 
-import { SecurityPageName } from '../../../../common/constants';
-import { getRuleDetailsTabUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { RuleDetailTabs } from '../../../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
+import { SecurityPageName } from '../../../../common/constants';
+import { getRuleDetailsTabUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
 
 interface LinkToRuleDetailsProps {
   referenceName: string;

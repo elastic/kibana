@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SystemIndicesMigrationStatus } from '../../common/types';
 import { convertFeaturesToIndicesArray } from './es_system_indices_migration';
+import { SystemIndicesMigrationStatus } from '../../common/types';
 
 const esUpgradeSystemIndicesStatusMock: SystemIndicesMigrationStatus = {
   features: [

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 
-import { FIELD_TYPES, Field, UseField, fieldValidators } from '../../../../../../shared_imports';
+import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
 
 import { FieldsConfig } from './shared';
 

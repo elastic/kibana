@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -13,16 +16,13 @@ import {
   EuiForm,
   EuiFormRow,
   EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useState } from 'react';
 
 import { createIndex } from '../../../../services';
 import { notificationService } from '../../../../services/notification';

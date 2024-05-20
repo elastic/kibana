@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { triggersActionsUiConfig } from '../../common/lib/config_api';
 import { useKibana } from '../../common/lib/kibana';
+import { triggersActionsUiConfig } from '../../common/lib/config_api';
 
 export const useLoadConfigQuery = () => {
   const { http } = useKibana().services;

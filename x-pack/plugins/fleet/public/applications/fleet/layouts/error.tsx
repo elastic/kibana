@@ -1,6 +1,3 @@
-import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,11 +5,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
  * 2.0.
  */
 import React from 'react';
+import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 
+import { MissingESRequirementsPage } from '../sections/agents/agent_requirements_page';
 import { WithHeaderLayout, WithoutHeaderLayout } from '../../../layouts';
 import { Error } from '../components';
-import { MissingESRequirementsPage } from '../sections/agents/agent_requirements_page';
 
 import { DefaultLayout, DefaultPageTitle } from './default';
 

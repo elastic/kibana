@@ -11,15 +11,15 @@ import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 
 import {
-  Build,
-  Config,
-  Platform,
-  Task,
   deleteAll,
   downloadToDisk,
   gunzip,
-  read,
   untar,
+  Task,
+  Config,
+  Build,
+  Platform,
+  read,
 } from '../lib';
 
 const DOWNLOAD_DIRECTORY = '.native_modules';

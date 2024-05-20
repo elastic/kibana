@@ -7,15 +7,15 @@
  */
 
 import Boom from '@hapi/boom';
-import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { cloneDeep } from 'lodash';
 import Semver from 'semver';
+import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { ActiveMigrations, Transform, TransformType } from '../types';
 import type { MigrationPipeline, MigrationPipelineResult } from './types';
 import {
+  coreVersionTransformTypes,
   applyVersion,
   assertValidCoreVersion,
-  coreVersionTransformTypes,
   maxVersion,
 } from './utils';
 

@@ -6,13 +6,14 @@
  */
 
 import React, { NamedExoticComponent } from 'react';
-import { SecuritySolutionPluginContext } from '..';
 import { BlockListFlyoutProps, BlockListFormProps, SelectedDataView } from '../types';
+import { SecuritySolutionPluginContext } from '..';
 
 export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext => ({
   getFiltersGlobalComponent:
     () =>
-    ({ children }) => <div>{children}</div>,
+    ({ children }) =>
+      <div>{children}</div>,
   licenseService: {
     isEnterprise(): boolean {
       return true;
@@ -23,7 +24,8 @@ export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext 
   },
   getPageWrapper:
     () =>
-    ({ children }) => <div>{children}</div>,
+    ({ children }) =>
+      <div>{children}</div>,
   sourcererDataView: {
     sourcererDataView: {
       id: 'security-solution-default',

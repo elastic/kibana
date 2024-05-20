@@ -8,11 +8,10 @@
 import type { DataProvider, DataProvidersAnd } from './data_provider';
 import {
   addContentToTimeline,
-  addProviderToEmptyTimeline,
   addProviderToGroup,
+  addProviderToEmptyTimeline,
   convertDataProviderAnd,
   flattenIntoAndGroups,
-  getDisplayValue,
   getGroupIndexFromDroppableId,
   indexIsValid,
   isValidDestination,
@@ -24,6 +23,7 @@ import {
   reorder,
   sourceAndDestinationAreSameDroppable,
   unFlattenGroups,
+  getDisplayValue,
 } from './helpers';
 import {
   providerA,

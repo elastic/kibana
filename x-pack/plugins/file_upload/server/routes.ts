@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { schema } from '@kbn/config-schema';
-import type { IScopedClusterClient } from '@kbn/core/server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
 import { MAX_FILE_SIZE_BYTES } from '../common/constants';
 import type { IngestPipelineWrapper, InputData } from '../common/types';
-import { analyzeFile } from './analyze_file';
 import { wrapError } from './error_wrapper';
-import { getTimeFieldRange } from './get_time_field_range';
 import { importDataProvider } from './import_data';
+import { getTimeFieldRange } from './get_time_field_range';
+import { analyzeFile } from './analyze_file';
 
-import { checkFileUploadPrivileges } from './check_privileges';
-import { previewIndexTimeRange } from './preview_index_time_range';
+import { updateTelemetry } from './telemetry';
 import {
-  analyzeFileQuerySchema,
   importFileBodySchema,
   importFileQuerySchema,
+  analyzeFileQuerySchema,
   runtimeMappingsSchema,
 } from './schemas';
-import { updateTelemetry } from './telemetry';
 import type { StartDeps } from './types';
+import { checkFileUploadPrivileges } from './check_privileges';
+import { previewIndexTimeRange } from './preview_index_time_range';
 
 function importData(
   client: IScopedClusterClient,

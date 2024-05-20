@@ -7,8 +7,8 @@
  */
 
 import { Subject } from 'rxjs';
-import type { TelemetryCounter } from '../events';
 import type { IShipper } from './types';
+import type { TelemetryCounter } from '../events';
 
 function createShipper(): jest.Mocked<IShipper> {
   return new MockedShipper();

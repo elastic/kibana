@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useEffect, useState, useCallback } from 'react';
-import type { SavedObjectsReference, TagSelectorProps } from './services';
+import type { TagSelectorProps, SavedObjectsReference } from './services';
 
 const tagsList = ['id-1', 'id-2', 'id-3', 'id-4', 'id-5'];
 

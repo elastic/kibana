@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import { GetViewInAppUrlArgs, getViewInAppUrl } from './get_view_in_app_url';
 import { Aggregators } from './types';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { getViewInAppUrl, GetViewInAppUrlArgs } from './get_view_in_app_url';
 
 describe('getViewInAppUrl', () => {
   const logsExplorerLocator = {

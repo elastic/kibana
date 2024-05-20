@@ -1,4 +1,3 @@
-import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../screens/fleet';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -6,6 +5,7 @@ import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../screens/fleet';
  * 2.0.
  */
 import { setupFleetServer } from '../tasks/fleet_server';
+import { AGENT_FLYOUT, AGENT_POLICY_DETAILS_PAGE } from '../screens/fleet';
 import { login } from '../tasks/login';
 
 describe('Edit agent policy', () => {

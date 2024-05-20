@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, NotificationsStart } from '@kbn/core/public';
 import React, {
   createContext,
   useContext,
@@ -14,14 +13,15 @@ import React, {
   useMemo,
   PropsWithChildren,
 } from 'react';
+import { NotificationsStart, CoreStart } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
-import { ApiService } from '../lib/api';
 import type {
-  DataPublicPluginStart,
   DataView,
+  DataPublicPluginStart,
   FieldFormatsStart,
   RuntimeFieldSubFields,
 } from '../shared_imports';
+import { ApiService } from '../lib/api';
 import type { InternalFieldType, PluginStart } from '../types';
 
 export interface Context {

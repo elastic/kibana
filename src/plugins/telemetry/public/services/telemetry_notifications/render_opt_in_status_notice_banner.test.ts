@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
 import {
   analyticsServiceMock,
   httpServiceMock,
@@ -14,7 +15,6 @@ import {
   themeServiceMock,
 } from '@kbn/core/public/mocks';
 import { mockTelemetryConstants, mockTelemetryService } from '../../mocks';
-import { renderOptInStatusNoticeBanner } from './render_opt_in_status_notice_banner';
 
 describe('renderOptInStatusNoticeBanner', () => {
   it('adds a banner to banners with priority of 10000', () => {

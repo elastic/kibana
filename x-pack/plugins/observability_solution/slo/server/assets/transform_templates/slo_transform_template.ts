@@ -6,12 +6,12 @@
  */
 
 import {
-  QueryDslQueryContainer,
   TransformDestination,
   TransformPivot,
   TransformPutTransformRequest,
   TransformSource,
   TransformTimeSync,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO_RESOURCES_VERSION } from '../../../common/constants';

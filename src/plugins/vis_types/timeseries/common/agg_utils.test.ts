@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import {
+  getMetricLabel,
+  isBasicAgg,
   getAggByPredicate,
   getAggsByPredicate,
   getAggsByType,
-  getMetricLabel,
-  isBasicAgg,
 } from './agg_utils';
+import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { TSVB_METRIC_TYPES } from './enums';
 import type { Metric } from './types';
 

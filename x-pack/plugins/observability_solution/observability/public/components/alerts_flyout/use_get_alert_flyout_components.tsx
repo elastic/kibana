@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { useCallback, useMemo } from 'react';
+import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { useRouteMatch } from 'react-router-dom';
+import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
-import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
+import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
-import { AlertsFlyoutHeader } from './alerts_flyout_header';
+import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 
 export { AlertsFlyout } from './alerts_flyout';
 

@@ -16,16 +16,16 @@ import {
   Axis,
   Chart,
   CurveType,
-  LEGACY_LIGHT_THEME,
   Position,
   ScaleType,
   Settings,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 
+import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { kibanaFieldFormat } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
-import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 
 export interface MetricDistributionChartData {
   x: number;

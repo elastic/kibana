@@ -10,8 +10,8 @@ import React, { useContext } from 'react';
 import { EuiLink, EuiPageTemplate } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
-import { useAppContext } from '../../../../app_context';
 import { WatchContext } from '../../watch_context';
+import { useAppContext } from '../../../../app_context';
 
 export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
   const { watch } = useContext(WatchContext);

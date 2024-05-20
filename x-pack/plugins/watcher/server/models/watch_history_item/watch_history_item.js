@@ -6,11 +6,11 @@
  */
 
 import { badRequest } from '@hapi/boom';
+import { get, cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, get } from 'lodash';
 
 import { getMoment } from '../../../common/lib/get_moment';
-import { buildClientWatchStatusModel, buildServerWatchStatusModel } from '../watch_status_model';
+import { buildServerWatchStatusModel, buildClientWatchStatusModel } from '../watch_status_model';
 
 export class WatchHistoryItem {
   constructor(props) {

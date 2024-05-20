@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ObjectType } from '@kbn/config-schema';
-import type { Logger } from '@kbn/core/server';
 import { max, memoize, omit } from 'lodash';
+import type { Logger } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
+import { TaskTypeDictionary } from './task_type_dictionary';
+import type { TaskInstance, ConcreteTaskInstance, TaskDefinition } from './task';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { isErr, tryAsResult } from './lib/result_type';
-import type { ConcreteTaskInstance, TaskDefinition, TaskInstance } from './task';
-import { TaskTypeDictionary } from './task_type_dictionary';
 
 interface TaskValidatorOpts {
   allowReadingInvalidState: boolean;

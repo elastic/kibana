@@ -6,15 +6,15 @@
  */
 
 import { IRouter } from '@kbn/core/server';
+import { ILicenseState } from '../../../../lib';
+import { verifyAccessAndContext } from '../../../lib';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { Rule } from '../../../../application/rule/types';
-import { ILicenseState } from '../../../../lib';
 import {
   AlertingRequestHandlerContext,
   BASE_ALERTING_API_PATH,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '../../../../types';
-import { verifyAccessAndContext } from '../../../lib';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 
 import type {

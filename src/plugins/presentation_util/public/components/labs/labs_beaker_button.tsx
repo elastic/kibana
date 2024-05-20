@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiButtonProps, EuiIcon, EuiNotificationBadge } from '@elastic/eui';
 import React, { useState } from 'react';
+import { EuiButton, EuiIcon, EuiNotificationBadge, EuiButtonProps } from '@elastic/eui';
 
 import { pluginServices } from '../../services';
-import { Props as FlyoutProps, LabsFlyout } from './labs_flyout';
+import { LabsFlyout, Props as FlyoutProps } from './labs_flyout';
 
 export type Props = EuiButtonProps & Pick<FlyoutProps, 'solutions'>;
 

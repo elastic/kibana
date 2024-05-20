@@ -9,20 +9,20 @@ import React, { ReactNode } from 'react';
 
 import {
   EuiCallOut,
-  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiText,
   EuiTitle,
+  EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
-import { getReindexProgressLabel } from '../../../../../lib/utils';
 import { CancelLoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { StepProgress, StepProgressStep } from './step_progress';
+import { getReindexProgressLabel } from '../../../../../lib/utils';
 
 const ErrorCallout: React.FunctionComponent<{ errorMessage: string | null }> = ({
   errorMessage,

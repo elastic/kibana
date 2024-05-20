@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { useGeneratedHtmlId } from '@elastic/eui';
-import { ChangeEvent, SyntheticEvent, useCallback, useState } from 'react';
+import { useState, useCallback, ChangeEvent, SyntheticEvent } from 'react';
 import * as i18n from '../../translations';
 import { ListDetails } from '../../types';
 

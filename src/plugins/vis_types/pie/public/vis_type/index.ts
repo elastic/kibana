@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { PieTypeProps } from '../types';
 import { getPieVisTypeDefinition } from './pie';
+import type { PieTypeProps } from '../types';
 
 export const pieVisType = (props: PieTypeProps) => {
   return getPieVisTypeDefinition(props);

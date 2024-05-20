@@ -29,7 +29,9 @@
         "tags": [],
         "label": "SEARCH_PROJECT_SETTINGS",
         "description": [],
-        "signature": ["string[]"],
+        "signature": [
+          "string[]"
+        ],
         "path": "packages/serverless/settings/search_project/index.ts",
         "deprecated": false,
         "trackAdoption": false,

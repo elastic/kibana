@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ApplicationUsageMetric, createApplicationUsageMetric } from './metrics';
 import { Reporter } from './reporter';
+import { createApplicationUsageMetric, ApplicationUsageMetric } from './metrics';
 
 type TrackedApplication = Record<string, ApplicationUsageMetric>;
 interface ApplicationKey {

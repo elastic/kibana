@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { EuiDelayRender, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { withSuspense } from '@kbn/shared-ux-utility';
 import React from 'react';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { EuiDelayRender, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import type {
-  UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps,
+  UnifiedFieldListSidebarContainerApi,
 } from './field_list_sidebar_container';
 
 const LazyUnifiedFieldListSidebarContainer = React.lazy(

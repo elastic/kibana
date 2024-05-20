@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf, schema } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from '@kbn/core/server';
 import { get, has } from 'lodash';
+import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { DEFAULT_TRIAL_BUFFER } from '../common/constants';
 

@@ -5,59 +5,70 @@
  * 2.0.
  */
 
+import { partition, uniqBy } from 'lodash';
+import React from 'react';
+import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
+import {
+  DataViewBase,
+  EsQueryConfig,
+  Filter,
+  Query,
+  AggregateQuery,
+  TimeRange,
+  isOfQueryType,
+  getAggregateQueryMode,
+  ExecutionContextSearch,
+  getLanguageDisplayName,
+} from '@kbn/es-query';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
   DataPublicPluginStart,
-  FilterManager,
   TimefilterContract,
+  FilterManager,
   getEsQueryConfig,
   mapAndFlattenFilters,
 } from '@kbn/data-plugin/public';
-import {
-  AggregateQuery,
-  DataViewBase,
-  EsQueryConfig,
-  ExecutionContextSearch,
-  Filter,
-  Query,
-  TimeRange,
-  getAggregateQueryMode,
-  getLanguageDisplayName,
-  isOfQueryType,
-} from '@kbn/es-query';
-import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { i18n } from '@kbn/i18n';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { partition, uniqBy } from 'lodash';
-import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import type { Observable } from 'rxjs';
 
+import { merge, Subscription, switchMap } from 'rxjs';
+import { toExpression } from '@kbn/interpreter';
 import {
   Datatable,
   DefaultInspectorAdapters,
   ErrorLike,
   RenderMode,
 } from '@kbn/expressions-plugin/common';
+import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs';
+import fastIsEqual from 'fast-deep-equal';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
 } from '@kbn/expressions-plugin/public';
-import { toExpression } from '@kbn/interpreter';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import fastIsEqual from 'fast-deep-equal';
-import { Subscription, merge, switchMap } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 
-import { EuiEmptyPrompt, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import {
-  BrushTriggerEvent,
-  ClickTriggerEvent,
-  MultiClickTriggerEvent,
-} from '@kbn/charts-plugin/public';
+  EmbeddableStateTransfer,
+  Embeddable as AbstractEmbeddable,
+  EmbeddableInput,
+  EmbeddableOutput,
+  IContainer,
+  SavedObjectEmbeddableInput,
+  ReferenceOrValueEmbeddable,
+  SelfStyledEmbeddable,
+  FilterableEmbeddable,
+  cellValueTrigger,
+  CELL_VALUE_TRIGGER,
+  type CellValueContext,
+  shouldFetch$,
+} from '@kbn/embeddable-plugin/public';
+import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 import type {
   Capabilities,
   CoreStart,
@@ -65,85 +76,74 @@ import type {
   IUiSettingsClient,
   KibanaExecutionContext,
 } from '@kbn/core/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import {
-  Embeddable as AbstractEmbeddable,
-  CELL_VALUE_TRIGGER,
-  type CellValueContext,
-  EmbeddableInput,
-  EmbeddableOutput,
-  EmbeddableStateTransfer,
-  FilterableEmbeddable,
-  IContainer,
-  ReferenceOrValueEmbeddable,
-  SavedObjectEmbeddableInput,
-  SelfStyledEmbeddable,
-  cellValueTrigger,
-  shouldFetch$,
-} from '@kbn/embeddable-plugin/public';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import {
+  BrushTriggerEvent,
+  ClickTriggerEvent,
+  MultiClickTriggerEvent,
+} from '@kbn/charts-plugin/public';
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import { canTrackContentfulRender } from '@kbn/presentation-containers';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
+import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 import {
-  AddUserMessages,
-  Datasource,
-  DatasourceMap,
-  FramePublicAPI,
-  GetCompatibleCellValueActions,
-  IndexPatternMap,
-  IndexPatternRef,
-  LensTableRowContextMenuEvent,
-  UserMessage,
-  UserMessagesDisplayLocationId,
-  UserMessagesGetter,
-  Visualization,
-  VisualizationMap,
   isLensBrushEvent,
-  isLensEditEvent,
   isLensFilterEvent,
   isLensMultiFilterEvent,
+  isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
+  LensTableRowContextMenuEvent,
+  VisualizationMap,
+  Visualization,
+  DatasourceMap,
+  Datasource,
+  IndexPatternMap,
+  GetCompatibleCellValueActions,
+  UserMessage,
+  IndexPatternRef,
+  FramePublicAPI,
+  AddUserMessages,
   isMessageRemovable,
+  UserMessagesGetter,
+  UserMessagesDisplayLocationId,
 } from '../types';
-import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
 
-import { APP_ID, DOC_TYPE, getEditPath } from '../../common/constants';
 import type {
   AllowedChartOverrides,
-  AllowedGaugeOverrides,
   AllowedPartitionOverrides,
   AllowedSettingsOverrides,
+  AllowedGaugeOverrides,
   AllowedXYOverrides,
 } from '../../common/types';
-import {
-  filterAndSortUserMessages,
-  getApplicationUserMessages,
-} from '../app_plugin/get_application_user_messages';
-import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
-import { combineQueryAndFilters, getLayerMetaInfo } from '../app_plugin/show_underlying_data';
-import { TextBasedPersistedState } from '../datasources/text_based/types';
-import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
-import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
-import type { TableInspectorAdapter } from '../editor_frame_service/types';
+import { getEditPath, DOC_TYPE, APP_ID } from '../../common/constants';
 import { LensAttributeService } from '../lens_attribute_service';
-import { LensInspector, getLensInspectorService } from '../lens_inspector_service';
-import type { LensPluginStartDependencies } from '../plugin';
-import { getDatasourceLayers } from '../state_management/utils';
+import type { TableInspectorAdapter } from '../editor_frame_service/types';
+import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps, VisualizationDisplayOptions } from '../types';
 import {
-  extractReferencesFromState,
   getActiveDatasourceIdFromDoc,
   getActiveVisualizationIdFromDoc,
   getIndexPatternsObjects,
   getSearchWarningMessages,
   inferTimeField,
+  extractReferencesFromState,
 } from '../utils';
+import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
+import {
+  filterAndSortUserMessages,
+  getApplicationUserMessages,
+} from '../app_plugin/get_application_user_messages';
+import { MessageList } from '../editor_frame_service/editor_frame/workspace_panel/message_list';
+import type { DocumentToExpressionReturnType } from '../editor_frame_service/editor_frame';
 import type { TypedLensByValueInput } from './embeddable_component';
+import type { LensPluginStartDependencies } from '../plugin';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
+import { getDatasourceLayers } from '../state_management/utils';
+import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { TextBasedPersistedState } from '../datasources/text_based/types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 

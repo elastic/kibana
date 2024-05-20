@@ -24,7 +24,9 @@
         "type": "Class",
         "tags": [],
         "label": "FullStoryShipper",
-        "description": ["\nFullStory shipper."],
+        "description": [
+          "\nFullStory shipper."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/analytics-shippers-fullstory",
@@ -52,7 +54,9 @@
             "type": "string",
             "tags": [],
             "label": "shipperName",
-            "description": ["Shipper's unique name"],
+            "description": [
+              "Shipper's unique name"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -63,8 +67,12 @@
             "type": "Function",
             "tags": [],
             "label": "Constructor",
-            "description": ["\nCreates a new instance of the FullStoryShipper."],
-            "signature": ["any"],
+            "description": [
+              "\nCreates a new instance of the FullStoryShipper."
+            ],
+            "signature": [
+              "any"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -75,7 +83,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "config",
-                "description": ["{@link FullStoryShipperConfig }"],
+                "description": [
+                  "{@link FullStoryShipperConfig }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-shippers-fullstory",
@@ -96,7 +106,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "initContext",
-                "description": ["{@link AnalyticsClientInitContext }"],
+                "description": [
+                  "{@link AnalyticsClientInitContext }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -144,7 +156,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "newContext",
-                "description": ["The full new context to set {@link EventContext }"],
+                "description": [
+                  "The full new context to set {@link EventContext }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -171,7 +185,9 @@
             "description": [
               "\nStops/restarts the shipping mechanism based on the value of isOptedIn"
             ],
-            "signature": ["(isOptedIn: boolean) => void"],
+            "signature": [
+              "(isOptedIn: boolean) => void"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -182,8 +198,12 @@
                 "type": "boolean",
                 "tags": [],
                 "label": "isOptedIn",
-                "description": ["`true` for resume sending events. `false` to stop."],
-                "signature": ["boolean"],
+                "description": [
+                  "`true` for resume sending events. `false` to stop."
+                ],
+                "signature": [
+                  "boolean"
+                ],
                 "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
                 "deprecated": false,
                 "trackAdoption": false,
@@ -222,7 +242,9 @@
                 "type": "Array",
                 "tags": [],
                 "label": "events",
-                "description": ["batched events {@link Event }"],
+                "description": [
+                  "batched events {@link Event }"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/analytics-client",
@@ -250,7 +272,9 @@
             "description": [
               "\nFlushes all internal queues of the shipper.\nIt doesn't really do anything inside because this shipper doesn't hold any internal queues."
             ],
-            "signature": ["() => Promise<void>"],
+            "signature": [
+              "() => Promise<void>"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -263,8 +287,12 @@
             "type": "Function",
             "tags": [],
             "label": "shutdown",
-            "description": ["\nShuts down the shipper."],
-            "signature": ["() => void"],
+            "description": [
+              "\nShuts down the shipper."
+            ],
+            "signature": [
+              "() => void"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
             "trackAdoption": false,
@@ -283,7 +311,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FullStoryShipperConfig",
-        "description": ["\nFullStory shipper configuration."],
+        "description": [
+          "\nFullStory shipper configuration."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/analytics-shippers-fullstory",
@@ -314,7 +344,9 @@
             "description": [
               "\nFullStory's custom events rate limit is very aggressive.\nIf this setting is provided, it'll only send the event types specified in this list."
             ],
-            "signature": ["string[] | undefined"],
+            "signature": [
+              "string[] | undefined"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -326,7 +358,9 @@
             "tags": [],
             "label": "pageVarsDebounceTimeMs",
             "description": [],
-            "signature": ["number | undefined"],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -340,7 +374,9 @@
         "type": "Interface",
         "tags": [],
         "label": "FullStorySnippetConfig",
-        "description": ["\nFullStory basic configuration."],
+        "description": [
+          "\nFullStory basic configuration."
+        ],
         "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -351,7 +387,9 @@
             "type": "string",
             "tags": [],
             "label": "fullStoryOrgId",
-            "description": ["\nThe FullStory account id."],
+            "description": [
+              "\nThe FullStory account id."
+            ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -365,7 +403,9 @@
             "description": [
               "\nThe host to send the data to. Used to overcome AdBlockers by using custom DNSs.\nIf not specified, it defaults to `fullstory.com`."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -379,7 +419,9 @@
             "description": [
               "\nThe URL to load the FullStory client from. Falls back to `edge.fullstory.com/s/fs.js` if not specified."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -390,8 +432,12 @@
             "type": "CompoundType",
             "tags": [],
             "label": "debug",
-            "description": ["\nWhether the debug logs should be printed to the console."],
-            "signature": ["boolean | undefined"],
+            "description": [
+              "\nWhether the debug logs should be printed to the console."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -405,7 +451,9 @@
             "description": [
               "\nThe name of the variable where the API is stored: `window[namespace]`. Defaults to `FS`."
             ],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
             "deprecated": false,
             "trackAdoption": false

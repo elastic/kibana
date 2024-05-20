@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 
 export const getAllIndices = ({ registry }: { registry: SavedObjectTypeRegistry }): string[] => {
   return [

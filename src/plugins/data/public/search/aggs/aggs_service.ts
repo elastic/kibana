@@ -9,17 +9,17 @@
 import { Subscription } from 'rxjs';
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { TimeRange, calculateBounds } from '../../../common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
-  AggsCommonService,
-  AggsCommonStartDependencies,
   aggsRequiredUiSettings,
+  AggsCommonStartDependencies,
+  AggsCommonService,
 } from '../../../common/search/aggs';
-import type { NowProviderInternalContract } from '../../now_provider';
+import { calculateBounds, TimeRange } from '../../../common';
 import type { AggsSetup, AggsStart } from './types';
+import type { NowProviderInternalContract } from '../../now_provider';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change

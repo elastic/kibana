@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { execSync } from 'child_process';
 import fs from 'fs';
+import { execSync } from 'child_process';
 import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
 
 (async () => {

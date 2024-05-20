@@ -5,11 +5,8 @@
  * 2.0.
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
-import {
-  ALL_DATASETS_LOCATOR_ID,
-  AllDatasetsLocatorParams,
-} from '@kbn/deeplinks-observability/locators';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   ActionMenuDivider,
   Section,
@@ -18,8 +15,11 @@ import {
   SectionSubtitle,
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
-import React from 'react';
-import { useHistory } from 'react-router-dom';
+import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
+} from '@kbn/deeplinks-observability/locators';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { isJavaAgentName } from '../../../../../../common/agent_name';
 import { SERVICE_NODE_NAME } from '../../../../../../common/es_fields/apm';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';

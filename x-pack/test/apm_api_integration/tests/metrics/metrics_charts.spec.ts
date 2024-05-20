@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GenericMetricsChart } from '@kbn/apm-plugin/server/routes/metrics/fetch_and_transform_metrics';
 import expect from '@kbn/expect';
 import { first } from 'lodash';
+import { GenericMetricsChart } from '@kbn/apm-plugin/server/routes/metrics/fetch_and_transform_metrics';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -71,9 +71,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                cpuUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                 Array [
                   0.714,
                   0.3877,
@@ -94,9 +93,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             it('has correct series', () => {
               expect(systemMemoryUsageChart).to.not.empty();
-              expectSnapshot(
-                systemMemoryUsageChart?.series.map(({ title }) => title)
-              ).toMatchInline(`
+              expectSnapshot(systemMemoryUsageChart?.series.map(({ title }) => title))
+                .toMatchInline(`
                               Array [
                                 "Max",
                                 "Average",
@@ -105,9 +103,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                 Array [
                   0.722093920925555,
                   0.718173546796348,
@@ -173,9 +170,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                cpuUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                               Array [
                                 0.203,
                                 0.178777777777778,
@@ -208,9 +204,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             it('has correct series', () => {
               expect(systemMemoryUsageChart).to.not.empty();
-              expectSnapshot(
-                systemMemoryUsageChart?.series.map(({ title }) => title)
-              ).toMatchInline(`
+              expectSnapshot(systemMemoryUsageChart?.series.map(({ title }) => title))
+                .toMatchInline(`
                               Array [
                                 "Max",
                                 "Average",
@@ -219,9 +214,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                               Array [
                                 0.707924703557837,
                                 0.705395980841182,
@@ -260,9 +254,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                cpuUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                               Array [
                                 222501617.777778,
                                 374341632,
@@ -302,9 +295,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                cpuUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                               Array [
                                 138573397.333333,
                                 147677639.111111,
@@ -342,9 +334,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                cpuUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                               Array [
                                 44.4444444444444,
                                 45,
@@ -382,9 +373,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                cpuUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                 Array [
                   0,
                   3,
@@ -412,9 +402,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             it('has correct series overall values', () => {
-              expectSnapshot(
-                cpuUsageChart?.series.map(({ overallValue }) => overallValue)
-              ).toMatchInline(`
+              expectSnapshot(cpuUsageChart?.series.map(({ overallValue }) => overallValue))
+                .toMatchInline(`
                 Array [
                   0,
                   37500,
@@ -451,9 +440,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                         "Average",
                       ]
                   `);
-          expectSnapshot(
-            systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue)
-          ).toMatchInline(`
+          expectSnapshot(systemMemoryUsageChart?.series.map(({ overallValue }) => overallValue))
+            .toMatchInline(`
                       Array [
                         0.114523896426499,
                         0.114002376090415,

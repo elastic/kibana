@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 import type { GetDeprecationsContext } from '@kbn/core-deprecations-server';
-import { loggerMock } from '@kbn/logging-mocks';
 import { DeprecationsFactory, DeprecationsFactoryConfig } from './deprecations_factory';
+import { loggerMock } from '@kbn/logging-mocks';
+import type { DeprecationsDetails } from '@kbn/core-deprecations-common';
 
 describe('DeprecationsFactory', () => {
   let logger: ReturnType<typeof loggerMock.create>;

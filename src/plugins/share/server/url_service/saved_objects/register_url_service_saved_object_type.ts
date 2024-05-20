@@ -11,8 +11,8 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsType,
 } from '@kbn/core/server';
-import type { ServerUrlService } from '..';
 import type { LocatorData } from '../../../common/url_service';
+import type { ServerUrlService } from '..';
 
 export const registerUrlServiceSavedObjectType = (
   so: Pick<SavedObjectsServiceSetup, 'registerType'>,

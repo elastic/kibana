@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TableId } from '@kbn/securitysolution-data-table';
 import React, { useMemo } from 'react';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { SecurityPageName } from '../../../../app/types';
 import { SessionsView } from '../../../../common/components/sessions_viewer';
 import { fieldNameExistsFilter } from '../../../../common/components/visualization_actions/utils';

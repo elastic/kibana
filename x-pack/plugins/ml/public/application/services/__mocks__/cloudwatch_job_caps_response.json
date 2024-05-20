@@ -806,7 +806,11 @@
         "type": "keyword",
         "aggregatable": true,
         "counter": false,
-        "aggIds": ["distinct_count", "high_distinct_count", "low_distinct_count"]
+        "aggIds": [
+          "distinct_count",
+          "high_distinct_count",
+          "low_distinct_count"
+        ]
       },
       {
         "id": "NetworkIn",
@@ -882,7 +886,11 @@
         "type": "keyword",
         "aggregatable": true,
         "counter": false,
-        "aggIds": ["distinct_count", "high_distinct_count", "low_distinct_count"]
+        "aggIds": [
+          "distinct_count",
+          "high_distinct_count",
+          "low_distinct_count"
+        ]
       },
       {
         "id": "sourcetype",
@@ -898,7 +906,11 @@
         "type": "keyword",
         "aggregatable": true,
         "counter": false,
-        "aggIds": ["distinct_count", "high_distinct_count", "low_distinct_count"]
+        "aggIds": [
+          "distinct_count",
+          "high_distinct_count",
+          "low_distinct_count"
+        ]
       }
     ]
   }

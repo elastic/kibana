@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   EuiButtonEmpty,
@@ -14,21 +14,21 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
-import { Capabilities } from '@kbn/core/public';
 import DateMath from '@kbn/datemath';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { CONTAINER_FIELD, HOST_FIELD, POD_FIELD } from '../../../../../common/constants';
-import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
-import { useNodeDetailsRedirect } from '../../../link_to';
+import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
-  MetricsExplorerChartOptions,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
+  MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
+import { useNodeDetailsRedirect } from '../../../link_to';
+import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 
 export interface Props {
   options: MetricsExplorerOptions;

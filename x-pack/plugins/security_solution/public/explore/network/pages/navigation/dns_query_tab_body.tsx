@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import { getOr } from 'lodash/fp';
 
-import { manageQuery } from '../../../../common/components/page/manage_query';
 import { NetworkDnsTable } from '../../components/network_dns_table';
-import { ID, useNetworkDns } from '../../containers/network_dns';
+import { useNetworkDns, ID } from '../../containers/network_dns';
+import { manageQuery } from '../../../../common/components/page/manage_query';
 
 import type { NetworkComponentQueryProps } from './types';
 
-import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
 import type {
-  MatrixHistogramConfigs,
   MatrixHistogramOption,
+  MatrixHistogramConfigs,
 } from '../../../../common/components/matrix_histogram/types';
+import * as i18n from './translations';
+import { MatrixHistogram } from '../../../../common/components/matrix_histogram';
+import { networkSelectors } from '../../store';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { getDnsTopDomainsLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
-import { networkSelectors } from '../../store';
-import * as i18n from './translations';
 
 const HISTOGRAM_ID = 'networkDnsHistogramQuery';
 

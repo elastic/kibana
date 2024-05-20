@@ -5,30 +5,18 @@
  * 2.0.
  */
 
-import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
+import { euiLightVars as lightTheme, euiDarkVars as darkTheme } from '@kbn/ui-theme';
 import React from 'react';
 
+import type { DescriptionList } from '../../../../../common/utility_types';
+import { useDarkMode } from '../../../../common/lib/kibana';
 import type {
   FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../../common/search_strategy';
-import type { DescriptionList } from '../../../../../common/utility_types';
-import { getEmptyTagValue } from '../../../../common/components/empty_value';
-import { useDarkMode } from '../../../../common/lib/kibana';
 import type { networkModel } from '../../store';
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 
-import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
-import {
-  FirstLastSeen,
-  FirstLastSeenType,
-} from '../../../../common/components/first_last_seen/first_last_seen';
-import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { Loader } from '../../../../common/components/loader';
-import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { AnomalyScores } from '../../../../common/components/ml/score/anomaly_scores';
-import type { Anomalies, NarrowDateRange } from '../../../../common/components/ml/types';
-import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
-import { OverviewWrapper } from '../../../../common/components/page';
 import {
   autonomousSystemRenderer,
   hostIdRenderer,
@@ -37,7 +25,19 @@ import {
   reputationRenderer,
   whoisRenderer,
 } from '../../../../timelines/components/field_renderers/field_renderers';
+import {
+  FirstLastSeen,
+  FirstLastSeenType,
+} from '../../../../common/components/first_last_seen/first_last_seen';
 import * as i18n from './translations';
+import { OverviewWrapper } from '../../../../common/components/page';
+import { Loader } from '../../../../common/components/loader';
+import type { Anomalies, NarrowDateRange } from '../../../../common/components/ml/types';
+import { AnomalyScores } from '../../../../common/components/ml/score/anomaly_scores';
+import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
+import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
+import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
+import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
 
 export interface IpOverviewProps {
   anomaliesData: Anomalies | null;

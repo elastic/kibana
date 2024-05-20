@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Attachment, Case } from '@kbn/cases-plugin/common/types/domain';
+import { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import { omit } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -31,7 +31,7 @@ export function SvlCasesOmitServiceProvider({}: FtrProviderContext) {
     removeServerGeneratedPropertiesFromSavedObject<T extends CommonSavedObjectAttributes>(
       attributes: T,
       keys: Array<keyof T> = []
-    ): Omit<T, (typeof savedObjectCommonAttributes)[number] | (typeof keys)[number]> {
+    ): Omit<T, typeof savedObjectCommonAttributes[number] | typeof keys[number]> {
       return this.removeServerGeneratedPropertiesFromObject(attributes, [
         ...savedObjectCommonAttributes,
         ...keys,

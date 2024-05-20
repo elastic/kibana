@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { sanitizeRequest, getRequestWithStreamOption, removeEndpointFromUrl } from './openai_utils';
 import {
   DEFAULT_OPENAI_MODEL,
   OPENAI_CHAT_URL,
   OPENAI_LEGACY_COMPLETION_URL,
 } from '../../../../common/openai/constants';
-import { getRequestWithStreamOption, removeEndpointFromUrl, sanitizeRequest } from './openai_utils';
 
 describe('Open AI Utils', () => {
   describe('sanitizeRequest', () => {

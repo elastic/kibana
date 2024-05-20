@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
 import React from 'react';
-import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
+import { render } from '@testing-library/react';
+import { RightPanelContext } from '../context';
+import {
+  ENTITIES_HOST_OVERVIEW_TEST_ID,
+  ENTITIES_USER_OVERVIEW_TEST_ID,
+  INSIGHTS_ENTITIES_TEST_ID,
+} from './test_ids';
+import { EntitiesOverview } from './entities_overview';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
+import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
+import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import {
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
-import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { RightPanelContext } from '../context';
-import { EntitiesOverview } from './entities_overview';
-import {
-  ENTITIES_HOST_OVERVIEW_TEST_ID,
-  ENTITIES_USER_OVERVIEW_TEST_ID,
-  INSIGHTS_ENTITIES_TEST_ID,
-} from './test_ids';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';

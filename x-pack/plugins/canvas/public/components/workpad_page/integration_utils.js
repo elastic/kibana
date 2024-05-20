@@ -6,13 +6,13 @@
  */
 
 import { shallowEqual } from 'react-recompose';
-import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
-import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
-import { matrixToAngle } from '../../lib/aeroelastic/matrix';
-import { isGroupId } from '../../lib/workpad';
+import { getNodes, getSelectedPage } from '../../state/selectors/workpad';
 import { addElement, removeElements, setMultiplePositions } from '../../state/actions/elements';
 import { selectToplevelNodes } from '../../state/actions/transient';
-import { getNodes, getSelectedPage } from '../../state/selectors/workpad';
+import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
+import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
+import { isGroupId } from '../../lib/workpad';
+import { matrixToAngle } from '../../lib/aeroelastic/matrix';
 import { elementToShape } from './positioning_utils';
 export * from './positioning_utils';
 

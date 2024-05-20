@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import React, { ChangeEvent, FormEvent } from 'react';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
-import { AnnotationEditorControls } from '@kbn/event-annotation-components';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { QueryInputServices } from '@kbn/visualization-ui-components';
 import { ReactWrapper } from 'enzyme';
-import React, { ChangeEvent, FormEvent } from 'react';
-import { act } from 'react-dom/test-utils';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { GroupEditorControls } from './group_editor_controls';
+import { EuiTextAreaProps, EuiTextProps } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { act } from 'react-dom/test-utils';
+import type { QueryInputServices } from '@kbn/visualization-ui-components';
+import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 
 jest.mock('@elastic/eui', () => {
   return {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { EuiLink } from '@elastic/eui';
 import { getSettingDefault } from '../../services/follower_index_default_settings';
 
 export const getAdvancedSettingsFields = (documentationLinks) => {

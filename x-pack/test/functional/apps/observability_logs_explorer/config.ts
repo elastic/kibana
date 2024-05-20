@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { LogLevel, LogsSynthtraceEsClient, createLogger } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
+import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<

@@ -6,40 +6,40 @@
  * Side Public License, v 1.
  */
 
-import EventEmitter from 'events';
-import { EuiBetaBadgeProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import { parse } from 'query-string';
 import React from 'react';
+import moment from 'moment';
+import EventEmitter from 'events';
+import { i18n } from '@kbn/i18n';
+import { EuiBetaBadgeProps } from '@elastic/eui';
+import { parse } from 'query-string';
 
 import { Capabilities } from '@kbn/core/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
+import {
+  showSaveModal,
+  SavedObjectSaveModalOrigin,
+  SavedObjectSaveOpts,
+  OnSaveProps,
+} from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import {
-  OnSaveProps,
-  SavedObjectSaveModalOrigin,
-  SavedObjectSaveOpts,
-  showSaveModal,
-} from '@kbn/saved-objects-plugin/public';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
+import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { saveVisualization } from '../../utils/saved_visualize_utils';
+import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
 
-import { VisualizeConstants } from '../../../common/constants';
-import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
-import { getUiActions } from '../../services';
-import { AGG_BASED_VISUALIZATION_TRIGGER, VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
 import {
+  VisualizeServices,
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
-  VisualizeServices,
 } from '../types';
+import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
+import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
+import { getUiActions } from '../../services';
+import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
 import './visualize_navigation.scss';
@@ -267,12 +267,12 @@ export const getTopNavConfig = (
           defaultMessage: 'Save to library',
         })
       : originatingApp && savedVis.id
-        ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
-            defaultMessage: 'Save as',
-          })
-        : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
-            defaultMessage: 'Save',
-          });
+      ? i18n.translate('visualizations.topNavMenu.saveVisualizationAsButtonLabel', {
+          defaultMessage: 'Save as',
+        })
+      : i18n.translate('visualizations.topNavMenu.saveVisualizationButtonLabel', {
+          defaultMessage: 'Save',
+        });
 
   const showSaveButton =
     visualizeCapabilities.save || (!originatingApp && dashboardCapabilities.showWriteControls);

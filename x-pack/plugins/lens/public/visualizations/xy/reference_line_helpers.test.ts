@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { generateActiveData } from '../../mocks';
 import { computeOverallDataDomain, getStaticValue } from './reference_line_helpers';
 import { XYDataLayerConfig } from './types';
+import { generateActiveData } from '../../mocks';
 
 describe('reference_line helpers', () => {
   describe('getStaticValue', () => {

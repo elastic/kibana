@@ -5,15 +5,15 @@
  * 2.0.
  */
 
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { lazy } from 'react';
-import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from '../lib/servicenow/helpers';
 import { ServiceNowConfig, ServiceNowSecrets } from '../lib/servicenow/types';
 import { ServiceNowSIRActionParams } from './types';
+import { getConnectorDescriptiveTitle, getSelectedConnectorIcon } from '../lib/servicenow/helpers';
 
 export const SERVICENOW_SIR_DESC = i18n.translate(
   'xpack.stackConnectors.components.serviceNowSIR.selectMessageText',

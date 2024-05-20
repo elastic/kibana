@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import React from 'react';
+import ReactDOM from 'react-dom';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { StartRenderServices } from '../plugin';
 
 let isOpenConfirmPanel = false;

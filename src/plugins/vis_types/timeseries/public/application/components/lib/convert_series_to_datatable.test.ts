@@ -8,7 +8,7 @@
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { PanelData } from '../../../../common/types';
 import { TimeseriesVisParams } from '../../../types';
-import { addMetaToColumns, convertSeriesToDataTable } from './convert_series_to_datatable';
+import { convertSeriesToDataTable, addMetaToColumns } from './convert_series_to_datatable';
 
 jest.mock('../../../services', () => {
   return {

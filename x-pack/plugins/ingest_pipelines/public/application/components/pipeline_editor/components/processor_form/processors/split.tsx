@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import {
   FIELD_TYPES,
+  fieldValidators,
+  UseField,
   Field,
   ToggleField,
-  UseField,
-  fieldValidators,
 } from '../../../../../../shared_imports';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { TargetField } from './common_fields/target_field';
-import { FieldsConfig, from, to } from './shared';
+import { IgnoreMissingField } from './common_fields/ignore_missing_field';
+import { FieldsConfig, to, from } from './shared';
 
 const { emptyField } = fieldValidators;
 

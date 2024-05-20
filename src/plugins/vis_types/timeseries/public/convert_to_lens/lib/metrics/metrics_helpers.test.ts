@@ -8,10 +8,10 @@
 
 import { TimeRange } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
+import type { Metric, Series, Panel } from '../../../../common/types';
 import { TIME_RANGE_DATA_MODES, TSVB_METRIC_TYPES } from '../../../../common/enums';
-import type { Metric, Panel, Series } from '../../../../common/types';
-import { createPanel, createSeries } from '../__mocks__';
 import { getFormulaEquivalent, getReducedTimeRange } from './metrics_helpers';
+import { createPanel, createSeries } from '../__mocks__';
 
 jest.mock('../../../services', () => ({
   getUISettings: () => ({ get: () => 50 }),

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { History, createHashHistory } from 'history';
+import { createHashHistory, History } from 'history';
 import { HistoryLocationState } from './build_services';
 
 export class HistoryService {

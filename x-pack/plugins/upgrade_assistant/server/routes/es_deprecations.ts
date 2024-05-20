@@ -8,9 +8,9 @@
 import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { reindexServiceFactory } from '../lib/reindexing';
-import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
 import { RouteDependencies } from '../types';
+import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
+import { reindexServiceFactory } from '../lib/reindexing';
 
 export function registerESDeprecationRoutes({
   config: { featureSet },

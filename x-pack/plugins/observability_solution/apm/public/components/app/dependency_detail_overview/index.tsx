@@ -1,5 +1,3 @@
-import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,12 +5,14 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import React from 'react';
+import { EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 import { DependenciesDetailTable } from './dependencies_detail_table';
+import { DependencyMetricCharts } from '../../shared/dependency_metric_charts';
 
 export function DependencyDetailOverview() {
   const {

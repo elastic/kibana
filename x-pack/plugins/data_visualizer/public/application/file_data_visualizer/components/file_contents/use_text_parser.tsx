@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
-import React, { useMemo } from 'react';
-import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
-import { useDataVisualizerKibana } from '../../../kibana_context';
 import { FieldBadge } from './field_badge';
+import { useDataVisualizerKibana } from '../../../kibana_context';
+import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { GrokHighlighter } from './grok_highlighter';
 
 export function useGrokHighlighter() {

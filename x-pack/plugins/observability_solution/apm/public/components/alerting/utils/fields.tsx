@@ -1,5 +1,3 @@
-import { EuiFieldNumber } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -7,19 +5,21 @@ import { i18n } from '@kbn/i18n';
  * 2.0.
  */
 import moment from 'moment';
+import { EuiFieldNumber } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  ENVIRONMENT_ALL,
-  allOptionText,
-  getEnvironmentLabel,
-} from '../../../../common/environment_filter_values';
 import {
   ERROR_GROUP_ID,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-  TRANSACTION_NAME,
   TRANSACTION_TYPE,
+  TRANSACTION_NAME,
 } from '../../../../common/es_fields/apm';
+import {
+  ENVIRONMENT_ALL,
+  getEnvironmentLabel,
+  allOptionText,
+} from '../../../../common/environment_filter_values';
 import { SuggestionsSelect } from '../../shared/suggestions_select';
 import { PopoverExpression } from '../ui_components/popover_expression';
 

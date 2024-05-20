@@ -6,77 +6,77 @@
  */
 
 import './dimension_editor.scss';
+import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import {
-  EuiBasicTable,
-  EuiButtonIcon,
+  EuiListGroup,
+  EuiFormRow,
+  EuiSpacer,
+  EuiListGroupItemProps,
+  EuiToolTip,
+  EuiText,
+  EuiIconTip,
+  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiListGroup,
-  EuiListGroupItemProps,
-  EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSpacer,
-  EuiText,
-  EuiToolTip,
-  useEuiTheme,
+  EuiPanel,
+  EuiBasicTable,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import { NameInput } from '@kbn/visualization-ui-components';
-import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { DOCUMENT_FIELD_NAME } from '../../../../common/constants';
-import type { LayerType } from '../../../../common/types';
-import type { IndexPattern, IndexPatternField } from '../../../types';
-import { documentField } from '../document_field';
-import { GenericIndexPatternColumn, deleteColumn } from '../form_based';
-import { WrappingHelpPopover } from '../help_popover';
+import { NameInput } from '@kbn/visualization-ui-components';
+import type { FormBasedDimensionEditorProps } from './dimension_panel';
+import type { OperationSupportMatrix } from './operation_support';
+import { deleteColumn, GenericIndexPatternColumn } from '../form_based';
 import {
-  FieldBasedIndexPatternColumn,
-  adjustColumnReferencesForChangedColumn,
-  canTransition,
+  operationDefinitionMap,
   getOperationDisplay,
   insertOrReplaceColumn,
-  operationDefinitionMap,
   replaceColumn,
-  resetIncomplete,
   updateColumnParam,
   updateDefaultLabels,
+  resetIncomplete,
+  FieldBasedIndexPatternColumn,
+  canTransition,
+  adjustColumnReferencesForChangedColumn,
 } from '../operations';
-import { ParamEditorProps } from '../operations/definitions';
-import { isColumn } from '../operations/definitions/helpers';
-import { getReferencedField, hasField } from '../pure_utils';
 import { mergeLayer } from '../state_helpers';
-import type { FormBasedLayer } from '../types';
+import { getReferencedField, hasField } from '../pure_utils';
 import { fieldIsInvalid, getSamplingValue, isSamplingValueEnabled } from '../utils';
-import { AdvancedOptions } from './advanced_options';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import type { FormBasedDimensionEditorProps } from './dimension_panel';
+import type { FormBasedLayer } from '../types';
+import { FormatSelector } from './format_selector';
+import { ReferenceEditor } from './reference_editor';
+import { TimeScaling } from './time_scaling';
+import { Filtering } from './filtering';
+import { ReducedTimeRange } from './reduced_time_range';
+import { AdvancedOptions } from './advanced_options';
+import { TimeShift } from './time_shift';
+import type { LayerType } from '../../../../common/types';
+import { DOCUMENT_FIELD_NAME } from '../../../../common/constants';
 import {
-  CalloutWarning,
-  DimensionEditorButtonGroups,
-  DimensionEditorGroupsOptions,
-  formulaOperationName,
-  getParamEditor,
-  isLayerChangingDueToDecimalsPercentile,
-  isLayerChangingDueToOtherBucketChange,
-  isQuickFunction,
   quickFunctionsName,
   staticValueOperationName,
+  isQuickFunction,
+  getParamEditor,
+  formulaOperationName,
+  DimensionEditorButtonGroups,
+  CalloutWarning,
+  DimensionEditorGroupsOptions,
+  isLayerChangingDueToDecimalsPercentile,
+  isLayerChangingDueToOtherBucketChange,
 } from './dimensions_editor_helpers';
 import type { TemporaryState } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
+import { ParamEditorProps } from '../operations/definitions';
+import { WrappingHelpPopover } from '../help_popover';
+import { isColumn } from '../operations/definitions/helpers';
 import type { FieldChoiceWithOperationType } from './field_select';
-import { Filtering } from './filtering';
-import { FormatSelector } from './format_selector';
-import type { OperationSupportMatrix } from './operation_support';
-import { ReducedTimeRange } from './reduced_time_range';
-import { ReferenceEditor } from './reference_editor';
-import { TimeScaling } from './time_scaling';
-import { TimeShift } from './time_shift';
+import type { IndexPattern, IndexPatternField } from '../../../types';
+import { documentField } from '../document_field';
 
 export interface DimensionEditorProps extends FormBasedDimensionEditorProps {
   selectedColumn?: GenericIndexPatternColumn;

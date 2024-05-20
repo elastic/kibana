@@ -1,8 +1,3 @@
-import { EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { find } from 'lodash';
-import moment from 'moment';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -10,22 +5,27 @@ import moment from 'moment';
  * 2.0.
  */
 import React, { useContext, useState, useCallback, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { find } from 'lodash';
+import moment from 'moment';
 import { useRouteMatch } from 'react-router-dom';
-import { formatTimestampToDuration } from '../../../../common';
-import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
-import { PipelineViewer } from '../../../components/logstash/pipeline_viewer';
-import { vertexFactory } from '../../../components/logstash/pipeline_viewer/models/graph/vertex_factory';
+import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { EuiSpacer } from '@elastic/eui';
+import { GlobalStateContext } from '../../contexts/global_state_context';
+import { ComponentProps } from '../../route_init';
 import { List } from '../../../components/logstash/pipeline_viewer/models/list';
+import { PipelineViewer } from '../../../components/logstash/pipeline_viewer';
 import { Pipeline } from '../../../components/logstash/pipeline_viewer/models/pipeline';
 import { PipelineState } from '../../../components/logstash/pipeline_viewer/models/pipeline_state';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { ExternalConfigContext } from '../../contexts/external_config_context';
-import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
-import { useTable } from '../../hooks/use_table';
-import { ComponentProps } from '../../route_init';
+import { vertexFactory } from '../../../components/logstash/pipeline_viewer/models/graph/vertex_factory';
 import { LogstashTemplate } from './logstash_template';
+import { useTable } from '../../hooks/use_table';
+import { ExternalConfigContext } from '../../contexts/external_config_context';
+import { formatTimestampToDuration } from '../../../../common';
+import { CALCULATE_DURATION_SINCE } from '../../../../common/constants';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { PipelineVersions } from './pipeline_versions_dropdown';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashPipelinePage: React.FC<ComponentProps> = ({ clusters }) => {
   const match = useRouteMatch<{ id: string | undefined; hash: string | undefined }>();

@@ -7,47 +7,47 @@
  */
 
 import {
-  type CoreStart,
-  type Logger,
-  type PluginInitializerContext,
-  SavedObjectsClient,
-  type SavedObjectsClientContract,
-} from '@kbn/core/server';
-import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
-import fetch from 'node-fetch';
-import {
   BehaviorSubject,
-  EMPTY,
-  Observable,
-  Subscription,
-  catchError,
-  defer,
   exhaustMap,
   filter,
   firstValueFrom,
   merge,
   mergeMap,
-  retry,
+  Observable,
   skip,
+  Subscription,
   takeUntil,
   timer,
+  catchError,
+  defer,
+  EMPTY,
+  retry,
 } from 'rxjs';
-import { PAYLOAD_CONTENT_ENCODING } from '../common/constants';
-import { isReportIntervalExpired } from '../common/is_report_interval_expired';
+import fetch from 'node-fetch';
+import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
+import {
+  type PluginInitializerContext,
+  type Logger,
+  type SavedObjectsClientContract,
+  SavedObjectsClient,
+  type CoreStart,
+} from '@kbn/core/server';
 import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
-import type { EncryptedTelemetryPayload } from '../common/types';
-import type { TelemetryConfigType } from './config';
-import { getNextAttemptDate } from './get_next_attempt_date';
 import {
   TELEMETRY_SAVED_OBJECT_TYPE,
   getTelemetrySavedObject,
   updateTelemetrySavedObject,
 } from './saved_objects';
+import { getNextAttemptDate } from './get_next_attempt_date';
 import {
-  getTelemetryFailureDetails,
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
+  getTelemetryFailureDetails,
 } from './telemetry_config';
+import { PAYLOAD_CONTENT_ENCODING } from '../common/constants';
+import type { EncryptedTelemetryPayload } from '../common/types';
+import type { TelemetryConfigType } from './config';
+import { isReportIntervalExpired } from '../common/is_report_interval_expired';
 
 export interface FetcherTaskDepsStart {
   telemetryCollectionManager: TelemetryCollectionManagerPluginStart;

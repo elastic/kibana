@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
 import React from 'react';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { get } from 'lodash';
 import { CONSOLE_COMMANDS } from '../../../management/common/translations';
 
 interface EndpointCallOutProps {

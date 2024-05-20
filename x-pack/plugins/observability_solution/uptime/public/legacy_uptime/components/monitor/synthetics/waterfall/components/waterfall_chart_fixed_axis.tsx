@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import {
   Axis,
   BarSeries,
@@ -15,11 +16,10 @@ import {
   ScaleType,
   Settings,
   TickFormatter,
-  Tooltip,
   TooltipType,
+  Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { useBaseChartTheme } from '../../../../../hooks/use_base_chart_theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
 import { WaterfallChartMarkers } from './waterfall_markers';

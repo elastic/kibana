@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import {
-  GenerativeAIForObservabilityConnectorFeatureId,
-  GenerativeAIForSearchPlaygroundConnectorFeatureId,
-  GenerativeAIForSecurityConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
-import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
+import { i18n } from '@kbn/i18n';
 import {
   SubActionConnectorType,
   ValidatorType,
 } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import {
+  GenerativeAIForSecurityConnectorFeatureId,
+  GenerativeAIForObservabilityConnectorFeatureId,
+  GenerativeAIForSearchPlaygroundConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
+import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import { i18n } from '@kbn/i18n';
+import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
 import {
   OPENAI_CONNECTOR_ID,
   OPENAI_TITLE,

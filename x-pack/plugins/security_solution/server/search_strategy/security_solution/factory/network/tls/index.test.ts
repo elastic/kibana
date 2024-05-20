@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import * as buildQuery from './query.tls_network.dsl';
 import { networkTls } from '.';
 import {
-  formattedSearchStrategyResponse,
   mockOptions,
   mockSearchStrategyResponse,
+  formattedSearchStrategyResponse,
 } from './__mocks__';
-import * as buildQuery from './query.tls_network.dsl';
 
 describe('networkTls search strategy', () => {
   const buildNetworkTlsQuery = jest.spyOn(buildQuery, 'buildNetworkTlsQuery');

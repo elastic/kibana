@@ -6,12 +6,12 @@
  */
 
 import moment from 'moment';
-import type { ElasticsearchResponse } from '../../../common/types/es';
 import { LegacyRequest } from '../../types';
 import { checkParam } from '../error_missing_required';
-import { apmAggFilterPath, apmAggResponseHandler, apmUuidsAgg } from './_apm_stats';
-import { getTimeOfLastEvent } from './_get_time_of_last_event';
 import { createApmQuery } from './create_apm_query';
+import { apmAggFilterPath, apmUuidsAgg, apmAggResponseHandler } from './_apm_stats';
+import { getTimeOfLastEvent } from './_get_time_of_last_event';
+import type { ElasticsearchResponse } from '../../../common/types/es';
 
 export function handleResponse(response: ElasticsearchResponse) {
   const { apmTotal, totalEvents } = apmAggResponseHandler(response);

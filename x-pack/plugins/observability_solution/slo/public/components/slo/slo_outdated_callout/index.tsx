@@ -5,12 +5,12 @@
  * 2.0.
  */
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { paths } from '../../../../common/locators/paths';
-import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { useKibana } from '../../../utils/kibana_react';
+import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
+import { paths } from '../../../../common/locators/paths';
 
 export function SloOutdatedCallout() {
   const {

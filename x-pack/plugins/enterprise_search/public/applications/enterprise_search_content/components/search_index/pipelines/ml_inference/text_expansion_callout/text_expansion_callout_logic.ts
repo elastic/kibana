@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeLogicType, kea } from 'kea';
+import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
@@ -103,26 +103,26 @@ export const getTextExpansionError = (
         message: getErrorsFromHttpResponse(createError)[0],
       }
     : startError !== undefined
-      ? {
-          title: i18n.translate(
-            'xpack.enterpriseSearch.content.indices.pipelines.textExpansionStartError.title',
-            {
-              defaultMessage: 'Error starting ELSER deployment',
-            }
-          ),
-          message: getErrorsFromHttpResponse(startError)[0],
-        }
-      : fetchError !== undefined
-        ? {
-            title: i18n.translate(
-              'xpack.enterpriseSearch.content.indices.pipelines.textExpansionFetchError.title',
-              {
-                defaultMessage: 'Error fetching ELSER model',
-              }
-            ),
-            message: getErrorsFromHttpResponse(fetchError)[0],
+    ? {
+        title: i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.textExpansionStartError.title',
+          {
+            defaultMessage: 'Error starting ELSER deployment',
           }
-        : null;
+        ),
+        message: getErrorsFromHttpResponse(startError)[0],
+      }
+    : fetchError !== undefined
+    ? {
+        title: i18n.translate(
+          'xpack.enterpriseSearch.content.indices.pipelines.textExpansionFetchError.title',
+          {
+            defaultMessage: 'Error fetching ELSER model',
+          }
+        ),
+        message: getErrorsFromHttpResponse(fetchError)[0],
+      }
+    : null;
 };
 
 export const TextExpansionCalloutLogic = kea<

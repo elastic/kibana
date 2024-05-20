@@ -67,7 +67,11 @@
             "tags": [],
             "label": "createSetupContract",
             "description": [],
-            "signature": ["() => jest.Mocked<", "InternalUserSettingsServiceSetup", ">"],
+            "signature": [
+              "() => jest.Mocked<",
+              "InternalUserSettingsServiceSetup",
+              ">"
+            ],
             "path": "packages/core/user-settings/core-user-settings-server-mocks/src/user_settings_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,

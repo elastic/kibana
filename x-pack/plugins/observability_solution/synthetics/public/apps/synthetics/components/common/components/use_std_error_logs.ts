@@ -6,8 +6,8 @@
  */
 
 import { createEsParams, useEsSearch } from '@kbn/observability-shared-plugin/public';
-import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { Ping } from '../../../../../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 export const useStdErrorLogs = ({ checkGroup }: { checkGroup?: string }) => {
   const { data, loading } = useEsSearch(

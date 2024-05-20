@@ -10,50 +10,55 @@
 // TODO: Refactor code - component can be broken apart
 import {
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiWindowEvent,
+  EuiHorizontalRule,
+  EuiFlexItem,
 } from '@elastic/eui';
-import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
-import type { DocLinks } from '@kbn/doc-links';
-import type { Filter } from '@kbn/es-query';
-import {
-  TableId,
-  dataTableActions,
-  dataTableSelectors,
-  tableDefaults,
-} from '@kbn/securitysolution-data-table';
-import { isTab } from '@kbn/timelines-plugin/public';
-import { isEqual } from 'lodash';
+import styled from 'styled-components';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-import styled from 'styled-components';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
-import { SecurityPageName } from '../../../app/types';
-import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
-import type { UpdateDateRange } from '../../../common/components/charts/common';
+import { isTab } from '@kbn/timelines-plugin/public';
+import type { Filter } from '@kbn/es-query';
+import type { DocLinks } from '@kbn/doc-links';
+import {
+  dataTableActions,
+  dataTableSelectors,
+  tableDefaults,
+  TableId,
+} from '@kbn/securitysolution-data-table';
+import { isEqual } from 'lodash';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
+import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
-import { FiltersGlobal } from '../../../common/components/filters_global';
-import { useFormatUrl } from '../../../common/components/link_to';
-import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
-import { SecuritySolutionLinkButton } from '../../../common/components/links';
-import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
-import { SiemSearchBar } from '../../../common/components/search_bar';
-import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import { useSignalHelpers } from '../../../common/containers/sourcerer/use_signal_helpers';
-import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
-import { useGlobalTime } from '../../../common/containers/use_global_time';
+import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { InputsModelId } from '../../../common/store/inputs/constants';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
+import { SecurityPageName } from '../../../app/types';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import type { UpdateDateRange } from '../../../common/components/charts/common';
+import { FiltersGlobal } from '../../../common/components/filters_global';
+import { getRulesUrl } from '../../../common/components/link_to/redirect_to_detection_engine';
+import { SiemSearchBar } from '../../../common/components/search_bar';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { InputsModelId } from '../../../common/store/inputs/constants';
+import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
+import { useUserData } from '../../components/user_info';
+import { DetectionEngineNoIndex } from './detection_engine_no_index';
+import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
+import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
+import * as i18n from './translations';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
+import { useFormatUrl } from '../../../common/components/link_to';
+import { useGlobalFullScreen } from '../../../common/containers/use_full_screen';
 import { Display } from '../../../explore/hosts/pages/display';
 import {
   focusUtilityBarAction,
@@ -67,27 +72,22 @@ import {
   buildShowBuildingBlockFilter,
   buildThreatMatchFilter,
 } from '../../components/alerts_table/default_config';
-import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
-import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
-import { useUserData } from '../../components/user_info';
-import { useListsConfig } from '../../containers/detection_engine/lists/use_lists_config';
 import { ChartPanels } from './chart_panels';
-import { DetectionEngineNoIndex } from './detection_engine_no_index';
-import { DetectionEngineUserUnauthenticated } from './detection_engine_user_unauthenticated';
-import * as i18n from './translations';
+import { useSourcererDataView } from '../../../common/containers/sourcerer';
+import { useSignalHelpers } from '../../../common/containers/sourcerer/use_signal_helpers';
 
-import type { Status } from '../../../../common/api/detection_engine';
-import { EmptyPrompt } from '../../../common/components/empty_prompt';
-import { HeaderPage } from '../../../common/components/header_page';
-import { NoPrivileges } from '../../../common/components/no_privileges';
-import { useKibana } from '../../../common/lib/kibana';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
-import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
-import { AlertsTableComponent } from '../../components/alerts_table';
+import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
+import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
+import { useKibana } from '../../../common/lib/kibana';
+import { NoPrivileges } from '../../../common/components/no_privileges';
+import { HeaderPage } from '../../../common/components/header_page';
+import { EmptyPrompt } from '../../../common/components/empty_prompt';
+import type { Status } from '../../../../common/api/detection_engine';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
 import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
-import { MissingPrivilegesCallOut } from '../../components/callouts/missing_privileges_callout';
-import { NeedAdminForUpdateRulesCallOut } from '../../components/callouts/need_admin_for_update_callout';
+import { AlertsTableComponent } from '../../components/alerts_table';
+import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.

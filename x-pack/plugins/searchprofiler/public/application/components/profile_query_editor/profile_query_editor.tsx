@@ -5,24 +5,24 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React, { useRef, memo, useCallback } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiForm,
+  EuiFieldText,
+  EuiFormRow,
+  EuiButton,
+  EuiText,
+  EuiFlexGroup,
+  EuiSpacer,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { decompressFromEncodedURIComponent } from 'lz-string';
 
+import { useRequestProfile } from '../../hooks';
 import { useAppContext } from '../../contexts/app_context';
 import { useProfilerActionContext } from '../../contexts/profiler_context';
-import { useRequestProfile } from '../../hooks';
 import { Editor, EditorInstance } from './editor';
 
 const DEFAULT_INDEX_VALUE = '_all';

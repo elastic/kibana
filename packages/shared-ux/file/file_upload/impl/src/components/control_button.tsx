@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { useBehaviorSubject } from '@kbn/shared-ux-file-util';
 import { useUploadState } from '../context';
-import { CancelButton } from './cancel_button';
-import { RetryButton } from './retry_button';
 import { UploadButton } from './upload_button';
+import { RetryButton } from './retry_button';
+import { CancelButton } from './cancel_button';
 
 interface Props {
   onCancel: () => void;

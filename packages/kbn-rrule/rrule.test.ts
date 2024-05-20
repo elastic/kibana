@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import sinon from 'sinon';
-import { Frequency, RRule, Weekday } from './rrule';
+import { RRule, Frequency, Weekday } from './rrule';
 
 const DATE_2019 = '2019-01-01T00:00:00.000Z';
 const DATE_2019_DECEMBER_19 = '2019-12-19T00:00:00.000Z';

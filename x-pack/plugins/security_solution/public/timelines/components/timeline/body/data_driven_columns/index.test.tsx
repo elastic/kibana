@@ -9,8 +9,8 @@ import { shallow } from 'enzyme';
 
 import React from 'react';
 
-import { mockTimelineData } from '../../../../../common/mock';
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
+import { mockTimelineData } from '../../../../../common/mock';
 import { defaultHeaders } from '../column_headers/default_headers';
 import { getDefaultControlColumn } from '../control_columns';
 

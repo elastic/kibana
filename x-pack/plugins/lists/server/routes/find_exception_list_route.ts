@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 
+import type { ListsPluginRouter } from '../types';
 import {
   FindExceptionListRequestQueryDecoded,
   findExceptionListRequestQuery,
   findExceptionListResponse,
 } from '../../common/api';
-import type { ListsPluginRouter } from '../types';
 
 import { buildRouteValidation, buildSiemResponse, getExceptionListClient } from './utils';
 

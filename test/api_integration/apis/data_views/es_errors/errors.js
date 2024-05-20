@@ -6,18 +6,18 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import expect from '@kbn/expect';
 
 import {
-  convertEsError,
-  createNoMatchingIndicesError,
   isEsIndexNotFoundError,
+  createNoMatchingIndicesError,
   isNoMatchingIndicesError,
+  convertEsError,
 } from '@kbn/data-views-plugin/server/fetcher/lib/errors';
 
-import { getDocNotFoundError, getIndexNotFoundError } from './lib';
+import { getIndexNotFoundError, getDocNotFoundError } from './lib';
 
 export default function ({ getService }) {
   const es = getService('es');

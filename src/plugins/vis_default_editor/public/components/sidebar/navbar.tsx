@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
+import { EuiTabs, EuiTab } from '@elastic/eui';
 
 import { OptionTab } from './use_option_tabs';
 

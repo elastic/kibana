@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
+import React from 'react';
+import { EuiToolTip, EuiText, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import type { ActionResult } from '@kbn/actions-plugin/server';
-import type { RuleAction, RuleActionFrequency } from '@kbn/alerting-plugin/common';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { RuleActionFrequency, RuleAction } from '@kbn/alerting-plugin/common';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getTimeTypeValue } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import * as i18n from './translations';
 

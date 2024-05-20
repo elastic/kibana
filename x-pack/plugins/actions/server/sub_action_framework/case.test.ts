@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MockedLogger } from '@kbn/logging-mocks';
-import { ActionsConfigurationUtilities } from '../actions_config';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { TestCaseConnector } from './mocks';
+import { ActionsConfigurationUtilities } from '../actions_config';
 
 describe('CaseConnector', () => {
   let logger: MockedLogger;

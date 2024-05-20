@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  HttpStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import {
+  HttpStart,
+  AppMountParameters,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_APP_CATEGORIES,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
-import { ConfigSchema } from '.';
-import { PLUGIN_ID } from '../common';
-import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
 import type { ObservabilityOnboardingConfig } from '../server';
-import { ObservabilityOnboardingPluginLocators } from './locators';
+import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
+import { ObservabilityOnboardingPluginLocators } from './locators';
+import { ConfigSchema } from '.';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../common/telemetry_events';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;

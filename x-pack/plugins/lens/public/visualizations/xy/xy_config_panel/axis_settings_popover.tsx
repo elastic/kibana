@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { EuiButtonGroup, EuiFormRow, EuiSelect, EuiSwitch, IconType } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiSwitch, IconType, EuiFormRow, EuiButtonGroup, EuiSelect } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { isEqual } from 'lodash';
+import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
+import { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import {
   EuiIconAxisBottom,
   EuiIconAxisLeft,
   EuiIconAxisRight,
   EuiIconAxisTop,
 } from '@kbn/chart-icons';
-import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
-import { i18n } from '@kbn/i18n';
-import { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
-import { isEqual } from 'lodash';
-import React, { useCallback } from 'react';
+import { isHorizontalChart } from '../state_helpers';
 import {
+  ToolbarPopover,
+  AxisTitleSettings,
   AxisBoundsControl,
   AxisTicksSettings,
-  AxisTitleSettings,
-  ToolbarPopover,
 } from '../../../shared_components';
-import { isHorizontalChart } from '../state_helpers';
-import { AxesSettingsConfig, XYLayerConfig } from '../types';
+import { XYLayerConfig, AxesSettingsConfig } from '../types';
 
 import './axis_settings_popover.scss';
-import { getBounds } from '../../../shared_components/axis/extent/axis_extent_settings';
 import { validateExtent } from '../../../shared_components/axis/extent/helpers';
+import { getBounds } from '../../../shared_components/axis/extent/axis_extent_settings';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
 

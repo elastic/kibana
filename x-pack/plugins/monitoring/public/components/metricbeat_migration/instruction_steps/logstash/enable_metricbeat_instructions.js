@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Fragment } from 'react';
+import { EuiSpacer, EuiCodeBlock, EuiLink, EuiText } from '@elastic/eui';
+import { Monospace } from '../components/monospace';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Legacy } from '../../../../legacy_shims';
 import { getMigrationStatusStep, getSecurityStep } from '../common_instructions';
-import { Monospace } from '../components/monospace';
 
 export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { esMonitoringUrl }) {
   const logstashUrl = Legacy.shims.docLinks.links.monitoring.monitorLogstash;

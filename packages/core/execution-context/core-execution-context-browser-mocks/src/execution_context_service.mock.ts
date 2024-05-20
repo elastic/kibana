@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
 import type { ExecutionContextService } from '@kbn/core-execution-context-browser-internal';
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { BehaviorSubject } from 'rxjs';
 
 const createContractMock = (): jest.Mocked<ExecutionContextSetup> => ({
   context$: new BehaviorSubject({}),

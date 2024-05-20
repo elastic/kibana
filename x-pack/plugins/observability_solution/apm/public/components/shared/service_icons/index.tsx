@@ -6,25 +6,25 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   CloudProvider,
   getAgentIcon,
   getCloudProviderIcon,
   getServerlessIcon,
 } from '@kbn/custom-icons';
-import { i18n } from '@kbn/i18n';
 import React, { ReactChild, useState } from 'react';
-import { isOpenTelemetryAgentName } from '../../../../common/agent_name';
-import { ServerlessType } from '../../../../common/serverless';
+import { useTheme } from '../../../hooks/use_theme';
 import { ContainerType } from '../../../../common/service_metadata';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useTheme } from '../../../hooks/use_theme';
 import { CloudDetails } from './cloud_details';
-import { ContainerDetails } from './container_details';
-import { IconPopover } from './icon_popover';
-import { OTelDetails } from './otel_details';
 import { ServerlessDetails } from './serverless_details';
+import { ContainerDetails } from './container_details';
+import { OTelDetails } from './otel_details';
+import { IconPopover } from './icon_popover';
 import { ServiceDetails } from './service_details';
+import { ServerlessType } from '../../../../common/serverless';
+import { isOpenTelemetryAgentName } from '../../../../common/agent_name';
 
 interface Props {
   serviceName: string;

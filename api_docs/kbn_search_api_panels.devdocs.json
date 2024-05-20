@@ -87,7 +87,9 @@
             "tags": [],
             "label": "{\n  application,\n  codeSnippet,\n  consolePlugin,\n  languageType,\n  languages,\n  assetBasePath,\n  selectedLanguage,\n  setSelectedLanguage,\n  sharePlugin,\n  consoleRequest,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<CodeBoxProps>"],
+            "signature": [
+              "React.PropsWithChildren<CodeBoxProps>"
+            ],
             "path": "packages/kbn-search-api-panels/components/code_box.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -337,7 +339,9 @@
             "tags": [],
             "label": "{\n  codeSnippet,\n  selectedLanguage,\n  selectedPipeline,\n  setSelectedLanguage,\n  docLinks,\n  assetBasePath,\n  application,\n  consolePlugin,\n  sharePlugin,\n  languages,\n  consoleRequest,\n  additionalIngestionPanel,\n  ingestPipelineData,\n  setSelectedPipeline,\n  defaultIngestPipeline,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<IngestDataProps>"],
+            "signature": [
+              "React.PropsWithChildren<IngestDataProps>"
+            ],
             "path": "packages/kbn-search-api-panels/components/ingest_data.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -368,7 +372,9 @@
             "tags": [],
             "label": "{\n  additionalIngestionPanel,\n  docLinks,\n  assetBasePath,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<IngestionPanelProps>"],
+            "signature": [
+              "React.PropsWithChildren<IngestionPanelProps>"
+            ],
             "path": "packages/kbn-search-api-panels/components/ingestions_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -399,7 +405,9 @@
             "tags": [],
             "label": "{\n  selectedPipeline,\n  setSelectedPipeline,\n  ingestPipelinesData,\n  defaultIngestPipeline,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<IngestPipelinePanelProps>"],
+            "signature": [
+              "React.PropsWithChildren<IngestPipelinePanelProps>"
+            ],
             "path": "packages/kbn-search-api-panels/components/ingest_pipelines/ingest_pipeline_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -430,7 +438,9 @@
             "tags": [],
             "label": "{\n  codeSnippet,\n  consoleRequest,\n  language,\n  languages,\n  setSelectedLanguage,\n  assetBasePath,\n  application,\n  sharePlugin,\n  isPanelLeft = true,\n  overviewPanelProps,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<InstallClientProps>"],
+            "signature": [
+              "React.PropsWithChildren<InstallClientProps>"
+            ],
             "path": "packages/kbn-search-api-panels/components/install_client.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -461,7 +471,9 @@
             "tags": [],
             "label": "{\n  language,\n  setSelectedLanguage,\n  isSelectedLanguage,\n  assetBasePath,\n  src,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<SelectClientProps>"],
+            "signature": [
+              "React.PropsWithChildren<SelectClientProps>"
+            ],
             "path": "packages/kbn-search-api-panels/components/language_client_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -492,7 +504,9 @@
             "tags": [],
             "label": "{\n  children,\n  description,\n  leftPanelContent,\n  links,\n  rightPanelContent,\n  title,\n  overviewPanelProps,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<React.PropsWithChildren<OverviewPanelProps>>"],
+            "signature": [
+              "React.PropsWithChildren<React.PropsWithChildren<OverviewPanelProps>>"
+            ],
             "path": "packages/kbn-search-api-panels/components/overview_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -523,7 +537,9 @@
             "tags": [],
             "label": "{\n  clusterImage,\n  cutImage,\n  reporterImage,\n}",
             "description": [],
-            "signature": ["React.PropsWithChildren<PipelinePanelProps>"],
+            "signature": [
+              "React.PropsWithChildren<PipelinePanelProps>"
+            ],
             "path": "packages/kbn-search-api-panels/components/pipeline_panel.tsx",
             "deprecated": false,
             "trackAdoption": false,
@@ -684,7 +700,9 @@
             "tags": [],
             "label": "cloudId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -696,7 +714,9 @@
             "tags": [],
             "label": "elasticsearchUrl",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -708,7 +728,9 @@
             "tags": [],
             "label": "isPanelLeft",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/components/cloud_details.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -806,7 +828,9 @@
             "tags": [],
             "label": "docLink",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -818,7 +842,9 @@
             "tags": [],
             "label": "configureClient",
             "description": [],
-            "signature": ["CodeSnippet | undefined"],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -830,7 +856,9 @@
             "tags": [],
             "label": "ingestData",
             "description": [],
-            "signature": ["CodeSnippet | undefined"],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -842,7 +870,9 @@
             "tags": [],
             "label": "ingestDataIndex",
             "description": [],
-            "signature": ["CodeSnippet | undefined"],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -854,7 +884,9 @@
             "tags": [],
             "label": "installClient",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -866,7 +898,9 @@
             "tags": [],
             "label": "buildSearchQuery",
             "description": [],
-            "signature": ["CodeSnippet | undefined"],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -878,7 +912,9 @@
             "tags": [],
             "label": "testConnection",
             "description": [],
-            "signature": ["CodeSnippet | undefined"],
+            "signature": [
+              "CodeSnippet | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -890,7 +926,9 @@
             "tags": [],
             "label": "advancedConfig",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -902,7 +940,9 @@
             "tags": [],
             "label": "apiReference",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -914,7 +954,9 @@
             "tags": [],
             "label": "basicConfig",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -926,7 +968,9 @@
             "tags": [],
             "label": "github",
             "description": [],
-            "signature": ["{ link: string; label: string; } | undefined"],
+            "signature": [
+              "{ link: string; label: string; } | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -938,7 +982,9 @@
             "tags": [],
             "label": "languageStyling",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -986,7 +1032,9 @@
             "tags": [],
             "label": "indexName",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -998,7 +1046,9 @@
             "tags": [],
             "label": "cloudId",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1010,7 +1060,9 @@
             "tags": [],
             "label": "ingestPipeline",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1022,7 +1074,9 @@
             "tags": [],
             "label": "extraIngestDocumentValues",
             "description": [],
-            "signature": ["Record<string, boolean> | undefined"],
+            "signature": [
+              "Record<string, boolean> | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1048,7 +1102,9 @@
             "tags": [],
             "label": "docLinks",
             "description": [],
-            "signature": ["{ elasticsearchClients: string; kibanaRunApiInConsole: string; }"],
+            "signature": [
+              "{ elasticsearchClients: string; kibanaRunApiInConsole: string; }"
+            ],
             "path": "packages/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1060,7 +1116,9 @@
             "tags": [],
             "label": "isPanelLeft",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1247,7 +1305,9 @@
             "tags": [],
             "label": "assetBasePath",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1259,7 +1319,9 @@
             "tags": [],
             "label": "image",
             "description": [],
-            "signature": ["string | undefined"],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/index.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1271,7 +1333,9 @@
             "tags": [],
             "label": "showDescription",
             "description": [],
-            "signature": ["boolean | undefined"],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "packages/kbn-search-api-panels/index.tsx",
             "deprecated": false,
             "trackAdoption": false

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
+import moment from 'moment';
 
 describe('calculateDateHistogramOffset(timerange)', () => {
   it('should just work', () => {

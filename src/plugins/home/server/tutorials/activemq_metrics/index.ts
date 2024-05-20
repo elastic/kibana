@@ -8,15 +8,15 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  TutorialContext,
-  TutorialSchema,
-  TutorialsCategory,
-} from '../../services/tutorials/lib/tutorials_registry_types';
-import {
+  onPremInstructions,
   cloudInstructions,
   onPremCloudInstructions,
-  onPremInstructions,
 } from '../instructions/metricbeat_instructions';
+import {
+  TutorialContext,
+  TutorialsCategory,
+  TutorialSchema,
+} from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function activemqMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'activemq';

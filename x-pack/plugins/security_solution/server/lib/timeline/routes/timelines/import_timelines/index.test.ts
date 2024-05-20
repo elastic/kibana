@@ -5,36 +5,36 @@
  * 2.0.
  */
 
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import { TimelineStatus, TimelineType } from '../../../../../../common/api/timeline';
-import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
+import { getImportTimelinesRequest } from '../../../__mocks__/request_responses';
 import {
-  createMockConfig,
+  serverMock,
   requestContextMock,
   requestMock,
-  serverMock,
+  createMockConfig,
 } from '../../../../detection_engine/routes/__mocks__';
-import { getImportTimelinesRequest } from '../../../__mocks__/request_responses';
+import { TIMELINE_EXPORT_URL } from '../../../../../../common/constants';
+import { TimelineStatus, TimelineType } from '../../../../../../common/api/timeline';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 
 import {
-  mockCreatedTemplateTimeline,
-  mockCreatedTimeline,
+  mockUniqueParsedObjects,
+  mockParsedObjects,
   mockDuplicateIdErrors,
   mockGetCurrentUser,
-  mockGetTemplateTimelineValue,
   mockGetTimelineValue,
-  mockParsedObjects,
-  mockParsedTemplateTimelineObject,
-  mockParsedTemplateTimelineObjects,
   mockParsedTimelineObject,
-  mockUniqueParsedObjects,
+  mockParsedTemplateTimelineObjects,
   mockUniqueParsedTemplateTimelineObjects,
+  mockParsedTemplateTimelineObject,
+  mockCreatedTemplateTimeline,
+  mockGetTemplateTimelineValue,
+  mockCreatedTimeline,
 } from '../../../__mocks__/import_timelines';
 import {
+  TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
   EMPTY_TITLE_ERROR_MESSAGE,
   NOT_ALLOW_UPDATE_STATUS_ERROR_MESSAGE,
   NOT_ALLOW_UPDATE_TIMELINE_TYPE_ERROR_MESSAGE,
-  TEMPLATE_TIMELINE_VERSION_CONFLICT_MESSAGE,
 } from '../../../utils/failure_cases';
 
 describe('import timelines', () => {

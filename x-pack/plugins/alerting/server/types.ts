@@ -5,68 +5,68 @@
  * 2.0.
  */
 
-import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
-import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
-import { Alert } from '@kbn/alerts-as-data-utils';
-import type { ObjectType } from '@kbn/config-schema';
 import type {
-  CustomRequestHandlerContext,
   IRouter,
-  IUiSettingsClient,
+  CustomRequestHandlerContext,
   SavedObjectReference,
+  IUiSettingsClient,
 } from '@kbn/core/server';
+import z from 'zod';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   IScopedClusterClient,
-  Logger,
   SavedObjectAttributes,
   SavedObjectsClientContract,
+  Logger,
 } from '@kbn/core/server';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
-import { LicenseType } from '@kbn/licensing-plugin/server';
-import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import z from 'zod';
-import { MaintenanceWindowClient } from './maintenance_window_client';
-import { PluginSetupContract, PluginStartContract } from './plugin';
+import { SharePluginStart } from '@kbn/share-plugin/server';
+import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
+import { Alert } from '@kbn/alerts-as-data-utils';
+import { Filter } from '@kbn/es-query';
+import { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
+import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
 import {
   RulesSettingsClient,
   RulesSettingsFlappingClient,
   RulesSettingsQueryDelayClient,
 } from './rules_settings_client';
+import { MaintenanceWindowClient } from './maintenance_window_client';
 export * from '../common';
 import {
-  ActionGroup,
-  ActionVariable,
-  AlertDelay,
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertsFilter,
-  AlertsFilterTimeframe,
-  AlertsHealth,
-  IntervalSchedule,
-  MappedParams,
   Rule,
-  RuleActionParams,
-  RuleAlertData,
-  RuleExecutionStatusErrorReasons,
-  RuleExecutionStatusWarningReasons,
-  RuleExecutionStatuses,
-  RuleLastRun,
-  RuleMonitoring,
-  RuleNotifyWhenType,
-  RuleSnooze,
   RuleTypeParams,
   RuleTypeState,
-  SanitizedRule,
-  SanitizedRuleConfig,
+  RuleActionParams,
+  RuleExecutionStatuses,
+  RuleExecutionStatusErrorReasons,
+  RuleExecutionStatusWarningReasons,
+  RuleNotifyWhenType,
+  ActionGroup,
+  AlertInstanceContext,
+  AlertInstanceState,
+  AlertsHealth,
   WithoutReservedActionGroups,
+  ActionVariable,
+  SanitizedRuleConfig,
+  RuleMonitoring,
+  MappedParams,
+  RuleSnooze,
+  IntervalSchedule,
+  RuleLastRun,
+  SanitizedRule,
+  AlertsFilter,
+  AlertsFilterTimeframe,
+  RuleAlertData,
+  AlertDelay,
 } from '../common';
-import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertFactory } from './alert/create_alert_factory';
+import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
 import { GetTimeRangeResult } from './lib/get_time_range';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -100,7 +100,7 @@ export interface RuleExecutorServices<
   State extends AlertInstanceState = AlertInstanceState,
   Context extends AlertInstanceContext = AlertInstanceContext,
   ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = RuleAlertData,
+  AlertData extends RuleAlertData = RuleAlertData
 > {
   searchSourceClient: ISearchStartSearchSource;
   savedObjectsClient: SavedObjectsClientContract;
@@ -131,7 +131,7 @@ export interface RuleExecutorOptions<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = never,
+  AlertData extends RuleAlertData = never
 > {
   executionId: string;
   logger: Logger;
@@ -160,7 +160,7 @@ export type ExecutorType<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
-  AlertData extends RuleAlertData = never,
+  AlertData extends RuleAlertData = never
 > = (
   options: RuleExecutorOptions<
     Params,
@@ -286,7 +286,7 @@ export interface RuleType<
   InstanceContext extends AlertInstanceContext = never,
   ActionGroupIds extends string = never,
   RecoveryActionGroupId extends string = never,
-  AlertData extends RuleAlertData = never,
+  AlertData extends RuleAlertData = never
 > {
   id: string;
   name: string;

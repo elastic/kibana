@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { SmallUserAvatar } from './small_user_avatar';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { UserToolTip } from './user_tooltip';
+import { SmallUserAvatar } from './small_user_avatar';
 import type { UsernameProps } from './username';
 import { Username } from './username';
 

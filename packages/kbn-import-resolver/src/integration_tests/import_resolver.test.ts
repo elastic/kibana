@@ -7,8 +7,8 @@
  */
 
 import Path from 'path';
-import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { Package } from '@kbn/repo-packages';
+import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 
 import { ImportResolver } from '../import_resolver';
 
@@ -43,9 +43,8 @@ describe('#resolve()', () => {
   });
 
   it('resolves nested node_module imports', () => {
-    expect(
-      resolver.resolve('bar', Path.join(FIXTURES_DIR, 'packages', 'box'))
-    ).toMatchInlineSnapshot(`
+    expect(resolver.resolve('bar', Path.join(FIXTURES_DIR, 'packages', 'box')))
+      .toMatchInlineSnapshot(`
       Object {
         "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules/bar/index.js,
         "nodeModule": "bar",
@@ -105,9 +104,8 @@ describe('#resolve()', () => {
       }
     `);
 
-    expect(
-      resolver.resolve('@elastic/eui/src/components/foo', FIXTURES_DIR)
-    ).toMatchInlineSnapshot(`
+    expect(resolver.resolve('@elastic/eui/src/components/foo', FIXTURES_DIR))
+      .toMatchInlineSnapshot(`
       Object {
         "type": "ignore",
       }

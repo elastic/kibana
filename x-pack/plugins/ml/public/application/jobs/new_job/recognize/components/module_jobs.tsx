@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import type { FC } from 'react';
+import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,14 +16,11 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import type { FC } from 'react';
-import React, { useState } from 'react';
-import type { JobOverride } from '../../../../../../common/types/modules';
 import type { JobOverrides, ModuleJobUI } from '../page';
 import { SAVE_STATE } from '../page';
-import { EditJob } from './edit_job';
 import { JobItem } from './job_item';
+import { EditJob } from './edit_job';
+import type { JobOverride } from '../../../../../../common/types/modules';
 
 interface ModuleJobsProps {
   jobs: ModuleJobUI[];

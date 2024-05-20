@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { ParsedDashboardAttributesWithType } from '../../types';
 import { createExtract, createInject } from './dashboard_container_references';
+import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
+import { ParsedDashboardAttributesWithType } from '../../types';
+import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/public';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 

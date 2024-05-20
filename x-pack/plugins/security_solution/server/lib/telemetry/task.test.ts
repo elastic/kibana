@@ -8,14 +8,14 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SuccessfulRunResult } from '@kbn/task-manager-plugin/server/task';
+import { SecurityTelemetryTask } from './task';
 import {
-  createMockSecurityTelemetryTask,
   createMockTaskInstance,
-  createMockTaskMetrics,
   createMockTelemetryEventsSender,
   createMockTelemetryReceiver,
+  createMockTaskMetrics,
+  createMockSecurityTelemetryTask,
 } from './__mocks__';
-import { SecurityTelemetryTask } from './task';
 
 describe('test security telemetry task', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;

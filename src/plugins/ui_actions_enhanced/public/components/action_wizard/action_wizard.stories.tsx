@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { storiesOf } from '@storybook/react';
+import { SerializableRecord } from '@kbn/utility-types';
 import { Demo, dashboardFactory, urlFactory } from './test_data';
+import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
 
 const dashboard = dashboardFactory as unknown as ActionFactory<
   SerializableRecord,

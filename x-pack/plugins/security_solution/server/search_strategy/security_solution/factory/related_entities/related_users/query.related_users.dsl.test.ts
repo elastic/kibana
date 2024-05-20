@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { expectedDsl, mockOptions } from './__mocks__';
 import { buildRelatedUsersQuery } from './query.related_users.dsl';
+import { mockOptions, expectedDsl } from './__mocks__';
 
 describe('buildRelatedUsersQuery', () => {
   test('build query from options correctly', () => {

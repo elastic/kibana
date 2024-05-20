@@ -16,12 +16,12 @@ import {
 } from '../../../screens/timeline';
 
 import {
-  addAlertPropertyToTimeline,
-  clickExpandActions,
-  filterForAlertProperty,
-  filterOutAlertProperty,
   scrollAlertTableColumnIntoView,
+  addAlertPropertyToTimeline,
+  filterForAlertProperty,
   showTopNAlertProperty,
+  clickExpandActions,
+  filterOutAlertProperty,
 } from '../../../tasks/alerts';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { createRule } from '../../../tasks/api_calls/rules';

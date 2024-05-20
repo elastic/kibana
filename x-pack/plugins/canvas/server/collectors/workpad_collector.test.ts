@@ -6,9 +6,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import moment from 'moment';
-import { workpads } from '../../__fixtures__/workpads';
 import { summarizeWorkpads } from './workpad_collector';
+import { workpads } from '../../__fixtures__/workpads';
+import moment from 'moment';
 
 describe('usage collector handle es response data', () => {
   it('should summarize workpads, pages, and elements', () => {

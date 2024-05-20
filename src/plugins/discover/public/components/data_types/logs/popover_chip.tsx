@@ -6,24 +6,24 @@
  * Side Public License, v 1.
  */
 
+import React, { useCallback, useState } from 'react';
 import {
   EuiBadge,
   type EuiBadgeProps,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  useEuiFontSize,
   EuiPopoverFooter,
   EuiText,
-  useEuiFontSize,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import React, { useCallback, useState } from 'react';
-import { CopyButton } from './copy_button';
+import { closeCellActionPopoverText, openCellActionPopoverAriaText } from './translations';
 import { FilterInButton } from './filter_in_button';
 import { FilterOutButton } from './filter_out_button';
-import { closeCellActionPopoverText, openCellActionPopoverAriaText } from './translations';
+import { CopyButton } from './copy_button';
 
 const DataTablePopoverCellValue = dynamic(
   () => import('@kbn/unified-data-table/src/components/data_table_cell_value')

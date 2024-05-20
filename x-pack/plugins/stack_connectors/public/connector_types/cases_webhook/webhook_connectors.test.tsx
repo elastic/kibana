@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
+import CasesWebhookActionConnectorFields from './webhook_connectors';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import * as i18n from './translations';
-import CasesWebhookActionConnectorFields from './webhook_connectors';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
   const originalModule = jest.requireActual('@kbn/triggers-actions-ui-plugin/public');

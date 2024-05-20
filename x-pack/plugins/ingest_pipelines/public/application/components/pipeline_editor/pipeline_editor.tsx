@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import {
-  OnDoneLoadJsonHandler,
-  OnFailureProcessorsTitle,
-  ProcessorsEmptyPrompt,
-  ProcessorsHeader,
-} from './components';
 import { usePipelineProcessorsContext } from './context';
-import { GlobalOnFailureProcessorsEditor, ProcessorsEditor } from './editors';
+import {
+  ProcessorsEmptyPrompt,
+  OnFailureProcessorsTitle,
+  ProcessorsHeader,
+  OnDoneLoadJsonHandler,
+} from './components';
+import { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 
 import './pipeline_editor.scss';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
+import { LIGHT_THEME, DARK_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { useMemo } from 'react';
 import { useTheme } from './use_theme';
 

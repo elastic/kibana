@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash';
 import type { Dispatch, MiddlewareAPI } from 'redux';
+import { isEqual } from 'lodash';
 import type { SafeResolverEvent } from '../../../../common/endpoint/types';
 
-import type { State } from '../../../common/store/types';
 import type { DataAccessLayer, PanelViewAndParameters } from '../../types';
+import type { State } from '../../../common/store/types';
+import * as selectors from '../selectors';
 import {
   appRequestedCurrentRelatedEventData,
   serverFailedToReturnCurrentRelatedEventData,
   serverReturnedCurrentRelatedEventData,
 } from '../data/action';
-import * as selectors from '../selectors';
 
 /**
  *

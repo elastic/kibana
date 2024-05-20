@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import type { AccessorFn } from '@elastic/charts';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
+import type { DatatableColumn, Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';

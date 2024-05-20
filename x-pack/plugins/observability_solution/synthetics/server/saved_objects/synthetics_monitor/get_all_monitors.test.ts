@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { processMonitors } from './get_all_monitors';
+import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import * as getLocations from '../../synthetics_service/get_all_locations';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { SyntheticsService } from '../../synthetics_service/synthetics_service';
-import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
+import * as getLocations from '../../synthetics_service/get_all_locations';
 import { SyntheticsServerSetup } from '../../types';
-import { processMonitors } from './get_all_monitors';
 
 describe('processMonitors', () => {
   const mockEsClient = {

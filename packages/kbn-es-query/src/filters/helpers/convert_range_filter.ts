@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { keys } from 'lodash';
 import moment from 'moment';
+import { keys } from 'lodash';
 import type { RangeFilter } from '../build_filters';
 import type { TimeRange } from './types';
 

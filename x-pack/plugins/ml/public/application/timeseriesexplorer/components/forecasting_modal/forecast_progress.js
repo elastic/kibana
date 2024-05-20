@@ -13,17 +13,17 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import {
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiFlexGroup,
   EuiProgress,
   EuiSpacer,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
 import { ProgressIcon } from './progress_icon';
 import { PROGRESS_STATES } from './progress_states';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export function ForecastProgress({ forecastProgress, jobOpeningState, jobClosingState }) {
   return (

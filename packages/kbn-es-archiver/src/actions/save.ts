@@ -6,20 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { resolve, relative } from 'path';
 import { createWriteStream, mkdirSync } from 'fs';
-import { relative, resolve } from 'path';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
-import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
 import { createListStream, createPromiseFromStreams } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
-  Progress,
+  createStats,
+  createGenerateIndexRecordsStream,
   createFormatArchiveStreams,
   createGenerateDocRecordsStream,
-  createGenerateIndexRecordsStream,
-  createStats,
+  Progress,
 } from '../lib';
 
 export async function saveAction({

@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { ReactWrapper } from 'enzyme';
 
-import { HttpSetup } from '@kbn/core/public';
 import {
-  AsyncTestBedConfig,
-  TestBed,
-  findTestSubject,
   registerTestBed,
+  TestBed,
+  AsyncTestBedConfig,
+  findTestSubject,
 } from '@kbn/test-jest-helpers';
+import { HttpSetup } from '@kbn/core/public';
 import { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';
-import { TestSubjects, WithAppDependencies, services } from '../helpers';
+import { WithAppDependencies, services, TestSubjects } from '../helpers';
 
 export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
   actions: {

@@ -13,17 +13,17 @@ import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
+import { defineEnrollRoutes } from './enroll';
+import { routeDefinitionParamsMock } from './index.mock';
 import {
+  ElasticsearchConnectionStatus,
   ERROR_ELASTICSEARCH_CONNECTION_CONFIGURED,
   ERROR_ENROLL_FAILURE,
   ERROR_KIBANA_CONFIG_FAILURE,
   ERROR_KIBANA_CONFIG_NOT_WRITABLE,
   ERROR_OUTSIDE_PREBOOT_STAGE,
-  ElasticsearchConnectionStatus,
 } from '../../common';
 import { interactiveSetupMock } from '../mocks';
-import { defineEnrollRoutes } from './enroll';
-import { routeDefinitionParamsMock } from './index.mock';
 
 describe('Enroll routes', () => {
   let router: jest.Mocked<IRouter>;

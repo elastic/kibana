@@ -8,13 +8,13 @@
 
 import Path from 'path';
 
-import { getPackageRelativeImportReq, getRelativeImportReq } from '@kbn/import-resolver';
 import type { Rule } from 'eslint';
+import { getRelativeImportReq, getPackageRelativeImportReq } from '@kbn/import-resolver';
 
-import { getImportResolver } from '../get_import_resolver';
 import { report } from '../helpers/report';
-import { getSourcePath } from '../helpers/source';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
+import { getSourcePath } from '../helpers/source';
+import { getImportResolver } from '../get_import_resolver';
 
 export const UniformImportsRule: Rule.RuleModule = {
   meta: {

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { validateDuration, ValidateDurationOptions } from '../../../common/validate_duration';
 import {
   RULE_CCR_READ_EXCEPTIONS,
   RULE_DETAILS,
   RULE_REQUIRES_APP_CONTEXT,
 } from '../../../common/constants';
-import { ValidateDurationOptions, validateDuration } from '../../../common/validate_duration';
 import type { MonitoringConfig } from '../../types';
 import {
   LazyExpression,

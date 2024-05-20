@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { resolve } from 'path';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 import fetch from 'node-fetch';
+import { resolve } from 'path';
 import pkg from '../../package.json';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common/src/constants';
 
 function getRequestParams(argv) {
   // use `--host=https://somedomain.com:5601` or else http://localhost:5601 is defaulted

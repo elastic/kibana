@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { set } from 'lodash';
-import React from 'react';
-import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import { expectIsViewOnly, getPolicySettingsFormTestSubjects, exactMatchText } from '../../mocks';
 import type { AppContextTestRender } from '../../../../../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../../../../../common/mock/endpoint';
-import { exactMatchText, expectIsViewOnly, getPolicySettingsFormTestSubjects } from '../../mocks';
+import { FleetPackagePolicyGenerator } from '../../../../../../../../common/endpoint/data_generators/fleet_package_policy_generator';
+import React from 'react';
+import { set } from 'lodash';
 import type { WindowsEventCollectionCardProps } from './windows_event_collection_card';
 import { WindowsEventCollectionCard } from './windows_event_collection_card';
 

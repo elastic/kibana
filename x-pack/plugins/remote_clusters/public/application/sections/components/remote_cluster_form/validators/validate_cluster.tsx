@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
-import { FormFields } from '../remote_cluster_form';
-import { validateCloudRemoteAddress } from './validate_cloud_url';
 import { validateName } from './validate_name';
-import { validateProxy } from './validate_proxy';
+import { PROXY_MODE, SNIFF_MODE } from '../../../../../../common/constants';
 import { validateSeeds } from './validate_seeds';
+import { validateProxy } from './validate_proxy';
+import { validateCloudRemoteAddress } from './validate_cloud_url';
+import { FormFields } from '../remote_cluster_form';
 
 type ClusterError = JSX.Element | null;
 

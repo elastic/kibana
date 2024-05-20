@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { API_URLS } from '../../../../common/constants';
+import { apiService } from './utils';
+import { FetchJourneyStepsParams } from '../actions/journey';
 import { Ping, PingType } from '../../../../common/runtime_types/ping/ping';
 import {
   FailedStepsApiResponse,
@@ -16,8 +17,7 @@ import {
   SyntheticsJourneyApiResponse,
   SyntheticsJourneyApiResponseType,
 } from '../../../../common/runtime_types/ping/synthetics';
-import { FetchJourneyStepsParams } from '../actions/journey';
-import { apiService } from './utils';
+import { API_URLS } from '../../../../common/constants';
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
   return apiService.post<ScreenshotBlockDoc[]>(API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {

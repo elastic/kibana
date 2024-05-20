@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
-import type { Dataset, Integration } from '../../../../common/datasets';
 import { ReloadDatasets } from '../../../hooks/use_datasets';
 import { errorLabel, noDataRetryLabel } from '../constants';
+import type { Dataset, Integration } from '../../../../common/datasets';
 import { DatasetSkeleton } from './datasets_skeleton';
 
 export interface ListStatusProps {

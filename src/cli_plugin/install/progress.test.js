@@ -8,8 +8,8 @@
 
 import sinon from 'sinon';
 
-import { Logger } from '../../cli/logger';
 import { Progress } from './progress';
+import { Logger } from '../../cli/logger';
 
 describe('kibana cli', function () {
   describe('plugin installer', function () {

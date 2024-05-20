@@ -6,41 +6,41 @@
  * Side Public License, v 1.
  */
 
+import React, { Component } from 'react';
+import { get } from 'lodash';
+import { v4 as uuidv4 } from 'uuid';
 import {
-  EuiCode,
-  EuiFieldNumber,
-  EuiFieldText,
+  htmlIdGenerator,
+  EuiTabs,
+  EuiTab,
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiHorizontalRule,
-  EuiPanel,
   EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiText,
+  EuiFieldText,
   EuiTitle,
-  htmlIdGenerator,
+  EuiHorizontalRule,
+  EuiCode,
+  EuiText,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { get } from 'lodash';
-import React, { Component } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 
-import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { FieldSelect } from '../aggs/field_select';
-import { IndexPattern } from '../index_pattern';
 import { SeriesEditor } from '../series_editor';
+import { IndexPattern } from '../index_pattern';
 import { YesNo } from '../yes_no';
 
-import { BUCKET_TYPES } from '../../../../common/enums';
-import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
-import { TimeseriesVisParams } from '../../../types';
-import { VisDataContext } from '../../contexts/vis_data_context';
-import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
-import { PANEL_CONFIG_TABS, PanelConfigProps } from './types';
+import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
+import { VisDataContext } from '../../contexts/vis_data_context';
+import { BUCKET_TYPES } from '../../../../common/enums';
+import { PanelConfigProps, PANEL_CONFIG_TABS } from './types';
+import { TimeseriesVisParams } from '../../../types';
+import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 export class TablePanelConfig extends Component<
   PanelConfigProps,

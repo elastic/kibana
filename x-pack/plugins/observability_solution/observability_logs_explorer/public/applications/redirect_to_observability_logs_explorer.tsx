@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
-import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { useLocation } from 'react-router-dom';
+import { Router } from '@kbn/shared-ux-router';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 export const renderObservabilityLogsExplorerRedirect = (
   core: CoreStart,
