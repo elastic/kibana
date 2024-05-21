@@ -7,7 +7,6 @@
 
 import fetch from 'node-fetch';
 import { resolve } from 'path';
-import abab from 'abab';
 import pkg from '../../package.json';
 
 function getRequestParams(argv) {
@@ -16,7 +15,7 @@ function getRequestParams(argv) {
   // use `--auth=myuser:mypassword` or else elastic:changeme is defaulted
   // passing `--auth` with no value effectively sends no auth
   const auth = argv.auth || 'elastic:changeme';
-  const authStr = abab.btoa(auth);
+  const authStr = Buffer.from(auth).toString('base64');
   // auto-add a leading slash to basePath
   const basePath = argv.basePath ? '/' + argv.basePath : '';
 
