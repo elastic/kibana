@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
-import { EuiCard, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
+import {
+  EuiCard,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTextColor,
+  EuiButton,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
 
-import { LinkButton } from '@kbn/security-solution-navigation/src/links';
+import { useNavigation } from '@kbn/security-solution-navigation';
 import * as i18n from '../pages/translations';
 
 const StyledEuiCard = styled(EuiCard)`
@@ -30,6 +38,11 @@ export const EntityAnalyticsUpsellingSection = memo(
     upgradeToLabel: string;
     upgradeHref?: string;
   }) => {
+    const { navigateTo } = useNavigation();
+    const goToSubscription = useCallback(() => {
+      navigateTo({ url: upgradeHref });
+    }, [navigateTo, upgradeHref]);
+
     return (
       <StyledEuiCard
         betaBadgeProps={{ label: upgradeToLabel }}
@@ -58,9 +71,10 @@ export const EntityAnalyticsUpsellingSection = memo(
             <EuiFlexItem>
               {upgradeHref && (
                 <div>
-                  <LinkButton path={upgradeHref} fill id="upgrade-button">
+                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
+                  <EuiButton href={upgradeHref} onClick={goToSubscription} fill>
                     {i18n.UPGRADE_BUTTON(upgradeToLabel)}
-                  </LinkButton>
+                  </EuiButton>
                 </div>
               )}
             </EuiFlexItem>
