@@ -119,6 +119,15 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
+import {
+  ANNOTATION_MISSING_DATE_HISTOGRAM,
+  LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
+  XY_MIXED_LOG_SCALE,
+  XY_MIXED_LOG_SCALE_DIMENSION,
+  XY_RENDER_ARRAY_VALUES,
+  XY_X_WRONG_DATA_TYPE,
+  XY_Y_WRONG_DATA_TYPE,
+} from '../../user_messages_ids';
 
 const XY_ID = 'lnsXY';
 
@@ -773,6 +782,7 @@ export const getXyVisualization = ({
       layer.annotations.forEach((annotation) => {
         if (!hasDateHistogram) {
           errors.push({
+            uniqueId: ANNOTATION_MISSING_DATE_HISTOGRAM,
             severity: 'error',
             fixableInEditor: true,
             displayLocations: [{ id: 'dimensionButton', dimensionId: annotation.id }],
@@ -788,30 +798,7 @@ export const getXyVisualization = ({
         }
 
         const errorMessages = getAnnotationLayerErrors(layer, annotation.id, dataViews);
-        errors.push(
-          ...errorMessages.map((errorMessage) => {
-            const message: UserMessage = {
-              severity: 'error',
-              fixableInEditor: true,
-              displayLocations: [
-                { id: 'visualization' },
-                { id: 'dimensionButton', dimensionId: annotation.id },
-              ],
-              shortMessage: errorMessage,
-              longMessage: (
-                <FormattedMessage
-                  id="xpack.lens.xyChart.annotationError"
-                  defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
-                  values={{
-                    annotationName: annotation.label,
-                    errorMessage,
-                  }}
-                />
-              ),
-            };
-            return message;
-          })
-        );
+        errors.push(...errorMessages);
       });
     });
 
@@ -825,35 +812,34 @@ export const getXyVisualization = ({
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
       // Order is important here: Y Axis is fundamental to exist to make it valid
-      const checks: Array<[string, (layer: XYDataLayerConfig) => boolean]> = [
+      const checks: Array<['Y' | 'Break down', (layer: XYDataLayerConfig) => boolean]> = [
         ['Y', hasNoAccessors],
         ['Break down', hasNoSplitAccessor],
       ];
 
       for (const [dimension, criteria] of checks) {
-        const result = validateLayersForDimension(dimension, state.layers, criteria);
-        if (!result.valid) {
+        const layerValidation = validateLayersForDimension(dimension, state.layers, criteria);
+        if (!layerValidation.valid) {
           errors.push({
+            ...layerValidation.error,
             severity: 'error',
             fixableInEditor: true,
             displayLocations: [{ id: 'visualization' }],
-            shortMessage: result.payload.shortMessage,
-            longMessage: result.payload.longMessage,
           });
         }
       }
     }
     // temporary fix for #87068
     errors.push(
-      ...checkXAccessorCompatibility(state, datasourceLayers).map(
-        ({ shortMessage, longMessage }) =>
-          ({
-            severity: 'error',
-            fixableInEditor: true,
-            displayLocations: [{ id: 'visualization' }],
-            shortMessage,
-            longMessage,
-          } as UserMessage)
+      ...checkXAccessorCompatibility(state, datasourceLayers).map<UserMessage>(
+        ({ shortMessage, longMessage }) => ({
+          severity: 'error',
+          uniqueId: XY_X_WRONG_DATA_TYPE,
+          fixableInEditor: true,
+          displayLocations: [{ id: 'visualization' }],
+          shortMessage,
+          longMessage,
+        })
       )
     );
 
@@ -864,6 +850,7 @@ export const getXyVisualization = ({
           const operation = datasourceAPI.getOperationForColumnId(accessor);
           if (operation && operation.dataType !== 'number') {
             errors.push({
+              uniqueId: XY_Y_WRONG_DATA_TYPE,
               severity: 'error',
               fixableInEditor: true,
               displayLocations: [{ id: 'visualization' }],
@@ -914,6 +901,7 @@ export const getXyVisualization = ({
 
       accessorsWithArrayValues.forEach((label) =>
         warnings.push({
+          uniqueId: XY_RENDER_ARRAY_VALUES,
           severity: 'warning',
           fixableInEditor: true,
           displayLocations: [{ id: 'toolbar' }],
@@ -974,7 +962,7 @@ export const getXyVisualization = ({
           const { groupId } = axisGroup;
 
           warnings.push({
-            uniqueId: `mixedLogScale-${groupId}`,
+            uniqueId: `${XY_MIXED_LOG_SCALE}${groupId}`,
             severity: 'warning',
             shortMessage: '',
             longMessage: (
@@ -1003,7 +991,7 @@ export const getXyVisualization = ({
 
           axisGroup.mixedDomainSeries.forEach(({ accessor }) => {
             warnings.push({
-              uniqueId: `mixedLogScale-dimension-${accessor}`,
+              uniqueId: `${XY_MIXED_LOG_SCALE_DIMENSION}${accessor}`,
               severity: 'warning',
               shortMessage: '',
               longMessage: (
@@ -1276,7 +1264,7 @@ function getNotifiableFeatures(
 
   return [
     {
-      uniqueId: 'ignoring-global-filters-layers',
+      uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
       severity: 'info',
       fixableInEditor: false,
       shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {

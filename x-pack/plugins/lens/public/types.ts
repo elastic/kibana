@@ -299,7 +299,7 @@ type UserMessageDisplayLocation =
 export type UserMessagesDisplayLocationId = UserMessageDisplayLocation['id'];
 
 export interface UserMessage {
-  uniqueId?: string;
+  uniqueId: string;
   severity: 'error' | 'warning' | 'info';
   shortMessage: string;
   longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);

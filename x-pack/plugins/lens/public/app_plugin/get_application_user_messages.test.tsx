@@ -210,6 +210,7 @@ describe('filtering user messages', () => {
 
   const userMessages: UserMessage[] = [
     {
+      uniqueId: 'unique_id_1',
       severity: 'error',
       fixableInEditor: true,
       displayLocations: [{ id: 'dimensionButton', dimensionId: dimensionId1 }],
@@ -217,6 +218,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_2',
       severity: 'warning',
       fixableInEditor: true,
       displayLocations: [{ id: 'dimensionButton', dimensionId: dimensionId2 }],
@@ -224,6 +226,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_3',
       severity: 'warning',
       fixableInEditor: true,
       displayLocations: [{ id: 'banner' }],
@@ -231,6 +234,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_4',
       severity: 'error',
       fixableInEditor: true,
       displayLocations: [{ id: 'visualization' }],
@@ -238,6 +242,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_5',
       severity: 'error',
       fixableInEditor: true,
       displayLocations: [{ id: 'visualizationInEditor' }],
@@ -245,6 +250,7 @@ describe('filtering user messages', () => {
       longMessage: '',
     },
     {
+      uniqueId: 'unique_id_6',
       severity: 'warning',
       fixableInEditor: true,
       displayLocations: [{ id: 'visualizationOnEmbeddable' }],

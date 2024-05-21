@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
@@ -14,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { validateQuery } from '@kbn/visualization-ui-components';
 import { DataViewsState } from '../../state_management';
-import { FramePublicAPI, DatasourcePublicAPI } from '../../types';
+import { FramePublicAPI, DatasourcePublicAPI, UserMessage } from '../../types';
 import {
   visualizationTypes,
   XYLayerConfig,
@@ -30,6 +32,13 @@ import {
   isDataLayer,
   isByReferenceAnnotationsLayer,
 } from './visualization_helpers';
+import {
+  ANNOTATION_INVALID_FILTER_QUERY,
+  ANNOTATION_MISSING_TIME_FIELD,
+  ANNOTATION_MISSING_TOOLTIP_FIELD,
+  ANNOTATION_TEXT_FIELD_NOT_FOUND,
+  ANNOTATION_TIME_FIELD_NOT_FOUND,
+} from '../../user_messages_ids';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -142,11 +151,38 @@ export const annotationLayerHasUnsavedChanges = (layer: XYAnnotationLayerConfig)
   return !fastIsEqual(currentConfig, savedConfig);
 };
 
+function createAnnotationErrorMessage(
+  errorMessage: string,
+  type: string,
+  annotationId: string,
+  annotationName: string
+): UserMessage {
+  return {
+    severity: 'error',
+    type,
+    fixableInEditor: true,
+    displayLocations: [
+      { id: 'visualization' },
+      { id: 'dimensionButton', dimensionId: annotationId },
+    ],
+    shortMessage: errorMessage,
+    longMessage: (
+      <FormattedMessage
+        id="xpack.lens.xyChart.annotationError"
+        defaultMessage="Annotation {annotationName} has an error: {errorMessage}"
+        values={{
+          annotationName,
+          errorMessage,
+        }}
+      />
+    ),
+  };
+}
 export function getAnnotationLayerErrors(
   layer: XYAnnotationLayerConfig,
   columnId: string,
   dataViews: DataViewsState
-): string[] {
+): UserMessage[] {
   if (!layer) {
     return [];
   }
@@ -156,35 +192,57 @@ export function getAnnotationLayerErrors(
   }
   const layerDataView = dataViews.indexPatterns[layer.indexPatternId];
 
-  const invalidMessages: string[] = [];
+  const invalidMessages: UserMessage[] = [];
 
   if (annotation.timeField == null || annotation.timeField === '') {
     invalidMessages.push(
-      i18n.translate('xpack.lens.xyChart.annotationError.timeFieldEmpty', {
-        defaultMessage: 'Time field is missing',
-      })
+      createAnnotationErrorMessage(
+        i18n.translate('xpack.lens.xyChart.annotationError.timeFieldEmpty', {
+          defaultMessage: 'Time field is missing',
+        }),
+        ANNOTATION_MISSING_TIME_FIELD,
+        annotation.id,
+        annotation.label
+      )
     );
   }
 
   if (annotation.timeField && !Boolean(layerDataView.getFieldByName(annotation.timeField))) {
     invalidMessages.push(
-      i18n.translate('xpack.lens.xyChart.annotationError.timeFieldNotFound', {
-        defaultMessage: 'Time field {timeField} not found in data view {dataView}',
-        values: { timeField: annotation.timeField, dataView: layerDataView.title },
-      })
+      createAnnotationErrorMessage(
+        i18n.translate('xpack.lens.xyChart.annotationError.timeFieldNotFound', {
+          defaultMessage: 'Time field {timeField} not found in data view {dataView}',
+          values: { timeField: annotation.timeField, dataView: layerDataView.title },
+        }),
+        ANNOTATION_TIME_FIELD_NOT_FOUND,
+        annotation.id,
+        annotation.label
+      )
     );
   }
 
   const { isValid, error } = validateQuery(annotation?.filter, layerDataView);
   if (!isValid && error) {
-    invalidMessages.push(error);
+    invalidMessages.push(
+      createAnnotationErrorMessage(
+        error,
+        ANNOTATION_INVALID_FILTER_QUERY,
+        annotation.id,
+        annotation.label
+      )
+    );
   }
   if (annotation.textField && !Boolean(layerDataView.getFieldByName(annotation.textField))) {
     invalidMessages.push(
-      i18n.translate('xpack.lens.xyChart.annotationError.textFieldNotFound', {
-        defaultMessage: 'Text field {textField} not found in data view {dataView}',
-        values: { textField: annotation.textField, dataView: layerDataView.title },
-      })
+      createAnnotationErrorMessage(
+        i18n.translate('xpack.lens.xyChart.annotationError.textFieldNotFound', {
+          defaultMessage: 'Text field {textField} not found in data view {dataView}',
+          values: { textField: annotation.textField, dataView: layerDataView.title },
+        }),
+        ANNOTATION_TEXT_FIELD_NOT_FOUND,
+        annotation.id,
+        annotation.label
+      )
     );
   }
   if (annotation.extraFields?.length) {
@@ -196,15 +254,20 @@ export function getAnnotationLayerErrors(
     }
     if (missingTooltipFields.length) {
       invalidMessages.push(
-        i18n.translate('xpack.lens.xyChart.annotationError.tooltipFieldNotFound', {
-          defaultMessage:
-            'Tooltip {missingFields, plural, one {field} other {fields}} {missingTooltipFields} not found in data view {dataView}',
-          values: {
-            missingTooltipFields: missingTooltipFields.join(', '),
-            missingFields: missingTooltipFields.length,
-            dataView: layerDataView.title,
-          },
-        })
+        createAnnotationErrorMessage(
+          i18n.translate('xpack.lens.xyChart.annotationError.tooltipFieldNotFound', {
+            defaultMessage:
+              'Tooltip {missingFields, plural, one {field} other {fields}} {missingTooltipFields} not found in data view {dataView}',
+            values: {
+              missingTooltipFields: missingTooltipFields.join(', '),
+              missingFields: missingTooltipFields.length,
+              dataView: layerDataView.title,
+            },
+          }),
+          ANNOTATION_MISSING_TOOLTIP_FIELD,
+          annotation.id,
+          annotation.label
+        )
       );
     }
   }

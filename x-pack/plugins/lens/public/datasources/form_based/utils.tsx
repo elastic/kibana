@@ -64,6 +64,14 @@ import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants'
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
 import { ReducedSamplingSectionEntries } from './info_badges';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import {
+  LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
+  LAYER_SETTINGS_RANDOM_SAMPLING_INFO,
+  PRECISION_ERROR_ACCURACY_MODE_DISABLED,
+  PRECISION_ERROR_ACCURACY_MODE_ENABLED,
+  PRECISION_ERROR_ASC_COUNT_PRECISION,
+  TSDB_UNSUPPORTED_COUNTER_OP,
+} from '../../user_messages_ids';
 
 function isMinOrMaxColumn(
   column?: GenericIndexPatternColumn
@@ -181,6 +189,7 @@ const accuracyModeDisabledWarning = (
   columnId: string,
   enableAccuracyMode: () => void
 ): UserMessage => ({
+  uniqueId: PRECISION_ERROR_ACCURACY_MODE_DISABLED,
   severity: 'warning',
   displayLocations: [{ id: 'toolbar' }, { id: 'dimensionButton', dimensionId: columnId }],
   fixableInEditor: true,
@@ -215,6 +224,7 @@ const accuracyModeEnabledWarning = (
   columnId: string,
   docLink: string
 ): UserMessage => ({
+  uniqueId: PRECISION_ERROR_ACCURACY_MODE_ENABLED,
   severity: 'warning',
   displayLocations: [{ id: 'toolbar' }, { id: 'dimensionButton', dimensionId: columnId }],
   fixableInEditor: true,
@@ -287,6 +297,7 @@ export function getSearchWarningMessages(
             ).map(
               (label) =>
                 ({
+                  type: 'xx',
                   uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
                   severity: 'warning',
                   fixableInEditor: true,
@@ -376,6 +387,7 @@ export function getUnsupportedOperationsWarningMessage(
     for (const columnsGrouped of columnsGroupedByField) {
       const sourceField = columnsGrouped[0][0].sourceField;
       warningMessages.push({
+        uniqueId: TSDB_UNSUPPORTED_COUNTER_OP,
         severity: 'warning',
         fixableInEditor: false,
         displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
@@ -507,6 +519,7 @@ export function getPrecisionErrorWarningMessages(
             );
           } else {
             warningMessages.push({
+              uniqueId: PRECISION_ERROR_ASC_COUNT_PRECISION,
               severity: 'warning',
               displayLocations: [
                 { id: 'toolbar' },
@@ -611,7 +624,7 @@ export function getNotifiableFeatures(
   );
   if (layersWithCustomSamplingValues.length) {
     features.push({
-      uniqueId: 'random_sampling_info',
+      uniqueId: LAYER_SETTINGS_RANDOM_SAMPLING_INFO,
       severity: 'info',
       fixableInEditor: false,
       shortMessage: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
@@ -630,7 +643,7 @@ export function getNotifiableFeatures(
   const layersWithIgnoreGlobalFilters = layers.filter(([, layer]) => layer.ignoreGlobalFilters);
   if (layersWithIgnoreGlobalFilters.length) {
     features.push({
-      uniqueId: 'ignoring-global-filters-layers',
+      uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
       severity: 'info',
       fixableInEditor: false,
       shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {

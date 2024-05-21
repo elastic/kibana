@@ -61,6 +61,7 @@ import {
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
+import { LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS } from '../../user_messages_ids';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -3412,7 +3413,7 @@ describe('xy_visualization', () => {
             fixableInEditor: false,
             severity: 'info',
             shortMessage: 'Layers ignoring global filters',
-            uniqueId: 'ignoring-global-filters-layers',
+            uniqueId: LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
           })
         );
       });

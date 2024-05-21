@@ -38,6 +38,7 @@ import { HeatmapToolbar } from './toolbar_component';
 import { HeatmapDimensionEditor } from './dimension_editor';
 import { getSafePaletteParams } from './utils';
 import { FormBasedPersistedState } from '../..';
+import { HEATMAP_RENDER_ARRAY_VALUES, HEATMAP_X_MISSING_AXIS } from '../../user_messages_ids';
 
 const groupLabelForHeatmap = i18n.translate('xpack.lens.heatmapVisualization.heatmapGroupLabel', {
   defaultMessage: 'Magnitude',
@@ -428,6 +429,7 @@ export const getHeatmapVisualization = ({
 
     if (!state.xAccessor) {
       errors.push({
+        uniqueId: HEATMAP_X_MISSING_AXIS,
         severity: 'error',
         fixableInEditor: true,
         displayLocations: [{ id: 'visualization' }],
@@ -456,6 +458,7 @@ export const getHeatmapVisualization = ({
         warnings = hasArrayValues
           ? [
               {
+                uniqueId: HEATMAP_RENDER_ARRAY_VALUES,
                 severity: 'warning',
                 fixableInEditor: true,
                 displayLocations: [{ id: 'toolbar' }],

@@ -13,6 +13,7 @@ import {
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
+  UserMessage,
   VisualizationType,
 } from '../../types';
 import {
@@ -30,6 +31,7 @@ import {
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
+import { XY_BREAKDOWN_MISSING_AXIS, XY_Y_MISSING_AXIS } from '../../user_messages_ids';
 
 export function getAxisName(
   axis: 'x' | 'y' | 'yLeft' | 'yRight',
@@ -256,15 +258,16 @@ export const supportedDataLayer = {
 };
 
 // i18n ids cannot be dynamically generated, hence the function below
-export function getMessageIdsForDimension(
-  dimension: string,
+function getMessageIdsForDimension(
+  dimension: 'Y' | 'Break down',
   layers: number[],
   isHorizontal: boolean
-) {
+): Pick<UserMessage, 'uniqueId' | 'shortMessage' | 'longMessage'> {
   const layersList = layers.map((i: number) => i + 1).join(', ');
   switch (dimension) {
     case 'Break down':
       return {
+        uniqueId: XY_BREAKDOWN_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
           defaultMessage: `Missing {axis}.`,
           values: { axis: 'Break down by axis' },
@@ -276,6 +279,7 @@ export function getMessageIdsForDimension(
       };
     case 'Y':
       return {
+        uniqueId: XY_Y_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
           defaultMessage: `Missing {axis}.`,
           values: { axis: getAxisName('y', { isHorizontal }) },
@@ -286,7 +290,6 @@ export function getMessageIdsForDimension(
         }),
       };
   }
-  return { shortMessage: '', longMessage: '' };
 }
 
 const newLayerFn = {
@@ -368,14 +371,14 @@ export function getLayersByType(state: State, byType?: string) {
 }
 
 export function validateLayersForDimension(
-  dimension: string,
+  dimension: 'Y' | 'Break down',
   allLayers: XYLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }
   | {
       valid: false;
-      payload: { shortMessage: string; longMessage: React.ReactNode };
+      error: Pick<UserMessage, 'uniqueId' | 'shortMessage' | 'longMessage'>;
     } {
   const dataLayers = allLayers
     .map((layer, i) => ({ layer, originalIndex: i }))
@@ -411,7 +414,7 @@ export function validateLayersForDimension(
 
   return {
     valid: false,
-    payload: getMessageIdsForDimension(
+    error: getMessageIdsForDimension(
       dimension,
       layerMissingAccessors,
       isHorizontalChart(dataLayers.map(({ layer }) => layer))

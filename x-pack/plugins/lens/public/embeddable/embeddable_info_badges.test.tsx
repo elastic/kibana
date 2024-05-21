@@ -27,6 +27,7 @@ describe('EmbeddableFeatureBadge', () => {
       <EmbeddableFeatureBadge
         messages={[
           {
+            uniqueId: 'unique_id',
             shortMessage: 'Short message',
             longMessage: 'Long text',
             severity: 'info',
@@ -44,6 +45,7 @@ describe('EmbeddableFeatureBadge', () => {
   it('should render a description of the badge in a tooltip on hover', async () => {
     renderPopup([
       {
+        uniqueId: 'unique_id',
         shortMessage: 'Short message',
         longMessage: 'Long text',
         severity: 'info',
@@ -104,46 +106,11 @@ describe('EmbeddableFeatureBadge', () => {
     expect(await screen.findAllByText('LongText', { exact: false })).toHaveLength(2);
   });
 
-  it('should render messages without id first, then grouped messages', async () => {
-    renderPopup(
-      [
-        {
-          shortMessage: 'Section2',
-          longMessage: <div>AnotherText</div>,
-          severity: 'info',
-          fixableInEditor: false,
-          displayLocations: [],
-        },
-        {
-          uniqueId: '1',
-          shortMessage: 'Section1',
-          longMessage: <div>LongText1</div>,
-          severity: 'info',
-          fixableInEditor: false,
-          displayLocations: [],
-        },
-        {
-          uniqueId: '1',
-          shortMessage: 'Section1',
-          longMessage: <div>LongText2</div>,
-          severity: 'info',
-          fixableInEditor: false,
-          displayLocations: [],
-        },
-      ],
-      2 // last two messages are grouped
-    );
-    expect(await screen.findAllByText('Section', { exact: false })).toHaveLength(2);
-    // now check the order
-    const longMessages = await screen.findAllByText('Text', { exact: false });
-    expect(longMessages[0]).toHaveTextContent('AnotherText');
-    expect(longMessages[1]).toHaveTextContent('LongText1');
-  });
-
   describe('Horizontal rules', () => {
     it('should render no rule for single message', async () => {
       renderPopup([
         {
+          uniqueId: 'unique_id',
           shortMessage: `Section1`,
           longMessage: <div>hello</div>,
           severity: 'info',
