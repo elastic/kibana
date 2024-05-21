@@ -47,7 +47,7 @@ export const handleStreamStorage = async ({
   }
 };
 
-const parseGeminiStream: StreamParser = async (stream, logger, abortSignal) => {
+export const parseGeminiStream: StreamParser = async (stream, logger, abortSignal) => {
   let responseBody = '';
   stream.on('data', (chunk) => {
     responseBody += chunk.toString();
@@ -115,7 +115,7 @@ const parseOpenAIResponse = (responseBody: string) =>
     }, '');
 
 /** Parse Gemini stream response body */
-const parseGeminiResponse = (responseBody: string) =>{
+export const parseGeminiResponse = (responseBody: string) =>{
   return responseBody
     .split('\n')
     .filter((line) => {

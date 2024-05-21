@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { handleStreamStorage } from './parse_stream';
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
+import { parseGeminiStream, parseGeminiResponse } from './parse_stream';
 
 function createStreamMock() {
   const transform: Transform = new Transform({});
@@ -106,6 +107,75 @@ describe('handleStreamStorage', () => {
       );
     });
   });
+
+
+describe('parseGeminiStream', () => {
+  let mockStream: Readable;
+  let mockLogger: any;
+  let mockAbortSignal: AbortSignal;
+
+  beforeEach(() => {
+    mockStream = new Readable();
+    mockLogger = { info: jest.fn() };
+    mockAbortSignal = new AbortController().signal;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should parse Gemini stream successfully', async () => {
+    const chunks = [
+      'data: {"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]}\n',
+      'data: {"candidates":[{"content":{"parts":[{"text":"World"}]}}]}\n',
+    ];
+
+    const expectedParsedResponse = 'HelloWorld';
+    const parseGeminiResponseMock = jest.fn().mockReturnValue(expectedParsedResponse);
+    (parseGeminiResponse as jest.MockedFunction<typeof parseGeminiResponse>).mockImplementationOnce(parseGeminiResponseMock);
+
+    // Simulate data chunks and end of stream
+    setTimeout(() => {
+      chunks.forEach(chunk => mockStream.push(chunk));
+      mockStream.push(null); // Signal end of stream
+    }, 0);
+
+    const parsedResponse = await parseGeminiStream(mockStream, mockLogger);
+    expect(parseGeminiResponseMock).toHaveBeenCalledWith(chunks.join(''));
+    expect(parsedResponse).toBe(expectedParsedResponse);
+  });
+
+  it('should handle errors during streaming', async () => {
+    const errorMessage = 'Stream error';
+    setTimeout(() => {
+      mockStream.emit('error', new Error(errorMessage));
+    }, 0);
+
+    await expect(parseGeminiStream(mockStream, mockLogger)).rejects.toThrowError(errorMessage);
+  });
+
+  it('should resolve with partial response if aborted', async () => {
+    const chunks = [
+      'data: {"candidates":[{"content":{"parts":[{"text":"Hello"}]}}]}\n',
+      'data: {"candidates":[{"content":{"parts":[{"text":"World"}]}}]}\n',
+    ];
+
+    const expectedParsedResponse = 'Hello';
+    const parseGeminiResponseMock = jest.fn().mockReturnValue(expectedParsedResponse);
+    (parseGeminiResponse as jest.MockedFunction<typeof parseGeminiResponse>).mockImplementationOnce(parseGeminiResponseMock);
+
+    // Simulate data chunks and abort
+    setTimeout(() => {
+      mockStream.push(chunks[0]);
+      mockAbortSignal.dispatchEvent(new Event('abort'));
+    }, 0);
+
+    const parsedResponse = await parseGeminiStream(mockStream, mockLogger, mockAbortSignal);
+    expect(parseGeminiResponseMock).toHaveBeenCalledWith(chunks[0]);
+    expect(parsedResponse).toBe(expectedParsedResponse);
+  });
+});
+
 });
 
 function encodeBedrockResponse(completion: string) {
