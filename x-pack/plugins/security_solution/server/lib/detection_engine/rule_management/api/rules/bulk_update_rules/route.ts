@@ -18,8 +18,6 @@ import { buildRouteValidationWithZod } from '../../../../../../utils/build_valid
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
 import type { SetupPlugins } from '../../../../../../plugin';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import {
@@ -68,17 +66,8 @@ export const bulkUpdateRulesRoute = (
 
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-
-          const savedObjectsClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient(ml);
 
           const rules = await Promise.all(
             request.body.map(async (payloadRule) => {
@@ -92,8 +81,6 @@ export const bulkUpdateRulesRoute = (
                     message: validationErrors.join(),
                   });
                 }
-
-                throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
                 const existingRule = await readRules({
                   rulesClient,
@@ -118,15 +105,12 @@ export const bulkUpdateRulesRoute = (
                 });
 
                 const rule = await rulesManagementClient.updateRule({
-                  existingRule,
+                  ruleId: payloadRule.rule_id,
+                  id: payloadRule.id,
                   ruleUpdate: payloadRule,
                 });
 
-                if (rule != null) {
-                  return transformValidateBulkError(rule.id, rule);
-                } else {
-                  return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
-                }
+                return transformValidateBulkError(rule.id, rule);
               } catch (err) {
                 return transformBulkError(idOrRuleIdOrUnknown, err);
               }

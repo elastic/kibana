@@ -17,8 +17,6 @@ import {
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { SetupPlugins } from '../../../../../../plugin';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { transformBulkError, buildSiemResponse } from '../../../../routes/utils';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
@@ -63,28 +61,14 @@ export const bulkPatchRulesRoute = (
 
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-
-          const savedObjectsClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient(ml);
 
           const rules = await Promise.all(
             request.body.map(async (payloadRule) => {
               const idOrRuleIdOrUnknown = payloadRule.id ?? payloadRule.rule_id ?? '(unknown id)';
 
               try {
-                if (payloadRule.type) {
-                  // reject an unauthorized "promotion" to ML
-                  throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
-                }
-
                 const existingRule = await readRules({
                   rulesClient,
                   ruleId: payloadRule.rule_id,
@@ -93,11 +77,6 @@ export const bulkPatchRulesRoute = (
 
                 if (!existingRule) {
                   return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
-                }
-
-                if (existingRule?.params.type) {
-                  // reject an unauthorized modification of an ML rule
-                  throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
                 }
 
                 validateRulesWithDuplicatedDefaultExceptionsList({
@@ -114,15 +93,12 @@ export const bulkPatchRulesRoute = (
                 });
 
                 const rule = await rulesManagementClient.patchRule({
-                  existingRule,
+                  ruleId: payloadRule.rule_id,
+                  id: payloadRule.id,
                   nextParams: payloadRule,
                 });
 
-                if (rule != null && rule.enabled != null && rule.name != null) {
-                  return transformValidateBulkError(rule.id, rule);
-                } else {
-                  return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
-                }
+                return transformValidateBulkError(rule.id, rule);
               } catch (err) {
                 return transformBulkError(idOrRuleIdOrUnknown, err);
               }

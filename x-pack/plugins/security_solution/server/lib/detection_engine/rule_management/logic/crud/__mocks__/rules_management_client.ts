@@ -14,7 +14,6 @@ import type {
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleCreateProps,
-  RuleToImport,
   RuleObjectId,
 } from '../../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../../../prebuilt_rules';
@@ -68,23 +67,6 @@ export const _upgradePrebuiltRuleWithTypeChange: jest.Mock<
 
 export const _toggleRuleEnabledOnUpdate: jest.Mock<
   (rulesClient: RulesClient, existingRule: RuleAlertType, enabled: boolean) => Promise<void>
-> = jest.fn();
-
-export const _importNewRule: jest.Mock<
-  (
-    rulesClient: RulesClient,
-    importRulePayload: {
-      ruleToImport: RuleToImport;
-      options?: { allowMissingConnectorSecrets?: boolean };
-    }
-  ) => Promise<RuleAlertType>
-> = jest.fn();
-
-export const _importExistingRule: jest.Mock<
-  (
-    rulesClient: RulesClient,
-    importRulePayload: { ruleToImport: RuleToImport; existingRule: RuleAlertType }
-  ) => Promise<RuleAlertType>
 > = jest.fn();
 
 export const _deleteRule: jest.Mock<

@@ -16,8 +16,6 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
@@ -63,8 +61,7 @@ export const createRuleRoute = (
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
-          const savedObjectsClient = ctx.core.savedObjects.client;
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient(ml);
           const exceptionsClient = ctx.lists?.getExceptionListClient();
 
           if (request.body.rule_id != null) {
@@ -80,14 +77,6 @@ export const createRuleRoute = (
               });
             }
           }
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
-          throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
 
           // This will create the endpoint list if it does not exist yet
           await exceptionsClient?.createEndpointList();

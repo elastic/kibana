@@ -7,18 +7,25 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { SharedServices } from '@kbn/ml-plugin/server/shared_services';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { MlAuthz } from '../../../../machine_learning/authz';
+import { buildMlAuthz } from '../../../../machine_learning/authz';
 import type {
   RuleCreateProps,
   RuleObjectId,
   RuleToImport,
   PatchRuleRequestBody,
   RuleUpdateProps,
+  RuleSignatureId,
 } from '../../../../../../common/api/detection_engine';
 
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 
 import { readRules } from './read_rules';
-import { PrepackagedRulesError } from '../../../prebuilt_rules/api/install_prebuilt_rules_and_timelines/install_prebuilt_rules_and_timelines_route';
 
 import {
   convertPatchAPIToInternalSchema,
@@ -28,6 +35,16 @@ import {
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import type { RuleAlertType, RuleParams } from '../../../rule_schema';
 import { createBulkErrorObject } from '../../../routes/utils';
+import { getIdError } from '../../utils/utils';
+import { throwAuthzError } from '../../../../machine_learning/validation';
+
+class ClientError extends Error {
+  public readonly statusCode: number;
+  constructor(message: string, statusCode: number) {
+    super(message);
+    this.statusCode = statusCode;
+  }
+}
 
 export interface CreateRuleOptions {
   /* Optionally pass an ID to use for the rule document. If not provided, an ID will be generated. */
@@ -56,9 +73,17 @@ interface CreatePrebuiltRuleProps {
   ruleAsset: PrebuiltRuleAsset;
 }
 
-type UpdateRuleProps = _UpdateRuleProps;
+interface UpdateRuleProps {
+  ruleId?: RuleSignatureId;
+  id?: RuleObjectId;
+  ruleUpdate: RuleUpdateProps;
+}
 
-type PatchRuleProps = _PatchRuleProps;
+interface PatchRuleProps {
+  ruleId?: RuleSignatureId;
+  id?: RuleObjectId;
+  nextParams: PatchRuleRequestBody;
+}
 
 interface DeleteRuleProps {
   ruleId: RuleObjectId;
@@ -78,16 +103,6 @@ interface ImportRuleProps {
   options: ImportRuleOptions;
 }
 
-interface ImportNewRuleProps {
-  ruleToImport: RuleToImport;
-  options: ImportRuleOptions;
-}
-
-interface ImportExistingRuleProps {
-  ruleToImport: RuleToImport;
-  existingRule: RuleAlertType;
-}
-
 export interface IRulesManagementClient {
   createCustomRule: (createCustomRulePayload: CreateCustomRuleProps) => Promise<RuleAlertType>;
   createPrebuiltRule: (
@@ -102,26 +117,39 @@ export interface IRulesManagementClient {
   importRule: (importRulePayload: ImportRuleProps) => Promise<RuleAlertType>;
 }
 
-export const createRulesManagementClient = (rulesClient: RulesClient) => {
+export const createRulesManagementClient = (
+  rulesClient: RulesClient,
+  request: KibanaRequest,
+  savedObjectsClient: SavedObjectsClientContract,
+  licensing: LicensingApiRequestHandlerContext,
+  ml?: SharedServices
+): IRulesManagementClient => {
+  const mlAuthz = buildMlAuthz({
+    license: licensing.license,
+    ml,
+    request,
+    savedObjectsClient,
+  });
+
   const client = {
     createCustomRule: async (
       createCustomRulePayload: CreateCustomRuleProps
     ): Promise<RuleAlertType> => {
-      return createCustomRule(rulesClient, createCustomRulePayload);
+      return createCustomRule(rulesClient, createCustomRulePayload, mlAuthz);
     },
 
     createPrebuiltRule: async (
       createPrebuiltRulePayload: CreatePrebuiltRuleProps
     ): Promise<RuleAlertType> => {
-      return createPrebuiltRule(rulesClient, createPrebuiltRulePayload);
+      return createPrebuiltRule(rulesClient, createPrebuiltRulePayload, mlAuthz);
     },
 
     updateRule: async (updateRulePayload: UpdateRuleProps): Promise<RuleAlertType> => {
-      return updateRule(rulesClient, updateRulePayload);
+      return updateRule(rulesClient, updateRulePayload, mlAuthz);
     },
 
     patchRule: async (patchRulePayload: PatchRuleProps): Promise<RuleAlertType> => {
-      return patchRule(rulesClient, patchRulePayload);
+      return patchRule(rulesClient, patchRulePayload, mlAuthz);
     },
 
     deleteRule: async (deleteRulePayload: DeleteRuleProps): Promise<void> => {
@@ -131,11 +159,11 @@ export const createRulesManagementClient = (rulesClient: RulesClient) => {
     upgradePrebuiltRule: async (
       upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps
     ): Promise<RuleAlertType> => {
-      return upgradePrebuiltRule(rulesClient, upgradePrebuiltRulePayload);
+      return upgradePrebuiltRule(rulesClient, upgradePrebuiltRulePayload, mlAuthz);
     },
 
     importRule: async (importRulePayload: ImportRuleProps): Promise<RuleAlertType> => {
-      return importRule(rulesClient, importRulePayload);
+      return importRule(rulesClient, importRulePayload, mlAuthz);
     },
   };
 
@@ -144,9 +172,11 @@ export const createRulesManagementClient = (rulesClient: RulesClient) => {
 
 export const createCustomRule = async (
   rulesClient: RulesClient,
-  createCustomRulePayload: CreateCustomRuleProps
+  createCustomRulePayload: CreateCustomRuleProps,
+  mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
   const { params } = createCustomRulePayload;
+  await _validateMlAuth(mlAuthz, params.type);
 
   const rule = await _createRule(rulesClient, params, { immutable: false });
   return rule;
@@ -154,9 +184,12 @@ export const createCustomRule = async (
 
 export const createPrebuiltRule = async (
   rulesClient: RulesClient,
-  createPrebuiltRulePayload: CreatePrebuiltRuleProps
+  createPrebuiltRulePayload: CreatePrebuiltRuleProps,
+  mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
   const { ruleAsset } = createPrebuiltRulePayload;
+
+  await _validateMlAuth(mlAuthz, ruleAsset.type);
 
   const rule = await _createRule(rulesClient, ruleAsset, {
     immutable: true,
@@ -168,9 +201,23 @@ export const createPrebuiltRule = async (
 
 export const updateRule = async (
   rulesClient: RulesClient,
-  updateRulePayload: UpdateRuleProps
+  updateRulePayload: UpdateRuleProps,
+  mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
-  const { ruleUpdate, existingRule } = updateRulePayload;
+  const { ruleUpdate, ruleId, id } = updateRulePayload;
+
+  await _validateMlAuth(mlAuthz, ruleUpdate.type);
+
+  const existingRule = await readRules({
+    rulesClient,
+    ruleId,
+    id,
+  });
+
+  if (existingRule == null) {
+    const error = getIdError({ id, ruleId });
+    throw new ClientError(error.message, error.statusCode);
+  }
 
   const update = await _updateRule(rulesClient, { ruleUpdate, existingRule });
 
@@ -182,10 +229,25 @@ export const updateRule = async (
 
 export const patchRule = async (
   rulesClient: RulesClient,
-  patchRulePayload: PatchRuleProps
+  patchRulePayload: PatchRuleProps,
+  mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
-  const { nextParams, existingRule } = patchRulePayload;
-  const update = await _patchRule(rulesClient, patchRulePayload);
+  const { nextParams, ruleId, id } = patchRulePayload;
+
+  const existingRule = await readRules({
+    rulesClient,
+    ruleId,
+    id,
+  });
+
+  if (existingRule == null) {
+    const error = getIdError({ id, ruleId });
+    throw new ClientError(error.message, error.statusCode);
+  }
+
+  await _validateMlAuth(mlAuthz, nextParams.type ?? existingRule.params.type);
+
+  const update = await _patchRule(rulesClient, { existingRule, nextParams });
 
   await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, nextParams.enabled ?? false);
 
@@ -206,9 +268,13 @@ export const deleteRule = async (
 
 export const upgradePrebuiltRule = async (
   rulesClient: RulesClient,
-  upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps
+  upgradePrebuiltRulePayload: UpgradePrebuiltRuleProps,
+  mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
   const { ruleAsset } = upgradePrebuiltRulePayload;
+
+  await _validateMlAuth(mlAuthz, ruleAsset.type);
+
   const existingRule = await readRules({
     rulesClient,
     ruleId: ruleAsset.rule_id,
@@ -216,7 +282,7 @@ export const upgradePrebuiltRule = async (
   });
 
   if (!existingRule) {
-    throw new PrepackagedRulesError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
+    throw new ClientError(`Failed to find rule ${ruleAsset.rule_id}`, 500);
   }
 
   // If rule has change its type during upgrade, delete and recreate it
@@ -234,7 +300,7 @@ export const upgradePrebuiltRule = async (
   });
 
   if (!updatedRule) {
-    throw new PrepackagedRulesError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
+    throw new ClientError(`Rule ${ruleAsset.rule_id} not found after upgrade`, 500);
   }
 
   return updatedRule;
@@ -242,7 +308,8 @@ export const upgradePrebuiltRule = async (
 
 export const importRule = async (
   rulesClient: RulesClient,
-  importRulePayload: ImportRuleProps
+  importRulePayload: ImportRuleProps,
+  mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
   const { ruleToImport, overwriteRules, options } = importRulePayload;
 
@@ -253,9 +320,16 @@ export const importRule = async (
   });
 
   if (!existingRule) {
-    return _importNewRule(rulesClient, { ruleToImport, options });
+    return _createRule(rulesClient, ruleToImport, {
+      immutable: false,
+      allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
+    });
   } else if (existingRule && overwriteRules) {
-    return _importExistingRule(rulesClient, { ruleToImport, existingRule });
+    await _validateMlAuth(mlAuthz, existingRule.params.type);
+    return _updateRule(rulesClient, {
+      existingRule,
+      ruleUpdate: ruleToImport,
+    });
   } else {
     throw createBulkErrorObject({
       ruleId: existingRule.params.ruleId,
@@ -354,26 +428,6 @@ const _toggleRuleEnabledOnUpdate = async (
   }
 };
 
-const _importNewRule = async (
-  rulesClient: RulesClient,
-  importRulePayload: ImportNewRuleProps
-): Promise<RuleAlertType> => {
-  const { ruleToImport, options } = importRulePayload;
-
-  return _createRule(rulesClient, ruleToImport, {
-    immutable: false,
-    allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
-  });
-};
-
-const _importExistingRule = async (
-  rulesClient: RulesClient,
-  importRulePayload: ImportExistingRuleProps
-): Promise<RuleAlertType> => {
-  const { ruleToImport, existingRule } = importRulePayload;
-
-  return _updateRule(rulesClient, {
-    existingRule,
-    ruleUpdate: ruleToImport,
-  });
+const _validateMlAuth = async (mlAuthz: MlAuthz, ruleType: Type) => {
+  throwAuthzError(await mlAuthz.validateRuleType(ruleType));
 };

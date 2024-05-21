@@ -107,7 +107,6 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             items,
             rule,
             listsClient,
-            rulesClient,
             rulesManagementClient,
           });
 
@@ -132,12 +131,10 @@ export const createRuleExceptions = async ({
   items,
   rule,
   listsClient,
-  rulesClient,
   rulesManagementClient,
 }: {
   items: CreateRuleExceptionListItemSchemaDecoded[];
   listsClient: ExceptionListClient | null;
-  rulesClient: RulesClient;
   rulesManagementClient: IRulesManagementClient;
   rule: SanitizedRule<RuleParams>;
 }) => {

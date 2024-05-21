@@ -68,17 +68,8 @@ export const bulkCreateRulesRoute = (
 
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
-
-          const savedObjectsClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient(ml);
 
           const ruleDefinitions = request.body;
           const dupes = getDuplicates(ruleDefinitions, 'rule_id');
@@ -124,8 +115,6 @@ export const bulkCreateRulesRoute = (
                       message: validationErrors.join(),
                     });
                   }
-
-                  throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
 
                   const createdRule = await rulesManagementClient.createCustomRule({
                     params: payloadRule,

@@ -17,6 +17,7 @@ import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginSetupDependencies,
+  SetupPlugins,
 } from './plugin_contract';
 import type {
   SecuritySolutionApiRequestHandlerContext,
@@ -67,6 +68,7 @@ export class RequestContextFactory implements IRequestContextFactory {
     const [, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, security, request);
     const coreContext = await context.core;
+    const licensing = await context.licensing;
 
     const getSpaceId = (): string =>
       startPlugins.spaces?.spacesService?.getSpaceId(request) || DEFAULT_SPACE_ID;
@@ -112,9 +114,14 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
-      getRulesManagementClient: memoize(() =>
-        createRulesManagementClient(startPlugins.alerting.getRulesClientWithRequest(request))
-      ),
+      getRulesManagementClient: (ml?: SetupPlugins['ml']) =>
+        createRulesManagementClient(
+          startPlugins.alerting.getRulesClientWithRequest(request),
+          request,
+          coreContext.savedObjects.client,
+          licensing,
+          ml
+        ),
 
       getDetectionEngineHealthClient: memoize(() =>
         ruleMonitoringService.createDetectionEngineHealthClient({

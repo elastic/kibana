@@ -16,8 +16,6 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
@@ -56,18 +54,9 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           const params = request.body;
           const rulesClient = (await context.alerting).getRulesClient();
           const savedObjectsClient = (await context.core).savedObjects.client;
-          const rulesManagementClient = (await context.securitySolution).getRulesManagementClient();
-
-          const mlAuthz = buildMlAuthz({
-            license: (await context.licensing).license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
-          if (params.type) {
-            // reject an unauthorized "promotion" to ML
-            throwAuthzError(await mlAuthz.validateRuleType(params.type));
-          }
+          const rulesManagementClient = (await context.securitySolution).getRulesManagementClient(
+            ml
+          );
 
           const existingRule = await readRules({
             rulesClient,
@@ -83,11 +72,6 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
             });
           }
 
-          if (existingRule?.params.type) {
-            // reject an unauthorized modification of an ML rule
-            throwAuthzError(await mlAuthz.validateRuleType(existingRule?.params.type));
-          }
-
           checkDefaultRuleExceptionListReferences({ exceptionLists: params.exceptions_list });
           await validateRuleDefaultExceptionList({
             exceptionsList: params.exceptions_list,
@@ -97,21 +81,14 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
           });
 
           const rule = await rulesManagementClient.patchRule({
-            existingRule,
+            ruleId: params.rule_id,
+            id: params.id,
             nextParams: params,
           });
 
-          if (rule != null && rule.enabled != null && rule.name != null) {
-            return response.ok({
-              body: transformValidate(rule),
-            });
-          } else {
-            const error = getIdError({ id: params.id, ruleId: params.rule_id });
-            return siemResponse.error({
-              body: error.message,
-              statusCode: error.statusCode,
-            });
-          }
+          return response.ok({
+            body: transformValidate(rule),
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

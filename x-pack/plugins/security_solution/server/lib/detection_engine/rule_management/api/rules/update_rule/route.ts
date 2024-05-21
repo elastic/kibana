@@ -16,8 +16,6 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
 import { readRules } from '../../../logic/crud/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
@@ -51,18 +49,8 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         }
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-
-          const savedObjectsClient = ctx.core.savedObjects.client;
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
-          throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient(ml);
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 
@@ -94,21 +82,14 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
           );
 
           const rule = await rulesManagementClient.updateRule({
-            existingRule,
+            ruleId: request.body.rule_id,
+            id: request.body.id,
             ruleUpdate: request.body,
           });
 
-          if (rule != null) {
-            return response.ok({
-              body: transformValidate(rule),
-            });
-          } else {
-            const error = getIdError({ id: request.body.id, ruleId: request.body.rule_id });
-            return siemResponse.error({
-              body: error.message,
-              statusCode: error.statusCode,
-            });
-          }
+          return response.ok({
+            body: transformValidate(rule),
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({
