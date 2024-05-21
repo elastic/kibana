@@ -174,7 +174,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
                                   content={
                                     <FormattedMessage
                                       id="xpack.fleet.policyDetails.summary.containsUnprivilegedAgentsWarning"
-                                      defaultMessage="This agent policy contains integrations that require Elastic Agents to have root privileges. Some enrolled agents are unprivileged."
+                                      defaultMessage="This agent policy contains integrations that require Elastic Agents to have root privileges. Some enrolled agents are running in unprivileged mode."
                                     />
                                   }
                                 />
