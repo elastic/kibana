@@ -46,6 +46,7 @@ type PersistedTemplatesConfiguration = Array<{
   key: string;
   name: string;
   description: string;
+  tags?: string[];
   caseFields?: CaseFieldsAttributes | null;
 }>;
 

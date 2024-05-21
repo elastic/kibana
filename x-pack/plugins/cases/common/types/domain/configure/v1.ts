@@ -58,24 +58,34 @@ export const CustomFieldConfigurationRt = rt.union([
 
 export const CustomFieldsConfigurationRt = rt.array(CustomFieldConfigurationRt);
 
-export const TemplateConfigurationRt = rt.strict({
-  /**
-   * key of template
-   */
-  key: rt.string,
-  /**
-   * name of template
-   */
-  name: rt.string,
-  /**
-   * description of template
-   */
-  description: rt.string,
-  /**
-   * case fields of template
-   */
-  caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRt]),
-});
+export const TemplateConfigurationRt = rt.intersection([
+  rt.strict({
+    /**
+     * key of template
+     */
+    key: rt.string,
+    /**
+     * name of template
+     */
+    name: rt.string,
+    /**
+     * description of template
+     */
+    description: rt.string,
+    /**
+     * case fields of template
+     */
+    caseFields: rt.union([rt.null, CaseBaseOptionalFieldsRt]),
+  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * tags of template
+       */
+      tags: rt.array(rt.string),
+    })
+  ),
+]);
 
 export const TemplatesConfigurationRt = rt.array(TemplateConfigurationRt);
 
