@@ -11,3 +11,4 @@ export * from './use_load_ui_config';
 export * from './use_health_check';
 export * from './use_create_rule';
 export * from './use_update_rule';
+export * from './use_resolve_rule';

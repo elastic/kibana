@@ -21,6 +21,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { createRuleRoute, editRuleRoute, RuleForm } from '@kbn/alerts-ui-shared';
 import { TriggersActionsUiExamplePublicStartDeps } from './plugin';
 
 import { Page } from './components/page';
@@ -37,12 +38,13 @@ import { RuleStatusFilterSandbox } from './components/rule_status_filter_sandbox
 import { AlertsTableSandbox } from './components/alerts_table_sandbox';
 import { RulesSettingsLinkSandbox } from './components/rules_settings_link_sandbox';
 
-import { RuleDefinitionSandbox } from './components/rule_form/rule_definition_sandbox';
 import { RuleActionsSandbox } from './components/rule_form/rule_actions_sandbox';
 import { RuleDetailsSandbox } from './components/rule_form/rule_details_sandbox';
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
+  toasts: CoreStart['notifications']['toasts'];
+  docLinks: CoreStart['docLinks'];
   basename: string;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -55,6 +57,9 @@ export interface TriggersActionsUiExampleComponentParams {
 const TriggersActionsUiExampleApp = ({
   basename,
   triggersActionsUi,
+  http,
+  toasts,
+  docLinks,
   data,
   charts,
   dataViews,
@@ -162,15 +167,39 @@ const TriggersActionsUiExampleApp = ({
           )}
         />
         <Route
-          path="/rule_definition"
+          path={createRuleRoute}
           render={() => (
-            <Page title="Rule Definition">
-              <RuleDefinitionSandbox
-                triggersActionsUi={triggersActionsUi}
-                data={data}
-                charts={charts}
-                dataViews={dataViews}
-                unifiedSearch={unifiedSearch}
+            <Page title="Rule Create">
+              <RuleForm
+                plugins={{
+                  http,
+                  toasts,
+                  docLinks,
+                  charts,
+                  data,
+                  dataViews,
+                  unifiedSearch,
+                  ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                }}
+              />
+            </Page>
+          )}
+        />
+        <Route
+          path={editRuleRoute}
+          render={() => (
+            <Page title="Rule Edit">
+              <RuleForm
+                plugins={{
+                  http,
+                  toasts,
+                  docLinks,
+                  charts,
+                  data,
+                  dataViews,
+                  unifiedSearch,
+                  ruleTypeRegistry: triggersActionsUi.ruleTypeRegistry,
+                }}
               />
             </Page>
           )}
@@ -203,7 +232,7 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element }: AppMountParameters
 ) => {
-  const { http } = core;
+  const { http, notifications, docLinks } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
   ReactDOM.render(
@@ -220,6 +249,8 @@ export const renderApp = (
           <TriggersActionsUiExampleApp
             basename={appBasePath}
             http={http}
+            toasts={notifications.toasts}
+            docLinks={docLinks}
             triggersActionsUi={deps.triggersActionsUi}
             data={deps.data}
             charts={deps.charts}

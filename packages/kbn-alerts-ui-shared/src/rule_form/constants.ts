@@ -28,3 +28,6 @@ export const GET_DEFAULT_FORM_DATA = ({
     name,
   };
 };
+
+export const createRuleRoute = '/rule/create/:ruleTypeId' as const;
+export const editRuleRoute = '/rule/edit/:id' as const;

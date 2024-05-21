@@ -69,13 +69,13 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
     selectedRuleType,
   } = props;
 
-  const { formData, plugins, errors, metadata } = useRuleFormState();
+  const { formData, plugins, errors, metadata, id } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
   const { charts, data, dataViews, unifiedSearch, docLinks } = plugins!;
 
-  const { id, params, schedule, alertDelay, notifyWhen } = formData;
+  const { params, schedule, alertDelay, notifyWhen } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(!!alertDelay);
 

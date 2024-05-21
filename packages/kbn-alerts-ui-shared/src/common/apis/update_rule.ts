@@ -14,7 +14,7 @@ import { RuleFormData } from '../../rule_form';
 import { BASE_ALERTING_API_PATH } from '../constants';
 import { transformRule } from '../utils';
 
-const UPDATE_FIELDS: Array<keyof RuleFormData> = [
+export const UPDATE_FIELDS: Array<keyof RuleFormData> = [
   'name',
   'tags',
   'schedule',
@@ -22,7 +22,10 @@ const UPDATE_FIELDS: Array<keyof RuleFormData> = [
   'alertDelay',
 ];
 
-const rewriteBodyRequest: RewriteResponseCase<RuleFormData> = ({ alertDelay, ...res }): any => ({
+export const rewriteUpdateBodyRequest: RewriteResponseCase<RuleFormData> = ({
+  alertDelay,
+  ...res
+}): any => ({
   ...res,
   actions: [],
   ...(alertDelay ? { alert_delay: alertDelay } : {}),
@@ -40,7 +43,7 @@ export async function updateRule({
   const res = await http.put<AsApiContract<Rule>>(
     `${BASE_ALERTING_API_PATH}/rule/${encodeURIComponent(id)}`,
     {
-      body: JSON.stringify(rewriteBodyRequest(pick(rule, UPDATE_FIELDS))),
+      body: JSON.stringify(rewriteUpdateBodyRequest(pick(rule, UPDATE_FIELDS))),
     }
   );
   return transformRule(res);

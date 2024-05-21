@@ -81,9 +81,14 @@ export const Sidebar = () => {
             id: 'rule-form-components',
             items: [
               {
-                id: 'rule-definition',
-                name: 'Rule Definition',
-                onClick: () => history.push('/rule_definition'),
+                id: 'rule-create',
+                name: 'Rule Create',
+                onClick: () => history.push('/rule/create/.es-query'),
+              },
+              {
+                id: 'rule-edit',
+                name: 'Rule Edit',
+                onClick: () => history.push('/rule/edit/test'),
               },
               {
                 id: 'rule-actions',

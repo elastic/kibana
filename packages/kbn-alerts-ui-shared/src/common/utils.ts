@@ -7,15 +7,8 @@
  */
 
 import { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
-import {
-  Rule,
-  RuleExecutionStatus,
-  RuleLastRun,
-  RuleSystemAction,
-  SanitizedRuleAction as RuleAction,
-} from '@kbn/alerting-types';
-
-type RuleUiAction = RuleAction | RuleSystemAction;
+import { Rule, RuleExecutionStatus, RuleLastRun } from '@kbn/alerting-types';
+import { RuleUiAction } from '../rule_form';
 
 const transformExecutionStatus: RewriteRequestCase<RuleExecutionStatus> = ({
   last_execution_date: lastExecutionDate,

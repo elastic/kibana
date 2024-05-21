@@ -13,10 +13,9 @@ import type { RuleFormData } from '../../rule_form';
 import { BASE_ALERTING_API_PATH } from '../constants';
 import { transformRule } from '../utils';
 
-const rewriteBodyRequest: RewriteResponseCase<RuleFormData> = ({
+export const rewriteCreateBodyRequest: RewriteResponseCase<RuleFormData> = ({
   ruleTypeId,
   alertDelay,
-  id,
   ...res
 }): any => ({
   ...res,
@@ -33,7 +32,7 @@ export async function createRule({
   rule: RuleFormData;
 }): Promise<Rule> {
   const res = await http.post<AsApiContract<Rule>>(`${BASE_ALERTING_API_PATH}/rule`, {
-    body: JSON.stringify(rewriteBodyRequest(rule)),
+    body: JSON.stringify(rewriteCreateBodyRequest(rule)),
   });
   return transformRule(res);
 }

@@ -38,5 +38,7 @@
     "@kbn/charts-plugin",
     "@kbn/data-plugin",
     "@kbn/router-utils",
+    "@kbn/kibana-react-plugin",
+    "@kbn/utility-types",
   ]
 }

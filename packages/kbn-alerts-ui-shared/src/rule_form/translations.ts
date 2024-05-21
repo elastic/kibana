@@ -217,6 +217,13 @@ export const RULE_NAME_INPUT_TITLE = i18n.translate(
   }
 );
 
+export const RULE_NAME_INPUT_BUTTON_ARIA_LABEL = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDetails.ruleNameInputButtonAriaLabel',
+  {
+    defaultMessage: 'Save rule name',
+  }
+);
+
 export const RULE_TAG_INPUT_TITLE = i18n.translate(
   'alertsUIShared.ruleForm.ruleDetails.ruleTagsInputTitle',
   {
@@ -227,7 +234,7 @@ export const RULE_TAG_INPUT_TITLE = i18n.translate(
 export const RULE_TAG_PLACEHOLDER = i18n.translate(
   'alertsUIShared.ruleForm.ruleDetails.ruleTagsPlaceholder',
   {
-    defaultMessage: 'Create tags',
+    defaultMessage: 'Add tags',
   }
 );
 
@@ -325,3 +332,32 @@ export const HEALTH_CHECK_API_KEY_DISABLED_ERROR_TEXT = i18n.translate(
 export const HEALTH_CHECK_ACTION_TEXT = i18n.translate('alertsUIShared.healthCheck.actionText', {
   defaultMessage: 'Learn more.',
 });
+
+export const RULE_FORM_ROUTE_PARAMS_ERROR_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.routeParamsErrorTitle',
+  {
+    defaultMessage: 'Unable to load rule form.',
+  }
+);
+
+export const RULE_FORM_ROUTE_PARAMS_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.routeParamsErrorText',
+  {
+    defaultMessage: 'There was an error loading the rule form. Please ensure the route is correct.',
+  }
+);
+
+export const RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.ruleNotFoundErrorTitle',
+  {
+    defaultMessage: 'Unable to load rule or rule type.',
+  }
+);
+
+export const RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.ruleNotFoundErrorText',
+  {
+    defaultMessage:
+      'There was an error loading the rule or rule type. Please ensure you have access to the rule or rule type selected.',
+  }
+);

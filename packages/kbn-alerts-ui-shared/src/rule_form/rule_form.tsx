@@ -7,24 +7,49 @@
  */
 
 import React, { useMemo } from 'react';
+import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { CreateRuleForm, CreateRuleFormProps } from './create_rule_form';
-import { EditRuleForm, EditRuleFormProps } from './edit_rule_form';
+import { useParams } from 'react-router-dom';
+import { CreateRuleForm } from './create_rule_form';
+import { EditRuleForm } from './edit_rule_form';
+import {
+  RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
+  RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
+} from './translations';
+import { RuleFormPlugins } from './types';
 
 const queryClient = new QueryClient();
 
-const isCreate = (props: CreateRuleFormProps | EditRuleFormProps): props is CreateRuleFormProps => {
-  return (props as CreateRuleFormProps).consumer !== undefined;
-};
+export interface RuleFormProps {
+  plugins: RuleFormPlugins;
+}
 
-export const RuleForm = (props: CreateRuleFormProps | EditRuleFormProps) => {
+export const RuleForm = (props: RuleFormProps) => {
+  const { plugins } = props;
+  const { id, ruleTypeId } = useParams<{
+    id?: string;
+    ruleTypeId?: string;
+  }>();
+
   const ruleFormComponent = useMemo(() => {
-    if (isCreate(props)) {
-      return <CreateRuleForm {...props} />;
-    } else {
-      return <EditRuleForm {...props} />;
+    if (id) {
+      return <EditRuleForm id={id} plugins={plugins} />;
     }
-  }, [props]);
+    if (ruleTypeId) {
+      return <CreateRuleForm ruleTypeId={ruleTypeId} plugins={plugins} />;
+    }
+    return (
+      <EuiEmptyPrompt
+        color="danger"
+        iconType="error"
+        title={<h2>{RULE_FORM_ROUTE_PARAMS_ERROR_TITLE}</h2>}
+      >
+        <EuiText>
+          <p>{RULE_FORM_ROUTE_PARAMS_ERROR_TEXT}</p>
+        </EuiText>
+      </EuiEmptyPrompt>
+    );
+  }, [id, ruleTypeId, plugins]);
 
   return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
 };

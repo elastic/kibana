@@ -9,3 +9,4 @@
 export const ALERTS_FEATURE_ID = 'alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
 export const BASE_RAC_ALERTS_API_PATH = '/internal/rac/alerts';
+export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting';

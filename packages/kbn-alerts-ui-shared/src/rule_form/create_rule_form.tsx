@@ -6,35 +6,52 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
-import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import type { RuleFormCommonProps, RuleFormData } from './types';
+import React, { useCallback, useMemo } from 'react';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+// import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import type { RuleFormData, RuleFormPlugins } from './types';
 import { GET_DEFAULT_FORM_DATA } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
-import { useLoadUiConfig, useHealthCheck, useCreateRule } from '../common/hooks';
+import {
+  useLoadUiConfig,
+  useHealthCheck,
+  useCreateRule,
+  useLoadRuleTypesQuery,
+} from '../common/hooks';
 
 import { RulePage } from './rule_page';
 import { RuleFormHealthCheckError } from './rule_form_health_check_error';
+import {
+  RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE,
+  RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT,
+} from './translations';
 
-export type CreateRuleFormProps = {
-  formData?: RuleFormData;
-  consumer: RuleCreationValidConsumer;
-  canChangeTrigger?: boolean;
-  hideGrouping?: boolean;
-  filteredRuleTypes?: string[];
-  validConsumers?: RuleCreationValidConsumer[];
-  useRuleProducer?: boolean;
-  initialSelectedConsumer?: RuleCreationValidConsumer | null;
-} & RuleFormCommonProps;
+export interface CreateRuleFormProps {
+  ruleTypeId: string;
+  plugins: RuleFormPlugins;
+  // formData?: RuleFormData;
+  // consumer: RuleCreationValidConsumer;
+  // canChangeTrigger?: boolean;
+  // hideGrouping?: boolean;
+  // filteredRuleTypes?: string[];
+  // validConsumers?: RuleCreationValidConsumer[];
+  // useRuleProducer?: boolean;
+  // initialSelectedConsumer?: RuleCreationValidConsumer | null;
+}
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
-  const { formData, plugins, metadata, ruleTypeModel, ruleType, validConsumers, onCancel } = props;
-
-  const { http, docLinks } = plugins;
+  // const { formData, plugins, ruleTypeModel, ruleType, validConsumers } = props;
+  const { ruleTypeId, plugins } = props;
+  const { http, docLinks, toasts, ruleTypeRegistry } = plugins;
 
   const { data, isLoading: isLoadingUiConfig } = useLoadUiConfig({ http });
   const { error, isLoading: isLoadingHealthCheck } = useHealthCheck({ http });
+  const {
+    ruleTypesState: { data: ruleTypeIndex, isLoading: isLoadingRuleTypes },
+  } = useLoadRuleTypesQuery({
+    http,
+    toasts,
+  });
 
   const { mutate, isLoading: isSaving } = useCreateRule({ http });
 
@@ -45,8 +62,35 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     [mutate]
   );
 
-  if (isLoadingUiConfig || isLoadingHealthCheck) {
+  const ruleTypes = [...ruleTypeIndex.values()];
+  const ruleType = ruleTypes.find((rt) => rt.id === ruleTypeId);
+  const ruleTypeModel = useMemo(() => {
+    let model;
+    try {
+      model = ruleTypeRegistry.get(ruleTypeId);
+    } catch (e) {
+      return null;
+    }
+    return model;
+  }, [ruleTypeId, ruleTypeRegistry]);
+
+  if (isLoadingUiConfig || isLoadingHealthCheck || isLoadingRuleTypes) {
     return <EuiLoadingSpinner />;
+  }
+
+  if (!ruleType || !ruleTypeModel) {
+    return (
+      <EuiEmptyPrompt
+        color="danger"
+        iconType="error"
+        title={<h2>{RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE}</h2>}
+        body={
+          <EuiText>
+            <p>{RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT}</p>
+          </EuiText>
+        }
+      />
+    );
   }
 
   if (error) {
@@ -56,15 +100,12 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   return (
     <RuleFormStateProvider
       initialRuleFormState={{
-        formData:
-          formData ||
-          GET_DEFAULT_FORM_DATA({
-            ruleTypeId: ruleType.id,
-            name: `${ruleType.name} rule`,
-          }),
+        formData: GET_DEFAULT_FORM_DATA({
+          ruleTypeId,
+          name: `${ruleType.name} rule`,
+        }),
         plugins,
         minimumScheduleInterval: data?.minimumScheduleInterval,
-        metadata,
         selectedRuleTypeModel: ruleTypeModel,
       }}
     >
@@ -72,9 +113,9 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         canShowConsumerSelection
         selectedRuleTypeModel={ruleTypeModel}
         selectedRuleType={ruleType}
-        validConsumers={validConsumers}
+        // validConsumers={validConsumers}
         isSaving={isSaving}
-        onCancel={onCancel}
+        onCancel={() => {}}
         onSave={onSave}
       />
     </RuleFormStateProvider>

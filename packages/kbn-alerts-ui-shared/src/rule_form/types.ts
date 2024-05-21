@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { ComponentType } from 'react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ComponentType } from 'react';
+import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -20,7 +22,8 @@ import type {
   RuleAction,
   RuleSystemAction,
 } from '@kbn/alerting-types';
-import type { RuleTypeWithDescription } from '../common/types';
+import { TypeRegistry } from '../common/type_registry';
+// import type { RuleTypeWithDescription } from '../common/types';
 
 export type RuleTypeParams = Record<string, unknown>;
 
@@ -37,7 +40,7 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-type RuleUiAction = RuleAction | RuleSystemAction;
+export type RuleUiAction = RuleAction | RuleSystemAction;
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -98,8 +101,9 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<any>>;
 }
 
+export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
+
 export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
-  id?: SanitizedRule<Params>['id'];
   name: SanitizedRule<Params>['name'];
   tags: SanitizedRule<Params>['tags'];
   params: SanitizedRule<Params>['params'];
@@ -112,14 +116,17 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
 
 export interface RuleFormPlugins {
   http: HttpStart;
+  toasts: ToastsStart;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   docLinks: DocLinksStart;
+  ruleTypeRegistry: RuleTypeRegistryContract;
 }
 
 export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
+  id?: string;
   formData: RuleFormData<Params>;
   plugins: RuleFormPlugins;
   errors?: RuleFormErrors;
@@ -127,13 +134,4 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   metadata?: Record<string, unknown>;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
-}
-
-export interface RuleFormCommonProps {
-  metadata?: Record<string, unknown>;
-  plugins: RuleFormPlugins;
-  ruleType: RuleTypeWithDescription;
-  ruleTypeModel: RuleTypeModel;
-  hideInterval?: boolean;
-  onCancel: () => void;
 }
