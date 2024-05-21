@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type SuperTest from 'supertest';
+import type { SuperTest, Test } from 'supertest';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { RoleCredentials } from '../../../shared/services';
 
@@ -16,7 +16,7 @@ async function createOpenAIConnector({
   requestHeader = {},
   apiKeyHeader = {},
 }: {
-  supertest: SuperTest.Agent;
+  supertest: SuperTest<Test>;
   requestHeader?: Record<string, string>;
   apiKeyHeader?: Record<string, string>;
 }): Promise<() => Promise<void>> {
