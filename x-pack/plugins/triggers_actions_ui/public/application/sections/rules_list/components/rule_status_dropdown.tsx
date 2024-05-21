@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { RuleSnooze } from '@kbn/alerting-plugin/common';
@@ -29,7 +29,6 @@ import { Rule, SnoozeSchedule, BulkOperationResponse } from '../../../../types';
 import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 import { UntrackAlertsModal } from '../../common/components/untrack_alerts_modal';
 
-export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const SNOOZE_END_TIME_FORMAT = 'LL @ LT';
 
 type DropdownRuleRecord = Pick<
@@ -60,21 +59,16 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   hideSnoozeOption = false,
   direction = 'column',
 }: ComponentOpts) => {
-  const [isSnoozed, setIsSnoozed] = useState<boolean>(!hideSnoozeOption && isRuleSnoozed(rule));
-
   const {
     notifications: { toasts },
     i18n: i18nStart,
     theme,
   } = useKibana().services;
 
-  useEffect(() => {
-    if (!hideSnoozeOption) setIsSnoozed(isRuleSnoozed(rule));
-  }, [rule, hideSnoozeOption]);
-
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isUntrackAlertsModalOpen, setIsUntrackAlertsModalOpen] = useState<boolean>(false);
+  const isSnoozed = !hideSnoozeOption && isRuleSnoozed(rule);
 
   const onClickBadge = useCallback(() => setIsPopoverOpen((isOpen) => !isOpen), [setIsPopoverOpen]);
   const onClosePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
