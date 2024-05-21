@@ -52,6 +52,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
   const [areProcessorsDirty, setAreProcessorsDirty] = useState<boolean>(false);
+  const [hasSubmittedForm, setHasSubmittedForm] = useState<boolean>(false);
 
   const {
     processors: initialProcessors,
@@ -77,6 +78,11 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
     if (processorStateRef.current) {
       const state = processorStateRef.current;
       if (await state.validate()) {
+        // We only want to show unsaved changed prompts to the user after the form
+        // has been submitted.
+        setHasSubmittedForm(true);
+
+        // Save the form state, this will also trigger a redirect to pipelines list
         onSave({ ...formData, ...state.getData() });
       }
     }
@@ -131,7 +137,14 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
 
   return (
     <>
-      <UnsavedChangesPrompt hasUnsavedChanges={isFormDirty || areProcessorsDirty} />
+      {/*
+        We need to check if the form is dirty and also if the form has been submitted.
+        Because on form submission we also redirect the user to the pipelines list,
+        and this could otherwise trigger an unwanted unsaved changes prompt.
+      */}
+      <UnsavedChangesPrompt
+        hasUnsavedChanges={(isFormDirty || areProcessorsDirty) && !hasSubmittedForm}
+      />
 
       <Form
         form={form}
