@@ -345,7 +345,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
               />
             }
             color="warning"
-            data-test-subj="titleDupicateWarnMsg"
+            data-test-subj="titleDuplicateWarnMsg"
             id={duplicateWarningId}
           >
             <p>

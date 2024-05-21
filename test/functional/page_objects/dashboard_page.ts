@@ -251,9 +251,9 @@ export class DashboardPageObject extends FtrService {
    */
   public async expectDuplicateTitleWarningDisplayed({ displayed = true }) {
     if (displayed) {
-      await this.testSubjects.existOrFail('titleDupicateWarnMsg');
+      await this.testSubjects.existOrFail('titleDuplicateWarnMsg');
     } else {
-      await this.testSubjects.missingOrFail('titleDupicateWarnMsg');
+      await this.testSubjects.missingOrFail('titleDuplicateWarnMsg');
     }
   }
 
@@ -599,7 +599,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async ensureDuplicateTitleCallout() {
-    await this.testSubjects.existOrFail('titleDupicateWarnMsg');
+    await this.testSubjects.existOrFail('titleDuplicateWarnMsg');
   }
 
   public async selectDashboardTags(tagNames: string[]) {
