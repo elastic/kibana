@@ -548,6 +548,7 @@ interface RuleCreateOptions {
   defaultEnabled?: boolean;
 }
 
+// eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps,
   options?: RuleCreateOptions

@@ -172,7 +172,6 @@ export const createRuleExceptions = async ({
       // and update the rule's exceptions lists to include newly created default list.
       const defaultList = await createAndAssociateDefaultExceptionList({
         rule,
-        rulesClient,
         listsClient,
         rulesManagementClient,
         removeOldAssociation: true,
@@ -183,7 +182,6 @@ export const createRuleExceptions = async ({
   } else {
     const defaultList = await createAndAssociateDefaultExceptionList({
       rule,
-      rulesClient,
       listsClient,
       rulesManagementClient,
       removeOldAssociation: false,
@@ -278,13 +276,11 @@ export const createExceptionList = async ({
 export const createAndAssociateDefaultExceptionList = async ({
   rule,
   listsClient,
-  rulesClient,
   rulesManagementClient,
   removeOldAssociation,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
-  rulesClient: RulesClient;
   rulesManagementClient: IRulesManagementClient;
   removeOldAssociation: boolean;
 }): Promise<ExceptionListSchema> => {

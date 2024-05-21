@@ -266,7 +266,7 @@ export const importRule = async (
 };
 
 /* -------- Internal Methods -------- */
-export const _createRule = async (
+const _createRule = async (
   rulesClient: RulesClient,
   params: RuleCreateProps,
   options: CreateRuleOptions
@@ -283,7 +283,7 @@ export const _createRule = async (
   return rule;
 };
 
-export const _updateRule = async (
+const _updateRule = async (
   rulesClient: RulesClient,
   updateRulePayload: _UpdateRuleProps
 ): Promise<RuleAlertType> => {
@@ -302,7 +302,7 @@ export const _updateRule = async (
   return update;
 };
 
-export const _patchRule = async (
+const _patchRule = async (
   rulesClient: RulesClient,
   patchRulePayload: _PatchRuleProps
 ): Promise<RuleAlertType> => {
@@ -318,7 +318,7 @@ export const _patchRule = async (
   return update;
 };
 
-export const _upgradePrebuiltRuleWithTypeChange = async (
+const _upgradePrebuiltRuleWithTypeChange = async (
   rulesClient: RulesClient,
   ruleAsset: PrebuiltRuleAsset,
   existingRule: RuleAlertType
@@ -326,7 +326,7 @@ export const _upgradePrebuiltRuleWithTypeChange = async (
   // If we're trying to change the type of a prepackaged rule, we need to delete the old one
   // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
   // and exception lists from the old rule
-  await rulesClient.delete({ id: ruleAsset.rule_id });
+  await rulesClient.delete({ id: existingRule.id });
 
   return _createRule(
     rulesClient,
@@ -342,7 +342,7 @@ export const _upgradePrebuiltRuleWithTypeChange = async (
   );
 };
 
-export const _toggleRuleEnabledOnUpdate = async (
+const _toggleRuleEnabledOnUpdate = async (
   rulesClient: RulesClient,
   existingRule: RuleAlertType,
   enabled: boolean
@@ -354,7 +354,7 @@ export const _toggleRuleEnabledOnUpdate = async (
   }
 };
 
-export const _importNewRule = async (
+const _importNewRule = async (
   rulesClient: RulesClient,
   importRulePayload: ImportNewRuleProps
 ): Promise<RuleAlertType> => {
@@ -366,7 +366,7 @@ export const _importNewRule = async (
   });
 };
 
-export const _importExistingRule = async (
+const _importExistingRule = async (
   rulesClient: RulesClient,
   importRulePayload: ImportExistingRuleProps
 ): Promise<RuleAlertType> => {
