@@ -4,15 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-import type { IlmPutLifecycleRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
-export const reportingIlmPolicy: IlmPutLifecycleRequest['body'] = {
-  policy: {
-    phases: {
-      hot: {
-        actions: {},
-      },
-    },
-  },
-};
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('playground', async () => {
+    loadTestFile(require.resolve('./playground_overview.ess.ts'));
+  });
+}
