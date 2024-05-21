@@ -22,7 +22,10 @@ export const unmuteAllRuleRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_unmute_all`,
-      options: { access: 'public' },
+      options: {
+        access: 'public',
+        description: `Unmute all alerts`,
+      },
       validate: {
         params: paramSchema,
       },
