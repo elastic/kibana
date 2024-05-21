@@ -27,7 +27,7 @@ test('getTopNavLinks result', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isTextBased: false,
+    isEsqlMode: false,
     adHocDataViews: [],
     topNavCustomization: undefined,
   });
@@ -80,7 +80,7 @@ test('getTopNavLinks result for ES|QL mode', () => {
     onOpenInspector: jest.fn(),
     services,
     state,
-    isTextBased: true,
+    isEsqlMode: true,
     adHocDataViews: [],
     topNavCustomization: undefined,
   });
