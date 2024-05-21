@@ -11,7 +11,7 @@ import { isConfigSchema, Type, metaFields } from '@kbn/config-schema';
 import { get } from 'lodash';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { KnownParameters } from '../../type';
-import { isReferenceObject, trimTrailingStar } from '../common';
+import { isReferenceObject } from '../common';
 import { parse } from './parse';
 
 import { createCtx, IContext } from './post_process_mutations';
@@ -104,9 +104,10 @@ export const convert = (kbnConfigSchema: unknown) => {
   return { schema: result, shared: Object.fromEntries(shared.entries()) };
 };
 
-const getParamSchema = (knownParameters: KnownParameters, schemaKey: string) => {
+export const getParamSchema = (knownParameters: KnownParameters, schemaKey: string) => {
   return (
     knownParameters[schemaKey] ??
+    // Handle special path parameters
     knownParameters[schemaKey + '*'] ??
     knownParameters[schemaKey + '?*']
   );

@@ -10,7 +10,7 @@ import { schema, metaFields } from '@kbn/config-schema';
 import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash';
 import { OpenAPIV3 } from 'openapi-types';
-import { is, tryConvertToRef, isNullableObjectType } from './lib';
+import { is, tryConvertToRef, isNullableObjectType, getParamSchema } from './lib';
 
 describe('is', () => {
   test.each([
@@ -64,4 +64,15 @@ test('isNullableObjectType', () => {
 
   const nullableObject = schema.nullable(schema.object({}));
   expect(isNullableObjectType(nullableObject.getSchema().describe())).toBe(true);
+});
+
+test('getParamSchema from {pathVar*}', () => {
+  const a = { optional: true };
+  const b = { optional: true };
+  const c = { optional: true };
+  const keyName = 'pathVar';
+  // Special * syntax in API defs
+  expect(getParamSchema({ a, b, [`${keyName}*`]: c }, keyName)).toBe(c);
+  // Special * syntax with ? in API defs
+  expect(getParamSchema({ a, b, [`${keyName}?*`]: c }, keyName)).toBe(c);
 });
