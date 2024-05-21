@@ -78,10 +78,7 @@ export interface PackageClient {
     bundledPackage: BundledPackage
   ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
 
-  getPackage(
-    packageName: string,
-    packageVersion: string
-  ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
+  getPackage(packageName: string, packageVersion: string): ReturnType<typeof getPackage>;
 
   getPackages(params?: {
     excludeInstallStatus?: false;
