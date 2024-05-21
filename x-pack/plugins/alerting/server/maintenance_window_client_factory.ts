@@ -10,6 +10,7 @@ import {
   Logger,
   SavedObjectsServiceStart,
   SECURITY_EXTENSION_ID,
+  UiSettingsServiceStart,
 } from '@kbn/core/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { MaintenanceWindowClient } from './maintenance_window_client';
@@ -19,6 +20,7 @@ export interface MaintenanceWindowClientFactoryOpts {
   logger: Logger;
   savedObjectsService: SavedObjectsServiceStart;
   securityPluginStart?: SecurityPluginStart;
+  uiSettings: UiSettingsServiceStart;
 }
 
 export class MaintenanceWindowClientFactory {
@@ -26,6 +28,7 @@ export class MaintenanceWindowClientFactory {
   private logger!: Logger;
   private savedObjectsService!: SavedObjectsServiceStart;
   private securityPluginStart?: SecurityPluginStart;
+  private uiSettings!: UiSettingsServiceStart;
 
   public initialize(options: MaintenanceWindowClientFactoryOpts) {
     if (this.isInitialized) {
@@ -35,6 +38,7 @@ export class MaintenanceWindowClientFactory {
     this.logger = options.logger;
     this.savedObjectsService = options.savedObjectsService;
     this.securityPluginStart = options.securityPluginStart;
+    this.uiSettings = options.uiSettings;
   }
 
   private createMaintenanceWindowClient(request: KibanaRequest, withAuth: boolean) {
@@ -44,9 +48,12 @@ export class MaintenanceWindowClientFactory {
       ...(withAuth ? {} : { excludedExtensions: [SECURITY_EXTENSION_ID] }),
     });
 
+    const uiSettingClient = this.uiSettings.asScopedToClient(savedObjectsClient);
+
     return new MaintenanceWindowClient({
       logger: this.logger,
       savedObjectsClient,
+      uiSettings: uiSettingClient,
       async getUserName() {
         if (!securityPluginStart || !request) {
           return null;

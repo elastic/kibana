@@ -556,6 +556,7 @@ export class AlertingPlugin {
       logger: this.logger,
       savedObjectsService: core.savedObjects,
       securityPluginStart: plugins.security,
+      uiSettings: core.uiSettings,
     });
 
     const getRulesClientWithRequest = (request: KibanaRequest) => {

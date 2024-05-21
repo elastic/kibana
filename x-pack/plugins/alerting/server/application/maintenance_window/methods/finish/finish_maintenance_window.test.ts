@@ -8,7 +8,11 @@
 import moment from 'moment-timezone';
 import { Frequency } from '@kbn/rrule';
 import { finishMaintenanceWindow } from './finish_maintenance_window';
-import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  loggingSystemMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import {
   MaintenanceWindowClientContext,
@@ -18,6 +22,7 @@ import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/te
 import type { MaintenanceWindow } from '../../types';
 
 const savedObjectsClient = savedObjectsClientMock.create();
+const uiSettings = uiSettingsServiceMock.createClient();
 
 const firstTimestamp = '2023-02-26T00:00:00.000Z';
 
@@ -32,6 +37,7 @@ const mockContext: jest.Mocked<MaintenanceWindowClientContext> = {
   logger: loggingSystemMock.create().get(),
   getModificationMetadata: jest.fn(),
   savedObjectsClient,
+  uiSettings,
 };
 
 describe('MaintenanceWindowClient - finish', () => {
