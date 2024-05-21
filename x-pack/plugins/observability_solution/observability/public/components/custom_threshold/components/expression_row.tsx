@@ -24,7 +24,7 @@ import {
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { LEGACY_OUTSIDE_RANGE } from '../../../../common';
+import { convertToBuiltInComparators } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
@@ -200,11 +200,9 @@ const ThresholdElement: React.FC<{
 
   const thresholdComparator = useCallback(() => {
     if (!comparator) return COMPARATORS.GREATER_THAN;
-    // Check if the rule had a LEGACY_OUTSIDE_RANGE inside its params.
+    // Check if the rule had a legacy OUTSIDE_RANGE inside its params.
     // Then, change it on-the-fly to NOT_BETWEEN
-    // @ts-ignore
-    if (comparator === LEGACY_OUTSIDE_RANGE) return COMPARATORS.NOT_BETWEEN;
-    return comparator;
+    return convertToBuiltInComparators(comparator);
   }, [comparator]);
   return (
     <>

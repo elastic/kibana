@@ -9,7 +9,7 @@ import { schema, Type } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
-import { LEGACY_OUTSIDE_RANGE, observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
   InventoryItemType,
@@ -17,6 +17,7 @@ import {
   SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import {
   SnapshotCustomAggregation,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
@@ -53,7 +54,7 @@ import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
 const comparators: string[] = Object.values(COMPARATORS);
-comparators.push(LEGACY_OUTSIDE_RANGE);
+comparators.push(LEGACY_COMPARATORS.OUTSIDE_RANGE);
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(comparators) as Type<COMPARATORS>,

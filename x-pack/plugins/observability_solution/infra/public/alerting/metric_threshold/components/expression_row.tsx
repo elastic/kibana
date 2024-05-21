@@ -29,7 +29,7 @@ import {
 import { DataViewBase } from '@kbn/es-query';
 import useToggle from 'react-use/lib/useToggle';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { LEGACY_OUTSIDE_RANGE } from '@kbn/observability-plugin/common';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { Aggregators } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
 import { DerivedIndexPattern } from '../../../containers/metrics_source';
@@ -372,11 +372,9 @@ const ThresholdElement: React.FC<{
   }, [threshold, isMetricPct]);
   const thresholdComparator = useCallback(() => {
     if (!comparator) return COMPARATORS.GREATER_THAN;
-    // Check if the rule had a LEGACY_OUTSIDE_RANGE inside its params.
+    // Check if the rule had the legacy OUTSIDE_RANGE inside its params.
     // Then, change it on-the-fly to NOT_BETWEEN
-    // @ts-ignore
-    if (comparator === LEGACY_OUTSIDE_RANGE) return COMPARATORS.NOT_BETWEEN;
-    return comparator;
+    return convertToBuiltInComparators(comparator);
   }, [comparator]);
   return (
     <>

@@ -9,8 +9,9 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
-import { LEGACY_OUTSIDE_RANGE, observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
 import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/http_api';
@@ -53,7 +54,7 @@ export function registerMetricThresholdRuleType(
     return;
   }
   const comparators: string[] = Object.values(COMPARATORS);
-  comparators.push(LEGACY_OUTSIDE_RANGE);
+  comparators.push(LEGACY_COMPARATORS.OUTSIDE_RANGE);
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(comparators),

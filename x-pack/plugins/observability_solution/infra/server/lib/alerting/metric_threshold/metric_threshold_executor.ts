@@ -20,9 +20,10 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { TimeUnitChar, getAlertUrl, LEGACY_OUTSIDE_RANGE } from '@kbn/observability-plugin/common';
+import { TimeUnitChar, getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, MetricExpressionParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
@@ -123,21 +124,13 @@ export const createMetricThresholdExecutor =
 
     const { criteria } = params;
     criteria.forEach((criteriaItem: MetricExpressionParams) => {
-      // For backwards-compatibility check if the rule had a LEGACY_OUTSIDE_RANGE inside its params.
+      // For backwards-compatibility check if the rule had the legacy OUTSIDE_RANGE inside its params.
       // Then, change it on-the-fly to NOT_BETWEEN
-      const ifLegacyComparator = criteriaItem.comparator as
-        | COMPARATORS
-        | typeof LEGACY_OUTSIDE_RANGE;
-
-      const ifLegacyWarningComparator = criteriaItem.warningComparator as
-        | COMPARATORS
-        | typeof LEGACY_OUTSIDE_RANGE;
-
-      if (ifLegacyComparator === LEGACY_OUTSIDE_RANGE) {
-        criteriaItem.comparator = COMPARATORS.NOT_BETWEEN;
-      }
-      if (ifLegacyWarningComparator === LEGACY_OUTSIDE_RANGE) {
-        criteriaItem.warningComparator = COMPARATORS.NOT_BETWEEN;
+      criteriaItem.comparator = convertToBuiltInComparators(criteriaItem.comparator);
+      if (criteriaItem.warningComparator) {
+        criteriaItem.warningComparator = convertToBuiltInComparators(
+          criteriaItem.warningComparator
+        );
       }
     });
 

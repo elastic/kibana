@@ -17,10 +17,10 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { Group } from '../../../../common/custom_threshold_rule/types';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
-import { AlertsLocatorParams, getAlertDetailsUrl, LEGACY_OUTSIDE_RANGE } from '../../../../common';
+import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
@@ -34,11 +34,7 @@ import {
   CustomThresholdActionGroup,
   CustomThresholdAlert,
 } from './types';
-import {
-  buildFiredAlertReason,
-  buildNoDataAlertReason,
-  // buildRecoveredAlertReason,
-} from './messages';
+import { buildFiredAlertReason, buildNoDataAlertReason } from './messages';
 import {
   createScopedLogger,
   hasAdditionalContext,
@@ -93,14 +89,9 @@ export const createCustomThresholdExecutor = ({
 
     const { criteria } = params;
     criteria.forEach((criteriaItem) => {
-      // For backwards-compatibility check if the rule had a LEGACY_OUTSIDE_RANGE inside its params.
+      // For backwards-compatibility check if the rule had the legacy OUTSIDE_RANGE inside its params.
       // Then, change it on-the-fly to NOT_BETWEEN
-      const ifLegacyComparator = criteriaItem.comparator as
-        | COMPARATORS
-        | typeof LEGACY_OUTSIDE_RANGE;
-      if (ifLegacyComparator === LEGACY_OUTSIDE_RANGE) {
-        criteriaItem.comparator = COMPARATORS.NOT_BETWEEN;
-      }
+      criteriaItem.comparator = convertToBuiltInComparators(criteriaItem.comparator);
     });
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const thresholdLogger = createScopedLogger(logger, 'thresholdRule', {
