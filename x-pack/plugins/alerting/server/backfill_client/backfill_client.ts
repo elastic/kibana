@@ -270,7 +270,26 @@ export class BackfillClient {
           this.logger.warn(
             `Error deleting backfill jobs with IDs: ${deleteErrors
               .map((status) => status.id)
-              .join(', ')} with errors: ${deleteErrors.map((status) => status.error?.message)}`
+              .join(', ')} with errors: ${deleteErrors.map(
+              (status) => status.error?.message
+            )} - jobs and associated task were not deleted.`
+          );
+        }
+
+        // only delete tasks if the associated ad hoc runs were successfully deleted
+        const taskIdsToDelete = deleteResult.statuses
+          .filter((status) => status.success)
+          .map((status) => status.id);
+
+        // delete the associated tasks
+        const taskManager = await this.taskManagerStartPromise;
+        const deleteTaskResult = await taskManager.bulkRemove(taskIdsToDelete);
+        const deleteTaskErrors = deleteTaskResult.statuses.filter((status) => !!status.error);
+        if (deleteTaskErrors.length > 0) {
+          this.logger.warn(
+            `Error deleting tasks with IDs: ${deleteTaskErrors
+              .map((status) => status.id)
+              .join(', ')} with errors: ${deleteTaskErrors.map((status) => status.error?.message)}`
           );
         }
       }

@@ -11,7 +11,12 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX, SavedObject } from '@kbn/core-saved-
 import { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
-import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
+import {
+  getTestRuleData,
+  getUrlPrefix,
+  ObjectRemover,
+  TaskManagerDoc,
+} from '../../../../../common/lib';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,10 +28,6 @@ export default function deleteRuleForBackfillTests({ getService }: FtrProviderCo
   describe('delete rule with backfills', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    beforeEach(async () => {
-      await runInvalidateTask();
-    });
-
     after(() => objectRemover.removeAll());
 
     async function getAdHocRunSO(id: string) {
@@ -37,12 +38,12 @@ export default function deleteRuleForBackfillTests({ getService }: FtrProviderCo
       return result._source;
     }
 
-    async function runInvalidateTask() {
-      // Invoke the invalidate API key task
-      await supertest
-        .post('/api/alerts_fixture/api_key_invalidation/_run_soon')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
+    async function getScheduledTask(id: string): Promise<TaskManagerDoc> {
+      const scheduledTask = await es.get<TaskManagerDoc>({
+        id: `task:${id}`,
+        index: '.kibana_task_manager',
+      });
+      return scheduledTask._source!;
     }
 
     function getRule(overwrites = {}) {
@@ -111,6 +112,32 @@ export default function deleteRuleForBackfillTests({ getService }: FtrProviderCo
       const adHocRun3: AdHocRunSO = get(adHocRunSO3, 'ad_hoc_run_params');
       expect(adHocRun3).not.to.be(undefined);
 
+      // check that the scheduled tasks were created
+      const taskRecord1 = await getScheduledTask(backfillId1);
+      expect(taskRecord1.type).to.eql('task');
+      expect(taskRecord1.task.taskType).to.eql('ad_hoc_run-backfill');
+      expect(taskRecord1.task.enabled).to.eql(true);
+      expect(JSON.parse(taskRecord1.task.params)).to.eql({
+        adHocRunParamsId: backfillId1,
+        spaceId,
+      });
+      const taskRecord2 = await getScheduledTask(backfillId2);
+      expect(taskRecord2.type).to.eql('task');
+      expect(taskRecord2.task.taskType).to.eql('ad_hoc_run-backfill');
+      expect(taskRecord2.task.enabled).to.eql(true);
+      expect(JSON.parse(taskRecord2.task.params)).to.eql({
+        adHocRunParamsId: backfillId2,
+        spaceId,
+      });
+      const taskRecord3 = await getScheduledTask(backfillId3);
+      expect(taskRecord3.type).to.eql('task');
+      expect(taskRecord3.task.taskType).to.eql('ad_hoc_run-backfill');
+      expect(taskRecord3.task.enabled).to.eql(true);
+      expect(JSON.parse(taskRecord3.task.params)).to.eql({
+        adHocRunParamsId: backfillId3,
+        spaceId,
+      });
+
       // delete both rules which should delete the backfills
       await supertestWithoutAuth
         .delete(`${getUrlPrefix(spaceId)}/api/alerting/rule/${ruleId1}`)
@@ -141,6 +168,28 @@ export default function deleteRuleForBackfillTests({ getService }: FtrProviderCo
       try {
         await getAdHocRunSO(backfillId3);
         throw new Error(`Should have removed ad hoc run with id ${backfillId3}`);
+      } catch (e) {
+        expect(e.meta.statusCode).to.eql(404);
+      }
+
+      // ensure the tasks were deleted
+      try {
+        await getScheduledTask(backfillId1);
+        throw new Error(`Should have removed task with id ${backfillId1}`);
+      } catch (e) {
+        expect(e.meta.statusCode).to.eql(404);
+      }
+
+      try {
+        await getScheduledTask(backfillId2);
+        throw new Error(`Should have removed tas with id ${backfillId2}`);
+      } catch (e) {
+        expect(e.meta.statusCode).to.eql(404);
+      }
+
+      try {
+        await getScheduledTask(backfillId3);
+        throw new Error(`Should have removed task with id ${backfillId3}`);
       } catch (e) {
         expect(e.meta.statusCode).to.eql(404);
       }
