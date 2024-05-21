@@ -139,6 +139,11 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
+   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   */
+  assistantKnowledgeBaseByDefault: false,
+
+  /**
    * Enables the new user details flyout displayed on the Alerts table.
    */
   newUserDetailsFlyout: true,
@@ -179,6 +184,11 @@ export const allowedExperimentalValues = Object.freeze({
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
+
+  /**
+   * Enables alerts suppression for ES|QL rules
+   */
+  alertSuppressionForEsqlRuleEnabled: false,
 
   /**
    * Enables the risk engine privileges route
