@@ -211,7 +211,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [abortController, setAbortController] = useState(new AbortController());
   const [integrations, setIntegrations] = useState<FleetResponse['items']>([]);
   const [indices, setIndices] = useState<Array<{ name: string }>>([]);
-  // const [isModalVisible, setIsModalVisible] = useState(false);
   const [isPopoverVisible, setIsPopoverVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [popoverPosition, setPopoverPosition] = useState<{ top?: number; left?: number }>({});
@@ -220,11 +219,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value === 'from') {
-      // setEditorLanguage(ESQL_LANG_ID);
-      // setCode(`from ${indices[0]?.name} | limit 10`);
-      // setCodeOneLiner(`from ${indices[0]?.name} | limit 10`);
-      onUpdateAndSubmit(`from ${indices[0]?.name} | limit 10`);
       setIsFlyoutVisible(false);
+      setTimeout(() => {
+        onUpdateAndSubmit(`from ${indices[0]?.name} | limit 10`);
+        addSourceDecoration(`from ${indices[0]?.name} | limit 10`);
+      }, 300);
     } else if (e.target.value === '/') {
       setIsFlyoutVisible(true);
     } else if (e.target.value === '') {
@@ -746,7 +745,20 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         .map((item) => {
           return { name: item.name };
         });
-      setIndices(visibleSources);
+      const sources: Array<{ name: string }> = [];
+      visibleSources.forEach((source) => {
+        if (source.name.includes('logstash') && !sources.find((s) => s.name === 'logstash-*')) {
+          sources.push({ name: 'logstash-*' });
+        } else if (
+          source.name.includes('logstash') &&
+          sources.find((s) => s.name === 'logstash-*')
+        ) {
+          return;
+        } else {
+          sources.push(source);
+        }
+      });
+      setIndices(sources);
       setIntegrations(response.items);
     }
     fetchIntegrations();
@@ -1157,9 +1169,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                             });
                             if (currentPosition && content) {
                               const currentWord = model?.getWordAtPosition(currentPosition);
-                              const pattern = getIndexPatternFromESQLQuery(content);
+                              const pattern = getIndexPatternFromESQLQuery(
+                                model?.getValue() ?? content
+                              );
                               if (currentWord?.word === pattern.trim()) {
-                                addSourceDecoration(content);
+                                addSourceDecoration(model?.getValue() ?? content);
                               }
                             }
 
@@ -1311,6 +1325,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         onChange={(e) => onChange(e)}
                         aria-label="Type from to begin a query or '/' for quick adds"
                         fullWidth
+                        autoFocus
                       />
                     )}
                     {isCompactFocused && !isCodeEditorExpanded && editorLanguage === ESQL_LANG_ID && (
