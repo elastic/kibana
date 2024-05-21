@@ -16,9 +16,7 @@ export interface PlaygroundProviderProps {
   children: React.ReactNode;
 }
 
-export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({
-  children,
-}) => {
+export const PlaygroundProvider: React.FC<PlaygroundProviderProps> = ({ children }) => {
   const form = useForm<ChatForm>({
     defaultValues: {
       prompt: 'You are an assistant for question-answering tasks.',
