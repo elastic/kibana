@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -59,11 +60,13 @@ export interface SingleMetricViewerProps {
    * Last reload request time, can be used for manual reload
    */
   lastRefresh?: number;
-  onLoading?: (isLoading: boolean) => void; // TODO: callback
   onRenderComplete?: () => void;
   onError?: (error: Error) => void;
   uuid: string;
 }
+
+type Zoom = AppStateZoom | undefined;
+type ForecastId = string | undefined;
 
 const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   // Component dependencies
@@ -81,12 +84,12 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   uuid,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
-  const [zoom, setZoom] = useState<AppStateZoom | undefined>();
-  const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
+  const [zoom, setZoom] = useState<Zoom>();
+  const [selectedForecastId, setSelectedForecastId] = useState<ForecastId>();
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
   const [jobsLoaded, setJobsLoaded] = useState(false);
 
-  const isMounted = useRef(true);
+  const isMounted = useMountedState();
 
   const { mlApiServices, mlJobService, mlTimeSeriesExplorerService, toastNotificationService } =
     mlServices;
@@ -112,17 +115,13 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
           }
         }
       }
-      if (isMounted.current === false) {
+      if (isMounted() === false) {
         return;
       }
       loadJobs();
-
-      return () => {
-        isMounted.current = false;
-      };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [isMounted]
   );
 
   useEffect(
@@ -140,12 +139,12 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
           }
         }
       }
-      if (isMounted.current === false) {
+      if (isMounted() === false) {
         return;
       }
       fetchSelectedJob();
     },
-    [selectedJobId, mlApiServices, onError]
+    [selectedJobId, mlApiServices, isMounted, onError]
   );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const resizeHandler = useCallback(
@@ -163,19 +162,19 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   }, [mlTimeSeriesExplorerService, selectedJob]);
 
   const appStateHandler = useCallback(
-    (action: string, payload?: any) => {
+    (action: string, payload?: Zoom | ForecastId) => {
       /**
        * Empty zoom indicates that chart hasn't been rendered yet,
        * hence any updates prior that should replace the URL state.
        */
       switch (action) {
         case APP_STATE_ACTION.SET_FORECAST_ID:
-          setSelectedForecastId(payload);
+          setSelectedForecastId(payload as ForecastId);
           setZoom(undefined);
           break;
 
         case APP_STATE_ACTION.SET_ZOOM:
-          setZoom(payload);
+          setZoom(payload as Zoom);
           break;
 
         case APP_STATE_ACTION.UNSET_ZOOM:
@@ -187,7 +186,6 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
     [setZoom, setSelectedForecastId]
   );
 
-  // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376>
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
@@ -202,6 +200,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
           data-test-subj={`mlSingleMetricViewer_${uuid}`}
           ref={resizeRef}
           className="ml-time-series-explorer"
+          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
         >
           <KibanaRenderContextProvider {...startServices}>
             <KibanaContextProvider
