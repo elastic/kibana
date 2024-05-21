@@ -31,7 +31,7 @@ jest.mock('./components/event_header_title', () => ({
 }));
 
 const mockUseBasicDataFromDetailsData = useBasicDataFromDetailsData as jest.Mock;
-const mockGuidedOnboardingTourStep = GuidedOnboardingTourStep as jest.Mock;
+const mockGuidedOnboardingTourStep = GuidedOnboardingTourStep as unknown as jest.Mock;
 
 describe('PanelHeader', () => {
   beforeEach(() => {
