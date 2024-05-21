@@ -5,10 +5,11 @@
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "sideEffects": false,
   "scripts": {
-    "maketests": "ts-node --transpileOnly ./scripts/generate_function_validation_tests.ts && yarn run lint:fix",
+    "maketests": "ts-node --transpileOnly ./scripts/generate_function_validation_tests.ts",
     "postmaketests": "yarn run lint:fix",
     "makedefs": "node ./scripts/generate_function_definitions.js",
-    "postmakedefs": "yarn run lint:fix",
-    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-esql-validation-autocomplete/src/**/*.ts"
+    "postmakedefs": "yarn run lint:fix && yarn run i18n:fix",
+    "lint:fix": "cd ../.. && node ./scripts/eslint --fix ./packages/kbn-esql-validation-autocomplete/src/**/*.ts",
+    "i18n:fix": "cd ../.. && node ./scripts/i18n_check.js --fix"
   }
 }
