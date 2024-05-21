@@ -30,6 +30,16 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/capture_oas_snapshot.sh
+    label: 'Capture OAS snapshot'
+    agents:
+      queue: n2-2-spot
+    key: capture_oas_snapshot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
   - wait
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
