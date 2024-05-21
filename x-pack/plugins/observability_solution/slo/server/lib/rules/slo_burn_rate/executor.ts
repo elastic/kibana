@@ -188,7 +188,7 @@ export const getRuleExecutor = ({
             sloInstanceId: instanceId,
             slo,
             suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
-            errorBudgetExhaustionTime: formatTimeToExhaustErrorBudgetInHours(
+            errorBudgetExhaustionTimeInHours: formatTimeToExhaustErrorBudgetInHours(
               longWindowBurnRate,
               slo.timeWindow
             ),
