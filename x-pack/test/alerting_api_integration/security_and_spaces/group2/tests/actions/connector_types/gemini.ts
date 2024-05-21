@@ -52,7 +52,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           config: configService.get('kbnTestServer.serverArgs'),
         },
       });
-      const config = { url: '' };
+      const config = { ...defaultConfig, url: '' };
 
       before(async () => {
         config.url = await simulator.start();
@@ -86,7 +86,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('should return 400 Bad Request when creating the connector without the url', async () => {
+      it('should return 400 Bad Request when creating the connector without the url, project id and region', async () => {
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
@@ -102,10 +102,55 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: [url]: expected value of type [string] but got [undefined]',
+                'error validating action type config: [url, gcpRegion, gcpProjectID]: expected value of type [string] but got [undefined]',
             });
           });
       });
+
+      it('should return 400 Bad Request when creating the connector without the project id', async () => {
+        const config = { gcpRegion: 'us-central-1', url: '' };
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets,
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: [gcpProjectID]: expected value of type [string] but got [undefined]',
+            });
+          });
+      });
+
+      it('should return 400 Bad Request when creating the connector without the region', async () => {
+        const config = { gcpProjectID: 'test-project', url: '' };
+        await supertest
+          .post('/api/actions/connector')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name,
+            connector_type_id: connectorTypeId,
+            config,
+            secrets,
+          })
+          .expect(400)
+          .then((resp: any) => {
+            expect(resp.body).to.eql({
+              statusCode: 400,
+              error: 'Bad Request',
+              message:
+                'error validating action type config: [gcpRegion]: expected value of type [string] but got [undefined]',
+            });
+          });
+      });
+
 
       it('should return 400 Bad Request when creating the connector with a url that is not allowed', async () => {
         await supertest
