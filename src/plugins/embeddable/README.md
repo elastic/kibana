@@ -26,7 +26,7 @@ For example, [publishes_panel_title](https://github.com/elastic/kibana/tree/main
 #### Comparators
 Comparators allow a page to track changes to an embeddable's state. For example, Dashboard uses comparators to display a UI notification for unsaved changes, to reset changes, and persist unsaved changes to session storage.
 
-A comparitor must be provided for each property in an embeddable's RuntimeState. A comparitor is a 3 element tuple: where the first element is a publishing subject providing the current value. The second element is a setter allowing the page to reset the value. The third element is an optional comparator which provides logic to diff lasted stored value and current value.
+A comparator must be provided for each property in an embeddable's RuntimeState. A comparator is a 3 element tuple: where the first element is a publishing subject providing the current value. The second element is a setter allowing the page to reset the value. The third element is an optional comparator function which provides logic to diff this property.
 
 For example, [initializeTitles](https://github.com/elastic/kibana/tree/main/packages/presentation/presentation_publishing/interfaces/titles/titles_api.ts) provides an implemenation for the titles publishing package. Comparitors are provided for each property from `SerializedTitles`.
 
