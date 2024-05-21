@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
 import { MAX_SPACE_INITIALS } from '../../common';
 
@@ -20,6 +20,17 @@ export const spaceSchema = schema.object({
     },
   }),
   name: schema.string({ minLength: 1 }),
+  solution: offeringBasedSchema({
+    traditional: schema.maybe(
+      schema.oneOf([
+        schema.literal('security'),
+        schema.literal('observability'),
+        schema.literal('search'),
+        schema.literal('classic'),
+      ])
+    ),
+    serverless: schema.never(),
+  }),
   description: schema.maybe(schema.string()),
   initials: schema.maybe(schema.string({ maxLength: MAX_SPACE_INITIALS })),
   color: schema.maybe(

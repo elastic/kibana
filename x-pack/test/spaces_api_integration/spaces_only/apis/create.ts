@@ -19,6 +19,7 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
     expectNewSpaceResult,
     expectConflictResponse,
     expectReservedSpecifiedResult,
+    expectSolutionSpecifiedResult,
   } = createTestSuiteFactory(esArchiver, supertestWithoutAuth);
 
   describe('create', () => {
@@ -44,6 +45,10 @@ export default function createSpacesOnlySuite({ getService }: FtrProviderContext
           reservedSpecified: {
             statusCode: 200,
             response: expectReservedSpecifiedResult,
+          },
+          solutionSpecified: {
+            statusCode: 200,
+            response: expectSolutionSpecifiedResult,
           },
         },
       });

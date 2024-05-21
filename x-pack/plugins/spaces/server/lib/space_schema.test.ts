@@ -230,3 +230,32 @@ describe('#imageUrl', () => {
     ).not.toThrowError();
   });
 });
+
+describe('#solution', () => {
+  it('should throw error if solution is defined in serverless offering', () => {
+    expect(() =>
+      spaceSchema.validate({ ...defaultProperties, solution: 'search' }, { serverless: true })
+    ).toThrow();
+  });
+
+  it('should not throw error if solution is undefined in classic offering', () => {
+    expect(() =>
+      spaceSchema.validate({ ...defaultProperties, solution: undefined }, {})
+    ).not.toThrow();
+  });
+
+  it('should throw error if solution is invalid in classic offering', () => {
+    expect(() => spaceSchema.validate({ ...defaultProperties, solution: 'some_value' }, {}))
+      .toThrowErrorMatchingInlineSnapshot(`
+      "[solution]: types that failed validation:
+      - [solution.0]: expected value to equal [security]
+      - [solution.1]: expected value to equal [observability]
+      - [solution.2]: expected value to equal [search]
+      - [solution.3]: expected value to equal [classic]"
+    `);
+
+    expect(() =>
+      spaceSchema.validate({ ...defaultProperties, solution: ' search ' }, {})
+    ).toThrow();
+  });
+});

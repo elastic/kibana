@@ -30,7 +30,9 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
 
       try {
         const space = await spacesClient.get(spaceId);
-        return response.ok({ body: space });
+        return response.ok({
+          body: space,
+        });
       } catch (error) {
         if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
           return response.notFound();

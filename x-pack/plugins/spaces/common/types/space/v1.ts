@@ -58,6 +58,11 @@ export interface Space {
    * @private
    */
   _reserved?: boolean;
+
+  /**
+   * Solution selected for this space.
+   */
+  solution?: 'security' | 'observability' | 'search' | 'classic';
 }
 
 /**

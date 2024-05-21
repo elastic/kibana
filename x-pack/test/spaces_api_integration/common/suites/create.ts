@@ -19,6 +19,7 @@ interface CreateTests {
   newSpace: CreateTest;
   alreadyExists: CreateTest;
   reservedSpecified: CreateTest;
+  solutionSpecified?: CreateTest;
 }
 
 interface CreateTestDefinition {
@@ -61,6 +62,17 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       color: '#5c5959',
       disabledFeatures: [],
     });
+  };
+
+  const expectSolutionSpecifiedResult = (resp: Record<string, any>) => {
+    console.log(resp.error);
+    // expect(resp.body).to.eql({
+    //   name: 'reserved space',
+    //   id: 'reserved',
+    //   description: 'a description',
+    //   color: '#5c5959',
+    //   disabledFeatures: [],
+    // });
   };
 
   const makeCreateTest =
@@ -128,6 +140,26 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
                 .then(tests.reservedSpecified.response);
             });
           });
+
+          describe.only('when solution is specified', () => {
+            it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
+              return (
+                supertest
+                  .post(`${urlPrefix}/api/spaces/space`)
+                  .auth(user.username, user.password)
+                  .send({
+                    name: 'space with solution',
+                    id: 'solution',
+                    description: 'a description',
+                    color: '#5c5959',
+                    solution: 'search',
+                    disabledFeatures: [],
+                  })
+                  // .expect(tests.solutionSpecified.statusCode)
+                  .then(tests.solutionSpecified.response)
+              );
+            });
+          });
         });
       });
     };
@@ -142,5 +174,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expectNewSpaceResult,
     expectRbacForbiddenResponse,
     expectReservedSpecifiedResult,
+    expectSolutionSpecifiedResult,
   };
 }

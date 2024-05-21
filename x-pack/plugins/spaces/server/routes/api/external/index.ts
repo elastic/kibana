@@ -27,9 +27,10 @@ export interface ExternalRouteDeps {
   getSpacesService: () => SpacesServiceStart;
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
   log: Logger;
+  buildFlavor: BuildFlavor;
 }
 
-export function initExternalSpacesApi(deps: ExternalRouteDeps, buildFlavor: BuildFlavor) {
+export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   // These two routes are always registered, internal in serverless by default
   initGetSpaceApi(deps);
   initGetAllSpacesApi(deps);
@@ -37,7 +38,7 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps, buildFlavor: Buil
   // In the serverless environment, Spaces are enabled but are effectively hidden from the user. We
   // do not support more than 1 space: the default space. These HTTP APIs for creating, deleting,
   // updating, and manipulating saved objects across multiple spaces are not needed.
-  if (buildFlavor !== 'serverless') {
+  if (deps.buildFlavor !== 'serverless') {
     initPutSpacesApi(deps);
     initDeleteSpacesApi(deps);
     initPostSpacesApi(deps);
