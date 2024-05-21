@@ -42,20 +42,20 @@ const embeddablesRegistry: {
 const renderReactEmbeddable = ({
   type,
   uuid,
-  serializedState,
+  input,
   container,
   handlers,
   core,
 }: {
   type: string;
   uuid: string;
-  serializedState: object;
+  input: EmbeddableInput;
   container: CanvasContainerApi;
   handlers: RendererHandlers;
   core: CoreStart;
 }) => {
   // wrap in functional component to allow usage of hooks
-  const RendererWrapper: FC<{ canvasApi: CanvasContainerApi }> = ({ canvasApi }) => {
+  const RendererWrapper: FC<{}> = () => {
     const getAppContext = useGetAppContext(core);
 
     return (
@@ -66,7 +66,7 @@ const renderReactEmbeddable = ({
           ...container,
           getAppContext,
           getSerializedStateForChild: () => ({
-            rawState: serializedState,
+            rawState: omit(input, 'disableTriggers'),
           }),
         })}
         key={`${type}_${uuid}`}
@@ -89,7 +89,7 @@ const renderReactEmbeddable = ({
         className={CANVAS_EMBEDDABLE_CLASSNAME}
         style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
-        <RendererWrapper canvasApi={container} />
+        <RendererWrapper />
       </div>
     </KibanaRenderContextProvider>
   );
@@ -141,7 +141,7 @@ export const embeddableRendererFactory = (
          */
         ReactDOM.render(
           renderReactEmbeddable({
-            serializedState: omit(input, 'disableTriggers'),
+            input,
             handlers,
             uuid: uniqueId,
             type: embeddableType,
