@@ -80,6 +80,8 @@ export const deserializeState = (
     },
     references
   );
+  console.log('SAVEDVIS TYPE', serializedState.savedVis.type);
+
   return {
     ...serializedState,
     savedVis: {

@@ -210,6 +210,9 @@ class VisEditorVisualizationUI extends Component {
               api.subscribeToInitialRender(() =>
                 this.props.eventEmitter.emit('embeddableRendered')
               );
+              console.log('INSPECTOR SETTER', this.props.embeddableApiHandler);
+              const [, setOpenInspector] = this.props.embeddableApiHandler.openInspector;
+              setOpenInspector(() => api.openInspector);
             }}
           />
         </div>
@@ -238,7 +241,6 @@ VisEditorVisualizationUI.propTypes = {
   onCommit: PropTypes.func,
   uiState: PropTypes.object,
   onToggleAutoApply: PropTypes.func,
-  embeddableHandler: PropTypes.object,
   eventEmitter: PropTypes.object,
   timeRange: PropTypes.object,
   dirty: PropTypes.bool,

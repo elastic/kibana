@@ -6,24 +6,25 @@
  * Side Public License, v 1.
  */
 
-import './visualize_editor.scss';
-import React, { useEffect, useState } from 'react';
 import { EventEmitter } from 'events';
+import React, { useEffect, useState } from 'react';
+import './visualize_editor.scss';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { VisualizeInput } from '../..';
+import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeAppProps } from '../app';
+import { VisualizeServices } from '../types';
 import {
   useChromeVisibility,
-  useVisByValue,
-  useVisualizeAppState,
+  useDataViewUpdates,
   useEditorUpdates,
   useLinkedSearchUpdates,
-  useDataViewUpdates,
+  useVisByValue,
+  useVisualizeAppState,
+  useEmbeddableApiHandler,
 } from '../utils';
-import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeAppProps } from '../app';
-import { VisualizeConstants } from '../../../common/constants';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
@@ -34,6 +35,8 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [embeddableId, setEmbeddableId] = useState<string>();
   const [valueInput, setValueInput] = useState<VisualizeInput>();
 
+  const embeddableApiHandler = useEmbeddableApiHandler();
+  const [openInspectorFn] = embeddableApiHandler.openInspector;
   useEffect(() => {
     const { stateTransferService, history, data } = services;
     const {
@@ -67,6 +70,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
     services,
     eventEmitter,
     isChromeVisible,
+    embeddableApiHandler,
     valueInput,
     originatingApp,
     originatingPath
@@ -111,6 +115,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
       embeddableId={embeddableId}
       onAppLeave={onAppLeave}
       eventEmitter={eventEmitter}
+      openInspectorFn={openInspectorFn}
     />
   );
 };

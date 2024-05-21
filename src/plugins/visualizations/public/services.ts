@@ -26,6 +26,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -96,3 +97,5 @@ export const [getSavedSearch, setSavedSearch] =
 
 export const [getDataViews, setDataViews] =
   createGetterSetter<DataViewsPublicPluginStart>('DataViews');
+
+export const [getInspector, setInspector] = createGetterSetter<InspectorStart>('Inspector');

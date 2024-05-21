@@ -17,6 +17,7 @@ export const useVisByValue = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
+  embeddableApiHandler: any,
   valueInput?: VisualizeInput,
   originatingApp?: string,
   originatingPath?: string
@@ -40,17 +41,16 @@ export const useVisByValue = (
         return;
       }
       const byValueVisInstance = await getVisualizationInstanceFromInput(services, valueInput);
-      const { embeddableHandler, vis } = byValueVisInstance;
+      const { vis } = byValueVisInstance;
       let visEditorController;
 
       const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
-
       if (Editor) {
         visEditorController = new Editor(
           visEditorRef.current,
           vis,
           eventEmitter,
-          embeddableHandler
+          embeddableApiHandler
         );
       }
 
@@ -88,14 +88,13 @@ export const useVisByValue = (
     valueInput,
     originatingApp,
     originatingPath,
+    embeddableApiHandler,
   ]);
 
   useEffect(() => {
     return () => {
       if (state.visEditorController) {
         state.visEditorController.destroy();
-      } else if (state.byValueVisInstance?.embeddableHandler) {
-        state.byValueVisInstance.embeddableHandler.destroy();
       }
     };
   }, [state]);

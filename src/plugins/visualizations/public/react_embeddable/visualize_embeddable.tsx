@@ -29,7 +29,7 @@ import React, { useRef } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
-import { getUiActions } from '../services';
+import { getInspector, getUiActions } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
@@ -79,6 +79,8 @@ export const getVisualizeEmbeddableFactory: (
       : undefined;
     const parentApiContext = apiHasAppContext(parentApi) ? parentApi.getAppContext() : undefined;
 
+    const inspectorAdapters$ = new BehaviorSubject<Record<string, unknown>>({});
+
     const api = buildApi(
       {
         ...titlesApi,
@@ -119,6 +121,19 @@ export const getVisualizeEmbeddableFactory: (
           vis$.next(await createVisAsync(newVis.type, newVis));
         },
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
+        openInspector: () => {
+          const adapters = inspectorAdapters$.getValue();
+          if (!adapters) return;
+          const inspector = getInspector();
+          if (!inspector.isAvailable(adapters)) return;
+          getInspector().open(adapters, {
+            title:
+              titlesApi.panelTitle?.getValue() ||
+              i18n.translate('visualizations.embeddable.inspectorTitle', {
+                defaultMessage: 'Inspector',
+              }),
+          });
+        },
       },
       {
         ...titleComparators,
@@ -190,6 +205,11 @@ export const getVisualizeEmbeddableFactory: (
 
             await getUiActions().getTrigger(triggerId).exec(context);
           }
+        },
+        onData: (_, inspectorAdapters) => {
+          inspectorAdapters$.next(
+            typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters
+          );
         },
       });
       if (params) expressionParams$.next(params);

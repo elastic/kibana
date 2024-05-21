@@ -70,6 +70,7 @@ export interface TopNavConfigParams {
   setNavigateToLens: (flag: boolean) => void;
   showBadge: boolean;
   eventEmitter?: EventEmitter;
+  hasInspector: boolean;
 }
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
@@ -101,6 +102,7 @@ export const getTopNavConfig = (
     setNavigateToLens,
     showBadge,
     eventEmitter,
+    hasInspector,
   }: TopNavConfigParams,
   {
     data,
@@ -119,7 +121,7 @@ export const getTopNavConfig = (
     ...startServices
   }: VisualizeServices
 ) => {
-  const { vis, embeddableHandler } = visInstance;
+  const { vis } = visInstance;
   const savedVis = visInstance.savedVis;
 
   /**
@@ -348,11 +350,11 @@ export const getTopNavConfig = (
       }),
       testId: 'openInspectorButton',
       disableButton() {
-        return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
+        return !hasInspector;
       },
       run: openInspector,
       tooltip() {
-        if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
+        if (!hasInspector) {
           return i18n.translate('visualizations.topNavMenu.openInspectorDisabledButtonTooltip', {
             defaultMessage: `This visualization doesn't support any inspectors.`,
           });
@@ -482,7 +484,6 @@ export const getTopNavConfig = (
               }) => {
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
-                embeddableHandler.updateInput({ title: newTitle });
                 savedVis.description = newDescription;
 
                 if (savedObjectsTagging) {

@@ -36,4 +36,5 @@ export type VisualizeApi = HasEditCapabilities &
   DefaultEmbeddableApi<VisualizeSerializedState> & {
     setVis: (vis: SerializedVis<VisParams>) => void;
     subscribeToInitialRender: (listener: () => void) => void;
+    openInspector: () => void;
   };

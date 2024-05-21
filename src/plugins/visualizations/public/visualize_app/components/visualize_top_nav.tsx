@@ -24,6 +24,7 @@ import type {
 } from '../types';
 import { VISUALIZE_APP_NAME } from '../../../common/constants';
 import { getTopNavConfig, isFallbackDataView } from '../utils';
+import { OpenInspectorFn } from '../utils/use/use_embeddable_api_handler';
 
 const LOCAL_STORAGE_EDIT_IN_LENS_BADGE = 'EDIT_IN_LENS_BADGE_VISIBLE';
 
@@ -43,6 +44,7 @@ interface VisualizeTopNavProps {
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
   eventEmitter?: EventEmitter;
+  openInspectorFn?: OpenInspectorFn;
 }
 
 const TopNav = ({
@@ -61,12 +63,12 @@ const TopNav = ({
   embeddableId,
   onAppLeave,
   eventEmitter,
+  openInspectorFn,
 }: VisualizeTopNavProps & { intl: InjectedIntl }) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
   const { setHeaderActionMenu, visualizeCapabilities } = services;
   const {
-    embeddableHandler,
     vis,
     savedVis: { managed },
   } = visInstance;
@@ -84,9 +86,10 @@ const TopNav = ({
   }, [setHideTryInLensBadge]);
 
   const openInspector = useCallback(() => {
-    const session = embeddableHandler.openInspector();
+    if (!openInspectorFn) return;
+    const session = openInspectorFn();
     setInspectorSession(session);
-  }, [embeddableHandler]);
+  }, [openInspectorFn]);
 
   const doReload = useCallback(async () => {
     // start a new session to make sure all data is up to date
@@ -104,18 +107,19 @@ const TopNav = ({
     [doReload]
   );
 
-  useEffect(() => {
-    const subscription = embeddableHandler
-      .getExpressionVariables$()
-      .subscribe((expressionVariables) => {
-        setDisplayEditInLensItem(
-          Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
-        );
-      });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [embeddableHandler, vis]);
+  // useEffect(() => {
+  //   if (!embeddableHandler) return;
+  //   const subscription = embeddableHandler
+  //     .getExpressionVariables$()
+  //     .subscribe((expressionVariables) => {
+  //       setDisplayEditInLensItem(
+  //         Boolean(vis.type.navigateToLens && expressionVariables?.canNavigateToLens)
+  //       );
+  //     });
+  //   return () => {
+  //     subscription.unsubscribe();
+  //   };
+  // }, [embeddableHandler, vis]);
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
@@ -138,6 +142,7 @@ const TopNav = ({
           setNavigateToLens,
           showBadge: !hideTryInLensBadge && displayEditInLensItem,
           eventEmitter,
+          hasInspector: !!openInspectorFn,
         },
         services
       );
@@ -160,6 +165,7 @@ const TopNav = ({
     hideLensBadge,
     hideTryInLensBadge,
     eventEmitter,
+    openInspectorFn,
   ]);
   const [indexPatterns, setIndexPatterns] = useState<DataView[]>([]);
   const showDatePicker = () => {

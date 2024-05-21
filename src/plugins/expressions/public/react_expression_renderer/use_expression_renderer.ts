@@ -140,7 +140,6 @@ export function useExpressionRenderer(
         isEmpty: false,
         ...(!isExpressionValueError(result) ? { error: null } : {}),
       });
-
       onData$?.(result, expressionLoaderRef.current?.inspect(), partial);
     });
 

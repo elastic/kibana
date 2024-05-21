@@ -102,7 +102,7 @@ export const useSavedVisInstance = (
         if (embeddableInput && embeddableInput.timeRange) {
           savedVisInstance.panelTimeRange = embeddableInput.timeRange;
         }
-        const { embeddableHandler, savedVis, vis } = savedVisInstance;
+        const { savedVis, vis } = savedVisInstance;
 
         const originatingAppName = originatingApp
           ? stateTransferService.getAppNameFromId(originatingApp)
@@ -148,15 +148,8 @@ export const useSavedVisInstance = (
             const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
 
             if (Editor) {
-              visEditorController = new Editor(
-                visEditorRef.current,
-                vis,
-                eventEmitter,
-                embeddableHandler
-              );
+              visEditorController = new Editor(visEditorRef.current, vis, eventEmitter);
             }
-          } else {
-            embeddableHandler.render(visEditorRef.current);
           }
         }
         setState({
@@ -210,8 +203,6 @@ export const useSavedVisInstance = (
     return () => {
       if (state.visEditorController) {
         state.visEditorController.destroy();
-      } else if (state.savedVisInstance?.embeddableHandler) {
-        state.savedVisInstance.embeddableHandler.destroy();
       }
     };
   }, [state]);

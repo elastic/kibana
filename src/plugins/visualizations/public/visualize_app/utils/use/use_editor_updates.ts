@@ -38,7 +38,7 @@ export const useEditorUpdates = (
         queryString,
         state$,
       } = services.data.query;
-      const { embeddableHandler, savedSearch, vis } = visInstance;
+      const { savedSearch, vis } = visInstance;
       const savedVis = 'savedVis' in visInstance ? visInstance.savedVis : undefined;
       const initialState = appState.getState();
       setCurrentAppState(initialState);
@@ -55,13 +55,6 @@ export const useEditorUpdates = (
             linked: !!vis.data.savedSearchId,
             savedSearch,
             unifiedSearch: services.unifiedSearch,
-          });
-        } else {
-          embeddableHandler.updateInput({
-            timeRange: timefilter.getTime(),
-            filters: filterManager.getFilters(),
-            query: queryString.getQuery() as Query,
-            searchSessionId: services.data.search.session.getSessionId(),
           });
         }
       };
@@ -102,16 +95,6 @@ export const useEditorUpdates = (
 
       vis.uiState.on('change', updateOnChange);
 
-      const sessionSubscription = services.data.search.session
-        .getSession$()
-        .subscribe((sessionId) => {
-          if (embeddableHandler.getInput().searchSessionId !== sessionId) {
-            embeddableHandler.updateInput({
-              searchSessionId: sessionId,
-            });
-          }
-        });
-
       const unsubscribeStateUpdates = appState.subscribe((state) => {
         setCurrentAppState(state);
         if (savedVis && savedVis.id && !services.history.location.pathname.includes(savedVis.id)) {
@@ -142,7 +125,6 @@ export const useEditorUpdates = (
               aggs,
             },
           });
-          embeddableHandler.reload();
           eventEmitter.emit('updateEditor');
         }
 
@@ -167,7 +149,6 @@ export const useEditorUpdates = (
         subscriptions.unsubscribe();
         vis.uiState.off('change', updateOnChange);
         unsubscribeStateUpdates();
-        sessionSubscription.unsubscribe();
       };
     }
   }, [appState, eventEmitter, visInstance, services, setHasUnsavedChanges, visEditorController]);

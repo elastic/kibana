@@ -7,33 +7,14 @@
  */
 import { cloneDeep } from 'lodash';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import type { ExpressionValueError } from '@kbn/expressions-plugin/public';
-import { SavedFieldNotFound, SavedFieldTypeInvalidForAgg } from '@kbn/kibana-utils-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
-import {
-  SerializedVis,
-  Vis,
-  VisSavedObject,
-  VisualizeEmbeddableContract,
-  VisualizeInput,
-} from '../..';
+import { SerializedVis, Vis, VisSavedObject, VisualizeInput } from '../..';
 import type { VisInstance, VisualizeServices } from '../types';
 
-function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
-  const originalError = error.original || error;
-  return (
-    originalError instanceof SavedFieldNotFound ||
-    originalError instanceof SavedFieldTypeInvalidForAgg
-  );
-}
-
-const createVisualizeEmbeddableAndLinkSavedSearch = async (
-  vis: Vis,
-  visualizeServices: VisualizeServices
-) => {
-  const { data, createVisEmbeddableFromObject, savedSearch: savedSearchApi } = visualizeServices;
+const createLinkedSavedSearch = async (vis: Vis, visualizeServices: VisualizeServices) => {
+  const { savedSearch: savedSearchApi } = visualizeServices;
 
   let savedSearch: SavedSearch | undefined;
 
@@ -47,23 +28,7 @@ const createVisualizeEmbeddableAndLinkSavedSearch = async (
     }
   }
 
-  const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
-    id: '',
-    timeRange: data.query.timefilter.timefilter.getTime(),
-    filters: data.query.filterManager.getFilters(),
-    searchSessionId: data.search.session.getSessionId(),
-    renderMode: 'edit',
-  })) as VisualizeEmbeddableContract;
-
-  embeddableHandler.getOutput$().subscribe((output) => {
-    if (output.error && !isErrorRelatedToRuntimeFields(output.error)) {
-      data.search.showError(
-        (output.error as unknown as ExpressionValueError['error']).original || output.error
-      );
-    }
-  });
-
-  return { savedSearch, embeddableHandler };
+  return { savedSearch };
 };
 
 export const getVisualizationInstanceFromInput = async (
@@ -97,14 +62,10 @@ export const getVisualizationInstanceFromInput = async (
     }
   }
 
-  const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
-    vis,
-    visualizeServices
-  );
+  const { savedSearch } = await createLinkedSavedSearch(vis, visualizeServices);
   return {
     vis,
     savedVis,
-    embeddableHandler,
     savedSearch,
     panelTitle: input?.title ?? '',
     panelDescription: input?.description ?? '',
@@ -146,13 +107,9 @@ export const getVisualizationInstance = async (
     }
   }
 
-  const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
-    vis,
-    visualizeServices
-  );
+  const { savedSearch } = await createLinkedSavedSearch(vis, visualizeServices);
   return {
     vis,
-    embeddableHandler,
     savedSearch,
     savedVis,
   };

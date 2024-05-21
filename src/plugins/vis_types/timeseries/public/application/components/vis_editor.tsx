@@ -6,38 +6,38 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
-import * as Rx from 'rxjs';
-import { share } from 'rxjs';
-import { isEqual, isEmpty, debounce } from 'lodash';
-import { EventEmitter } from 'events';
 import { css } from '@emotion/react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import { EventEmitter } from 'events';
+import { debounce, isEmpty, isEqual } from 'lodash';
+import React, { Component } from 'react';
+import * as Rx from 'rxjs';
+import { share } from 'rxjs';
 
 import type { TimeRange } from '@kbn/es-query';
 import type { EditorRenderProps } from '@kbn/visualizations-plugin/public';
+import type { EmbeddableApiHandler } from '@kbn/visualizations-plugin/public';
 import type { IndexPatternValue, TimeseriesVisData } from '../../../common/types';
 
-import { VisEditorVisualization } from './vis_editor_visualization';
-import { PanelConfig } from './panel_config';
-import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
 import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/enums';
-import { VisPicker } from './vis_picker';
-import { fetchFields, VisFields } from '../lib/fetch_fields';
-import { getDataStart, getCoreStart, getUnifiedSearchStart } from '../../services';
+import { extractIndexPatternValues } from '../../../common/index_patterns_utils';
+import { getCoreStart, getDataStart, getUnifiedSearchStart } from '../../services';
 import type { TimeseriesVisParams } from '../../types';
+import { fetchFields, VisFields } from '../lib/fetch_fields';
+import { PanelConfig } from './panel_config';
 import { UseIndexPatternModeCallout } from './use_index_patter_mode_callout';
+import { VisEditorVisualization } from './vis_editor_visualization';
+import { VisPicker } from './vis_picker';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 const APP_NAME = 'VisEditor';
 
 export interface TimeseriesEditorProps {
   config: IUiSettingsClient;
-  embeddableHandler: VisualizeEmbeddableContract;
   eventEmitter: EventEmitter;
   timeRange: TimeRange;
   filters: EditorRenderProps['filters'];
@@ -45,6 +45,7 @@ export interface TimeseriesEditorProps {
   uiState: EditorRenderProps['uiState'];
   vis: Vis<TimeseriesVisParams>;
   defaultIndexPattern?: DataView;
+  embeddableApiHandler: EmbeddableApiHandler;
 }
 
 interface TimeseriesEditorState {
@@ -101,7 +102,6 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
 
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
-    this.props.embeddableHandler.reload();
     this.props.eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
@@ -201,7 +201,6 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
             model={model}
-            embeddableHandler={this.props.embeddableHandler}
             eventEmitter={this.props.eventEmitter}
             vis={this.props.vis}
             timeRange={this.props.timeRange}
@@ -213,6 +212,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
             title={this.props.vis.title}
             description={this.props.vis.description}
             onDataChange={this.onDataChange}
+            embeddableApiHandler={this.props.embeddableApiHandler}
           />
           <div className="tvbEditor--hideForReporting">
             <PanelConfig

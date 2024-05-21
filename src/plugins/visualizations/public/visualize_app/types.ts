@@ -43,17 +43,12 @@ import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-searc
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type {
-  Vis,
-  VisualizeEmbeddableContract,
-  VisSavedObject,
-  PersistedState,
-  VisParams,
-} from '..';
+import type { Vis, VisSavedObject, PersistedState, VisParams } from '..';
 
 import type { ListingViewRegistry, SavedVisState } from '../types';
 import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
+import { EmbeddableApiHandler } from './utils/use/use_embeddable_api_handler';
 
 export interface VisualizeAppState {
   dataView?: string;
@@ -128,7 +123,6 @@ export interface VisInstance {
   vis: Vis;
   savedVis: VisSavedObject;
   savedSearch?: SavedSearch;
-  embeddableHandler: VisualizeEmbeddableContract;
   panelTitle?: string;
   panelDescription?: string;
   panelTimeRange?: TimeRange;
@@ -142,7 +136,7 @@ export type VisEditorConstructor<TVisParams extends VisParams = VisParams> = new
   element: HTMLElement,
   vis: Vis<TVisParams>,
   eventEmitter: EventEmitter,
-  embeddableHandler: VisualizeEmbeddableContract
+  embeddableApiHandler: EmbeddableApiHandler
 ) => IEditorController;
 
 export interface IEditorController {
@@ -164,3 +158,5 @@ export interface EditorRenderProps {
    */
   linked: boolean;
 }
+
+export type { EmbeddableApiHandler };

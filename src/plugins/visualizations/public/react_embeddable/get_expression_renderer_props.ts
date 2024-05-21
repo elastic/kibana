@@ -31,6 +31,7 @@ interface GetExpressionRendererPropsParams {
   vis: Vis<VisParams>;
   onRender: () => void;
   onEvent: (event: ExpressionRendererEvent) => void;
+  onData: ExpressionRendererParams['onData$'];
 }
 
 export const getExpressionRendererProps: (params: GetExpressionRendererPropsParams) => Promise<{
@@ -46,6 +47,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
   abortController,
   onRender,
   onEvent,
+  onData,
 }) => {
   const parentContext = parentExecutionContext ?? getExecutionContext().get();
   const childContext: KibanaExecutionContext = {
@@ -86,6 +88,7 @@ export const getExpressionRendererProps: (params: GetExpressionRendererPropsPara
     inspectorAdapters,
     executionContext,
     onRender$: onRender,
+    onData$: onData,
     onEvent,
   };
 

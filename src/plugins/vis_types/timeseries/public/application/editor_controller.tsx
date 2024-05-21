@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type {
+  EditorRenderProps,
+  IEditorController,
+  Vis,
+  EmbeddableApiHandler,
+} from '@kbn/visualizations-plugin/public';
+import type { EventEmitter } from 'events';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { EventEmitter } from 'events';
-import type {
-  Vis,
-  VisualizeEmbeddableContract,
-  IEditorController,
-  EditorRenderProps,
-} from '@kbn/visualizations-plugin/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { getUISettings, getCoreStart, getDataViewsStart } from '../services';
-import { VisEditor } from './components/vis_editor_lazy';
+import { getCoreStart, getDataViewsStart, getUISettings } from '../services';
 import type { TimeseriesVisParams } from '../types';
+import { VisEditor } from './components/vis_editor_lazy';
 
 export const TSVB_EDITOR_NAME = 'tsvbEditor';
 
@@ -27,7 +27,7 @@ export class EditorController implements IEditorController {
     private el: HTMLElement,
     private vis: Vis<TimeseriesVisParams>,
     private eventEmitter: EventEmitter,
-    private embeddableHandler: VisualizeEmbeddableContract
+    private embeddableApiHandler: EmbeddableApiHandler
   ) {}
 
   async render({ timeRange, uiState, filters, query }: EditorRenderProps) {
@@ -39,12 +39,12 @@ export class EditorController implements IEditorController {
           config={getUISettings()}
           vis={this.vis}
           timeRange={timeRange}
-          embeddableHandler={this.embeddableHandler}
           eventEmitter={this.eventEmitter}
           uiState={uiState}
           filters={filters}
           query={query}
           defaultIndexPattern={defaultIndexPattern}
+          embeddableApiHandler={this.embeddableApiHandler}
         />
       </KibanaRenderContextProvider>,
       this.el

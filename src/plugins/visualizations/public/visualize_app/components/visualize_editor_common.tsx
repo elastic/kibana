@@ -32,6 +32,7 @@ import {
   CHARTS_TO_BE_DEPRECATED,
   isSplitChart as isSplitChartFn,
 } from '../utils/split_chart_warning_helpers';
+import { OpenInspectorFn } from '../utils/use/use_embeddable_api_handler';
 
 interface VisualizeEditorCommonProps {
   visInstance?: VisualizeEditorVisInstance;
@@ -50,6 +51,7 @@ interface VisualizeEditorCommonProps {
   visualizationIdFromUrl?: string;
   embeddableId?: string;
   eventEmitter?: EventEmitter;
+  openInspectorFn?: OpenInspectorFn;
 }
 
 export const VisualizeEditorCommon = ({
@@ -69,6 +71,7 @@ export const VisualizeEditorCommon = ({
   embeddableId,
   visEditorRef,
   eventEmitter,
+  openInspectorFn,
 }: VisualizeEditorCommonProps) => {
   const { services } = useKibana<VisualizeServices>();
 
@@ -152,6 +155,7 @@ export const VisualizeEditorCommon = ({
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
           eventEmitter={eventEmitter}
+          openInspectorFn={openInspectorFn}
         />
       )}
       {visInstance?.vis?.type?.stage === 'experimental' &&
