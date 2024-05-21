@@ -110,7 +110,6 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
               !watch(ChatFormFields.elasticsearchQuery, '')
             }
             onClick={onStartClick}
-            data-test-subj="startChatButton"
           >
             <FormattedMessage
               id="xpack.searchPlayground.startNewChat.startBtn"
