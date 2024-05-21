@@ -36,7 +36,10 @@ const absDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW number = -1.0 \n| EVAL abs_number = ABS(number)","FROM employees\n| KEEP first_name, last_name, height\n| EVAL abs_height = ABS(0.0 - height)"],
+  examples: [
+    'ROW number = -1.0 \n| EVAL abs_number = ABS(number)',
+    'FROM employees\n| KEEP first_name, last_name, height\n| EVAL abs_height = ABS(0.0 - height)',
+  ],
 };
 
 const acosDefinition: FunctionDefinition = {
@@ -61,7 +64,7 @@ const acosDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=.9\n| EVAL acos=ACOS(a)"],
+  examples: ['ROW a=.9\n| EVAL acos=ACOS(a)'],
 };
 
 const asinDefinition: FunctionDefinition = {
@@ -87,7 +90,7 @@ const asinDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=.9\n| EVAL asin=ASIN(a)"],
+  examples: ['ROW a=.9\n| EVAL asin=ASIN(a)'],
 };
 
 const atanDefinition: FunctionDefinition = {
@@ -113,7 +116,7 @@ const atanDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=12.9\n| EVAL atan=ATAN(a)"],
+  examples: ['ROW a=12.9\n| EVAL atan=ATAN(a)'],
 };
 
 const atan2Definition: FunctionDefinition = {
@@ -144,7 +147,7 @@ const atan2Definition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW y=12.9, x=.6\n| EVAL atan2=ATAN2(y, x)"],
+  examples: ['ROW y=12.9, x=.6\n| EVAL atan2=ATAN2(y, x)'],
 };
 
 const cbrtDefinition: FunctionDefinition = {
@@ -170,7 +173,7 @@ const cbrtDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW d = 1000.0\n| EVAL c = cbrt(d)"],
+  examples: ['ROW d = 1000.0\n| EVAL c = cbrt(d)'],
 };
 
 const ceilDefinition: FunctionDefinition = {
@@ -195,7 +198,7 @@ const ceilDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=1.8\n| EVAL a=CEIL(a)"],
+  examples: ['ROW a=1.8\n| EVAL a=CEIL(a)'],
 };
 
 const cidrMatchDefinition: FunctionDefinition = {
@@ -227,7 +230,9 @@ const cidrMatchDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM hosts \n| WHERE CIDR_MATCH(ip1, \"127.0.0.2/32\", \"127.0.0.3/32\") \n| KEEP card, host, ip0, ip1"],
+  examples: [
+    'FROM hosts \n| WHERE CIDR_MATCH(ip1, "127.0.0.2/32", "127.0.0.3/32") \n| KEEP card, host, ip0, ip1',
+  ],
 };
 
 const coalesceDefinition: FunctionDefinition = {
@@ -324,7 +329,7 @@ const coalesceDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=null, b=\"b\"\n| EVAL COALESCE(a, b)"],
+  examples: ['ROW a=null, b="b"\n| EVAL COALESCE(a, b)'],
 };
 
 const concatDefinition: FunctionDefinition = {
@@ -355,7 +360,9 @@ const concatDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP first_name, last_name\n| EVAL fullname = CONCAT(first_name, \" \", last_name)"],
+  examples: [
+    'FROM employees\n| KEEP first_name, last_name\n| EVAL fullname = CONCAT(first_name, " ", last_name)',
+  ],
 };
 
 const cosDefinition: FunctionDefinition = {
@@ -380,7 +387,7 @@ const cosDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=1.8 \n| EVAL cos=COS(a)"],
+  examples: ['ROW a=1.8 \n| EVAL cos=COS(a)'],
 };
 
 const coshDefinition: FunctionDefinition = {
@@ -405,7 +412,7 @@ const coshDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=1.8 \n| EVAL cosh=COSH(a)"],
+  examples: ['ROW a=1.8 \n| EVAL cosh=COSH(a)'],
 };
 
 const dateDiffDefinition: FunctionDefinition = {
@@ -502,7 +509,9 @@ const dateDiffDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW date1 = TO_DATETIME(\"2023-12-02T11:00:00.000Z\"), date2 = TO_DATETIME(\"2023-12-02T11:00:00.001Z\")\n| EVAL dd_ms = DATE_DIFF(\"microseconds\", date1, date2)"],
+  examples: [
+    'ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")\n| EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)',
+  ],
 };
 
 const dateExtractDefinition: FunctionDefinition = {
@@ -532,7 +541,10 @@ const dateExtractDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW date = DATE_PARSE(\"yyyy-MM-dd\", \"2022-05-06\")\n| EVAL year = DATE_EXTRACT(\"year\", date)","FROM sample_data\n| WHERE DATE_EXTRACT(\"hour_of_day\", @timestamp) < 9 AND DATE_EXTRACT(\"hour_of_day\", @timestamp) >= 17"],
+  examples: [
+    'ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")\n| EVAL year = DATE_EXTRACT("year", date)',
+    'FROM sample_data\n| WHERE DATE_EXTRACT("hour_of_day", @timestamp) < 9 AND DATE_EXTRACT("hour_of_day", @timestamp) >= 17',
+  ],
 };
 
 const dateFormatDefinition: FunctionDefinition = {
@@ -562,7 +574,9 @@ const dateFormatDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP first_name, last_name, hire_date\n| EVAL hired = DATE_FORMAT(\"YYYY-MM-dd\", hire_date)"],
+  examples: [
+    'FROM employees\n| KEEP first_name, last_name, hire_date\n| EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)',
+  ],
 };
 
 const dateParseDefinition: FunctionDefinition = {
@@ -593,7 +607,7 @@ const dateParseDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW date_string = \"2022-05-06\"\n| EVAL date = DATE_PARSE(\"yyyy-MM-dd\", date_string)"],
+  examples: ['ROW date_string = "2022-05-06"\n| EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)'],
 };
 
 const dateTruncDefinition: FunctionDefinition = {
@@ -638,7 +652,11 @@ const dateTruncDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP first_name, last_name, hire_date\n| EVAL year_hired = DATE_TRUNC(1 year, hire_date)","FROM employees\n| EVAL year = DATE_TRUNC(1 year, hire_date)\n| STATS hires = COUNT(emp_no) BY year\n| SORT year","FROM sample_data\n| EVAL error = CASE(message LIKE \"*error*\", 1, 0)\n| EVAL hour = DATE_TRUNC(1 hour, @timestamp)\n| STATS error_rate = AVG(error) by hour\n| SORT hour"],
+  examples: [
+    'FROM employees\n| KEEP first_name, last_name, hire_date\n| EVAL year_hired = DATE_TRUNC(1 year, hire_date)',
+    'FROM employees\n| EVAL year = DATE_TRUNC(1 year, hire_date)\n| STATS hires = COUNT(emp_no) BY year\n| SORT year',
+    'FROM sample_data\n| EVAL error = CASE(message LIKE "*error*", 1, 0)\n| EVAL hour = DATE_TRUNC(1 hour, @timestamp)\n| STATS error_rate = AVG(error) by hour\n| SORT hour',
+  ],
 };
 
 const eDefinition: FunctionDefinition = {
@@ -657,7 +675,7 @@ const eDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW E()"],
+  examples: ['ROW E()'],
 };
 
 const endsWithDefinition: FunctionDefinition = {
@@ -688,7 +706,7 @@ const endsWithDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP last_name\n| EVAL ln_E = ENDS_WITH(last_name, \"d\")"],
+  examples: ['FROM employees\n| KEEP last_name\n| EVAL ln_E = ENDS_WITH(last_name, "d")'],
 };
 
 const floorDefinition: FunctionDefinition = {
@@ -713,7 +731,7 @@ const floorDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=1.8\n| EVAL a=FLOOR(a)"],
+  examples: ['ROW a=1.8\n| EVAL a=FLOOR(a)'],
 };
 
 const fromBase64Definition: FunctionDefinition = {
@@ -738,7 +756,7 @@ const fromBase64Definition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["row a = \"ZWxhc3RpYw==\" \n| eval d = from_base64(a)"],
+  examples: ['row a = "ZWxhc3RpYw==" \n| eval d = from_base64(a)'],
 };
 
 const greatestDefinition: FunctionDefinition = {
@@ -867,7 +885,7 @@ const greatestDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a = 10, b = 20\n| EVAL g = GREATEST(a, b)"],
+  examples: ['ROW a = 10, b = 20\n| EVAL g = GREATEST(a, b)'],
 };
 
 const leastDefinition: FunctionDefinition = {
@@ -996,7 +1014,7 @@ const leastDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a = 10, b = 20\n| EVAL l = LEAST(a, b)"],
+  examples: ['ROW a = 10, b = 20\n| EVAL l = LEAST(a, b)'],
 };
 
 const leftDefinition: FunctionDefinition = {
@@ -1027,7 +1045,9 @@ const leftDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP last_name\n| EVAL left = LEFT(last_name, 3)\n| SORT last_name ASC\n| LIMIT 5"],
+  examples: [
+    'FROM employees\n| KEEP last_name\n| EVAL left = LEFT(last_name, 3)\n| SORT last_name ASC\n| LIMIT 5',
+  ],
 };
 
 const lengthDefinition: FunctionDefinition = {
@@ -1052,7 +1072,7 @@ const lengthDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP first_name, last_name\n| EVAL fn_length = LENGTH(first_name)"],
+  examples: ['FROM employees\n| KEEP first_name, last_name\n| EVAL fn_length = LENGTH(first_name)'],
 };
 
 const locateDefinition: FunctionDefinition = {
@@ -1103,7 +1123,7 @@ const locateDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["row a = \"hello\"\n| eval a_ll = locate(a, \"ll\")"],
+  examples: ['row a = "hello"\n| eval a_ll = locate(a, "ll")'],
 };
 
 const logDefinition: FunctionDefinition = {
@@ -1167,7 +1187,10 @@ const logDefinition: FunctionDefinition = {
     }
     return messages;
   },
-  // examples: ["ROW base = 2.0, value = 8.0\n| EVAL s = LOG(base, value)","row value = 100\n| EVAL s = LOG(value);"],
+  examples: [
+    'ROW base = 2.0, value = 8.0\n| EVAL s = LOG(base, value)',
+    'row value = 100\n| EVAL s = LOG(value);',
+  ],
 };
 
 const log10Definition: FunctionDefinition = {
@@ -1216,7 +1239,7 @@ const log10Definition: FunctionDefinition = {
     }
     return messages;
   },
-  // examples: ["ROW d = 1000.0 \n| EVAL s = LOG10(d)"],
+  examples: ['ROW d = 1000.0 \n| EVAL s = LOG10(d)'],
 };
 
 const ltrimDefinition: FunctionDefinition = {
@@ -1241,7 +1264,9 @@ const ltrimDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW message = \"   some text  \",  color = \" red \"\n| EVAL message = LTRIM(message)\n| EVAL color = LTRIM(color)\n| EVAL message = CONCAT(\"'\", message, \"'\")\n| EVAL color = CONCAT(\"'\", color, \"'\")"],
+  examples: [
+    'ROW message = "   some text  ",  color = " red "\n| EVAL message = LTRIM(message)\n| EVAL color = LTRIM(color)\n| EVAL message = CONCAT("\'", message, "\'")\n| EVAL color = CONCAT("\'", color, "\'")',
+  ],
 };
 
 const mvAvgDefinition: FunctionDefinition = {
@@ -1267,7 +1292,7 @@ const mvAvgDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=[3, 5, 1, 6]\n| EVAL avg_a = MV_AVG(a)"],
+  examples: ['ROW a=[3, 5, 1, 6]\n| EVAL avg_a = MV_AVG(a)'],
 };
 
 const mvConcatDefinition: FunctionDefinition = {
@@ -1298,7 +1323,10 @@ const mvConcatDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=[\"foo\", \"zoo\", \"bar\"]\n| EVAL j = MV_CONCAT(a, \", \")","ROW a=[10, 9, 8]\n| EVAL j = MV_CONCAT(TO_STRING(a), \", \")"],
+  examples: [
+    'ROW a=["foo", "zoo", "bar"]\n| EVAL j = MV_CONCAT(a, ", ")',
+    'ROW a=[10, 9, 8]\n| EVAL j = MV_CONCAT(TO_STRING(a), ", ")',
+  ],
 };
 
 const mvCountDefinition: FunctionDefinition = {
@@ -1414,7 +1442,7 @@ const mvCountDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=[\"foo\", \"zoo\", \"bar\"]\n| EVAL count_a = MV_COUNT(a)"],
+  examples: ['ROW a=["foo", "zoo", "bar"]\n| EVAL count_a = MV_COUNT(a)'],
 };
 
 const mvDedupeDefinition: FunctionDefinition = {
@@ -1489,7 +1517,7 @@ const mvDedupeDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=[\"foo\", \"foo\", \"bar\", \"foo\"]\n| EVAL dedupe_a = MV_DEDUPE(a)"],
+  examples: ['ROW a=["foo", "foo", "bar", "foo"]\n| EVAL dedupe_a = MV_DEDUPE(a)'],
 };
 
 const mvFirstDefinition: FunctionDefinition = {
@@ -1605,7 +1633,7 @@ const mvFirstDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=\"foo;bar;baz\"\n| EVAL first_a = MV_FIRST(SPLIT(a, \";\"))"],
+  examples: ['ROW a="foo;bar;baz"\n| EVAL first_a = MV_FIRST(SPLIT(a, ";"))'],
 };
 
 const mvLastDefinition: FunctionDefinition = {
@@ -1721,7 +1749,7 @@ const mvLastDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=\"foo;bar;baz\"\n| EVAL last_a = MV_LAST(SPLIT(a, \";\"))"],
+  examples: ['ROW a="foo;bar;baz"\n| EVAL last_a = MV_LAST(SPLIT(a, ";"))'],
 };
 
 const mvMaxDefinition: FunctionDefinition = {
@@ -1797,7 +1825,10 @@ const mvMaxDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=[3, 5, 1]\n| EVAL max_a = MV_MAX(a)","ROW a=[\"foo\", \"zoo\", \"bar\"]\n| EVAL max_a = MV_MAX(a)"],
+  examples: [
+    'ROW a=[3, 5, 1]\n| EVAL max_a = MV_MAX(a)',
+    'ROW a=["foo", "zoo", "bar"]\n| EVAL max_a = MV_MAX(a)',
+  ],
 };
 
 const mvMedianDefinition: FunctionDefinition = {
@@ -1823,7 +1854,10 @@ const mvMedianDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=[3, 5, 1]\n| EVAL median_a = MV_MEDIAN(a)","ROW a=[3, 7, 1, 6]\n| EVAL median_a = MV_MEDIAN(a)"],
+  examples: [
+    'ROW a=[3, 5, 1]\n| EVAL median_a = MV_MEDIAN(a)',
+    'ROW a=[3, 7, 1, 6]\n| EVAL median_a = MV_MEDIAN(a)',
+  ],
 };
 
 const mvMinDefinition: FunctionDefinition = {
@@ -1899,7 +1933,10 @@ const mvMinDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=[2, 1]\n| EVAL min_a = MV_MIN(a)","ROW a=[\"foo\", \"bar\"]\n| EVAL min_a = MV_MIN(a)"],
+  examples: [
+    'ROW a=[2, 1]\n| EVAL min_a = MV_MIN(a)',
+    'ROW a=["foo", "bar"]\n| EVAL min_a = MV_MIN(a)',
+  ],
 };
 
 const mvSliceDefinition: FunctionDefinition = {
@@ -2115,7 +2152,10 @@ const mvSliceDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["row a = [1, 2, 2, 3]\n| eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)","row a = [1, 2, 2, 3]\n| eval a1 = mv_slice(a, -2), a2 = mv_slice(a, -3, -1)"],
+  examples: [
+    'row a = [1, 2, 2, 3]\n| eval a1 = mv_slice(a, 1), a2 = mv_slice(a, 2, 3)',
+    'row a = [1, 2, 2, 3]\n| eval a1 = mv_slice(a, -2), a2 = mv_slice(a, -3, -1)',
+  ],
 };
 
 const mvSortDefinition: FunctionDefinition = {
@@ -2226,7 +2266,7 @@ const mvSortDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a = [4, 2, -3, 2]\n| EVAL sa = mv_sort(a), sd = mv_sort(a, \"DESC\")"],
+  examples: ['ROW a = [4, 2, -3, 2]\n| EVAL sa = mv_sort(a), sd = mv_sort(a, "DESC")'],
 };
 
 const mvSumDefinition: FunctionDefinition = {
@@ -2252,7 +2292,7 @@ const mvSumDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=[3, 5, 6]\n| EVAL sum_a = MV_SUM(a)"],
+  examples: ['ROW a=[3, 5, 6]\n| EVAL sum_a = MV_SUM(a)'],
 };
 
 const mvZipDefinition: FunctionDefinition = {
@@ -2288,7 +2328,9 @@ const mvZipDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a = [\"x\", \"y\", \"z\"], b = [\"1\", \"2\"]\n| EVAL c = mv_zip(a, b, \"-\")\n| KEEP a, b, c"],
+  examples: [
+    'ROW a = ["x", "y", "z"], b = ["1", "2"]\n| EVAL c = mv_zip(a, b, "-")\n| KEEP a, b, c',
+  ],
 };
 
 const nowDefinition: FunctionDefinition = {
@@ -2307,7 +2349,7 @@ const nowDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW current_date = NOW()","FROM sample_data\n| WHERE @timestamp > NOW() - 1 hour"],
+  examples: ['ROW current_date = NOW()', 'FROM sample_data\n| WHERE @timestamp > NOW() - 1 hour'],
 };
 
 const piDefinition: FunctionDefinition = {
@@ -2326,7 +2368,7 @@ const piDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW PI()"],
+  examples: ['ROW PI()'],
 };
 
 const powDefinition: FunctionDefinition = {
@@ -2356,7 +2398,10 @@ const powDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW base = 2.0, exponent = 2\n| EVAL result = POW(base, exponent)","ROW base = 4, exponent = 0.5\n| EVAL s = POW(base, exponent)"],
+  examples: [
+    'ROW base = 2.0, exponent = 2\n| EVAL result = POW(base, exponent)',
+    'ROW base = 4, exponent = 0.5\n| EVAL s = POW(base, exponent)',
+  ],
 };
 
 const replaceDefinition: FunctionDefinition = {
@@ -2392,7 +2437,7 @@ const replaceDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW str = \"Hello World\"\n| EVAL str = REPLACE(str, \"World\", \"Universe\")\n| KEEP str"],
+  examples: ['ROW str = "Hello World"\n| EVAL str = REPLACE(str, "World", "Universe")\n| KEEP str'],
 };
 
 const rightDefinition: FunctionDefinition = {
@@ -2423,7 +2468,9 @@ const rightDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP last_name\n| EVAL right = RIGHT(last_name, 3)\n| SORT last_name ASC\n| LIMIT 5"],
+  examples: [
+    'FROM employees\n| KEEP last_name\n| EVAL right = RIGHT(last_name, 3)\n| SORT last_name ASC\n| LIMIT 5',
+  ],
 };
 
 const roundDefinition: FunctionDefinition = {
@@ -2464,7 +2511,9 @@ const roundDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP first_name, last_name, height\n| EVAL height_ft = ROUND(height * 3.281, 1)"],
+  examples: [
+    'FROM employees\n| KEEP first_name, last_name, height\n| EVAL height_ft = ROUND(height * 3.281, 1)',
+  ],
 };
 
 const rtrimDefinition: FunctionDefinition = {
@@ -2489,7 +2538,9 @@ const rtrimDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW message = \"   some text  \",  color = \" red \"\n| EVAL message = RTRIM(message)\n| EVAL color = RTRIM(color)\n| EVAL message = CONCAT(\"'\", message, \"'\")\n| EVAL color = CONCAT(\"'\", color, \"'\")"],
+  examples: [
+    'ROW message = "   some text  ",  color = " red "\n| EVAL message = RTRIM(message)\n| EVAL color = RTRIM(color)\n| EVAL message = CONCAT("\'", message, "\'")\n| EVAL color = CONCAT("\'", color, "\'")',
+  ],
 };
 
 const signumDefinition: FunctionDefinition = {
@@ -2515,7 +2566,7 @@ const signumDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW d = 100.0\n| EVAL s = SIGNUM(d)"],
+  examples: ['ROW d = 100.0\n| EVAL s = SIGNUM(d)'],
 };
 
 const sinDefinition: FunctionDefinition = {
@@ -2540,7 +2591,7 @@ const sinDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=1.8 \n| EVAL sin=SIN(a)"],
+  examples: ['ROW a=1.8 \n| EVAL sin=SIN(a)'],
 };
 
 const sinhDefinition: FunctionDefinition = {
@@ -2565,7 +2616,7 @@ const sinhDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=1.8 \n| EVAL sinh=SINH(a)"],
+  examples: ['ROW a=1.8 \n| EVAL sinh=SINH(a)'],
 };
 
 const splitDefinition: FunctionDefinition = {
@@ -2595,7 +2646,7 @@ const splitDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW words=\"foo;bar;baz;qux;quux;corge\"\n| EVAL word = SPLIT(words, \";\")"],
+  examples: ['ROW words="foo;bar;baz;qux;quux;corge"\n| EVAL word = SPLIT(words, ";")'],
 };
 
 const sqrtDefinition: FunctionDefinition = {
@@ -2621,7 +2672,7 @@ const sqrtDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW d = 100.0\n| EVAL s = SQRT(d)"],
+  examples: ['ROW d = 100.0\n| EVAL s = SQRT(d)'],
 };
 
 const stContainsDefinition: FunctionDefinition = {
@@ -2757,7 +2808,9 @@ const stContainsDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM airport_city_boundaries\n| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE(\"POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))\"))\n| KEEP abbrev, airport, region, city, city_location"],
+  examples: [
+    'FROM airport_city_boundaries\n| WHERE ST_CONTAINS(city_boundary, TO_GEOSHAPE("POLYGON((109.35 18.3, 109.45 18.3, 109.45 18.4, 109.35 18.4, 109.35 18.3))"))\n| KEEP abbrev, airport, region, city, city_location',
+  ],
 };
 
 const stDisjointDefinition: FunctionDefinition = {
@@ -2893,7 +2946,9 @@ const stDisjointDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM airport_city_boundaries\n| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE(\"POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))\"))\n| KEEP abbrev, airport, region, city, city_location"],
+  examples: [
+    'FROM airport_city_boundaries\n| WHERE ST_DISJOINT(city_boundary, TO_GEOSHAPE("POLYGON((-10 -60, 120 -60, 120 60, -10 60, -10 -60))"))\n| KEEP abbrev, airport, region, city, city_location',
+  ],
 };
 
 const stIntersectsDefinition: FunctionDefinition = {
@@ -3029,7 +3084,9 @@ const stIntersectsDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM airports\n| WHERE ST_INTERSECTS(location, TO_GEOSHAPE(\"POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))\"))"],
+  examples: [
+    'FROM airports\n| WHERE ST_INTERSECTS(location, TO_GEOSHAPE("POLYGON((42 14, 43 14, 43 15, 42 15, 42 14))"))',
+  ],
 };
 
 const stWithinDefinition: FunctionDefinition = {
@@ -3165,7 +3222,9 @@ const stWithinDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM airport_city_boundaries\n| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE(\"POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))\"))\n| KEEP abbrev, airport, region, city, city_location"],
+  examples: [
+    'FROM airport_city_boundaries\n| WHERE ST_WITHIN(city_boundary, TO_GEOSHAPE("POLYGON((109.1 18.15, 109.6 18.15, 109.6 18.65, 109.1 18.65, 109.1 18.15))"))\n| KEEP abbrev, airport, region, city, city_location',
+  ],
 };
 
 const stXDefinition: FunctionDefinition = {
@@ -3201,7 +3260,9 @@ const stXDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW point = TO_GEOPOINT(\"POINT(42.97109629958868 14.7552534006536)\")\n| EVAL x =  ST_X(point), y = ST_Y(point)"],
+  examples: [
+    'ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")\n| EVAL x =  ST_X(point), y = ST_Y(point)',
+  ],
 };
 
 const stYDefinition: FunctionDefinition = {
@@ -3237,7 +3298,9 @@ const stYDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW point = TO_GEOPOINT(\"POINT(42.97109629958868 14.7552534006536)\")\n| EVAL x =  ST_X(point), y = ST_Y(point)"],
+  examples: [
+    'ROW point = TO_GEOPOINT("POINT(42.97109629958868 14.7552534006536)")\n| EVAL x =  ST_X(point), y = ST_Y(point)',
+  ],
 };
 
 const startsWithDefinition: FunctionDefinition = {
@@ -3268,7 +3331,7 @@ const startsWithDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP last_name\n| EVAL ln_S = STARTS_WITH(last_name, \"B\")"],
+  examples: ['FROM employees\n| KEEP last_name\n| EVAL ln_S = STARTS_WITH(last_name, "B")'],
 };
 
 const substringDefinition: FunctionDefinition = {
@@ -3304,7 +3367,11 @@ const substringDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["FROM employees\n| KEEP last_name\n| EVAL ln_sub = SUBSTRING(last_name, 1, 3)","FROM employees\n| KEEP last_name\n| EVAL ln_sub = SUBSTRING(last_name, -3, 3)","FROM employees\n| KEEP last_name\n| EVAL ln_sub = SUBSTRING(last_name, 2)"],
+  examples: [
+    'FROM employees\n| KEEP last_name\n| EVAL ln_sub = SUBSTRING(last_name, 1, 3)',
+    'FROM employees\n| KEEP last_name\n| EVAL ln_sub = SUBSTRING(last_name, -3, 3)',
+    'FROM employees\n| KEEP last_name\n| EVAL ln_sub = SUBSTRING(last_name, 2)',
+  ],
 };
 
 const tanDefinition: FunctionDefinition = {
@@ -3329,7 +3396,7 @@ const tanDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=1.8 \n| EVAL tan=TAN(a)"],
+  examples: ['ROW a=1.8 \n| EVAL tan=TAN(a)'],
 };
 
 const tanhDefinition: FunctionDefinition = {
@@ -3354,7 +3421,7 @@ const tanhDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=1.8 \n| EVAL tanh=TANH(a)"],
+  examples: ['ROW a=1.8 \n| EVAL tanh=TANH(a)'],
 };
 
 const tauDefinition: FunctionDefinition = {
@@ -3373,7 +3440,7 @@ const tauDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW TAU()"],
+  examples: ['ROW TAU()'],
 };
 
 const toBase64Definition: FunctionDefinition = {
@@ -3398,7 +3465,7 @@ const toBase64Definition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["row a = \"elastic\" \n| eval e = to_base64(a)"],
+  examples: ['row a = "elastic" \n| eval e = to_base64(a)'],
 };
 
 const toBooleanDefinition: FunctionDefinition = {
@@ -3444,7 +3511,7 @@ const toBooleanDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW str = [\"true\", \"TRuE\", \"false\", \"\", \"yes\", \"1\"]\n| EVAL bool = TO_BOOLEAN(str)"],
+  examples: ['ROW str = ["true", "TRuE", "false", "", "yes", "1"]\n| EVAL bool = TO_BOOLEAN(str)'],
 };
 
 const toCartesianpointDefinition: FunctionDefinition = {
@@ -3483,7 +3550,9 @@ const toCartesianpointDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW wkt = [\"POINT(4297.11 -1475.53)\", \"POINT(7580.93 2272.77)\"]\n| MV_EXPAND wkt\n| EVAL pt = TO_CARTESIANPOINT(wkt)"],
+  examples: [
+    'ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]\n| MV_EXPAND wkt\n| EVAL pt = TO_CARTESIANPOINT(wkt)',
+  ],
 };
 
 const toCartesianshapeDefinition: FunctionDefinition = {
@@ -3532,7 +3601,9 @@ const toCartesianshapeDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW wkt = [\"POINT(4297.11 -1475.53)\", \"POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))\"]\n| MV_EXPAND wkt\n| EVAL geom = TO_CARTESIANSHAPE(wkt)"],
+  examples: [
+    'ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]\n| MV_EXPAND wkt\n| EVAL geom = TO_CARTESIANSHAPE(wkt)',
+  ],
 };
 
 const toDatetimeDefinition: FunctionDefinition = {
@@ -3578,7 +3649,10 @@ const toDatetimeDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW string = [\"1953-09-02T00:00:00.000Z\", \"1964-06-02T00:00:00.000Z\", \"1964-06-02 00:00:00\"]\n| EVAL datetime = TO_DATETIME(string)","ROW int = [0, 1]\n| EVAL dt = TO_DATETIME(int)"],
+  examples: [
+    'ROW string = ["1953-09-02T00:00:00.000Z", "1964-06-02T00:00:00.000Z", "1964-06-02 00:00:00"]\n| EVAL datetime = TO_DATETIME(string)',
+    'ROW int = [0, 1]\n| EVAL dt = TO_DATETIME(int)',
+  ],
 };
 
 const toDegreesDefinition: FunctionDefinition = {
@@ -3603,7 +3677,7 @@ const toDegreesDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW rad = [1.57, 3.14, 4.71]\n| EVAL deg = TO_DEGREES(rad)"],
+  examples: ['ROW rad = [1.57, 3.14, 4.71]\n| EVAL deg = TO_DEGREES(rad)'],
 };
 
 const toDoubleDefinition: FunctionDefinition = {
@@ -3659,7 +3733,9 @@ const toDoubleDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW str1 = \"5.20128E11\", str2 = \"foo\"\n| EVAL dbl = TO_DOUBLE(\"520128000000\"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)"],
+  examples: [
+    'ROW str1 = "5.20128E11", str2 = "foo"\n| EVAL dbl = TO_DOUBLE("520128000000"), dbl1 = TO_DOUBLE(str1), dbl2 = TO_DOUBLE(str2)',
+  ],
 };
 
 const toGeopointDefinition: FunctionDefinition = {
@@ -3695,7 +3771,7 @@ const toGeopointDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW wkt = \"POINT(42.97109630194 14.7552534413725)\"\n| EVAL pt = TO_GEOPOINT(wkt)"],
+  examples: ['ROW wkt = "POINT(42.97109630194 14.7552534413725)"\n| EVAL pt = TO_GEOPOINT(wkt)'],
 };
 
 const toGeoshapeDefinition: FunctionDefinition = {
@@ -3741,7 +3817,9 @@ const toGeoshapeDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW wkt = \"POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))\"\n| EVAL geom = TO_GEOSHAPE(wkt)"],
+  examples: [
+    'ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"\n| EVAL geom = TO_GEOSHAPE(wkt)',
+  ],
 };
 
 const toIntegerDefinition: FunctionDefinition = {
@@ -3797,7 +3875,7 @@ const toIntegerDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW long = [5013792, 2147483647, 501379200000]\n| EVAL int = TO_INTEGER(long)"],
+  examples: ['ROW long = [5013792, 2147483647, 501379200000]\n| EVAL int = TO_INTEGER(long)'],
 };
 
 const toIpDefinition: FunctionDefinition = {
@@ -3832,7 +3910,9 @@ const toIpDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW str1 = \"1.1.1.1\", str2 = \"foo\"\n| EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)\n| WHERE CIDR_MATCH(ip1, \"1.0.0.0/8\")"],
+  examples: [
+    'ROW str1 = "1.1.1.1", str2 = "foo"\n| EVAL ip1 = TO_IP(str1), ip2 = TO_IP(str2)\n| WHERE CIDR_MATCH(ip1, "1.0.0.0/8")',
+  ],
 };
 
 const toLongDefinition: FunctionDefinition = {
@@ -3888,7 +3968,9 @@ const toLongDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW str1 = \"2147483648\", str2 = \"2147483648.2\", str3 = \"foo\"\n| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)"],
+  examples: [
+    'ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"\n| EVAL long1 = TO_LONG(str1), long2 = TO_LONG(str2), long3 = TO_LONG(str3)',
+  ],
 };
 
 const toLowerDefinition: FunctionDefinition = {
@@ -3913,7 +3995,7 @@ const toLowerDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW message = \"Some Text\"\n| EVAL message_lower = TO_LOWER(message)"],
+  examples: ['ROW message = "Some Text"\n| EVAL message_lower = TO_LOWER(message)'],
 };
 
 const toRadiansDefinition: FunctionDefinition = {
@@ -3938,7 +4020,7 @@ const toRadiansDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW deg = [90.0, 180.0, 270.0]\n| EVAL rad = TO_RADIANS(deg)"],
+  examples: ['ROW deg = [90.0, 180.0, 270.0]\n| EVAL rad = TO_RADIANS(deg)'],
 };
 
 const toStringDefinition: FunctionDefinition = {
@@ -4053,7 +4135,7 @@ const toStringDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW a=10\n| EVAL j = TO_STRING(a)","ROW a=[10, 9, 8]\n| EVAL j = TO_STRING(a)"],
+  examples: ['ROW a=10\n| EVAL j = TO_STRING(a)', 'ROW a=[10, 9, 8]\n| EVAL j = TO_STRING(a)'],
 };
 
 const toUnsignedLongDefinition: FunctionDefinition = {
@@ -4112,7 +4194,9 @@ const toUnsignedLongDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW str1 = \"2147483648\", str2 = \"2147483648.2\", str3 = \"foo\"\n| EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)"],
+  examples: [
+    'ROW str1 = "2147483648", str2 = "2147483648.2", str3 = "foo"\n| EVAL long1 = TO_UNSIGNED_LONG(str1), long2 = TO_ULONG(str2), long3 = TO_UL(str3)',
+  ],
 };
 
 const toUpperDefinition: FunctionDefinition = {
@@ -4137,7 +4221,7 @@ const toUpperDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW message = \"Some Text\"\n| EVAL message_upper = TO_UPPER(message)"],
+  examples: ['ROW message = "Some Text"\n| EVAL message_upper = TO_UPPER(message)'],
 };
 
 const toVersionDefinition: FunctionDefinition = {
@@ -4172,7 +4256,7 @@ const toVersionDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW v = TO_VERSION(\"1.2.3\")"],
+  examples: ['ROW v = TO_VERSION("1.2.3")'],
 };
 
 const trimDefinition: FunctionDefinition = {
@@ -4197,7 +4281,9 @@ const trimDefinition: FunctionDefinition = {
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  // examples: ["ROW message = \"   some text  \",  color = \" red \"\n| EVAL message = TRIM(message)\n| EVAL color = TRIM(color)"],
+  examples: [
+    'ROW message = "   some text  ",  color = " red "\n| EVAL message = TRIM(message)\n| EVAL color = TRIM(color)',
+  ],
 };
 
 const caseDefinition: FunctionDefinition = {
@@ -4222,14 +4308,15 @@ const caseDefinition: FunctionDefinition = {
       ],
       minParams: 2,
       returnType: 'any',
+      examples: [
+        'from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")',
+      ],
     },
-  ],
-  examples: [
-    'from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")',
   ],
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
+  examples: [],
 };
 export const evalFunctionDefinitions = [
   absDefinition,

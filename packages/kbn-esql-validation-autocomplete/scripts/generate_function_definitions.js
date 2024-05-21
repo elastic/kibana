@@ -44,10 +44,10 @@ const extraFunctions = [
         ],
         minParams: 2,
         returnType: 'any',
-        examples: [
-          `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
-        ],
       },
+    ],
+    examples: [
+      `from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")`,
     ],
   },
 ];
@@ -276,7 +276,7 @@ function printGeneratedFunctionsFile(functionDefinitions) {
     supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
     supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
     validate: ${functionDefinition.validate || 'undefined'},
-    // examples: ${JSON.stringify(functionDefinition.examples || [])},
+    examples: ${JSON.stringify(functionDefinition.examples || [])},
 }`;
   };
 
