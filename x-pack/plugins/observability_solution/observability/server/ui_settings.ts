@@ -278,7 +278,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
       defaultMessage: 'Custom dashboards for asset details in Infrastructure',
     }),
-    value: false,
+    value: true,
     description: i18n.translate(
       'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
       {

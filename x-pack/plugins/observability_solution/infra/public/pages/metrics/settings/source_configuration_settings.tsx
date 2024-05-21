@@ -17,6 +17,7 @@ import {
   enableInfrastructureContainerAssetView,
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureAssetCustomDashboards,
 } from '@kbn/observability-plugin/common';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -91,6 +92,7 @@ export const SourceConfigurationSettings = ({
   const infraUiSettings = useEditableSettings([
     enableInfrastructureHostsView,
     enableInfrastructureProfilingIntegration,
+    enableInfrastructureAssetCustomDashboards,
     enableInfrastructureContainerAssetView,
   ]);
 
