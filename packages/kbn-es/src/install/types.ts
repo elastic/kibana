@@ -40,4 +40,6 @@ export interface InstallArchiveOptions {
   installPath?: string;
   log?: ToolingLog;
   esArgs?: string[];
+  /** Disable creating a temp directory, allowing ES to write to OS's /tmp directory */
+  disableEsTmpDir?: boolean;
 }
