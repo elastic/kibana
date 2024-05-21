@@ -28,7 +28,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
-  const assetsSynthtraceClient = getService('assetsSynthtraceEsClient');
+  const entitiesSynthtraceClient = getService('entitiesSynthtraceEsClient');
   const apmSynthtraceClient = getService('apmSynthtraceEsClient');
   const logSynthtraceClient = getService('logSynthtraceEsClient');
 
@@ -185,7 +185,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const tracesGenAssets = createGeneratorFromArray(traces);
 
       return Promise.all([
-        assetsSynthtraceClient.index(
+        entitiesSynthtraceClient.index(
           Readable.from(Array.from(logsGenAssets).concat(Array.from(tracesGenAssets)))
         ),
         logSynthtraceClient.index(logsGen),
@@ -196,7 +196,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     after(async () => {
       await logSynthtraceClient.clean();
       await apmSynthtraceClient.clean();
-      await assetsSynthtraceClient.clean();
+      await entitiesSynthtraceClient.clean();
     });
 
     describe('when no additional filters are applied', () => {

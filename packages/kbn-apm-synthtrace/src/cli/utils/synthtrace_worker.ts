@@ -16,7 +16,7 @@ import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
 import { getLogsEsClient } from './get_logs_es_client';
 import { getInfraEsClient } from './get_infra_es_client';
-import { getAssetsEsClient } from './get_assets_es_client';
+import { getEntitiesEsClient } from './get_entities_es_client';
 
 export interface WorkerData {
   bucketFrom: Date;
@@ -31,7 +31,7 @@ const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as Worke
 
 async function start() {
   const logger = loggerProxy;
-  const assetsEsClient = getAssetsEsClient({
+  const assetsEsClient = getEntitiesEsClient({
     concurrency: runOptions.concurrency,
     target: esUrl,
     logger,

@@ -16,7 +16,7 @@ export interface ServiceEntityDocument extends EntityDocument {
 }
 
 export class ServiceEntity extends Entity<ServiceEntityDocument> {
-  constructor(fields: Omit<ServiceEntityDocument, 'asset.type'>) {
+  constructor(fields: ServiceEntityDocument) {
     super({ 'entity.definitionId': 'apm-service', ...fields });
   }
 }

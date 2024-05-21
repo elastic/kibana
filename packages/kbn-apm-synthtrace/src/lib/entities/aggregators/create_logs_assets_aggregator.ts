@@ -7,6 +7,6 @@
  */
 
 import { LogDocument } from '@kbn/apm-synthtrace-client';
-import { createAssetsAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
+import { createEntitiesAggregatorFactory } from '../../utils/create_assets_aggregator_factory';
 
-export const createLogsAssetsAggregator = createAssetsAggregatorFactory<LogDocument>();
+export const createLogsAssetsAggregator = createEntitiesAggregatorFactory<LogDocument>();

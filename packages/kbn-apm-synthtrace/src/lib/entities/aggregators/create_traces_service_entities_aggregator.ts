@@ -30,6 +30,7 @@ export function createTracesServiceEntitiesAggregator() {
             'service.name': event['service.name']!,
           },
           'entity.latestTimestamp': lastSeen,
+          'entity.firstSeen': firstSeen,
           'entity.indexPatterns': ['metrics-*'],
         };
       },

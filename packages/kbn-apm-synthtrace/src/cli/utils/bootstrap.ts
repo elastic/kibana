@@ -13,7 +13,7 @@ import { getInfraEsClient } from './get_infra_es_client';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
-import { getAssetsEsClient } from './get_assets_es_client';
+import { getEntitiesEsClient } from './get_entities_es_client';
 
 export async function bootstrap(runOptions: RunOptions) {
   const logger = createLogger(runOptions.logLevel);
@@ -55,7 +55,7 @@ export async function bootstrap(runOptions: RunOptions) {
     concurrency: runOptions.concurrency,
   });
 
-  const assetsEsClient = getAssetsEsClient({
+  const entitiesEsClient = getEntitiesEsClient({
     target: esUrl,
     logger,
     concurrency: runOptions.concurrency,
@@ -65,7 +65,7 @@ export async function bootstrap(runOptions: RunOptions) {
     await apmEsClient.clean();
     await logsEsClient.clean();
     await infraEsClient.clean();
-    await assetsEsClient.clean();
+    await entitiesEsClient.clean();
   }
 
   return {
@@ -73,7 +73,7 @@ export async function bootstrap(runOptions: RunOptions) {
     apmEsClient,
     logsEsClient,
     infraEsClient,
-    assetsEsClient,
+    assetsEsClient: entitiesEsClient,
     version,
     kibanaUrl,
     esUrl,

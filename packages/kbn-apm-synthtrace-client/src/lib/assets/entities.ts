@@ -12,8 +12,8 @@ import { Serializable } from '../serializable';
 export interface EntityDocument extends Fields {
   'entity.id': string;
   'entity.latestTimestamp': string;
+  'entity.firstSeen': string;
   'entity.indexPatterns': string[];
-  'entity.definitionId': string;
 }
 
 export class Entity<F extends EntityDocument> extends Serializable<F> {}
