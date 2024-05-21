@@ -394,6 +394,65 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
     });
+    describe.skip('SearchBar', () => {
+      it('add filter', async () => {
+        const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('Resource');
+
+        // Filter bar uses the field's customLabel in the DataView
+        await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
+        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
+
+        const grouping = await findings.findingsGrouping();
+
+        const groupRow = await grouping.getRowAtIndex(0);
+        expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
+
+        const groupCount = await grouping.getGroupCount();
+        expect(groupCount).to.be('1 resource');
+
+        const unitCount = await grouping.getUnitCount();
+        expect(unitCount).to.be('1 finding');
+      });
+
+      it('remove filter', async () => {
+        await filterBar.removeFilter('rule.name');
+
+        expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
+
+        const grouping = await findings.findingsGrouping();
+        const groupCount = await grouping.getGroupCount();
+        expect(groupCount).to.be('3 resources');
+
+        const unitCount = await grouping.getUnitCount();
+        expect(unitCount).to.be('4 findings');
+      });
+
+      it('set search query', async () => {
+        await queryBar.setQuery(ruleName1);
+        await queryBar.submitQuery();
+
+        const grouping = await findings.findingsGrouping();
+
+        const groupRow = await grouping.getRowAtIndex(0);
+        expect(await groupRow.getVisibleText()).to.contain(data[0].resource.name);
+
+        const groupCount = await grouping.getGroupCount();
+        expect(groupCount).to.be('1 resource');
+
+        const unitCount = await grouping.getUnitCount();
+        expect(unitCount).to.be('1 finding');
+
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+
+        expect(await grouping.getGroupCount()).to.be('3 resources');
+        expect(await grouping.getUnitCount()).to.be('4 findings');
+      });
+    });
 
     describe('Group table', async () => {
       it('shows findings table when expanding', async () => {

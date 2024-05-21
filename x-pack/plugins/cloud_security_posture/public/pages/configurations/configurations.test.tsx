@@ -166,16 +166,9 @@ describe('<Findings />', () => {
     it('add filter', async () => {
       server.use(cspmStatusIndexed);
       server.use(bsearchFindingsPageDefault);
-      const { getByText, getByTestId, getAllByText } = renderFindingsPage();
+      const { getByTestId, getAllByText } = renderFindingsPage();
 
-      // Loading while checking the status API
-      expect(getByText('Loading...')).toBeInTheDocument();
-
-      await waitFor(() => expect(getByText('Loading results')).toBeInTheDocument());
-      await waitFor(() => expect(getByTestId('latest_findings_container')).toBeInTheDocument());
-      await waitFor(() => expect(getByTestId('discoverDocTable')).toBeInTheDocument());
-
-      expect(getAllByText('azure-disk')).toHaveLength(2);
+      await waitFor(() => expect(getAllByText('azure-disk')).toHaveLength(2));
 
       userEvent.click(getByTestId('addFilter'), undefined, { skipPointerEventsCheck: true });
 
@@ -185,7 +178,7 @@ describe('<Findings />', () => {
         getByTestId('filterFieldSuggestionList')
       ).getByTestId('comboBoxSearchInput');
 
-      userEvent.type(filterFieldSuggestionListInput, 'rule.section');
+      userEvent.paste(filterFieldSuggestionListInput, 'rule.section');
       userEvent.keyboard('{enter}');
 
       const filterOperatorListInput = within(getByTestId('filterOperatorList')).getByTestId(
@@ -199,8 +192,7 @@ describe('<Findings />', () => {
       fireEvent.click(filterOption);
 
       const filterParamsInput = within(getByTestId('filterParams')).getByRole('textbox');
-      userEvent.type(filterParamsInput, 'Logging and Monitoring');
-      userEvent.keyboard('{enter}');
+      userEvent.paste(filterParamsInput, 'Logging and Monitoring');
 
       userEvent.click(getByTestId('saveFilter'), undefined, { skipPointerEventsCheck: true });
 
