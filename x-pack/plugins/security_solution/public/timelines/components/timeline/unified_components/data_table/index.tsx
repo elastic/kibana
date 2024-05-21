@@ -13,10 +13,10 @@ import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
+import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { selectTimelineById } from '../../../../store/selectors';
 import { RowRendererCount } from '../../../../../../common/api/timeline';
-import { EmptyComponent } from '../../../../../common/lib/cell_actions/helpers';
 import { withDataView } from '../../../../../common/components/with_data_view';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailTimeline, ExpandedDetailType } from '../../../../../../common/types';
@@ -80,6 +80,7 @@ type CommonDataTableProps = {
   | 'renderCustomGridBody'
   | 'trailingControlColumns'
   | 'isSortEnabled'
+  | 'columnsMeta'
 >;
 
 interface DataTableProps extends CommonDataTableProps {
@@ -115,6 +116,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     leadingControlColumns,
     cellContext,
     eventIdToNoteIds,
+    columnsMeta,
   }) {
     const dispatch = useDispatch();
 
@@ -424,7 +426,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             onFilter={onFilter}
             onResize={onResizeDataGrid}
             onSetColumns={onSetColumns}
-            onSort={!isTextBasedQuery ? onSort : undefined}
+            onSort={onSort}
             rows={tableRows}
             sampleSizeState={sampleSize || 500}
             onUpdateSampleSize={onUpdateSampleSize}
@@ -458,6 +460,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             renderCustomGridBody={isTextBasedQuery ? undefined : renderCustomBodyCallback}
             externalControlColumns={leadingControlColumns}
             cellContext={cellContext}
+            columnsMeta={columnsMeta}
           />
           {showExpandedDetails && !isTimelineExpandableFlyoutEnabled && (
             <DetailsPanel

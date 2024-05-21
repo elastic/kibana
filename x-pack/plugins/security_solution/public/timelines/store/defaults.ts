@@ -11,9 +11,29 @@ import { TimelineType, TimelineStatus } from '../../../common/api/timeline';
 import { defaultHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
+import type { ESQLOptions } from './types';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
+
+const timelineESQLDefaults: ESQLOptions = {
+  query: {
+    esql: '',
+  },
+  esqlDataViewId: undefined,
+  queryValidation: {
+    hasKeepClause: false,
+    sourceCommand: undefined,
+  },
+  sort: [
+    {
+      columnId: '@timestamp',
+      columnType: 'date',
+      esTypes: ['date'],
+      sortDirection: 'desc',
+    },
+  ],
+};
 
 export const timelineDefaults: SubsetTimelineModel &
   Pick<
@@ -87,9 +107,7 @@ export const timelineDefaults: SubsetTimelineModel &
   sampleSize: 500,
   rowHeight: 3,
   esqlOptions: {
-    query: {
-      esql: '',
-    },
+    ...timelineESQLDefaults,
   },
 };
 

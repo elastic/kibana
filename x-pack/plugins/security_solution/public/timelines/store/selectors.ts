@@ -198,3 +198,10 @@ export const selectTimelineColumns = createSelector(
   selectTimelineById,
   (timeline) => timeline?.columns
 );
+
+export const selectTimelineActiveTab = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.activeTab
+);
+
+export const selectTimelineSort = createSelector(selectTimelineById, (timeline) => timeline?.sort);

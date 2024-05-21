@@ -5,34 +5,35 @@
  * 2.0.
  */
 
-import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type { AggregateQuery } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { DataLoadingState } from '@kbn/unified-data-table';
-import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useState } from 'react';
-import type { ColumnHeaderOptions } from '@kbn/securitysolution-data-table/common/types';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isEmpty } from 'lodash';
 import { useQuery } from '@tanstack/react-query';
-import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
-import * as timelineActions from '../../../../store/actions';
-import type { State, ESQLOptions } from '../../../../store/types';
-import { useGetDataViewWithTextQuery } from '../../../../../common/containers/sourcerer/use_get_data_view_with_text_query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
+import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/use_get_sourcerer_data_view';
+import { useTextBasedEvents } from '../../../../../common/containers/use_text_based_query_events';
+import * as timelineActions from '../../../../store/actions';
+import type { ESQLOptions } from '../../../../store/types';
+import type { State } from '../../../../../common/store/types';
+import { useGetAdHocDataViewWithTextQuery } from '../../../../../common/containers/sourcerer/use_get_data_view_with_text_query';
+import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TimelineTabs } from '../../../../../../common/types';
-import { useTextBasedEvents } from '../../../../../common/components/events_viewer/use_text_based_events';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { UnifiedTimeline } from '../../unified_components';
+import type { ESQLTabHeaderProps } from './header';
 import { ESQLTabHeader } from './header';
-import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { defaultColumnHeaderType } from '../../unified_components/default_headers';
 import {
   selectTimelineColumns,
   selectTimelineDateRange,
   selectTimelineESQLOptions,
 } from '../../../../store/selectors';
-import { useValidateTimelineESQLQuery } from './use_validate_timeline_esql_query';
 
 interface UnifiedEsqlProps {
   timelineId: string;
@@ -41,19 +42,19 @@ interface UnifiedEsqlProps {
 export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   const { timelineId } = props;
   const dispatch = useDispatch();
-  const inspectorAdapters = useRef({ requests: new RequestAdapter() });
-  const [dataLoadingState, setDataLoadingState] = useState<DataLoadingState>(
-    DataLoadingState.loaded
-  );
 
-  const { query: esqlQuery, esqlDataViewId } = useSelector((state: State) =>
-    selectTimelineESQLOptions(state, timelineId)
-  );
-  const { hasKeepClause, metaDataColumns } = useValidateTimelineESQLQuery(esqlQuery);
+  const inspectorAdapters = useRef({ requests: new RequestAdapter() });
+
+  const {
+    query: esqlQuery,
+    esqlDataViewId,
+    queryValidation: { hasKeepClause = false, sourceCommand },
+    sort,
+  } = useSelector((state: State) => selectTimelineESQLOptions(state, timelineId));
+
   const timelineDateRange = useSelector((state: State) =>
     selectTimelineDateRange(state, timelineId)
   );
-
   const timelineColumns = useSelector((state: State) => selectTimelineColumns(state, timelineId));
 
   const updateESQLOptionsHandler = useCallback(
@@ -68,7 +69,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     [dispatch, timelineId]
   );
 
-  const originalDataView = useGetScopedSourcererDataView({
+  const securityDataView = useGetScopedSourcererDataView({
     sourcererScope: SourcererScopeName.timeline,
   });
 
@@ -83,82 +84,114 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     },
   });
 
-  const { getDataView, isLoading: isDataViewLoading } = useGetDataViewWithTextQuery({
-    query: esqlQuery,
-    dataViews,
-    onSuccess: (dataView) => {
+  const onAdHocDataViewSuccessCallback = useCallback(
+    (dataView?: DataView) => {
+      if (!dataView) return;
       updateESQLOptionsHandler({
         esqlDataViewId: dataView.id,
       });
     },
-  });
+    [updateESQLOptionsHandler]
+  );
 
-  const { fetch } = useTextBasedEvents({
+  const {
+    refetch,
+    data,
+    isLoading: isEventFetchInProgress,
+  } = useTextBasedEvents({
     query: esqlQuery,
     dataView: esqlDataView,
-    data: customDataService,
     expressions,
     inspectorAdapters: inspectorAdapters.current,
-  });
-
-  const onFetch = useCallback(async () => {
-    const result = await fetch();
-
-    if (!hasKeepClause) {
-      return {
-        rows: result.data,
-        cols: timelineColumns,
-        warnings: result.textBasedHeaderWarning,
-      };
-    }
-
-    const newCols = (result.textBasedQueryColumns ?? []).map((localCols) => ({
-      id: localCols.name,
-      type: localCols.meta?.type ?? 'unknown',
-      esTypes: localCols.meta?.esType ? [localCols.meta?.esType] : undefined,
-      searchable: false,
-      aggregatable: false,
-      columnHeaderType: defaultColumnHeaderType,
-    }));
-
-    return {
-      rows: result.data,
-      cols: newCols,
-      warnings: result.textBasedHeaderWarning,
-    };
-
-    // const columns = timelineColumns
-    //   .map((timelineCol) => (timelineCol in columnMap ? columnMap.get(timelineCol) : undefined))
-    //   .filter(Boolean) as ColumnHeaderOptions[];
-    //
-    //
-  }, [fetch, hasKeepClause, timelineColumns]);
-
-  const { refetch, data } = useQuery<{
-    rows: DataTableRecord[];
-    cols: ColumnHeaderOptions[];
-    warnings: unknown;
-  }>({
-    queryKey: ['esql'],
-    queryFn: () => onFetch(),
-    enabled: false,
-    initialData: {
-      rows: [],
-      cols: [],
-      warnings: [],
+    timeRange: {
+      from: timelineDateRange.start,
+      to: timelineDateRange.end,
     },
   });
 
-  const hasError = !metaDataColumns.includes('_id') || !metaDataColumns.includes('_index');
+  const { getDataView, isLoading: isDataViewLoading } = useGetAdHocDataViewWithTextQuery({
+    query: esqlQuery,
+    dataViews,
+    onDataViewCreationSuccess: onAdHocDataViewSuccessCallback,
+  });
 
-  const onQuerySubmit = useCallback(async () => {
-    setDataLoadingState(DataLoadingState.loading);
-    await getDataView();
-    await refetch();
-    setDataLoadingState(DataLoadingState.loaded);
-  }, [refetch, getDataView]);
+  const getAugumentedColumns = useCallback(() => {
+    const resultCols: ColumnHeaderOptions[] = [];
+    const resultDataViewFiels: DataViewField[] = [];
+    let columnsMeta: DataTableColumnsMeta | undefined;
 
-  const onQueryChange: SearchBarProps<AggregateQuery>['onQueryChange'] = useCallback(
+    let hasTimeStamp = false;
+
+    const isFromCommand = sourceCommand === 'from';
+
+    for (const currentColumn of data.columns) {
+      if (!columnsMeta) {
+        columnsMeta = {};
+      }
+
+      columnsMeta[currentColumn.name] = {
+        type: currentColumn.meta?.type ?? 'unknown',
+        esType: currentColumn.meta?.esType ? currentColumn.meta?.esType : undefined,
+      };
+
+      if (currentColumn.name === '@timestamp') {
+        hasTimeStamp = true;
+      }
+
+      if (hasKeepClause || !isFromCommand) {
+        /*
+         * If the query has a KEEP clause or is not FROM command,
+         * it means there are particular columns that user wants to see
+         */
+        const newCol = {
+          id: currentColumn.name,
+          type: currentColumn.meta?.type ?? 'unknown',
+          esTypes: currentColumn.meta?.esType ? [currentColumn.meta?.esType] : undefined,
+          searchable: false,
+          aggregatable: false,
+          columnHeaderType: defaultColumnHeaderType,
+        };
+        resultCols.push(newCol);
+
+        const newField = new DataViewField({
+          name: currentColumn.name,
+          type: currentColumn.meta?.type ?? 'unknown',
+          esTypes: currentColumn.meta?.esType ? [currentColumn.meta?.esType] : undefined,
+          searchable: false,
+          aggregatable: false,
+        });
+
+        resultDataViewFiels.push(newField);
+      }
+    }
+
+    return {
+      columns: resultCols.length > 0 ? resultCols : timelineColumns,
+      dataViewFields: resultDataViewFiels.length > 0 ? resultDataViewFiels : undefined,
+      hasTimeStamp,
+      columnsMeta,
+    };
+  }, [hasKeepClause, timelineColumns, data.columns, sourceCommand]);
+
+  const augumentedColumns = useMemo(() => {
+    return getAugumentedColumns();
+  }, [getAugumentedColumns]);
+
+  const onQuerySubmit: ESQLTabHeaderProps['onQuerySubmit'] = useCallback(
+    async ({ queryValidationResult }) => {
+      await getDataView();
+      await refetch();
+      updateESQLOptionsHandler({
+        queryValidation: {
+          hasKeepClause: queryValidationResult.hasKeepClause,
+          sourceCommand: queryValidationResult.command,
+        },
+      });
+    },
+    [refetch, getDataView, updateESQLOptionsHandler]
+  );
+
+  const onQueryChange: ESQLTabHeaderProps['onQueryChange'] = useCallback(
     (args) => {
       const {
         query: newQuery,
@@ -180,54 +213,65 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     [timelineId, dispatch, updateESQLOptionsHandler]
   );
 
-  if (!originalDataView) {
-    return <div>{'Loading...'}</div>;
+  const dataLoadingState = useMemo(
+    () =>
+      isEventFetchInProgress || isDataViewLoading
+        ? DataLoadingState.loading
+        : DataLoadingState.loaded,
+    [isEventFetchInProgress, isDataViewLoading]
+  );
+
+  const esqlSort = useMemo(() => {
+    return augumentedColumns.hasTimeStamp ? sort : [];
+  }, [augumentedColumns.hasTimeStamp, sort]);
+
+  if (!securityDataView) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoElastic" size="xl" />}
+        title={<h2>{'Loading Dataview'}</h2>}
+      />
+    );
   }
 
   return (
-    <div style={{ width: '100%' }}>
-      <ESQLTabHeader
-        onQuerySubmit={onQuerySubmit}
-        onQueryChange={onQueryChange}
-        onCancel={() => {}}
-        isLoading={false}
-        query={esqlQuery}
-        dateRangeFrom={timelineDateRange.start}
-        dateRangeTo={timelineDateRange.end}
-        indexPatterns={[originalDataView]}
-      />
-      {hasError ? (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTextColor color="danger">
-              <p>{`Metadata columns _id and _index must be included in form "from index metadata _id, _index | keep _id, _index" to enabled extra features. `}</p>
-              <p> {JSON.stringify(data?.warnings ?? [])}</p>
-            </EuiTextColor>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ) : null}
-      {esqlDataView && !isEmpty(data.rows) ? (
-        <UnifiedTimeline
-          columns={data.cols}
-          rowRenderers={[]}
-          isSortEnabled={true}
-          timelineId={timelineId}
-          itemsPerPage={100}
-          itemsPerPageOptions={[10, 20, 50, 100]}
-          sort={[]}
-          events={data.rows}
-          refetch={refetch}
-          dataLoadingState={dataLoadingState}
-          totalCount={data.rows.length}
-          showExpandedDetails={false}
-          onChangePage={() => {}}
-          activeTab={TimelineTabs.esql}
-          updatedAt={Date.now()}
-          isTextBasedQuery={true}
-          dataView={esqlDataView}
+    <EuiFlexGroup direction="column" gutterSize="none">
+      <EuiFlexItem grow={false}>
+        <ESQLTabHeader
+          onQuerySubmit={onQuerySubmit}
+          onQueryChange={onQueryChange}
+          query={esqlQuery}
+          dateRangeFrom={timelineDateRange.start}
+          dateRangeTo={timelineDateRange.end}
+          indexPatterns={[securityDataView]}
         />
+      </EuiFlexItem>
+      {!isEmpty(data.data) ? (
+        <EuiFlexItem grow={true}>
+          <UnifiedTimeline
+            columns={augumentedColumns.columns}
+            rowRenderers={[]}
+            isSortEnabled={true}
+            timelineId={timelineId}
+            itemsPerPage={100}
+            itemsPerPageOptions={[10, 20, 50, 100]}
+            sort={esqlSort}
+            events={data.data}
+            refetch={refetch}
+            dataLoadingState={dataLoadingState}
+            totalCount={data.data.length}
+            showExpandedDetails={false}
+            onChangePage={() => {}}
+            activeTab={TimelineTabs.esql}
+            updatedAt={Date.now()}
+            isTextBasedQuery={true}
+            dataView={esqlDataView ?? securityDataView}
+            textBasedDataViewFields={augumentedColumns.dataViewFields}
+            columnsMeta={augumentedColumns.columnsMeta}
+          />
+        </EuiFlexItem>
       ) : null}
-    </div>
+    </EuiFlexGroup>
   );
 };
 

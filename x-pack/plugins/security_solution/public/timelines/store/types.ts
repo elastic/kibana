@@ -53,5 +53,10 @@ export interface InitialyzeTimelineSettings extends Partial<TimelineModelSetting
 
 export interface ESQLOptions {
   query: AggregateQuery;
-  esqlDataViewId: string;
+  esqlDataViewId?: string;
+  sort: SortColumnTimeline[];
+  queryValidation: {
+    hasKeepClause: boolean;
+    sourceCommand?: string;
+  };
 }

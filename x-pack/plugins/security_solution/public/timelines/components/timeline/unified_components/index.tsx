@@ -10,10 +10,9 @@ import React, { useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { generateFilters } from '@kbn/data-plugin/public';
-import { DataViewField } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
-import type { DataLoadingState } from '@kbn/unified-data-table';
+import type { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
@@ -83,9 +82,6 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
       .euiFlexItem:last-child {
         /* padding-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS}; */
       }
-      .unifiedFieldListSidebar__list {
-        padding-left: 0px;
-      }
 
       .unifiedFieldListSidebar__addBtn {
         margin-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS};
@@ -97,7 +93,7 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
 export const SAMPLE_SIZE_SETTING = 500;
 export const HIDE_FOR_SIZES = ['xs', 's'];
 
-interface Props {
+type Props = {
   columns: ColumnHeaderOptions[];
   isSortEnabled?: boolean;
   rowRenderers: RowRenderer[];
@@ -121,7 +117,13 @@ interface Props {
   leadingControlColumns?: EuiDataGridProps['leadingControlColumns'];
   pinnedEventIds?: TimelineModel['pinnedEventIds'];
   eventIdToNoteIds?: TimelineModel['eventIdToNoteIds'];
-}
+  /*
+   *
+   * Suppors ESQL queries that result in dynamic columns
+   *
+   * */
+  textBasedDataViewFields?: DataViewField[];
+} & Pick<UnifiedDataTableProps, 'columnsMeta'>;
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
   columns,
@@ -147,6 +149,8 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   leadingControlColumns,
   pinnedEventIds,
   eventIdToNoteIds,
+  textBasedDataViewFields,
+  columnsMeta,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -371,18 +375,8 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   }, [onFieldEdited]);
 
   const sideBarFields = useMemo(() => {
-    if (!isTextBasedQuery) return dataView ? dataView.fields : [];
-    return columns.map(
-      (column) =>
-        new DataViewField({
-          name: column.id,
-          type: column.type ?? 'unknown',
-          esTypes: column.esTypes,
-          searchable: false,
-          aggregatable: false,
-        })
-    );
-  }, [columns, dataView, isTextBasedQuery]);
+    return textBasedDataViewFields ?? dataView.fields;
+  }, [textBasedDataViewFields, dataView]);
 
   const cellContext = useMemo(() => {
     return {
@@ -446,6 +440,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
                 <DropOverlayWrapper isVisible={isDropAllowed}>
                   <EventDetailsWidthProvider>
                     <DataGridMemoized
+                      columnsMeta={columnsMeta}
                       columns={columns}
                       columnIds={currentColumnIds}
                       rowRenderers={rowRenderers}

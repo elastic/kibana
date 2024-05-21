@@ -6,14 +6,16 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
-import type { EditorError, ESQLAst } from '@kbn/esql-ast';
+import type { EditorError, ESQLAst, ESQLCommandOption } from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-interface UseValidateTimelineESQLQueryArgs {
+interface UseValidateSecuritySolutionESQLQueryArgs {
   query: AggregateQuery;
 }
 
-export function useValidateTimelineESQLQuery(query: AggregateQuery) {
+export function useValidateSecuritySolutionESQLQuery({
+  query,
+}: UseValidateSecuritySolutionESQLQueryArgs) {
   const [errors, setErrors] = useState<EditorError[]>([]);
 
   const [ast, setAst] = useState<ESQLAst>(getAstAndSyntaxErrors(query.esql).ast);
@@ -32,12 +34,21 @@ export function useValidateTimelineESQLQuery(query: AggregateQuery) {
     return ast.some((clause) => clause.name === 'keep');
   }, [ast]);
 
+  const command = useMemo(() => {
+    const commandClause = ast.find((clause) => clause.type === 'command');
+
+    return commandClause && 'name' in commandClause ? commandClause.name : undefined;
+  }, [ast]);
+
   const metaDataColumns = useMemo(() => {
     const fromClause = ast.find((clause) => clause.name === 'from');
+
     const metadataClause = fromClause?.args.find((arg) => 'name' in arg && arg.name === 'metadata');
 
     const metadataColumns =
-      metadataClause?.args.map((arg) => ('name' in arg ? arg.name : '')) || [];
+      (metadataClause as ESQLCommandOption | undefined)?.args.map((arg) =>
+        'name' in arg ? arg.name : ''
+      ) || [];
 
     return metadataColumns;
   }, [ast]);
@@ -46,5 +57,6 @@ export function useValidateTimelineESQLQuery(query: AggregateQuery) {
     errors,
     hasKeepClause,
     metaDataColumns,
+    command,
   };
 }
