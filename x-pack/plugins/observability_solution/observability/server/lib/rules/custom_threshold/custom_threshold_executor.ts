@@ -95,8 +95,10 @@ export const createCustomThresholdExecutor = ({
     criteria.forEach((criteriaItem) => {
       // For backwards-compatibility check if the rule had a LEGACY_OUTSIDE_RANGE inside its params.
       // Then, change it on-the-fly to NOT_BETWEEN
-      // @ts-ignore
-      if (criteriaItem.comparator === LEGACY_OUTSIDE_RANGE) {
+      const ifLegacyComparator = criteriaItem.comparator as
+        | COMPARATORS
+        | typeof LEGACY_OUTSIDE_RANGE;
+      if (ifLegacyComparator === LEGACY_OUTSIDE_RANGE) {
         criteriaItem.comparator = COMPARATORS.NOT_BETWEEN;
       }
     });
