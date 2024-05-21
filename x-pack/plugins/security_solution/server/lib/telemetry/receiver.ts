@@ -232,6 +232,7 @@ export interface ITelemetryReceiver {
   getExperimentalFeatures(): ExperimentalFeatures | undefined;
 
   setMaxPageSizeBytes(bytes: number): void;
+
   setNumDocsToSample(n: number): void;
 }
 
