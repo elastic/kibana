@@ -101,8 +101,9 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-import { CreatePackagePolicySinglePage } from '.';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
+
+import { CreatePackagePolicySinglePage } from '.';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
@@ -113,7 +114,7 @@ afterAll(() => {
   consoleDebugMock.mockRestore();
 });
 
-describe('when on the package policy create page', () => {
+describe('When on the package policy create page', () => {
   const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-1.3.0' })[1];
 
   let testRenderer: TestRenderer;
@@ -200,7 +201,7 @@ describe('when on the package policy create page', () => {
     (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(mockPackageInfo);
   });
 
-  describe('and Route state is provided via Fleet HashRouter', () => {
+  describe('And Route state is provided via Fleet HashRouter', () => {
     let expectedRouteState: CreatePackagePolicyRouteState;
 
     beforeEach(() => {
@@ -242,7 +243,7 @@ describe('when on the package policy create page', () => {
     });
   });
 
-  describe('submit page', () => {
+  describe('Submit page', () => {
     const newPackagePolicy = {
       description: '',
       enabled: true,
@@ -307,7 +308,7 @@ describe('when on the package policy create page', () => {
       });
     });
 
-    describe('on save navigate', () => {
+    describe('On save navigate', () => {
       async function setupSaveNavigate(routeState: any, queryParamsPolicyId?: string) {
         (useIntraAppState as jest.MockedFunction<any>).mockReturnValue(routeState);
         render(queryParamsPolicyId);
@@ -417,7 +418,7 @@ describe('when on the package policy create page', () => {
       );
     });
 
-    describe('without query param', () => {
+    describe('Without query param', () => {
       beforeEach(async () => {
         await act(async () => {
           render();
@@ -590,7 +591,7 @@ describe('when on the package policy create page', () => {
       });
     });
 
-    describe('with agentless policy available', () => {
+    describe('With agentless policy available', () => {
       beforeEach(async () => {
         (sendGetOneAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
           data: { item: { id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' } },
@@ -610,6 +611,13 @@ describe('when on the package policy create page', () => {
       });
 
       test('should not force create package policy when not in serverless', async () => {
+        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
+          ...useStartServices(),
+          cloud: {
+            ...useStartServices().cloud,
+            isServerlessEnabled: false,
+          },
+        });
         await act(async () => {
           fireEvent.click(renderResult.getByText('Existing hosts')!);
         });

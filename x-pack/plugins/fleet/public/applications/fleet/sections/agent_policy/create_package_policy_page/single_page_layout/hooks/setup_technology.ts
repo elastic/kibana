@@ -26,19 +26,18 @@ export const useAgentless = () => {
 
   const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
 
-  // TODO: remove check agentPolicy.id === AGENTLESS_POLICY_ID
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
-    if (agentPolicy && agentPolicy?.supports_agentless && agentPolicy?.id)
-      return (
-        isAgentlessEnabled &&
-        (agentPolicy.id === AGENTLESS_POLICY_ID || agentPolicy.supports_agentless)
-      );
-    return false;
+    if (!agentPolicy) return false;
+    return (
+      isAgentlessEnabled &&
+      (agentPolicy?.id === AGENTLESS_POLICY_ID || !!agentPolicy?.supports_agentless)
+    );
   };
 
   // When an integration has at least a policy template enabled for agentless
   const isAgentlessIntegration = (packageInfo: PackageInfo | undefined) => {
     if (
+      isAgentlessEnabled &&
       packageInfo?.policy_templates &&
       packageInfo?.policy_templates.length > 0 &&
       !!packageInfo?.policy_templates.find(
@@ -50,10 +49,9 @@ export const useAgentless = () => {
     return false;
   };
 
-  // TODO: remove this check when CSPM adds the above flag in the integration
-  // and rely only on isAgentlessIntegration
+  // TODO: remove this check when CSPM implements the above flag and rely only on `isAgentlessIntegration`
   const isAgentlessPackagePolicy = (packagePolicy: NewPackagePolicy) => {
-    return packagePolicy.policy_id === AGENTLESS_POLICY_ID;
+    return isAgentlessEnabled && packagePolicy.policy_id === AGENTLESS_POLICY_ID;
   };
   return {
     isAgentlessEnabled,
@@ -90,7 +88,6 @@ export function useSetupTechnology({
 
   useEffect(() => {
     const fetchAgentlessPolicy = async () => {
-      // TODO: replace the hardcoded agentless policy with a query that fetches all the policies with `supports_agentless`
       const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
       const isAgentlessAvailable = !error && data && data.item;
 
