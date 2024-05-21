@@ -155,18 +155,30 @@ interface GuidedOnboardingTourStep extends SecurityTourStep {
 // wraps tour anchor component
 // and gives the tour step itself a place to mount once it is active
 // mounts the tour step with a delay to ensure the anchor will render first
-export const GuidedOnboardingTourStep = ({
-  children,
-  // can be false if the anchor is an iterative element
-  // do not use this as an "is tour active" check, the SecurityTourStep checks that anyway
-  isTourAnchor = true,
-  ...props
-}: GuidedOnboardingTourStep) => {
+export const GuidedOnboardingTourStep = React.memo(
+  ({
+    children,
+    // can be false if the anchor is an iterative element
+    // do not use this as an "is tour active" check, the SecurityTourStep checks that anyway
+    isTourAnchor = true,
+    ...props
+  }: GuidedOnboardingTourStep) => {
+    return isTourAnchor ? (
+      <SecurityTourStepAnchor {...props}>{children}</SecurityTourStepAnchor>
+    ) : (
+      <>{children}</>
+    );
+  }
+);
+GuidedOnboardingTourStep.displayName = 'GuidedOnboardingTourStep';
+
+const SecurityTourStepAnchor = React.memo(({ children, ...props }: SecurityTourStep) => {
   const { hidden: allStepsHidden } = useTourContext();
   const hiddenByFlyout = useHiddenByFlyout({ tourId: props.tourId, step: props.step });
-  return isTourAnchor && !allStepsHidden && !hiddenByFlyout ? (
+  return !allStepsHidden && !hiddenByFlyout ? (
     <SecurityTourStep {...props}>{children}</SecurityTourStep>
   ) : (
     <>{children}</>
   );
-};
+});
+SecurityTourStepAnchor.displayName = 'SecurityTourStepAnchor';
