@@ -63,6 +63,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasAppContext",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasAppContext",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasAppContext",
+            "text": "HasAppContext"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasAppContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiHasDisableTriggers",
         "type": "Function",
         "tags": [],
@@ -1315,6 +1355,55 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.getPanelDescription",
+        "type": "Function",
+        "tags": [],
+        "label": "getPanelDescription",
+        "description": [],
+        "signature": [
+          "(api: Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelDescription",
+            "text": "PublishesPanelDescription"
+          },
+          ">) => string | undefined"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.getPanelDescription.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "Partial<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishesPanelDescription",
+                "text": "PublishesPanelDescription"
+              },
+              ">"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/titles/publishes_panel_description.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.getPanelTitle",
         "type": "Function",
         "tags": [],
@@ -1359,6 +1448,33 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.getUnchangingComparator",
+        "type": "Function",
+        "tags": [],
+        "label": "getUnchangingComparator",
+        "description": [
+          "\nComparators are required for every runtime state key. Occasionally, a comparator may\nactually be optional. In those cases, implementors can fall back to this blank definition\nwhich will always return 'true'."
+        ],
+        "signature": [
+          "<State extends object, Key extends keyof State>() => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.ComparatorDefinition",
+            "text": "ComparatorDefinition"
+          },
+          "<State, Key>"
+        ],
+        "path": "packages/presentation/presentation_publishing/comparators/fallback_comparator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1988,6 +2104,49 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.EmbeddableAppContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "EmbeddableAppContext",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.EmbeddableAppContext.getCurrentPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getCurrentPath",
+            "description": [
+              "\nCurrent app's path including query and hash starting from {appId}"
+            ],
+            "signature": [
+              "(() => string) | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.EmbeddableAppContext.currentAppId",
+            "type": "string",
+            "tags": [],
+            "label": "currentAppId",
+            "description": [],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.FetchContext",
         "type": "Interface",
         "tags": [],
@@ -2112,6 +2271,43 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasAppContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasAppContext",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasAppContext.getAppContext",
+            "type": "Function",
+            "tags": [],
+            "label": "getAppContext",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.EmbeddableAppContext",
+                "text": "EmbeddableAppContext"
+              }
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_app_context.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.HasDisableTriggers",
         "type": "Interface",
         "tags": [],
@@ -2173,7 +2369,7 @@
             "label": "onEdit",
             "description": [],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
             "deprecated": false,
@@ -2205,7 +2401,7 @@
             "label": "getEditHref",
             "description": [],
             "signature": [
-              "(() => string | undefined) | undefined"
+              "(() => Promise<string | undefined>) | undefined"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts",
             "deprecated": false,
@@ -6467,7 +6663,7 @@
         "label": "StateComparators",
         "description": [],
         "signature": [
-          "{ [KeyType in keyof StateType]: ",
+          "{ [KeyType in keyof Required<StateType>]: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",

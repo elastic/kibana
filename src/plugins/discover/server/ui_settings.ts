@@ -30,7 +30,6 @@ import {
   TRUNCATE_MAX_HEIGHT,
   SHOW_FIELD_STATISTICS,
   ROW_HEIGHT_OPTION,
-  ENABLE_ESQL,
 } from '@kbn/discover-utils';
 import { DEFAULT_ROWS_PER_PAGE, ROWS_PER_PAGE_OPTIONS } from '../common/constants';
 
@@ -309,26 +308,5 @@ export const getUiSettings: (
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
-  },
-  [ENABLE_ESQL]: {
-    name: i18n.translate('discover.advancedSettings.enableESQLTitle', {
-      defaultMessage: 'Enable ES|QL',
-    }),
-    value: true,
-    description: i18n.translate('discover.advancedSettings.enableESQLDescription', {
-      defaultMessage:
-        'This setting enables ES|QL in Kibana. By switching it off you will hide the ES|QL user interface from various applications. However, users will be able to access existing ES|QL saved searches, visualizations, etc. If you have feedback on this experience please reach out to us on {link}',
-      values: {
-        link:
-          `<a href="https://ela.st/esql-feedback" target="_blank" rel="noopener">` +
-          i18n.translate('discover.advancedSettings.enableESQL.discussLinkText', {
-            defaultMessage: 'https://ela.st/esql-feedback',
-          }) +
-          '</a>',
-      },
-    }),
-    requiresPageReload: true,
-    category: ['discover'],
-    schema: schema.boolean(),
   },
 });

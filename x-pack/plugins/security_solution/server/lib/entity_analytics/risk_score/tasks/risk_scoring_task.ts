@@ -15,8 +15,8 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
+import type { AfterKeys } from '../../../../../common/api/entity_analytics/common';
 import {
-  type AfterKeys,
   type IdentifierType,
   RiskScoreEntity,
 } from '../../../../../common/entity_analytics/risk_engine';
@@ -310,7 +310,7 @@ export const runTask = async ({
     };
     telemetry.reportEvent(RISK_SCORE_EXECUTION_SUCCESS_EVENT.eventType, telemetryEvent);
 
-    riskScoreService.scheduleLatestTransformNow();
+    await riskScoreService.scheduleLatestTransformNow();
 
     if (isCancelled()) {
       log('task was cancelled');

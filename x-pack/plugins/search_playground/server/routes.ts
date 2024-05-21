@@ -6,13 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { streamFactory } from '@kbn/ml-response-stream/server';
 import type { Logger } from '@kbn/logging';
 import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { sendMessageEvent, SendMessageEventData } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
 import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
+import { handleStreamResponse } from './utils/handle_stream_response';
 import {
   APIRoutes,
   SearchPlaygroundPluginStart,
@@ -88,13 +89,13 @@ export function defineRoutes({
       },
     },
     errorHandler(async (context, request, response) => {
-      const [, { actions }] = await getStartServices();
+      const [{ analytics }, { actions }] = await getStartServices();
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
       } as AssistClientOptionsWithClient);
       const { messages, data } = await request.body;
-      const { chatModel, chatPrompt } = await getChatParams(
+      const { chatModel, chatPrompt, connector } = await getChatParams(
         {
           connectorId: data.connector_id,
           model: data.summarization_model,
@@ -108,6 +109,11 @@ export function defineRoutes({
 
       try {
         sourceFields = JSON.parse(data.source_fields);
+        sourceFields = Object.keys(sourceFields).reduce((acc, key) => {
+          // @ts-ignore
+          acc[key] = sourceFields[key][0];
+          return acc;
+        }, {});
       } catch (e) {
         logger.error('Failed to parse the source fields', e);
         throw Error(e);
@@ -131,10 +137,10 @@ export function defineRoutes({
       } catch (e) {
         logger.error('Failed to create the chat stream', e);
 
-        if (typeof e === 'string') {
+        if (typeof e === 'object') {
           return response.badRequest({
             body: {
-              message: e,
+              message: e.message,
             },
           });
         }
@@ -142,25 +148,15 @@ export function defineRoutes({
         throw e;
       }
 
-      const { end, push, responseWithHeaders } = streamFactory(request.headers, logger);
+      analytics.reportEvent<SendMessageEventData>(sendMessageEvent.eventType, {
+        connectorType:
+          connector.actionTypeId +
+          (connector.config?.apiProvider ? `-${connector.config.apiProvider}` : ''),
+        model: data.summarization_model ?? '',
+        isCitationsEnabled: data.citations,
+      });
 
-      const reader = (stream as ReadableStream).getReader();
-      const textDecoder = new TextDecoder();
-
-      async function pushStreamUpdate() {
-        reader.read().then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
-          if (done) {
-            end();
-            return;
-          }
-          push(textDecoder.decode(value));
-          pushStreamUpdate();
-        });
-      }
-
-      pushStreamUpdate();
-
-      return response.ok(responseWithHeaders);
+      return handleStreamResponse({ logger, stream, response, request });
     })
   );
 

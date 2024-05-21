@@ -15,7 +15,11 @@ export interface MlClient {
   modules: MlModules;
 }
 
-export async function getMlClient({ plugins, context, request }: MinimalAPMRouteHandlerResources) {
+export async function getMlClient({
+  plugins,
+  context,
+  request,
+}: Pick<MinimalAPMRouteHandlerResources, 'plugins' | 'context' | 'request'>) {
   const [coreContext, licensingContext] = await Promise.all([context.core, context.licensing]);
 
   const mlplugin = plugins.ml;

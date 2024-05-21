@@ -9,7 +9,7 @@ import { cloneDeep } from 'lodash';
 import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { PieLayerState, PieVisualizationState } from '../../../common/types';
 
-type PersistedPieLayerState = Omit<PieLayerState, 'legendStats'> & {
+type PersistedPieLayerState = PieLayerState & {
   showValuesInLegend?: boolean;
 };
 
@@ -37,17 +37,4 @@ function convertToLegendStats(state: PieVisualizationState) {
   });
 
   return state;
-}
-
-export function convertToPersistable(state: PieVisualizationState) {
-  const newState = cloneDeep(state) as unknown as PersistedPieVisualizationState;
-
-  newState.layers.forEach((l) => {
-    if ('legendStats' in l && Array.isArray(l.legendStats)) {
-      l.showValuesInLegend = l.legendStats.includes(PartitionLegendValue.Value);
-      delete l.legendStats;
-    }
-  });
-
-  return newState;
 }

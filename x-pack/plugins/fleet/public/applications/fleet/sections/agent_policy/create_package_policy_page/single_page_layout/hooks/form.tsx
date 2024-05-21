@@ -31,7 +31,10 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
-import { getMaxPackageName } from '../../../../../../../../common/services';
+import {
+  getMaxPackageName,
+  isRootPrivilegesRequired,
+} from '../../../../../../../../common/services';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -266,13 +269,24 @@ export function useOnSubmit({
         setFormState('CONFIRM');
         return;
       }
+      if (
+        packageInfo &&
+        isRootPrivilegesRequired(packageInfo) &&
+        (agentPolicy?.unprivileged_agents ?? 0) > 0 &&
+        formState !== 'CONFIRM' &&
+        formState !== 'CONFIRM_UNPRIVILEGED'
+      ) {
+        setFormState('CONFIRM_UNPRIVILEGED');
+        return;
+      }
       let createdPolicy = overrideCreatedAgentPolicy;
       if (selectedPolicyTab === SelectedPolicyTab.NEW && !overrideCreatedAgentPolicy) {
         try {
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
             const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
-            if (packageInfo) {
+            // skip preinstall of input package, to be able to rollback when package policy creation fails
+            if (packageInfo && packageInfo.type !== 'input') {
               packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {

@@ -68,6 +68,7 @@
     "@kbn/serverless",
     "@kbn/task-manager-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/observability-plugin"
   ],
   "exclude": ["target/**/*"]
 }

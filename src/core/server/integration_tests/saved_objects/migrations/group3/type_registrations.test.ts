@@ -49,6 +49,7 @@ const previouslyRegisteredTypes = [
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
+  'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
   'epm-packages',
   'epm-packages-assets',
@@ -149,9 +150,9 @@ const previouslyRegisteredTypes = [
 describe('SO type registrations', () => {
   let root: ReturnType<typeof createRoot>;
 
-  afterEach(() => {
+  afterEach(async () => {
     try {
-      root?.shutdown();
+      await root?.shutdown();
     } catch (e) {
       /* trap */
     }

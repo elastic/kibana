@@ -75,6 +75,7 @@ import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
+import { UnprivilegedConfirmModal } from './confirm_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -226,10 +227,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       }
     };
 
+    if (selectedPolicyTab === SelectedPolicyTab.NEW) {
+      setAgentCount(0);
+      return;
+    }
+
     if (isFleetEnabled && agentPolicyId) {
       getAgentCount();
     }
-  }, [agentPolicyId, isFleetEnabled]);
+  }, [agentPolicyId, selectedPolicyTab, isFleetEnabled]);
 
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
@@ -431,6 +437,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -440,8 +447,22 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             agentPolicy={agentPolicy}
             onConfirm={onSubmit}
             onCancel={() => setFormState('VALID')}
+            showUnprivilegedAgentsCallout={Boolean(
+              packageInfo &&
+                isRootPrivilegesRequired(packageInfo) &&
+                (agentPolicy?.unprivileged_agents ?? 0) > 0
+            )}
+            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
           />
         )}
+        {formState === 'CONFIRM_UNPRIVILEGED' && agentPolicy ? (
+          <UnprivilegedConfirmModal
+            onCancel={() => setFormState('VALID')}
+            onConfirm={onSubmit}
+            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
+            agentPolicyName={agentPolicy?.name ?? ''}
+          />
+        ) : null}
         {formState === 'SUBMITTED_NO_AGENTS' &&
           agentPolicy &&
           packageInfo &&

@@ -428,6 +428,7 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
   FLYOUT: 'securitySolution.documentDetails.newFeaturesTour.v8.14',
+  ATTACK_DISCOVERY: 'securitySolution.attackDiscovery.newFeaturesTour.v8.14',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -442,6 +443,7 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
   ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
+  INVESTIGATION_FIELDS_FEATURE = 'INVESTIGATION_FIELDS_FEATURE',
 }
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;

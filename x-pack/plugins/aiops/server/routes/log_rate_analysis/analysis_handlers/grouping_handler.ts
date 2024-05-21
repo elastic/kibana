@@ -221,7 +221,7 @@ export const groupingHandlerFactory =
           }
         }, MAX_CONCURRENT_QUERIES);
 
-        groupHistogramQueue.push(significantItemGroups);
+        await groupHistogramQueue.push(significantItemGroups);
         await groupHistogramQueue.drain();
       }
     } catch (e) {

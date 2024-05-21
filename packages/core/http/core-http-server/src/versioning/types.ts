@@ -238,10 +238,22 @@ export type VersionedResponseBodyValidation =
  * )
  * ...
  * ```
+ * @example
+ * ```ts
+ * {
+ *    200: {
+ *       body: schema.stream()
+ *       bodyContentType: 'application/octet-stream'
+ *    }
+ * }
  * @public
  */
 export interface VersionedRouteResponseValidation {
   [statusCode: number]: {
+    /**
+     * A string representing the mime type of the response body.
+     */
+    bodyContentType?: string;
     body: VersionedResponseBodyValidation;
   };
   unsafe?: { body?: boolean };

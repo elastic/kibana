@@ -31,38 +31,38 @@ import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
-import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { addLog } from '../../../../utils/add_log';
-import { useInternalStateSelector } from '../../services/discover_internal_state_container';
-import type { DiscoverAppState } from '../../services/discover_app_state_container';
-import { DataDocumentsMsg, RecordRawType } from '../../services/discover_data_state_container';
-import { useSavedSearch } from '../../services/discover_state_provider';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
+import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
+import { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import { useSavedSearch } from '../../state_management/discover_state_provider';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
-const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
+const EMPTY_ESQL_COLUMNS: DatatableColumn[] = [];
 const EMPTY_FILTERS: Filter[] = [];
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
   inspectorAdapters: InspectorAdapters;
   hideChart: boolean | undefined;
-  isPlainRecord: boolean;
 }
 
 export const useDiscoverHistogram = ({
   stateContainer,
   inspectorAdapters,
   hideChart,
-  isPlainRecord,
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const savedSearchData$ = stateContainer.dataState.data$;
   const savedSearchState = useSavedSearch();
+  const isEsqlMode = useIsEsqlMode();
 
   /**
    * API initialization
@@ -160,10 +160,8 @@ export const useDiscoverHistogram = ({
   useEffect(() => {
     const subscription = createTotalHitsObservable(unifiedHistogram?.state$)?.subscribe(
       ({ status, result }) => {
-        const { recordRawType, result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
-
-        if (recordRawType === RecordRawType.PLAIN) {
-          // ignore histogram's total hits updates for text-based records as Discover manages them during docs fetching
+        if (isEsqlMode) {
+          // ignore histogram's total hits updates for ES|QL as Discover manages them during docs fetching
           return;
         }
 
@@ -172,6 +170,8 @@ export const useDiscoverHistogram = ({
           setTotalHitsError(result);
           return;
         }
+
+        const { result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
 
         if (
           (status === UnifiedHistogramFetchStatus.loading ||
@@ -187,7 +187,6 @@ export const useDiscoverHistogram = ({
         savedSearchData$.totalHits$.next({
           fetchStatus: status.toString() as FetchStatus,
           result,
-          recordRawType,
         });
 
         if (status !== UnifiedHistogramFetchStatus.complete || typeof result !== 'number') {
@@ -203,9 +202,11 @@ export const useDiscoverHistogram = ({
       subscription?.unsubscribe();
     };
   }, [
+    isEsqlMode,
     savedSearchData$.main$,
     savedSearchData$.totalHits$,
     setTotalHitsError,
+    stateContainer.appState,
     unifiedHistogram?.state$,
   ]);
 
@@ -221,30 +222,30 @@ export const useDiscoverHistogram = ({
     timefilter.getTime()
   );
 
-  // When in text based language mode, update the data view, query, and
+  // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
   // don't frequently change, such as when the user modifies the table
   // columns, which would trigger unnecessary refetches.
-  const textBasedFetchComplete$ = useMemo(
+  const esqlFetchComplete$ = useMemo(
     () => createFetchCompleteObservable(stateContainer),
     [stateContainer]
   );
 
-  const [initialTextBasedProps] = useState(() =>
-    getUnifiedHistogramPropsForTextBased({
+  const [initialEsqlProps] = useState(() =>
+    getUnifiedHistogramPropsForEsql({
       documentsValue: savedSearchData$.documents$.getValue(),
       savedSearch: stateContainer.savedSearchState.getState(),
     })
   );
 
   const {
-    dataView: textBasedDataView,
-    query: textBasedQuery,
-    columns: textBasedColumns,
-  } = useObservable(textBasedFetchComplete$, initialTextBasedProps);
+    dataView: esqlDataView,
+    query: esqlQuery,
+    columns: esqlColumns,
+  } = useObservable(esqlFetchComplete$, initialEsqlProps);
 
   useEffect(() => {
-    if (!isPlainRecord) {
+    if (!isEsqlMode) {
       return;
     }
 
@@ -253,7 +254,7 @@ export const useDiscoverHistogram = ({
         setIsSuggestionLoading(true);
       }
     });
-    const fetchComplete = textBasedFetchComplete$.subscribe(() => {
+    const fetchComplete = esqlFetchComplete$.subscribe(() => {
       setIsSuggestionLoading(false);
     });
 
@@ -261,7 +262,7 @@ export const useDiscoverHistogram = ({
       fetchStart.unsubscribe();
       fetchComplete.unsubscribe();
     };
-  }, [isPlainRecord, stateContainer.dataState.fetch$, textBasedFetchComplete$]);
+  }, [isEsqlMode, stateContainer.dataState.fetch$, esqlFetchComplete$]);
 
   /**
    * Data fetching
@@ -287,17 +288,17 @@ export const useDiscoverHistogram = ({
 
     let fetch$: Observable<string>;
 
-    // When in text based language mode, we refetch under two conditions:
+    // When in ES|QL mode, we refetch under two conditions:
     // 1. When the current Lens suggestion changes. This syncs the visualization
     //    with the user's selection.
     // 2. When the documents are done fetching. This is necessary because we don't
     //    have access to the latest columns until after the documents are fetched,
     //    which are required to get the latest Lens suggestion, which would trigger
     //    a refetch anyway and result in multiple unnecessary fetches.
-    if (isPlainRecord) {
+    if (isEsqlMode) {
       fetch$ = merge(
         createCurrentSuggestionObservable(unifiedHistogram.state$).pipe(map(() => 'lens')),
-        textBasedFetchComplete$.pipe(map(() => 'discover'))
+        esqlFetchComplete$.pipe(map(() => 'discover'))
       ).pipe(debounceTime(50));
     } else {
       fetch$ = stateContainer.dataState.fetch$.pipe(
@@ -317,14 +318,14 @@ export const useDiscoverHistogram = ({
     });
 
     // triggering the initial request for total hits hook
-    if (!isPlainRecord && !skipRefetch.current) {
+    if (!isEsqlMode && !skipRefetch.current) {
       unifiedHistogram.refetch();
     }
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [isPlainRecord, stateContainer.dataState.fetch$, textBasedFetchComplete$, unifiedHistogram]);
+  }, [isEsqlMode, stateContainer.dataState.fetch$, esqlFetchComplete$, unifiedHistogram]);
 
   const dataView = useInternalStateSelector((state) => state.dataView!);
 
@@ -381,12 +382,12 @@ export const useDiscoverHistogram = ({
     ref,
     getCreationOptions,
     services,
-    dataView: isPlainRecord ? textBasedDataView : dataView,
-    query: isPlainRecord ? textBasedQuery : query,
+    dataView: isEsqlMode ? esqlDataView : dataView,
+    query: isEsqlMode ? esqlQuery : query,
     filters: filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
-    columns: isPlainRecord ? textBasedColumns : undefined,
+    columns: isEsqlMode ? esqlColumns : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
@@ -394,10 +395,10 @@ export const useDiscoverHistogram = ({
     isChartLoading: isSuggestionLoading,
     // visContext should be in sync with current query
     externalVisContext:
-      isPlainRecord && canImportVisContext(savedSearchState?.visContext)
+      isEsqlMode && canImportVisContext(savedSearchState?.visContext)
         ? savedSearchState?.visContext
         : undefined,
-    onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
+    onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
   };
 };
 
@@ -473,7 +474,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
     filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
     map((documentsValue) => {
-      return getUnifiedHistogramPropsForTextBased({
+      return getUnifiedHistogramPropsForEsql({
         documentsValue,
         savedSearch: stateContainer.savedSearchState.getState(),
       });
@@ -495,14 +496,14 @@ const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramSt
   );
 };
 
-function getUnifiedHistogramPropsForTextBased({
+function getUnifiedHistogramPropsForEsql({
   documentsValue,
   savedSearch,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
   savedSearch: SavedSearch;
 }) {
-  const columns = documentsValue?.textBasedQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
+  const columns = documentsValue?.esqlQueryColumns || EMPTY_ESQL_COLUMNS;
 
   const nextProps = {
     dataView: savedSearch.searchSource.getField('index')!,
@@ -510,7 +511,7 @@ function getUnifiedHistogramPropsForTextBased({
     columns,
   };
 
-  addLog('[UnifiedHistogram] delayed next props for text-based', nextProps);
+  addLog('[UnifiedHistogram] delayed next props for ES|QL', nextProps);
 
   return nextProps;
 }

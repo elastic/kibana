@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, QuerySchema } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import { EuiIconTip } from '@elastic/eui';
 import React from 'react';
@@ -16,7 +16,15 @@ import { CreateSLOForm } from '../../types';
 import { IndexFieldSelector } from './index_field_selector';
 import { GroupByCardinality } from './group_by_cardinality';
 
-export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isLoading: boolean }) {
+export function GroupByField({
+  dataView,
+  isLoading,
+  filters,
+}: {
+  dataView?: DataView;
+  isLoading: boolean;
+  filters?: QuerySchema;
+}) {
   const { watch } = useFormContext<CreateSLOForm>();
 
   const groupByFields = dataView?.fields?.filter((field) => canGroupBy(field)) ?? [];
@@ -48,7 +56,7 @@ export function GroupByField({ dataView, isLoading }: { dataView?: DataView; isL
         isLoading={!!index && isLoading}
         isDisabled={!index}
       />
-      <GroupByCardinality />
+      <GroupByCardinality customFilters={filters} />
     </>
   );
 }

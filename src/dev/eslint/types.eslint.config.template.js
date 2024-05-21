@@ -24,4 +24,14 @@ module.exports = {
   rules: {
     '@typescript-eslint/consistent-type-exports': 'error',
   },
+  overrides: [
+    {
+      files: ['server/**/*'],
+      rules: {
+        // Let's focus on server-side errors first to avoid server crashes.
+        // We'll tackle /public eventually.
+        '@typescript-eslint/no-floating-promises': 'error',
+      },
+    },
+  ],
 };

@@ -80,8 +80,10 @@ export function createTestConfig(options: CreateTestConfigOptions, testFiles?: s
           '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
             'previewTelemetryUrlEnabled',
+            'alertSuppressionForEsqlRuleEnabled',
             'riskScoringPersistence',
             'riskScoringRoutesEnabled',
+            'bulkCustomHighlightedFieldsEnabled',
           ])}`,
           '--xpack.task_manager.poll_interval=1000',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,

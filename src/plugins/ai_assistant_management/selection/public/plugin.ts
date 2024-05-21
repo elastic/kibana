@@ -60,7 +60,7 @@ export class AIAssistantManagementPlugin
           defaultMessage: 'Manage your AI Assistants.',
         }),
         icon: 'sparkles',
-        path: '/app/management/kibana/ai-assistant',
+        path: '/app/management/kibana/aiAssistantManagementSelection',
         showOnHomePage: false,
         category: 'admin',
       });

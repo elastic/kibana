@@ -17,8 +17,6 @@ import {
   ActionsClientLlm,
 } from '@kbn/elastic-assistant-common/impl/language_models';
 import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
@@ -38,9 +36,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
-  elserId,
   esClient,
-  kbResource,
+  esStore,
   langChainMessages,
   llmType,
   logger,
@@ -50,7 +47,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   replacements,
   request,
   size,
-  telemetry,
   traceOptions,
 }) => {
   // TODO implement llmClass for bedrock streaming
@@ -87,16 +83,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     returnMessages: true,
   });
 
-  // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(
-    esClient,
-    KNOWLEDGE_BASE_INDEX_PATTERN,
-    logger,
-    telemetry,
-    elserId,
-    kbResource
-  );
-
   const modelExists = await esStore.isModelInstalled();
 
   // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
@@ -116,23 +102,31 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     size,
   };
-  const tools: ToolInterface[] = assistantTools.flatMap(
-    (tool) => tool.getTool(assistantToolParams) ?? []
-  );
+
+  const tools: ToolInterface[] = assistantTools
+    .filter((tool) =>
+      isStream
+        ? tool.id !== 'esql-knowledge-base-tool'
+        : tool.id !== 'esql-knowledge-base-structured-tool'
+    )
+    .flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
+  const executorArgs = {
+    memory,
+    verbose: false,
+    handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
+  };
   // isStream check is not on agentType alone because typescript doesn't like
   const executor = isStream
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
-        memory,
-        verbose: false,
+        ...executorArgs,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'chat-conversational-react-description',
-        memory,
-        verbose: false,
+        ...executorArgs,
       });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
@@ -162,7 +156,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
             traceId: streamingSpan?.ids?.['trace.id'],
           },
           isError
-        );
+        ).catch(() => {});
       }
       streamEnd();
       didEnd = true;

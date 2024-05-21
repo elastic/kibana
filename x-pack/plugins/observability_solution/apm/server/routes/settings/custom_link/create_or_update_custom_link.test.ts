@@ -33,8 +33,8 @@ describe('Create or Update Custom link', () => {
     mockNow(1570737000000);
   });
 
-  it('creates a new custom link', () => {
-    createOrUpdateCustomLink({
+  it('creates a new custom link', async () => {
+    await createOrUpdateCustomLink({
       customLink,
       internalESClient: mockInternalESClient,
     });
@@ -50,8 +50,8 @@ describe('Create or Update Custom link', () => {
       },
     });
   });
-  it('update a new custom link', () => {
-    createOrUpdateCustomLink({
+  it('update a new custom link', async () => {
+    await createOrUpdateCustomLink({
       customLinkId: 'bar',
       customLink,
       internalESClient: mockInternalESClient,

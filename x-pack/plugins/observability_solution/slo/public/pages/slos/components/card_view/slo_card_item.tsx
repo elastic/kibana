@@ -23,15 +23,18 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import moment from 'moment';
 import React, { useState } from 'react';
-import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
-import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
+import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { BurnRateRuleParams } from '../../../../typings';
 import { useKibana } from '../../../../utils/kibana_react';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useSloListActions } from '../../hooks/use_slo_list_actions';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
+import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
 
@@ -71,43 +74,72 @@ const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
-  const [isMouseOver, setIsMouseOver] = useState(false);
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
+  const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
   const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
+
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
-  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm, handleAttachToDashboardSave } =
-    useSloListActions({
-      slo,
-      setDeleteConfirmationModalOpen,
-      setIsActionsPopoverOpen,
-      setIsAddRuleFlyoutOpen,
-    });
+  const { handleCreateRule, handleAttachToDashboardSave } = useSloListActions({
+    slo,
+    setIsActionsPopoverOpen,
+    setIsAddRuleFlyoutOpen,
+  });
+
+  const closeDeleteModal = () => {
+    setDeleteConfirmationModalOpen(false);
+  };
+
+  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
+
+  const handleResetConfirm = async () => {
+    await resetSlo({ id: slo.id, name: slo.name });
+    setResetConfirmationModalOpen(false);
+  };
+
+  const handleResetCancel = () => {
+    setResetConfirmationModalOpen(false);
+  };
 
   return (
     <>
       <EuiPanel
+        className="sloCardItem"
         panelRef={containerRef as React.Ref<HTMLDivElement>}
-        onMouseOver={() => {
-          if (!isMouseOver) {
-            setIsMouseOver(true);
-          }
-        }}
-        onMouseLeave={() => {
-          if (isMouseOver) {
-            setIsMouseOver(false);
-          }
-        }}
         paddingSize="none"
         css={css`
           height: 182px;
           overflow: hidden;
           position: relative;
+
+          & .sloCardItemActions_hover {
+            pointer-events: none;
+            opacity: 0;
+
+            &:focus-within {
+              pointer-events: auto;
+              opacity: 1;
+            }
+          }
+          &:hover .sloCardItemActions_hover {
+            pointer-events: auto;
+            opacity: 1;
+          }
         `}
-        title={slo.summary.status}
+        title={
+          slo.summary.summaryUpdatedAt
+            ? i18n.translate('xpack.slo.sloCardItem.euiPanel.lastUpdatedLabel', {
+                defaultMessage: '{status}, Last updated: {value}',
+                values: {
+                  status: slo.summary.status,
+                  value: moment(slo.summary.summaryUpdatedAt).fromNow(),
+                },
+              })
+            : slo.summary.status
+        }
       >
         <SloCardChart
           slo={slo}
@@ -122,7 +154,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             />
           }
         />
-        {(isMouseOver || isActionsPopoverOpen) && (
+        <div className={isActionsPopoverOpen ? '' : 'sloCardItemActions_hover'}>
           <SloCardItemActions
             slo={slo}
             rules={rules}
@@ -132,8 +164,9 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
             setDeleteConfirmationModalOpen={setDeleteConfirmationModalOpen}
             setIsEditRuleFlyoutOpen={setIsEditRuleFlyoutOpen}
             setDashboardAttachmentReady={setDashboardAttachmentReady}
+            setResetConfirmationModalOpen={setResetConfirmationModalOpen}
           />
-        )}
+        </div>
       </EuiPanel>
 
       <BurnRateRuleFlyout
@@ -150,12 +183,18 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
       />
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
+        <SloDeleteModal slo={slo} onCancel={closeDeleteModal} onSuccess={closeDeleteModal} />
+      ) : null}
+
+      {isResetConfirmationModalOpen ? (
+        <SloResetConfirmationModal
           slo={slo}
-          onCancel={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
+          onCancel={handleResetCancel}
+          onConfirm={handleResetConfirm}
+          isLoading={isResetLoading}
         />
       ) : null}
+
       {isDashboardAttachmentReady ? (
         <SavedObjectSaveModalDashboard
           objectType={i18n.translate('xpack.slo.item.actions.addToDashboard.objectTypeLabel', {
@@ -220,6 +259,12 @@ export function SloCardChart({
               title: slo.name,
               subtitle: subTitle,
               value: sliValue,
+              trendA11yTitle: i18n.translate('xpack.slo.slo.sLOGridItem.trendA11yLabel', {
+                defaultMessage: `The "{title}" trend`,
+                values: {
+                  title: slo.name,
+                },
+              }),
               trendShape: MetricTrendShape.Area,
               trend: historicalSliData?.map((d) => ({
                 x: d.key as number,

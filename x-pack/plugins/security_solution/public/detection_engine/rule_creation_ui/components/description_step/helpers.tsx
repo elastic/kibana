@@ -18,15 +18,13 @@ import {
 } from '@elastic/eui';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
-import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-import { FieldIcon } from '@kbn/react-field';
 
 import type { ThreatMapping, Type, Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   RequiredFieldArray,
   Threshold,
@@ -49,8 +47,10 @@ import type {
 } from '../../../../detections/pages/detection_engine/rules/types';
 import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
+import { RequiredFieldIcon } from '../../../rule_management/components/rule_details/required_field_icon';
 import { ThreatEuiFlexGroup } from './threat_description';
 import { AlertSuppressionLabel } from './alert_suppression_label';
+
 const NoteDescriptionContainer = styled(EuiFlexItem)`
   height: 105px;
   overflow-y: hidden;
@@ -565,11 +565,7 @@ export const buildRequiredFieldsDescription = (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
                 <EuiFlexItem grow={false}>
-                  <FieldIcon
-                    data-test-subj="field-type-icon"
-                    type={castEsToKbnFieldTypeName(rF.type)}
-                    label={rF.type}
-                  />
+                  <RequiredFieldIcon data-test-subj="field-type-icon" type={rF.type} />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <FieldTypeText grow={false} size={'s'}>
@@ -675,4 +671,13 @@ export const buildSetupDescription = (label: string, setup: string): ListItems[]
     ];
   }
   return [];
+};
+
+export const buildIntervalDescription = (label: string, value: string): ListItems[] => {
+  return [
+    {
+      title: label,
+      description: <IntervalAbbrScreenReader interval={value} />,
+    },
+  ];
 };
