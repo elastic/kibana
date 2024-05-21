@@ -19,18 +19,18 @@ export const useRootProfile = ({
   const [rootProfileLoading, setRootProfileLoading] = useState(true);
 
   useEffect(() => {
-    const abortController = new AbortController();
+    let aborted = false;
 
     setRootProfileLoading(true);
 
-    profilesManager.resolveRootContext({ solutionNavId }, abortController.signal).then(() => {
-      if (!abortController.signal.aborted) {
+    profilesManager.resolveRootContext({ solutionNavId }).then(() => {
+      if (!aborted) {
         setRootProfileLoading(false);
       }
     });
 
     return () => {
-      abortController.abort();
+      aborted = true;
     };
   }, [profilesManager, solutionNavId]);
 
