@@ -82,6 +82,10 @@ export const openSavedBookEditor = (
     );
 
     const overlayOptions = !isCreate && apiHasUniqueId(api) ? { focusedPanelId: api.uuid } : {};
+    /**
+     * if our parent needs to know about the overlay, notify it. This allows the parent to close the overlay
+     * when navigating away, or change certain behaviors based on the overlay being open.
+     */
     if (apiHasParentApi(api) && tracksOverlays(api.parentApi)) {
       api.parentApi.openOverlay(overlay, overlayOptions);
     }
@@ -171,7 +175,7 @@ export const SavedBookEditor = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onCancel} flush="left">
               {i18n.translate('embeddableExamples.savedBook.editor.cancel', {
-                defaultMessage: 'Cancel',
+                defaultMessage: 'Discard changes',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -195,7 +199,7 @@ export const SavedBookEditor = ({
                         defaultMessage: 'Create book',
                       })
                     : i18n.translate('embeddableExamples.savedBook.editor.save', {
-                        defaultMessage: 'Apply changes',
+                        defaultMessage: 'Keep changes',
                       })}
                 </EuiButton>
               </EuiFlexItem>
