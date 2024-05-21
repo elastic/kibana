@@ -53,7 +53,7 @@ export function generateProcessors(definition: EntityDefinition, spaceId: string
     },
     {
       set: {
-        field: 'event.spaceId',
+        field: 'entity.spaceId',
         value: spaceId,
       },
     },

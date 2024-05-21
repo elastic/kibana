@@ -10,7 +10,7 @@ Array [
   },
   Object {
     "set": Object {
-      "field": "event.spaceId",
+      "field": "entity.spaceId",
       "value": "test",
     },
   },
