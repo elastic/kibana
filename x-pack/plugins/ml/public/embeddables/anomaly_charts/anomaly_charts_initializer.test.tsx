@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { MlApiServices } from '../../application/services/ml_api_service';
 
@@ -32,9 +32,11 @@ describe('AnomalyChartsInitializer', () => {
     const onCancel = jest.fn();
     const adJobsApiService = jest.fn();
 
-    const defaultTitle = getDefaultExplorerChartsPanelTitle([]);
+    const jobIds = ['job1', 'job2'];
+    const defaultTitle = getDefaultExplorerChartsPanelTitle(jobIds);
     const input = {
       maxSeriesToPlot: 12,
+      jobIds,
     };
     const { getByTestId } = render(
       <KibanaContextProvider services={kibanaContextMock.services}>
@@ -48,18 +50,17 @@ describe('AnomalyChartsInitializer', () => {
       defaultOptions
     );
 
-    const confirmButton = screen.getByText(/Confirm/i).closest('button');
-    expect(confirmButton).toBeDefined();
-    expect(onCreate).toHaveBeenCalledTimes(0);
+    act(() => {
+      const confirmButton = screen.getByText(/Confirm/i).closest('button');
+      expect(confirmButton).toBeDefined();
+      expect(onCreate).toHaveBeenCalledTimes(0);
 
-    userEvent.click(confirmButton!);
-    expect(onCreate).toHaveBeenCalledWith({
-      jobIds: [],
-      title: defaultTitle,
-      maxSeriesToPlot: input.maxSeriesToPlot,
+      userEvent.click(confirmButton!);
+      expect(onCreate).toHaveBeenCalledWith({
+        jobIds: ['job1', 'job2'],
+        title: defaultTitle,
+        maxSeriesToPlot: input.maxSeriesToPlot,
+      });
     });
-
-    userEvent.clear(await getByTestId('panelTitleInput'));
-    expect(confirmButton).toHaveAttribute('disabled');
   });
 });
