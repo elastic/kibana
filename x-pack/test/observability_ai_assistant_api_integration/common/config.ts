@@ -50,7 +50,7 @@ export interface CreateTest {
   kbnTestServer: any;
 }
 
-function createObservabilityAIAssistantAPIConfig({
+export function createObservabilityAIAssistantAPIConfig({
   config,
   license,
   name,
