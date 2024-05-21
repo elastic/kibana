@@ -19,11 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
-import {
-  Vis,
-  PersistedState,
-  VisualizeEmbeddableContract,
-} from '@kbn/visualizations-plugin/public';
+import { Vis, PersistedState } from '@kbn/visualizations-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -35,7 +31,6 @@ import { SidebarTitle } from './sidebar_title';
 import { useOptionTabs } from './use_option_tabs';
 
 interface DefaultEditorSideBarProps {
-  embeddableHandler: VisualizeEmbeddableContract;
   isCollapsed: boolean;
   onClickCollapse: () => void;
   uiState: PersistedState;
@@ -47,7 +42,6 @@ interface DefaultEditorSideBarProps {
 }
 
 function DefaultEditorSideBarComponent({
-  embeddableHandler,
   isCollapsed,
   onClickCollapse,
   uiState,
@@ -107,12 +101,11 @@ function DefaultEditorSideBarComponent({
         aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.serialize()) as any) : [],
       },
     });
-    embeddableHandler.reload();
     eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
     setTouched(false);
-  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter, embeddableHandler]);
+  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     (event) => {

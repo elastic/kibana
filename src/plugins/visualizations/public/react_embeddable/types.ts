@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { Reference } from '@kbn/content-management-utils';
+import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
 import { HasVisualizeConfig } from '../embeddable';
@@ -36,5 +37,5 @@ export type VisualizeApi = HasEditCapabilities &
   DefaultEmbeddableApi<VisualizeSerializedState> & {
     setVis: (vis: SerializedVis<VisParams>) => void;
     subscribeToInitialRender: (listener: () => void) => void;
-    openInspector: () => void;
+    openInspector: () => OverlayRef | undefined;
   };

@@ -18,8 +18,8 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
   EditorRenderProps,
+  EmbeddableApiHandler,
   Vis,
-  VisualizeEmbeddableContract,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
 
@@ -42,14 +42,14 @@ function DefaultEditor({
   timeRange,
   filters,
   query,
-  embeddableHandler,
+  embeddableApiHandler,
   eventEmitter,
   linked,
   savedSearch,
 }: EditorRenderProps & {
   vis: Vis;
   eventEmitter: EventEmitter;
-  embeddableHandler: VisualizeEmbeddableContract;
+  embeddableApiHandler: EmbeddableApiHandler;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [parentApi] = useState({
@@ -118,6 +118,8 @@ function DefaultEditor({
                   parentApi={parentApi}
                   onApiAvailable={(api) => {
                     api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
+                    const [, setOpenInspector] = embeddableApiHandler.openInspector;
+                    setOpenInspector(() => api.openInspector);
                   }}
                 />
               </EuiResizablePanel>
@@ -138,7 +140,6 @@ function DefaultEditor({
                 }}
               >
                 <DefaultEditorSideBar
-                  embeddableHandler={embeddableHandler}
                   isCollapsed={isCollapsed}
                   onClickCollapse={onClickCollapse}
                   vis={vis}

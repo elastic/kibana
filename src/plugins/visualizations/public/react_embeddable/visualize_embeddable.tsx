@@ -126,7 +126,7 @@ export const getVisualizeEmbeddableFactory: (
           if (!adapters) return;
           const inspector = getInspector();
           if (!inspector.isAvailable(adapters)) return;
-          getInspector().open(adapters, {
+          return getInspector().open(adapters, {
             title:
               titlesApi.panelTitle?.getValue() ||
               i18n.translate('visualizations.embeddable.inspectorTitle', {

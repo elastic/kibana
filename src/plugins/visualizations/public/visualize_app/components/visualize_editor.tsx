@@ -19,6 +19,7 @@ import {
   useEditorUpdates,
   useLinkedSearchUpdates,
   useDataViewUpdates,
+  useEmbeddableApiHandler,
 } from '../utils';
 import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
@@ -35,6 +36,9 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
+
+  const embeddableApiHandler = useEmbeddableApiHandler();
+  const [openInspectorFn] = embeddableApiHandler.openInspector;
 
   const isChromeVisible = useChromeVisibility(services.chrome);
   useEffect(() => {
@@ -114,6 +118,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
       onAppLeave={onAppLeave}
       embeddableId={embeddableIdValue}
       eventEmitter={eventEmitter}
+      openInspectorFn={openInspectorFn}
     />
   );
 };

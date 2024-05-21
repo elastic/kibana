@@ -11,7 +11,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { EventEmitter } from 'events';
 import { EuiErrorBoundary, EuiLoadingChart } from '@elastic/eui';
 
-import { Vis, VisualizeEmbeddableContract } from '@kbn/visualizations-plugin/public';
+import { EmbeddableApiHandler, Vis } from '@kbn/visualizations-plugin/public';
 import { IEditorController, EditorRenderProps } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { getAnalytics, getI18n, getTheme } from './services';
@@ -24,7 +24,7 @@ class DefaultEditorController implements IEditorController {
     private el: HTMLElement,
     private vis: Vis,
     private eventEmitter: EventEmitter,
-    private embeddableHandler: VisualizeEmbeddableContract
+    private embeddableApiHandler: EmbeddableApiHandler
   ) {}
 
   render(props: EditorRenderProps) {
@@ -47,7 +47,7 @@ class DefaultEditorController implements IEditorController {
           >
             <DefaultEditor
               eventEmitter={this.eventEmitter}
-              embeddableHandler={this.embeddableHandler}
+              embeddableApiHandler={this.embeddableApiHandler}
               vis={this.vis}
               {...props}
             />
