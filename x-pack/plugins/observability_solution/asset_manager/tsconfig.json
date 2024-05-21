@@ -29,6 +29,7 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/entities-schema",
     "@kbn/es-query",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/spaces-plugin"
   ]
 }
