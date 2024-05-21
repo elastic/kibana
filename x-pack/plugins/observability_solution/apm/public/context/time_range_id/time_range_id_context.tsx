@@ -14,11 +14,7 @@ export const TimeRangeIdContext = createContext<{
   timeRangeId: 0,
 });
 
-export function TimeRangeIdContextProvider({
-  children,
-}: {
-  children: React.ReactChild;
-}) {
+export function TimeRangeIdContextProvider({ children }: { children: React.ReactChild }) {
   const [timeRangeId, setTimeRangeId] = useState(0);
 
   const api = useMemo(() => {
@@ -28,9 +24,5 @@ export function TimeRangeIdContextProvider({
     };
   }, [timeRangeId, setTimeRangeId]);
 
-  return (
-    <TimeRangeIdContext.Provider value={api}>
-      {children}
-    </TimeRangeIdContext.Provider>
-  );
+  return <TimeRangeIdContext.Provider value={api}>{children}</TimeRangeIdContext.Provider>;
 }

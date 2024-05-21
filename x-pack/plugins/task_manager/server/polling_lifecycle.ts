@@ -8,7 +8,7 @@
 import { Subject, Observable } from 'rxjs';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map as mapOptional } from 'fp-ts/lib/Option';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 

@@ -25,6 +25,7 @@ export class CspConfig implements ICspConfig {
   public readonly warnLegacyBrowsers: boolean;
   public readonly disableEmbedding: boolean;
   public readonly header: string;
+  public readonly reportOnlyHeader: string;
 
   /**
    * Returns the default CSP configuration when passed with no config
@@ -36,7 +37,10 @@ export class CspConfig implements ICspConfig {
       this.#directives.clearDirectiveValues('frame-ancestors');
       this.#directives.addDirectiveValue('frame-ancestors', `'self'`);
     }
-    this.header = this.#directives.getCspHeader();
+    const { enforceHeader, reportOnlyHeader } = this.#directives.getCspHeadersByDisposition();
+    this.header = enforceHeader;
+    this.reportOnlyHeader = reportOnlyHeader;
+
     this.strict = rawCspConfig.strict;
     this.disableUnsafeEval = rawCspConfig.disableUnsafeEval;
     this.warnLegacyBrowsers = rawCspConfig.warnLegacyBrowsers;

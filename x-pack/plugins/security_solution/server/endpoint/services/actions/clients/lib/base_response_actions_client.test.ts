@@ -116,6 +116,17 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(responsePromise).rejects.toBeInstanceOf(ResponseActionsNotSupportedError);
       await expect(responsePromise).rejects.toHaveProperty('statusCode', 405);
     });
+
+    it.each(['getFileDownload', 'getFileInfo'])(
+      'should throw not implemented error for %s()',
+      async (method) => {
+        // @ts-expect-error ignoring input type to method since they all should throw
+        const responsePromise = baseClassMock[method]({});
+
+        await expect(responsePromise).rejects.toThrow(`Method ${method}() not implemented`);
+        await expect(responsePromise).rejects.toHaveProperty('statusCode', 501);
+      }
+    );
   });
 
   describe('#updateCases()', () => {
@@ -460,6 +471,30 @@ describe('ResponseActionsClientImpl base class', () => {
       });
 
       describe('#riteActionRequestToEndpointIndex()', () => {
+        it('should write doc with all expected data', async () => {
+          indexDocOptions.meta = { one: 1 };
+
+          await expect(
+            baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+          ).resolves.toEqual({
+            '@timestamp': expect.any(String),
+            EndpointActions: {
+              action_id: expect.any(String),
+              data: {
+                command: 'isolate',
+                comment: 'test comment',
+                parameters: undefined,
+              },
+              expiration: expect.any(String),
+              input_type: 'endpoint',
+              type: 'INPUT_ACTION',
+            },
+            agent: { id: ['one'] },
+            meta: { one: 1 },
+            user: { id: 'foo' },
+          });
+        });
+
         it('should write doc with error when license is not Enterprise', async () => {
           (
             constructorOptions.endpointService.getLicenseService().isEnterprise as jest.Mock
@@ -514,6 +549,7 @@ describe('ResponseActionsClientImpl base class', () => {
           comment: 'some comment',
           output: undefined,
         },
+        meta: { one: 1 },
       };
     });
 
@@ -539,6 +575,7 @@ describe('ResponseActionsClientImpl base class', () => {
         error: {
           message: 'test error',
         },
+        meta: { one: 1 },
       } as LogsEndpointActionResponse);
     });
 
@@ -677,10 +714,20 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.fetchActionDetails(actionId);
   }
 
-  public async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
-  ): Promise<LogsEndpointAction> {
-    return super.writeActionRequestToEndpointIndex(actionRequest);
+  public async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
+    return super.writeActionRequestToEndpointIndex<TParameters, TOutputContent, TMeta>(
+      actionRequest
+    );
   }
 
   public async writeActionResponseToEndpointIndex<

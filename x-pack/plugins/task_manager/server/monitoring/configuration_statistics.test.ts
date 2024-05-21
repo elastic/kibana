@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { take, bufferCount } from 'rxjs/operators';
+import { take, bufferCount } from 'rxjs';
 import { createConfigurationAggregator } from './configuration_statistics';
 import { TaskManagerConfig } from '../config';
 

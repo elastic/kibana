@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   CoreSetup,
   PluginInitializerContext,
   KibanaRequest,
-  RequestHandlerContext,
+  IScopedClusterClient,
 } from '@kbn/core/server';
-import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { createAnnotationsClient } from './create_annotations_client';
 import { registerAnnotationAPIs } from './register_annotation_apis';
 
@@ -39,7 +39,8 @@ export async function bootstrapAnnotations({ index, core, context }: Params) {
 
   return {
     getScopedAnnotationsClient: async (
-      requestContext: RequestHandlerContext & {
+      requestContext: {
+        core: Promise<{ elasticsearch: { client: IScopedClusterClient } }>;
         licensing: Promise<LicensingApiRequestHandlerContext>;
       },
       request: KibanaRequest

@@ -11,7 +11,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { get } from 'lodash';
 import { ClassNames } from '@emotion/react';
-import { Markdown } from '@kbn/shared-ux-markdown';
+import { Markdown } from '@kbn/kibana-react-plugin/public';
 
 import { ErrorComponent } from '../../error';
 import { replaceVars } from '../../lib/replace_vars';
@@ -79,11 +79,9 @@ function MarkdownVisualization(props) {
                 {!markdownError && (
                   <Markdown
                     onRender={initialRender}
+                    markdown={markdownSource}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}
-                    readOnly
-                  >
-                    {markdownSource}
-                  </Markdown>
+                  />
                 )}
               </div>
             </div>

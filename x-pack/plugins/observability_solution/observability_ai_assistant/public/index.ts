@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+
 import { ObservabilityAIAssistantPlugin } from './plugin';
 import type {
   ObservabilityAIAssistantPublicSetup,
@@ -30,6 +31,7 @@ export type {
 export { AssistantAvatar } from './components/assistant_avatar';
 export { ConnectorSelectorBase } from './components/connector_selector/connector_selector_base';
 export { useAbortableAsync, type AbortableAsyncState } from './hooks/use_abortable_async';
+export { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 
 export { createStorybookChatService, createStorybookService } from './storybook_mock';
 
@@ -55,8 +57,6 @@ export {
   VISUALIZE_ESQL_USER_INTENTIONS,
 } from '../common/functions/visualize_esql';
 
-export { getAssistantSystemMessage } from './service/get_assistant_system_message';
-
 export { isSupportedConnectorType } from '../common';
 export { FunctionVisibility } from '../common';
 
@@ -66,6 +66,9 @@ export { ObservabilityAIAssistantTelemetryEventType } from './analytics/telemetr
 export type { Conversation, Message, KnowledgeBaseEntry } from '../common';
 export { MessageRole, KnowledgeBaseEntryRole } from '../common';
 
+export { createFunctionRequestMessage } from '../common/utils/create_function_request_message';
+export { createFunctionResponseMessage } from '../common/utils/create_function_response_message';
+
 export type {
   ObservabilityAIAssistantAPIClientRequestParamsOf,
   ObservabilityAIAssistantAPIEndpoint,
@@ -73,6 +76,13 @@ export type {
 } from './api';
 
 export type { UseChatResult } from './hooks/use_chat';
+export { LANGUAGE_OPTIONS, DEFAULT_LANGUAGE_OPTION } from '../common/ui_settings/language_options';
+
+export {
+  aiAssistantResponseLanguage,
+  aiAssistantLogsIndexPattern,
+  aiAssistantSimulatedFunctionCalling,
+} from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<
   ObservabilityAIAssistantPublicSetup,

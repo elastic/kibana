@@ -94,7 +94,14 @@
     "@kbn/serverless",
     "@kbn/core-lifecycle-server",
     "@kbn/elastic-agent-utils",
-    "@kbn/aiops-log-rate-analysis"
+    "@kbn/dashboard-plugin",
+    "@kbn/shared-svg",
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/react-hooks",
+    "@kbn/search-types",
+    "@kbn/router-utils",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*"

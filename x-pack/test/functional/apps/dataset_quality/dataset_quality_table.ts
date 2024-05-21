@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows the right number of rows in correct order', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
@@ -43,7 +44,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
       expect(namespaceColCellTexts).to.eql([defaultNamespace, defaultNamespace, defaultNamespace]);
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -61,7 +62,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const datasetNameCol = cols['Dataset Name'];
       await datasetNameCol.sort('ascending');
 
-      const degradedDocsCol = cols['Degraded Docs'];
+      const degradedDocsCol = cols['Degraded Docs (%)'];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%']);
 
@@ -123,8 +124,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('sorts by dataset name', async () => {
       // const header = await PageObjects.datasetQuality.getDatasetTableHeader('Dataset Name');
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      expect(Object.keys(cols).length).to.eql(7);
-
       const datasetNameCol = cols['Dataset Name'];
 
       // Sort ascending
@@ -222,6 +221,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     it('hides inactive datasets', async () => {
+      await PageObjects.datasetQuality.waitUntilTableLoaded();
+
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols['Last Activity'];

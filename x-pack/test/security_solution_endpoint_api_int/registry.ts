@@ -55,6 +55,7 @@ export function createEndpointDockerConfig(
       port: dockerRegistryPort,
       args,
       waitForLogLine: 'package manifests loaded',
+      waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes,
     },
   });
 }

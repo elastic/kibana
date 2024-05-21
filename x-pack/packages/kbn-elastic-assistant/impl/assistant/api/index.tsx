@@ -7,17 +7,27 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  ApiConfig,
+  CreateKnowledgeBaseRequestParams,
+  CreateKnowledgeBaseResponse,
+  DeleteKnowledgeBaseRequestParams,
+  DeleteKnowledgeBaseResponse,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
+  ReadKnowledgeBaseRequestParams,
+  ReadKnowledgeBaseResponse,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
+import { TraceOptions } from '../types';
 export * from './conversations';
 
 export interface FetchConnectorExecuteAction {
   conversationId: string;
   isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
-  allow?: string[];
-  allowReplacement?: string[];
   isEnabledKnowledgeBase: boolean;
   assistantStreamingEnabled: boolean;
   apiConfig: ApiConfig;
@@ -26,6 +36,7 @@ export interface FetchConnectorExecuteAction {
   replacements: Replacements;
   signal?: AbortSignal | undefined;
   size?: number;
+  traceOptions?: TraceOptions;
 }
 
 export interface FetchConnectorExecuteResponse {
@@ -42,8 +53,6 @@ export const fetchConnectorExecuteAction = async ({
   conversationId,
   isEnabledRAGAlerts,
   alertsIndexPattern,
-  allow,
-  allowReplacement,
   isEnabledKnowledgeBase,
   assistantStreamingEnabled,
   http,
@@ -52,17 +61,18 @@ export const fetchConnectorExecuteAction = async ({
   apiConfig,
   signal,
   size,
+  traceOptions,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  // TODO: Remove in part 3 of streaming work for security solution
-  // tracked here: https://github.com/elastic/security-team/issues/7363
-  // In part 3 I will make enhancements to langchain to introduce streaming
-  // Once implemented, invokeAI can be removed
-  const isStream = assistantStreamingEnabled && !isEnabledKnowledgeBase && !isEnabledRAGAlerts;
+  const isStream =
+    assistantStreamingEnabled &&
+    (apiConfig.actionTypeId === '.gen-ai' ||
+      // TODO add streaming support for bedrock with langchain on
+      // tracked here: https://github.com/elastic/security-team/issues/7363
+      (apiConfig.actionTypeId === '.bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase));
+
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
     alertsIndexPattern,
-    allow,
-    allowReplacement,
     size,
   });
 
@@ -71,9 +81,14 @@ export const fetchConnectorExecuteAction = async ({
     message,
     subAction: isStream ? 'invokeStream' : 'invokeAI',
     conversationId,
+    actionTypeId: apiConfig.actionTypeId,
     replacements,
     isEnabledKnowledgeBase,
     isEnabledRAGAlerts,
+    langSmithProject:
+      traceOptions?.langSmithProject === '' ? undefined : traceOptions?.langSmithProject,
+    langSmithApiKey:
+      traceOptions?.langSmithApiKey === '' ? undefined : traceOptions?.langSmithApiKey,
     ...optionalRequestParams,
   };
 
@@ -85,9 +100,9 @@ export const fetchConnectorExecuteAction = async ({
           method: 'POST',
           body: JSON.stringify(requestBody),
           signal,
-          asResponse: isStream,
-          rawResponse: isStream,
-          version: '1',
+          asResponse: true,
+          rawResponse: true,
+          version: API_VERSIONS.internal.v1,
         }
       );
 
@@ -107,9 +122,6 @@ export const fetchConnectorExecuteAction = async ({
       };
     }
 
-    // TODO: Remove in part 3 of streaming work for security solution
-    // tracked here: https://github.com/elastic/security-team/issues/7363
-    // This is a temporary code to support the non-streaming API
     const response = await http.fetch<{
       connector_id: string;
       status: string;
@@ -125,7 +137,7 @@ export const fetchConnectorExecuteAction = async ({
       body: JSON.stringify(requestBody),
       headers: { 'Content-Type': 'application/json' },
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     if (response.status !== 'ok' || !response.data) {
@@ -178,19 +190,6 @@ export const fetchConnectorExecuteAction = async ({
   }
 };
 
-export interface GetKnowledgeBaseStatusParams {
-  http: HttpSetup;
-  resource?: string;
-  signal?: AbortSignal | undefined;
-}
-
-export interface GetKnowledgeBaseStatusResponse {
-  elser_exists: boolean;
-  esql_exists?: boolean;
-  index_exists: boolean;
-  pipeline_exists: boolean;
-}
-
 /**
  * API call for getting the status of the Knowledge Base. Provide
  * a resource to include the status of that specific resource.
@@ -200,36 +199,28 @@ export interface GetKnowledgeBaseStatusResponse {
  * @param {string} [options.resource] - Resource to get the status of, otherwise status of overall KB
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<GetKnowledgeBaseStatusResponse | IHttpFetchError>}
+ * @returns {Promise<ReadKnowledgeBaseResponse | IHttpFetchError>}
  */
 export const getKnowledgeBaseStatus = async ({
   http,
   resource,
   signal,
-}: GetKnowledgeBaseStatusParams): Promise<GetKnowledgeBaseStatusResponse | IHttpFetchError> => {
+}: ReadKnowledgeBaseRequestParams & { http: HttpSetup; signal?: AbortSignal | undefined }): Promise<
+  ReadKnowledgeBaseResponse | IHttpFetchError
+> => {
   try {
-    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
     const response = await http.fetch(path, {
       method: 'GET',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
-    return response as GetKnowledgeBaseStatusResponse;
+    return response as ReadKnowledgeBaseResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }
 };
-
-export interface PostKnowledgeBaseParams {
-  http: HttpSetup;
-  resource?: string;
-  signal?: AbortSignal | undefined;
-}
-
-export interface PostKnowledgeBaseResponse {
-  success: boolean;
-}
 
 /**
  * API call for setting up the Knowledge Base. Provide a resource to set up a specific resource.
@@ -239,36 +230,29 @@ export interface PostKnowledgeBaseResponse {
  * @param {string} [options.resource] - Resource to be added to the KB, otherwise sets up the base KB
  * @param {AbortSignal} [options.signal] - AbortSignal
  *
- * @returns {Promise<PostKnowledgeBaseResponse | IHttpFetchError>}
+ * @returns {Promise<CreateKnowledgeBaseResponse | IHttpFetchError>}
  */
 export const postKnowledgeBase = async ({
   http,
   resource,
   signal,
-}: PostKnowledgeBaseParams): Promise<PostKnowledgeBaseResponse | IHttpFetchError> => {
+}: CreateKnowledgeBaseRequestParams & {
+  http: HttpSetup;
+  signal?: AbortSignal | undefined;
+}): Promise<CreateKnowledgeBaseResponse | IHttpFetchError> => {
   try {
-    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
     const response = await http.fetch(path, {
       method: 'POST',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
-    return response as PostKnowledgeBaseResponse;
+    return response as CreateKnowledgeBaseResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }
 };
-
-export interface DeleteKnowledgeBaseParams {
-  http: HttpSetup;
-  resource?: string;
-  signal?: AbortSignal | undefined;
-}
-
-export interface DeleteKnowledgeBaseResponse {
-  success: boolean;
-}
 
 /**
  * API call for deleting the Knowledge Base. Provide a resource to delete that specific resource.
@@ -284,13 +268,16 @@ export const deleteKnowledgeBase = async ({
   http,
   resource,
   signal,
-}: DeleteKnowledgeBaseParams): Promise<DeleteKnowledgeBaseResponse | IHttpFetchError> => {
+}: DeleteKnowledgeBaseRequestParams & {
+  http: HttpSetup;
+  signal?: AbortSignal | undefined;
+}): Promise<DeleteKnowledgeBaseResponse | IHttpFetchError> => {
   try {
-    const path = `/internal/elastic_assistant/knowledge_base/${resource || ''}`;
+    const path = ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL.replace('{resource?}', resource || '');
     const response = await http.fetch(path, {
       method: 'DELETE',
       signal,
-      version: '1',
+      version: API_VERSIONS.internal.v1,
     });
 
     return response as DeleteKnowledgeBaseResponse;

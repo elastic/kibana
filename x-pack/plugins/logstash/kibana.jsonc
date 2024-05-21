@@ -20,8 +20,6 @@
       "monitoring",
       "security"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

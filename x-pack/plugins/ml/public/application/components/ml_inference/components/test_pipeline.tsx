@@ -92,7 +92,6 @@ export const TestPipeline: FC<Props> = memo(({ state, sourceIndex, mode }) => {
   const simulatePipeline = async () => {
     try {
       const result = await trainedModelPipelineSimulate(
-        // @ts-expect-error pipeline._meta is defined as mandatory
         pipelineConfig,
         JSON.parse(sampleDocsString) as IngestSimulateDocument[]
       );

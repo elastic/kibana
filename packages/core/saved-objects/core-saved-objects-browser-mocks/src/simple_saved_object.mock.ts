@@ -46,6 +46,7 @@ const createSimpleSavedObjectMock = (
     references: savedObject.references,
     updatedAt: savedObject.updated_at,
     createdAt: savedObject.created_at,
+    createdBy: savedObject.created_by,
     namespaces: savedObject.namespaces,
     get: jest.fn(),
     set: jest.fn(),

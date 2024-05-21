@@ -10,7 +10,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import * as puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
-import { mergeMap, take } from 'rxjs/operators';
+import { mergeMap, take } from 'rxjs';
 import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
 import { ConfigType } from '../../../config';
 
@@ -82,7 +82,7 @@ describe('HeadlessChromiumDriverFactory', () => {
     it('rejects if Puppeteer launch fails', async () => {
       jest.spyOn(puppeteer, 'launch').mockRejectedValue(`Puppeteer Launch mock fail.`);
 
-      expect(() =>
+      await expect(() =>
         factory
           .createPage({ openUrlTimeout: 0, defaultViewport: DEFAULT_VIEWPORT })
           .pipe(take(1))

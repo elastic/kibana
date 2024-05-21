@@ -37,14 +37,28 @@ jest.mock('../../../../hooks', () => {
     sendGetAgentStatus: jest.fn().mockResolvedValue({ data: { results: { total: 0 } } }),
     useGetAgentPolicies: jest.fn().mockReturnValue({
       data: {
-        items: [{ id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' }],
+        items: [
+          {
+            id: 'agent-policy-1',
+            name: 'Agent policy 1',
+            namespace: 'default',
+            unprivileged_agents: 1,
+          },
+        ],
       },
       error: undefined,
       isLoading: false,
       resendRequest: jest.fn(),
     } as any),
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
-      data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
+      data: {
+        item: {
+          id: 'agent-policy-1',
+          name: 'Agent policy 1',
+          namespace: 'default',
+          unprivileged_agents: 1,
+        },
+      },
     }),
     useGetPackageInfoByKeyQuery: jest.fn(),
     sendGetSettings: jest.fn().mockResolvedValue({
@@ -101,8 +115,9 @@ jest.mock('react-router-dom', () => ({
   }),
 }));
 
-import { CreatePackagePolicySinglePage } from '.';
 import { AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
+
+import { CreatePackagePolicySinglePage } from '.';
 
 // mock console.debug to prevent noisy logs from console.debugs in ./index.tsx
 let consoleDebugMock: any;
@@ -128,16 +143,9 @@ describe('when on the package policy create page', () => {
         />
       </Route>
     ));
-  let mockPackageInfo: any;
 
-  beforeEach(() => {
-    testRenderer = createFleetTestRendererMock();
-    mockApiCalls(testRenderer.startServices.http);
-    testRenderer.mountHistory.push(createPageUrlPath);
-
-    jest.mocked(useStartServices().application.navigateToApp).mockReset();
-
-    mockPackageInfo = {
+  function getMockPackageInfo(requiresRoot?: boolean) {
+    return {
       data: {
         item: {
           name: 'nginx',
@@ -192,12 +200,25 @@ describe('when on the package policy create page', () => {
           latestVersion: '1.3.0',
           keepPoliciesUpToDate: false,
           status: 'not_installed',
+          agent: {
+            privileges: {
+              root: requiresRoot,
+            },
+          },
         },
       },
       isLoading: false,
     };
+  }
 
-    (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(mockPackageInfo);
+  beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
+    mockApiCalls(testRenderer.startServices.http);
+    testRenderer.mountHistory.push(createPageUrlPath);
+
+    jest.mocked(useStartServices().application.navigateToApp).mockReset();
+
+    (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getMockPackageInfo());
   });
 
   describe('and Route state is provided via Fleet HashRouter', () => {
@@ -278,6 +299,73 @@ describe('when on the package policy create page', () => {
       policy_id: 'agent-policy-1',
       vars: undefined,
     };
+
+    test('should show unprivileged warning modal on submit if conditions match', async () => {
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getMockPackageInfo(true));
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      let saveBtn: HTMLElement;
+
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).not.toBeDisabled();
+      });
+
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      await waitFor(() => {
+        expect(
+          renderResult.getByText('Unprivileged agents enrolled to the selected policy')
+        ).toBeInTheDocument();
+        expect(renderResult.getByTestId('unprivilegedAgentsCallout').textContent).toContain(
+          'This integration requires Elastic Agents to have root privileges. There is 1 agent running in an unprivileged mode using Agent policy 1. To ensure that all data required by the integration can be collected, re-enroll the agent using an account with root privileges.'
+        );
+      });
+
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Add integration/).closest('button')!;
+      });
+
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledTimes(1);
+    });
+
+    test('should show unprivileged warning and agents modal on submit if conditions match', async () => {
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getMockPackageInfo(true));
+      (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
+        data: { results: { total: 1 } },
+      });
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+      });
+
+      await waitFor(() => {
+        expect(renderResult.getByText('This action will update 1 agent')).toBeInTheDocument();
+        expect(
+          renderResult.getByText('Unprivileged agents enrolled to the selected policy')
+        ).toBeInTheDocument();
+        expect(renderResult.getByTestId('unprivilegedAgentsCallout').textContent).toContain(
+          'This integration requires Elastic Agents to have root privileges. There is 1 agent running in an unprivileged mode using Agent policy 1. To ensure that all data required by the integration can be collected, re-enroll the agent using an account with root privileges.'
+        );
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getAllByText(/Save and deploy changes/)[1].closest('button')!);
+      });
+
+      expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+    });
 
     test('should create package policy on submit when query param agent policy id is set', async () => {
       await act(async () => {
@@ -383,10 +471,10 @@ describe('when on the package policy create page', () => {
 
     test('should create agent policy without sys monitoring when new hosts is selected for system integration', async () => {
       (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue({
-        ...mockPackageInfo,
+        ...getMockPackageInfo(),
         data: {
           item: {
-            ...mockPackageInfo.data!.item,
+            ...getMockPackageInfo().data!.item,
             name: 'system',
           },
         },
@@ -471,7 +559,7 @@ describe('when on the package policy create page', () => {
         expect(renderResult.getByText(/Save and continue/).closest('button')!).toBeDisabled();
       });
 
-      test('should not show modal if agent policy has agents', async () => {
+      test('should show modal if agent policy has agents', async () => {
         (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
           data: { results: { total: 1 } },
         });
@@ -523,7 +611,7 @@ describe('when on the package policy create page', () => {
 
         test('should disable submit button on invalid form with empty name', async () => {
           await act(async () => {
-            fireEvent.change(renderResult.getByLabelText('Integration name'), {
+            fireEvent.change(renderResult.getByTestId('packagePolicyNameInput'), {
               target: { value: '' },
             });
           });
@@ -536,7 +624,7 @@ describe('when on the package policy create page', () => {
 
         test('should disable submit button on invalid form with empty package var', async () => {
           await act(async () => {
-            fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+            fireEvent.click(renderResult.getByText('Change defaults'));
           });
 
           await act(async () => {
@@ -553,7 +641,7 @@ describe('when on the package policy create page', () => {
 
         test('should submit form with changed package var', async () => {
           await act(async () => {
-            fireEvent.click(renderResult.getByLabelText('Show logfile inputs'));
+            fireEvent.click(renderResult.getByText('Change defaults'));
           });
 
           await act(async () => {

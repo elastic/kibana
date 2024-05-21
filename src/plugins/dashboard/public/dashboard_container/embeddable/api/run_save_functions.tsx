@@ -9,11 +9,8 @@
 import { Reference } from '@kbn/content-management-utils';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import {
-  EmbeddableInput,
-  isReferenceOrValueEmbeddable,
-  reactEmbeddableRegistryHasKey,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
+import { apiHasSerializableState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -34,12 +31,15 @@ import { DashboardSaveModal } from './overlays/save_modal';
 const serializeAllPanelState = async (
   dashboard: DashboardContainer
 ): Promise<{ panels: DashboardContainerInput['panels']; references: Reference[] }> => {
+  const {
+    embeddable: { reactEmbeddableRegistryHasKey },
+  } = pluginServices.getServices();
   const references: Reference[] = [];
   const panels = cloneDeep(dashboard.getInput().panels);
   for (const [uuid, panel] of Object.entries(panels)) {
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
-    const api = dashboard.reactEmbeddableChildren.value[uuid];
-    if (api) {
+    const api = dashboard.children$.value[uuid];
+    if (api && apiHasSerializableState(api)) {
       const serializedState = api.serializeState();
       panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
       references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));

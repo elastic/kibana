@@ -12,6 +12,7 @@ import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { id } from '../../common/id';
 import { list_id } from '../../common/list_id';
 import { valueOrUndefined } from '../../common/value';
+import { refresh } from '../../common/refresh';
 
 export const deleteListItemSchema = t.intersection([
   t.exact(
@@ -19,7 +20,7 @@ export const deleteListItemSchema = t.intersection([
       value: valueOrUndefined,
     })
   ),
-  t.exact(t.partial({ id, list_id })),
+  t.exact(t.partial({ id, list_id, refresh })),
 ]);
 
 export type DeleteListItemSchema = t.OutputOf<typeof deleteListItemSchema>;

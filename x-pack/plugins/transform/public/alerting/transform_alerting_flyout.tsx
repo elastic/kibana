@@ -10,7 +10,7 @@ import React, { createContext, useContext, useMemo } from 'react';
 import { memoize } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { pluck } from 'rxjs/operators';
+import { pluck } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { useAppDependencies } from '../app/app_dependencies';
 import type {

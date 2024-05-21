@@ -14,20 +14,33 @@ import {
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
 import { RightPanelContext } from '../context';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetEndpointDetails } from '../../../../management/hooks';
-import { useGetSentinelOneAgentStatus } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
-import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  useAgentStatusHook,
+  useGetAgentStatus,
+  useGetSentinelOneAgentStatus,
+} from '../../../../management/hooks/agents/use_get_agent_status';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');
-jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
+jest.mock('../../../../management/hooks/agents/use_get_agent_status');
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
+
+const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;
+const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
+const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
+const hooksToMock: Record<string, jest.Mock> = {
+  useGetSentinelOneAgentStatus: useGetSentinelOneAgentStatusMock,
+  useGetAgentStatus: useGetAgentStatusMock,
+};
 
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
@@ -41,9 +54,11 @@ const panelContextValue = {
 
 const renderHighlightedFieldsCell = (values: string[], field: string) =>
   render(
-    <RightPanelContext.Provider value={panelContextValue}>
-      <HighlightedFieldsCell values={values} field={field} />
-    </RightPanelContext.Provider>
+    <TestProviders>
+      <RightPanelContext.Provider value={panelContextValue}>
+        <HighlightedFieldsCell values={values} field={field} />
+      </RightPanelContext.Provider>
+    </TestProviders>
   );
 
 describe('<HighlightedFieldsCell />', () => {
@@ -52,18 +67,22 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render a basic cell', () => {
-    const { getByTestId } = render(<HighlightedFieldsCell values={['value']} field={'field'} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <HighlightedFieldsCell values={['value']} field={'field'} />
+      </TestProviders>
+    );
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render a link cell if field is host.name', () => {
+  it('should render a link cell if field is `host.name`', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['value'], 'host.name');
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render a link cell if field is user.name', () => {
+  it('should render a link cell if field is `user.name`', () => {
     const { getByTestId } = renderHighlightedFieldsCell(['value'], 'user.name');
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID)).toBeInTheDocument();
@@ -84,7 +103,7 @@ describe('<HighlightedFieldsCell />', () => {
     });
   });
 
-  it('should render agent status cell if field is agent.status', () => {
+  it('should render agent status cell if field is `agent.status`', () => {
     (useGetEndpointDetails as jest.Mock).mockReturnValue({});
     const { getByTestId } = render(
       <TestProviders>
@@ -95,26 +114,38 @@ describe('<HighlightedFieldsCell />', () => {
     expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  it('should render sentinelone agent status cell if field is agent.status and origialField is observer.serial_number', () => {
-    (useGetSentinelOneAgentStatus as jest.Mock).mockReturnValue({
-      isFetched: true,
-      isLoading: false,
-    });
-    const { getByTestId } = render(
-      <TestProviders>
-        <HighlightedFieldsCell
-          values={['value']}
-          field={'agent.status'}
-          originalField="observer.serial_number"
-        />
-      </TestProviders>
-    );
+  // TODO: 8.15 simplify when `agentStatusClientEnabled` FF is enabled and removed
+  it.each(Object.keys(hooksToMock))(
+    'should render SentinelOne agent status cell if field is agent.status and `origialField` is `observer.serial_number` with %s hook',
+    (hookName) => {
+      const hook = hooksToMock[hookName];
+      useAgentStatusHookMock.mockImplementation(() => hook);
 
-    expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
-  });
+      (hook as jest.Mock).mockReturnValue({
+        isFetched: true,
+        isLoading: false,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <HighlightedFieldsCell
+            values={['value']}
+            field={'agent.status'}
+            originalField="observer.serial_number"
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
+    }
+  );
 
   it('should not render if values is null', () => {
-    const { container } = render(<HighlightedFieldsCell values={null} field={'field'} />);
+    const { container } = render(
+      <TestProviders>
+        <HighlightedFieldsCell values={null} field={'field'} />
+      </TestProviders>
+    );
 
     expect(container).toBeEmptyDOMElement();
   });

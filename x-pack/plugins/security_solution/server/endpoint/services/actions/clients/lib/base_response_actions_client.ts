@@ -13,7 +13,11 @@ import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/
 import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { fetchActionResponses } from '../../fetch_action_responses';
+import { validateActionId } from '../../utils/validate_action_id';
+import {
+  fetchActionResponses,
+  fetchEndpointActionResponses,
+} from '../../utils/fetch_action_responses';
 import { createEsSearchIterable } from '../../../../utils/create_es_search_iterable';
 import { categorizeResponseResults, getActionRequestExpiration } from '../../utils';
 import { isActionSupportedByAgentType } from '../../../../../../common/endpoint/service/response_actions/is_response_action_supported';
@@ -33,6 +37,7 @@ import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
   ResponseActionsClient,
+  GetFileDownloadMethodResponse,
 } from './types';
 import type {
   ActionDetails,
@@ -52,6 +57,7 @@ import type {
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
   WithAllKeys,
+  UploadedFileInfo,
 } from '../../../../../../common/endpoint/types';
 import type {
   ExecuteActionRequestBody,
@@ -111,19 +117,24 @@ export interface ResponseActionsClientUpdateCasesOptions {
   actionId: string;
 }
 
-export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
-  ResponseActionsRequestBody &
-    Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> & {
-      command: ResponseActionsApiCommandNames;
-      actionId?: string;
-    };
+export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> = ResponseActionsRequestBody &
+  Pick<CommonResponseActionMethodOptions, 'ruleName' | 'ruleId' | 'hosts' | 'error'> &
+  Pick<LogsEndpointAction<TParameters, TOutputContent, TMeta>, 'meta'> & {
+    command: ResponseActionsApiCommandNames;
+    actionId?: string;
+  };
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
-} & Pick<LogsEndpointActionResponse, 'error'> &
+} & Pick<LogsEndpointActionResponse<TOutputContent, TMeta>, 'error' | 'meta'> &
   Pick<LogsEndpointActionResponse<TOutputContent>['EndpointActions'], 'data'>;
 
 export type ResponseActionsClientValidateRequestResponse =
@@ -135,6 +146,13 @@ export type ResponseActionsClientValidateRequestResponse =
       isValid: false;
       error: ResponseActionsClientError;
     };
+
+export interface FetchActionResponseEsDocsResponse<
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+  TMeta extends {} = {}
+> {
+  [agentId: string]: LogsEndpointActionResponse<TOutputContent, TMeta>;
+}
 
 /**
  * Base class for a Response Actions client
@@ -280,6 +298,38 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
+   * Fetches the Response Action ES response documents for a given action id
+   * @param actionId
+   * @param agentIds
+   * @protected
+   */
+  protected async fetchActionResponseEsDocs<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionId: string,
+    /** Specific Agent IDs to retrieve. default is to retrieve all */
+    agentIds?: string[]
+  ): Promise<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>> {
+    const responseDocs = await fetchEndpointActionResponses<TOutputContent, TMeta>({
+      esClient: this.options.esClient,
+      actionIds: [actionId],
+      agentIds,
+    });
+
+    return responseDocs.reduce<FetchActionResponseEsDocsResponse<TOutputContent, TMeta>>(
+      (acc, response) => {
+        const agentId = Array.isArray(response.agent.id) ? response.agent.id[0] : response.agent.id;
+
+        acc[agentId] = response;
+
+        return acc;
+      },
+      {}
+    );
+  }
+
+  /**
    * Provides validations against a response action request and returns the result.
    * Checks made should be generic to all response actions and not specific to any one action.
    *
@@ -327,9 +377,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
    * Creates a Response Action request document in the Endpoint index (`.logs-endpoint.actions-default`)
    * @protected
    */
-  protected async writeActionRequestToEndpointIndex(
-    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
-  ): Promise<LogsEndpointAction> {
+  protected async writeActionRequestToEndpointIndex<
+    TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
+    TMeta extends {} = {}
+  >(
+    actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<
+      TParameters,
+      TOutputContent,
+      TMeta
+    >
+  ): Promise<LogsEndpointAction<TParameters, TOutputContent, TMeta>> {
     let errorMsg = String(actionRequest.error ?? '').trim();
 
     if (!errorMsg) {
@@ -346,7 +404,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     this.notifyUsage(actionRequest.command);
 
-    const doc: LogsEndpointAction = {
+    const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
       agent: {
         id: actionRequest.endpoint_ids,
@@ -367,6 +425,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       user: {
         id: this.options.username,
       },
+      meta: actionRequest.meta,
       ...(errorMsg ? { error: { message: errorMsg } } : {}),
       ...(actionRequest.ruleId && actionRequest.ruleName
         ? { rule: { id: actionRequest.ruleId, name: actionRequest.ruleName } }
@@ -407,15 +466,20 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   protected buildActionResponseEsDoc<
     // Default type purposely set to empty object in order to ensure proper types are used when calling the method
-    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>,
+    TMeta extends {} = {}
   >({
     actionId,
     error,
     agentId,
     data,
-  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>): LogsEndpointActionResponse<TOutputContent> {
+    meta,
+  }: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
+    TOutputContent,
+    TMeta
+  >): LogsEndpointActionResponse<TOutputContent, TMeta> {
     const timestamp = new Date().toISOString();
-    const doc: LogsEndpointActionResponse<TOutputContent> = {
+    const doc: LogsEndpointActionResponse<TOutputContent, TMeta> = {
       '@timestamp': timestamp,
       agent: {
         id: agentId,
@@ -428,6 +492,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         data,
       },
       error,
+      meta,
     };
 
     return doc;
@@ -477,6 +542,10 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
     }
 
     usageService.notifyUsage(featureKey);
+  }
+
+  protected async ensureValidActionId(actionId: string): Promise<void> {
+    return validateActionId(this.options.esClient, actionId, this.agentType);
   }
 
   protected fetchAllPendingActions(): AsyncIterable<LogsEndpointAction[]> {
@@ -632,5 +701,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
   public async processPendingActions(_: ProcessPendingActionsMethodOptions): Promise<void> {
     this.log.debug(`#processPendingActions() method is not implemented for ${this.agentType}!`);
+  }
+
+  public async getFileDownload(
+    actionId: string,
+    fileId: string
+  ): Promise<GetFileDownloadMethodResponse> {
+    throw new ResponseActionsClientError(`Method getFileDownload() not implemented`, 501);
+  }
+
+  public async getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo> {
+    throw new ResponseActionsClientError(`Method getFileInfo() not implemented`, 501);
   }
 }

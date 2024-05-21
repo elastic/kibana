@@ -270,7 +270,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         };
         updatePatternRollup(updatedRollup);
 
-        if (indexId && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
+        if (indexName && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
           const report = {
             batchId: uuidv4(),
             ecsVersion: EcsVersion,

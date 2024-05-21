@@ -11,8 +11,18 @@
       "searchPlayground"
     ],
     "requiredPlugins": [
+      "actions",
+      "encryptedSavedObjects",
       "navigation",
-      "security"
+      "share",
+      "security",
+      "stackConnectors",
+      "triggersActionsUi",
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "console",
+      "usageCollection",
     ],
     "requiredBundles": [
       "kibanaReact"

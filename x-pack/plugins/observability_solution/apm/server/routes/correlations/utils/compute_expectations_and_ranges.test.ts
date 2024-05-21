@@ -18,34 +18,20 @@ describe('aggregation utils', () => {
     it('returns expectations and ranges based on given percentiles #2', async () => {
       const { expectations, ranges } = computeExpectationsAndRanges([1, 3, 5]);
       expect(expectations).toEqual([1, 2, 4, 5]);
-      expect(ranges).toEqual([
-        { to: 1 },
-        { from: 1, to: 3 },
-        { from: 3, to: 5 },
-        { from: 5 },
-      ]);
+      expect(ranges).toEqual([{ to: 1 }, { from: 1, to: 3 }, { from: 3, to: 5 }, { from: 5 }]);
     });
 
     it('returns expectations and ranges with adjusted fractions', async () => {
-      const { expectations, ranges } = computeExpectationsAndRanges([
-        1, 3, 3, 5,
-      ]);
+      const { expectations, ranges } = computeExpectationsAndRanges([1, 3, 3, 5]);
       expect(expectations.length).toBe(ranges.length);
-      expect(expectations).toEqual([
-        1, 2.333333333333333, 3.666666666666667, 5,
-      ]);
-      expect(ranges).toEqual([
-        { to: 1 },
-        { from: 1, to: 3 },
-        { from: 3, to: 5 },
-        { from: 5 },
-      ]);
+      expect(expectations).toEqual([1, 2.333333333333333, 3.666666666666667, 5]);
+      expect(ranges).toEqual([{ to: 1 }, { from: 1, to: 3 }, { from: 3, to: 5 }, { from: 5 }]);
     });
 
     it('returns expectation and ranges adjusted when percentiles have equal values', async () => {
       const { expectations, ranges } = computeExpectationsAndRanges([
-        5000, 5000, 3090428, 3090428, 3090428, 3618812, 3618812, 3618812,
-        3618812, 3696636, 3696636, 3696636, 3696636, 3696636, 3696636,
+        5000, 5000, 3090428, 3090428, 3090428, 3618812, 3618812, 3618812, 3618812, 3696636, 3696636,
+        3696636, 3696636, 3696636, 3696636,
       ]);
       expect(expectations.length).toBe(ranges.length);
       expect(expectations).toEqual([

@@ -43,6 +43,7 @@ import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from './components/rule_condition_chart/rule_condition_chart';
+import { getSearchConfiguration } from './helpers/get_search_configuration';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -83,6 +84,7 @@ export default function Expressions(props: Props) {
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
+  const [paramsWarning, setParamsWarning] = useState<string>();
   const derivedIndexPattern = useMemo<DataViewBase>(
     () => ({
       fields: dataView?.fields || [],
@@ -112,7 +114,10 @@ export default function Expressions(props: Props) {
             newSearchSource.setField('index', defaultDataView);
             setDataView(defaultDataView);
           }
-          initialSearchConfiguration = newSearchSource.getSerializedFields();
+          initialSearchConfiguration = getSearchConfiguration(
+            newSearchSource.getSerializedFields(),
+            setParamsWarning
+          );
         }
       }
 
@@ -188,7 +193,10 @@ export default function Expressions(props: Props) {
       );
       setRuleParams('criteria', ruleCriteria);
       searchSource?.setParent(undefined).setField('index', newDataView);
-      setRuleParams('searchConfiguration', searchSource?.getSerializedFields());
+      setRuleParams(
+        'searchConfiguration',
+        searchSource && getSearchConfiguration(searchSource.getSerializedFields(), setParamsWarning)
+      );
       setDataView(newDataView);
     },
     [ruleParams.criteria, searchSource, setRuleParams]
@@ -223,6 +231,7 @@ export default function Expressions(props: Props) {
 
   const onFilterChange = useCallback(
     ({ query }: { query?: Query }) => {
+      setParamsWarning(undefined);
       setRuleParams('searchConfiguration', { ...ruleParams.searchConfiguration, query });
     },
     [setRuleParams, ruleParams.searchConfiguration]
@@ -365,6 +374,24 @@ export default function Expressions(props: Props) {
   );
   return (
     <>
+      {!!paramsWarning && (
+        <>
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.observability.customThreshold.rule.alertFlyout.warning.title',
+              {
+                defaultMessage: 'Warning',
+              }
+            )}
+            color="warning"
+            iconType="warning"
+            data-test-subj="thresholdRuleExpressionWarning"
+          >
+            {paramsWarning}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -412,7 +439,7 @@ export default function Expressions(props: Props) {
         onQueryChange={debouncedOnFilterChange}
         onQuerySubmit={onFilterChange}
         dataTestSubj="thresholdRuleUnifiedSearchBar"
-        query={ruleParams.searchConfiguration?.query as Query}
+        query={ruleParams.searchConfiguration?.query}
         filters={ruleParams.searchConfiguration?.filter}
         onFiltersUpdated={(filter) => {
           // Since rule params will be sent to the API as is, and we only need meta and query parameters to be

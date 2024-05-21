@@ -22,7 +22,7 @@ export function registerScriptsRoute(router: IRouter) {
         validate: {
           response: {
             '200': {
-              body: schema.arrayOf(schema.string()),
+              body: () => schema.arrayOf(schema.string()),
             },
           },
         },

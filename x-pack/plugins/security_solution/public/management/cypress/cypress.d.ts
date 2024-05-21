@@ -198,6 +198,12 @@ declare global {
       ): Chainable<string>;
 
       task(
+        name: 'getSessionCookie',
+        arg: string,
+        options?: Partial<Loggable & Timeoutable>
+      ): Chainable<{ cookie: string; username: string; password: string }>;
+
+      task(
         name: 'loadUserAndRole',
         arg: LoadUserAndRoleCyTaskOptions,
         options?: Partial<Loggable & Timeoutable>

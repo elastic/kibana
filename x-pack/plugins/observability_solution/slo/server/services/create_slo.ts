@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient, IBasePath, Logger } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getTransformQueryComposite } from './utils/get_transform_compite_query';
 import {
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
@@ -17,7 +18,7 @@ import {
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
 import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
-import { Duration, DurationUnit, SLO } from '../domain/models';
+import { Duration, DurationUnit, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
@@ -62,7 +63,7 @@ export class CreateSLO {
           this.esClient.index({
             index: SLO_SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${slo.id}`,
-            document: createTempSummaryDocument(slo, this.spaceId),
+            document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
             refresh: true,
           }),
         { logger: this.logger }
@@ -94,27 +95,31 @@ export class CreateSLO {
     rollUpTransform: TransformPutTransformRequest;
     summaryTransform: TransformPutTransformRequest;
     temporaryDoc: Record<string, any>;
+    rollUpTransformCompositeQuery: string;
+    summaryTransformCompositeQuery: string;
   } {
     const slo = this.toSLO(params);
     validateSLO(slo);
 
     const rollUpTransform = this.transformManager.inspect(slo);
     const pipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
-
     const summaryTransform = this.summaryTransformManager.inspect(slo);
-
-    const temporaryDoc = createTempSummaryDocument(slo, this.spaceId);
+    const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
 
     return {
+      slo,
       pipeline,
       temporaryDoc,
       summaryTransform,
       rollUpTransform,
-      slo,
+      // @ts-expect-error there is some issue with deprecated types being used in es types
+      rollUpTransformCompositeQuery: getTransformQueryComposite(rollUpTransform),
+      // @ts-expect-error there is some issue with deprecated types being used in es types
+      summaryTransformCompositeQuery: getTransformQueryComposite(summaryTransform),
     };
   }
 
-  private toSLO(params: CreateSLOParams): SLO {
+  private toSLO(params: CreateSLOParams): SLODefinition {
     const now = new Date();
     return {
       ...params,
@@ -133,7 +138,7 @@ export class CreateSLO {
     };
   }
 
-  private toResponse(slo: SLO): CreateSLOResponse {
+  private toResponse(slo: SLODefinition): CreateSLOResponse {
     return {
       id: slo.id,
     };

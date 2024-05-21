@@ -27,8 +27,8 @@ import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
 import { TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { InferenceApi } from './inference_api_tab';
-import { JobMap } from '../data_frame_analytics/pages/job_map';
 import type { ModelItemFull } from './models_list';
 import { ModelPipelines } from './pipelines';
 import { AllocatedModels } from '../memory_usage/nodes_overview/allocated_models';
@@ -39,6 +39,10 @@ import { useEnabledFeatures } from '../contexts/ml';
 interface ExpandedRowProps {
   item: ModelItemFull;
 }
+
+const JobMap = dynamic(async () => ({
+  default: (await import('../data_frame_analytics/pages/job_map')).JobMap,
+}));
 
 const useBadgeFormatter = () => {
   const xs = useEuiPaddingSize('xs');

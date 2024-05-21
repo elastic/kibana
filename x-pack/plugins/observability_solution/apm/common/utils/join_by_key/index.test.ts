@@ -132,9 +132,11 @@ describe('joinByKey', () => {
       })
     );
 
-    expect(
-      joined.find((item) => item.serviceName === 'opbeans-node')?.values
-    ).toEqual(['a', 'b', 'c']);
+    expect(joined.find((item) => item.serviceName === 'opbeans-node')?.values).toEqual([
+      'a',
+      'b',
+      'c',
+    ]);
   });
 
   it('deeply merges objects', () => {

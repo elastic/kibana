@@ -177,6 +177,7 @@ const DEV_PATTERNS = [
   'x-pack/performance/**/*',
   'src/setup_node_env/index.js',
   'src/cli/dev.js',
+  'packages/kbn-esql-validation-autocomplete/scripts/**/*',
 ];
 
 /** Restricted imports with suggested alternatives */
@@ -252,6 +253,11 @@ const RESTRICTED_IMPORTS = [
     name: '@kbn/kibana-react-plugin/public',
     importNames: ['Route'],
     message: 'Please use @kbn/shared-ux-router instead',
+  },
+  {
+    name: 'rxjs/operators',
+    message:
+      'Please, use rxjs instead: rxjs/operators is just a subset, unnecessarily duplicating the package import.',
   },
 ];
 
@@ -928,6 +934,7 @@ module.exports = {
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
+        '@kbn/i18n/formatted_message_should_start_with_the_right_id': 'warn',
       },
     },
     {
@@ -1027,6 +1034,7 @@ module.exports = {
         'x-pack/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/public/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/common/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'import/no-nodejs-modules': 'error',
@@ -1056,6 +1064,7 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       excludedFiles: [
         'x-pack/plugins/ecs_data_quality_dashboard/**/*.{test,mock,test_helper}.{ts,tsx}',
@@ -1068,6 +1077,7 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-non-null-assertion': 'error',
@@ -1086,6 +1096,7 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/**/*.{ts,tsx}',
         'x-pack/plugins/timelines/**/*.{ts,tsx}',
         'x-pack/plugins/cases/**/*.{ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-this-alias': 'error',
@@ -1124,6 +1135,7 @@ module.exports = {
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
         'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1222,7 +1234,8 @@ module.exports = {
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
-            'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+            'x-pack/packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
+            'packages/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',
@@ -1518,6 +1531,7 @@ module.exports = {
         ],
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
         '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
+        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
     /**

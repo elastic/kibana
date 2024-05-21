@@ -44,7 +44,7 @@ export interface ObservabilityLogsExplorerStartDeps {
   discover: DiscoverStart;
   logsExplorer: LogsExplorerPluginStart;
   logsShared: LogsSharedClientStartExports;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
   slo: SloPublicStart;
   serverless?: ServerlessPluginStart;

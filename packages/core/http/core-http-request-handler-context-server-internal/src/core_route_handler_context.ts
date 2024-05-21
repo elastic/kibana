@@ -28,6 +28,10 @@ import {
   CoreSecurityRouteHandlerContext,
   type InternalSecurityServiceStart,
 } from '@kbn/core-security-server-internal';
+import {
+  CoreUserProfileRouteHandlerContext,
+  type InternalUserProfileServiceStart,
+} from '@kbn/core-user-profile-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
@@ -39,6 +43,7 @@ export interface CoreRouteHandlerContextParams {
   uiSettings: InternalUiSettingsServiceStart;
   deprecations: InternalDeprecationsServiceStart;
   security: InternalSecurityServiceStart;
+  userProfile: InternalUserProfileServiceStart;
 }
 
 /**
@@ -52,6 +57,7 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
   #uiSettings?: CoreUiSettingsRouteHandlerContext;
   #deprecations?: CoreDeprecationsRouteHandlerContext;
   #security?: CoreSecurityRouteHandlerContext;
+  #userProfile?: CoreUserProfileRouteHandlerContext;
 
   constructor(
     private readonly coreStart: CoreRouteHandlerContextParams,
@@ -104,5 +110,15 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
       this.#security = new CoreSecurityRouteHandlerContext(this.coreStart.security, this.request);
     }
     return this.#security;
+  }
+
+  public get userProfile() {
+    if (!this.#userProfile) {
+      this.#userProfile = new CoreUserProfileRouteHandlerContext(
+        this.coreStart.userProfile,
+        this.request
+      );
+    }
+    return this.#userProfile;
   }
 }

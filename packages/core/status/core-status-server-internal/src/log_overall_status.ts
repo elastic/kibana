@@ -7,7 +7,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, pairwise, takeUntil, map, startWith } from 'rxjs/operators';
+import { distinctUntilChanged, pairwise, takeUntil, map, startWith } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import type { Logger } from '@kbn/logging';
 

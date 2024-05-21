@@ -43,9 +43,7 @@ export function DiagnosticsApmDocuments() {
           legacy === true &&
           docCount === 0 &&
           intervals &&
-          Object.values(intervals).every(
-            (interval) => interval.eventDocCount === 0
-          );
+          Object.values(intervals).every((interval) => interval.eventDocCount === 0);
 
         return !isLegacyAndUnused;
       }) ?? []
@@ -128,15 +126,12 @@ export function DiagnosticsApmDocuments() {
       {isImported && diagnosticsBundle ? (
         <>
           <EuiBadge>
-            {i18n.translate(
-              'xpack.apm.diagnosticsApmDocuments.from:BadgeLabel',
-              {
-                defaultMessage: 'From: {date}',
-                values: {
-                  date: new Date(diagnosticsBundle.params.start).toISOString(),
-                },
-              }
-            )}
+            {i18n.translate('xpack.apm.diagnosticsApmDocuments.from:BadgeLabel', {
+              defaultMessage: 'From: {date}',
+              values: {
+                date: new Date(diagnosticsBundle.params.start).toISOString(),
+              },
+            })}
           </EuiBadge>
           <EuiBadge>
             {i18n.translate('xpack.apm.diagnosticsApmDocuments.to:BadgeLabel', {
@@ -147,16 +142,14 @@ export function DiagnosticsApmDocuments() {
             })}
           </EuiBadge>
           <EuiBadge>
-            {i18n.translate(
-              'xpack.apm.diagnosticsApmDocuments.filter:BadgeLabel',
-              { defaultMessage: 'Filter:' }
-            )}
+            {i18n.translate('xpack.apm.diagnosticsApmDocuments.filter:BadgeLabel', {
+              defaultMessage: 'Filter:',
+            })}
             {diagnosticsBundle?.params.kuery ?? (
               <em>
-                {i18n.translate(
-                  'xpack.apm.diagnosticsApmDocuments.em.emptyLabel',
-                  { defaultMessage: 'Empty' }
-                )}
+                {i18n.translate('xpack.apm.diagnosticsApmDocuments.em.emptyLabel', {
+                  defaultMessage: 'Empty',
+                })}
               </em>
             )}
           </EuiBadge>
@@ -209,12 +202,9 @@ function IntervalDocCount({
     >
       <div style={{ cursor: 'pointer' }}>
         {asBigNumber(interval.metricDocCount)}&nbsp;
-        <EuiText
-          css={{ fontStyle: 'italic', fontSize: '80%', display: 'inline' }}
-        >
+        <EuiText css={{ fontStyle: 'italic', fontSize: '80%', display: 'inline' }}>
           {i18n.translate('xpack.apm.intervalDocCount.TextLabel', {
-            defaultMessage:
-              '({docCount} {docCount, plural, one {event} other {events}})',
+            defaultMessage: '({docCount} {docCount, plural, one {event} other {events}})',
             values: {
               docCount: asBigNumber(interval.eventDocCount),
             },

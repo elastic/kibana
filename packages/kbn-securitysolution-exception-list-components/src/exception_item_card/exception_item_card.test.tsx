@@ -12,6 +12,7 @@ import { fireEvent, render } from '@testing-library/react';
 import { ExceptionItemCard } from '.';
 import { getExceptionListItemSchemaMock } from '../mocks/exception_list_item_schema.mock';
 import { getCommentsArrayMock, mockGetFormattedComments } from '../mocks/comments.mock';
+import { MockedShowValueListModal } from '../mocks/value_list_modal.mock';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { rules } from '../mocks/rule_references.mock';
 
@@ -30,6 +31,7 @@ describe('ExceptionItemCard', () => {
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={() => []}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -53,6 +55,7 @@ describe('ExceptionItemCard', () => {
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={mockGetFormattedComments}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -77,6 +80,7 @@ describe('ExceptionItemCard', () => {
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={() => []}
+        showValueListModal={MockedShowValueListModal}
       />
     );
     expect(wrapper.queryByTestId('itemActionButton')).not.toBeInTheDocument();
@@ -97,6 +101,7 @@ describe('ExceptionItemCard', () => {
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={() => []}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 
@@ -120,6 +125,7 @@ describe('ExceptionItemCard', () => {
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={() => []}
+        showValueListModal={MockedShowValueListModal}
       />
     );
     fireEvent.click(wrapper.getByTestId('exceptionItemCardHeaderButtonIcon'));
@@ -146,6 +152,7 @@ describe('ExceptionItemCard', () => {
         securityLinkAnchorComponent={() => null}
         formattedDateComponent={() => null}
         getFormattedComments={mockGetFormattedComments}
+        showValueListModal={MockedShowValueListModal}
       />
     );
 

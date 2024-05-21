@@ -37,7 +37,7 @@ import { CreatePackagePolicyBottomBar } from '.';
 const CentralTitle = styled('h1')`
   text-align: center;
 `;
-const PaddedCentralTitle: React.FC = ({ children }) => (
+const PaddedCentralTitle: React.FC<{ children?: React.ReactNode }> = ({ children }) => (
   <>
     <EuiSpacer size={'s'} />
     <EuiTitle size="l">
@@ -64,7 +64,7 @@ const CenteredEuiImage = (props: EuiImageProps) => (
   </div>
 );
 
-const ResponsiveStepGroup: React.FC = ({ children }) => {
+const ResponsiveStepGroup: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const isScreenSmall = useIsWithinMaxBreakpoint('s');
 
   return (
@@ -97,13 +97,13 @@ const AddIntegrationStepsIllustrations = () => {
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
-              <h4>
+            <EuiText textAlign="center" size="xs">
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.installAgentStepTitle"
                   defaultMessage="Install Elastic Agent"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage
@@ -133,13 +133,13 @@ const AddIntegrationStepsIllustrations = () => {
             <CenteredEuiImage alt="" src={assetsBasePath + '2_add_integration.svg'} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
-              <h4>
+            <EuiText textAlign="center" size="xs">
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.addIntegrationStepTitle"
                   defaultMessage="Add the integration"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage
@@ -169,13 +169,13 @@ const AddIntegrationStepsIllustrations = () => {
             <CenteredEuiImage alt="" src={assetsBasePath + '3_confirm_data.svg'} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText textAlign="center">
-              <h4>
+            <EuiText textAlign="center" size="xs">
+              <h2>
                 <FormattedMessage
                   id="xpack.fleet.addFirstIntegrationSplash.confirmDataStepTitle"
                   defaultMessage="Confirm incoming data"
                 />
-              </h4>
+              </h2>
             </EuiText>
             <SubtitleText>
               <FormattedMessage

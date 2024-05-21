@@ -15,25 +15,23 @@ import {
   map,
   Subscription,
 } from 'rxjs';
-import { IEmbeddable } from '../..';
+import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../..';
 import { Container } from '../../containers';
 import { ViewMode as LegacyViewMode } from '../../types';
-import {
-  CommonLegacyEmbeddable,
-  CommonLegacyInput,
-  CommonLegacyOutput,
-} from './legacy_embeddable_to_api';
+import { CommonLegacyEmbeddable } from './legacy_embeddable_to_api';
 
 export const embeddableInputToSubject = <
-  T extends unknown = unknown,
-  LegacyInput extends CommonLegacyInput = CommonLegacyInput
+  ValueType extends unknown = unknown,
+  LegacyInput extends EmbeddableInput = EmbeddableInput
 >(
   subscription: Subscription,
   embeddable: IEmbeddable<LegacyInput>,
   key: keyof LegacyInput,
   useExplicitInput = false
 ) => {
-  const subject = new BehaviorSubject<T | undefined>(embeddable.getExplicitInput()?.[key] as T);
+  const subject = new BehaviorSubject<ValueType | undefined>(
+    embeddable.getExplicitInput()?.[key] as ValueType
+  );
   if (useExplicitInput && embeddable.parent) {
     subscription.add(
       embeddable.parent
@@ -47,33 +45,35 @@ export const embeddableInputToSubject = <
             return deepEqual(previousValue, currentValue);
           })
         )
-        .subscribe(() => subject.next(embeddable.getExplicitInput()?.[key] as T))
+        .subscribe(() => subject.next(embeddable.getExplicitInput()?.[key] as ValueType))
     );
   } else {
     subscription.add(
       embeddable
         .getInput$()
         .pipe(distinctUntilKeyChanged(key))
-        .subscribe(() => subject.next(embeddable.getInput()?.[key] as T))
+        .subscribe(() => subject.next(embeddable.getInput()?.[key] as ValueType))
     );
   }
   return subject;
 };
 
 export const embeddableOutputToSubject = <
-  T extends unknown = unknown,
-  LegacyOutput extends CommonLegacyOutput = CommonLegacyOutput
+  ValueType extends unknown = unknown,
+  LegacyOutput extends EmbeddableOutput = EmbeddableOutput
 >(
   subscription: Subscription,
-  embeddable: IEmbeddable<CommonLegacyInput, LegacyOutput>,
+  embeddable: IEmbeddable<EmbeddableInput, LegacyOutput>,
   key: keyof LegacyOutput
 ) => {
-  const subject = new BehaviorSubject<T | undefined>(embeddable.getOutput()[key] as T);
+  const subject = new BehaviorSubject<ValueType | undefined>(
+    embeddable.getOutput()[key] as ValueType
+  );
   subscription.add(
     embeddable
       .getOutput$()
       .pipe(distinctUntilKeyChanged(key))
-      .subscribe(() => subject.next(embeddable.getOutput()[key] as T))
+      .subscribe(() => subject.next(embeddable.getOutput()[key] as ValueType))
   );
   return subject;
 };

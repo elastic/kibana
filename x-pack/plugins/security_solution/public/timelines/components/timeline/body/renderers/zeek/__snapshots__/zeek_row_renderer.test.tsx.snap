@@ -25,6 +25,9 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
             "id": Array [
               "1",
             ],
+            "kind": Array [
+              "signal",
+            ],
             "module": Array [
               "nginx",
             ],

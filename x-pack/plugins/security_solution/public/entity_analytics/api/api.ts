@@ -6,7 +6,23 @@
  */
 
 import { useMemo } from 'react';
-import type { AssetCriticalityRecord } from '../../../common/api/entity_analytics/asset_criticality';
+import type { RiskEngineDisableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_disable_route.gen';
+import type { RiskEngineStatusResponse } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import type { RiskEngineInitResponse } from '../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
+import type { RiskEngineEnableResponse } from '../../../common/api/entity_analytics/risk_engine/engine_enable_route.gen';
+import type {
+  RiskScoresPreviewRequest,
+  RiskScoresPreviewResponse,
+} from '../../../common/api/entity_analytics/risk_engine/preview_route.gen';
+import type {
+  RiskScoresEntityCalculationRequest,
+  RiskScoresEntityCalculationResponse,
+} from '../../../common/api/entity_analytics/risk_engine/entity_calculation_route.gen';
+import type { AssetCriticalityCsvUploadResponse } from '../../../common/entity_analytics/asset_criticality/types';
+import type {
+  AssetCriticalityRecord,
+  EntityAnalyticsPrivileges,
+} from '../../../common/api/entity_analytics/asset_criticality';
 import type { RiskScoreEntity } from '../../../common/search_strategy';
 import {
   RISK_ENGINE_STATUS_URL,
@@ -19,21 +35,16 @@ import {
   ASSET_CRITICALITY_URL,
   RISK_SCORE_INDEX_STATUS_API_URL,
   RISK_ENGINE_SETTINGS_URL,
+  ASSET_CRITICALITY_CSV_UPLOAD_URL,
+  RISK_SCORE_ENTITY_CALCULATION_URL,
 } from '../../../common/constants';
-
-import type {
-  CalculateScoresResponse,
-  EnableRiskEngineResponse,
-  GetRiskEngineStatusResponse,
-  InitRiskEngineResponse,
-  DisableRiskEngineResponse,
-} from '../../../server/lib/entity_analytics/types';
-import type { RiskScorePreviewRequestSchema } from '../../../common/entity_analytics/risk_engine/risk_score_preview/request_schema';
-import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics/common';
 import type { RiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
 
+export interface DeleteAssetCriticalityResponse {
+  deleted: true;
+}
 export const useEntityAnalyticsRoutes = () => {
   const http = useKibana().services.http;
 
@@ -46,9 +57,9 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params: RiskScorePreviewRequestSchema;
+      params: RiskScoresPreviewRequest;
     }) =>
-      http.fetch<CalculateScoresResponse>(RISK_SCORE_PREVIEW_URL, {
+      http.fetch<RiskScoresPreviewResponse>(RISK_SCORE_PREVIEW_URL, {
         version: '1',
         method: 'POST',
         body: JSON.stringify(params),
@@ -59,7 +70,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Fetches risks engine status
      */
     const fetchRiskEngineStatus = ({ signal }: { signal?: AbortSignal }) =>
-      http.fetch<GetRiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
+      http.fetch<RiskEngineStatusResponse>(RISK_ENGINE_STATUS_URL, {
         version: '1',
         method: 'GET',
         signal,
@@ -69,7 +80,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Init risk score engine
      */
     const initRiskEngine = () =>
-      http.fetch<InitRiskEngineResponse>(RISK_ENGINE_INIT_URL, {
+      http.fetch<RiskEngineInitResponse>(RISK_ENGINE_INIT_URL, {
         version: '1',
         method: 'POST',
       });
@@ -78,7 +89,7 @@ export const useEntityAnalyticsRoutes = () => {
      * Enable risk score engine
      */
     const enableRiskEngine = () =>
-      http.fetch<EnableRiskEngineResponse>(RISK_ENGINE_ENABLE_URL, {
+      http.fetch<RiskEngineEnableResponse>(RISK_ENGINE_ENABLE_URL, {
         version: '1',
         method: 'POST',
       });
@@ -87,10 +98,21 @@ export const useEntityAnalyticsRoutes = () => {
      * Disable risk score engine
      */
     const disableRiskEngine = () =>
-      http.fetch<DisableRiskEngineResponse>(RISK_ENGINE_DISABLE_URL, {
+      http.fetch<RiskEngineDisableResponse>(RISK_ENGINE_DISABLE_URL, {
         version: '1',
         method: 'POST',
       });
+
+    /**
+     * Calculate and stores risk score for an entity
+     */
+    const calculateEntityRiskScore = (params: RiskScoresEntityCalculationRequest) => {
+      return http.fetch<RiskScoresEntityCalculationResponse>(RISK_SCORE_ENTITY_CALCULATION_URL, {
+        version: '1',
+        method: 'POST',
+        body: JSON.stringify(params),
+      });
+    };
 
     /**
      * Get risk engine privileges
@@ -114,7 +136,9 @@ export const useEntityAnalyticsRoutes = () => {
      * Create asset criticality
      */
     const createAssetCriticality = async (
-      params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'>
+      params: Pick<AssetCriticality, 'idField' | 'idValue' | 'criticalityLevel'> & {
+        refresh?: 'wait_for';
+      }
     ): Promise<AssetCriticalityRecord> =>
       http.fetch<AssetCriticalityRecord>(ASSET_CRITICALITY_URL, {
         version: '1',
@@ -123,8 +147,22 @@ export const useEntityAnalyticsRoutes = () => {
           id_value: params.idValue,
           id_field: params.idField,
           criticality_level: params.criticalityLevel,
+          refresh: params.refresh,
         }),
       });
+
+    const deleteAssetCriticality = async (
+      params: Pick<AssetCriticality, 'idField' | 'idValue'> & { refresh?: 'wait_for' }
+    ): Promise<{ deleted: true }> => {
+      await http.fetch(ASSET_CRITICALITY_URL, {
+        version: '1',
+        method: 'DELETE',
+        query: { id_value: params.idValue, id_field: params.idField, refresh: params.refresh },
+      });
+
+      // spoof a response to allow us to better distnguish a delete from a create in use_asset_criticality.ts
+      return { deleted: true };
+    };
 
     /**
      * Get asset criticality
@@ -136,6 +174,24 @@ export const useEntityAnalyticsRoutes = () => {
         version: '1',
         method: 'GET',
         query: { id_value: params.idValue, id_field: params.idField },
+      });
+    };
+
+    const uploadAssetCriticalityFile = async (
+      fileContent: string,
+      fileName: string
+    ): Promise<AssetCriticalityCsvUploadResponse> => {
+      const file = new File([new Blob([fileContent])], fileName, { type: 'text/csv' });
+      const body = new FormData();
+      body.append('file', file);
+
+      return http.fetch<AssetCriticalityCsvUploadResponse>(ASSET_CRITICALITY_CSV_UPLOAD_URL, {
+        version: '1',
+        method: 'POST',
+        headers: {
+          'Content-Type': undefined, // Lets the browser set the appropriate content type
+        },
+        body,
       });
     };
 
@@ -178,9 +234,12 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       createAssetCriticality,
+      deleteAssetCriticality,
       fetchAssetCriticality,
+      uploadAssetCriticalityFile,
       getRiskScoreIndexStatus,
       fetchRiskEngineSettings,
+      calculateEntityRiskScore,
     };
   }, [http]);
 };

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { getGlobalConfig, getGlobalConfig$ } from './legacy_config';
 import { duration } from 'moment';
 import { fromRoot } from '@kbn/repo-info';

@@ -27,15 +27,8 @@ export async function saveServiceGroup({
     attributes,
     updated_at: updatedAt,
   } = await (serviceGroupId
-    ? savedObjectsClient.update(
-        APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-        serviceGroupId,
-        serviceGroup
-      )
-    : savedObjectsClient.create(
-        APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-        serviceGroup
-      ));
+    ? savedObjectsClient.update(APM_SERVICE_GROUP_SAVED_OBJECT_TYPE, serviceGroupId, serviceGroup)
+    : savedObjectsClient.create(APM_SERVICE_GROUP_SAVED_OBJECT_TYPE, serviceGroup));
   return {
     id,
     ...(attributes as ServiceGroup),

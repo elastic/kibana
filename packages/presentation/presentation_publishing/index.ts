@@ -17,6 +17,7 @@ export interface EmbeddableApiContext {
 export {
   getInitialValuesFromComparators,
   runComparators,
+  getUnchangingComparator,
   type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,
@@ -28,8 +29,33 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export {
+  initializeTimeRange,
+  type SerializedTimeRange,
+} from './interfaces/fetch/initialize_time_range';
+export { fetch$, type FetchContext } from './interfaces/fetch/fetch';
+export {
+  apiPublishesPartialUnifiedSearch,
+  apiPublishesTimeRange,
+  apiPublishesUnifiedSearch,
+  apiPublishesWritableUnifiedSearch,
+  type PublishesTimeRange,
+  type PublishesUnifiedSearch,
+  type PublishesWritableUnifiedSearch,
+} from './interfaces/fetch/publishes_unified_search';
+export {
+  apiHasAppContext,
+  type HasAppContext,
+  type EmbeddableAppContext,
+} from './interfaces/has_app_context';
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
+export {
+  apiHasLegacyLibraryTransforms,
+  apiHasLibraryTransforms,
+  type HasLegacyLibraryTransforms,
+  type HasLibraryTransforms,
+} from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
   apiHasSupportedTriggers,
@@ -42,6 +68,10 @@ export {
   type HasTypeDisplayName,
 } from './interfaces/has_type';
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
+export {
+  apiHasExecutionContext,
+  type HasExecutionContext,
+} from './interfaces/has_execution_context';
 export {
   apiPublishesBlockingError,
   type PublishesBlockingError,
@@ -62,16 +92,6 @@ export {
   type PublishesPhaseEvents,
 } from './interfaces/publishes_phase_events';
 export {
-  apiPublishesTimeRange,
-  apiPublishesUnifiedSearch,
-  apiPublishesPartialUnifiedSearch,
-  apiPublishesWritableUnifiedSearch,
-  type PublishesTimeRange,
-  type PublishesUnifiedSearch,
-  type PublishesWritableUnifiedSearch,
-} from './interfaces/unified_search/publishes_unified_search';
-export { initializeTimeRange } from './interfaces/unified_search/initialize_time_range';
-export {
   apiPublishesSavedObjectId,
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
@@ -89,6 +109,7 @@ export {
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,
+  getPanelDescription,
   type PublishesPanelDescription,
   type PublishesWritablePanelDescription,
 } from './interfaces/titles/publishes_panel_description';
@@ -101,12 +122,7 @@ export {
 } from './interfaces/titles/publishes_panel_title';
 export { initializeTitles, type SerializedTitles } from './interfaces/titles/titles_api';
 export {
-  type HasLibraryTransforms,
-  apiHasLibraryTransforms,
-  type HasLegacyLibraryTransforms,
-  apiHasLegacyLibraryTransforms,
-} from './interfaces/has_library_transforms';
-export {
+  useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,
   usePublishingSubject,
   useStateFromPublishingSubject,

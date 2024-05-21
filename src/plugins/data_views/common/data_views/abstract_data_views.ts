@@ -12,7 +12,7 @@ import type {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { cloneDeep, findIndex, merge } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   DataViewSpec,
@@ -47,6 +47,8 @@ interface AbstractDataViewDeps {
   shortDotsEnable?: boolean;
   metaFields?: string[];
 }
+
+type DataViewFieldBaseSpecMap = Record<string, DataViewFieldBase>;
 
 export abstract class AbstractDataView {
   /**
@@ -125,7 +127,7 @@ export abstract class AbstractDataView {
    */
   public matchedIndices: string[] = [];
 
-  protected scriptedFields: DataViewFieldBase[];
+  protected scriptedFieldsMap: DataViewFieldBaseSpecMap;
 
   private allowHidden: boolean = false;
 
@@ -155,10 +157,15 @@ export abstract class AbstractDataView {
       : [];
 
     this.allowNoIndex = spec?.allowNoIndex || false;
-    // CRUD operations on scripted fields need to be examined
-    this.scriptedFields = spec?.fields
-      ? Object.values(spec.fields).filter((field) => field.scripted)
-      : [];
+
+    this.scriptedFieldsMap = spec?.fields
+      ? Object.values(spec.fields)
+          .filter((field) => field.scripted)
+          .reduce<DataViewFieldBaseSpecMap>((acc, field) => {
+            acc[field.name] = field;
+            return acc;
+          }, {})
+      : {};
 
     // set dependencies
     this.fieldFormats = { ...fieldFormats };
@@ -303,6 +310,16 @@ export abstract class AbstractDataView {
   }
 
   /**
+   * Set field count
+   * @param fieldName name of field to set count on
+   * @param count count value. If undefined, count is removed
+   */
+
+  protected setFieldCountInternal(fieldName: string, count: number | undefined | null) {
+    this.setFieldAttrs(fieldName, 'count', count === null ? undefined : count);
+  }
+
+  /**
    * Set field custom description
    * @param fieldName name of field to set custom description on
    * @param customDescription custom description value. If undefined, custom description is removed
@@ -348,7 +365,7 @@ export abstract class AbstractDataView {
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: stringifyOrUndefined(this.sourceFilters),
-      fields: stringifyOrUndefined(this.scriptedFields),
+      fields: stringifyOrUndefined(Object.values(this.scriptedFieldsMap)),
       fieldFormatMap: stringifyOrUndefined(this.fieldFormatMap),
       type: this.type!,
       typeMeta: stringifyOrUndefined(this.typeMeta),
@@ -359,30 +376,71 @@ export abstract class AbstractDataView {
     };
   }
 
+  protected toSpecShared(includeFields = true): DataViewSpec {
+    // if fields aren't included, don't include count
+    const fieldAttrs = cloneDeep(this.fieldAttrs);
+    if (!includeFields) {
+      Object.keys(fieldAttrs).forEach((key) => {
+        delete fieldAttrs[key].count;
+        if (Object.keys(fieldAttrs[key]).length === 0) {
+          delete fieldAttrs[key];
+        }
+      });
+    }
+
+    const spec: DataViewSpec = {
+      id: this.id,
+      version: this.version,
+      title: this.getIndexPattern(),
+      timeFieldName: this.timeFieldName,
+      sourceFilters: [...(this.sourceFilters || [])],
+      typeMeta: this.typeMeta,
+      type: this.type,
+      fieldFormats: { ...this.fieldFormatMap },
+      runtimeFieldMap: cloneDeep(this.runtimeFieldMap),
+      fieldAttrs,
+      allowNoIndex: this.allowNoIndex,
+      name: this.name,
+      allowHidden: this.getAllowHidden(),
+    };
+
+    // Filter undefined values from the spec
+    return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
+  }
+
   protected upsertScriptedFieldInternal = (field: FieldSpec) => {
-    // search for scriped field with same name
-    const findByName = (f: DataViewFieldBase) => f.name === field.name;
-
-    const fieldIndex = findIndex(this.scriptedFields, findByName);
-
-    const scriptedField: DataViewFieldBase = {
+    this.scriptedFieldsMap[field.name] = {
       name: field.name,
       script: field.script,
       lang: field.lang,
       type: field.type,
       scripted: field.scripted,
     };
-
-    if (fieldIndex === -1) {
-      this.scriptedFields.push(scriptedField);
-    } else {
-      this.scriptedFields[fieldIndex] = scriptedField;
-    }
   };
 
   protected deleteScriptedFieldInternal = (fieldName: string) => {
-    this.scriptedFields = this.scriptedFields.filter((field) => field.name !== fieldName);
+    delete this.scriptedFieldsMap[fieldName];
   };
+
+  replaceAllScriptedFields(newFields: Record<string, FieldSpec>) {
+    const oldScriptedFieldNames = Object.keys(this.scriptedFieldsMap);
+
+    oldScriptedFieldNames.forEach((name) => {
+      this.removeScriptedField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.upsertScriptedField(field);
+    });
+  }
+
+  removeScriptedField(name: string) {
+    return this.deleteScriptedFieldInternal(name);
+  }
+
+  upsertScriptedField(field: FieldSpec) {
+    return this.upsertScriptedFieldInternal(field);
+  }
 
   /**
    * Checks if runtime field exists
@@ -428,6 +486,29 @@ export abstract class AbstractDataView {
       }),
       {}
     );
+  }
+
+  /**
+   * Replaces all existing runtime fields with new fields.
+   * @param newFields Map of runtime field definitions by field name
+   */
+  replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
+    const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
+    oldRuntimeFieldNames.forEach((name) => {
+      this.removeRuntimeField(name);
+    });
+
+    Object.entries(newFields).forEach(([name, field]) => {
+      this.addRuntimeField(name, field);
+    });
+  }
+
+  removeRuntimeField(name: string) {
+    return this.removeRuntimeFieldInteral(name);
+  }
+
+  addRuntimeField(name: string, runtimeField: RuntimeField) {
+    return this.addRuntimeFieldInteral(name, runtimeField);
   }
 
   protected removeRuntimeFieldInteral(name: string) {

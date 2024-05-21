@@ -106,18 +106,17 @@ export const getTopNavConfig = (
     data,
     application,
     chrome,
-    overlays,
     history,
     share,
     setActiveUrl,
     toastNotifications,
     visualizeCapabilities,
     dashboardCapabilities,
-    i18n: { Context: I18nContext },
     savedObjectsTagging,
     presentationUtil,
     getKibanaVersion,
     serverless,
+    ...startServices
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -144,8 +143,8 @@ export const getTopNavConfig = (
 
     try {
       const id = await saveVisualization(savedVis, saveOptions, {
-        overlays,
         savedObjectsTagging,
+        ...startServices,
       });
 
       if (id) {
@@ -395,6 +394,11 @@ export const getTopNavConfig = (
             shareableUrl: unhashUrl(window.location.href),
             objectId: savedVis?.id,
             objectType: 'visualization',
+            objectTypeMeta: {
+              title: i18n.translate('visualizations.share.shareModal.title', {
+                defaultMessage: 'Share this visualization',
+              }),
+            },
             sharingData: {
               title:
                 savedVis?.title ||
@@ -410,6 +414,7 @@ export const getTopNavConfig = (
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
             showPublicUrlSwitch,
+            toasts: toastNotifications,
           });
         }
       },

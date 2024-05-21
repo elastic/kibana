@@ -89,7 +89,11 @@ export function getI18nImportFixer({
 
   // If the file doesn't have an import line for the translation package yet, we need to add it.
   // Pretty safe bet to add it underneath the import line for React.
-  let lineIndex = sourceCode.lines.findIndex((l) => l.includes("from 'react'") || l.includes('*/'));
+  let lineIndex = sourceCode.lines.findIndex((l) => l.includes("from 'react'"));
+
+  if (lineIndex === -1) {
+    lineIndex = sourceCode.lines.findIndex((l) => l.includes('*/'));
+  }
 
   if (lineIndex === -1) {
     lineIndex = 0;

@@ -91,7 +91,6 @@ exports[`Table should render normally 1`] = `
       ],
     }
   }
-  responsive={true}
   searchFormat="eql"
   sorting={true}
   tableLayout="fixed"

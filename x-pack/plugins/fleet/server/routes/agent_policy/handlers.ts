@@ -19,8 +19,8 @@ import { HTTPAuthorizationHeader } from '../../../common/http_authorization_head
 
 import { fullAgentPolicyToYaml } from '../../../common/services';
 import { appContextService, agentPolicyService } from '../../services';
-import { getAgentsByKuery } from '../../services/agents';
-import { AGENTS_PREFIX } from '../../constants';
+import { getAgentsByKuery, getLatestAvailableAgentVersion } from '../../services/agents';
+import { AGENTS_PREFIX, UNPRIVILEGED_AGENT_KUERY } from '../../constants';
 import type {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -62,13 +62,21 @@ export async function populateAssignedAgentsCount(
 ) {
   await pMap(
     agentPolicies,
-    (agentPolicy: GetAgentPoliciesResponseItem) =>
-      getAgentsByKuery(esClient, soClient, {
+    (agentPolicy: GetAgentPoliciesResponseItem) => {
+      const totalAgents = getAgentsByKuery(esClient, soClient, {
         showInactive: false,
         perPage: 0,
         page: 1,
         kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id}`,
-      }).then(({ total: agentTotal }) => (agentPolicy.agents = agentTotal)),
+      }).then(({ total }) => (agentPolicy.agents = total));
+      const unprivilegedAgents = getAgentsByKuery(esClient, soClient, {
+        showInactive: false,
+        perPage: 0,
+        page: 1,
+        kuery: `${AGENTS_PREFIX}.policy_id:${agentPolicy.id} and ${UNPRIVILEGED_AGENT_KUERY}`,
+      }).then(({ total }) => (agentPolicy.unprivileged_agents = total));
+      return Promise.all([totalAgents, unprivilegedAgents]);
+    },
     { concurrency: 10 }
   );
 }
@@ -466,13 +474,12 @@ export const getK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
-  const fleetContext = await context.fleet;
-
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+
+    const agentVersion = await getLatestAvailableAgentVersion();
+
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
       fleetServer,
       token,
@@ -500,13 +507,10 @@ export const downloadK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
-  const fleetContext = await context.fleet;
-
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const agentVersion =
-      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const agentVersion = await getLatestAvailableAgentVersion();
     const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
       fleetServer,
       token,

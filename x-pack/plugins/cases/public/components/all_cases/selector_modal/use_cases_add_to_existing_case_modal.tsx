@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
@@ -158,9 +158,11 @@ export const useCasesAddToExistingCaseModal = ({
     [closeModal, dispatch, handleOnRowClick, onClose, onCreateCaseClicked]
   );
 
-  return {
-    open: openModal,
-    close: closeModal,
-  };
+  return useMemo(() => {
+    return {
+      open: openModal,
+      close: closeModal,
+    };
+  }, [openModal, closeModal]);
 };
 export type UseCasesAddToExistingCaseModal = typeof useCasesAddToExistingCaseModal;

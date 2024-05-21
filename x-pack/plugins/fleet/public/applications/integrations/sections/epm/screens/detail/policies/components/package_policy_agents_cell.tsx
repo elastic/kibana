@@ -13,8 +13,20 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LinkedAgentCount, AddAgentHelpPopover } from '../../../../../../components';
 import type { AgentPolicy } from '../../../../../../types';
 
-const AddAgentButton = ({ onAddAgent }: { onAddAgent: () => void }) => (
-  <EuiButton iconType="plusInCircle" data-test-subj="addAgentButton" onClick={onAddAgent} size="s">
+const AddAgentButton = ({
+  onAddAgent,
+  canAddAgents,
+}: {
+  onAddAgent: () => void;
+  canAddAgents: boolean;
+}) => (
+  <EuiButton
+    iconType="plusInCircle"
+    data-test-subj="addAgentButton"
+    onClick={onAddAgent}
+    size="s"
+    isDisabled={!canAddAgents}
+  >
     <FormattedMessage
       id="xpack.fleet.epm.packageDetails.integrationList.addAgent"
       defaultMessage="Add agent"
@@ -22,13 +34,19 @@ const AddAgentButton = ({ onAddAgent }: { onAddAgent: () => void }) => (
   </EuiButton>
 );
 
-const AddAgentButtonWithPopover = ({ onAddAgent }: { onAddAgent: () => void }) => {
+const AddAgentButtonWithPopover = ({
+  onAddAgent,
+  canAddAgents,
+}: {
+  onAddAgent: () => void;
+  canAddAgents: boolean;
+}) => {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(true);
   const onAddAgentCloseHelp = () => {
     setIsHelpOpen(false);
     onAddAgent();
   };
-  const button = <AddAgentButton onAddAgent={onAddAgentCloseHelp} />;
+  const button = <AddAgentButton onAddAgent={onAddAgentCloseHelp} canAddAgents={canAddAgents} />;
   return (
     <AddAgentHelpPopover
       button={button}
@@ -43,11 +61,13 @@ export const PackagePolicyAgentsCell = ({
   agentCount = 0,
   onAddAgent,
   hasHelpPopover = false,
+  canAddAgents,
 }: {
   agentPolicy: AgentPolicy;
   agentCount?: number;
   hasHelpPopover?: boolean;
   onAddAgent: () => void;
+  canAddAgents: boolean;
 }) => {
   if (agentCount > 0 || agentPolicy.is_managed) {
     return (
@@ -59,9 +79,9 @@ export const PackagePolicyAgentsCell = ({
     );
   }
 
-  if (!hasHelpPopover) {
-    return <AddAgentButton onAddAgent={onAddAgent} />;
+  if (!hasHelpPopover || !canAddAgents) {
+    return <AddAgentButton onAddAgent={onAddAgent} canAddAgents={canAddAgents} />;
   }
 
-  return <AddAgentButtonWithPopover onAddAgent={onAddAgent} />;
+  return <AddAgentButtonWithPopover onAddAgent={onAddAgent} canAddAgents={canAddAgents} />;
 };

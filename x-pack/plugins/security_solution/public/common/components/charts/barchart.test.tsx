@@ -13,7 +13,6 @@ import React from 'react';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
 import { TestProviders } from '../../mock';
-import '../../mock/match_media';
 import '../../mock/react_beautiful_dnd';
 
 import { BarChartBaseComponent, BarChartComponent } from './barchart';

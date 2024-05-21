@@ -17,18 +17,12 @@ const Version = euiStyled('span')`
   font-size: ${({ theme }) => theme.eui.euiFontSizeS};
 `;
 
-export function UserAgentSummaryItem({
-  name,
-  version,
-}: UserAgentSummaryItemProps) {
+export function UserAgentSummaryItem({ name, version }: UserAgentSummaryItemProps) {
   return (
     <EuiToolTip
-      content={i18n.translate(
-        'xpack.apm.transactionDetails.userAgentAndVersionLabel',
-        {
-          defaultMessage: 'User agent & version',
-        }
-      )}
+      content={i18n.translate('xpack.apm.transactionDetails.userAgentAndVersionLabel', {
+        defaultMessage: 'User agent & version',
+      })}
     >
       <>
         {name}&nbsp;

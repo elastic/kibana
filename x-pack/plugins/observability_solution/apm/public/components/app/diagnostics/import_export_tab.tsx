@@ -57,12 +57,9 @@ function ExportCard() {
                 return;
               }
 
-              const blob = new Blob(
-                [JSON.stringify(diagnosticsBundle, null, 2)],
-                {
-                  type: 'text/plain',
-                }
-              );
+              const blob = new Blob([JSON.stringify(diagnosticsBundle, null, 2)], {
+                type: 'text/plain',
+              });
               const fileURL = URL.createObjectURL(blob);
 
               const { kibanaVersion } = diagnosticsBundle;
@@ -112,8 +109,7 @@ function ImportCard() {
               {!importStatus.isValid && (
                 <>
                   <EuiCallOut color="danger" iconType="warning">
-                    The uploaded file could not be parsed:{' '}
-                    {importStatus.errorMessage}
+                    The uploaded file could not be parsed: {importStatus.errorMessage}
                   </EuiCallOut>
                   <EuiSpacer />
                 </>
@@ -143,9 +139,7 @@ function ImportCard() {
                           errorMessage: e.message,
                         });
 
-                        console.error(
-                          `Could not parse file ${file.name}. ${e.message}`
-                        );
+                        console.error(`Could not parse file ${file.name}. ${e.message}`);
                       }
                     };
 

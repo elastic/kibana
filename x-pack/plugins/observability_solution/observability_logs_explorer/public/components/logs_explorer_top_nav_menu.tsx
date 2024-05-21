@@ -30,17 +30,22 @@ import { AlertsPopover } from './alerts_popover';
 
 export const LogsExplorerTopNavMenu = () => {
   const {
-    services: { serverless },
+    services: { chrome },
   } = useKibanaContextForPlugin();
 
-  return Boolean(serverless) ? <ServerlessTopNav /> : <StatefulTopNav />;
+  const chromeStyle = useObservable(chrome.getChromeStyle$());
+
+  return chromeStyle === 'project' ? <ProjectTopNav /> : <ClassicTopNav />;
 };
 
-const ServerlessTopNav = () => {
+const ProjectTopNav = () => {
   const { services } = useKibanaContextForPlugin();
 
   return (
-    <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
+    <EuiHeader
+      data-test-subj="logsExplorerHeaderMenu"
+      css={{ boxShadow: 'none', backgroundColor: euiThemeVars.euiPageBackgroundColor }}
+    >
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
           <LogsExplorerTabs services={services} selectedTab="logs-explorer" />
@@ -79,7 +84,7 @@ const ServerlessTopNav = () => {
   );
 };
 
-const StatefulTopNav = () => {
+const ClassicTopNav = () => {
   const {
     services: {
       appParams: { setHeaderActionMenu },

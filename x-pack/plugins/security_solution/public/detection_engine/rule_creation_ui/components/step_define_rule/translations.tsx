@@ -217,3 +217,40 @@ export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined)
       }
     )
   );
+
+export const EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionDisableText',
+  {
+    defaultMessage: 'Suppression is not supported for EQL sequence queries.',
+  }
+);
+
+export const EQL_SEQUENCE_SUPPRESSION_GROUPBY_VALIDATION_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.eqlSequenceSuppressionValidationText',
+  {
+    defaultMessage:
+      '{EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP} Change the EQL query to a non-sequence query, or remove the suppression fields.',
+    values: { EQL_SEQUENCE_SUPPRESSION_DISABLE_TOOLTIP },
+  }
+);
+
+export const GROUP_BY_TECH_PREVIEW_LABEL_APPEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsTechPreviewLabelAppend',
+  {
+    defaultMessage: 'Optional (Technical Preview)',
+  }
+);
+
+export const GROUP_BY_GA_LABEL_APPEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsGALabelAppend',
+  {
+    defaultMessage: 'Optional',
+  }
+);
+
+export const GROUP_BY_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
+  {
+    defaultMessage: 'Suppress alerts by',
+  }
+);

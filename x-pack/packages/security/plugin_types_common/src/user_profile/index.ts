@@ -12,4 +12,4 @@ export type {
   UserProfileUserInfoWithSecurity,
   UserProfile,
   UserProfileWithSecurity,
-} from './user_profile';
+} from '@kbn/core-user-profile-common';

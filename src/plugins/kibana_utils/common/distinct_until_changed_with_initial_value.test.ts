@@ -8,7 +8,7 @@
 
 import { Subject } from 'rxjs';
 import { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
-import { toArray } from 'rxjs/operators';
+import { toArray } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 
 describe('distinctUntilChangedWithInitialValue', () => {

@@ -17,6 +17,7 @@ import { createConnector } from '../utils/create_connector';
 const mockRequest = {
   message: 'Do you know my name?',
   subAction: 'invokeAI',
+  actionTypeId: '.bedrock',
   isEnabledKnowledgeBase: false,
   isEnabledRAGAlerts: false,
   replacements: {},
@@ -27,8 +28,8 @@ export default ({ getService }: FtrProviderContext) => {
   const objectRemover = new ObjectRemover(supertest);
   const configService = getService('config');
 
-  // @skipInQA tag because the simulators do not work in the QA env
-  describe('@ess @serverless @skipInQA Basic Security AI Assistant Invoke AI [non-streaming, non-LangChain]', async () => {
+  // @skipInServerlessMKI tag because the simulators do not work in the QA env
+  describe('@ess @serverless @skipInServerlessMKI Basic Security AI Assistant Invoke AI [non-streaming, non-LangChain]', async () => {
     after(() => {
       objectRemover.removeAll();
     });
@@ -84,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should execute a chat completion', async () => {
         const response = await postActionsClientExecute(
           openaiActionId,
-          { ...mockRequest },
+          { ...mockRequest, actionTypeId: '.gen-ai' },
           supertest
         );
 

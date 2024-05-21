@@ -15,7 +15,6 @@ export const visualizeESQLFunction = {
   descriptionForUser: 'Use this function to visualize charts for ES|QL queries.',
   parameters: {
     type: 'object',
-    additionalProperties: true,
     properties: {
       query: {
         type: 'string',

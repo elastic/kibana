@@ -82,7 +82,7 @@ export class CspPlugin
   private isCloudEnabled?: boolean;
 
   public setup(
-    core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>,
+    _core: CoreSetup<CspClientPluginStartDeps, CspClientPluginStart>,
     plugins: CspClientPluginSetupDeps
   ): CspClientPluginSetup {
     this.isCloudEnabled = plugins.cloud.isCloudEnabled;

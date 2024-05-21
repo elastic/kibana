@@ -76,7 +76,7 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
         logger.info(
           `File (id: ${file.id}) upload aborted. Deleting file due to self-destruct flag.`
         );
-        file.delete(); // fire and forget
+        file.delete().catch(() => {}); // fire and forget
       }
       return res.customError({ body: { message: e.message }, statusCode: 499 });
     }

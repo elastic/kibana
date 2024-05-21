@@ -14,7 +14,7 @@ import moment from 'moment';
 import type { Observable } from 'rxjs';
 import { forkJoin, of } from 'rxjs';
 import { each, get } from 'lodash';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs';
 import { type MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { TimeRangeBounds, TimeBucketsInterval } from '@kbn/ml-time-buckets';
 import { parseInterval } from '../../../common/util/parse_interval';

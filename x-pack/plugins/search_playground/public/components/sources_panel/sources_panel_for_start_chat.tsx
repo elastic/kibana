@@ -5,48 +5,37 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { useController } from 'react-hook-form';
 import { AddIndicesField } from './add_indices_field';
 import { IndicesTable } from './indices_table';
 import { StartChatPanel } from '../start_chat_panel';
 import { CreateIndexCallout } from './create_index_callout';
-import { useSourceIndicesField } from '../../hooks/use_source_indices_field';
 import { useQueryIndices } from '../../hooks/use_query_indices';
-import { ChatFormFields } from '../../types';
-import { useIndicesFields } from '../../hooks/use_indices_fields';
-import { createQuery, getDefaultQueryFields } from '../../utils/create_query';
+import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 
 export const SourcesPanelForStartChat: React.FC = () => {
-  const { selectedIndices, removeIndex, addIndex } = useSourceIndicesField();
-  const { indices, isLoading } = useQueryIndices();
-  const { fields } = useIndicesFields(selectedIndices || []);
-
   const {
-    field: { onChange: elasticsearchQueryOnChange },
-  } = useController({
-    name: ChatFormFields.elasticsearchQuery,
-    defaultValue: {},
-  });
-
-  useEffect(() => {
-    if (fields) {
-      const defaultFields = getDefaultQueryFields(fields);
-      elasticsearchQueryOnChange(createQuery(defaultFields, fields));
-    }
-  }, [fields, elasticsearchQueryOnChange]);
+    indices: selectedIndices,
+    removeIndex,
+    addIndex,
+    loading: fieldIndicesLoading,
+    noFieldsIndicesWarning,
+  } = useSourceIndicesFields();
+  const { indices, isLoading } = useQueryIndices();
 
   return (
     <StartChatPanel
       title={i18n.translate('xpack.searchPlayground.emptyPrompts.sources.title', {
-        defaultMessage: 'Select sources',
+        defaultMessage: 'Select indices',
       })}
       description={i18n.translate('xpack.searchPlayground.emptyPrompts.sources.description', {
-        defaultMessage: 'Where should the data for this chat experience be retrieved from?',
+        defaultMessage:
+          "Select the Elasticsearch indices you'd like to query, providing additional context for the LLM.",
       })}
-      isValid={!!selectedIndices.length}
+      isValid={!!selectedIndices?.length}
+      dataTestSubj="selectIndicesChatPanel"
     >
       {!!selectedIndices?.length && (
         <EuiFlexItem>
@@ -54,15 +43,33 @@ export const SourcesPanelForStartChat: React.FC = () => {
         </EuiFlexItem>
       )}
 
+      {noFieldsIndicesWarning && (
+        <EuiCallOut color="warning" iconType="warning" data-test-subj="NoIndicesFieldsMessage">
+          <p>
+            {i18n.translate('xpack.searchPlayground.emptyPrompts.sources.warningCallout', {
+              defaultMessage:
+                'No fields found for {errorMessage}. Try adding data to these indices.',
+              values: {
+                errorMessage: noFieldsIndicesWarning,
+              },
+            })}
+          </p>
+        </EuiCallOut>
+      )}
+
       {isLoading && (
         <EuiFlexGroup justifyContent="center" alignItems="center">
-          <EuiLoadingSpinner size="l" />
+          <EuiLoadingSpinner size="l" data-test-subj="indicesLoading" />
         </EuiFlexGroup>
       )}
 
       {!isLoading && !!indices?.length && (
         <EuiFlexItem>
-          <AddIndicesField selectedIndices={selectedIndices} onIndexSelect={addIndex} />
+          <AddIndicesField
+            selectedIndices={selectedIndices}
+            onIndexSelect={addIndex}
+            loading={fieldIndicesLoading}
+          />
         </EuiFlexItem>
       )}
 

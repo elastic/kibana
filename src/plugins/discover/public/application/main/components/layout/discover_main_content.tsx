@@ -16,12 +16,13 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle';
-import { DiscoverStateContainer } from '../../services/discover_state';
+import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const DROP_PROPS = {
   value: {
@@ -38,7 +39,6 @@ const DROP_PROPS = {
 
 export interface DiscoverMainContentProps {
   dataView: DataView;
-  isPlainRecord: boolean;
   stateContainer: DiscoverStateContainer;
   viewMode: VIEW_MODE;
   onAddFilter: DocViewFilterFn | undefined;
@@ -51,7 +51,6 @@ export interface DiscoverMainContentProps {
 
 export const DiscoverMainContent = ({
   dataView,
-  isPlainRecord,
   viewMode,
   onAddFilter,
   onFieldEdited,
@@ -61,7 +60,9 @@ export const DiscoverMainContent = ({
   panelsToggle,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric } = useDiscoverServices();
+  const { trackUiMetric, dataVisualizer: dataVisualizerService } = useDiscoverServices();
+  const isEsqlMode = useIsEsqlMode();
+  const shouldShowViewModeToggle = dataVisualizerService !== undefined;
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -81,10 +82,10 @@ export const DiscoverMainContent = ({
   const isDropAllowed = Boolean(onDropFieldToTable);
 
   const viewModeToggle = useMemo(() => {
-    return (
+    return shouldShowViewModeToggle ? (
       <DocumentViewModeToggle
         viewMode={viewMode}
-        isTextBasedQuery={isPlainRecord}
+        isEsqlMode={isEsqlMode}
         stateContainer={stateContainer}
         setDiscoverViewMode={setDiscoverViewMode}
         prepend={
@@ -93,12 +94,15 @@ export const DiscoverMainContent = ({
             : undefined
         }
       />
+    ) : (
+      <React.Fragment />
     );
   }, [
+    shouldShowViewModeToggle,
     viewMode,
-    setDiscoverViewMode,
-    isPlainRecord,
+    isEsqlMode,
     stateContainer,
+    setDiscoverViewMode,
     panelsToggle,
     isChartAvailable,
   ]);
@@ -125,9 +129,9 @@ export const DiscoverMainContent = ({
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}
-              onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+              onAddFilter={onAddFilter}
               stateContainer={stateContainer}
-              onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
+              onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
           ) : (
             <>
@@ -136,7 +140,7 @@ export const DiscoverMainContent = ({
                 dataView={dataView}
                 columns={columns}
                 stateContainer={stateContainer}
-                onAddFilter={!isPlainRecord ? onAddFilter : undefined}
+                onAddFilter={!isEsqlMode ? onAddFilter : undefined}
                 trackUiMetric={trackUiMetric}
               />
             </>

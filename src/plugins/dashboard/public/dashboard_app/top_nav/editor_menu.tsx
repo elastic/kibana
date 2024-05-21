@@ -13,7 +13,8 @@ import {
   EuiBadge,
   EuiContextMenu,
   EuiContextMenuItemIcon,
-  EuiContextMenuPanelItemDescriptor,
+  type EuiContextMenuPanelDescriptor,
+  type EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
@@ -27,8 +28,12 @@ import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { ADD_PANEL_TRIGGER } from '../../triggers';
-import { getAddPanelActionMenuItems } from './add_panel_action_menu_items';
-interface FactoryGroup {
+import {
+  getAddPanelActionMenuItems,
+  type GroupedAddPanelActions,
+} from './add_panel_action_menu_items';
+
+export interface FactoryGroup {
   id: string;
   appName: string;
   icon: EuiContextMenuItemIcon;
@@ -40,6 +45,97 @@ interface UnwrappedEmbeddableFactory {
   factory: EmbeddableFactory;
   isEditable: boolean;
 }
+
+export type GetEmbeddableFactoryMenuItem = ReturnType<typeof getEmbeddableFactoryMenuItemProvider>;
+
+export const getEmbeddableFactoryMenuItemProvider =
+  (api: PresentationContainer, closePopover: () => void) => (factory: EmbeddableFactory) => {
+    const icon = factory?.getIconType ? factory.getIconType() : 'empty';
+
+    const toolTipContent = factory?.getDescription ? factory.getDescription() : undefined;
+
+    return {
+      name: factory.getDisplayName(),
+      icon,
+      toolTipContent,
+      onClick: async () => {
+        closePopover();
+        api.addNewPanel({ panelType: factory.type }, true);
+      },
+      'data-test-subj': `createNew-${factory.type}`,
+    };
+  };
+
+export const mergeGroupedItemsProvider =
+  (getEmbeddableFactoryMenuItem: GetEmbeddableFactoryMenuItem) =>
+  (
+    factoryGroupMap: Record<string, FactoryGroup>,
+    groupedAddPanelAction: Record<string, GroupedAddPanelActions>
+  ): [EuiContextMenuPanelItemDescriptor[], EuiContextMenuPanelDescriptor[]] => {
+    const initialPanelGroups: EuiContextMenuPanelItemDescriptor[] = [];
+    const additionalPanels: EuiContextMenuPanelDescriptor[] = [];
+
+    new Set(Object.keys(factoryGroupMap).concat(Object.keys(groupedAddPanelAction))).forEach(
+      (groupId) => {
+        const dataTestSubj = `dashboardEditorMenu-${groupId}Group`;
+
+        const factoryGroup = factoryGroupMap[groupId];
+        const addPanelGroup = groupedAddPanelAction[groupId];
+
+        if (factoryGroup && addPanelGroup) {
+          const panelId = factoryGroup.panelId;
+
+          initialPanelGroups.push({
+            'data-test-subj': dataTestSubj,
+            name: factoryGroup.appName,
+            icon: factoryGroup.icon,
+            panel: panelId,
+          });
+
+          additionalPanels.push({
+            id: panelId,
+            title: factoryGroup.appName,
+            items: [
+              ...factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
+              ...(addPanelGroup?.items ?? []),
+            ],
+          });
+        } else if (factoryGroup) {
+          const panelId = factoryGroup.panelId;
+
+          initialPanelGroups.push({
+            'data-test-subj': dataTestSubj,
+            name: factoryGroup.appName,
+            icon: factoryGroup.icon,
+            panel: panelId,
+          });
+
+          additionalPanels.push({
+            id: panelId,
+            title: factoryGroup.appName,
+            items: factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
+          });
+        } else if (addPanelGroup) {
+          const panelId = addPanelGroup.id;
+
+          initialPanelGroups.push({
+            'data-test-subj': dataTestSubj,
+            name: addPanelGroup.title,
+            icon: addPanelGroup.icon,
+            panel: panelId,
+          });
+
+          additionalPanels.push({
+            id: panelId,
+            title: addPanelGroup.title,
+            items: addPanelGroup.items,
+          });
+        }
+      }
+    );
+
+    return [initialPanelGroups, additionalPanels];
+  };
 
 export const EditorMenu = ({
   createNewVisType,
@@ -230,44 +326,29 @@ export const EditorMenu = ({
     };
   };
 
-  const getEmbeddableFactoryMenuItem = (
-    factory: EmbeddableFactory,
-    closePopover: () => void
-  ): EuiContextMenuPanelItemDescriptor => {
-    const icon = factory?.getIconType ? factory.getIconType() : 'empty';
-
-    const toolTipContent = factory?.getDescription ? factory.getDescription() : undefined;
-
-    return {
-      name: factory.getDisplayName(),
-      icon,
-      toolTipContent,
-      onClick: async () => {
-        closePopover();
-        api.addNewPanel({ panelType: factory.type }, true);
-      },
-      'data-test-subj': `createNew-${factory.type}`,
-    };
-  };
-
   const aggsPanelTitle = i18n.translate('dashboard.editorMenu.aggBasedGroupTitle', {
     defaultMessage: 'Aggregation based',
   });
 
-  const getEditorMenuPanels = (closePopover: () => void) => {
+  const getEditorMenuPanels = (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
+    const getEmbeddableFactoryMenuItem = getEmbeddableFactoryMenuItemProvider(api, closePopover);
+
+    const [ungroupedAddPanelActions, groupedAddPanelAction] = getAddPanelActionMenuItems(
+      api,
+      addPanelActions,
+      closePopover
+    );
+
+    const [initialPanelGroups, additionalPanels] = mergeGroupedItemsProvider(
+      getEmbeddableFactoryMenuItem
+    )(factoryGroupMap, groupedAddPanelAction);
+
     const initialPanelItems = [
       ...visTypeAliases.map(getVisTypeAliasMenuItem),
-      ...getAddPanelActionMenuItems(api, addPanelActions, closePopover),
+      ...ungroupedAddPanelActions,
       ...toolVisTypes.map(getVisTypeMenuItem),
-      ...ungroupedFactories.map((factory) => {
-        return getEmbeddableFactoryMenuItem(factory, closePopover);
-      }),
-      ...Object.values(factoryGroupMap).map(({ id, appName, icon, panelId }) => ({
-        name: appName,
-        icon,
-        panel: panelId,
-        'data-test-subj': `dashboardEditorMenu-${id}Group`,
-      })),
+      ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
+      ...initialPanelGroups,
       ...promotedVisTypes.map(getVisTypeMenuItem),
     ];
     if (aggsBasedVisTypes.length > 0) {
@@ -289,17 +370,10 @@ export const EditorMenu = ({
         title: aggsPanelTitle,
         items: aggsBasedVisTypes.map(getVisTypeMenuItem),
       },
-      ...Object.values(factoryGroupMap).map(
-        ({ appName, panelId, factories: groupFactories }: FactoryGroup) => ({
-          id: panelId,
-          title: appName,
-          items: groupFactories.map((factory) => {
-            return getEmbeddableFactoryMenuItem(factory, closePopover);
-          }),
-        })
-      ),
+      ...additionalPanels,
     ];
   };
+
   return (
     <ToolbarPopover
       zIndex={Number(euiTheme.levels.header) - 1}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
@@ -13,7 +12,8 @@ import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandabl
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLeftPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelVisualizeTab } from '..';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelVisualizeTab } from '..';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
@@ -50,7 +50,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
 /**
  * Visualize view displayed in the document details expandable flyout left section
  */
-export const VisualizeTab: FC = memo(() => {
+export const VisualizeTab = memo(() => {
   const { eventId, indexName, scopeId } = useLeftPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();

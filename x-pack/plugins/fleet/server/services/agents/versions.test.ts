@@ -12,7 +12,7 @@ import type { DeepPartial } from 'utility-types';
 
 import type { FleetConfigType } from '../../../public/plugin';
 
-import { getAvailableVersions } from './versions';
+import { getAvailableVersions, getLatestAvailableAgentVersion } from './versions';
 
 let mockKibanaVersion = '300.0.0';
 let mockConfig: DeepPartial<FleetConfigType> = {};
@@ -38,6 +38,91 @@ const emptyResponse = {
   status: 200,
   text: jest.fn().mockResolvedValue(JSON.stringify({})),
 } as any;
+
+beforeEach(() => {
+  mockedReadFile.mockReset();
+  mockedFetch.mockReset();
+});
+
+describe('getLatestAvailableAgentVersion', () => {
+  it('should return latest available version when aligned with kibana version', async () => {
+    mockKibanaVersion = '8.13.0';
+    mockedReadFile.mockResolvedValue(`["8.13.0", "8.12.2", "8.12.1", "8.12.0"]`);
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 8.13.0',
+              version_number: '8.13.0',
+            },
+            {
+              title: 'Elastic Agent 8.12.2',
+              version_number: '8.12.2',
+            },
+            {
+              title: 'Elastic Agent 8.12.1',
+              version_number: '8.12.1',
+            },
+            {
+              title: 'Elastic Agent 8.12.0',
+              version_number: '8.12.0',
+            },
+          ],
+        ])
+      ),
+    } as any);
+
+    const res = await getLatestAvailableAgentVersion({ ignoreCache: true });
+
+    expect(res).toEqual('8.13.0');
+  });
+
+  it('should return kibana version when kibana version is newer than latest available and API results are empty', async () => {
+    mockKibanaVersion = '8.14.0';
+    mockedReadFile.mockResolvedValue(`["8.13.0", "8.12.2", "8.12.1", "8.12.0"]`);
+    mockedFetch.mockResolvedValueOnce(emptyResponse);
+
+    const res = await getLatestAvailableAgentVersion({ ignoreCache: true });
+
+    expect(res).toEqual('8.14.0');
+  });
+
+  it('should return latest compatible version when kibana version is older than latest available', async () => {
+    mockKibanaVersion = '8.12.2';
+    mockedReadFile.mockResolvedValue(`["8.13.0", "8.12.2", "8.12.1", "8.12.0"]`);
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 8.13.0',
+              version_number: '8.13.0',
+            },
+            {
+              title: 'Elastic Agent 8.12.2',
+              version_number: '8.12.2',
+            },
+            {
+              title: 'Elastic Agent 8.12.1',
+              version_number: '8.12.1',
+            },
+            {
+              title: 'Elastic Agent 8.12.0',
+              version_number: '8.12.0',
+            },
+          ],
+        ])
+      ),
+    } as any);
+
+    const res = await getLatestAvailableAgentVersion({ ignoreCache: true });
+
+    expect(res).toEqual('8.12.2');
+  });
+});
 
 describe('getAvailableVersions', () => {
   beforeEach(() => {

@@ -154,7 +154,6 @@
     "@kbn/expressions-plugin",
     "@kbn/dev-proc-runner",
     "@kbn/alerts-ui-shared",
-    "@kbn/text-based-editor",
     "@kbn/security-solution-navigation",
     "@kbn/security-solution-upselling",
     "@kbn/discover-plugin",
@@ -181,7 +180,6 @@
     "@kbn/dom-drag-drop",
     "@kbn/unified-field-list",
     "@kbn/resizable-layout",
-    "@kbn/shared-ux-error-boundary",
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
     "@kbn/search-errors",
@@ -194,6 +192,15 @@
     "@kbn/core-ui-settings-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server-mocks",
-    "@kbn/data-service"
+    "@kbn/data-service",
+    "@kbn/core-chrome-browser",
+    "@kbn/shared-ux-chrome-navigation",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/management-plugin",
+    "@kbn/security-plugin-types-server",
+    "@kbn/deeplinks-security",
+    "@kbn/react-kibana-context-render",
+    "@kbn/search-types",
+    "@kbn/field-utils"
   ]
 }

@@ -101,5 +101,9 @@ describe('getGroup', () => {
     it('should return empty array if fields and values are empty', () => {
       expect(getGroups([], [])).toEqual([]);
     });
+
+    it('should return empty array if fields and values are undefined', () => {
+      expect(getGroups()).toEqual([]);
+    });
   });
 });

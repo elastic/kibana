@@ -39,7 +39,9 @@ const TitleComponent: React.FC<Props> = ({ title, badgeOptions }) => (
   <EuiTitle size="l">
     <Header data-test-subj="header-page-title">
       <TitleWrapper>
-        <TruncatableText tooltipContent={title}>{title}</TruncatableText>
+        <TruncatableText tooltipContent={typeof title === 'string' ? title : null}>
+          {title}
+        </TruncatableText>
       </TitleWrapper>
       {badgeOptions && (
         <>

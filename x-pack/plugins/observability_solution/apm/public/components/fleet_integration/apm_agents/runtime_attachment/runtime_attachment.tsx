@@ -152,10 +152,9 @@ export function RuntimeAttachment({
                 disabled={editDiscoveryRuleId !== null}
                 onClick={onAddRule}
               >
-                {i18n.translate(
-                  'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.addRule',
-                  { defaultMessage: 'Add rule' }
-                )}
+                {i18n.translate('xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.addRule', {
+                  defaultMessage: 'Add rule',
+                })}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

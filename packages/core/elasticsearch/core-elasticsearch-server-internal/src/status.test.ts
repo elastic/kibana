@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { take } from 'rxjs';
 import { Subject, of } from 'rxjs';
 
 import { ServiceStatusLevels, ServiceStatusLevel, ServiceStatus } from '@kbn/core-status-common';

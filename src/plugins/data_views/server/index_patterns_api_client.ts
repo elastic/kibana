@@ -6,21 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
+} from '@kbn/core/server';
 import { GetFieldsOptions, IDataViewsApiClient } from '../common/types';
 import { DataViewMissingIndices } from '../common/lib';
 import { IndexPatternsFetcher } from './fetcher';
 import { hasUserDataView } from './has_user_data_view';
 
 export class IndexPatternsApiServer implements IDataViewsApiClient {
-  esClient: ElasticsearchClient;
   constructor(
-    elasticsearchClient: ElasticsearchClient,
+    private readonly esClient: ElasticsearchClient,
     private readonly savedObjectsClient: SavedObjectsClientContract,
+    private readonly uiSettingsClient: IUiSettingsClient,
     private readonly rollupsEnabled: boolean
-  ) {
-    this.esClient = elasticsearchClient;
-  }
+  ) {}
   async getFieldsForWildcard({
     pattern,
     metaFields,
@@ -29,12 +31,13 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     allowNoIndex,
     indexFilter,
     fields,
+    includeEmptyFields,
   }: GetFieldsOptions) {
-    const indexPatterns = new IndexPatternsFetcher(
-      this.esClient,
-      allowNoIndex,
-      this.rollupsEnabled
-    );
+    const indexPatterns = new IndexPatternsFetcher(this.esClient, {
+      uiSettingsClient: this.uiSettingsClient,
+      allowNoIndices: allowNoIndex,
+      rollupsEnabled: this.rollupsEnabled,
+    });
     return await indexPatterns
       .getFieldsForWildcard({
         pattern,
@@ -43,6 +46,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         rollupIndex,
         indexFilter,
         fields,
+        includeEmptyFields,
       })
       .catch((err) => {
         if (

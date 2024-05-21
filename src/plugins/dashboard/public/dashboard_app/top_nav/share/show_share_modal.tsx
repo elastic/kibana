@@ -59,6 +59,7 @@ export function ShowShareModal({
         },
       },
     },
+    notifications,
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -175,6 +176,11 @@ export function ShowShareModal({
     shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',
+    objectTypeMeta: {
+      title: i18n.translate('dashboard.share.shareModal.title', {
+        defaultMessage: 'Share this dashboard',
+      }),
+    },
     sharingData: {
       title:
         dashboardTitle ||
@@ -197,5 +203,6 @@ export function ShowShareModal({
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,
+    toasts: notifications.toasts,
   });
 }

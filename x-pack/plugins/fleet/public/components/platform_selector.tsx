@@ -6,7 +6,6 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import styled from 'styled-components';
 import {
   EuiText,
   EuiSpacer,
@@ -46,11 +45,6 @@ interface Props {
   fleetServerHost?: string;
   onCopy?: () => void;
 }
-
-// Otherwise the copy button is over the text
-const CommandCode = styled.pre({
-  overflow: 'auto',
-});
 
 export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxCommand,
@@ -233,8 +227,9 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               css={`
                 max-width: 1100px;
               `}
+              whiteSpace="pre"
             >
-              <CommandCode>{commandsByPlatform[platform]}</CommandCode>
+              {commandsByPlatform[platform]}
             </EuiCodeBlock>
 
             <EuiSpacer size="s" />

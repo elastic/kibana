@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   RISK_SCORE_CREATE_STORED_SCRIPT,
   RISK_SCORE_DELETE_STORED_SCRIPT,
@@ -19,11 +19,10 @@ import type { CreateStoredScript, DeleteStoredScript, DeleteStoredScripts } from
 export async function createStoredScript({
   errorMessage,
   http,
-  notifications,
   options,
   renderDocLink,
   signal,
-  theme,
+  startServices: { notifications, ...startServices },
 }: CreateStoredScript) {
   const res = await http
     .put(RISK_SCORE_CREATE_STORED_SCRIPT, {
@@ -32,11 +31,12 @@ export async function createStoredScript({
       signal,
     })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications.toasts.addDanger({
         title: errorMessage ?? STORED_SCRIPT_CREATION_ERROR_MESSAGE,
-        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
-          theme$: theme?.theme$,
-        }),
+        text: toMountPoint(
+          renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message,
+          startServices
+        ),
       });
     });
 
@@ -46,11 +46,10 @@ export async function createStoredScript({
 export async function deleteStoredScript({
   errorMessage,
   http,
-  notifications,
   options,
   renderDocLink,
   signal,
-  theme,
+  startServices: { notifications, ...startServices },
 }: DeleteStoredScript) {
   const res = await http
     .delete(RISK_SCORE_DELETE_STORED_SCRIPT, {
@@ -59,11 +58,12 @@ export async function deleteStoredScript({
       signal,
     })
     .catch((e) => {
-      notifications?.toasts?.addDanger({
+      notifications.toasts.addDanger({
         title: errorMessage ?? STORED_SCRIPT_DELETION_ERROR_MESSAGE,
-        text: toMountPoint(renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message, {
-          theme$: theme?.theme$,
-        }),
+        text: toMountPoint(
+          renderDocLink ? renderDocLink(e?.body?.message) : e?.body?.message,
+          startServices
+        ),
       });
     });
 
@@ -72,19 +72,19 @@ export async function deleteStoredScript({
 
 export async function deleteStoredScripts({
   http,
-  notifications,
   signal,
   errorMessage,
   ids,
+  startServices,
 }: DeleteStoredScripts) {
   const result = await Promise.all(
     ids.map((id) => {
       return deleteStoredScript({
         http,
-        notifications,
         signal,
         errorMessage,
         options: { id },
+        startServices,
       });
     })
   );

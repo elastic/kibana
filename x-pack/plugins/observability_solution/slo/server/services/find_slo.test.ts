@@ -7,12 +7,12 @@
 
 import { ALL_VALUE, Paginated } from '@kbn/slo-schema';
 import { SLO_MODEL_VERSION } from '../../common/constants';
-import { SLO } from '../domain/models';
+import { SLODefinition } from '../domain/models';
 import { FindSLO } from './find_slo';
 import { createSLO } from './fixtures/slo';
 import { createSLORepositoryMock, createSummarySearchClientMock } from './mocks';
 import { SLORepository } from './slo_repository';
-import { SLOSummary, SummarySearchClient } from './summary_search_client';
+import { SummaryResult, SummarySearchClient } from './summary_search_client';
 
 describe('FindSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
@@ -45,6 +45,7 @@ describe('FindSLO', () => {
             "page": 1,
             "perPage": 25,
           },
+          undefined,
         ]
       `);
 
@@ -139,6 +140,7 @@ describe('FindSLO', () => {
             "page": 2,
             "perPage": 10,
           },
+          undefined,
         ]
       `);
     });
@@ -158,14 +160,14 @@ describe('FindSLO', () => {
   });
 });
 
-function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
+function summarySearchResult(slo: SLODefinition): Paginated<SummaryResult> {
   return {
     total: 1,
     perPage: 25,
     page: 1,
     results: [
       {
-        id: slo.id,
+        sloId: slo.id,
         instanceId: slo.groupBy === ALL_VALUE ? ALL_VALUE : 'host-abcde',
         groupings: {},
         summary: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { PropsWithChildren } from 'react';
 import { Observable, Subject } from 'rxjs';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
@@ -107,9 +107,7 @@ describe('Lens App', () => {
     services?: jest.Mocked<LensAppServices>;
     preloadedState?: Partial<LensAppState>;
   }) {
-    const wrappingComponent: React.FC<{
-      children: React.ReactNode;
-    }> = ({ children }) => {
+    const wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => {
       return (
         <I18nProvider>
           <KibanaContextProvider services={services}>{children}</KibanaContextProvider>
@@ -188,8 +186,8 @@ describe('Lens App', () => {
         query: { query: '', language: 'lucene' },
         filters: [pinnedFilter],
         resolvedDateRange: {
-          fromDate: '2021-01-10T04:00:00.000Z',
-          toDate: '2021-01-10T08:00:00.000Z',
+          fromDate: 'now-7d',
+          toDate: 'now',
         },
       }),
     });
@@ -1119,8 +1117,8 @@ describe('Lens App', () => {
         lens: expect.objectContaining({
           query: { query: '', language: 'lucene' },
           resolvedDateRange: {
-            fromDate: '2021-01-10T04:00:00.000Z',
-            toDate: '2021-01-10T08:00:00.000Z',
+            fromDate: 'now-7d',
+            toDate: 'now',
           },
         }),
       });
@@ -1156,8 +1154,8 @@ describe('Lens App', () => {
         lens: expect.objectContaining({
           query: { query: 'new', language: 'lucene' },
           resolvedDateRange: {
-            fromDate: '2021-01-09T04:00:00.000Z',
-            toDate: '2021-01-09T08:00:00.000Z',
+            fromDate: 'now-14d',
+            toDate: 'now-7d',
           },
         }),
       });
@@ -1456,8 +1454,8 @@ describe('Lens App', () => {
         type: 'lens/setState',
         payload: {
           resolvedDateRange: {
-            fromDate: '2021-01-10T04:00:00.000Z',
-            toDate: '2021-01-10T08:00:00.000Z',
+            fromDate: 'now-7d',
+            toDate: 'now',
           },
           searchSessionId: 'sessionId-2',
         },

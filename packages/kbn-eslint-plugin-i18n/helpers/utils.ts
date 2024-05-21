@@ -55,5 +55,5 @@ export function getTranslatableValueFromString(str: string) {
     return '';
   }
 
-  return strTrimmed;
+  return strTrimmed.replace(/'/g, "\\'");
 }

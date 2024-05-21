@@ -21,12 +21,9 @@ export const djangoLineNumbers = () => ({
 });
 
 export const django = `INSTALLED_APPS = (
-  # ${i18n.translate(
-    'xpack.apm.onboarding.djangoClient.configure.commands.addAgentComment',
-    {
-      defaultMessage: 'Add the agent to installed apps',
-    }
-  )}
+  # ${i18n.translate('xpack.apm.onboarding.djangoClient.configure.commands.addAgentComment', {
+    defaultMessage: 'Add the agent to installed apps',
+  })}
   'elasticapm.contrib.django',
   # ...
 )

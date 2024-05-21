@@ -508,7 +508,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('should authorize system actions correctly', async () => {
           const startDate = new Date().toISOString();
           const connectorId = 'system-connector-test.system-action-kibana-privileges';
-          const name = 'System action: test.system-action-kibana-privileges';
+          const name = 'Test system action with kibana privileges';
           const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
 
           /**

@@ -88,7 +88,7 @@ export function buildReferences(dataviews: Record<string, DataView>) {
 const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   return {
     [dataView.id ?? uuidv4()]: {
-      ...dataView.toSpec(),
+      ...dataView.toSpec(false),
     },
   };
 };

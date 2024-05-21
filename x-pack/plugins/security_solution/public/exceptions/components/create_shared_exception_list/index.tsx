@@ -21,6 +21,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { ErrorToastOptions, Toast, ToastInput } from '@kbn/core-notifications-browser';
@@ -153,16 +154,26 @@ export const CreateSharedListFlyout = memo(
       handleCreateSuccess,
     ]);
 
+    const createSharedExceptionListFlyoutTitleId = useGeneratedHtmlId({
+      prefix: 'createSharedExceptionListFlyout',
+    });
+
     return (
       <EuiFlyout
         ownFocus
         size="s"
         onClose={handleCloseFlyout}
         data-test-subj="createSharedExceptionListFlyout"
+        aria-labelledby={createSharedExceptionListFlyoutTitleId}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 data-test-subj="createSharedExceptionListTitle">{CREATE_SHARED_LIST_TITLE}</h2>
+            <h2
+              id={createSharedExceptionListFlyoutTitleId}
+              data-test-subj="createSharedExceptionListTitle"
+            >
+              {CREATE_SHARED_LIST_TITLE}
+            </h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

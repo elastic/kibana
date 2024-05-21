@@ -13,6 +13,8 @@ properties:
         type: string
       title:
         type: string
+      requires_root:
+        type: boolean  
     required:
       - name
       - version
@@ -50,6 +52,8 @@ properties:
     type: string
   description:
     type: string
+  overrides:
+    type: object
 required:
   - inputs
   - name

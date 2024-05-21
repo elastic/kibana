@@ -12,10 +12,13 @@ import {
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../../../common/constants';
-import { SLO } from '../../../../domain/models';
+import { SLODefinition } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
 
-export function createBurnRateRule(slo: SLO, params: Partial<BurnRateRuleParams> = {}) {
+export function createBurnRateRule(
+  slo: SLODefinition,
+  params: Partial<BurnRateRuleParams> = {}
+): BurnRateRuleParams {
   return {
     sloId: slo.id,
     windows: [

@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
-import { IndexContent } from '@kbn/index-management-plugin/public/services';
+import { IndexContent } from '@kbn/index-management';
 
 const IndexMappingsDocsLink: FunctionComponent<{ docLinks: CoreStart['docLinks'] }> = ({
   docLinks,

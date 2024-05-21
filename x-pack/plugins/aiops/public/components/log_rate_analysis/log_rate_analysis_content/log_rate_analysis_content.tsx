@@ -15,7 +15,6 @@ import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   getWindowParametersForTrigger,
   getSnappedTimestamps,
@@ -26,16 +25,16 @@ import {
   type WindowParameters,
 } from '@kbn/aiops-log-rate-analysis';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
+import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
 
 import { useData } from '../../../hooks/use_data';
+import { useDataSource } from '../../../hooks/use_data_source';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
 import {
   LogRateAnalysisResults,
   type LogRateAnalysisResultsData,
 } from '../log_rate_analysis_results';
-import type { GroupTableItem } from '../../log_rate_analysis_results_table/types';
-import { useLogRateAnalysisResultsTableRowContext } from '../../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
 
 const DEFAULT_SEARCH_QUERY: estypes.QueryDslQueryContainer = { match_all: {} };
 const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
@@ -64,10 +63,7 @@ export function getDocumentCountStatsSplitLabel(
 }
 
 export interface LogRateAnalysisContentProps {
-  /** The data view to analyze. */
-  dataView: DataView;
-  /** Timestamp for the start of the range for initial analysis */
-  initialAnalysisStart?: number | WindowParameters;
+  /** Optional time range override */
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
@@ -86,8 +82,6 @@ export interface LogRateAnalysisContentProps {
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
-  dataView,
-  initialAnalysisStart: incomingInitialAnalysisStart,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
   stickyHistogram,
@@ -97,10 +91,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   onWindowParametersChange,
   embeddingOrigin,
 }) => {
+  const { dataView } = useDataSource();
+
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
-  const [initialAnalysisStart, setInitialAnalysisStart] = useState<
-    number | WindowParameters | undefined
-  >(incomingInitialAnalysisStart);
   const [isBrushCleared, setIsBrushCleared] = useState(true);
   const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(
     LOG_RATE_ANALYSIS_TYPE.SPIKE
@@ -140,13 +133,16 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   );
 
   const {
+    autoRunAnalysis,
     currentSelectedSignificantItem,
     currentSelectedGroup,
+    setAutoRunAnalysis,
+    setInitialAnalysisStart,
     setPinnedSignificantItem,
     setPinnedGroup,
     setSelectedSignificantItem,
     setSelectedGroup,
-  } = useLogRateAnalysisResultsTableRowContext();
+  } = useLogRateAnalysisStateContext();
 
   const { documentStats, earliest, latest } = useData(
     dataView,
@@ -206,7 +202,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         }
       : undefined;
 
-  const triggerAnalysis = useCallback(() => {
+  const triggerAnalysisForManualSelection = useCallback(() => {
+    setAutoRunAnalysis(true);
+  }, [setAutoRunAnalysis]);
+
+  const triggerAnalysisForChangePoint = useCallback(() => {
     if (documentCountStats) {
       const { interval, timeRangeEarliest, timeRangeLatest, changePoint } = documentCountStats;
 
@@ -222,14 +222,37 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
         const snapTimestamps = getSnappedTimestamps(timeRangeEarliest, timeRangeLatest, interval);
         const wpSnap = getSnappedWindowParameters(wp, snapTimestamps);
 
+        triggerAnalysisForManualSelection();
         setInitialAnalysisStart(wpSnap);
       }
     }
-  }, [documentCountStats]);
+  }, [documentCountStats, setInitialAnalysisStart, triggerAnalysisForManualSelection]);
+
+  const showDocumentCountContent = documentCountStats !== undefined;
+
+  const showLogRateAnalysisResults =
+    autoRunAnalysis &&
+    earliest !== undefined &&
+    latest !== undefined &&
+    windowParameters !== undefined;
+
+  const showNoAutoRunEmptyPrompt =
+    !autoRunAnalysis &&
+    earliest !== undefined &&
+    latest !== undefined &&
+    windowParameters !== undefined;
+
+  const showSpikeDetectedEmptyPrompt =
+    windowParameters === undefined && documentCountStats?.changePoint;
+
+  const showDefaultEmptyPrompt =
+    windowParameters === undefined && documentCountStats?.changePoint === undefined;
+
+  const changePointType = documentCountStats?.changePoint?.type;
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
-      {documentCountStats !== undefined && (
+      {showDocumentCountContent && (
         <DocumentCountContent
           brushSelectionUpdateHandler={brushSelectionUpdate}
           documentCountStats={documentCountStats}
@@ -241,16 +264,14 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           isBrushCleared={isBrushCleared}
           totalCount={totalCount}
           sampleProbability={sampleProbability}
-          initialAnalysisStart={initialAnalysisStart}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           barStyleAccessor={barStyleAccessor}
         />
       )}
       <EuiHorizontalRule />
-      {earliest !== undefined && latest !== undefined && windowParameters !== undefined && (
+      {showLogRateAnalysisResults && (
         <LogRateAnalysisResults
-          dataView={dataView}
           analysisType={logRateAnalysisType}
           earliest={earliest}
           isBrushCleared={isBrushCleared}
@@ -266,7 +287,47 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           embeddingOrigin={embeddingOrigin}
         />
       )}
-      {windowParameters === undefined && documentCountStats?.changePoint && (
+      {showNoAutoRunEmptyPrompt && (
+        <EuiEmptyPrompt
+          color="subdued"
+          hasShadow={false}
+          hasBorder={false}
+          css={{ minWidth: '100%' }}
+          title={undefined}
+          titleSize="xs"
+          body={
+            <>
+              <p>
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptBody"
+                  defaultMessage="Next you can fine tune the time ranges for baseline and deviation by dragging the handles of the brushes. Once you're ready, click the button 'Run analysis' below."
+                />
+              </p>
+              <EuiButton
+                data-test-subj="aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton"
+                onClick={triggerAnalysisForManualSelection}
+              >
+                <FormattedMessage
+                  id="xpack.aiops.logRateAnalysis.page.noAutoRunPromptRunAnalysisButton"
+                  defaultMessage="Run analysis"
+                />
+              </EuiButton>{' '}
+              <EuiButton
+                data-test-subj="aiopsClearSelectionBadge"
+                onClick={() => clearSelection()}
+                color="text"
+              >
+                <FormattedMessage
+                  id="xpack.aiops.clearSelectionLabel"
+                  defaultMessage="Clear selection"
+                />
+              </EuiButton>
+            </>
+          }
+          data-test-subj="aiopsChangePointDetectedPrompt"
+        />
+      )}
+      {showSpikeDetectedEmptyPrompt && (
         <EuiEmptyPrompt
           color="subdued"
           hasShadow={false}
@@ -274,20 +335,20 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           css={{ minWidth: '100%' }}
           title={
             <h2>
-              {documentCountStats?.changePoint.type === LOG_RATE_ANALYSIS_TYPE.SPIKE && (
+              {changePointType === LOG_RATE_ANALYSIS_TYPE.SPIKE && (
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointSpikePromptTitle"
                   defaultMessage="Log rate spike detected"
                 />
               )}
-              {documentCountStats?.changePoint.type === LOG_RATE_ANALYSIS_TYPE.DIP && (
+              {changePointType === LOG_RATE_ANALYSIS_TYPE.DIP && (
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointDipPromptTitle"
                   defaultMessage="Log rate dip detected"
                 />
               )}
-              {documentCountStats?.changePoint.type !== LOG_RATE_ANALYSIS_TYPE.SPIKE &&
-                documentCountStats?.changePoint.type !== LOG_RATE_ANALYSIS_TYPE.DIP && (
+              {changePointType !== LOG_RATE_ANALYSIS_TYPE.SPIKE &&
+                changePointType !== LOG_RATE_ANALYSIS_TYPE.DIP && (
                   <FormattedMessage
                     id="xpack.aiops.logRateAnalysis.page.changePointOtherPromptTitle"
                     defaultMessage="Log rate change point detected"
@@ -301,12 +362,12 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
               <p>
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointPromptBody"
-                  defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or dip."
+                  defaultMessage="The log rate analysis feature identifies statistically significant field/value combinations that contribute to a log rate spike or dip. To analyse the area highlighted in the chart, click the button below. For custom analysis of other areas, start by clicking on any of the non-highlighted bars in the histogram chart."
                 />
               </p>
               <EuiButton
                 data-test-subj="aiopsLogRateAnalysisContentRunAnalysisButton"
-                onClick={triggerAnalysis}
+                onClick={triggerAnalysisForChangePoint}
               >
                 <FormattedMessage
                   id="xpack.aiops.logRateAnalysis.page.changePointPromptRunAnalysisButton"
@@ -318,7 +379,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           data-test-subj="aiopsChangePointDetectedPrompt"
         />
       )}
-      {windowParameters === undefined && documentCountStats?.changePoint === undefined && (
+      {showDefaultEmptyPrompt && (
         <EuiEmptyPrompt
           color="subdued"
           hasShadow={false}
@@ -328,7 +389,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
             <h2>
               <FormattedMessage
                 id="xpack.aiops.logRateAnalysis.page.emptyPromptTitle"
-                defaultMessage="Click a spike or dip in the histogram chart to start the analysis."
+                defaultMessage="Start by clicking a spike or dip in the histogram chart."
               />
             </h2>
           }

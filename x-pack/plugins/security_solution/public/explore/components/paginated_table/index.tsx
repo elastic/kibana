@@ -117,8 +117,7 @@ export interface BasicTableProps<T> {
   loading: boolean;
   loadPage: (activePage: number) => void;
   onChange?: (criteria: Criteria) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  pageOfItems: any[];
+  pageOfItems: unknown[];
   setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   sorting?: SortingBasicTable;
@@ -292,6 +291,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
           }
           title={headerTitle}
           tooltip={headerTooltip}
+          inspectMultiple
         >
           {!loadingInitial && headerSupplement}
         </HeaderSection>
@@ -397,6 +397,6 @@ export const PaginationEuiFlexItem = styled(EuiFlexItem)`
       right: ${({ theme }) => theme.eui.euiSizeL};
     }
   }
-`;
+` as typeof EuiFlexItem;
 
 PaginationEuiFlexItem.displayName = 'PaginationEuiFlexItem';

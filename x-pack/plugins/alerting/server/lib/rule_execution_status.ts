@@ -76,7 +76,7 @@ export function executionStatusFromState({
     // These errors are reported by ruleResultService.addLastRunError, therefore they are landed in successful execution map
     error = {
       reason: RuleExecutionStatusErrorReasons.Unknown,
-      message: errorsFromLastRun.join(','),
+      message: errorsFromLastRun.map((lastRunError) => lastRunError.message).join(','),
     };
   }
 

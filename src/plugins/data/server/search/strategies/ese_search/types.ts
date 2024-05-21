@@ -11,7 +11,7 @@ import type {
   SearchResponse,
   ShardStatistics,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchRequestParams } from '../../../../common';
+import type { ISearchRequestParams } from '@kbn/search-types';
 
 export interface IAsyncSearchRequestParams extends ISearchRequestParams {
   keep_alive?: AsyncSearchGetRequest['keep_alive'];
@@ -27,6 +27,6 @@ export interface AsyncSearchResponse<T = unknown> {
   is_running: boolean;
 }
 export interface AsyncSearchStatusResponse extends Omit<AsyncSearchResponse, 'response'> {
-  completion_status: number;
+  completion_status?: number;
   _shards: ShardStatistics;
 }

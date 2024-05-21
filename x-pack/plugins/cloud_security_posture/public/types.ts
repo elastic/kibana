@@ -14,7 +14,7 @@ import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { ToastsStart } from '@kbn/core/public';
+import { CoreStart, ToastsStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -89,3 +89,8 @@ export interface CspSecuritySolutionContext {
 
   useUpsellingComponent: (id: UpsellingSectionId) => React.ComponentType | null;
 }
+
+export type CloudSecurityPostureStartServices = Pick<
+  CoreStart,
+  'notifications' | 'analytics' | 'i18n' | 'theme'
+>;

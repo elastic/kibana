@@ -33,7 +33,7 @@ import type {
 export interface ProfilingPluginPublicSetupDeps {
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
   data: DataPublicPluginSetup;
   charts: ChartsPluginSetup;
@@ -46,7 +46,7 @@ export interface ProfilingPluginPublicSetupDeps {
 export interface ProfilingPluginPublicStartDeps {
   observability: ObservabilityPublicStart;
   observabilityShared: ObservabilitySharedPluginStart;
-  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   charts: ChartsPluginStart;

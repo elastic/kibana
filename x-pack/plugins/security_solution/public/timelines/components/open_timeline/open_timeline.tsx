@@ -225,7 +225,7 @@ export const OpenTimeline = React.memo<OpenTimelineProps>(
           title={i18n.IMPORT_TIMELINE}
         />
 
-        <div className={OPEN_TIMELINE_CLASS_NAME}>
+        <div data-test-subj="timelines-page-container" className={OPEN_TIMELINE_CLASS_NAME}>
           {!!timelineFilter && timelineFilter}
           <SearchRow
             data-test-subj="search-row"

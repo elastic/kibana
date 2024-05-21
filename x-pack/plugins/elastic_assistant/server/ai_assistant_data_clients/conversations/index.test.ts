@@ -33,7 +33,7 @@ describe('AIAssistantConversationsDataClient', () => {
       logger,
       elasticsearchClientPromise: Promise.resolve(clusterClient),
       spaceId: 'default',
-      indexPatternsResorceName: '',
+      indexPatternsResourceName: '',
       currentUser: mockUser1,
       kibanaVersion: '8.8.0',
     };
@@ -177,6 +177,7 @@ describe('AIAssistantConversationsDataClient', () => {
       lang: 'painless',
       params: {
         api_config: {
+          action_type_id: '.gen-ai',
           connector_id: '2',
           default_system_prompt_id: 'Default',
           model: 'model',

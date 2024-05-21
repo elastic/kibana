@@ -6,7 +6,7 @@
  */
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { DynamicTool } from 'langchain/tools';
+import { DynamicTool } from '@langchain/core/tools';
 
 import { requestHasRequiredAnonymizationParams } from '@kbn/elastic-assistant-plugin/server/lib/langchain/helpers';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
@@ -36,7 +36,6 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
       description: ALERT_COUNTS_TOOL_DESCRIPTION,
       func: async () => {
         const query = getAlertsCountQuery(alertsIndexPattern);
-
         const result = await esClient.search<SearchResponse>(query);
 
         return JSON.stringify(result);

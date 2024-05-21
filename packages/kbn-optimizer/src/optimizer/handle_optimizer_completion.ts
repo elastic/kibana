@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { createFailError } from '@kbn/dev-cli-errors';
 
 import { pipeClosure } from '../common';

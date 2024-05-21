@@ -10,12 +10,13 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   SecurityRequestHandlerContext,
   AuthcRequestHandlerContext,
+  AuditRequestHandlerContext,
 } from '@kbn/core-security-server';
 import type { InternalSecurityServiceStart } from './internal_contracts';
 
 export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerContext {
   #authc?: AuthcRequestHandlerContext;
-
+  #audit?: AuditRequestHandlerContext;
   constructor(
     private readonly securityStart: InternalSecurityServiceStart,
     private readonly request: KibanaRequest
@@ -28,5 +29,14 @@ export class CoreSecurityRouteHandlerContext implements SecurityRequestHandlerCo
       };
     }
     return this.#authc;
+  }
+
+  public get audit() {
+    if (this.#audit == null) {
+      this.#audit = {
+        logger: this.securityStart.audit.asScoped(this.request),
+      };
+    }
+    return this.#audit;
   }
 }

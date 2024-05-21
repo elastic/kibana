@@ -60,7 +60,6 @@ const DEFAULT_MODELS: MlModel[] = [
 ];
 
 const DEFAULT_PIPELINES: FetchMlInferencePipelinesResponse = {
-  // @ts-expect-error pipeline._meta defined as mandatory
   'my-pipeline': {
     processors: [
       {
@@ -131,7 +130,6 @@ describe('PipelineSelectLogic', () => {
         jest.spyOn(PipelineSelectLogic.actions, 'setInferencePipelineConfiguration');
 
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
-          // @ts-expect-error pipeline._meta defined as mandatory
           'my-pipeline': {
             processors: [
               {
@@ -186,7 +184,6 @@ describe('PipelineSelectLogic', () => {
       });
       it('returns disabled pipeline option if missing source fields', () => {
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
-          // @ts-expect-error pipeline._meta defined as mandatory
           'my-pipeline': {
             processors: [
               {
@@ -235,7 +232,6 @@ describe('PipelineSelectLogic', () => {
       });
       it('returns enabled pipeline option if model is redacted', () => {
         FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
-          // @ts-expect-error pipeline._meta defined as mandatory
           'my-pipeline': {
             processors: [
               {

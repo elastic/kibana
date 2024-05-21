@@ -5,14 +5,19 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   getSentinelOneAgentId,
   isAlertFromSentinelOneEvent,
 } from '../../../common/utils/sentinelone_alert_check';
-import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
+import {
+  getCrowdstrikeAgentId,
+  isAlertFromCrowdstrikeEvent,
+} from '../../../common/utils/crowdstrike_alert_check';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
+import type { AgentStatusInfo } from '../../../../common/endpoint/types';
 import { HostStatus } from '../../../../common/endpoint/types';
 import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
 import { useEndpointHostIsolationStatus } from '../../containers/detection_engine/alerts/use_host_isolation_status';
@@ -20,7 +25,7 @@ import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { getFieldValue } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
-import { useGetSentinelOneAgentStatus } from './use_sentinelone_host_isolation';
+import { useAgentStatusHook } from '../../../management/hooks/agents/use_get_agent_status';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;
@@ -35,11 +40,18 @@ export const useHostIsolationAction = ({
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
+  const useAgentStatus = useAgentStatusHook();
+
   const hasActionsAllPrivileges = useKibana().services.application?.capabilities?.actions?.save;
 
+  const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );
+  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
+
   const { canIsolateHost, canUnIsolateHost } = useUserPrivileges().endpointPrivileges;
 
   const isEndpointAlert = useMemo(
@@ -52,12 +64,18 @@ export const useHostIsolationAction = ({
     [detailsData]
   );
 
+  const isCrowdstrikeAlert = useMemo(
+    () => isAlertFromCrowdstrikeEvent({ data: detailsData || [] }),
+    [detailsData]
+  );
+
   const agentId = useMemo(
     () => getFieldValue({ category: 'agent', field: 'agent.id' }, detailsData),
     [detailsData]
   );
 
   const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(detailsData), [detailsData]);
+  const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(detailsData), [detailsData]);
 
   const hostOsFamily = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),
@@ -79,20 +97,33 @@ export const useHostIsolationAction = ({
     agentType: sentinelOneAgentId ? 'sentinel_one' : 'endpoint',
   });
 
-  const { data: sentinelOneAgentData } = useGetSentinelOneAgentStatus([sentinelOneAgentId || '']);
+  const { data: sentinelOneAgentData } = useAgentStatus(
+    [sentinelOneAgentId || ''],
+    'sentinel_one',
+    {
+      enabled: !!sentinelOneAgentId && sentinelOneManualHostActionsEnabled,
+    }
+  );
   const sentinelOneAgentStatus = sentinelOneAgentData?.[`${sentinelOneAgentId}`];
+  // TODO TC: Add support for Crowdstrike agent status - ongoing work by Ash :+1:
 
   const isHostIsolated = useMemo(() => {
     if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
       return sentinelOneAgentStatus?.isolated;
+    }
+    if (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert) {
+      return false;
+      // return crowdstrikeAgentStatus?.isolated;
     }
 
     return isIsolated;
   }, [
     isIsolated,
     isSentinelOneAlert,
+    isCrowdstrikeAlert,
     sentinelOneAgentStatus?.isolated,
     sentinelOneManualHostActionsEnabled,
+    crowdstrikeManualHostActionsEnabled,
   ]);
 
   const doesHostSupportIsolation = useMemo(() => {
@@ -129,19 +160,36 @@ export const useHostIsolationAction = ({
 
   const isIsolationActionDisabled = useMemo(() => {
     if (sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
-      return (
-        !sentinelOneAgentStatus ||
-        sentinelOneAgentStatus?.isUninstalled ||
-        sentinelOneAgentStatus?.isPendingUninstall
-      );
+      // 8.15 use FF for computing if action is enabled
+      if (agentStatusClientEnabled) {
+        return sentinelOneAgentStatus?.status === HostStatus.UNENROLLED;
+      }
+
+      // else use the old way
+      if (!sentinelOneAgentStatus) {
+        return true;
+      }
+
+      const { isUninstalled, isPendingUninstall } =
+        sentinelOneAgentStatus as AgentStatusInfo[string];
+
+      return isUninstalled || isPendingUninstall;
+    }
+
+    if (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAlert) {
+      // TODO TC: crowdstrikeAgentStatus functionality is going to be implemented in another PR
+      return false;
     }
 
     return agentStatus === HostStatus.UNENROLLED;
   }, [
     agentStatus,
+    agentStatusClientEnabled,
     isSentinelOneAlert,
     sentinelOneAgentStatus,
     sentinelOneManualHostActionsEnabled,
+    crowdstrikeManualHostActionsEnabled,
+    isCrowdstrikeAlert,
   ]);
 
   const menuItems = useMemo(
@@ -173,6 +221,16 @@ export const useHostIsolationAction = ({
     }
 
     if (
+      isCrowdstrikeAlert &&
+      crowdstrikeManualHostActionsEnabled &&
+      crowdstrikeAgentId &&
+      // status &&
+      hasActionsAllPrivileges
+    ) {
+      return menuItems;
+    }
+
+    if (
       isEndpointAlert &&
       doesHostSupportIsolation &&
       !loadingHostIsolationStatus &&
@@ -196,5 +254,8 @@ export const useHostIsolationAction = ({
     sentinelOneAgentStatus,
     sentinelOneAgentId,
     sentinelOneManualHostActionsEnabled,
+    crowdstrikeAgentId,
+    isCrowdstrikeAlert,
+    crowdstrikeManualHostActionsEnabled,
   ]);
 };

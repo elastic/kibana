@@ -6,10 +6,10 @@
  */
 
 import {
-  getServiceGroupFields,
-  getServiceGroupFieldsAgg,
+  getApmAlertSourceFields,
+  getApmAlertSourceFieldsAgg,
   flattenSourceDoc,
-} from './get_service_group_fields';
+} from './get_apm_alert_source_fields';
 
 const mockSourceObj = {
   service: {
@@ -18,6 +18,12 @@ const mockSourceObj = {
     language: {
       name: 'typescript',
     },
+  },
+  container: {
+    id: 'my-container',
+  },
+  host: {
+    name: 'my-host',
   },
   labels: {
     team: 'test',
@@ -38,10 +44,12 @@ const mockBucket = {
 
 describe('getSourceFields', () => {
   it('should return a flattened record of fields and values for a given bucket except for labels', () => {
-    const result = getServiceGroupFields(mockBucket);
+    const result = getApmAlertSourceFields(mockBucket);
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
+        "container.id": "my-container",
+        "host.name": "my-host",
         "labels": Object {
           "event": Array [
             "event-0",
@@ -59,7 +67,7 @@ describe('getSourceFields', () => {
 
 describe('getSourceFieldsAgg', () => {
   it('should create a agg for specific source fields', () => {
-    const agg = getServiceGroupFieldsAgg();
+    const agg = getApmAlertSourceFieldsAgg();
     expect(agg).toMatchInlineSnapshot(`
       Object {
         "source_fields": Object {
@@ -81,7 +89,7 @@ describe('getSourceFieldsAgg', () => {
   });
 
   it('should accept options for top_hits options', () => {
-    const agg = getServiceGroupFieldsAgg({
+    const agg = getApmAlertSourceFieldsAgg({
       sort: [{ 'transaction.duration.us': { order: 'desc' } }],
     });
     expect(agg).toMatchInlineSnapshot(`
@@ -118,6 +126,8 @@ describe('flattenSourceDoc', () => {
     expect(result).toMatchInlineSnapshot(`
       Object {
         "agent.name": "nodejs",
+        "container.id": "my-container",
+        "host.name": "my-host",
         "labels": Object {
           "event": Array [
             "event-0",

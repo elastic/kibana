@@ -38,7 +38,8 @@ export const serverless: Command = {
       --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
       --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
-      --basePath          Path to the directory where the ES cluster will store data
+      --basePath          Full path where the ES cluster will store data [default: <REPO>/.es]
+      --dataPath          Directory in basePath where the ES cluster will store data [default: stateless]
       --clean             Remove existing file system object store before running
       --kill              Kill running ES serverless nodes if detected on startup
       --host              Publish ES docker container on additional host IP
@@ -87,12 +88,22 @@ export const serverless: Command = {
         esArgs: 'E',
         files: 'F',
         projectType: 'project-type',
+        dataPath: 'data-path',
       },
 
-      string: ['projectType', 'tag', 'image', 'basePath', 'resources', 'host', 'kibanaUrl'],
+      string: [
+        'projectType',
+        'tag',
+        'image',
+        'basePath',
+        'resources',
+        'host',
+        'kibanaUrl',
+        'dataPath',
+      ],
       boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
-      default: { ...defaults, kibanaUrl: 'https://localhost:5601/' },
+      default: { ...defaults, kibanaUrl: 'https://localhost:5601/', dataPath: 'stateless' },
     }) as unknown as ServerlessOptions;
 
     if (!options.projectType) {

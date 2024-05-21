@@ -17,7 +17,11 @@ import type {
   Datatable,
   ExpressionRendererEvent,
 } from '@kbn/expressions-plugin/public';
-import type { Configuration, NavigateToLensContext } from '@kbn/visualizations-plugin/common';
+import type {
+  Configuration,
+  NavigateToLensContext,
+  SeriesType,
+} from '@kbn/visualizations-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type {
   UiActionsStart,
@@ -61,6 +65,16 @@ import type { LensInspector } from './lens_inspector_service';
 import type { DataViewsState } from './state_management/types';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import type { Document } from './persistence/saved_object_store';
+
+export type StartServices = Pick<
+  CoreStart,
+  // used extensively in lens
+  | 'overlays'
+  // used for react rendering utilities
+  | 'analytics'
+  | 'i18n'
+  | 'theme'
+>;
 
 export interface IndexPatternRef {
   id: string;
@@ -644,7 +658,14 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   >;
   core: Pick<
     CoreStart,
-    'http' | 'notifications' | 'uiSettings' | 'overlays' | 'theme' | 'docLinks'
+    | 'http'
+    | 'notifications'
+    | 'uiSettings'
+    | 'overlays'
+    | 'analytics'
+    | 'i18n'
+    | 'theme'
+    | 'docLinks'
   >;
   dateRange: DateRange;
   dimensionGroups: VisualizationDimensionGroupConfig[];
@@ -934,6 +955,7 @@ export interface FramePublicAPI {
   filters: Filter[];
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
+  absDateRange: DateRange;
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
@@ -1000,7 +1022,8 @@ interface VisualizationStateFromContextChangeProps {
 export type AddLayerFunction<T = unknown> = (
   layerType: LayerType,
   extraArg?: T,
-  ignoreInitialValues?: boolean
+  ignoreInitialValues?: boolean,
+  seriesType?: SeriesType
 ) => void;
 
 export type AnnotationGroups = Record<string, EventAnnotationGroupConfig>;
@@ -1024,7 +1047,8 @@ export type RegisterLibraryAnnotationGroupFunction = (groupInfo: {
   id: string;
   group: EventAnnotationGroupConfig;
 }) => void;
-interface AddLayerButtonProps {
+interface AddLayerButtonProps<T> {
+  state: T;
   supportedLayers: VisualizationLayerDescription[];
   addLayer: AddLayerFunction;
   ensureIndexPattern: (specOrId: DataViewSpec | string) => Promise<void>;
@@ -1110,7 +1134,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     layerId: string,
     type: LayerType,
     indexPatternId: string,
-    extraArg?: ExtraAppendLayerArg
+    extraArg?: ExtraAppendLayerArg,
+    seriesType?: SeriesType
   ) => T;
 
   /** Retrieve a list of supported layer types with initialization data */
@@ -1254,8 +1279,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     label: string;
   }) => null | ReactElement<{ columnId: string; label: string }>;
   getAddLayerButtonComponent?: (
-    props: AddLayerButtonProps
-  ) => null | ReactElement<AddLayerButtonProps>;
+    props: AddLayerButtonProps<T>
+  ) => null | ReactElement<AddLayerButtonProps<T>>;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers
    */

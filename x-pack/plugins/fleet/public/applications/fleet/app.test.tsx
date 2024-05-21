@@ -35,6 +35,7 @@ describe('AppRoutes', () => {
           fleet: {
             readAgents: true,
           },
+          integrations: {},
         },
       },
       {
@@ -44,6 +45,7 @@ describe('AppRoutes', () => {
           'You are not authorized to access that page. It requires the Agents Read Kibana privilege for Fleet.',
         authz: {
           fleet: {},
+          integrations: {},
         },
       },
       {
@@ -54,6 +56,7 @@ describe('AppRoutes', () => {
           fleet: {
             readAgentPolicies: true,
           },
+          integrations: {},
         },
       },
       {
@@ -63,6 +66,7 @@ describe('AppRoutes', () => {
           'You are not authorized to access that page. It requires the Agent policies Read Kibana privilege for Fleet.',
         authz: {
           fleet: {},
+          integrations: {},
         },
       },
       {
@@ -73,6 +77,7 @@ describe('AppRoutes', () => {
           fleet: {
             readSettings: true,
           },
+          integrations: {},
         },
       },
       {
@@ -82,6 +87,7 @@ describe('AppRoutes', () => {
           'You are not authorized to access that page. It requires the Settings Read Kibana privilege for Fleet.',
         authz: {
           fleet: {},
+          integrations: {},
         },
       },
     ];

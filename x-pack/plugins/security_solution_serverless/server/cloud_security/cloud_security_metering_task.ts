@@ -17,6 +17,7 @@ import {
   KSPM,
   METERING_CONFIGS,
   THRESHOLD_MINUTES,
+  BILLABLE_ASSETS_CONFIG,
 } from './constants';
 import type { Tier, UsageRecord } from '../types';
 import type {
@@ -148,9 +149,18 @@ export const getSearchQueryByCloudSecuritySolution = (
   }
 
   if (cloudSecuritySolution === CSPM || cloudSecuritySolution === KSPM) {
+    const billableAssetsConfig = BILLABLE_ASSETS_CONFIG[cloudSecuritySolution];
+
     mustFilters.push({
       term: {
         'rule.benchmark.posture_type': cloudSecuritySolution,
+      },
+    });
+
+    // filter in only billable assets
+    mustFilters.push({
+      terms: {
+        [billableAssetsConfig.filter_attribute]: billableAssetsConfig.values,
       },
     });
   }

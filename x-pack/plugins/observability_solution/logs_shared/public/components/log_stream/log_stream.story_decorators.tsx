@@ -8,18 +8,18 @@
 import type { StoryContext } from '@storybook/react';
 import React from 'react';
 import { defer, of, Subject } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { delay } from 'rxjs';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ES_SEARCH_STRATEGY,
   FieldSpec,
 } from '@kbn/data-plugin/common';
-import {
-  IEsSearchResponse,
-  IKibanaSearchRequest,
+import type {
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-} from '@kbn/data-plugin/public';
+  IEsSearchResponse,
+} from '@kbn/search-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { getLogViewResponsePayloadRT } from '../../../common/http_api';
 import { defaultLogViewAttributes } from '../../../common/log_views';

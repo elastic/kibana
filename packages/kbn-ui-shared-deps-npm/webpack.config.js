@@ -60,6 +60,7 @@ module.exports = (_, argv) => {
         // modules from npm
         '@elastic/charts',
         '@elastic/eui',
+        '@elastic/eui/optimize/es/components/provider/nested',
         '@elastic/eui/optimize/es/services',
         '@elastic/eui/optimize/es/services/format',
         '@elastic/eui/dist/eui_charts_theme',
@@ -94,7 +95,6 @@ module.exports = (_, argv) => {
         'react',
         'reselect',
         'rxjs',
-        'rxjs/operators',
         'styled-components',
         'tslib',
         'uuid',

@@ -49,6 +49,7 @@ jest.mock('@elastic/eui', () => {
 
       return original.useIsWithinBreakpoints(breakpoints);
     }),
+    useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
   };
 });
 
@@ -236,14 +237,29 @@ describe('Discover flyout', function () {
     expect(props.setExpandedDoc).not.toHaveBeenCalled();
   });
 
-  it('should not render single/surrounding views for text based', async () => {
+  it('should not navigate with arrow keys through documents if an input is in focus', async () => {
+    mockFlyoutCustomization.Content = () => {
+      return <input data-test-subj="flyoutCustomInput" />;
+    };
+
+    const { component, props } = await mountComponent({});
+    findTestSubject(component, 'flyoutCustomInput').simulate('keydown', {
+      key: 'ArrowRight',
+    });
+    findTestSubject(component, 'flyoutCustomInput').simulate('keydown', {
+      key: 'ArrowLeft',
+    });
+    expect(props.setExpandedDoc).not.toHaveBeenCalled();
+  });
+
+  it('should not render single/surrounding views for ES|QL', async () => {
     const { component } = await mountComponent({
       query: { esql: 'FROM indexpattern' },
     });
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
     const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
-    expect(flyoutTitle.text()).toBe('Row');
+    expect(flyoutTitle.text()).toBe('Result');
   });
 
   describe('with applied customizations', () => {

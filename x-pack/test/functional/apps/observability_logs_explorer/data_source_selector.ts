@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects(['common', 'discover', 'observabilityLogsExplorer']);
 
   const noIntegrationsTitle = 'No integrations found';
@@ -772,11 +773,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             expect(url).to.contain(`/app/discover`);
           });
 
-          await retry.try(async () => {
-            expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.eql(
-              expectedDataViews[2]
-            );
-          });
+          await dataViews.waitForSwitcherToBe(expectedDataViews[2]);
         });
       });
 

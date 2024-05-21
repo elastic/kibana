@@ -34,19 +34,14 @@ interface Props {
   supportAIAssistant?: boolean;
 }
 export const ContextualInsightProcessRow = ({ command }: { command: string }) => {
-  const {
-    observabilityAIAssistant: {
-      ObservabilityAIAssistantContextualInsight,
-      getContextualInsightMessages,
-    },
-  } = useKibanaContextForPlugin().services;
+  const { observabilityAIAssistant } = useKibanaContextForPlugin().services;
 
   const explainProcessMessages = useMemo<Message[] | undefined>(() => {
-    if (!command) {
+    if (!command || !observabilityAIAssistant) {
       return undefined;
     }
 
-    return getContextualInsightMessages({
+    return observabilityAIAssistant.getContextualInsightMessages({
       message: `I am a software engineer. I am trying to understand what this process running on my
       machine does.`,
       instructions: `Your task is to first describe what the process is and what its general use cases are. If I also provide you
@@ -88,14 +83,15 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
       Process: ${command}
       Explanation:`,
     });
-  }, [command, getContextualInsightMessages]);
+  }, [command, observabilityAIAssistant]);
   return (
     <>
-      {ObservabilityAIAssistantContextualInsight && explainProcessMessages ? (
+      {observabilityAIAssistant?.ObservabilityAIAssistantContextualInsight &&
+      explainProcessMessages ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ObservabilityAIAssistantContextualInsight
+              <observabilityAIAssistant.ObservabilityAIAssistantContextualInsight
                 title={explainProcessMessageTitle}
                 messages={explainProcessMessages}
               />

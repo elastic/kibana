@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { UserProfilesKibanaProvider } from '@kbn/user-profile-components';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { useSolutionNavUserProfileToggle } from './use_solution_nav_userprofile_toggle';
 

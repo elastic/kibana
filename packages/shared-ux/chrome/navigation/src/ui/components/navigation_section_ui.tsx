@@ -184,7 +184,7 @@ const nodeToEuiCollapsibleNavProps = (
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
-  const { id, path, href, renderAs } = navNode;
+  const { id, path, href, renderAs, isCollapsible = DEFAULT_IS_COLLAPSIBLE } = navNode;
   const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
 
   const isAccordion = hasChildren && !isItem;
@@ -222,6 +222,9 @@ const nodeToEuiCollapsibleNavProps = (
   }
 
   const onClick = (e: React.MouseEvent) => {
+    // Do not navigate if it is a collapsible accordion, link will be used in the breadcrumb
+    if (isAccordion && isCollapsible) return;
+
     if (href !== undefined) {
       e.preventDefault();
       navigateToUrl(href);
@@ -318,15 +321,9 @@ const nodeToEuiCollapsibleNavProps = (
   return { items, isVisible };
 };
 
-// Temporary solution to prevent showing the outline when the page load when the
-// accordion is auto-expanded if one of its children is active
-// Once https://github.com/elastic/eui/pull/7314 is released in Kibana we can
-// safely remove this CSS class.
 const className = css`
-  .euiAccordion__childWrapper,
-  .euiAccordion__children,
-  .euiCollapsibleNavAccordion__children {
-    outline: none;
+  .euiAccordion__childWrapper {
+    transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
   }
 `;
 

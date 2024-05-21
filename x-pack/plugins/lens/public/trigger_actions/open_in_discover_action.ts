@@ -26,8 +26,8 @@ export const createOpenInDiscoverAction = (
     order: 19, // right after Inspect which is 20
     getIconType: () => 'popout',
     getDisplayName: () =>
-      i18n.translate('xpack.lens.app.exploreDataInDiscover', {
-        defaultMessage: 'Explore data in Discover',
+      i18n.translate('xpack.lens.action.exploreInDiscover', {
+        defaultMessage: 'Explore in Discover',
       }),
     getHref: async (context: EmbeddableApiContext) => {
       const { getHref } = await getDiscoverHelpersAsync();

@@ -7,10 +7,10 @@
  */
 
 import { BehaviorSubject, Subject } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
+import { take, filter } from 'rxjs';
 import supertest from 'supertest';
 import { Server as HapiServer } from '@hapi/hapi';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
@@ -28,7 +28,7 @@ describe('ServerMetricsCollector', () => {
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
 
   beforeEach(async () => {
-    server = createHttpServer();
+    server = createHttpService();
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
     const contextSetup = contextServiceMock.createSetupContract();
     const httpSetup = await server.setup({
@@ -116,7 +116,7 @@ describe('ServerMetricsCollector', () => {
     // Subscribe to the aborted$ event
     const waitFor1stAbort = disconnectAborted$.pipe(take(1)).toPromise();
 
-    discoReq1.abort();
+    void discoReq1.abort();
 
     // Wait for the aborted$ event
     await waitFor1stAbort;
@@ -132,7 +132,7 @@ describe('ServerMetricsCollector', () => {
     // Subscribe to the aborted$ event
     const waitFor2ndAbort = disconnectAborted$.pipe(take(1)).toPromise();
 
-    discoReq2.abort();
+    void discoReq2.abort();
 
     // Wait for the aborted$ event
     await waitFor2ndAbort;

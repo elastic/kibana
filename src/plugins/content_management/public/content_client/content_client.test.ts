@@ -7,7 +7,7 @@
  */
 
 import { lastValueFrom } from 'rxjs';
-import { takeWhile, toArray } from 'rxjs/operators';
+import { takeWhile, toArray } from 'rxjs';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import { ContentClient } from './content_client';
 import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, MSearchIn } from '../../common';

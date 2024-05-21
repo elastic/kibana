@@ -17,12 +17,12 @@ import { ALERTS_URL } from '../../../urls/navigation';
 import { getTimeline } from '../../../objects/timeline';
 import {
   GET_TIMELINE_GRID_CELL,
-  TIMELINE_FILTER_FOR,
-  TIMELINE_FILTER_OUT,
   TIMELINE_EVENT,
   TIMELINE_FILTER_BADGE_ENABLED,
+  HOVER_ACTIONS,
 } from '../../../screens/timeline';
 
+const mockTimeline = getTimeline();
 describe(
   `timleine cell actions`,
   {
@@ -34,18 +34,18 @@ describe(
       visitWithTimeRange(ALERTS_URL);
       openTimelineUsingToggle();
       createNewTimeline();
-      addNameAndDescriptionToTimeline(getTimeline());
+      addNameAndDescriptionToTimeline(mockTimeline);
       populateTimeline();
     });
     it('filter in', () => {
       cy.get(GET_TIMELINE_GRID_CELL('event.category')).trigger('mouseover');
-      cy.get(TIMELINE_FILTER_FOR).should('be.visible').click();
+      cy.get(HOVER_ACTIONS.FILTER_FOR).should('be.visible').click();
       cy.get(TIMELINE_FILTER_BADGE_ENABLED).should('be.visible');
     });
 
     it('filter out', () => {
       cy.get(GET_TIMELINE_GRID_CELL('event.category')).trigger('mouseover');
-      cy.get(TIMELINE_FILTER_OUT).should('be.visible').click();
+      cy.get(HOVER_ACTIONS.FILTER_OUT).should('be.visible').click();
       cy.get(TIMELINE_EVENT).should('not.exist');
     });
   }

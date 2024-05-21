@@ -1,7 +1,8 @@
 E
 
-
-Euler’s number.
+Syntax
+ParametersDescriptionReturns Euler’s number.Supported types
+Example
 ```esql
 ROW E()
 ```

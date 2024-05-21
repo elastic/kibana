@@ -44,6 +44,7 @@ const defaultProps = {
   actionTypeRegistry,
   onClose,
   onSelect,
+  actionTypeSelectorInline: false,
 };
 
 describe('ActionTypeSelectorModal', () => {

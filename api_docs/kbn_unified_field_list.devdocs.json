@@ -83,7 +83,7 @@
           "\nA top level wrapper for field list components (filters and field list groups)"
         ],
         "signature": [
-          "({ \"data-test-subj\": dataTestSubject, isProcessing, prepend, append, className, children, }: React.PropsWithChildren<",
+          "({ \"data-test-subj\": dataTestSubject, isProcessing, prepend, append, className, children, }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "common",
@@ -91,7 +91,7 @@
             "section": "def-common.FieldListProps",
             "text": "FieldListProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
         "deprecated": false,
@@ -105,7 +105,7 @@
             "label": "{\n  'data-test-subj': dataTestSubject = 'fieldList',\n  isProcessing,\n  prepend,\n  append,\n  className,\n  children,\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/unified-field-list",
                 "scope": "common",
@@ -113,7 +113,7 @@
                 "section": "def-common.FieldListProps",
                 "text": "FieldListProps"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-unified-field-list/src/components/field_list/field_list.tsx",
             "deprecated": false,
@@ -1224,7 +1224,7 @@
           {
             "parentPluginId": "@kbn/unified-field-list",
             "id": "def-common.triggerVisualizeActionsTextBasedLanguages.$5",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "query",
             "description": [],
@@ -4272,7 +4272,7 @@
                 "section": "def-common.Trigger",
                 "text": "Trigger"
               },
-              ") => void; readonly getTrigger: (triggerId: string) => ",
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
               "TriggerContract",
               "<object>; readonly registerAction: <Context extends object>(definition: ",
               {

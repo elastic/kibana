@@ -13,7 +13,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '../../../../mocks';
 import { createConnectedSearchSessionIndicator } from './connected_search_session_indicator';
 import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 import {
   ISessionService,
   RefreshInterval,

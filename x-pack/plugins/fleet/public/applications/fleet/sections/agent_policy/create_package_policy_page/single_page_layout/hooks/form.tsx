@@ -31,7 +31,10 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
-import { getMaxPackageName } from '../../../../../../../../common/services';
+import {
+  getMaxPackageName,
+  isRootPrivilegesRequired,
+} from '../../../../../../../../common/services';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -97,6 +100,7 @@ export function useOnSubmit({
   queryParamsPolicyId,
   packageInfo,
   integrationToEnable,
+  hasFleetAddAgentsPrivileges,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -105,6 +109,7 @@ export function useOnSubmit({
   agentCount: number;
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
+  hasFleetAddAgentsPrivileges: boolean;
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
@@ -264,13 +269,24 @@ export function useOnSubmit({
         setFormState('CONFIRM');
         return;
       }
+      if (
+        packageInfo &&
+        isRootPrivilegesRequired(packageInfo) &&
+        (agentPolicy?.unprivileged_agents ?? 0) > 0 &&
+        formState !== 'CONFIRM' &&
+        formState !== 'CONFIRM_UNPRIVILEGED'
+      ) {
+        setFormState('CONFIRM_UNPRIVILEGED');
+        return;
+      }
       let createdPolicy = overrideCreatedAgentPolicy;
       if (selectedPolicyTab === SelectedPolicyTab.NEW && !overrideCreatedAgentPolicy) {
         try {
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
             const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
-            if (packageInfo) {
+            // skip preinstall of input package, to be able to rollback when package policy creation fails
+            if (packageInfo && packageInfo.type !== 'input') {
               packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {
@@ -325,38 +341,44 @@ export function useOnSubmit({
 
       const hasGoogleCloudShell = data?.item ? getCloudShellUrlFromPackagePolicy(data.item) : false;
 
-      if (hasAzureArmTemplate) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+      if (hasFleetAddAgentsPrivileges) {
+        if (hasAzureArmTemplate) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_AZURE_ARM_TEMPLATE');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+        if (hasCloudFormation) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
+        if (hasGoogleCloudShell) {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
+        } else {
+          setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        }
       } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
+        setFormState('SUBMITTED');
       }
-      if (hasCloudFormation) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_CLOUD_FORMATION');
-      } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-      }
-      if (hasGoogleCloudShell) {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_GOOGLE_CLOUD_SHELL');
-      } else {
-        setFormState(agentCount ? 'SUBMITTED' : 'SUBMITTED_NO_AGENTS');
-      }
+
       if (!error) {
         setSavedPackagePolicy(data!.item);
 
-        const hasAgentsAssigned = agentCount && agentPolicy;
-        if (!hasAgentsAssigned && hasAzureArmTemplate) {
+        const promptForAgentEnrollment =
+          !(agentCount && agentPolicy) && hasFleetAddAgentsPrivileges;
+        if (promptForAgentEnrollment && hasAzureArmTemplate) {
           setFormState('SUBMITTED_AZURE_ARM_TEMPLATE');
           return;
         }
-        if (!hasAgentsAssigned && hasCloudFormation) {
+        if (promptForAgentEnrollment && hasCloudFormation) {
           setFormState('SUBMITTED_CLOUD_FORMATION');
           return;
         }
-        if (!hasAgentsAssigned && hasGoogleCloudShell) {
+        if (promptForAgentEnrollment && hasGoogleCloudShell) {
           setFormState('SUBMITTED_GOOGLE_CLOUD_SHELL');
           return;
         }
-        if (!hasAgentsAssigned) {
+        if (promptForAgentEnrollment) {
           setFormState('SUBMITTED_NO_AGENTS');
           return;
         }
@@ -369,7 +391,7 @@ export function useOnSubmit({
               packagePolicyName: packagePolicy.name,
             },
           }),
-          text: hasAgentsAssigned
+          text: promptForAgentEnrollment
             ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
                 defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
                 values: {
@@ -413,6 +435,7 @@ export function useOnSubmit({
       agentPolicy,
       onSaveNavigate,
       confirmForceInstall,
+      hasFleetAddAgentsPrivileges,
     ]
   );
 

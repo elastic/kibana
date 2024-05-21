@@ -98,7 +98,6 @@ export function TableDimensionEditor(
             defaultMessage: 'Text alignment',
           })}
           data-test-subj="lnsDatatable_alignment_groups"
-          name="alignment"
           buttonSize="compressed"
           options={[
             {
@@ -148,7 +147,6 @@ export function TableDimensionEditor(
                 defaultMessage: 'Color by value',
               })}
               data-test-subj="lnsDatatable_dynamicColoring_groups"
-              name="dynamicColoring"
               buttonSize="compressed"
               options={[
                 {

@@ -16,6 +16,7 @@ import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { omit } from 'lodash';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { isLocalhost } from './is_localhost';
@@ -69,7 +70,7 @@ interface CreateRuntimeServicesOptions {
   log?: ToolingLog;
   asSuperuser?: boolean;
   /** If true, then a certificate will not be used when creating the Kbn/Es clients when url is `https` */
-  noCertForSsl?: boolean;
+  useCertForSsl?: boolean;
 }
 
 class KbnClientExtended extends KbnClient {
@@ -107,22 +108,23 @@ export const createRuntimeServices = async ({
   username: _username,
   password: _password,
   apiKey,
-  esUsername,
-  esPassword,
-  log: _log,
+  esUsername: _esUsername,
+  esPassword: _esPassword,
+  log = createToolingLogger(),
   asSuperuser = false,
-  noCertForSsl,
+  useCertForSsl = false,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
-  const log = _log ?? createToolingLogger();
   let username = _username;
   let password = _password;
+  let esUsername = _esUsername;
+  let esPassword = _esPassword;
 
   if (asSuperuser) {
     const tmpKbnClient = createKbnClient({
       url: kibanaUrl,
       username,
       password,
-      noCertForSsl,
+      useCertForSsl,
       log,
     });
 
@@ -131,12 +133,15 @@ export const createRuntimeServices = async ({
 
     if (isServerlessEs) {
       log?.warning(
-        'Creating Security Superuser is not supported in current environment. ES is running in serverless mode. ' +
+        'Creating Security Superuser is not supported in current environment.\nES is running in serverless mode. ' +
           'Will use username [system_indices_superuser] instead.'
       );
 
       username = 'system_indices_superuser';
       password = 'changeme';
+
+      esUsername = 'system_indices_superuser';
+      esPassword = 'changeme';
     } else {
       const superuserResponse = await createSecuritySuperuser(
         createEsClient({
@@ -144,7 +149,7 @@ export const createRuntimeServices = async ({
           username: esUsername ?? username,
           password: esPassword ?? password,
           log,
-          noCertForSsl,
+          useCertForSsl,
         })
       );
 
@@ -161,14 +166,14 @@ export const createRuntimeServices = async ({
   const fleetURL = new URL(fleetServerUrl);
 
   return {
-    kbnClient: createKbnClient({ log, url: kibanaUrl, username, password, apiKey, noCertForSsl }),
+    kbnClient: createKbnClient({ log, url: kibanaUrl, username, password, apiKey, useCertForSsl }),
     esClient: createEsClient({
       log,
       url: elasticsearchUrl,
       username: esUsername ?? username,
       password: esPassword ?? password,
       apiKey,
-      noCertForSsl,
+      useCertForSsl,
     }),
     log,
     localhostRealIp: getLocalhostRealIp(),
@@ -217,7 +222,7 @@ export const createEsClient = ({
   password,
   apiKey,
   log,
-  noCertForSsl,
+  useCertForSsl = false,
 }: {
   url: string;
   username: string;
@@ -225,14 +230,14 @@ export const createEsClient = ({
   /** If defined, both `username` and `password` will be ignored */
   apiKey?: string;
   log?: ToolingLog;
-  noCertForSsl?: boolean;
+  useCertForSsl?: boolean;
 }): Client => {
   const isHttps = new URL(url).protocol.startsWith('https');
   const clientOptions: ClientOptions = {
     node: buildUrlWithCredentials(url, apiKey ? '' : username, apiKey ? '' : password),
   };
 
-  if (isHttps && !noCertForSsl) {
+  if (isHttps && useCertForSsl) {
     clientOptions.tls = {
       ca: [CA_CERTIFICATE],
     };
@@ -243,7 +248,12 @@ export const createEsClient = ({
   }
 
   if (log) {
-    log.verbose(`Creating Elasticsearch client options: ${JSON.stringify(clientOptions)}`);
+    log.verbose(
+      `Creating Elasticsearch client options: ${JSON.stringify({
+        ...omit(clientOptions, 'tls'),
+        ...(clientOptions.tls ? { tls: { ca: [typeof clientOptions.tls.ca] } } : {}),
+      })}`
+    );
   }
 
   return new Client(clientOptions);
@@ -255,7 +265,7 @@ export const createKbnClient = ({
   password,
   apiKey,
   log = createToolingLogger(),
-  noCertForSsl,
+  useCertForSsl = false,
 }: {
   url: string;
   username: string;
@@ -263,7 +273,7 @@ export const createKbnClient = ({
   /** If defined, both `username` and `password` will be ignored */
   apiKey?: string;
   log?: ToolingLog;
-  noCertForSsl?: boolean;
+  useCertForSsl?: boolean;
 }): KbnClient => {
   const isHttps = new URL(url).protocol.startsWith('https');
   const clientOptions: ConstructorParameters<typeof KbnClientExtended>[0] = {
@@ -272,7 +282,7 @@ export const createKbnClient = ({
     url: buildUrlWithCredentials(url, username, password),
   };
 
-  if (isHttps && !noCertForSsl) {
+  if (isHttps && useCertForSsl) {
     clientOptions.certificateAuthorities = [CA_CERTIFICATE];
   }
 

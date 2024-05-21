@@ -32,6 +32,7 @@ export {
   apmTraceExplorerTab,
   apmLabsButton,
   enableInfrastructureHostsView,
+  enableInfrastructureContainerAssetView,
   enableInfrastructureProfilingIntegration,
   enableInfrastructureAssetCustomDashboards,
   enableAwsLambdaMetrics,
@@ -54,6 +55,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  profilingFetchTopNFunctionsFromStacktraces,
 } from './ui_settings_keys';
 
 export {

@@ -19,14 +19,13 @@ import {
 } from '@kbn/server-http-tools';
 
 import type { Duration } from 'moment';
-import { firstValueFrom, Observable, Subscription } from 'rxjs';
-import { take, pairwise } from 'rxjs/operators';
+import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
 // @ts-expect-error no type definition
 import Brok from 'brok';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { CoreVersionedRouter, isSafeMethod, Router } from '@kbn/core-http-router-server-internal';
 import type {
   IRouter,
   RouteConfigOptions,
@@ -166,6 +165,11 @@ export type LifecycleRegistrar = Pick<
 export interface HttpServerSetupOptions {
   config$: Observable<HttpConfig>;
   executionContext?: InternalExecutionContextSetup;
+}
+
+/** @internal */
+export interface GetRoutersOptions {
+  pluginId?: string;
 }
 
 export class HttpServer {
@@ -622,6 +626,38 @@ export class HttpServer {
       const authResponseHeaders = this.authResponseHeaders.get(request);
       return t.next({ headers: authResponseHeaders });
     });
+  }
+
+  public getRouters({ pluginId }: GetRoutersOptions = {}): {
+    routers: Router[];
+    versionedRouters: CoreVersionedRouter[];
+  } {
+    const routers: {
+      routers: Router[];
+      versionedRouters: CoreVersionedRouter[];
+    } = {
+      routers: [],
+      versionedRouters: [],
+    };
+    const pluginIdFilter = pluginId ? Symbol(pluginId).toString() : undefined;
+
+    for (const router of this.registeredRouters) {
+      const matchesIdFilter =
+        !pluginIdFilter || (router as Router).pluginId?.toString() === pluginIdFilter;
+
+      if (
+        matchesIdFilter &&
+        (router as Router).getRoutes({ excludeVersionedRoutes: true }).length > 0
+      ) {
+        routers.routers.push(router as Router);
+      }
+
+      const versionedRouter = router.versioned as CoreVersionedRouter;
+      if (matchesIdFilter && versionedRouter.getRoutes().length > 0) {
+        routers.versionedRouters.push(versionedRouter);
+      }
+    }
+    return routers;
   }
 
   private registerStaticDir(path: string, dirPath: string) {

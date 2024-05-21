@@ -214,7 +214,8 @@ describe('Resolver, when analyzing a tree that has no ancestors and 2 children',
   });
 });
 
-describe('Resolver, when using a generated tree with 20 generations, 4 children per child, and 10 ancestors', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/181369
+describe.skip('Resolver, when using a generated tree with 20 generations, 4 children per child, and 10 ancestors', () => {
   const findAndClickFirstLoadingNodeInPanel = async (graphSimulator: Simulator) => {
     // If the camera has not moved it will return a node with ID 2kt059pl3i, this is the first node with the state
     // loading that is outside of the initial loaded view

@@ -9,7 +9,7 @@
 import { createReadStream, Stats } from 'fs';
 import { createHash } from 'crypto';
 import * as Rx from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs';
 
 export const generateFileHash = (fd: number): Promise<string> => {
   const hash = createHash('sha1');

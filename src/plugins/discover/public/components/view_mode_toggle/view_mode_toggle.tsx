@@ -10,28 +10,31 @@ import React, { useMemo, ReactElement } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { DOC_TABLE_LEGACY, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
+import { isLegacyTableEnabled, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { DiscoverStateContainer } from '../../application/main/services/discover_state';
+import { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
 
 export const DocumentViewModeToggle = ({
   viewMode,
-  isTextBasedQuery,
+  isEsqlMode,
   prepend,
   stateContainer,
   setDiscoverViewMode,
 }: {
   viewMode: VIEW_MODE;
-  isTextBasedQuery: boolean;
+  isEsqlMode: boolean;
   prepend?: ReactElement;
   stateContainer: DiscoverStateContainer;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { uiSettings } = useDiscoverServices();
-  const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
+  const { uiSettings, dataVisualizer: dataVisualizerService } = useDiscoverServices();
+  const isLegacy = useMemo(
+    () => isLegacyTableEnabled({ uiSettings, isEsqlMode }),
+    [uiSettings, isEsqlMode]
+  );
   const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
   const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
@@ -45,7 +48,8 @@ export const DocumentViewModeToggle = ({
     }
   `;
 
-  const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
+  const showViewModeToggle =
+    (uiSettings.get(SHOW_FIELD_STATISTICS) && dataVisualizerService !== undefined) ?? false;
 
   return (
     <EuiFlexGroup
@@ -68,7 +72,7 @@ export const DocumentViewModeToggle = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        {isTextBasedQuery || !showViewModeToggle ? (
+        {isEsqlMode || !showViewModeToggle ? (
           <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>

@@ -235,6 +235,7 @@ describe.skip('rule_add', () => {
 
     expect(wrapper.find('[data-test-subj="addRuleFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveRuleButton"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="showRequestButton"]').exists()).toBeTruthy();
 
     wrapper.find('[data-test-subj="cancelSaveRuleButton"]').last().simulate('click');
     expect(onClose).toHaveBeenCalledWith(RuleFlyoutCloseReason.CANCELED, {

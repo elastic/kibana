@@ -6,11 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
 import {
   CONNECTORS_INDEX,
+  cancelSync,
   deleteConnectorById,
   deleteConnectorSecret,
   fetchConnectorById,
@@ -28,7 +30,10 @@ import {
 
 import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
-import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identify_exceptions';
+import {
+  isResourceNotFoundException,
+  isStatusTransitionException,
+} from '@kbn/search-connectors/utils/identify_exceptions';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
@@ -113,6 +118,40 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       await cancelSyncs(client.asCurrentUser, request.params.connectorId);
+      return response.ok();
+    })
+  );
+
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{syncJobId}/cancel_sync',
+      validate: {
+        params: schema.object({
+          syncJobId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        await cancelSync(client.asCurrentUser, request.params.syncJobId);
+      } catch (error) {
+        if (isStatusTransitionException(error)) {
+          return createError({
+            errorCode: ErrorCode.STATUS_TRANSITION_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.statusTransitionError',
+              {
+                defaultMessage:
+                  'Connector sync job cannot be cancelled. Connector is already cancelled or not in a cancelable state.',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
       return response.ok();
     })
   );
@@ -433,21 +472,23 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/filtering',
       validate: {
-        body: schema.object({
-          advanced_snippet: schema.string(),
-          filtering_rules: schema.arrayOf(
-            schema.object({
-              created_at: schema.string(),
-              field: schema.string(),
-              id: schema.string(),
-              order: schema.number(),
-              policy: schema.string(),
-              rule: schema.string(),
-              updated_at: schema.string(),
-              value: schema.string(),
-            })
-          ),
-        }),
+        body: schema.maybe(
+          schema.object({
+            advanced_snippet: schema.string(),
+            filtering_rules: schema.arrayOf(
+              schema.object({
+                created_at: schema.string(),
+                field: schema.string(),
+                id: schema.string(),
+                order: schema.number(),
+                policy: schema.string(),
+                rule: schema.string(),
+                updated_at: schema.string(),
+                value: schema.string(),
+              })
+            ),
+          })
+        ),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -456,13 +497,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
       const { connectorId } = request.params;
-      const { advanced_snippet, filtering_rules } = request.body;
-      const result = await updateFiltering(client.asCurrentUser, connectorId, {
-        advancedSnippet: advanced_snippet,
-        // Have to cast here because our API schema validator doesn't know how to deal with enums
-        // We're relying on the schema in the validator above to flag if something goes wrong
-        filteringRules: filtering_rules as FilteringRule[],
-      });
+      const result = await updateFiltering(client.asCurrentUser, connectorId);
       return result ? response.ok({ body: result }) : response.conflict();
     })
   );

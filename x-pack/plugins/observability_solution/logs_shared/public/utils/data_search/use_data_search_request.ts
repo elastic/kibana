@@ -7,12 +7,12 @@
 
 import { useCallback } from 'react';
 import { OperatorFunction, ReplaySubject } from 'rxjs';
-import { share, tap } from 'rxjs/operators';
-import {
-  IKibanaSearchRequest,
+import { share, tap } from 'rxjs';
+import type {
   IKibanaSearchResponse,
+  IKibanaSearchRequest,
   ISearchOptions,
-} from '@kbn/data-plugin/public';
+} from '@kbn/search-types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { tapUnsubscribe, useObservable } from '../use_observable';
 import { ParsedDataSearchRequestDescriptor, ParsedKibanaSearchResponse } from './types';

@@ -10,6 +10,7 @@ import type { KbnClient } from '@kbn/test';
 import execa from 'execa';
 import chalk from 'chalk';
 import assert from 'assert';
+import pRetry from 'p-retry';
 import type { AgentPolicy, CreateAgentPolicyResponse, Output } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
@@ -42,7 +43,7 @@ import {
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { captureCallingStack, prefixedOutputLogger } from '../utils';
+import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
 import {
   createToolingLogger,
   RETRYABLE_TRANSIENT_ERRORS,
@@ -62,7 +63,6 @@ import {
   getFleetElasticsearchOutputHost,
   waitForHostToEnroll,
 } from '../fleet_services';
-import { dump } from '../../endpoint_agent_runner/utils';
 import { getLocalhostRealIp } from '../network_services';
 import { isLocalhost } from '../is_localhost';
 
@@ -138,7 +138,12 @@ export const startFleetServer = async ({
     const isServerless = await isServerlessKibanaFlavor(kbnClient);
     const policyId =
       policy || !isServerless ? await getOrCreateFleetServerAgentPolicyId(kbnClient, logger) : '';
-    const serviceToken = isServerless ? '' : await generateFleetServiceToken(kbnClient, logger);
+    const serviceToken = isServerless
+      ? ''
+      : await pRetry(async () => generateFleetServiceToken(kbnClient, logger), {
+          retries: 2,
+          forever: false,
+        });
     const startedFleetServer = await startFleetServerWithDocker({
       kbnClient,
       logger,
@@ -678,24 +683,32 @@ export const isFleetServerRunning = async (
   const url = new URL(fleetServerUrl);
   url.pathname = '/api/status';
 
-  return axios
-    .request({
-      method: 'GET',
-      url: url.toString(),
-      responseType: 'json',
-      // Custom agent to ensure we don't get cert errors
-      httpsAgent: new https.Agent({ rejectUnauthorized: false }),
-    })
-    .then((response) => {
-      log.debug(`Fleet server is up and running at [${fleetServerUrl}]. Status: `, response.data);
-      return true;
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .catch((e) => {
-      log.debug(`Fleet server not up at [${fleetServerUrl}]`);
-      log.verbose(`Call to [${url.toString()}] failed with:`, e);
-      return false;
-    });
+  return pRetry<boolean>(
+    async () => {
+      return axios
+        .request({
+          method: 'GET',
+          url: url.toString(),
+          responseType: 'json',
+          // Custom agent to ensure we don't get cert errors
+          httpsAgent: new https.Agent({ rejectUnauthorized: false }),
+        })
+        .then((response) => {
+          log.debug(
+            `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
+            response.data
+          );
+          return true;
+        })
+        .catch(catchAxiosErrorFormatAndThrow)
+        .catch((e) => {
+          log.debug(`Fleet server not up at [${fleetServerUrl}]`);
+          log.verbose(`Call to [${url.toString()}] failed with:`, e);
+          return false;
+        });
+    },
+    { maxTimeout: 10000 }
+  );
 };
 
 /**
