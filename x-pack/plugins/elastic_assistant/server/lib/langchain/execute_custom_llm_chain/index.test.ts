@@ -20,9 +20,9 @@ import { PassThrough, Stream } from 'stream';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
-} from '@kbn/elastic-assistant-common/impl/language_models';
+} from '@kbn/elastic-assistant-common/server';
 
-jest.mock('@kbn/elastic-assistant-common/impl/language_models', () => ({
+jest.mock('@kbn/elastic-assistant-common/server', () => ({
   ActionsClientChatOpenAI: jest.fn(),
   ActionsClientSimpleChatModel: jest.fn(),
 }));

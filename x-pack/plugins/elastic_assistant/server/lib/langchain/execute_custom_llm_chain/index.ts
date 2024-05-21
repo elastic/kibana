@@ -12,11 +12,11 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
+import { getDefaultArguments } from '@kbn/elastic-assistant-common/server/language_models/constants';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
-} from '@kbn/elastic-assistant-common/impl/language_models';
-import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
+} from '@kbn/elastic-assistant-common/server';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';

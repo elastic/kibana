@@ -17,8 +17,9 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
+import { ExecuteConnectorRequestBody } from '../..';
+import { parseBedrockStream } from '..';
 import { getDefaultArguments } from './constants';
-import { ExecuteConnectorRequestBody, parseBedrockStream } from '../..';
 
 export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
   content: prompt,

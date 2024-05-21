@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Message } from '../schemas';
+import { Message } from '../../impl/schemas';
 import { getMessageContentAndRole } from './helpers';
 
 describe('helpers', () => {

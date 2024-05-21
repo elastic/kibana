@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Message } from '../schemas';
+import { Message } from '../../impl/schemas';
 
 export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content' | 'role'> => ({
   content: prompt,

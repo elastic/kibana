@@ -9,7 +9,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientChatOpenAI, ActionsClientChatOpenAIParams } from './chat_openai';
-import { mockActionResponse, mockChatCompletion } from '../mock/mock_action_response';
+import { mockActionResponse, mockChatCompletion } from '../../impl/mock/mock_action_response';
 import {
   ChatCompletion,
   ChatCompletionChunk,

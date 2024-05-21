@@ -23,6 +23,5 @@ export {
 } from './impl/data_anonymization/helpers';
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
-export { parseBedrockStream } from './impl/utils/bedrock';
 
 export * from './constants';
