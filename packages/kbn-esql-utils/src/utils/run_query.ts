@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import type { ESQLColumn, ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLColumn, ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
 import { ESQL_LATEST_VERSION } from '../../constants';
 
@@ -95,4 +95,42 @@ export async function getESQLQueryColumnsRaw({
       })
     );
   }
+}
+
+export async function getESQLResults({
+  esqlQuery,
+  search,
+  signal,
+  filter,
+  dropNullColumns,
+}: {
+  esqlQuery: string;
+  search: ISearchGeneric;
+  signal?: AbortSignal;
+  filter?: unknown;
+  dropNullColumns?: boolean;
+}): Promise<{
+  response: ESQLSearchReponse;
+  params: ESQLSearchParams;
+}> {
+  const result = await lastValueFrom(
+    search(
+      {
+        params: {
+          ...(filter ? { filter } : {}),
+          query: esqlQuery,
+          version: ESQL_LATEST_VERSION,
+          ...(dropNullColumns ? { dropNullColumns: true } : {}),
+        },
+      },
+      {
+        abortSignal: signal,
+        strategy: 'esql_async',
+      }
+    )
+  );
+  return {
+    response: result.rawResponse as unknown as ESQLSearchReponse,
+    params: result.requestParams as unknown as ESQLSearchParams,
+  };
 }
