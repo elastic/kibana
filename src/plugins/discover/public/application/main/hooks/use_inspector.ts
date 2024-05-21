@@ -12,7 +12,7 @@ import {
   RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import { DiscoverStateContainer } from '../services/discover_state';
+import { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 
 export interface InspectorAdapters {

@@ -11,6 +11,7 @@ import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import {
   DataViewBase,
   EsQueryConfig,
@@ -659,6 +660,10 @@ export class Embeddable
       query: this.savedVis.state.query,
       filters: mergedSearchContext.filters ?? [],
       dateRange: {
+        fromDate: mergedSearchContext.timeRange?.from ?? '',
+        toDate: mergedSearchContext.timeRange?.to ?? '',
+      },
+      absDateRange: {
         fromDate: mergedSearchContext.timeRange?.from ?? '',
         toDate: mergedSearchContext.timeRange?.to ?? '',
       },
@@ -1556,7 +1561,7 @@ export class Embeddable
 
   public getIsEditable() {
     // for ES|QL, editing is allowed only if the advanced setting is on
-    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get('discover:enableESQL')) {
+    if (Boolean(this.isTextBasedLanguage()) && !this.deps.uiSettings.get(ENABLE_ESQL)) {
       return false;
     }
     return (

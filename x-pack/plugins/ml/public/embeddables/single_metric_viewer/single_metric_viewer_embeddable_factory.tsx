@@ -30,7 +30,11 @@ import { throttle } from 'lodash';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
-import type { SingleMetricViewerEmbeddableApi, SingleMetricViewerEmbeddableState } from '../types';
+import type {
+  SingleMetricViewerRuntimeState,
+  SingleMetricViewerEmbeddableApi,
+  SingleMetricViewerEmbeddableState,
+} from '../types';
 import { initializeSingleMetricViewerControls } from './single_metric_viewer_controls_initializer';
 import { initializeSingleMetricViewerDataFetcher } from './single_metric_viewer_data_fetcher';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
@@ -56,12 +60,11 @@ export const getSingleMetricViewerEmbeddableFactory = (
 ) => {
   const factory: ReactEmbeddableFactory<
     SingleMetricViewerEmbeddableState,
-    SingleMetricViewerEmbeddableApi
+    SingleMetricViewerEmbeddableApi,
+    SingleMetricViewerRuntimeState
   > = {
     type: ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE,
-    deserializeState: (state) => {
-      return state.rawState as SingleMetricViewerEmbeddableState;
-    },
+    deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const services = await getServices(getStartServices);
       const subscriptions = new Subscription();
@@ -85,6 +88,34 @@ export const getSingleMetricViewerEmbeddableFactory = (
 
       const api = buildApi(
         {
+          isEditingEnabled: () => true,
+          getTypeDisplayName: () =>
+            i18n.translate('xpack.ml.singleMetricViewerEmbeddable.typeDisplayName', {
+              defaultMessage: 'single metric viewer',
+            }),
+          onEdit: async () => {
+            try {
+              const { resolveEmbeddableSingleMetricViewerUserInput } = await import(
+                './single_metric_viewer_setup_flyout'
+              );
+              const [coreStart, { data, share }, { mlApiServices }] = services;
+              const result = await resolveEmbeddableSingleMetricViewerUserInput(
+                coreStart,
+                parentApi,
+                uuid,
+                { data, share },
+                mlApiServices,
+                {
+                  ...serializeTitles(),
+                  ...serializeSingleMetricViewerState(),
+                }
+              );
+
+              singleMetricViewerControlsApi.updateUserInput(result);
+            } catch (e) {
+              return Promise.reject();
+            }
+          },
           ...titlesApi,
           ...timeRangeApi,
           ...singleMetricViewerControlsApi,
@@ -93,6 +124,7 @@ export const getSingleMetricViewerEmbeddableFactory = (
           serializeState: () => {
             return {
               rawState: {
+                timeRange: undefined,
                 ...serializeTitles(),
                 ...serializeTimeRange(),
                 ...serializeSingleMetricViewerState(),
@@ -278,7 +310,8 @@ export const getSingleMetricViewerEmbeddableFactory = (
                       >
                         {singleMetricViewerData !== undefined &&
                           autoZoomDuration !== undefined &&
-                          jobsLoaded && (
+                          jobsLoaded &&
+                          selectedJobId === selectedJob?.job_id && (
                             <TimeSeriesExplorerEmbeddableChart
                               chartWidth={chartWidth - containerPadding}
                               dataViewsService={services[1].data.dataViews}

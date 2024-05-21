@@ -15,17 +15,19 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocumentViewModeToggle } from './view_mode_toggle';
 import { BehaviorSubject } from 'rxjs';
 import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
-import { DataTotalHits$ } from '../../application/main/services/discover_data_state_container';
+import { DataTotalHits$ } from '../../application/main/state_management/discover_data_state_container';
 import { FetchStatus } from '../../application/types';
+import { discoverServiceMock } from '../../__mocks__/services';
 
 describe('Document view mode toggle component', () => {
   const mountComponent = ({
     showFieldStatistics = true,
     viewMode = VIEW_MODE.DOCUMENT_LEVEL,
-    isTextBasedQuery = false,
+    isEsqlMode = false,
     setDiscoverViewMode = jest.fn(),
   } = {}) => {
-    const serivces = {
+    const services = {
+      ...discoverServiceMock,
       uiSettings: {
         get: () => showFieldStatistics,
       },
@@ -38,10 +40,10 @@ describe('Document view mode toggle component', () => {
     }) as DataTotalHits$;
 
     return mountWithIntl(
-      <KibanaContextProvider services={serivces}>
+      <KibanaContextProvider services={services}>
         <DocumentViewModeToggle
           viewMode={viewMode}
-          isTextBasedQuery={isTextBasedQuery}
+          isEsqlMode={isEsqlMode}
           stateContainer={stateContainer}
           setDiscoverViewMode={setDiscoverViewMode}
         />
@@ -61,8 +63,8 @@ describe('Document view mode toggle component', () => {
     expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
   });
 
-  it('should not render if text-based', () => {
-    const component = mountComponent({ isTextBasedQuery: true });
+  it('should not render if ES|QL', () => {
+    const component = mountComponent({ isEsqlMode: true });
     expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
     expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
   });

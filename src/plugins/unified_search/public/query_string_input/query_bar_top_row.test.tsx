@@ -64,8 +64,8 @@ const kqlQuery = {
   language: 'kuery',
 };
 
-const sqlQuery = {
-  sql: 'SELECT * FROM test',
+const esqlQuery = {
+  esql: 'FROM test',
 };
 
 const createMockWebStorage = () => ({
@@ -297,7 +297,7 @@ describe('QueryBarTopRowTopRow', () => {
   it('Should NOT render query input bar if on text based languages mode', () => {
     const component = mount(
       wrapQueryBarTopRowInContext({
-        query: sqlQuery,
+        query: esqlQuery,
         isDirty: false,
         screenTitle: 'SQL Screen',
         timeHistory: mockTimeHistory,
@@ -322,7 +322,7 @@ describe('QueryBarTopRowTopRow', () => {
     };
     const component = mount(
       wrapQueryBarTopRowInContext({
-        query: sqlQuery,
+        query: esqlQuery,
         isDirty: false,
         screenTitle: 'SQL Screen',
         timeHistory: mockTimeHistory,

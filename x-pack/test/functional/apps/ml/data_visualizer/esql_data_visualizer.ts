@@ -35,7 +35,7 @@ export interface TestData {
 
 const esqlFarequoteData = {
   suiteTitle: 'ES|QL farequote',
-  query: 'from `ft_farequote`',
+  query: 'from ft_farequote',
   sourceIndexOrSavedSearch: 'ft_farequote',
   expected: {
     hasDocCountChart: true,

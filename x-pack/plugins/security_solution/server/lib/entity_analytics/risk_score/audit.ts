@@ -9,5 +9,6 @@ export enum RiskScoreAuditActions {
   RISK_ENGINE_INSTALL = 'risk_engine_install',
   RISK_ENGINE_PRIVILEGES_GET = 'risk_engine_privileges_get',
   RISK_ENGINE_MANUAL_SCORING = 'risk_engine_manual_scoring',
+  RISK_ENGINE_ENTITY_MANUAL_SCORING = 'risk_engine_entity_manual_scoring',
   RISK_ENGINE_PREVIEW = 'risk_engine_preview',
 }

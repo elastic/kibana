@@ -31,8 +31,8 @@ describe('oauth routes', () => {
       });
     });
 
-    it('creates a request handler', () => {
-      mockRouter.callRoute({});
+    it('creates a request handler', async () => {
+      await mockRouter.callRoute({});
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/oauth/authorize',
@@ -76,8 +76,8 @@ describe('oauth routes', () => {
       });
     });
 
-    it('creates a request handler', () => {
-      mockRouter.callRoute({});
+    it('creates a request handler', async () => {
+      await mockRouter.callRoute({});
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/oauth/authorize',
@@ -117,8 +117,8 @@ describe('oauth routes', () => {
       });
     });
 
-    it('creates a request handler', () => {
-      mockRouter.callRoute({});
+    it('creates a request handler', async () => {
+      await mockRouter.callRoute({});
 
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/ws/oauth/authorize',

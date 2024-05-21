@@ -33,6 +33,7 @@ const pages = {
     chatInput: 'observabilityAiAssistantChatPromptEditorTextArea',
     retryButton: 'observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton',
     conversationLink: 'observabilityAiAssistantConversationsLink',
+    positiveFeedbackButton: 'observabilityAiAssistantFeedbackButtonsPositiveButton',
   },
   createConnectorFlyout: {
     flyout: 'create-connector-flyout',
@@ -42,6 +43,10 @@ const pages = {
     urlInput: 'config.apiUrl-input',
     apiKeyInput: 'secrets.apiKey-input',
     saveButton: 'create-connector-flyout-save-btn',
+  },
+  contextualInsights: {
+    button: 'obsAiAssistantInsightButton',
+    text: 'obsAiAssistantInsightResponse',
   },
 };
 
@@ -54,40 +59,36 @@ export async function ObservabilityAIAssistantUIProvider({
   const security = getService('security');
   const pageObjects = getPageObjects(['common']);
 
-  const roleName = 'observability-ai-assistant-functional-test-role';
+  const roleDefinition: Role = {
+    name: 'observability-ai-assistant-functional-test-role',
+    elasticsearch: {
+      cluster: [],
+      indices: [],
+      run_as: [],
+    },
+    kibana: [
+      {
+        spaces: ['*'],
+        base: [],
+        feature: {
+          actions: ['all'],
+          [APM_SERVER_FEATURE_ID]: ['all'],
+          [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID]: ['all'],
+        },
+      },
+    ],
+  };
 
   return {
     pages,
     auth: {
       login: async () => {
         await browser.navigateTo(deployment.getHostPort());
-
-        const roleDefinition: Role = {
-          name: roleName,
-          elasticsearch: {
-            cluster: [],
-            indices: [],
-            run_as: [],
-          },
-          kibana: [
-            {
-              spaces: ['*'],
-              base: [],
-              feature: {
-                actions: ['all'],
-                [APM_SERVER_FEATURE_ID]: ['all'],
-                [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID]: ['all'],
-              },
-            },
-          ],
-        };
-
-        await security.role.create(roleName, roleDefinition);
-
-        await security.testUser.setRoles([roleName, 'apm_user']); // performs a page reload
+        await security.role.create(roleDefinition.name, roleDefinition);
+        await security.testUser.setRoles([roleDefinition.name, 'apm_user', 'viewer']); // performs a page reload
       },
       logout: async () => {
-        await security.role.delete(roleName);
+        await security.role.delete(roleDefinition.name);
         await security.testUser.restoreDefaults();
       },
     },

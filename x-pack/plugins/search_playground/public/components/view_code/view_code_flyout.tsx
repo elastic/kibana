@@ -18,9 +18,11 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../common/routes';
@@ -35,20 +37,21 @@ export const ES_CLIENT_DETAILS = (cloud: CloudSetup | undefined) => {
   if (cloud) {
     return `
 es_client = Elasticsearch(
-  "${cloud.elasticsearchUrl}",
-  api_key=os.environ["ES_API_KEY"]
+    "${cloud.elasticsearchUrl}",
+    api_key=os.environ["ES_API_KEY"]
 )
       `;
   }
 
   return `
 es_client = Elasticsearch(
-  "<your-elasticsearch-url>"
+    "<your-elasticsearch-url>"
 )
   `;
 };
 
 export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
+  const usageTracker = useUsageTracker();
   const [selectedLanguage, setSelectedLanguage] = useState('py-es-client');
   const { getValues } = useFormContext<ChatForm>();
   const formValues = getValues();
@@ -62,15 +65,26 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
     'lc-py': LANGCHAIN_PYTHON(formValues, CLIENT_STEP),
     'py-es-client': PY_LANG_CLIENT(formValues, CLIENT_STEP),
   };
+  const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedLanguage(e.target.value);
+  };
+
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.viewCodeFlyoutOpened);
+  }, [usageTracker]);
+
+  useEffect(() => {
+    usageTracker?.click(`${AnalyticsEvents.viewCodeLanguageChange}_${selectedLanguage}`);
+  }, [usageTracker, selectedLanguage]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose}>
+    <EuiFlyout ownFocus onClose={onClose} data-test-subj="viewCodeFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.viewCode.flyout.title"
-              defaultMessage="View Code"
+              defaultMessage="Application code"
             />
           </h2>
         </EuiTitle>
@@ -79,7 +93,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.viewCode.flyout.subtitle"
-              defaultMessage="Copy the code into your app to use this. Modify the code as needed to fit your use case."
+              defaultMessage="Here's the code used to render this search experience. You can integrate it into your own application, modifying as needed."
             />
           </p>
         </EuiText>
@@ -94,7 +108,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
                     { value: 'py-es-client', text: 'Python Elasticsearch Client with OpenAI' },
                     { value: 'lc-py', text: 'LangChain Python with OpenAI' },
                   ]}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  onChange={handleLanguageChange}
                   value={selectedLanguage}
                 />
               </EuiFlexItem>
@@ -103,6 +117,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose }) => {
                   color="primary"
                   iconType="popout"
                   href={http.basePath.prepend(MANAGEMENT_API_KEYS)}
+                  data-test-subj="viewCodeManageApiKeys"
                   target="_blank"
                 >
                   <FormattedMessage

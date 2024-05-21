@@ -759,7 +759,7 @@
             "label": "alertStatus",
             "description": [],
             "signature": [
-              "\"active\" | \"recovered\" | \"untracked\""
+              "\"recovered\" | \"active\" | \"untracked\""
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "deprecated": false,

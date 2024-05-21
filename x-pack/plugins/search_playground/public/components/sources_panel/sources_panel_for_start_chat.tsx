@@ -28,12 +28,14 @@ export const SourcesPanelForStartChat: React.FC = () => {
   return (
     <StartChatPanel
       title={i18n.translate('xpack.searchPlayground.emptyPrompts.sources.title', {
-        defaultMessage: 'Select sources',
+        defaultMessage: 'Select indices',
       })}
       description={i18n.translate('xpack.searchPlayground.emptyPrompts.sources.description', {
-        defaultMessage: 'Where should the data for this chat experience be retrieved from?',
+        defaultMessage:
+          "Select the Elasticsearch indices you'd like to query, providing additional context for the LLM.",
       })}
-      isValid={!!selectedIndices.length}
+      isValid={!!selectedIndices?.length}
+      dataTestSubj="selectIndicesChatPanel"
     >
       {!!selectedIndices?.length && (
         <EuiFlexItem>

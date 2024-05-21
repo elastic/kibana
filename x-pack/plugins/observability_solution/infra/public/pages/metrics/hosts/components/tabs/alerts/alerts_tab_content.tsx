@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertConsumers, ALERT_RULE_PRODUCER } from '@kbn/rule-data-utils';
 import { BrushEndListener, type XYBrushEvent } from '@elastic/charts';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
+import { useBoolean } from '@kbn/react-hooks';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { HeightRetainer } from '../../../../../../components/height_retainer';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -25,7 +26,6 @@ import { CreateAlertRuleButton } from '../../../../../../components/shared/alert
 import { LinkToAlertsPage } from '../../../../../../components/shared/alerts/links/link_to_alerts_page';
 import { INFRA_ALERT_FEATURE_ID } from '../../../../../../../common/constants';
 import { AlertFlyout } from '../../../../../../alerting/inventory/components/alert_flyout';
-import { useBoolean } from '../../../../../../hooks/use_boolean';
 import { usePluginConfig } from '../../../../../../containers/plugin_config_context';
 
 export const AlertsTabContent = () => {

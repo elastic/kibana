@@ -8,11 +8,22 @@
 
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
 import { convertSecurityApi } from './convert_security_api';
+import { createAuditLoggerMock } from '../test_helpers/create_audit_logger.mock';
 
 describe('convertSecurityApi', () => {
   it('returns the API from the source', () => {
-    const source: CoreSecurityDelegateContract = { authc: { getCurrentUser: jest.fn() } };
+    const source: CoreSecurityDelegateContract = {
+      authc: {
+        getCurrentUser: jest.fn(),
+      },
+      audit: {
+        asScoped: jest.fn().mockReturnValue(createAuditLoggerMock.create()),
+        withoutRequest: createAuditLoggerMock.create(),
+      },
+    };
     const output = convertSecurityApi(source);
     expect(output.authc.getCurrentUser).toBe(source.authc.getCurrentUser);
+    expect(output.audit.asScoped).toBe(source.audit.asScoped);
+    expect(output.audit.withoutRequest).toBe(source.audit.withoutRequest);
   });
 });

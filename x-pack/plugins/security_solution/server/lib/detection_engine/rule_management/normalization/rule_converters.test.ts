@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { patchTypeSpecificSnakeToCamel, typeSpecificCamelToSnake } from './rule_converters';
 import {
+  commonParamsCamelToSnake,
+  patchTypeSpecificSnakeToCamel,
+  typeSpecificCamelToSnake,
+} from './rule_converters';
+import {
+  getBaseRuleParams,
   getEqlRuleParams,
+  getEsqlRuleParams,
   getMlRuleParams,
   getNewTermsRuleParams,
   getQueryRuleParams,
@@ -214,6 +220,27 @@ describe('rule_converters', () => {
       );
     });
 
+    test('should accept ES|QL alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['agent.name'],
+          duration: { value: 4, unit: 'h' as const },
+          missing_fields_strategy: 'doNotSuppress' as const,
+        },
+      };
+      const rule = getEsqlRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            groupBy: ['agent.name'],
+            missingFieldsStrategy: 'doNotSuppress',
+            duration: { value: 4, unit: 'h' },
+          },
+        })
+      );
+    });
+
     test('should accept threshold alerts suppression params', () => {
       const patchParams = {
         alert_suppression: {
@@ -368,6 +395,26 @@ describe('rule_converters', () => {
           })
         );
       });
+    });
+  });
+
+  describe('commonParamsCamelToSnake', () => {
+    test('should convert rule_source params to snake case', () => {
+      const transformedParams = commonParamsCamelToSnake({
+        ...getBaseRuleParams(),
+        ruleSource: {
+          type: 'external',
+          isCustomized: false,
+        },
+      });
+      expect(transformedParams).toEqual(
+        expect.objectContaining({
+          rule_source: {
+            type: 'external',
+            is_customized: false,
+          },
+        })
+      );
     });
   });
 });

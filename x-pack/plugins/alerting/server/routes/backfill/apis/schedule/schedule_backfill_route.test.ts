@@ -148,6 +148,6 @@ describe('scheduleBackfillRoute', () => {
       { rulesClient },
       { body: mockScheduleOptions }
     );
-    expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
+    await expect(handler(context, req, res)).rejects.toMatchInlineSnapshot(`[Error: Failure]`);
   });
 });

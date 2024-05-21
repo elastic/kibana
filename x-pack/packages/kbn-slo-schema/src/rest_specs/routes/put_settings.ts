@@ -5,10 +5,14 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { sloSettingsSchema } from '../../schema/settings';
+import { sloServerlessSettingsSchema, sloSettingsSchema } from '../../schema/settings';
 
 const putSLOSettingsParamsSchema = t.type({
   body: sloSettingsSchema,
+});
+
+const putSLOServerlessSettingsParamsSchema = t.type({
+  body: sloServerlessSettingsSchema,
 });
 
 const putSLOSettingsResponseSchema = sloSettingsSchema;
@@ -17,5 +21,9 @@ type PutSLOSettingsParams = t.TypeOf<typeof putSLOSettingsParamsSchema.props.bod
 type PutSLOSettingsResponse = t.OutputOf<typeof putSLOSettingsResponseSchema>;
 type GetSLOSettingsResponse = t.OutputOf<typeof sloSettingsSchema>;
 
-export { putSLOSettingsParamsSchema, putSLOSettingsResponseSchema };
+export {
+  putSLOSettingsParamsSchema,
+  putSLOSettingsResponseSchema,
+  putSLOServerlessSettingsParamsSchema,
+};
 export type { PutSLOSettingsParams, PutSLOSettingsResponse, GetSLOSettingsResponse };

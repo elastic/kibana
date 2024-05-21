@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
-import type { InternalState } from '@kbn/discover-plugin/public/application/main/services/discover_internal_state_container';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
+import type { InternalState } from '@kbn/discover-plugin/public/application/main/state_management/discover_internal_state_container';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 
 export interface SecuritySolutionDiscoverState {

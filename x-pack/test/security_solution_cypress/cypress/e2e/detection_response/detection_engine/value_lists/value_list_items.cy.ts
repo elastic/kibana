@@ -39,20 +39,13 @@ import {
   VALUE_LIST_ITEMS_MODAL_TITLE,
 } from '../../../../screens/lists';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
+import { getDefaultUsername } from '../../../../tasks/common/users';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/183713
+describe.skip(
   'Value list items',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'valueListItemsModalEnabled',
-          ])}`,
-        ],
-      },
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {
@@ -81,7 +74,7 @@ describe(
       // check modal title and info
       cy.get(VALUE_LIST_ITEMS_MODAL_TITLE).should('have.text', KNOWN_VALUE_LIST_FILES.TEXT);
       cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Type: keyword');
-      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains('Updated by: system_indices_superuse');
+      cy.get(VALUE_LIST_ITEMS_MODAL_INFO).contains(`Updated by: ${getDefaultUsername()}`);
       checkTotalItems(totalItems);
 
       // search working

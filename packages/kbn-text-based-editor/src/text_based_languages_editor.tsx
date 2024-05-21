@@ -9,14 +9,7 @@
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
-import {
-  SQLLang,
-  monaco,
-  ESQL_LANG_ID,
-  ESQL_THEME_ID,
-  ESQLLang,
-  type ESQLCallbacks,
-} from '@kbn/monaco';
+import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -142,18 +135,6 @@ const KEYCODE_ARROW_DOWN = 40;
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
-
-const languageId = (language: string) => {
-  switch (language) {
-    case 'esql': {
-      return ESQL_LANG_ID;
-    }
-    case 'sql':
-    default: {
-      return SQLLang.ID;
-    }
-  }
-};
 
 let clickedOutside = false;
 let initialRender = true;
@@ -378,8 +359,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
   }, []);
 
-  const esqlCallbacks: ESQLCallbacks = useMemo(
-    () => ({
+  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    const callbacks: ESQLCallbacks = {
       getSources: async () => {
         const [remoteIndices, localIndices] = await Promise.all([
           getRemoteIndicesList(dataViews),
@@ -418,16 +399,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
-    }),
-    [
-      dataViews,
-      expressions,
-      indexManagementApiService,
-      esqlFieldsCache,
-      memoizedFieldsFromESQL,
-      abortController,
-    ]
-  );
+    };
+    return callbacks;
+  }, [
+    dataViews,
+    expressions,
+    indexManagementApiService,
+    esqlFieldsCache,
+    memoizedFieldsFromESQL,
+    abortController,
+  ]);
 
   const parseMessages = useCallback(async () => {
     if (editorModel.current) {
@@ -864,7 +845,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         />
                       )}
                     <CodeEditor
-                      languageId={languageId(language)}
+                      languageId={ESQL_LANG_ID}
                       value={codeOneLiner || code}
                       options={codeEditorOptions}
                       width="100%"

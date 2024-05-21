@@ -54,13 +54,13 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import {
   XYPersistedByReferenceAnnotationLayerConfig,
   XYPersistedByValueAnnotationLayerConfig,
   XYPersistedLinkedByValueAnnotationLayerConfig,
   XYPersistedState,
 } from './persistence';
-import { LegendStats } from '@kbn/visualizations-plugin/common/constants';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -612,13 +612,13 @@ describe('xy_visualization', () => {
           ...exampleState(),
           legend: {
             ...exampleState().legend,
-            legendStats: ['values' as LegendStats.values],
+            legendStats: [XYLegendValue.CurrentAndLastValue],
           },
         };
 
         const transformedState = xyVisualization.initialize(() => 'first', persistedState);
 
-        expect(transformedState.legend.legendStats).toEqual(['values']);
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
         expect('valuesInLegend' in transformedState).toEqual(false);
       });
       it('loads a xy chart with `valuesInLegend` property equal to false and transforms to legendStats: []', () => {
@@ -641,7 +641,7 @@ describe('xy_visualization', () => {
 
         const transformedState = xyVisualization.initialize(() => 'first', persistedState);
 
-        expect(transformedState.legend.legendStats).toEqual(['values']);
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
         expect('valuesInLegend' in transformedState).toEqual(false);
       });
 
@@ -846,6 +846,7 @@ describe('xy_visualization', () => {
           },
         },
         dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+        absDateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -3836,23 +3837,6 @@ describe('xy_visualization', () => {
           ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
         },
       ]);
-    });
-
-    it('should transform legendStats to valuesInLegend', () => {
-      const state = exampleState();
-      const { state: noLegendStatsState } = xyVisualization.getPersistableState!(state);
-      expect(noLegendStatsState.legend.legendStats).not.toBeDefined();
-      expect(noLegendStatsState.valuesInLegend).not.toBeDefined();
-
-      state.legend.legendStats = ['values' as LegendStats.values];
-      const { state: legendStatsState } = xyVisualization.getPersistableState!(state);
-      expect(legendStatsState.legend.legendStats).not.toBeDefined();
-      expect(legendStatsState.valuesInLegend).toEqual(true);
-
-      state.legend.legendStats = [];
-      const { state: legendStatsStateFalsy } = xyVisualization.getPersistableState!(state);
-      expect(legendStatsStateFalsy.legend.legendStats).not.toBeDefined();
-      expect(legendStatsStateFalsy.valuesInLegend).toEqual(false);
     });
   });
 

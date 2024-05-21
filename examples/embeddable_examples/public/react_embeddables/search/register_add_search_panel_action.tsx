@@ -9,13 +9,14 @@
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { addPanelGrouping } from '../add_panel_grouping';
+import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_SEARCH_ACTION_ID, SEARCH_EMBEDDABLE_ID } from './constants';
+import { SearchSerializedState } from './types';
 
 export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
   uiActions.registerAction<EmbeddableApiContext>({
     id: ADD_SEARCH_ACTION_ID,
-    grouping: [addPanelGrouping],
+    grouping: [embeddableExamplesGrouping],
     getDisplayName: () => 'Search example',
     getIconType: () => 'search',
     isCompatible: async ({ embeddable }) => {
@@ -23,10 +24,9 @@ export const registerAddSearchPanelAction = (uiActions: UiActionsStart) => {
     },
     execute: async ({ embeddable }) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel(
+      embeddable.addNewPanel<SearchSerializedState>(
         {
           panelType: SEARCH_EMBEDDABLE_ID,
-          initialState: {},
         },
         true
       );

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
 import { useHostIsolationAction } from './use_host_isolation_action';
@@ -13,10 +14,10 @@ import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetSentinelOneAgentStatus,
-} from './use_sentinelone_host_isolation';
+} from '../../../management/hooks/agents/use_get_agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
-jest.mock('./use_sentinelone_host_isolation');
+jest.mock('../../../management/hooks/agents/use_get_agent_status');
 jest.mock('../../../common/hooks/use_experimental_features');
 
 type AgentType = 'endpoint' | 'sentinel_one' | 'crowdstrike';
@@ -33,7 +34,7 @@ describe('useHostIsolationAction', () => {
   ])('works with %s hook', (name, hook) => {
     const createReactQueryWrapper = () => {
       const queryClient = new QueryClient();
-      const wrapper: React.FC = ({ children }) => (
+      const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
       );
       return wrapper;

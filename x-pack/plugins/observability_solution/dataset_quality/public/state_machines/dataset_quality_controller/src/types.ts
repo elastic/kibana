@@ -19,6 +19,8 @@ import {
   DataStreamStatServiceResponse,
   IntegrationsResponse,
   DataStreamStat,
+  DataStreamStatType,
+  GetNonAggregatableDataStreamsResponse,
 } from '../../../../common/data_streams_stats';
 
 export type FlyoutDataset = Omit<
@@ -60,6 +62,7 @@ export interface WithFlyoutOptions {
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
     breakdownField?: string;
+    isNonAggregatable?: boolean;
   };
 }
 
@@ -68,15 +71,20 @@ export interface WithFilters {
 }
 
 export interface WithDataStreamStats {
-  dataStreamStats: DataStreamStat[];
+  dataStreamStats: DataStreamStatType[];
 }
 
 export interface WithDegradedDocs {
   degradedDocStats: DegradedDocsStat[];
 }
 
+export interface WithNonAggregatableDatasets {
+  nonAggregatableDatasets: string[];
+}
+
 export interface WithDatasets {
   datasets: DataStreamStat[];
+  isSizeStatsAvailable: boolean;
 }
 
 export interface WithIntegrations {
@@ -89,6 +97,7 @@ export type DefaultDatasetQualityControllerState = { type: string } & WithTableO
   WithFlyoutOptions &
   WithDatasets &
   WithFilters &
+  WithNonAggregatableDatasets &
   Partial<WithIntegrations>;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
@@ -117,6 +126,10 @@ export type DatasetQualityControllerTypeState =
     }
   | {
       value: 'integrations.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'nonAggregatableDatasets.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
@@ -188,6 +201,7 @@ export type DatasetQualityControllerEvent =
       query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
   | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamDetails>
   | DoneInvokeEvent<DataStreamSettings>

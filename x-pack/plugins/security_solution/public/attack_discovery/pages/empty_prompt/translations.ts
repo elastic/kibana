@@ -30,6 +30,14 @@ export const LEARN_MORE = i18n.translate(
   }
 );
 
+export const RESPONSES_FROM_AI_SYSTEMS = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.responsesFromAiSystemsTooltip',
+  {
+    defaultMessage:
+      'Responses from AI systems may not always be entirely accurate, although they can seem convincing. For more information on the Attack Discovery feature and its usage, please reference the documentation.',
+  }
+);
+
 export const SELECT_A_CONNECTOR = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.selectAConnectorLabel',
   {
@@ -40,6 +48,13 @@ export const SELECT_A_CONNECTOR = i18n.translate(
 export const START_GENERATING_DISCOVERIES = i18n.translate(
   'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.startGeneratingDiscoveriesLabel',
   {
-    defaultMessage: 'Start generating discoveries via Elastic AI Assistant.',
+    defaultMessage: 'Start discovering attacks with the power of AI and Elastic Security.',
+  }
+);
+
+export const UP_TO = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.pages.emptyPrompt.upToTitle',
+  {
+    defaultMessage: 'Up to',
   }
 );

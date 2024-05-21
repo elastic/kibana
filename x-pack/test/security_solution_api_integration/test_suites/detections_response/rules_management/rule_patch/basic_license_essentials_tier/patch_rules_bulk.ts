@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getSimpleRule,
   getSimpleRuleOutput,
+  getCustomQueryRuleParams,
   removeServerGeneratedProperties,
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
@@ -55,7 +56,49 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
+      });
+
+      it('should patch defaultable fields', async () => {
+        const rulePatchProperties = getCustomQueryRuleParams({
+          rule_id: 'rule-1',
+          max_signals: 200,
+          setup: '# some setup markdown',
+          related_integrations: [
+            { package: 'package-a', version: '^1.2.3' },
+            { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+          ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
+        });
+
+        const expectedRule = {
+          ...rulePatchProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
+
+        await securitySolutionApi.createRule({
+          body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
+        });
+
+        const { body: patchedRulesBulkResponse } = await securitySolutionApi
+          .bulkPatchRules({
+            body: [
+              {
+                ...rulePatchProperties,
+              },
+            ],
+          })
+          .expect(200);
+
+        expect(patchedRulesBulkResponse[0]).toMatchObject(expectedRule);
+
+        const { body: patchedRule } = await securitySolutionApi
+          .readRule({
+            query: { rule_id: 'rule-1' },
+          })
+          .expect(200);
+
+        expect(patchedRule).toMatchObject(expectedRule);
       });
 
       it('should patch two rule properties of name using the two rules rule_id', async () => {
@@ -84,8 +127,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare1 = removeServerGeneratedProperties(body[0]);
         const bodyToCompare2 = removeServerGeneratedProperties(body[1]);
-        expect(bodyToCompare1).to.eql(expectedRule1);
-        expect(bodyToCompare2).to.eql(expectedRule2);
+        expect(bodyToCompare1).toEqual(expectedRule1);
+        expect(bodyToCompare2).toEqual(expectedRule2);
       });
 
       it('should patch a single rule property of name using an id', async () => {
@@ -101,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.revision = 1;
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should patch two rule properties of name using the two rules id', async () => {
@@ -130,8 +173,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         const bodyToCompare1 = removeServerGeneratedPropertiesIncludingRuleId(body[0]);
         const bodyToCompare2 = removeServerGeneratedPropertiesIncludingRuleId(body[1]);
-        expect(bodyToCompare1).to.eql(expectedRule);
-        expect(bodyToCompare2).to.eql(expectedRule2);
+        expect(bodyToCompare1).toEqual(expectedRule);
+        expect(bodyToCompare2).toEqual(expectedRule2);
       });
 
       it('should patch a single rule property of name using the auto-generated id', async () => {
@@ -148,7 +191,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should not change the revision of a rule when it patches only enabled', async () => {
@@ -164,7 +207,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should change the revision of a rule when it patches enabled and another property', async () => {
@@ -182,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should not change other properties when it does patches', async () => {
@@ -208,7 +251,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect(bodyToCompare).to.eql(expectedRule);
+        expect(bodyToCompare).toEqual(expectedRule);
       });
 
       it('should return a 200 but give a 404 in the message if it is given a fake id', async () => {
@@ -218,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        expect(body).to.eql([
+        expect(body).toEqual([
           {
             id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d',
             error: {
@@ -234,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({ body: [{ rule_id: 'fake_id', name: 'some other name' }] })
           .expect(200);
 
-        expect(body).to.eql([
+        expect(body).toEqual([
           {
             rule_id: 'fake_id',
             error: { status_code: 404, message: 'rule_id: "fake_id" not found' },
@@ -261,7 +304,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect([bodyToCompare, body[1]]).to.eql([
+        expect([bodyToCompare, body[1]]).toEqual([
           expectedRule,
           {
             error: {
@@ -292,7 +335,7 @@ export default ({ getService }: FtrProviderContext) => {
         const expectedRule = updateUsername(outputRule, ELASTICSEARCH_USERNAME);
 
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
-        expect([bodyToCompare, body[1]]).to.eql([
+        expect([bodyToCompare, body[1]]).toEqual([
           expectedRule,
           {
             error: {

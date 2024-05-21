@@ -148,7 +148,7 @@ describe('addGeneratedActionValues()', () => {
   });
 
   test('throws error if KQL is not valid', async () => {
-    expect(async () =>
+    await expect(async () =>
       addGeneratedActionValues(
         [
           {

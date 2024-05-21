@@ -39,8 +39,8 @@ describe('PersistableStateAndExternalReferencesLimiter', () => {
   });
 
   describe('countOfItemsWithinCase', () => {
-    it('calls the attachment service with the right params', () => {
-      limiter.countOfItemsWithinCase(caseId);
+    it('calls the attachment service with the right params', async () => {
+      await limiter.countOfItemsWithinCase(caseId);
 
       expect(
         attachmentService.countPersistableStateAndExternalReferenceAttachments
