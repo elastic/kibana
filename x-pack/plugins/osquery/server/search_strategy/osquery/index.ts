@@ -35,14 +35,14 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
       const queryFactory: OsqueryFactory<T> = osqueryFactory[request.factoryQueryType];
 
       return forkJoin({
-        legacyIndexExists: esClient.asInternalUser.indices.exists({
+        actionsIndexExists: esClient.asInternalUser.indices.exists({
           index: `${ACTIONS_INDEX}*`,
         }),
         newDataStreamIndexExists: esClient.asInternalUser.indices.exists({
           index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`, // replace with your second index pattern
         }),
       }).pipe(
-        mergeMap(({ legacyIndexExists, newDataStreamIndexExists }) => {
+        mergeMap(({ actionsIndexExists, newDataStreamIndexExists }) => {
           const strictRequest = {
             factoryQueryType: request.factoryQueryType,
             kuery: request.kuery,
@@ -55,7 +55,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
 
           const dsl = queryFactory.buildDsl({
             ...strictRequest,
-            componentTemplateExists: legacyIndexExists,
+            componentTemplateExists: actionsIndexExists,
           } as StrategyRequestType<T>);
           // use internal user for searching .fleet* indices
           es =
@@ -85,7 +85,7 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
               ) {
                 const dataStreamDsl = queryFactory.buildDsl({
                   ...strictRequest,
-                  componentTemplateExists: legacyIndexExists,
+                  componentTemplateExists: actionsIndexExists,
                   useNewDataStream: true,
                 } as StrategyRequestType<T>);
 
