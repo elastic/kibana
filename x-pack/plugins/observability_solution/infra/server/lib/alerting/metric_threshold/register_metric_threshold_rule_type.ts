@@ -60,7 +60,7 @@ export function registerMetricThresholdRuleType(
     timeUnit: schema.string(),
     timeSize: schema.number(),
     warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
-    warningComparator: schema.maybe(oneOfLiterals(Object.values(COMPARATORS))),
+    warningComparator: schema.maybe(oneOfLiterals(comparators)),
   };
 
   const nonCountCriterion = schema.object({
