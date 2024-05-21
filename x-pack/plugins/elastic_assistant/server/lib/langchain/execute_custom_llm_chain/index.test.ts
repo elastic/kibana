@@ -17,10 +17,7 @@ import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { PassThrough, Stream } from 'stream';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain';
+import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain';
 import { AgentExecutorParams } from '../executors/types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
