@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
 import {
   StoriesProvider,
   StoriesProviderKeyCreationError,
@@ -21,8 +22,8 @@ export default {
 
 export const Default = () => {
   return (
-    <EuiFlyout size="l" onClose={() => {}}>
-      <StoriesProvider>
+    <EuiFlyout size="s" onClose={() => {}}>
+      <StoriesProvider onTelemetryEvent={action('onTelemetryEvent')}>
         <ConnectionDetailsFlyoutContent />
       </StoriesProvider>
     </EuiFlyout>
@@ -31,7 +32,7 @@ export const Default = () => {
 
 export const CreationError = () => {
   return (
-    <EuiFlyout size="l" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}}>
       <StoriesProviderKeyCreationError>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderKeyCreationError>
@@ -41,7 +42,7 @@ export const CreationError = () => {
 
 export const MissingPermissions = () => {
   return (
-    <EuiFlyout size="l" onClose={() => {}}>
+    <EuiFlyout size="s" onClose={() => {}}>
       <StoriesProviderNoKeyPermissions>
         <ConnectionDetailsFlyoutContent />
       </StoriesProviderNoKeyPermissions>

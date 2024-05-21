@@ -39,5 +39,5 @@ export type ResultDocument = t.TypeOf<typeof ResultDocument>;
 
 export const PostResultBody = ResultDocument;
 
-export const GetResultQuery = t.type({ pattern: t.string });
-export type GetResultQuery = t.TypeOf<typeof GetResultQuery>;
+export const GetResultParams = t.type({ pattern: t.string });
+export type GetResultParams = t.TypeOf<typeof GetResultParams>;

@@ -46,6 +46,7 @@ export interface UsageStats {
   'observability:apmAWSLambdaPriceFactor': string;
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
+  'observability:enableInfrastructureContainerAssetView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:enableInfrastructureAssetCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;

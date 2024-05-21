@@ -98,24 +98,24 @@ describe('getStateDefaults', () => {
     });
     expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
 
-    const actualForTextBasedWithInvalidViewMode = getStateDefaults({
+    const actualForEsqlWithInvalidViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForTextBasedWithInvalidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForEsqlWithInvalidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
 
-    const actualForTextBasedWithValidViewMode = getStateDefaults({
+    const actualForEsqlWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.DOCUMENT_LEVEL,
       },
     });
-    expect(actualForTextBasedWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
-    expect(actualForTextBasedWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
+    expect(actualForEsqlWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForEsqlWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
 
     const actualForWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
@@ -133,11 +133,11 @@ describe('getStateDefaults', () => {
   });
 
   test('should return expected dataSource', () => {
-    const actualForTextBased = getStateDefaults({
+    const actualForEsql = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: savedSearchMockWithESQL,
     });
-    expect(actualForTextBased.dataSource).toMatchInlineSnapshot(`
+    expect(actualForEsql.dataSource).toMatchInlineSnapshot(`
       Object {
         "type": "esql",
       }

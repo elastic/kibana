@@ -25,7 +25,7 @@ import { convertComputeUsageToGbSec } from './helper';
 
 export const computeUsageAvgScript = {
   avg: {
-    script: `return doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value * doc['${FAAS_BILLED_DURATION}'].value`,
+    script: `return $('${METRIC_SYSTEM_TOTAL_MEMORY}', 0) * $('${FAAS_BILLED_DURATION}', 0)`,
   },
 };
 
