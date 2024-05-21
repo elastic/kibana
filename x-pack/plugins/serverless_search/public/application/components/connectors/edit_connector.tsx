@@ -36,7 +36,6 @@ import { useConnector } from '../../hooks/api/use_connector';
 export const EditConnector: React.FC = () => {
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);
   const [menuIsOpen, setMenuIsOpen] = useState(false);
-  const [serviceType, setServiceType] = useState<string | null>(null);
 
   const { id } = useParams<{ id: string }>();
 
@@ -46,10 +45,6 @@ export const EditConnector: React.FC = () => {
   } = useKibanaServices();
 
   const { data, isLoading } = useConnector(id);
-
-  useEffect(() => {
-    setServiceType(data?.connector.service_type || null);
-  }, [data?.connector.service_type]);
 
   if (isLoading) {
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchEditConnectorsPage">
@@ -162,13 +157,13 @@ export const EditConnector: React.FC = () => {
       <EuiPageTemplate.Section>
         <EuiFlexGroup direction="row">
           <EuiFlexItem grow={1}>
-            <EditServiceType serviceType={serviceType} setServiceType={setServiceType} />
+            <EditServiceType connector={connector} />
             <EuiSpacer />
             <EditDescription connector={connector} />
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
             <EuiPanel hasBorder hasShadow={false}>
-              <ConnectorConfiguration connector={connector} serviceType={serviceType} />
+              <ConnectorConfiguration connector={connector} />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>

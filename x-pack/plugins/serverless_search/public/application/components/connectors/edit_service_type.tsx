@@ -15,18 +15,21 @@ import {
   EuiIcon,
   EuiSuperSelect,
 } from '@elastic/eui';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Connector } from '@kbn/search-connectors';
+import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditServiceTypeProps {
-  serviceType: string | null;
-  setServiceType: (serviceType: string) => void;
+  connector: Connector;
 }
 
-export const EditServiceType: React.FC<EditServiceTypeProps> = ({
-  serviceType,
-  setServiceType,
-}) => {
+export const EditServiceType: React.FC<EditServiceTypeProps> = ({ connector }) => {
+  const { http } = useKibanaServices();
   const connectorTypes = useConnectorTypes();
+  const queryClient = useQueryClient();
+  const { queryKey } = useConnector(connector.id);
 
   const options =
     connectorTypes.map((connectorType) => ({
@@ -49,6 +52,22 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({
       value: connectorType.serviceType,
     })) || [];
 
+  const { isLoading, mutate } = useMutation({
+    mutationFn: async (inputServiceType: string) => {
+      const body = { service_type: inputServiceType };
+      await http.post(`/internal/serverless_search/connectors/${connector.id}/service_type`, {
+        body: JSON.stringify(body),
+      });
+      return inputServiceType;
+    },
+    onSuccess: (successData) => {
+      queryClient.setQueryData(queryKey, {
+        connector: { ...connector, service_type: successData },
+      });
+      queryClient.invalidateQueries(queryKey);
+    },
+  });
+
   return (
     <EuiForm>
       <EuiFormLabel data-test-subj="serverlessSearchEditConnectorTypeLabel">
@@ -57,10 +76,13 @@ export const EditServiceType: React.FC<EditServiceTypeProps> = ({
         })}
       </EuiFormLabel>
       <EuiSuperSelect
+        // We only want to allow people to set the service type once to avoid weird conflicts
+        disabled={Boolean(connector.service_type)}
         data-test-subj="serverlessSearchEditConnectorTypeChoices"
-        onChange={(event) => setServiceType(event)}
+        isLoading={isLoading}
+        onChange={(event) => mutate(event)}
         options={options}
-        valueOfSelected={serviceType || undefined}
+        valueOfSelected={connector.service_type || undefined}
       />
     </EuiForm>
   );

@@ -31,15 +31,11 @@ import { ConnectorScheduling } from '../conector_scheduling_tab/connector_schedu
 
 interface ConnectorConfigurationProps {
   connector: Connector;
-  serviceType: string | null;
 }
 
 type ConnectorConfigurationStep = 'link' | 'configure' | 'connect' | 'connected';
 
-export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({
-  connector,
-  serviceType,
-}) => {
+export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({ connector }) => {
   const [currentStep, setCurrentStep] = useState<ConnectorConfigurationStep>('link');
   useEffect(() => {
     let step: ConnectorConfigurationStep = 'link';
@@ -140,7 +136,7 @@ export const ConnectorConfiguration: React.FC<ConnectorConfigurationProps> = ({
         {currentStep === 'link' && (
           <ConnectorLinkElasticsearch
             connectorId={connector.id}
-            serviceType={serviceType || connector.service_type || ''}
+            serviceType={connector.service_type || ''}
             status={connector.status}
           />
         )}

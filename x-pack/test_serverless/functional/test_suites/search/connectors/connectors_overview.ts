@@ -69,7 +69,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('searchBar and select, filters connector table', async () => {
-        await browser.refresh();
+        await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.getConnectorFromConnectorTable(
+          TEST_CONNECTOR_NAME
+        );
         await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.setSearchBarValue(
           TEST_CONNECTOR_NAME
         );
