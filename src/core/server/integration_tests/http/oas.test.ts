@@ -109,7 +109,10 @@ it.each([
     excludes: ['/my-include-test', '/my-other-plugin'],
   },
   {
-    queryParam: { pluginId: 'myOtherPlugin', pathStartsWith: '/api/my-other-plugin' },
+    queryParam: {
+      pluginId: 'myOtherPlugin',
+      pathStartsWith: ['/api/my-other-plugin', '/api/versioned'],
+    },
     includes: {
       paths: {
         '/api/my-other-plugin': {
