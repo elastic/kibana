@@ -140,6 +140,7 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       };
 
       expect(result).toEqual(expected);
@@ -175,6 +176,20 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+      });
+    });
+
+    test('filters out empty required fields', () => {
+      const result = formatDefineStepData({
+        ...mockData,
+        requiredFields: [
+          { name: 'host.name', type: 'keyword' },
+          { name: '', type: '' },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       });
     });
 
@@ -567,6 +582,7 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       };
 
       expect(result).toEqual(expected);
