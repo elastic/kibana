@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import type {
-  FieldMetadata,
-  FieldName,
-  FieldsMetadataDictionary,
-  PartialFieldMetadataPlain,
-} from '../../../../common';
+import type { FieldMetadataPlain } from '../../../../common';
 
-export interface IFieldsRepository {
-  getByName<TFieldName extends FieldName>(
-    fieldName: TFieldName
-  ): Promise<FieldMetadata | undefined> | FieldMetadata | undefined;
-  find<TFieldName extends FieldName>(params: {
-    fieldNames?: TFieldName[];
-  }): Promise<FieldsMetadataDictionary> | FieldsMetadataDictionary;
+export interface IntegrationFieldsSearchParams {
+  integration: string;
+  dataset?: string;
 }
+
+export type ExtractedIntegrationFields = Record<string, Record<string, FieldMetadataPlain>>;
 
 export type IntegrationFieldsExtractor = ({
   integration,
   dataset,
-}: {
-  integration: string;
-  dataset?: string;
-}) => Promise<Record<string, PartialFieldMetadataPlain>>;
+}: IntegrationFieldsSearchParams) => Promise<ExtractedIntegrationFields>;

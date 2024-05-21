@@ -8,7 +8,6 @@
 import mapValues from 'lodash/mapValues';
 import { FieldsMetadataDictionary } from '../../../../common/fields_metadata/models/fields_metadata_dictionary';
 import { FieldMetadata, FieldName, TEcsFields } from '../../../../common';
-import { IFieldsRepository } from './types';
 
 interface EcsFieldsRepositoryDeps {
   ecsFields: TEcsFields;
@@ -18,7 +17,7 @@ interface FindOptions {
   fieldNames?: FieldName[];
 }
 
-export class EcsFieldsRepository implements IFieldsRepository {
+export class EcsFieldsRepository {
   private readonly ecsFields: Record<FieldName, FieldMetadata>;
 
   private constructor(ecsFields: TEcsFields) {
@@ -27,7 +26,7 @@ export class EcsFieldsRepository implements IFieldsRepository {
     );
   }
 
-  getByName(fieldName: FieldName) {
+  getByName(fieldName: FieldName): FieldMetadata | undefined {
     return this.ecsFields[fieldName];
   }
 

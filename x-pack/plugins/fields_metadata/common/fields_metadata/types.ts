@@ -31,7 +31,6 @@ export const multiFieldRT = rt.type({
 });
 
 const requiredBaseMetadataPlainRT = rt.type({
-  description: rt.string,
   flat_name: rt.string,
   name: rt.string,
   source: fieldSourceRT,
@@ -44,6 +43,7 @@ const optionalMetadataPlainRT = rt.partial({
   allowed_values: rt.array(allowedValueRT),
   beta: rt.string,
   dashed_name: rt.string,
+  description: rt.string,
   doc_values: rt.boolean,
   example: rt.unknown,
   expected_values: rt.array(rt.string),

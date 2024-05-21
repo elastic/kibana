@@ -8,53 +8,57 @@
 import { Logger } from '@kbn/core/server';
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
-import { IntegrationsFieldsRepository } from './repositories/integration_fields_repository';
-import { IFieldsMetadataClient } from './types';
+import { IntegrationFieldsRepository } from './repositories/integration_fields_repository';
+import { IntegrationFieldsSearchParams } from './repositories/types';
+import { FindFieldsMetadataOptions, IFieldsMetadataClient } from './types';
 
 interface FieldsMetadataClientDeps {
   logger: Logger;
   ecsFieldsRepository: EcsFieldsRepository;
-  integrationFieldsRepository: IntegrationsFieldsRepository;
-}
-
-interface FindOptions {
-  fieldNames?: FieldName[];
+  integrationFieldsRepository: IntegrationFieldsRepository;
 }
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
   private constructor(
     private readonly logger: Logger,
     private readonly ecsFieldsRepository: EcsFieldsRepository,
-    private readonly integrationFieldsRepository: IntegrationsFieldsRepository
+    private readonly integrationFieldsRepository: IntegrationFieldsRepository
   ) {}
 
-  getByName<TFieldName extends FieldName>(fieldName: TFieldName): FieldMetadata | undefined {
+  async getByName<TFieldName extends FieldName>(
+    fieldName: TFieldName,
+    { integration, dataset }: Partial<IntegrationFieldsSearchParams> = {}
+  ): Promise<FieldMetadata | undefined> {
     this.logger.debug(`Retrieving field metadata for: ${fieldName}`);
 
+    // 1. Try resolving from ecs static metadata
     let field = this.ecsFieldsRepository.getByName(fieldName);
 
-    // TODO: enable resolution for integration field
-    if (!field) {
-      field = this.integrationFieldsRepository.getByName(fieldName);
+    // 2. Try searching for the fiels in the Elastic Package Registry
+    if (!field && integration) {
+      field = await this.integrationFieldsRepository.getByName(fieldName, { integration, dataset });
     }
 
     return field;
   }
 
-  find({ fieldNames }: FindOptions = {}): FieldsMetadataDictionary {
+  async find({
+    fieldNames,
+    integration,
+    dataset,
+  }: FindFieldsMetadataOptions = {}): Promise<FieldsMetadataDictionary> {
     if (!fieldNames) {
       return this.ecsFieldsRepository.find();
     }
 
-    const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
-      const field = this.getByName(fieldName);
+    const fields: Record<string, FieldMetadata> = {};
+    for (const fieldName of fieldNames) {
+      const field = await this.getByName(fieldName, { integration, dataset });
 
       if (field) {
-        fieldsMetadata[fieldName] = field;
+        fields[fieldName] = field;
       }
-
-      return fieldsMetadata;
-    }, {} as Record<FieldName, FieldMetadata>);
+    }
 
     return FieldsMetadataDictionary.create(fields);
   }

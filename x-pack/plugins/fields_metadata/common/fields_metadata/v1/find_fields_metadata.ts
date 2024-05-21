@@ -13,6 +13,8 @@ export const findFieldsMetadataRequestQueryRT = rt.exact(
   rt.partial({
     attributes: arrayToStringRt.pipe(rt.array(fieldAttributeRT)),
     fieldNames: arrayToStringRt.pipe(rt.array(rt.string)),
+    integration: rt.string,
+    dataset: rt.string,
   })
 );
 

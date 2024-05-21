@@ -6,7 +6,7 @@
  */
 
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
-import { IntegrationFieldsExtractor } from './repositories/types';
+import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './repositories/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataServiceStartDeps {}
@@ -19,7 +19,11 @@ export interface FieldsMetadataServiceStart {
   getClient(): IFieldsMetadataClient;
 }
 
+export interface FindFieldsMetadataOptions extends Partial<IntegrationFieldsSearchParams> {
+  fieldNames?: FieldName[];
+}
+
 export interface IFieldsMetadataClient {
-  getByName(fieldName: FieldName): FieldMetadata | undefined;
-  find(params: { fieldNames?: FieldName[] }): FieldsMetadataDictionary;
+  getByName(fieldName: FieldName): Promise<FieldMetadata | undefined>;
+  find(params: FindFieldsMetadataOptions): Promise<FieldsMetadataDictionary>;
 }
