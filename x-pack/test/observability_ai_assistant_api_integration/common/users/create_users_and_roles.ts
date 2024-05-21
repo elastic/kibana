@@ -11,6 +11,7 @@ import { allRoles } from './roles';
 
 export async function createUsersAndRoles(getService: InheritedFtrProviderContext['getService']) {
   const security = getService('security');
+  const log = getService('log');
 
   // create roles
   await Promise.all(
@@ -22,6 +23,7 @@ export async function createUsersAndRoles(getService: InheritedFtrProviderContex
   // create users
   await Promise.all(
     allUsers.map((user) => {
+      log.info(`Creating user: ${user.username} with roles: ${user.roles.join(', ')}`);
       return security.user.create(user.username, {
         password: user.password,
         roles: user.roles,

@@ -6,8 +6,13 @@
  */
 
 import { kbnTestConfig } from '@kbn/test';
-
 const password = kbnTestConfig.getUrlParts().password!;
+
+export interface User {
+  username: string;
+  password: string;
+  roles: string[];
+}
 
 export const editorUser: User = {
   username: 'editor',
@@ -20,11 +25,5 @@ export const viewerUser: User = {
   password,
   roles: ['viewer'],
 };
-
-export interface User {
-  username: string;
-  password: string;
-  roles: string[];
-}
 
 export const allUsers = [editorUser, viewerUser];

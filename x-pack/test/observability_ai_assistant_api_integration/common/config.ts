@@ -40,8 +40,9 @@ export interface CreateTest {
   servers: any;
   services: InheritedServices & {
     observabilityAIAssistantAPIClient: () => Promise<{
-      readUser: ObservabilityAIAssistantAPIClient;
-      writeUser: ObservabilityAIAssistantAPIClient;
+      adminUser: ObservabilityAIAssistantAPIClient;
+      viewerUser: ObservabilityAIAssistantAPIClient;
+      editorUser: ObservabilityAIAssistantAPIClient;
     }>;
   };
   junit: { reportName: string };
@@ -74,8 +75,9 @@ function createObservabilityAIAssistantAPIConfig({
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {
         return {
-          readUser: await getObservabilityAIAssistantAPIClient(kibanaServer, viewerUser.username),
-          writeUser: await getObservabilityAIAssistantAPIClient(kibanaServer, editorUser.username),
+          adminUser: await getObservabilityAIAssistantAPIClient(kibanaServer, 'elastic'),
+          viewerUser: await getObservabilityAIAssistantAPIClient(kibanaServer, viewerUser.username),
+          editorUser: await getObservabilityAIAssistantAPIClient(kibanaServer, editorUser.username),
         };
       },
     },
