@@ -49,8 +49,6 @@ describe('EnterpriseSearchAnalyticsPageTemplate', () => {
 
   it('updates the side nav dynamic links', async () => {
     const updateSideNavDefinition = jest.fn();
-    jest.spyOn(React, 'useEffect').mockImplementationOnce((f) => f());
-
     setMockValues({ ...mockValues, updateSideNavDefinition });
 
     const collectionsItems = [{ foo: 'bar' }];
