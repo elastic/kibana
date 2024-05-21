@@ -713,7 +713,7 @@ describe('features', () => {
         ]);
       });
 
-      test('actions defined in any feature privilege of disabled but referenced feature are included in `all` ignoring to excludeFromBasePrivileges', () => {
+      test('actions defined in any feature privilege of a disabled but referenced feature are included in `all`, ignoring the excludeFromBasePrivileges property', () => {
         const getFeatures = ({
           excludeFromBasePrivileges,
         }: {
@@ -991,7 +991,7 @@ describe('features', () => {
         ]);
       });
 
-      test('actions defined in a feature privilege with name `read` of disabled but referenced feature are included in `read` ignoring to excludeFromBasePrivileges', () => {
+      test('actions defined in a feature privilege with name `read` of a disabled but referenced feature are included in `read`, ignoring the excludeFromBasePrivileges property', () => {
         const getFeatures = ({
           excludeFromBasePrivileges,
         }: {
