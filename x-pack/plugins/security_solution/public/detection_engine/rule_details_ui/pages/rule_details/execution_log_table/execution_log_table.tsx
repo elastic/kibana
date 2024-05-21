@@ -446,7 +446,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
     if (showSourceEventTimeRange) {
       columns.push(...getSourceEventTimeRangeColumns());
-      messageColumnWidth = 35;
+      messageColumnWidth = 30;
     }
 
     if (showMetricColumns) {

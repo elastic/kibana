@@ -179,7 +179,7 @@ export const getSourceEventTimeRangeColumns = () => [
         getEmptyValue()
       );
     },
-    width: '15%',
+    width: '20%',
   },
 ];
 
