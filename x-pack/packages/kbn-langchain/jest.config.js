@@ -9,10 +9,10 @@ module.exports = {
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/packages/kbn_langchain',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/packages/kbn-langchain/server/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/packages/kbn-langchain/server/**/*.{ts}',
     '!<rootDir>/x-pack/packages/kbn-langchain/server/{__test__,__snapshots__,__examples__,*mock*,tests,test_helpers,integration_tests,types}/**/*',
-    '!<rootDir>/x-pack/packages/kbn-langchain/server/*mock*.{ts,tsx}',
-    '!<rootDir>/x-pack/packages/kbn-langchain/server/*.test.{ts,tsx}',
+    '!<rootDir>/x-pack/packages/kbn-langchain/server/*mock*.{ts}',
+    '!<rootDir>/x-pack/packages/kbn-langchain/server/*.test.{ts}',
     '!<rootDir>/x-pack/packages/kbn-langchain/server/*.d.ts',
     '!<rootDir>/x-pack/packages/kbn-langchain/server/*.config.ts',
   ],
