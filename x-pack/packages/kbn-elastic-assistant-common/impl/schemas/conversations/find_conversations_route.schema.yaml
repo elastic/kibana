@@ -91,7 +91,7 @@ paths:
                   message:
                     type: string
 
-  /api/elastic_assistant/conversations/current_user/_find:
+  /internal/elastic_assistant/conversations/current_user/_find:
     get:
       operationId: FindCurrentUserConversations
       x-codegen-enabled: true
