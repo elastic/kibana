@@ -133,7 +133,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    it('Shows a prompt when trying to navigate away when the form is dirty', async () => {
+    it('Shows a prompt when trying to navigate away from the creation form when the form is dirty', async () => {
       // Navigate to creation flow
       await testSubjects.click('createPipelineDropdown');
       await testSubjects.click('createNewPipeline');
