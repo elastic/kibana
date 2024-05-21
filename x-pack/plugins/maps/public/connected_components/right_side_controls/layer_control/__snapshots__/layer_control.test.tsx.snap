@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LayerControlInternal is rendered 1`] = `
+exports[`LayerControl is rendered 1`] = `
 <Fragment>
   <EuiPanel
     className="mapWidgetControl mapWidgetControl-hasShadow"
@@ -112,7 +112,7 @@ exports[`LayerControlInternal is rendered 1`] = `
 </Fragment>
 `;
 
-exports[`LayerControlInternal isLayerTOCOpen Should render expand button 1`] = `
+exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
@@ -127,7 +127,7 @@ exports[`LayerControlInternal isLayerTOCOpen Should render expand button 1`] = `
 </EuiToolTip>
 `;
 
-exports[`LayerControlInternal isLayerTOCOpen Should render expand button with error icon when layer has error 1`] = `
+exports[`LayerControl isLayerTOCOpen Should render expand button with error icon when layer has error 1`] = `
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
@@ -142,7 +142,7 @@ exports[`LayerControlInternal isLayerTOCOpen Should render expand button with er
 </EuiToolTip>
 `;
 
-exports[`LayerControlInternal isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
+exports[`LayerControl isLayerTOCOpen Should render expand button with loading icon when layer is loading 1`] = `
 <EuiToolTip
   content="Expand layers panel"
   delay="long"
@@ -157,7 +157,7 @@ exports[`LayerControlInternal isLayerTOCOpen Should render expand button with lo
 </EuiToolTip>
 `;
 
-exports[`LayerControlInternal isReadOnly 1`] = `
+exports[`LayerControl isReadOnly 1`] = `
 <Fragment>
   <EuiPanel
     className="mapWidgetControl mapWidgetControl-hasShadow"
@@ -252,7 +252,7 @@ exports[`LayerControlInternal isReadOnly 1`] = `
 </Fragment>
 `;
 
-exports[`LayerControlInternal should disable buttons when flyout is open 1`] = `
+exports[`LayerControl should disable buttons when flyout is open 1`] = `
 <Fragment>
   <EuiPanel
     className="mapWidgetControl mapWidgetControl-hasShadow"
