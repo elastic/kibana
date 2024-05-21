@@ -224,9 +224,104 @@ export const RULE_TAG_INPUT_TITLE = i18n.translate(
   }
 );
 
+export const RULE_TAG_PLACEHOLDER = i18n.translate(
+  'alertsUIShared.ruleForm.ruleDetails.ruleTagsPlaceholder',
+  {
+    defaultMessage: 'Create tags',
+  }
+);
+
 export const RULE_NAME_ARIA_LABEL_TEXT = i18n.translate(
   'alertsUIShared.ruleForm.rulePage.ruleNameAriaLabelText',
   {
     defaultMessage: 'Edit rule name',
   }
 );
+
+export const RULE_PAGE_FOOTER_CANCEL_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.rulePageFooter.cancelText',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const RULE_PAGE_FOOTER_SHOW_REQUEST_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.rulePageFooter.showRequestText',
+  {
+    defaultMessage: 'Show request',
+  }
+);
+
+export const RULE_PAGE_FOOTER_CREATE_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.rulePageFooter.createText',
+  {
+    defaultMessage: 'Create rule',
+  }
+);
+
+export const RULE_PAGE_FOOTER_SAVE_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.rulePageFooter.saveText',
+  {
+    defaultMessage: 'Save rule',
+  }
+);
+
+export const HEALTH_CHECK_ALERTS_ERROR_TITLE = i18n.translate(
+  'alertsUIShared.healthCheck.alertsErrorTitle',
+  {
+    defaultMessage: 'You must enable Alerting and Actions',
+  }
+);
+
+export const HEALTH_CHECK_ALERTS_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.healthCheck.alertsErrorText',
+  {
+    defaultMessage: 'To create a rule, you must enable the alerting and actions plugins. ',
+  }
+);
+
+export const HEALTH_CHECK_ENCRYPTION_ERROR_TITLE = i18n.translate(
+  'alertsUIShared.healthCheck.encryptionErrorTitle',
+  {
+    defaultMessage: 'Additional setup required',
+  }
+);
+
+export const HEALTH_CHECK_ENCRYPTION_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.healthCheck.encryptionErrorText',
+  {
+    defaultMessage: 'You must configure an encryption key to use Alerting.',
+  }
+);
+
+export const HEALTH_CHECK_API_KEY_ENCRYPTION_ERROR_TITLE = i18n.translate(
+  'alertsUIShared.healthCheck.healthCheck.apiKeysAndEncryptionErrorTitle',
+  {
+    defaultMessage: 'Additional setup required',
+  }
+);
+
+export const HEALTH_CHECK_API_KEY_ENCRYPTION_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.healthCheck.apiKeysAndEncryptionErrorText',
+  {
+    defaultMessage: 'You must enable API keys and configure an encryption key to use Alerting.',
+  }
+);
+
+export const HEALTH_CHECK_API_KEY_DISABLED_ERROR_TITLE = i18n.translate(
+  'alertsUIShared.healthCheck.apiKeysDisabledErrorTitle',
+  {
+    defaultMessage: 'You must enable API keys to use Alerting. ',
+  }
+);
+
+export const HEALTH_CHECK_API_KEY_DISABLED_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.healthCheck.apiKeysDisabledErrorText',
+  {
+    defaultMessage: 'You must enable API keys to use Alerting. ',
+  }
+);
+
+export const HEALTH_CHECK_ACTION_TEXT = i18n.translate('alertsUIShared.healthCheck.actionText', {
+  defaultMessage: 'Learn more.',
+});

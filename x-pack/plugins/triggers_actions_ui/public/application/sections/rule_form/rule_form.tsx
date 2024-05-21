@@ -200,6 +200,8 @@ export const RuleForm = ({
   } = useKibana().services;
   const canShowActions = hasShowActionsCapability(capabilities);
 
+  console.info('errors', errors);
+
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const flyoutBodyOverflowRef = useRef<HTMLDivElement | HTMLSpanElement | null>(null);
 

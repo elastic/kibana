@@ -10,12 +10,24 @@ import React, { useMemo } from 'react';
 import {
   EuiPageTemplate,
   EuiHorizontalRule,
+  EuiSpacer,
   EuiSteps,
   EuiStepsProps,
+  EuiBreadcrumbsProps,
   useEuiBackgroundColorCSS,
+  EuiIcon,
 } from '@elastic/eui';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { RuleDefinition, RuleActions, RuleDetails, RulePageNameInput, RuleTypeModel } from '..';
+import { getRouterLinkProps } from '@kbn/router-utils';
+import {
+  RuleDefinition,
+  RuleActions,
+  RuleDetails,
+  RulePageNameInput,
+  RulePageFooter,
+  RuleTypeModel,
+  RuleFormData,
+} from '..';
 import { RuleTypeWithDescription } from '../../common/types';
 
 export interface RulePageProps {
@@ -24,24 +36,51 @@ export interface RulePageProps {
   selectedRuleTypeModel: RuleTypeModel;
   selectedRuleType: RuleTypeWithDescription;
   validConsumers?: RuleCreationValidConsumer[];
+  referrerHref?: string;
+  isEdit?: boolean;
+  isSaving?: boolean;
+  onCancel: () => void;
+  onSave: (formData: RuleFormData) => void;
 }
 
 export const RulePage = (props: RulePageProps) => {
   const {
-    canShowConsumerSelection,
+    canShowConsumerSelection = false,
     authorizedConsumers,
     selectedRuleTypeModel,
     selectedRuleType,
     validConsumers,
+    referrerHref,
+    isEdit = false,
+    isSaving = false,
+    onCancel,
+    onSave,
   } = props;
 
   const styles = useEuiBackgroundColorCSS().transparent;
+
+  const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] = useMemo(() => {
+    if (referrerHref) {
+      return [
+        {
+          text: (
+            <>
+              <EuiIcon size="s" type="arrowLeft" /> Return
+            </>
+          ),
+          color: 'primary',
+          'aria-current': false,
+          ...getRouterLinkProps({ href: referrerHref, onClick: onCancel }),
+        },
+      ];
+    }
+    return [];
+  }, [onCancel, referrerHref]);
 
   const steps: EuiStepsProps['steps'] = useMemo(() => {
     return [
       {
         title: 'Rule definition',
-        status: 'current',
         children: (
           <RuleDefinition
             canShowConsumerSelection={canShowConsumerSelection}
@@ -54,21 +93,21 @@ export const RulePage = (props: RulePageProps) => {
       },
       {
         title: 'Actions',
-        status: 'current',
         children: (
           <>
             <RuleActions onClick={() => {}} />
-            <EuiHorizontalRule margin="xl" />
+            <EuiSpacer />
+            <EuiHorizontalRule margin="none" />
           </>
         ),
       },
       {
         title: 'Rule details',
-        status: 'current',
         children: (
           <>
             <RuleDetails />
-            <EuiHorizontalRule margin="xl" />
+            <EuiSpacer />
+            <EuiHorizontalRule margin="none" />
           </>
         ),
       },
@@ -83,11 +122,14 @@ export const RulePage = (props: RulePageProps) => {
 
   return (
     <EuiPageTemplate grow bottomBorder offset={0} css={styles}>
-      <EuiPageTemplate.Header>
+      <EuiPageTemplate.Header breadcrumbs={breadcrumbs}>
         <RulePageNameInput />
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section>
         <EuiSteps steps={steps} />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section>
+        <RulePageFooter isEdit={isEdit} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

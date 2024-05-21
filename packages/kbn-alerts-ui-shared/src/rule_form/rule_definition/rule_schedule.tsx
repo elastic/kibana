@@ -50,13 +50,13 @@ const getHelpTextForInterval = (
 const labelForRuleChecked = [SCHEDULE_TITLE_PREFIX];
 
 export const RuleSchedule = () => {
-  const { state, errors, minimumScheduleInterval } = useRuleFormState();
+  const { formData, errors = {}, minimumScheduleInterval } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
   const {
     schedule: { interval },
-  } = state;
+  } = formData;
 
   const hasIntervalError = useMemo(() => {
     return errors.interval?.length > 0;

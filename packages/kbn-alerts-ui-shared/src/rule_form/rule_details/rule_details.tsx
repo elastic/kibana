@@ -20,15 +20,16 @@ import {
   RULE_DETAILS_DESCRIPTION,
   RULE_NAME_INPUT_TITLE,
   RULE_TAG_INPUT_TITLE,
+  RULE_TAG_PLACEHOLDER,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
 export const RuleDetails = () => {
-  const { state, errors } = useRuleFormState();
+  const { formData, errors = {} } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
-  const { tags = [], name } = state;
+  const { tags = [], name } = formData;
 
   const tagsOptions = useMemo(() => {
     return tags.map((tag: string) => ({ label: tag }));
@@ -93,6 +94,7 @@ export const RuleDetails = () => {
         <EuiFieldText
           fullWidth
           value={name}
+          placeholder={RULE_NAME_INPUT_TITLE}
           onChange={onNameChange}
           data-test-subj="ruleDetailsNameInput"
         />
@@ -106,6 +108,7 @@ export const RuleDetails = () => {
         <EuiComboBox
           fullWidth
           noSuggestions
+          placeholder={RULE_TAG_PLACEHOLDER}
           data-test-subj="ruleDetailsTagsInput"
           selectedOptions={tagsOptions}
           onCreateOption={onAddTag}

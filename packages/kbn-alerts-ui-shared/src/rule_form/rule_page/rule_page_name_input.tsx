@@ -8,13 +8,13 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiInlineEditTitle, EuiInlineEditTitleProps } from '@elastic/eui';
-import { RULE_NAME_ARIA_LABEL_TEXT } from '../translations';
+import { RULE_NAME_ARIA_LABEL_TEXT, RULE_NAME_INPUT_TITLE } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 
 export const RulePageNameInput = () => {
-  const { state, errors } = useRuleFormState();
+  const { formData, errors = {} } = useRuleFormState();
 
-  const { name } = state;
+  const { name } = formData;
 
   const dispatch = useRuleFormDispatch();
 
@@ -57,6 +57,7 @@ export const RulePageNameInput = () => {
     <EuiInlineEditTitle
       heading="h3"
       value={name}
+      placeholder={RULE_NAME_INPUT_TITLE}
       onCancel={onInputCancel}
       onChange={onInputChange}
       inputAriaLabel={RULE_NAME_ARIA_LABEL_TEXT}

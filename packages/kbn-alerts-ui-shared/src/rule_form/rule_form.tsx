@@ -6,65 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import type { RuleTypeWithDescription } from '../common/types';
-import type {
-  RuleFormPlugins,
-  RuleFormSchema,
-  MinimumScheduleInterval,
-  RuleFormErrors,
-  RuleTypeModel,
-} from './types';
+import React, { useMemo } from 'react';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { CreateRuleForm, CreateRuleFormProps } from './create_rule_form';
+import { EditRuleForm, EditRuleFormProps } from './edit_rule_form';
 
-import { RuleFormStateProvider } from './rule_form_state';
+const queryClient = new QueryClient();
 
-import { RulePage } from './rule_page';
+const isCreate = (props: CreateRuleFormProps | EditRuleFormProps): props is CreateRuleFormProps => {
+  return (props as CreateRuleFormProps).consumer !== undefined;
+};
 
-export interface RuleFormProps {
-  plugins: RuleFormPlugins;
-  state: RuleFormSchema;
-  minimumScheduleInterval?: MinimumScheduleInterval;
-  errors?: RuleFormErrors;
-  canShowConsumerSelection?: boolean;
-  authorizedConsumers?: RuleCreationValidConsumer[];
-  selectedRuleTypeModel: RuleTypeModel;
-  selectedRuleType: RuleTypeWithDescription;
-  validConsumers?: RuleCreationValidConsumer[];
-  metadata?: Record<string, unknown>;
-}
+export const RuleForm = (props: CreateRuleFormProps | EditRuleFormProps) => {
+  const ruleFormComponent = useMemo(() => {
+    if (isCreate(props)) {
+      return <CreateRuleForm {...props} />;
+    } else {
+      return <EditRuleForm {...props} />;
+    }
+  }, [props]);
 
-export const RuleForm = (props: RuleFormProps) => {
-  const {
-    plugins,
-    state,
-    minimumScheduleInterval,
-    errors = {},
-    canShowConsumerSelection,
-    authorizedConsumers,
-    selectedRuleTypeModel,
-    selectedRuleType,
-    validConsumers,
-    metadata,
-  } = props;
-
-  return (
-    <RuleFormStateProvider
-      initialRuleFormState={{
-        state,
-        plugins,
-        minimumScheduleInterval,
-        errors,
-        metadata,
-      }}
-    >
-      <RulePage
-        canShowConsumerSelection={canShowConsumerSelection}
-        authorizedConsumers={authorizedConsumers}
-        selectedRuleTypeModel={selectedRuleTypeModel}
-        selectedRuleType={selectedRuleType}
-        validConsumers={validConsumers}
-      />
-    </RuleFormStateProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
 };

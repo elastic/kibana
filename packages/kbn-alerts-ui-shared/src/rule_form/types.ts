@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
+import type { HttpStart } from '@kbn/core-http-browser';
 import type { ComponentType } from 'react';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -19,6 +20,7 @@ import type {
   RuleAction,
   RuleSystemAction,
 } from '@kbn/alerting-types';
+import type { RuleTypeWithDescription } from '../common/types';
 
 export type RuleTypeParams = Record<string, unknown>;
 
@@ -96,18 +98,20 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<any>>;
 }
 
-export interface RuleFormSchema {
-  id?: SanitizedRule<RuleTypeParams>['id'];
-  name: SanitizedRule<RuleTypeParams>['name'];
-  tags: SanitizedRule<RuleTypeParams>['tags'];
-  params: SanitizedRule<RuleTypeParams>['params'];
-  schedule: SanitizedRule<RuleTypeParams>['schedule'];
-  consumer: SanitizedRule<RuleTypeParams>['consumer'];
-  alertDelay?: SanitizedRule<RuleTypeParams>['alertDelay'];
-  notifyWhen?: SanitizedRule<RuleTypeParams>['notifyWhen'];
+export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
+  id?: SanitizedRule<Params>['id'];
+  name: SanitizedRule<Params>['name'];
+  tags: SanitizedRule<Params>['tags'];
+  params: SanitizedRule<Params>['params'];
+  schedule: SanitizedRule<Params>['schedule'];
+  consumer: SanitizedRule<Params>['consumer'];
+  alertDelay?: SanitizedRule<Params>['alertDelay'];
+  notifyWhen?: SanitizedRule<Params>['notifyWhen'];
+  ruleTypeId?: SanitizedRule<Params>['ruleTypeId'];
 }
 
 export interface RuleFormPlugins {
+  http: HttpStart;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -115,11 +119,21 @@ export interface RuleFormPlugins {
   docLinks: DocLinksStart;
 }
 
-export interface RuleFormState {
-  state: RuleFormSchema;
-  plugins?: RuleFormPlugins;
-  errors: RuleFormErrors;
+export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
+  formData: RuleFormData<Params>;
+  plugins: RuleFormPlugins;
+  errors?: RuleFormErrors;
+  selectedRuleTypeModel: RuleTypeModel<Params>;
   metadata?: Record<string, unknown>;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;
+}
+
+export interface RuleFormCommonProps {
+  metadata?: Record<string, unknown>;
+  plugins: RuleFormPlugins;
+  ruleType: RuleTypeWithDescription;
+  ruleTypeModel: RuleTypeModel;
+  hideInterval?: boolean;
+  onCancel: () => void;
 }

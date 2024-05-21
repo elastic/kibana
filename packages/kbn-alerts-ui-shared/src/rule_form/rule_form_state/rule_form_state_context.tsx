@@ -7,22 +7,10 @@
  */
 
 import { createContext } from 'react';
-import { DEFAULT_RULE_INTERVAL } from '../constants';
 import type { RuleFormState } from '../types';
 import type { RuleFormStateReducerAction } from './rule_form_state_reducer';
 
-export const RuleFormStateContext = createContext<RuleFormState>({
-  state: {
-    tags: [],
-    name: '',
-    params: {},
-    schedule: {
-      interval: DEFAULT_RULE_INTERVAL,
-    },
-    consumer: 'alerts',
-  },
-  errors: {},
-});
+export const RuleFormStateContext = createContext<RuleFormState>({} as RuleFormState);
 
 export const RuleFormReducerContext = createContext<React.Dispatch<RuleFormStateReducerAction>>(
   () => {}

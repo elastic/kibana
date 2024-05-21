@@ -10,6 +10,7 @@ import React, { useReducer } from 'react';
 import { RuleFormState } from '../types';
 import { RuleFormStateContext, RuleFormReducerContext } from './rule_form_state_context';
 import { ruleFormStateReducer } from './rule_form_state_reducer';
+import { validateRuleBase, validateRuleParams } from '../validation';
 
 export interface RuleFormStateProviderProps {
   initialRuleFormState: RuleFormState;
@@ -17,8 +18,25 @@ export interface RuleFormStateProviderProps {
 
 export const RuleFormStateProvider: React.FC<RuleFormStateProviderProps> = (props) => {
   const { children, initialRuleFormState } = props;
+  const {
+    formData,
+    selectedRuleTypeModel: ruleTypeModel,
+    minimumScheduleInterval,
+  } = initialRuleFormState;
 
-  const [ruleFormState, dispatch] = useReducer(ruleFormStateReducer, initialRuleFormState);
+  const [ruleFormState, dispatch] = useReducer(ruleFormStateReducer, {
+    ...initialRuleFormState,
+    errors: {
+      ...validateRuleBase({
+        formData,
+        minimumScheduleInterval,
+      }),
+      ...validateRuleParams({
+        formData,
+        ruleTypeModel,
+      }),
+    },
+  });
   return (
     <RuleFormStateContext.Provider value={ruleFormState}>
       <RuleFormReducerContext.Provider value={dispatch}>{children}</RuleFormReducerContext.Provider>

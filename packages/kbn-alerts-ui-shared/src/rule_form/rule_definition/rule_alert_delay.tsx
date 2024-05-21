@@ -19,11 +19,11 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
 
 export const RuleAlertDelay = () => {
-  const { state, errors } = useRuleFormState();
+  const { formData, errors = {} } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
-  const { alertDelay } = state;
+  const { alertDelay } = formData;
 
   const onAlertDelayChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -63,6 +63,7 @@ export const RuleAlertDelay = () => {
         value={alertDelay?.active ?? ''}
         name="alertDelay"
         data-test-subj="alertDelayInput"
+        placeholder={ALERT_DELAY_TITLE}
         prepend={[
           ALERT_DELAY_TITLE_PREFIX,
           <EuiIconTip position="right" type="questionInCircle" content={ALERT_DELAY_HELP_TEXT} />,

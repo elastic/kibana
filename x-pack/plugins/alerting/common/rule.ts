@@ -45,6 +45,7 @@ export type {
   AlertDelay,
   SanitizedAlertsFilter,
   SanitizedRuleAction,
+  AlertsHealth,
 } from '@kbn/alerting-types';
 
 export {
@@ -52,6 +53,7 @@ export {
   RuleLastRunOutcomeValues,
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
+  HealthStatus,
 } from '@kbn/alerting-types';
 
 export type RuleTypeState = Record<string, unknown>;
@@ -105,27 +107,6 @@ export type SanitizedRuleConfig = Pick<
   ruleTypeId: string;
   ruleTypeName: string;
 };
-
-export enum HealthStatus {
-  OK = 'ok',
-  Warning = 'warn',
-  Error = 'error',
-}
-
-export interface AlertsHealth {
-  decryptionHealth: {
-    status: HealthStatus;
-    timestamp: string;
-  };
-  executionHealth: {
-    status: HealthStatus;
-    timestamp: string;
-  };
-  readHealth: {
-    status: HealthStatus;
-    timestamp: string;
-  };
-}
 
 export interface RuleMonitoringLastRunMetrics extends SavedObjectAttributes {
   duration?: number;

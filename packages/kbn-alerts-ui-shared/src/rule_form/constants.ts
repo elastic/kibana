@@ -6,4 +6,25 @@
  * Side Public License, v 1.
  */
 
+import { RuleFormData } from './types';
+
 export const DEFAULT_RULE_INTERVAL = '1m';
+
+export const GET_DEFAULT_FORM_DATA = ({
+  ruleTypeId,
+  name,
+}: {
+  ruleTypeId: RuleFormData['ruleTypeId'];
+  name: RuleFormData['name'];
+}) => {
+  return {
+    tags: [],
+    params: {},
+    schedule: {
+      interval: DEFAULT_RULE_INTERVAL,
+    },
+    consumer: 'alerts',
+    ruleTypeId,
+    name,
+  };
+};

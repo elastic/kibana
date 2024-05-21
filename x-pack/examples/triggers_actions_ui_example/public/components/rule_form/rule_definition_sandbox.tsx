@@ -17,7 +17,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { AlertConsumers, RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { RuleForm, useLoadRuleTypesQuery, getRuleErrors, InitialRule } from '@kbn/alerts-ui-shared';
+import { RuleForm, useLoadRuleTypesQuery } from '@kbn/alerts-ui-shared';
 
 interface RuleDefinitionSandboxProps {
   data: DataPublicPluginStart;
@@ -33,23 +33,6 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.STACK_ALERTS,
 ];
 
-const DEFAULT_FORM_VALUES = {
-  id: 'test-id',
-  name: 'test',
-  params: {},
-  schedule: {
-    interval: '1m',
-  },
-  alertDelay: {
-    active: 5,
-  },
-  notifyWhen: null,
-  consumer: 'stackAlerts',
-  enabled: true,
-  tags: [],
-  actions: [],
-  ruleTypeId: '.es-query',
-};
 
 export const RuleDefinitionSandbox = (props: RuleDefinitionSandboxProps) => {
   const { data, charts, dataViews, unifiedSearch, triggersActionsUi } = props;
@@ -73,40 +56,24 @@ export const RuleDefinitionSandbox = (props: RuleDefinitionSandboxProps) => {
 
   const selectedRuleTypeModel = triggersActionsUi.ruleTypeRegistry.get(ruleTypeId);
 
-  const errors = useMemo(() => {
-    if (!selectedRuleType || !selectedRuleTypeModel) {
-      return null;
-    }
-
-    return getRuleErrors({
-      rule: DEFAULT_FORM_VALUES as InitialRule,
-      minimumScheduleInterval: {
-        value: '1m',
-        enforce: true,
-      },
-      ruleTypeModel: selectedRuleTypeModel,
-    }).ruleErrors;
-  }, [selectedRuleType, selectedRuleTypeModel]);
-
-  if (isLoading || !selectedRuleType || !errors) {
+  if (isLoading || !selectedRuleType) {
     return <EuiLoadingSpinner />;
   }
 
   return (
     <RuleForm
       plugins={{
+        http,
         data,
         charts,
         dataViews,
         unifiedSearch,
         docLinks,
       }}
-      state={DEFAULT_FORM_VALUES}
-      canShowConsumerSelection
-      authorizedConsumers={VALID_CONSUMERS}
-      errors={errors}
-      selectedRuleType={selectedRuleType}
-      selectedRuleTypeModel={selectedRuleTypeModel}
+      consumer="alerts"
+      ruleType={selectedRuleType}
+      ruleTypeModel={selectedRuleTypeModel}
+      onCancel={() => {}}
     />
   );
 };

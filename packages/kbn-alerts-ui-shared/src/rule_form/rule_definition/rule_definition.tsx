@@ -69,13 +69,13 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
     selectedRuleType,
   } = props;
 
-  const { state, plugins, errors, metadata } = useRuleFormState();
+  const { formData, plugins, errors, metadata } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
   const { charts, data, dataViews, unifiedSearch, docLinks } = plugins!;
 
-  const { id, params, schedule, alertDelay, notifyWhen } = state;
+  const { id, params, schedule, alertDelay, notifyWhen } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(!!alertDelay);
 
@@ -189,7 +189,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                     ruleInterval={schedule.interval}
                     ruleThrottle={''}
                     alertNotifyWhen={notifyWhen || 'onActionGroupChange'}
-                    errors={errors}
+                    errors={errors || {}}
                     setRuleParams={onSetRuleParams}
                     setRuleProperty={onSetRuleProperty}
                     defaultActionGroupId={selectedRuleType.defaultActionGroupId}

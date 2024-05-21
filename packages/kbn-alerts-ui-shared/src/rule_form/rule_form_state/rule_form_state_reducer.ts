@@ -6,12 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { RuleFormSchema, RuleFormState } from '../types';
+import { RuleFormData, RuleFormState } from '../types';
+import { validateRuleBase, validateRuleParams } from '../validation';
 
 export type RuleFormStateReducerAction =
   | {
       type: 'setRule';
-      payload: RuleFormSchema;
+      payload: RuleFormData;
     }
   | {
       type: 'setRuleProperty';
@@ -22,15 +23,15 @@ export type RuleFormStateReducerAction =
     }
   | {
       type: 'setName';
-      payload: RuleFormSchema['name'];
+      payload: RuleFormData['name'];
     }
   | {
       type: 'setTags';
-      payload: RuleFormSchema['tags'];
+      payload: RuleFormData['tags'];
     }
   | {
       type: 'setParams';
-      payload: RuleFormSchema['params'];
+      payload: RuleFormData['params'];
     }
   | {
       type: 'setParamsProperty';
@@ -41,134 +42,122 @@ export type RuleFormStateReducerAction =
     }
   | {
       type: 'setSchedule';
-      payload: RuleFormSchema['schedule'];
+      payload: RuleFormData['schedule'];
     }
   | {
       type: 'setAlertDelay';
-      payload: RuleFormSchema['alertDelay'];
+      payload: RuleFormData['alertDelay'];
     }
   | {
       type: 'setNotifyWhen';
-      payload: RuleFormSchema['notifyWhen'];
+      payload: RuleFormData['notifyWhen'];
     }
   | {
       type: 'setConsumer';
-      payload: RuleFormSchema['consumer'];
+      payload: RuleFormData['consumer'];
     }
   | {
       type: 'setMetadata';
       payload: Record<string, unknown>;
     };
 
+const getUpdateWithValidation =
+  (ruleFormState: RuleFormState) =>
+  (updater: () => RuleFormData): RuleFormState => {
+    const { minimumScheduleInterval, selectedRuleTypeModel } = ruleFormState;
+    const formData = updater();
+
+    return {
+      ...ruleFormState,
+      formData,
+      errors: {
+        ...validateRuleBase({ formData, minimumScheduleInterval }),
+        ...validateRuleParams({ formData, ruleTypeModel: selectedRuleTypeModel }),
+      },
+    };
+  };
+
 export const ruleFormStateReducer = (
   ruleFormState: RuleFormState,
   action: RuleFormStateReducerAction
 ): RuleFormState => {
-  const { state } = ruleFormState;
+  const { formData } = ruleFormState;
+  const updateWithValidation = getUpdateWithValidation(ruleFormState);
 
   switch (action.type) {
     case 'setRule': {
       const { payload } = action;
-      return {
-        ...ruleFormState,
-        state: payload,
-      };
+      return updateWithValidation(() => payload);
     }
     case 'setRuleProperty': {
-      const { payload } = action;
-      const { property, value } = payload;
-      return {
-        ...ruleFormState,
-        state: {
-          ...ruleFormState.state,
-          [property]: value,
-        },
-      };
+      const {
+        payload: { property, value },
+      } = action;
+      return updateWithValidation(() => ({
+        ...ruleFormState.formData,
+        [property]: value,
+      }));
     }
     case 'setName': {
       const { payload } = action;
-      return {
-        ...ruleFormState,
-        state: {
-          ...state,
-          name: payload,
-        },
-      };
+      return updateWithValidation(() => ({
+        ...formData,
+        name: payload,
+      }));
     }
     case 'setTags': {
       const { payload } = action;
-      return {
-        ...ruleFormState,
-        state: {
-          ...state,
-          tags: payload,
-        },
-      };
+      return updateWithValidation(() => ({
+        ...formData,
+        tags: payload,
+      }));
     }
     case 'setParams': {
       const { payload } = action;
-      return {
-        ...ruleFormState,
-        state: {
-          ...state,
-          params: payload,
-        },
-      };
+      return updateWithValidation(() => ({
+        ...formData,
+        params: payload,
+      }));
     }
     case 'setParamsProperty': {
       const {
         payload: { property, value },
       } = action;
-      return {
-        ...ruleFormState,
-        state: {
-          ...state,
-          params: {
-            ...state.params,
-            [property]: value,
-          },
+      return updateWithValidation(() => ({
+        ...formData,
+        params: {
+          ...formData.params,
+          [property]: value,
         },
-      };
+      }));
     }
     case 'setSchedule': {
       const { payload } = action;
-      return {
-        ...ruleFormState,
-        state: {
-          ...state,
-          schedule: payload,
-        },
-      };
+      return updateWithValidation(() => ({
+        ...formData,
+        schedule: payload,
+      }));
     }
     case 'setAlertDelay': {
       const { payload } = action;
-      return {
-        ...ruleFormState,
-        state: {
-          ...state,
-          alertDelay: payload,
-        },
-      };
+      return updateWithValidation(() => ({
+        ...formData,
+        alertDelay: payload,
+      }));
     }
     case 'setNotifyWhen': {
       const { payload } = action;
-      return {
-        ...ruleFormState,
-        state: {
-          ...state,
-          notifyWhen: payload,
-        },
-      };
+      return updateWithValidation(() => ({
+        ...formData,
+        notifyWhen: payload,
+      }));
     }
     case 'setConsumer': {
       const { payload } = action;
-      return {
-        ...ruleFormState,
-        state: {
-          ...state,
-          consumer: payload,
-        },
-      };
+      return updateWithValidation(() => ({
+        ...formData,
+        consumer: payload,
+      }));
     }
     case 'setMetadata': {
       const { payload } = action;
