@@ -169,6 +169,7 @@ export const EsqlSpecificRuleParams = z.object({
   type: z.literal('esql'),
   language: z.literal('esql'),
   query: RuleQuery,
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type EsqlRuleParams = BaseRuleParams & EsqlSpecificRuleParams;
