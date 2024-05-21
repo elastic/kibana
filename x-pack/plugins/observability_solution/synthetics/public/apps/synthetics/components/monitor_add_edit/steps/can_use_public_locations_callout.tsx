@@ -8,24 +8,28 @@ import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const ReadOnlyCallout = ({ projectId }: { projectId?: string }) => {
-  if (projectId) {
+export const CanUsePublicLocationsCallout = ({
+  canUsePublicLocations,
+}: {
+  canUsePublicLocations?: boolean;
+}) => {
+  if (!canUsePublicLocations) {
     return (
       <>
         <EuiCallOut
+          color="warning"
           title={
             <FormattedMessage
-              id="xpack.synthetics.project.readOnly.callout.title"
-              defaultMessage="This configuration is read-only"
+              id="xpack.synthetics.publicLocations.readOnly.callout.title"
+              defaultMessage="You do not have permission to use Elastic managed locations"
             />
           }
-          iconType="document"
+          iconType="alert"
         >
           <p>
             <FormattedMessage
-              id="xpack.synthetics.project.readOnly.callout.content"
-              defaultMessage="This monitor was added from an external project: {projectId}. From this page, you can only enable and disable the monitor and its alerts, or remove it. To make configuration changes, you have to edit its source file and push it again from that project."
-              values={{ projectId: <strong>{projectId}</strong> }}
+              id="xpack.synthetics.publicLocations.readOnly.callout.content"
+              defaultMessage="This monitor contains a Elastic managed location. To edit this monitor, you need to have permission to use Elastic managed locations."
             />
           </p>
         </EuiCallOut>

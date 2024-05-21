@@ -7,6 +7,7 @@
 
 import React from 'react';
 import * as permissionsHooks from '../../hooks/use_fleet_permissions';
+import * as enablementHook from '../../hooks/use_enablement';
 import { render } from '../../utils/testing/rtl_helpers';
 import { GettingStartedPage } from './getting_started_page';
 import * as privateLocationsHooks from '../settings/private_locations/hooks/use_locations_api';
@@ -26,6 +27,16 @@ describe('GettingStartedPage', () => {
       formData: undefined,
     });
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
+    jest.spyOn(enablementHook, 'useEnablement').mockReturnValue({
+      isServiceAllowed: true,
+      areApiKeysEnabled: true,
+      canManageApiKeys: true,
+      canEnable: true,
+      isEnabled: true,
+      invalidApiKeyError: false,
+      loading: false,
+      error: null,
+    });
   });
   it('works with cloud locations', () => {
     const { getByText } = render(<GettingStartedPage />, {

@@ -21,10 +21,7 @@ const syntheticsTestRunDocsLink =
   'https://www.elastic.co/guide/en/observability/current/synthetic-run-tests.html';
 
 export const ProjectAPIKeys = () => {
-  const {
-    loading: enablementLoading,
-    enablement: { canManageApiKeys },
-  } = useEnablement();
+  const { loading: enablementLoading, canManageApiKeys } = useEnablement();
   const [apiKey, setApiKey] = useState<string | undefined>(undefined);
   const [loadAPIKey, setLoadAPIKey] = useState(false);
   const [accessToElasticManagedLocations, setAccessToElasticManagedLocations] = useState(true);
