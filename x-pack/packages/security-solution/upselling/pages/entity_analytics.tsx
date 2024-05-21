@@ -50,7 +50,7 @@ const EntityAnalyticsUpsellingComponent = ({
           />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiImage alt={upgradeMessage ?? ''} src={paywallPng} size="fullWidth" />
+              <EuiImage alt={upgradeMessage} src={paywallPng} size="fullWidth" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </PaywallDiv>

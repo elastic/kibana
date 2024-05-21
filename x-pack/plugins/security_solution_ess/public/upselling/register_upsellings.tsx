@@ -21,7 +21,7 @@ import type {
   UpsellingSectionId,
   UpsellingService,
 } from '@kbn/security-solution-upselling/service';
-import React from 'react';
+import type React from 'react';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
 import { EntityAnalyticsUpsellingPage } from './pages/entity_analytics_upselling';
@@ -88,7 +88,7 @@ export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.entityAnalytics,
     minimumLicenseRequired: 'platinum',
-    component: () => <EntityAnalyticsUpsellingPage />,
+    component: EntityAnalyticsUpsellingPage,
   },
 ];
 
@@ -98,7 +98,7 @@ export const upsellingSections: UpsellingSections = [
   {
     id: 'entity_analytics_panel',
     minimumLicenseRequired: 'platinum',
-    component: () => <EntityAnalyticsUpsellingSection />,
+    component: EntityAnalyticsUpsellingSection,
   },
 ];
 
