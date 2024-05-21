@@ -16,14 +16,6 @@ import { observeLines } from '@kbn/stdio-dev-helpers';
 
 import type { Result } from './kibana_worker';
 
-/**
- * Run a worker process that starts the core with all plugins enabled and sends back the
- * saved object mappings for all plugins.
- *
- * We run this in a child process to make it easier to kill the kibana instance once done
- * (dodges issues with open handles), and so that we can harvest logs and feed them into
- * the logger when debugging.
- */
 export function kibana(log: SomeDevLog) {
   log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
 
