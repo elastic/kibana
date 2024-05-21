@@ -279,14 +279,11 @@ export function getDataStateContainer({
             autoRefreshDone = undefined;
           }
 
-          await profilesManager.resolveDataSourceContext(
-            {
-              dataSource: getAppState().dataSource,
-              dataView: getSavedSearch().searchSource.getField('index'),
-              query: getAppState().query,
-            },
-            abortController.signal
-          );
+          await profilesManager.resolveDataSourceContext({
+            dataSource: getAppState().dataSource,
+            dataView: getSavedSearch().searchSource.getField('index'),
+            query: getAppState().query,
+          });
 
           const defaultColumns = getMergedAccessor(
             profilesManager.getProfiles(),

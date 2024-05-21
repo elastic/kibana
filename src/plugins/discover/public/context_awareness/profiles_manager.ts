@@ -47,6 +47,8 @@ export class ProfilesManager {
   );
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
+  private rootProfileAbortController?: AbortController;
+  private dataSourceProfileAbortController?: AbortController;
 
   constructor(
     private readonly rootProfileService: RootProfileService,
@@ -54,16 +56,20 @@ export class ProfilesManager {
     private readonly documentProfileService: DocumentProfileService
   ) {}
 
-  public async resolveRootContext(params: RootProfileProviderParams, abortSignal: AbortSignal) {
+  public async resolveRootContext(params: RootProfileProviderParams) {
     const serializedParams = this.serializeRootProfileParams(params);
 
     if (this.rootProfile$.getValue() && isEqual(this.prevRootProfileParams, serializedParams)) {
       return;
     }
 
+    const abortController = new AbortController();
+    this.rootProfileAbortController?.abort();
+    this.rootProfileAbortController = abortController;
+
     const profile = await this.rootProfileService.resolve(params);
 
-    if (abortSignal.aborted) {
+    if (abortController.signal.aborted) {
       return;
     }
 
@@ -71,10 +77,7 @@ export class ProfilesManager {
     this.prevRootProfileParams = serializedParams;
   }
 
-  public async resolveDataSourceContext(
-    params: DataSourceProfileProviderParams,
-    abortSignal: AbortSignal
-  ) {
+  public async resolveDataSourceContext(params: DataSourceProfileProviderParams) {
     const serializedParams = this.serializeDataSourceProfileParams(params);
 
     if (
@@ -84,9 +87,13 @@ export class ProfilesManager {
       return;
     }
 
+    const abortController = new AbortController();
+    this.dataSourceProfileAbortController?.abort();
+    this.dataSourceProfileAbortController = abortController;
+
     const profile = await this.dataSourceProfileService.resolve(params);
 
-    if (abortSignal.aborted) {
+    if (abortController.signal.aborted) {
       return;
     }
 
