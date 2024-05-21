@@ -140,7 +140,7 @@ export const createMetricThresholdExecutor =
         criteriaItem.warningComparator = COMPARATORS.NOT_BETWEEN;
       }
     });
-    console.log('criteria----------->', criteria);
+
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
