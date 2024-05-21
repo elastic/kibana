@@ -174,16 +174,14 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       }
 
-      const namespacedSoClient = preconfiguredAgentPolicy.kibana_namespace
-        ? appContextService.getInternalUserSOClientForSpaceId(
-            preconfiguredAgentPolicy.kibana_namespace
-          )
+      const namespacedSoClient = preconfiguredAgentPolicy.space_id
+        ? appContextService.getInternalUserSOClientForSpaceId(preconfiguredAgentPolicy.space_id)
         : soClient;
 
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         namespacedSoClient,
         esClient,
-        omit(preconfiguredAgentPolicy, 'is_managed', 'kibana_namespace') // Don't add `is_managed` until the policy has been fully configured
+        omit(preconfiguredAgentPolicy, 'is_managed', 'space_id') // Don't add `is_managed` until the policy has been fully configured
       );
 
       if (!created) {
@@ -354,7 +352,7 @@ export function comparePreconfiguredPolicyToCurrent(
     'package_policies',
     'id',
     'namespace',
-    'kibana_namespace'
+    'space_id'
   );
   const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
 

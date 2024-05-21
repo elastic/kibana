@@ -1126,7 +1126,7 @@ describe('policy preconfiguration', () => {
       expect(nonFatalErrorsB.length).toBe(0);
     });
 
-    it('should used a namespaced saved objet client if the agent policy kibana_namespace is set', async () => {
+    it('should used a namespaced saved objet client if the agent policy space_id is set', async () => {
       const TEST_NAMESPACE = 'test';
       const namespacedSOClient = getPutPreconfiguredPackagesMock();
       const soClient = getPutPreconfiguredPackagesMock();
@@ -1144,7 +1144,7 @@ describe('policy preconfiguration', () => {
             name: 'Test policy',
             namespace: 'default',
             id: 'test-id',
-            kibana_namespace: TEST_NAMESPACE,
+            space_id: TEST_NAMESPACE,
             is_managed: true,
             package_policies: [
               {

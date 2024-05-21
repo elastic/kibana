@@ -197,7 +197,7 @@ class AgentPolicyService {
   }> {
     const {
       id,
-      kibana_namespace: kibanaNamespace,
+      space_id: kibanaSpaceId,
       ...preconfiguredAgentPolicy
     } = omit(config, 'package_policies');
     const newAgentPolicyDefaults: Pick<NewAgentPolicy, 'namespace' | 'monitoring_enabled'> = {
