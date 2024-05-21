@@ -8,6 +8,7 @@
 examples/content_management_examples @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
+examples/dependency_injection_example @elastic/kibana-core
 examples/developer_examples @elastic/appex-sharedux
 examples/discover_customization_examples @elastic/kibana-data-discovery
 examples/embeddable_examples @elastic/kibana-presentation
