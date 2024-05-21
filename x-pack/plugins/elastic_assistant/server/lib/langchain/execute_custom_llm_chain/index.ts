@@ -17,8 +17,6 @@ import {
   ActionsClientLlm,
 } from '@kbn/elastic-assistant-common/impl/language_models';
 import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
@@ -38,9 +36,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
-  elserId,
   esClient,
-  kbResource,
+  esStore,
   langChainMessages,
   llmType,
   logger,
@@ -50,7 +47,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   replacements,
   request,
   size,
-  telemetry,
   traceOptions,
 }) => {
   // TODO implement llmClass for bedrock streaming
@@ -86,16 +82,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     outputKey: 'output',
     returnMessages: true,
   });
-
-  // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(
-    esClient,
-    KNOWLEDGE_BASE_INDEX_PATTERN,
-    logger,
-    telemetry,
-    elserId,
-    kbResource
-  );
 
   const modelExists = await esStore.isModelInstalled();
 

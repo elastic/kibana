@@ -152,6 +152,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     telemetry: {
       reportAssetDetailsFlyoutViewed: () => {},
       reportAssetDetailsPageViewed: () => {},
+      reportAssetDashboardLoaded: () => {},
     },
   };
 
