@@ -8,7 +8,7 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { DataStreamStat } from '../../../../common/api_types';
+import { DataStreamStat, DegradedField } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
@@ -35,6 +35,7 @@ import {
   fetchIntegrationsFailedNotifier,
   noDatasetSelected,
   fetchNonAggregatableDatasetsFailedNotifier,
+  fetchDegradedFieldsFailedNotifier,
 } from './notifications';
 import {
   DatasetQualityControllerContext,
@@ -311,6 +312,31 @@ export const createPureDatasetQualityControllerStateMachine = (
                     },
                   },
                 },
+                dataStreamDegradedFields: {
+                  initial: 'fetching',
+                  states: {
+                    fetching: {
+                      invoke: {
+                        src: 'loadDegradedFieldsPerDataStream',
+                        onDone: {
+                          target: 'done',
+                          actions: ['storeDegradedFields'],
+                        },
+                        onError: {
+                          target: 'done',
+                          actions: ['notifyFetchDegradedFieldsFailed'],
+                        },
+                      },
+                    },
+                    done: {
+                      on: {
+                        UPDATE_INSIGHTS_TIME_RANGE: {
+                          target: 'fetching',
+                        },
+                      },
+                    },
+                  },
+                },
               },
               onDone: {
                 target: '#DatasetQualityController.flyout.loaded',
@@ -470,6 +496,16 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeDegradedFields: assign((context, event) => {
+          return 'data' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  degradedFields: (event.data ?? {}) as DegradedField[],
+                },
+              }
+            : {};
+        }),
         storeNonAggregatableDatasets: assign(
           (
             _context: DefaultDatasetQualityControllerState,
@@ -579,6 +615,8 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDatasetStatsFailedNotifier(toasts, event.data),
       notifyFetchDegradedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDegradedStatsFailedNotifier(toasts, event.data),
+      notifyFetchDegradedFieldsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchDegradedFieldsFailedNotifier(toasts, event.data),
       notifyFetchNonAggregatableDatasetsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
       notifyFetchDatasetSettingsFailed: (_context, event: DoneInvokeEvent<Error>) =>
@@ -602,6 +640,29 @@ export const createDatasetQualityControllerStateMachine = ({
         return dataStreamStatsClient.getDataStreamsDegradedStats({
           type: context.type as GetDataStreamsStatsQuery['type'],
           datasetQuery: context.filters.query,
+          start,
+          end,
+        });
+      },
+
+      loadDegradedFieldsPerDataStream: (context) => {
+        if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {
+          fetchDatasetSettingsFailedNotifier(toasts, new Error(noDatasetSelected));
+
+          return Promise.resolve({});
+        }
+
+        const { startDate: start, endDate: end } = getDateISORange(
+          context.flyout.insightsTimeRange
+        );
+        const { type, name: dataset, namespace } = context.flyout.dataset;
+
+        return dataStreamDetailsClient.getDataStreamDegradedFields({
+          dataStream: dataStreamPartsToIndexName({
+            type: type as DataStreamType,
+            dataset,
+            namespace,
+          }),
           start,
           end,
         });

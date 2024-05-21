@@ -44,6 +44,15 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   });
 };
 
+export const fetchDegradedFieldsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.fetchDegradedFieldsFailed', {
+      defaultMessage: "We couldn't get your degraded fields information.",
+    }),
+    text: error.message,
+  });
+};
+
 export const fetchNonAggregatableDatasetsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchNonAggregatableDatasetsFailed', {

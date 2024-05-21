@@ -21,6 +21,7 @@ import {
   DataStreamStat,
   DataStreamStatType,
   GetNonAggregatableDataStreamsResponse,
+  DegradedField,
 } from '../../../../common/data_streams_stats';
 
 export type FlyoutDataset = Omit<
@@ -62,6 +63,7 @@ export interface WithFlyoutOptions {
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
     breakdownField?: string;
+    degradedFields?: DegradedField[];
     isNonAggregatable?: boolean;
   };
 }
@@ -141,6 +143,10 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
+      value: 'flyout.initializing.dataStreamDegradedFields.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
       value: 'flyout.initializing.integrationDashboards.fetching';
       context: DefaultDatasetQualityStateContext;
     };
@@ -204,6 +210,7 @@ export type DatasetQualityControllerEvent =
   | DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
   | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamDetails>
+  | DoneInvokeEvent<DegradedField[]>
   | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<IntegrationsResponse>

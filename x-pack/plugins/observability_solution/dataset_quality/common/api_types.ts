@@ -78,6 +78,16 @@ export const degradedDocsRt = rt.type({
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
+export const degradedFieldRt = rt.type({
+  fieldName: rt.string,
+  count: rt.number,
+  last_occurrence: rt.union([rt.null, rt.number]),
+});
+
+export const getDataStreamDegradedFieldsResponseRt = rt.array(degradedFieldRt);
+
+export type DegradedField = rt.TypeOf<typeof degradedFieldRt>;
+
 export const dataStreamSettingsRt = rt.partial({
   createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
 });

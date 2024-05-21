@@ -137,6 +137,33 @@ export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShow
   defaultMessage: 'Show all',
 });
 
+export const flyoutImprovementText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTitle',
+  {
+    defaultMessage: 'Degraded Fields',
+  }
+);
+
+export const flyoutImprovementTooltip = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
+  {
+    defaultMessage: 'Some logical tooltip for Improvements',
+  }
+);
+
+export const flyoutDegradedFieldsTableLoadingText = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableLoadingText',
+  {
+    defaultMessage: 'Loading degraded fields',
+  }
+);
+
+export const flyoutDegradedFieldsTableNoData = i18n.translate(
+  'xpack.datasetQuality.flyoutDegradedFieldsTableNoData',
+  {
+    defaultMessage: 'No degraded fields found',
+  }
+);
 /*
 Summary Panel
 */

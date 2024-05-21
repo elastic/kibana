@@ -115,6 +115,32 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
           .timestamp(timestamp);
       };
 
+      const datasetSynth4Logs = (i: number, timestamp: number) => {
+        const index = Math.floor(Math.random() * 3);
+        const isMalformed = i % 10 === 0;
+        return log
+          .create()
+          .dataset('synth.3')
+          .message(MESSAGE_LOG_LEVELS[index].message as string)
+          .service(SERVICE_NAMES[index])
+          .defaults({
+            'trace.id': generateShortId(),
+            'agent.name': 'synth-agent',
+            'orchestrator.cluster.name': CLUSTER[index].clusterName,
+            'orchestrator.cluster.id': CLUSTER[index].clusterId,
+            'orchestrator.resource.id': generateShortId(),
+            'cloud.provider': CLOUD_PROVIDERS[Math.floor(Math.random() * 3)],
+            'cloud.region': CLOUD_REGION[index],
+            'cloud.availability_zone': isMalformed
+              ? MORE_THAN_1024_CHARS // "ignore_above": 1024 in mapping
+              : `${CLOUD_REGION[index]}a`,
+            'cloud.project.id': generateShortId(),
+            'cloud.instance.id': generateShortId(),
+            'log.file.path': `/logs/${generateLongId()}/error.txt`,
+          })
+          .timestamp(timestamp + 100);
+      };
+
       const logs = range
         .interval('1m')
         .rate(1)
@@ -125,6 +151,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               datasetSynth1Logs(timestamp),
               datasetSynth2Logs(index, timestamp),
               datasetSynth3Logs(index, timestamp),
+              datasetSynth4Logs(index, timestamp),
             ]);
         });
 
