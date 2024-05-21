@@ -25,7 +25,6 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-  RecordRawType,
 } from '../../state_management/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
 import { FetchStatus } from '../../../types';
@@ -51,10 +50,8 @@ async function mountComponent(
   prevSidebarClosed?: boolean,
   mountOptions: { attachTo?: HTMLElement } = {},
   query?: Query | AggregateQuery,
-  isPlainRecord?: boolean,
   main$: DataMain$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
     foundDocuments: true,
   }) as DataMain$
 ) {
@@ -185,10 +182,8 @@ describe('Discover component', () => {
       undefined,
       undefined,
       undefined,
-      undefined,
       new BehaviorSubject({
         fetchStatus: FetchStatus.ERROR,
-        recordRawType: RecordRawType.DOCUMENT,
         foundDocuments: false,
         error: new Error('No results'),
       }) as DataMain$

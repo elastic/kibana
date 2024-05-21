@@ -23,7 +23,7 @@ describe('BasePathProxyServer', () => {
   let logger: TestLog;
   let config: IHttpConfig;
   let basePath: string;
-  let proxySupertest: supertest.SuperTest<supertest.Test>;
+  let proxySupertest: supertest.Agent;
 
   beforeEach(async () => {
     logger = new TestLog();
@@ -323,7 +323,7 @@ describe('BasePathProxyServer', () => {
 
   describe('shouldRedirect', () => {
     let proxyServerWithoutShouldRedirect: BasePathProxyServer;
-    let proxyWithoutShouldRedirectSupertest: supertest.SuperTest<supertest.Test>;
+    let proxyWithoutShouldRedirectSupertest: supertest.Agent;
 
     beforeEach(async () => {
       // setup and start a proxy server which does not use "shouldRedirectFromOldBasePath"
@@ -366,7 +366,7 @@ describe('BasePathProxyServer', () => {
 
   describe('constructor option for sending in a custom basePath', () => {
     let proxyServerWithFooBasePath: BasePathProxyServer;
-    let proxyWithFooBasePath: supertest.SuperTest<supertest.Test>;
+    let proxyWithFooBasePath: supertest.Agent;
 
     beforeEach(async () => {
       // setup and start a proxy server which uses a basePath of "foo"
