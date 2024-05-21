@@ -12,6 +12,8 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const config = getService('config');
+  const basic = config.get('esTestCluster.license') === 'basic';
 
   describe('API Keys', () => {
     describe('GET /internal/security/api_key/_enabled', () => {
@@ -66,8 +68,10 @@ export default function ({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should allow a cross cluster API Key to be created', async () => {
-        await supertest
+      it(`${basic ? 'basic' : 'trial'} license should ${
+        basic ? 'not allow' : 'allow'
+      } a cross cluster API Key to be created`, async () => {
+        const result = await supertest
           .post('/internal/security/api_key')
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -84,12 +88,11 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               ],
             },
-          })
-          .expect(200)
-          .then((response: Record<string, any>) => {
-            const { name } = response.body;
-            expect(name).to.eql('test_cc_api_key');
           });
+        expect(result.status).to.be(basic ? 403 : 200);
+        if (!basic) {
+          expect(result.body.name).to.be('test_cc_api_key');
+        }
       });
     });
 
@@ -128,12 +131,38 @@ export default function ({ getService }: FtrProviderContext) {
             const { updated } = response.body;
             expect(updated).to.eql(true);
           });
+
+        const getResult = await supertest
+          .get('/internal/security/api_key')
+          .set('kbn-xsrf', 'xxx')
+          .send();
+
+        expect(getResult.body.apiKeys).to.not.be(undefined);
+        const updatedKey = getResult.body.apiKeys.find(
+          (apiKey: { id: string }) => apiKey.id === id
+        );
+        expect(updatedKey).to.not.be(undefined);
+        expect(updatedKey.metadata).to.eql({ foo: 'bar' });
+        expect(updatedKey.role_descriptors).to.eql({
+          role_1: {
+            cluster: ['monitor'],
+            indices: [],
+            applications: [],
+            run_as: [],
+            metadata: {},
+            transient_metadata: {
+              enabled: true,
+            },
+          },
+        });
       });
 
-      it('should allow a cross cluster API Key to be updated', async () => {
-        let id = '';
+      it(`${basic ? 'basic' : 'trial'} license should ${
+        basic ? 'not allow' : 'allow'
+      } a cross cluster API Key to be updated`, async () => {
+        let id = '123456';
 
-        await supertest
+        const createResult = await supertest
           .post('/internal/security/api_key')
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -150,13 +179,13 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               ],
             },
-          })
-          .expect(200)
-          .then((response: Record<string, any>) => {
-            id = response.body.id;
           });
+        expect(createResult.status).to.be(basic ? 403 : 200);
+        if (!basic) {
+          id = createResult.body.id;
+        }
 
-        await supertest
+        const updateResult = await supertest
           .put('/internal/security/api_key')
           .set('kbn-xsrf', 'xxx')
           .send({
@@ -175,12 +204,32 @@ export default function ({ getService }: FtrProviderContext) {
                 },
               ],
             },
-          })
-          .expect(200)
-          .then((response: Record<string, any>) => {
-            const { updated } = response.body;
-            expect(updated).to.eql(true);
           });
+        expect(updateResult.status).to.be(basic ? 403 : 200);
+        if (!basic) {
+          expect(updateResult.body.updated).to.be(true);
+
+          const getResult = await supertest
+            .get('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send();
+
+          expect(getResult.body.apiKeys).to.not.be(undefined);
+          const updatedKey = getResult.body.apiKeys.find(
+            (apiKey: { id: string }) => apiKey.id === id
+          );
+          expect(updatedKey).to.not.be(undefined);
+          expect(updatedKey.metadata).to.eql({ foo: 'bar' });
+          expect(updatedKey.role_descriptors?.cross_cluster?.indices).to.eql([
+            {
+              names: ['somethingelse*'],
+              privileges: ['read', 'read_cross_cluster', 'view_index_metadata'],
+              field_security: { grant: ['field3'] },
+              query: '{"bool":{"must_not":{"term":{"field2":"value3"}}}}',
+              allow_restricted_indices: false,
+            },
+          ]);
+        }
       });
     });
 

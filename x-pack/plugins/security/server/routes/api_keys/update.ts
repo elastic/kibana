@@ -55,6 +55,8 @@ const getRestApiKeyWithKibanaPrivilegesSchema = (
 ) =>
   restApiKeySchema.extends({
     role_descriptors: null,
+    name: null,
+    id: schema.string(),
     kibana_role_descriptors: schema.recordOf(
       schema.string(),
       schema.object({
