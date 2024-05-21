@@ -215,8 +215,9 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
     const response = await this.request(requestArgs);
     const candidate = response.data.candidates[0];
+    const usageMetadata = response.data.usageMetadata;
     const completionText = candidate.content.parts[0].text;
-    return { completion: completionText };
+    return { completion: completionText, usageMetadata, };
 
  }
 
@@ -259,7 +260,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
         timeout,
     });
 
-    return { message: res.completion };
+    return { message: res.completion, usageMetadata: res.usageMetadata };
   }
 
   /**

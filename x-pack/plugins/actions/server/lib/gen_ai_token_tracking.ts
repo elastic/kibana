@@ -16,7 +16,7 @@ import {
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import { ActionTypeExecutorRawResult } from '../../common';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
-import { getTokenCountFromInvokeStream, InvokeBody } from './get_token_count_from_invoke_stream';
+import { getTokenCountFromInvokeStream, InvokeBody, parseGeminiStreamForUsageMetadata } from './get_token_count_from_invoke_stream';
 
 interface OwnProps {
   actionTypeId: string;
@@ -81,8 +81,30 @@ export const getGenAiTokenTracking = async ({
   }
 
   // this is a streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
-  if (validatedParams.subAction === 'invokeStream' && result.data instanceof Readable) {
+  if (validatedParams.subAction === 'invokeStream' && result.data instanceof Readable  && actionTypeId==".gemini") {
     try {
+      const { totalTokenCount, promptTokenCount, candidatesTokenCount } = await parseGeminiStreamForUsageMetadata({
+        responseStream: result.data.pipe(new PassThrough()),
+        body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
+        logger,
+      });
+
+      return {
+        total_tokens: totalTokenCount,
+        prompt_tokens: promptTokenCount,
+        completion_tokens: candidatesTokenCount,
+      };
+    } catch (e) {
+      logger.error('Failed to calculate tokens from Invoke Stream subaction streaming response');
+      logger.error(e);
+      // silently fail and null is returned at bottom of fuction
+    }
+  }
+
+
+  // this is a streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
+  if (validatedParams.subAction === 'invokeStream' && result.data instanceof Readable && actionTypeId!=".gemini") {
+   try {
       const { total, prompt, completion } = await getTokenCountFromInvokeStream({
         responseStream: result.data.pipe(new PassThrough()),
         actionTypeId,
@@ -172,6 +194,27 @@ export const getGenAiTokenTracking = async ({
       logger.error(e);
     }
   }
+// Process non-streamed Gemini response from `usageMetadata` object
+  if (actionTypeId === '.gemini' ) {
+    const data = result.data as unknown as {
+      usageMetadata: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+        totalTokenCount?: number;
+      };
+    };
+
+    if (data.usageMetadata == null) {
+      logger.error('Response did not contain usage metadata object');
+      return null;
+    }
+  
+    return {
+      total_tokens: data.usageMetadata?.totalTokenCount ?? 0,
+      prompt_tokens: data.usageMetadata?.promptTokenCount ?? 0,
+      completion_tokens: data.usageMetadata?.candidatesTokenCount ?? 0,
+    };
+  }
 
   // this is a non-streamed Bedrock response used by security solution
   if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAI') {
@@ -215,4 +258,4 @@ export const getGenAiTokenTracking = async ({
 };
 
 export const shouldTrackGenAiToken = (actionTypeId: string) =>
-  actionTypeId === '.gen-ai' || actionTypeId === '.bedrock';
+  actionTypeId === '.gen-ai' || actionTypeId === '.bedrock' ||  actionTypeId === '.gemini';
