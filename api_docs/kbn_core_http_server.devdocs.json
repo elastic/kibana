@@ -16018,6 +16018,10 @@
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
               {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/entries/create_route.ts"
+              },
+              {
                 "plugin": "controls",
                 "path": "src/plugins/controls/server/options_list/options_list_suggestions_route.ts"
               },
