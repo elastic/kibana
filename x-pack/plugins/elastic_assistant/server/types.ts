@@ -38,7 +38,7 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientLlm,
   ActionsClientSimpleChatModel,
-} from '@kbn/elastic-assistant-common/server';
+} from '@kbn/langchain';
 
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';

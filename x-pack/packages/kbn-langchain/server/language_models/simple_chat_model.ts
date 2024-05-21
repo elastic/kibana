@@ -17,7 +17,6 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { v4 as uuidv4 } from 'uuid';
 import { get } from 'lodash/fp';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { ExecuteConnectorRequestBody } from '../..';
 import { parseBedrockStream } from '..';
 import { getDefaultArguments } from './constants';
 
@@ -34,7 +33,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   signal?: AbortSignal;
   model?: string;
   temperature?: number;
-  request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  request: KibanaRequest;
   streaming: boolean;
 }
 
@@ -42,7 +41,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
-  #request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
+  #request: KibanaRequest;
   #traceId: string;
   #signal?: AbortSignal;
   llmType: string;
@@ -120,7 +119,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
       params: {
         subAction: this.streaming ? 'invokeStream' : 'invokeAI',
         subActionParams: {
-          model: this.#request.body.model,
+          model: this.model,
           messages: formattedMessages,
           ...getDefaultArguments(this.llmType, this.temperature, options.stop),
         },

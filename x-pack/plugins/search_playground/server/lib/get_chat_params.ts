@@ -12,8 +12,7 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { getDefaultArguments } from '@kbn/elastic-assistant-common/server/language_models/constants';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/server';
+import { ActionsClientChatOpenAI, ActionsClientLlm, getDefaultArguments } from '@kbn/langchain';
 import { Prompt } from '../../common/prompt';
 
 export const getChatParams = async (

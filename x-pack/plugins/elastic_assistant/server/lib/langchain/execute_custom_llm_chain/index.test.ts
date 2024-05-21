@@ -17,12 +17,9 @@ import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { PassThrough, Stream } from 'stream';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/elastic-assistant-common/server';
+import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain';
 
-jest.mock('@kbn/elastic-assistant-common/server', () => ({
+jest.mock('@kbn/langchain', () => ({
   ActionsClientChatOpenAI: jest.fn(),
   ActionsClientSimpleChatModel: jest.fn(),
 }));

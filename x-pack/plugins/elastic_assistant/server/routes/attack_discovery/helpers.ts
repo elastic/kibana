@@ -14,7 +14,7 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { v4 as uuidv4 } from 'uuid';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/server/language_models';
+import { ActionsClientLlm } from '@kbn/langchain';
 
 import { AssistantToolParams } from '../../types';
 

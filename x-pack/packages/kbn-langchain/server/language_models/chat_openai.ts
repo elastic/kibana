@@ -29,7 +29,7 @@ export interface ActionsClientChatOpenAIParams {
   llmType?: string;
   logger: Logger;
   request: KibanaRequest;
-  streaming: boolean;
+  streaming?: boolean;
   traceId?: string;
   maxRetries?: number;
   model?: string;
@@ -77,7 +77,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     maxRetries,
     model,
     signal,
-    streaming,
+    streaming = true,
     temperature,
     timeout,
   }: ActionsClientChatOpenAIParams) {

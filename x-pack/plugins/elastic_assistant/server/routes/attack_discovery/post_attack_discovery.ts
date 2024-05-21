@@ -14,7 +14,7 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/server/language_models';
+import { ActionsClientLlm } from '@kbn/langchain';
 
 import { ATTACK_DISCOVERY } from '../../../common/constants';
 import { getAssistantToolParams } from './helpers';
