@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const FIND_FIELDS_METADATA_URL = '/api/fields_metadata';
+export const FIND_FIELDS_METADATA_URL = '/internal/fields_metadata';

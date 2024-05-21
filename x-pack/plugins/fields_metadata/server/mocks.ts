@@ -9,10 +9,10 @@ import {
   createFieldsMetadataServiceSetupMock,
   createFieldsMetadataServiceStartMock,
 } from './services/fields_metadata/fields_metadata_service.mock';
-import { FieldsMetadataPluginSetup, FieldsMetadataPluginStart } from './types';
+import { FieldsMetadataServerSetup, FieldsMetadataServerStart } from './types';
 
 const createFieldsMetadataSetupMock = () => {
-  const fieldsMetadataSetupMock: jest.Mocked<FieldsMetadataPluginSetup> = {
+  const fieldsMetadataSetupMock: jest.Mocked<FieldsMetadataServerSetup> = {
     fieldsMetadata: createFieldsMetadataServiceSetupMock(),
   };
 
@@ -20,7 +20,7 @@ const createFieldsMetadataSetupMock = () => {
 };
 
 const createFieldsMetadataStartMock = () => {
-  const fieldsMetadataStartMock: jest.Mocked<FieldsMetadataPluginStart> = {
+  const fieldsMetadataStartMock: jest.Mocked<FieldsMetadataServerStart> = {
     fieldsMetadata: createFieldsMetadataServiceStartMock(),
   };
   return fieldsMetadataStartMock;

@@ -31,12 +31,12 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   getByName<TFieldName extends FieldName>(fieldName: TFieldName): FieldMetadata | undefined {
     this.logger.debug(`Retrieving field metadata for: ${fieldName}`);
 
-    const field = this.ecsFieldsRepository.getByName(fieldName);
+    let field = this.ecsFieldsRepository.getByName(fieldName);
 
     // TODO: enable resolution for integration field
-    // if (!field) {
-    //   field = this.integrationFieldsSourceClient.getByName(fieldName);
-    // }
+    if (!field) {
+      field = this.integrationFieldsRepository.getByName(fieldName);
+    }
 
     return field;
   }

@@ -6,33 +6,31 @@
  */
 
 import { FieldMetadata, FieldName } from '../../../../common';
-import { IFieldsRepository } from './types';
+import { IFieldsRepository, IntegrationFieldsExtractor } from './types';
 
 interface IntegrationsFieldsRepositoryDeps {
-  packageService: PackageService;
+  integrationFieldsExtractor: IntegrationFieldsExtractor;
 }
 
 export class IntegrationsFieldsRepository implements IFieldsRepository {
-  private constructor(private readonly packageClient: PackageClient) {}
+  private constructor(private readonly fieldsExtractor: IntegrationFieldsExtractor) {}
 
-  getByName<TFieldName extends FieldName>(fieldName: TFieldName) {
+  async getByName<TFieldName extends FieldName>(fieldName: TFieldName) {
+    const data = await this.fieldsExtractor({
+      integration: '1password',
+      // dataset: 'audit_events',
+    });
+
+    console.log(JSON.stringify(data, null, 2));
+
+    return undefined;
+  }
+
+  async find({ fieldNames }: { fieldNames?: FieldName[] } = {}): Record<FieldName, FieldMetadata> {
     throw new Error('TODO: Implement the IntegrationsFieldsRepository#getByName');
   }
 
-  find({ fieldNames }: { fieldNames?: FieldName[] } = {}): Record<FieldName, FieldMetadata> {
-    throw new Error('TODO: Implement the IntegrationsFieldsRepository#getByName');
-  }
-
-  public static create({ packageService }: IntegrationsFieldsRepositoryDeps) {
-    if (!packageService) {
-      return {
-        getByName: () => undefined,
-        find: () => ({}),
-      };
-    }
-
-    const packageClient = packageService.asInternalUser;
-
-    return new IntegrationsFieldsRepository(packageClient);
+  public static create({ integrationFieldsExtractor }: IntegrationsFieldsRepositoryDeps) {
+    return new IntegrationsFieldsRepository(integrationFieldsExtractor);
   }
 }

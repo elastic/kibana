@@ -6,12 +6,14 @@
  */
 
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
+import { IntegrationFieldsExtractor } from './repositories/types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataServiceStartDeps {}
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FieldsMetadataServiceSetup {}
+export interface FieldsMetadataServiceSetup {
+  registerIntegrationFieldsExtractor: (extractor: IntegrationFieldsExtractor) => void;
+}
 
 export interface FieldsMetadataServiceStart {
   getClient(): IFieldsMetadataClient;

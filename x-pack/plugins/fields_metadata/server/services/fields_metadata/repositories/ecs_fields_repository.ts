@@ -27,7 +27,7 @@ export class EcsFieldsRepository implements IFieldsRepository {
     );
   }
 
-  getByName(fieldName: FieldName): FieldMetadata | undefined {
+  getByName(fieldName: FieldName) {
     return this.ecsFields[fieldName];
   }
 

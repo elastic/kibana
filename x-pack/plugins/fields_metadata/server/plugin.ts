@@ -9,8 +9,8 @@ import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/s
 
 import {
   FieldsMetadataPluginCoreSetup,
-  FieldsMetadataPluginSetup,
-  FieldsMetadataPluginStart,
+  FieldsMetadataServerSetup,
+  FieldsMetadataServerStart,
   FieldsMetadataServerPluginSetupDeps,
   FieldsMetadataServerPluginStartDeps,
 } from './types';
@@ -21,8 +21,8 @@ import { FieldsMetadataBackendLibs } from './lib/shared_types';
 export class FieldsMetadataPlugin
   implements
     Plugin<
-      FieldsMetadataPluginSetup,
-      FieldsMetadataPluginStart,
+      FieldsMetadataServerSetup,
+      FieldsMetadataServerStart,
       FieldsMetadataServerPluginSetupDeps,
       FieldsMetadataServerPluginStartDeps
     >
@@ -51,14 +51,15 @@ export class FieldsMetadataPlugin
     initFieldsMetadataServer(this.libs);
 
     return {
-      fieldsMetadata,
+      registerIntegrationFieldsExtractor: fieldsMetadata.registerIntegrationFieldsExtractor,
     };
   }
 
   public start(core: CoreStart, plugins: FieldsMetadataServerPluginStartDeps) {
     const fieldsMetadata = this.fieldsMetadataService.start();
+    const client = fieldsMetadata.getClient();
 
-    return { fieldsMetadata };
+    return { client };
   }
 
   public stop() {}

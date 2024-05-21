@@ -10,26 +10,29 @@ import { Logger } from '@kbn/core/server';
 import { FieldsMetadataClient } from './fields_metadata_client';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import { IntegrationsFieldsRepository } from './repositories/integration_fields_repository';
+import { IntegrationFieldsExtractor } from './repositories/types';
 import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 
 export class FieldsMetadataService {
-  private packageService: any; // TODO: update types
+  private integrationFieldsExtractor: IntegrationFieldsExtractor = () => ({});
 
   constructor(private readonly logger: Logger) {}
 
   public setup(): FieldsMetadataServiceSetup {
     return {
-      registerPackageService: (packageService) => {
-        this.packageService = packageService;
+      registerIntegrationFieldsExtractor: (extractor: IntegrationFieldsExtractor) => {
+        this.integrationFieldsExtractor = extractor;
       },
     };
   }
 
   public start(): FieldsMetadataServiceStart {
-    const { logger, packageService } = this;
+    const { logger, integrationFieldsExtractor } = this;
 
     const ecsFieldsRepository = EcsFieldsRepository.create({ ecsFields });
-    const integrationFieldsRepository = IntegrationsFieldsRepository.create({ packageService });
+    const integrationFieldsRepository = IntegrationsFieldsRepository.create({
+      integrationFieldsExtractor,
+    });
 
     return {
       getClient() {
