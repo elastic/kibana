@@ -15,6 +15,7 @@ import type {
   RuleExecutionEvent,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
+  RuleRunTypeEnum,
   LogLevel,
   LogLevelEnum,
   RuleExecutionEventType,
@@ -100,66 +101,89 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
     async getExecutionResults(
       args: GetExecutionResultsArgs
     ): Promise<GetRuleExecutionResultsResponse> {
-      const { ruleId, start, end, statusFilters, page, perPage, sortField, sortOrder } = args;
+      const {
+        ruleId,
+        start,
+        end,
+        statusFilters,
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+        runTypeFilters,
+      } = args;
       const soType = RULE_SAVED_OBJECT_TYPE;
       const soIds = [ruleId];
+
+      let totalExecutions: number | undefined;
+      let idsFilter: string = '';
+
+      // Similar workaround to the above for status filters
+      // First fetch execution uuid's by run type filter if provided
+      // Then use those ID's to filter by status if provided
+      if (runTypeFilters.length > 0 && runTypeFilters.length < 2) {
+        const ruleRunEventActions = runTypeFilters.map((runType) => {
+          if (runType === RuleRunTypeEnum.standard) {
+            return 'execute';
+          } else {
+            return 'execute-backfill';
+          }
+        });
+
+        const { ids, total } = await getAggregetatedEventsWithFilter({
+          eventLog,
+          soType,
+          soIds,
+          start,
+          end,
+          filter: `event.provider:alerting AND (${ruleRunEventActions
+            .map((runType) => `event.action:${runType}`)
+            .join(' OR ')}) `,
+        });
+
+        if (ids.length === 0) {
+          return {
+            total: 0,
+            events: [],
+          };
+        } else {
+          totalExecutions = total;
+          idsFilter = `${f.RULE_EXECUTION_UUID}:(${ids.join(' OR ')})`;
+        }
+      }
 
       // Current workaround to support root level filters without missing fields in the aggregate event
       // or including events from statuses that aren't selected
       // TODO: See: https://github.com/elastic/kibana/pull/127339/files#r825240516
       // First fetch execution uuid's by status filter if provided
-      let statusIds: string[] = [];
-      let totalExecutions: number | undefined;
       // If 0 or 3 statuses are selected we can search for all statuses and don't need this pre-filter by ID
       if (statusFilters.length > 0 && statusFilters.length < 3) {
         const outcomes = mapRuleExecutionStatusToPlatformStatus(statusFilters);
         const outcomeFilter = outcomes.length ? `OR event.outcome:(${outcomes.join(' OR ')})` : '';
-        const statusResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
+        const { ids, total } = await getAggregetatedEventsWithFilter({
+          eventLog,
+          soType,
+          soIds,
           start,
           end,
-          // Also query for `event.outcome` to catch executions that only contain platform events
-          filter: `${f.RULE_EXECUTION_STATUS}:(${statusFilters.join(' OR ')}) ${outcomeFilter}`,
-          aggs: {
-            totalExecutions: {
-              cardinality: {
-                field: f.RULE_EXECUTION_UUID,
-              },
-            },
-            filteredExecutionUUIDs: {
-              terms: {
-                field: f.RULE_EXECUTION_UUID,
-                order: { executeStartTime: 'desc' },
-                size: MAX_EXECUTION_EVENTS_DISPLAYED,
-              },
-              aggs: {
-                executeStartTime: {
-                  min: {
-                    field: f.TIMESTAMP,
-                  },
-                },
-              },
-            },
-          },
+          filter: `(${f.RULE_EXECUTION_STATUS}:(${statusFilters.join(' OR ')}) ${outcomeFilter}) ${
+            idsFilter ? `AND ${idsFilter}` : ''
+          }`,
         });
-        const filteredExecutionUUIDs = statusResults.aggregations
-          ?.filteredExecutionUUIDs as ExecutionUuidAggResult;
-        statusIds = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
-        totalExecutions = (
-          statusResults.aggregations?.totalExecutions as estypes.AggregationsCardinalityAggregate
-        ).value;
+
         // Early return if no results based on status filter
-        if (statusIds.length === 0) {
+        if (ids.length === 0) {
           return {
             total: 0,
             events: [],
           };
+        } else {
+          idsFilter = `${f.RULE_EXECUTION_UUID}:(${ids.join(' OR ')})`;
+          totalExecutions = total;
         }
       }
 
       // Now query for aggregate events, and pass any ID's as filters as determined from the above status/queryText results
-      const idsFilter = statusIds.length
-        ? `${f.RULE_EXECUTION_UUID}:(${statusIds.join(' OR ')})`
-        : '';
       const results = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
         start,
         end,
@@ -169,6 +193,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
           page,
           perPage,
           sort: [{ [sortField]: { order: sortOrder } }],
+          runTypeFilters,
         }),
       });
 
@@ -304,4 +329,59 @@ const buildEventLogKqlFilter = ({
   }
 
   return kqlAnd(filters);
+};
+
+const getAggregetatedEventsWithFilter = async ({
+  eventLog,
+  soType,
+  soIds,
+  start,
+  end,
+  filter,
+}: {
+  eventLog: IEventLogClient;
+  soType: string;
+  soIds: string[];
+  start: string;
+  end: string;
+  filter: string;
+}) => {
+  const runTypesResponse = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
+    start,
+    end,
+    filter,
+    aggs: {
+      totalExecutions: {
+        cardinality: {
+          field: f.RULE_EXECUTION_UUID,
+        },
+      },
+      filteredExecutionUUIDs: {
+        terms: {
+          field: f.RULE_EXECUTION_UUID,
+          order: { executeStartTime: 'desc' },
+          size: MAX_EXECUTION_EVENTS_DISPLAYED,
+        },
+        aggs: {
+          executeStartTime: {
+            min: {
+              field: f.TIMESTAMP,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const total = (
+    runTypesResponse.aggregations?.totalExecutions as estypes.AggregationsCardinalityAggregate
+  ).value;
+  const filteredExecutionUUIDs = runTypesResponse.aggregations
+    ?.filteredExecutionUUIDs as ExecutionUuidAggResult;
+  const ids = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
+
+  return {
+    ids,
+    total,
+  };
 };

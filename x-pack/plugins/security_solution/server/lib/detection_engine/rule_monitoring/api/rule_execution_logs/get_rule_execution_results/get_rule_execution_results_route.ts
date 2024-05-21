@@ -56,6 +56,7 @@ export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRoute
           per_page: perPage,
           sort_field: sortField,
           sort_order: sortOrder,
+          run_type_filters: runTypeFilters,
         } = request.query;
 
         const siemResponse = buildSiemResponse(response);
@@ -73,6 +74,7 @@ export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRoute
             perPage,
             sortField,
             sortOrder,
+            runTypeFilters,
           });
 
           return response.ok({ body: executionResultsResponse });
