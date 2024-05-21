@@ -674,6 +674,36 @@ describe('getAlertsForNotification', () => {
     expect(delayedAlertsCount).toBe(2);
   });
 
+  test('should remove the alert from recoveredAlerts and should not return the alert in currentRecoveredAlerts if the activeCount is less than the rule alertDelay', () => {
+    const alert1 = new Alert('1', {
+      meta: { activeCount: 1, uuid: 'uuid-1' },
+    });
+    const alert2 = new Alert('2', { meta: { uuid: 'uuid-2' } });
+
+    const { recoveredAlerts, currentRecoveredAlerts, delayedAlertsCount } =
+      getAlertsForNotification(
+        DEFAULT_FLAPPING_SETTINGS,
+        true,
+        'default',
+        5,
+        {},
+        {},
+        {
+          // recovered alerts
+          '1': alert1,
+          '2': alert2,
+        },
+        {
+          // current recovered alerts
+          '1': alert1,
+          '2': alert2,
+        }
+      );
+    expect(recoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+    expect(currentRecoveredAlerts).toMatchInlineSnapshot(`Object {}`);
+    expect(delayedAlertsCount).toBe(0);
+  });
+
   test('should update active alert to look like a new alert if the activeCount is equal to the rule alertDelay', () => {
     const alert2 = new Alert('2', { meta: { uuid: 'uuid-2' } });
 
