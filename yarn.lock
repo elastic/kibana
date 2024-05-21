@@ -3302,6 +3302,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/capture-oas-snapshot-cli@link:packages/kbn-capture-oas-snapshot-cli":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cases-api-integration-test-plugin@link:x-pack/test/cases_api_integration/common/plugins/cases":
   version "0.0.0"
   uid ""
