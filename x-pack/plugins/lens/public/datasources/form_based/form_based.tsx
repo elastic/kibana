@@ -100,6 +100,7 @@ import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { UM_LENS_FORM_BASED_LAYER_DIMENSION } from '../../user_messages_types';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -770,34 +771,35 @@ export function getFormBasedDatasource({
         }
       );
 
-      const warningMessages = [
-        ...[
-          ...(getStateTimeShiftWarningMessages(data.datatableUtilities, state, framePublicAPI) ||
-            []),
-        ].map((longMessage) => {
-          const message: UserMessage = {
-            severity: 'warning',
-            fixableInEditor: true,
-            displayLocations: [{ id: 'toolbar' }],
-            shortMessage: '',
-            longMessage,
-          };
+      const timeShiftWarningMessages = getStateTimeShiftWarningMessages(
+        data.datatableUtilities,
+        state,
+        framePublicAPI
+      );
 
-          return message;
-        }),
-        ...getPrecisionErrorWarningMessages(
-          data.datatableUtilities,
-          state,
-          framePublicAPI,
-          core.docLinks,
-          setState
-        ),
-        ...getUnsupportedOperationsWarningMessage(state, framePublicAPI, core.docLinks),
-      ];
+      const precisionErrorWarningMessages = getPrecisionErrorWarningMessages(
+        data.datatableUtilities,
+        state,
+        framePublicAPI,
+        core.docLinks,
+        setState
+      );
+
+      const unsupporteOpsWarningMessages = getUnsupportedOperationsWarningMessage(
+        state,
+        framePublicAPI,
+        core.docLinks
+      );
 
       const infoMessages = getNotifiableFeatures(state, framePublicAPI, visualizationInfo);
 
-      return layerErrorMessages.concat(dimensionErrorMessages, warningMessages, infoMessages);
+      return layerErrorMessages.concat(
+        dimensionErrorMessages,
+        timeShiftWarningMessages,
+        precisionErrorWarningMessages,
+        unsupporteOpsWarningMessages,
+        infoMessages
+      );
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
@@ -1024,6 +1026,8 @@ function getInvalidDimensionErrorMessages(
 
         if (!isValidColumn(layerId, columnId)) {
           messages.push({
+            type: UM_LENS_FORM_BASED_LAYER_DIMENSION,
+            name: 'InvalidConfiguration',
             severity: 'error',
             displayLocations: [{ id: 'dimensionButton', dimensionId: columnId }],
             fixableInEditor: true,

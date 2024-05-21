@@ -1554,6 +1554,7 @@
     "@yarnpkg/lockfile": "^1.1.0",
     "abab": "^2.0.4",
     "aggregate-error": "^3.1.0",
+    "apache-arrow": "16.1.0",
     "apidoc-markdown": "^7.3.0",
     "argsplit": "^1.0.5",
     "autoprefixer": "^10.4.7",

@@ -20,7 +20,7 @@ import {
 } from '@kbn/data-plugin/common';
 import type { DateRange } from '../../../common/types';
 import type { FormBasedLayer, FormBasedPrivateState } from './types';
-import type { FramePublicAPI, IndexPattern } from '../../types';
+import type { FramePublicAPI, IndexPattern, UserMessage } from '../../types';
 
 export function parseTimeShiftWrapper(timeShiftString: string, dateRange: DateRange) {
   if (isAbsoluteTimeShift(timeShiftString.trim())) {
@@ -175,9 +175,9 @@ export function getStateTimeShiftWarningMessages(
   datatableUtilities: DatatableUtilitiesService,
   state: FormBasedPrivateState,
   { activeData, dataViews }: FramePublicAPI
-) {
-  if (!state) return;
-  const warningMessages: React.ReactNode[] = [];
+): UserMessage[] {
+  if (!state) return [];
+  const warningMessages: UserMessage[] = [];
   Object.entries(state.layers).forEach(([layerId, layer]) => {
     const layerIndexPattern = dataViews.indexPatterns[layer.indexPatternId];
     if (!layerIndexPattern) {
@@ -217,40 +217,56 @@ export function getStateTimeShiftWarningMessages(
     });
 
     if (timeShifts.size < 2) {
-      return;
+      return [];
     }
 
     timeShifts.forEach((timeShift) => {
       if (timeShift === 0) return;
       if (timeShift < shiftInterval) {
         timeShiftMap[timeShift].forEach((columnId) => {
-          warningMessages.push(
-            <FormattedMessage
-              key={`small-${columnId}`}
-              id="xpack.lens.indexPattern.timeShiftSmallWarning"
-              defaultMessage="{label} uses a time shift of {columnTimeShift} which is smaller than the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
-              values={{
-                label: <strong>{layer.columns[columnId].label}</strong>,
-                interval: <strong>{dateHistogramIntervalExpression}</strong>,
-                columnTimeShift: <strong>{layer.columns[columnId].timeShift}</strong>,
-              }}
-            />
-          );
+          warningMessages.push({
+            severity: 'warning',
+            type: 'LensFormBasedTimeShiftWarning',
+            name: 'TimeShiftSmallerThenInterval',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage: (
+              <FormattedMessage
+                key={`small-${columnId}`}
+                id="xpack.lens.indexPattern.timeShiftSmallWarning"
+                defaultMessage="{label} uses a time shift of {columnTimeShift} which is smaller than the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
+                values={{
+                  label: <strong>{layer.columns[columnId].label}</strong>,
+                  interval: <strong>{dateHistogramIntervalExpression}</strong>,
+                  columnTimeShift: <strong>{layer.columns[columnId].timeShift}</strong>,
+                }}
+              />
+            ),
+          });
         });
       } else if (!Number.isInteger(timeShift / shiftInterval)) {
         timeShiftMap[timeShift].forEach((columnId) => {
-          warningMessages.push(
-            <FormattedMessage
-              key={`multiple-${columnId}`}
-              id="xpack.lens.indexPattern.timeShiftMultipleWarning"
-              defaultMessage="{label} uses a time shift of {columnTimeShift} which is not a multiple of the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
-              values={{
-                label: <strong>{layer.columns[columnId].label}</strong>,
-                interval: <strong>{dateHistogramIntervalExpression}</strong>,
-                columnTimeShift: <strong>{layer.columns[columnId].timeShift!}</strong>,
-              }}
-            />
-          );
+          warningMessages.push({
+            severity: 'warning',
+            type: 'LensFormBasedTimeShiftWarning',
+            name: 'TimeShiftNotMultipleThenInterval',
+            fixableInEditor: true,
+            displayLocations: [{ id: 'toolbar' }],
+            shortMessage: '',
+            longMessage: (
+              <FormattedMessage
+                key={`multiple-${columnId}`}
+                id="xpack.lens.indexPattern.timeShiftMultipleWarning"
+                defaultMessage="{label} uses a time shift of {columnTimeShift} which is not a multiple of the date histogram interval of {interval}. To prevent mismatched data, use a multiple of {interval} as time shift."
+                values={{
+                  label: <strong>{layer.columns[columnId].label}</strong>,
+                  interval: <strong>{dateHistogramIntervalExpression}</strong>,
+                  columnTimeShift: <strong>{layer.columns[columnId].timeShift!}</strong>,
+                }}
+              />
+            ),
+          });
         });
       }
     });

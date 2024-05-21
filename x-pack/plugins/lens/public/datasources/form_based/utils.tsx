@@ -64,6 +64,7 @@ import { DEFAULT_MAX_DOC_COUNT } from './operations/definitions/terms/constants'
 import { getOriginalId } from '../../../common/expressions/datatable/transpose_helpers';
 import { ReducedSamplingSectionEntries } from './info_badges';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import { LENS_USER_MESSAGES_NAMES, LENS_USER_MESSAGES_TYPES } from '../../user_messages_types';
 
 function isMinOrMaxColumn(
   column?: GenericIndexPatternColumn
@@ -262,66 +263,68 @@ export function getSearchWarningMessages(
   response: estypes.SearchResponse,
   theme: ThemeServiceStart
 ): UserMessage[] {
-  if (state) {
-    if (warning.type === 'incomplete') {
-      return hasUnsupportedDownsampledAggregationFailure(warning)
-        ? Object.values(state.layers).flatMap((layer) =>
-            uniq(
-              Object.values(layer.columns)
-                .filter((col) =>
-                  [
-                    'median',
-                    'percentile',
-                    'percentile_rank',
-                    'last_value',
-                    'unique_count',
-                    'standard_deviation',
-                  ].includes(col.operationType)
-                )
-                .map((col) => col.label)
-            ).map(
-              (label) =>
-                ({
-                  uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
-                  severity: 'warning',
-                  fixableInEditor: true,
-                  displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
-                  shortMessage: '',
-                  longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
-                    defaultMessage:
-                      '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-                    values: {
-                      label,
-                    },
-                  }),
-                } as UserMessage)
-            )
-          )
-        : [
-            {
-              uniqueId: `incomplete`,
-              severity: 'warning',
-              fixableInEditor: true,
-              displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
-              shortMessage: '',
-              longMessage: (closePopover) => (
-                <SearchResponseWarningsBadgePopoverContent
-                  onViewDetailsClick={closePopover}
-                  warnings={[warning]}
-                />
-              ),
-            } as UserMessage,
-          ];
-    }
+  if (!state) {
+    return [];
   }
-  return [];
+  if (warning.type !== 'incomplete') {
+    return [];
+  }
+  return hasUnsupportedDownsampledAggregationFailure(warning)
+    ? Object.values(state.layers).flatMap((layer) =>
+        uniq(
+          Object.values(layer.columns)
+            .filter((col) =>
+              [
+                'median',
+                'percentile',
+                'percentile_rank',
+                'last_value',
+                'unique_count',
+                'standard_deviation',
+              ].includes(col.operationType)
+            )
+            .map((col) => col.label)
+        ).map((label) => ({
+          uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
+          severity: 'warning',
+          type: '',
+          name: '',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+          shortMessage: '',
+          longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+            defaultMessage:
+              '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+            values: {
+              label,
+            },
+          }),
+        }))
+      )
+    : [
+        {
+          uniqueId: `incomplete`,
+          severity: 'warning',
+          type: '',
+          name: '',
+          fixableInEditor: true,
+          displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+          shortMessage: '',
+          longMessage: (closePopover) => (
+            <SearchResponseWarningsBadgePopoverContent
+              onViewDetailsClick={closePopover}
+              warnings={[warning]}
+            />
+          ),
+        },
+      ];
 }
 
 export function getUnsupportedOperationsWarningMessage(
   state: FormBasedPrivateState,
   { dataViews }: FramePublicAPI,
   docLinks: DocLinksStart
-) {
+): UserMessage[] {
   const warningMessages: UserMessage[] = [];
   const columnsWithUnsupportedOperations: Array<
     [FieldBasedIndexPatternColumn, ReferenceBasedIndexPatternColumn | undefined]
@@ -372,6 +375,8 @@ export function getUnsupportedOperationsWarningMessage(
       const sourceField = columnsGrouped[0][0].sourceField;
       warningMessages.push({
         severity: 'warning',
+        type: LENS_USER_MESSAGES_TYPES.LAYER_DIMENSION,
+        name: LENS_USER_MESSAGES_NAMES.UNSUPPORTED_COUNTER_OP,
         fixableInEditor: false,
         displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
         shortMessage: i18n.translate(
@@ -434,7 +439,7 @@ export function getPrecisionErrorWarningMessages(
   { activeData, dataViews }: FramePublicAPI,
   docLinks: DocLinksStart,
   setState: StateSetter<FormBasedPrivateState>
-) {
+): UserMessage[] {
   const warningMessages: UserMessage[] = [];
 
   if (state && activeData) {
@@ -503,6 +508,8 @@ export function getPrecisionErrorWarningMessages(
           } else {
             warningMessages.push({
               severity: 'warning',
+              type: LENS_USER_MESSAGES_TYPES.LAYER_DIMENSION,
+              name: LENS_USER_MESSAGES_NAMES.ASC_COUNT_PRECISION_ERROR,
               displayLocations: [
                 { id: 'toolbar' },
                 { id: 'dimensionButton', dimensionId: column.id },
@@ -608,6 +615,8 @@ export function getNotifiableFeatures(
     features.push({
       uniqueId: 'random_sampling_info',
       severity: 'info',
+      type: LENS_USER_MESSAGES_TYPES.LAYER_SETTINGS,
+      name: LENS_USER_MESSAGES_NAMES.SAMPLING_PERCENT,
       fixableInEditor: false,
       shortMessage: i18n.translate('xpack.lens.indexPattern.samplingPerLayer', {
         defaultMessage: 'Sampling probability by layer',
@@ -627,6 +636,8 @@ export function getNotifiableFeatures(
     features.push({
       uniqueId: 'ignoring-global-filters-layers',
       severity: 'info',
+      type: LENS_USER_MESSAGES_TYPES.LAYER_SETTINGS,
+      name: LENS_USER_MESSAGES_NAMES.IGNORE_GLOBAL_FILTERS,
       fixableInEditor: false,
       shortMessage: i18n.translate('xpack.lens.xyChart.layerAnnotationsIgnoreTitle', {
         defaultMessage: 'Layers ignoring global filters',
