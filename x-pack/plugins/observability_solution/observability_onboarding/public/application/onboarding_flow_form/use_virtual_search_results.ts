@@ -11,10 +11,9 @@ import { CustomCard } from '../packages_list/types';
 
 export function useVirtualSearchResults(): CustomCard[] {
   const {
-    services: { application, http },
+    services: { application },
   } = useKibana();
   const getUrlForApp = application?.getUrlForApp;
-  const basePath = http?.basePath;
 
   return [
     {
