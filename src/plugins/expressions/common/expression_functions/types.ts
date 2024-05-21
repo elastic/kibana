@@ -58,6 +58,11 @@ export interface ExpressionFunctionDefinition<
   type?: TypeString<Output> | UnmappedTypeStrings;
 
   /**
+   * Opt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.
+   */
+  allowCache?: boolean;
+
+  /**
    * List of allowed type names for input value of this function. If this
    * property is set the input of function will be cast to the first possible
    * type in this list. If this property is missing the input will be provided

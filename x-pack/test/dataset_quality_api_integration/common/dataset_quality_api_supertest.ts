@@ -12,7 +12,7 @@ import type { APIEndpoint } from '@kbn/dataset-quality-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
 import type { APIClientRequestParamsOf, APIReturnType } from '@kbn/dataset-quality-plugin/common';
 
-export function createDatasetQualityApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createDatasetQualityApiClient(st: supertest.Agent) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       type?: 'form-data';
