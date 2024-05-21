@@ -198,7 +198,7 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
                     color="warning"
                     content={
                       <FormattedMessage
-                        id="xpack.fleet.policyDetails.summary.containsUnprivilegedAgentsWarning"
+                        id="xpack.fleet.agentPolicyList.agentsColumn.containsUnprivilegedAgentsWarning"
                         defaultMessage="This agent policy contains integrations that require Elastic Agents to have root privileges. Some enrolled agents are unprivileged."
                       />
                     }
