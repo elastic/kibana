@@ -185,8 +185,9 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
       const response = await this.request(requestArgs);
       const candidate = response.data.candidates[0];
+      const usageMetadata = response.data.usageMetadata;
       const completionText = candidate.content.parts[0].text;
-      return { completion: completionText };
+      return { completion: completionText, usageMetadata };
 
     } catch (error) {
       if (error.code === 401) {
@@ -200,11 +201,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       return { completion: '' };
     }
 }
-   
-    // const response = await this.request(requestArgs);
-    // const candidate = response.data.candidates[0];
-    // const completionText = candidate.content.parts[0].text;
-    // return { completion: completionText };
+
  }
 
 
