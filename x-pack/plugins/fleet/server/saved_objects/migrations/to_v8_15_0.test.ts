@@ -55,8 +55,8 @@ describe('8.15.0 Requires Root Package Policy migration', () => {
     it('should backfill `requires_root` field as `true` for `endpoint` package on Kibana update', () => {
       const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
         document: getPolicyDoc('endpoint'),
-        fromVersion: 9,
-        toVersion: 10,
+        fromVersion: 10,
+        toVersion: 11,
       });
 
       expect(migratedPolicyConfigSO.attributes.package?.requires_root).toBe(true);
@@ -65,8 +65,8 @@ describe('8.15.0 Requires Root Package Policy migration', () => {
     it('should backfill `requires_root` field as `true` for `auditd_manager` package on Kibana update', () => {
       const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
         document: getPolicyDoc('auditd_manager'),
-        fromVersion: 9,
-        toVersion: 10,
+        fromVersion: 10,
+        toVersion: 11,
       });
 
       expect(migratedPolicyConfigSO.attributes.package?.requires_root).toBe(true);
@@ -75,8 +75,8 @@ describe('8.15.0 Requires Root Package Policy migration', () => {
     it('should not backfill `requires_root` field as `true` for other package on Kibana update', () => {
       const migratedPolicyConfigSO = migrator.migrate<PackagePolicy, PackagePolicy>({
         document: getPolicyDoc('other'),
-        fromVersion: 9,
-        toVersion: 10,
+        fromVersion: 10,
+        toVersion: 11,
       });
 
       expect(migratedPolicyConfigSO.attributes.package!.requires_root).toBe(undefined);
