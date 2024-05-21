@@ -22,7 +22,9 @@ export class EcsFieldsRepository implements IFieldsRepository {
   private readonly ecsFields: Record<FieldName, FieldMetadata>;
 
   private constructor(ecsFields: TEcsFields) {
-    this.ecsFields = mapValues(ecsFields, (field) => FieldMetadata.create(field));
+    this.ecsFields = mapValues(ecsFields, (field) =>
+      FieldMetadata.create({ ...field, source: 'ecs' })
+    );
   }
 
   getByName(fieldName: FieldName): FieldMetadata | undefined {

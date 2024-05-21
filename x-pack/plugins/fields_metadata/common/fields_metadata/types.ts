@@ -8,6 +8,11 @@
 import { EcsFlat } from '@elastic/ecs';
 import * as rt from 'io-ts';
 
+export const fieldSourceRT = rt.keyof({
+  ecs: null,
+  integration: null,
+});
+
 export const allowedValueRT = rt.intersection([
   rt.type({
     description: rt.string,
@@ -29,15 +34,11 @@ const requiredBaseMetadataPlainRT = rt.type({
   description: rt.string,
   flat_name: rt.string,
   name: rt.string,
+  source: fieldSourceRT,
   type: rt.string,
 });
 
-const optionalBaseMetadataPlainRT = rt.partial({
-  description: rt.string,
-  flat_name: rt.string,
-  name: rt.string,
-  type: rt.string,
-});
+const optionalBaseMetadataPlainRT = rt.partial(requiredBaseMetadataPlainRT.props);
 
 const optionalMetadataPlainRT = rt.partial({
   allowed_values: rt.array(allowedValueRT),

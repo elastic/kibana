@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@elastic/ecs';
 import { Logger } from '@kbn/core/server';
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
 import { EcsFieldsRepository } from './repositories/ecs_fields_repository';
-import { IntegrationsFieldsSourceClient } from './repositories/integration_fields_repository';
+import { IntegrationsFieldsRepository } from './repositories/integration_fields_repository';
 import { IFieldsMetadataClient } from './types';
 
 interface FieldsMetadataClientDeps {
   logger: Logger;
   ecsFieldsRepository: EcsFieldsRepository;
-  integrationFieldsSourceClient: IntegrationsFieldsSourceClient;
+  integrationFieldsRepository: IntegrationsFieldsRepository;
 }
 
 interface FindOptions {
@@ -26,7 +25,7 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   private constructor(
     private readonly logger: Logger,
     private readonly ecsFieldsRepository: EcsFieldsRepository,
-    private readonly integrationFieldsSourceClient: IntegrationsFieldsSourceClient
+    private readonly integrationFieldsRepository: IntegrationsFieldsRepository
   ) {}
 
   getByName<TFieldName extends FieldName>(fieldName: TFieldName): FieldMetadata | undefined {
@@ -63,8 +62,8 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
   public static create({
     logger,
     ecsFieldsRepository,
-    integrationFieldsSourceClient,
+    integrationFieldsRepository,
   }: FieldsMetadataClientDeps) {
-    return new FieldsMetadataClient(logger, ecsFieldsRepository, integrationFieldsSourceClient);
+    return new FieldsMetadataClient(logger, ecsFieldsRepository, integrationFieldsRepository);
   }
 }

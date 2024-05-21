@@ -8,22 +8,22 @@
 import { FieldMetadata, FieldName } from '../../../../common';
 import { IFieldsRepository } from './types';
 
-interface IntegrationsFieldsSourceClientDeps {
+interface IntegrationsFieldsRepositoryDeps {
   packageService: PackageService;
 }
 
-export class IntegrationsFieldsSourceClient implements IFieldsRepository {
+export class IntegrationsFieldsRepository implements IFieldsRepository {
   private constructor(private readonly packageClient: PackageClient) {}
 
   getByName<TFieldName extends FieldName>(fieldName: TFieldName) {
-    throw new Error('TODO: Implement the IntegrationsFieldsSourceClient#getByName');
+    throw new Error('TODO: Implement the IntegrationsFieldsRepository#getByName');
   }
 
   find({ fieldNames }: { fieldNames?: FieldName[] } = {}): Record<FieldName, FieldMetadata> {
-    throw new Error('TODO: Implement the IntegrationsFieldsSourceClient#getByName');
+    throw new Error('TODO: Implement the IntegrationsFieldsRepository#getByName');
   }
 
-  public static create({ packageService }: IntegrationsFieldsSourceClientDeps) {
+  public static create({ packageService }: IntegrationsFieldsRepositoryDeps) {
     if (!packageService) {
       return {
         getByName: () => undefined,
@@ -33,6 +33,6 @@ export class IntegrationsFieldsSourceClient implements IFieldsRepository {
 
     const packageClient = packageService.asInternalUser;
 
-    return new IntegrationsFieldsSourceClient(packageClient);
+    return new IntegrationsFieldsRepository(packageClient);
   }
 }
