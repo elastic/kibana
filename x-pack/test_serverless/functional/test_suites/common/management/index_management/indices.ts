@@ -22,17 +22,25 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.changeTabs('indicesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
-
+    const testIndexName = `index-ftr-test-${Math.random()}`;
     it('renders the indices tab', async () => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
     });
     it('can create an index', async () => {
-      const testIndexName = `index-ftr-test-${Math.random()}`;
       await pageObjects.indexManagement.clickCreateIndexButton();
       await pageObjects.indexManagement.setCreateIndexName(testIndexName);
       await pageObjects.indexManagement.clickCreateIndexSaveButton();
       await pageObjects.indexManagement.expectIndexToExist(testIndexName);
+    });
+    it('can manage index', async () => {
+      await pageObjects.indexManagement.selectIndex(testIndexName);
+      await pageObjects.indexManagement.clickManageButton();
+      await pageObjects.indexManagement.contextMenuIsVisible();
+    });
+    it('can delete index', async () => {
+      await pageObjects.indexManagement.confirmDeleteModalIsVisible();
+      await pageObjects.indexManagement.expectIndexIsDeleted(testIndexName);
     });
   });
 };
