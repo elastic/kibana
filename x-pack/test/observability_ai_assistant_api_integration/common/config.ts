@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Config, FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
-import supertest from 'supertest';
-import { format, UrlObject } from 'url';
+import { Config, FtrConfigProviderContext } from '@kbn/test';
+import { UrlObject } from 'url';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import {
-  createObservabilityAIAssistantApiClient,
+  getScopedApiClient,
   ObservabilityAIAssistantAPIClient,
 } from './observability_ai_assistant_api_client';
 import { editorUser, viewerUser } from './users/users';
@@ -21,16 +20,6 @@ export interface ObservabilityAIAssistantFtrConfig {
   name: ObservabilityAIAssistantFtrConfigName;
   license: 'basic' | 'trial';
   kibanaConfig?: Record<string, any>;
-}
-
-async function getObservabilityAIAssistantAPIClient(kibanaServer: UrlObject, username: string) {
-  const { password } = kbnTestConfig.getUrlParts();
-  const baseUrlWithAuth = format({
-    ...kibanaServer,
-    auth: `${username}:${password}`,
-  });
-
-  return createObservabilityAIAssistantApiClient(supertest(baseUrlWithAuth));
 }
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
@@ -75,9 +64,9 @@ export function createObservabilityAIAssistantAPIConfig({
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {
         return {
-          adminUser: await getObservabilityAIAssistantAPIClient(kibanaServer, 'elastic'),
-          viewerUser: await getObservabilityAIAssistantAPIClient(kibanaServer, viewerUser.username),
-          editorUser: await getObservabilityAIAssistantAPIClient(kibanaServer, editorUser.username),
+          adminUser: await getScopedApiClient(kibanaServer, 'elastic'),
+          viewerUser: await getScopedApiClient(kibanaServer, viewerUser.username),
+          editorUser: await getScopedApiClient(kibanaServer, editorUser.username),
         };
       },
     },

@@ -9,7 +9,7 @@ import { kbnTestConfig } from '@kbn/test';
 const password = kbnTestConfig.getUrlParts().password!;
 
 export interface User {
-  username: string;
+  username: 'elastic' | 'editor' | 'viewer';
   password: string;
   roles: string[];
 }
