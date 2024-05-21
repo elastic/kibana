@@ -97,7 +97,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsPage.searchConnectorIndexPatternDescription',
       {
         defaultMessage:
-          'Index pattern used by the AI Assistant when querying search connectors indices (part of the knowledge base). By default the index for every search connectors will be queried',
+          'Index pattern used by the AI Assistant when querying search connectors indices (part of the knowledge base). By default the index for every search connector will be queried',
       }
     ),
     schema: schema.string(),
