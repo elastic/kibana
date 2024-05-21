@@ -80,7 +80,6 @@ export const importRulesRoute = (
             'licensing',
           ]);
 
-          const rulesClient = ctx.alerting.getRulesClient();
           const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
