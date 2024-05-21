@@ -296,7 +296,6 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       logger.debug(`Adding preconfigured package policies ${packagePoliciesToAdd}`);
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
-        defaultSoClient,
         esClient,
         policy!,
         packagePoliciesToAdd!,
@@ -363,7 +362,6 @@ export function comparePreconfiguredPolicyToCurrent(
 }
 
 async function addPreconfiguredPolicyPackages(
-  defaultSoClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<{
@@ -391,7 +389,7 @@ async function addPreconfiguredPolicyPackages(
       packageInfo = packageInfoMap.get(installedPackage.name)!;
     } else {
       packageInfo = await getPackageInfo({
-        savedObjectsClient: defaultSoClient,
+        savedObjectsClient: namespacedSoClient,
         pkgName: installedPackage.name,
         pkgVersion: installedPackage.version,
       });
