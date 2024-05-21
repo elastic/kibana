@@ -56,17 +56,18 @@ export const OtelLogsPanel: React.FC = () => {
     {
       id: 'mac',
       name: 'Mac',
-      content: `curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.100.0/otelcol_0.100.0_darwin_amd64.tar.gz
-tar -xvf otelcol_0.100.0_darwin_amd64.tar.gz
-curl --proto '=https' --tlsv1.2 -fOL https://github.com/elastic/observability/releases/download/v1.0.0/otel-collector-mac.yml
-# Use sed to add your API key and Elasticsearch endpoint
-sed -i '' 's/APIKEY/${apiKeyData?.apiKeyEncoded}/g' otel-collector-mac.yml
-sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel-collector-mac.yml`,
+      content: `curl --proto '=https' --tlsv1.2 -fOL https://snapshots.elastic.co/8.14.0-6b2f3648/downloads/beats/elastic-agent/elastic-agent-8.14.0-SNAPSHOT-darwin-x86_64.tar.gz
+      tar -xvf elastic-agent-8.13.4-darwin-x86_64.tar.gz
+      rm elastic-agent-8.13.4-darwin-x86_64/otel.yml && cp elastic-agent-8.13.4-darwin-x86_64/otel_templates/logs_hostmetrics.yaml elastic-agent-8.13.4-darwin-x86_64/otel.yml
+      sed -i '' 's/<<ES_ENDPOINT>>/'${setup?.elasticsearchUrl}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml && sed -i '' 's/<<ES_API_KEY>>/'${apiKeyData?.apiKeyEncoded}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml
+      
+      elastic-agent-8.13.4-darwin-x86_64/elastic-agent otel`,
     },
     {
       id: 'linux',
       name: 'Linux',
-      content: `curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.100.0/otelcol_0.100.0_linux_amd64.tar.gz
+      content: `# not final
+      curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.100.0/otelcol_0.100.0_linux_amd64.tar.gz
 tar -xvf otelcol_0.100.0_linux_amd64.tar.gz
 curl --proto '=https' --tlsv1.2 -fOL https://github.com/elastic/observability/releases/download/v1.0.0/otel-collector-mac.yml
 # Use sed to add your API key and Elasticsearch endpoint
@@ -76,12 +77,13 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
     {
       id: 'windows',
       name: 'Windows',
-      content: `curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.100.0/otelcol_0.100.0_windows_amd64.tar.gz
-tar -xvf otelcol_0.100.0_windows_amd64.tar.gz
-curl --proto '=https' --tlsv1.2 -fOL https://github.com/elastic/observability/releases/download/v1.0.0/otel-collector-mac.yml
-# Use sed to add your API key and Elasticsearch endpoint
-sed -i '' 's/APIKEY/${apiKeyData?.apiKeyEncoded}/g' otel-collector-windows.yml
-sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel-collector-windows.yml`,
+      content: `# not final
+      curl --proto '=https' --tlsv1.2 -fOL https://snapshots.elastic.co/8.14.0-6b2f3648/downloads/beats/elastic-agent/elastic-agent-8.14.0-SNAPSHOT-darwin-x86_64.tar.gz
+      tar -xvf elastic-agent-8.13.4-darwin-x86_64.tar.gz
+      rm elastic-agent-8.13.4-darwin-x86_64/otel.yml && cp elastic-agent-8.13.4-darwin-x86_64/otel_templates/logs_hostmetrics.yaml elastic-agent-8.13.4-darwin-x86_64/otel.yml
+      sed -i '' 's/<<ES_ENDPOINT>>/'${setup?.elasticsearchUrl}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml && sed -i '' 's/<<ES_API_KEY>>/'${apiKeyData?.apiKeyEncoded}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml
+      
+      elastic-agent-8.13.4-darwin-x86_64/elastic-agent otel`,
     },
   ];
 
@@ -116,7 +118,7 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
           <EuiSteps
             steps={[
               {
-                title: 'Install the Collector',
+                title: 'Install and run the collector',
                 children: (
                   <>
                     <EuiText>
@@ -148,7 +150,7 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
                 ),
               },
               {
-                title: 'Run the collector',
+                title: 'Validate everything is running properly',
                 children: (
                   <>
                     <EuiText>
@@ -157,7 +159,7 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
                           'xpack.observability_onboarding.otelLogsPanel.p.startTheCollectorOrLabel',
                           {
                             defaultMessage:
-                              'Start the collector or smth, idk. Also make sure it actually works.',
+                              'Check that the collector is running properly by running the following command:',
                           }
                         )}
                       </p>
