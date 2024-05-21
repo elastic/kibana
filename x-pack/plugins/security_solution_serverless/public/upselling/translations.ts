@@ -8,10 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 export const UPGRADE_PRODUCT_MESSAGE = (requiredProduct: string) =>
-  i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeProductMessage', {
-    defaultMessage:
-      'Entity risk scoring capability is available in our {requiredProduct} license tier',
-    values: {
-      requiredProduct,
-    },
-  });
+  i18n.translate(
+    'xpack.securitySolutionServerless.upselling.entityAnalytics.upgradeProductMessage',
+    {
+      defaultMessage:
+        'Entity risk scoring capability is available in our {requiredProduct} license tier',
+      values: {
+        requiredProduct,
+      },
+    }
+  );

@@ -26,7 +26,7 @@ export const EntityAnalyticsUpsellingSection = memo(
     upgradeHref,
     upgradeToLabel,
   }: {
-    upgradeMessage?: string;
+    upgradeMessage: string;
     upgradeToLabel: string;
     upgradeHref?: string;
   }) => {

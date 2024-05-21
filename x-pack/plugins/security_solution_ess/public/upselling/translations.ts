@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const UPGRADE_LICENSE_MESSAGE = (requiredLicense: string) =>
-  i18n.translate('securitySolutionPackages.entityAnalytics.paywall.upgradeLicenseMessage', {
+  i18n.translate('xpack.securitySolutionEss.upselling.upgradeLicenseMessage', {
     defaultMessage: 'This feature is available with {requiredLicense} or higher subscription',
     values: {
       requiredLicense,

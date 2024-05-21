@@ -8,7 +8,7 @@
 import { withSuspenseUpsell } from '@kbn/security-solution-upselling/helpers';
 import React, { lazy } from 'react';
 import { useKibana } from '../../common/services';
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
   lazy(() =>

@@ -7,6 +7,7 @@
 
 import React, { lazy } from 'react';
 import { useKibana } from '../../common/services';
+import * as i18n from '../translations';
 
 const EntityAnalyticsUpsellingLazy = lazy(
   () => import('@kbn/security-solution-upselling/pages/entity_analytics')
@@ -14,12 +15,15 @@ const EntityAnalyticsUpsellingLazy = lazy(
 
 export const EntityAnalyticsUpsellingPage = () => {
   const { services } = useKibana();
+  const requiredLicense = 'Platinum';
+
   return (
     <EntityAnalyticsUpsellingLazy
-      requiredLicense="Platinum"
-      subscriptionUrl={services.application.getUrlForApp('management', {
+      upgradeMessage={i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense ?? '')}
+      upgradeHref={services.application.getUrlForApp('management', {
         path: 'stack/license_management',
       })}
+      upgradeToLabel={requiredLicense}
     />
   );
 };

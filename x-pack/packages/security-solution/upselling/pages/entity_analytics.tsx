@@ -29,22 +29,14 @@ const PaywallDiv = styled.div`
 `;
 
 const EntityAnalyticsUpsellingComponent = ({
-  requiredLicense,
-  requiredProduct,
-  subscriptionUrl,
+  upgradeMessage,
+  upgradeHref,
+  upgradeToLabel,
 }: {
-  requiredLicense?: string;
-  requiredProduct?: string;
-  subscriptionUrl?: string;
+  upgradeMessage: string;
+  upgradeToLabel: string;
+  upgradeHref?: string;
 }) => {
-  if (!requiredProduct && !requiredLicense) {
-    throw new Error('requiredProduct or requiredLicense must be defined');
-  }
-
-  const upgradeMessage = requiredProduct
-    ? i18n.UPGRADE_PRODUCT_MESSAGE(requiredProduct)
-    : i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense ?? '');
-
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
       <KibanaPageTemplate.Section>
@@ -52,13 +44,13 @@ const EntityAnalyticsUpsellingComponent = ({
         <EuiSpacer size="xl" />
         <PaywallDiv>
           <EntityAnalyticsUpsellingSection
-            requiredLicense={requiredLicense}
-            requiredProduct={requiredProduct}
-            subscriptionUrl={subscriptionUrl}
+            upgradeMessage={upgradeMessage}
+            upgradeHref={upgradeHref}
+            upgradeToLabel={upgradeToLabel}
           />
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiImage alt={upgradeMessage} src={paywallPng} size="fullWidth" />
+              <EuiImage alt={upgradeMessage ?? ''} src={paywallPng} size="fullWidth" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </PaywallDiv>

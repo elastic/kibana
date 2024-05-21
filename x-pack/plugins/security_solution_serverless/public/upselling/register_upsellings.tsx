@@ -105,7 +105,8 @@ export const upsellingPages: UpsellingPages = [
     pli: ProductFeatureKey.advancedInsights,
     component: () => (
       <EntityAnalyticsUpsellingLazy
-        requiredProduct={getProductTypeByPLI(ProductFeatureKey.advancedInsights) ?? undefined}
+        upgradeToLabel={entityAnalyticsProductType}
+        upgradeMessage={i18n.UPGRADE_PRODUCT_MESSAGE(entityAnalyticsProductType)}
       />
     ),
   },
