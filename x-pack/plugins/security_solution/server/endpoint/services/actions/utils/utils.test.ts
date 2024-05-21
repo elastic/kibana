@@ -279,8 +279,8 @@ describe('When using Actions service utilities', () => {
     });
 
     describe('and action failed', () => {
-      let fleetResponseAtError: ActivityLogActionResponse;
-      let endpointResponseAtError: EndpointActivityLogActionResponse;
+      let fleetResponseAtError: EndpointActionResponse;
+      let endpointResponseAtError: LogsEndpointActionResponse;
 
       beforeEach(() => {
         const actionId = uuidv4();

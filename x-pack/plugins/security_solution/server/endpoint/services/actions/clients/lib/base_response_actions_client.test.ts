@@ -678,11 +678,7 @@ describe('ResponseActionsClientImpl base class', () => {
     });
 
     it('should provide an array of pending actions', async () => {
-      const iterationData: Array<
-        Array<
-          LogsEndpointAction<EndpointActionDataParameterTypes, EndpointActionResponseDataOutput, {}>
-        >
-      > = [];
+      const iterationData: ResponseActionsClientPendingAction[][] = [];
 
       for await (const pendingActions of baseClassMock.fetchAllPendingActions()) {
         iterationData.push(pendingActions);
