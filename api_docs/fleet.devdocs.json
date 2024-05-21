@@ -18905,6 +18905,54 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.isValidDataset",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidDataset",
+        "description": [],
+        "signature": [
+          "(dataset: string, allowBlank: boolean | undefined) => { valid: boolean; error?: string | undefined; }"
+        ],
+        "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.isValidDataset.$1",
+            "type": "string",
+            "tags": [],
+            "label": "dataset",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.isValidDataset.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowBlank",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.isValidNamespace",
         "type": "Function",
         "tags": [],
@@ -24949,7 +24997,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
+              "\"string\" | \"text\" | \"integer\" | \"password\" | \"select\" | \"textarea\" | \"bool\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -27341,6 +27389,17 @@
             "path": "x-pack/plugins/fleet/common/constants/routes.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "DELETE_UPLOAD_FILE_PATTERN",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -28301,6 +28360,38 @@
                 "type": "string",
                 "tags": [],
                 "label": "fileName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentRouteService.getAgentFileDeletePath",
+            "type": "Function",
+            "tags": [],
+            "label": "getAgentFileDeletePath",
+            "description": [],
+            "signature": [
+              "(fileId: string) => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentRouteService.getAgentFileDeletePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "fileId",
                 "description": [],
                 "signature": [
                   "string"

@@ -291,7 +291,7 @@
         "label": "isKibanaResponse",
         "description": [],
         "signature": [
-          "(response: Record<string, any>) => boolean"
+          "(response: Record<string, any> | undefined) => boolean"
         ],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,
@@ -305,12 +305,12 @@
             "label": "response",
             "description": [],
             "signature": [
-              "Record<string, any>"
+              "Record<string, any> | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/response.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -3555,6 +3555,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/internal/get_active_space.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/get_content_summary.ts"
+              },
+              {
                 "plugin": "taskManager",
                 "path": "x-pack/plugins/task_manager/server/routes/health.ts"
               },
@@ -3628,11 +3632,11 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/indices/get_fields.ts"
+                "path": "x-pack/plugins/security/server/routes/feature_check/feature_check.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/role_mapping/feature_check.ts"
+                "path": "x-pack/plugins/security/server/routes/indices/get_fields.ts"
               },
               {
                 "plugin": "security",
@@ -4569,6 +4573,10 @@
               {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/plugins/serverless_search/server/routes/mapping_routes.ts"
+              },
+              {
+                "plugin": "serverlessSearch",
+                "path": "x-pack/plugins/serverless_search/server/routes/ingest_pipeline_routes.ts"
               },
               {
                 "plugin": "snapshotRestore",
@@ -5535,6 +5543,10 @@
                 "path": "x-pack/plugins/spaces/server/routes/api/internal/get_active_space.test.ts"
               },
               {
+                "plugin": "spaces",
+                "path": "x-pack/plugins/spaces/server/routes/api/internal/get_content_summary.test.ts"
+              },
+              {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/backfill/apis/get/get_backfill_route.test.ts"
               },
@@ -5816,11 +5828,11 @@
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/indices/get_fields.test.ts"
+                "path": "x-pack/plugins/security/server/routes/feature_check/feature_check.test.ts"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/server/routes/role_mapping/feature_check.test.ts"
+                "path": "x-pack/plugins/security/server/routes/indices/get_fields.test.ts"
               },
               {
                 "plugin": "security",
@@ -7231,6 +7243,14 @@
               {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/create.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/reset.ts"
               },
               {
                 "plugin": "profiling",
@@ -9424,7 +9444,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/delete_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -9651,6 +9671,10 @@
                 "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/delete.ts"
+              },
+              {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
               },
@@ -9693,18 +9717,6 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/plugins/actions/server/routes/delete.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/delete_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/delete_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/delete_rule.test.ts"
               },
               {
                 "plugin": "globalSearch",
@@ -9785,6 +9797,18 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/maintenance_window/apis/delete/delete_maintenance_window_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/delete/delete_rule_route.test.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -13981,7 +14005,7 @@
               },
               {
                 "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_results.ts"
+                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_results_indices_latest.ts"
               },
               {
                 "plugin": "ml",
@@ -15992,6 +16016,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/entries/create_route.ts"
               },
               {
                 "plugin": "controls",
