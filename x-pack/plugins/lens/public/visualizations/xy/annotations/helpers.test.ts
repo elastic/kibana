@@ -16,7 +16,10 @@ describe('annotations helpers', () => {
         getStaticDate(
           [],
           createMockFramePublicAPI({
-            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+            absDateRange: {
+              fromDate: '2022-02-01T00:00:00.000Z',
+              toDate: '2022-04-20T00:00:00.000Z',
+            },
           })
         )
       ).toBe('2022-03-12T00:00:00.000Z');
@@ -34,7 +37,10 @@ describe('annotations helpers', () => {
             },
           ],
           createMockFramePublicAPI({
-            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+            absDateRange: {
+              fromDate: '2022-02-01T00:00:00.000Z',
+              toDate: '2022-04-20T00:00:00.000Z',
+            },
           })
         )
       ).toBe('2022-03-12T00:00:00.000Z');
@@ -76,7 +82,10 @@ describe('annotations helpers', () => {
             },
           ],
           createMockFramePublicAPI({
-            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+            absDateRange: {
+              fromDate: '2022-02-01T00:00:00.000Z',
+              toDate: '2022-04-20T00:00:00.000Z',
+            },
             activeData,
           })
         )
@@ -119,7 +128,10 @@ describe('annotations helpers', () => {
             },
           ],
           createMockFramePublicAPI({
-            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+            absDateRange: {
+              fromDate: '2022-02-01T00:00:00.000Z',
+              toDate: '2022-04-20T00:00:00.000Z',
+            },
             activeData,
           })
         )
@@ -174,7 +186,10 @@ describe('annotations helpers', () => {
             },
           ],
           createMockFramePublicAPI({
-            dateRange: { fromDate: '2022-02-01T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+            absDateRange: {
+              fromDate: '2022-02-01T00:00:00.000Z',
+              toDate: '2022-04-20T00:00:00.000Z',
+            },
             activeData,
           })
         )
@@ -263,7 +278,10 @@ describe('annotations helpers', () => {
 
           createMockFramePublicAPI({
             activeData,
-            dateRange: { fromDate: '2020-02-01T00:00:00.000Z', toDate: '2022-09-20T00:00:00.000Z' },
+            absDateRange: {
+              fromDate: '2020-02-01T00:00:00.000Z',
+              toDate: '2022-09-20T00:00:00.000Z',
+            },
           })
         )
       ).toBe('2020-08-24T12:06:40.000Z');
