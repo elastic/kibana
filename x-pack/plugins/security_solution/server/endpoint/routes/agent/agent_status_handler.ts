@@ -88,12 +88,14 @@ export const getAgentStatusRouteHandler = (
     // 8.15: use the new `agentStatusClientEnabled` FF enabled
     const data = endpointContext.experimentalFeatures.agentStatusClientEnabled
       ? await agentStatusClient.getAgentStatuses(agentIds)
-      : await getSentinelOneAgentStatus({
+      : agentType === 'sentinel_one'
+      ? await getSentinelOneAgentStatus({
           agentType,
           agentIds,
           logger,
           connectorActionsClient: (await context.actions).getActionsClient(),
-        });
+        })
+      : [];
 
     logger.debug(
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
