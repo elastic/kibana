@@ -10,7 +10,7 @@ import { map, reduce, mapValues, has, get, keys, pickBy } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter, FilterMeta, FilterMetaParams } from './types';
 import { FILTERS } from './types';
-import type { DataViewBase, DataViewFieldBase } from '../../es_query';
+import type { DataViewFieldBase } from '../../es_query';
 
 const OPERANDS_IN_RANGE = 2;
 
@@ -142,7 +142,7 @@ const formatValue = (params: any[]) =>
 export const buildRangeFilter = (
   field: DataViewFieldBase,
   params: RangeFilterParams,
-  indexPattern?: DataViewBase,
+  indexPatternId?: string,
   formattedValue?: string
 ): RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter => {
   params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
@@ -167,7 +167,7 @@ export const buildRangeFilter = (
   }, 0);
 
   const meta = {
-    index: indexPattern?.id,
+    index: indexPatternId,
     params: {},
     field: field.name,
     ...(formattedValue ? { formattedValue } : {}),

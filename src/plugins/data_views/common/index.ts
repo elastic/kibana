@@ -69,6 +69,7 @@ export type {
   DataViewListItem,
   DataViewsServicePublicMethods,
   TimeBasedDataView,
+  AbstractDataView,
 } from './data_views';
 export { DataView, DataViewLazy } from './data_views';
 export {
