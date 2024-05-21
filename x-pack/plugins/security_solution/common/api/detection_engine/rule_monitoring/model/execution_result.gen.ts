@@ -44,7 +44,7 @@ export const RuleExecutionResult = z.object({
   backfill: z
     .object({
       start: z.string().datetime().optional(),
-      end: z.string().datetime().optional(),
+      from: z.string().datetime().optional(),
       interval: z.string().optional(),
     })
     .optional(),

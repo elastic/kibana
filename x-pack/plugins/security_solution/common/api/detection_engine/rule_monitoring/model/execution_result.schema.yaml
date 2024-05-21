@@ -58,7 +58,7 @@ components:
             start:
               type: string
               format: date-time
-            end:
+            from:
               type: string
               format: date-time
             interval:

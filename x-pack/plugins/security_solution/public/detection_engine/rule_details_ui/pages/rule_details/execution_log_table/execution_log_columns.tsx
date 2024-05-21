@@ -165,14 +165,15 @@ export const getSourceEventTimeRangeColumns = () => [
       />
     ),
     field: 'backfill',
-    render: (backfill: { start: string; end: string }) => {
+    render: (backfill: { start: string; from: string }) => {
       return backfill ? (
         <div>
           <div>
             <FormattedDate value={backfill.start} fieldName="backfill.start" />
           </div>
+          <EuiText textAlign="center">{'-'}</EuiText>
           <div>
-            <FormattedDate value={backfill.end} fieldName="backfill.end" />
+            <FormattedDate value={backfill.from} fieldName="backfill.from" />
           </div>
         </div>
       ) : (

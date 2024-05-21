@@ -1557,7 +1557,7 @@ describe('formatExecutionEventResponse', () => {
             id: '341536e6-5ac9-4d0e-a25c-dc1c70cda7d5',
             start: '2024-04-01T17:50:00.000Z',
             interval: '1m',
-            end: '2024-04-01T17:51:00.000Z',
+            from: '2024-04-01T17:49:00.000Z',
           },
         },
       ],
