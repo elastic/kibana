@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import hash from 'object-hash';
 import { HashedCache } from '../../../../common/hashed_cache';
 import { FieldMetadata, FieldMetadataPlain, IntegrationFieldName } from '../../../../common';
 import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './types';
-
 interface IntegrationFieldsRepositoryDeps {
   integrationFieldsExtractor: IntegrationFieldsExtractor;
 }
@@ -27,9 +27,7 @@ export class IntegrationFieldsRepository {
     let field = this.getCachedField(fieldName, { integration, dataset });
 
     if (!field) {
-      await this.fieldsExtractor({ integration, dataset })
-        .then(this.mapExtractedFieldsToFieldMetadataInstances)
-        .then((fieldMetadataTree) => this.storeFieldsInCache(fieldMetadataTree, integration));
+      await this.extractFields({ integration, dataset });
 
       field = this.getCachedField(fieldName, { integration, dataset });
     }
@@ -45,11 +43,28 @@ export class IntegrationFieldsRepository {
     return new IntegrationFieldsRepository(integrationFieldsExtractor);
   }
 
+  private async extractFields({
+    integration,
+    dataset,
+  }: IntegrationFieldsSearchParams): Promise<void> {
+    const cacheKey = this.getCacheKey({ integration, dataset });
+    const cachedIntegration = this.cache.get(cacheKey);
+
+    if (cachedIntegration) {
+      return undefined;
+    }
+
+    return this.fieldsExtractor({ integration, dataset })
+      .then(this.mapExtractedFieldsToFieldMetadataInstances)
+      .then((fieldMetadataTree) => this.storeFieldsInCache(cacheKey, fieldMetadataTree));
+  }
+
   private getCachedField(
     fieldName: IntegrationFieldName,
     { integration, dataset }: IntegrationFieldsSearchParams
   ): FieldMetadata | undefined {
-    const cachedIntegration = this.cache.get(integration);
+    const cacheKey = this.getCacheKey({ integration, dataset });
+    const cachedIntegration = this.cache.get(cacheKey);
 
     // 1. Integration fields were never fetched
     if (!cachedIntegration) {
@@ -76,17 +91,19 @@ export class IntegrationFieldsRepository {
   }
 
   private storeFieldsInCache = (
-    extractedFieldsMetadata: Record<string, Record<string, FieldMetadata>>,
-    integration: string
+    cacheKey: string,
+    extractedFieldsMetadata: Record<string, Record<string, FieldMetadata>>
   ): void => {
-    const cachedIntegration = this.cache.get(integration);
+    const cachedIntegration = this.cache.get(cacheKey);
 
     if (!cachedIntegration) {
-      this.cache.set(integration, extractedFieldsMetadata);
+      this.cache.set(cacheKey, extractedFieldsMetadata);
     } else {
-      this.cache.set(integration, { ...cachedIntegration, ...extractedFieldsMetadata });
+      this.cache.set(cacheKey, { ...cachedIntegration, ...extractedFieldsMetadata });
     }
   };
+
+  private getCacheKey = (params: IntegrationFieldsSearchParams) => hash(params);
 
   private mapExtractedFieldsToFieldMetadataInstances = (
     extractedFields: Record<string, Record<string, FieldMetadataPlain>>
