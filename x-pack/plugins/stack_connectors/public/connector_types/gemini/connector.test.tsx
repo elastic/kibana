@@ -1,73 +1,219 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import GeminiConnectorFields from './connector'; // Import your component
-import { ConnectorValidationFunc } from '@kbn/triggers-actions-ui-plugin/public/types';
+import GeminiConnectorFields from './connector';
+import { ConnectorFormTestProvider } from '../lib/test_utils';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
+import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
+import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
 
-// Mock the useFormData hook
-jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => ({
-  useFormData: jest.fn().mockReturnValue([{ id: 'gemini-connector', name: 'Gemini Connector' }]),
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
 }));
+jest.mock('../lib/gen_ai/use_get_dashboard');
 
-describe('GeminiConnectorFields', () => {
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockDashboard = useGetDashboard as jest.Mock;
+const geminiConnector = {
+  actionTypeId: '.gemini',
+  name: 'gemini',
+  id: '123',
+  config: {
+    apiUrl: 'https://geminiurl.com',
+    defaultModel: DEFAULT_GEMINI_MODEL,
+    gcpRegion: 'us-central-1',
+    gcpProjectID: 'test-project',
+  },
+  secrets: {
+    credentialsJSON: 'your-service-account-json-file',
+  },
+  isDeprecated: false,
+};
+
+const navigateToUrl = jest.fn();
+
+describe('GeminiConnectorFields renders', () => {
   beforeEach(() => {
-    jest.clearAllMocks(); // Clear mocks before each test
+    jest.clearAllMocks();
+    useKibanaMock().services.application.navigateToUrl = navigateToUrl;
+    mockDashboard.mockImplementation(({ connectorId }) => ({
+      dashboardUrl: `https://dashboardurl.com/${connectorId}`,
+    }));
   });
-
-  it('renders the SimpleConnectorForm with correct props', () => {
-    render(
-      <GeminiConnectorFields
-        readOnly={false}
-        isEdit={false}
-        registerPreSubmitValidator={function (validator: ConnectorValidationFunc): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
+  test('Gemini connector fields are rendered', async () => {
+    const { getAllByTestId } = render(
+      <ConnectorFormTestProvider connector={geminiConnector}>
+        <GeminiConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </ConnectorFormTestProvider>
     );
 
-    expect(screen.getByLabelText('API Key')).toBeInTheDocument(); // Example config field
-    expect(screen.getByLabelText('API Secret')).toBeInTheDocument(); // Example secrets field
-  });
-
-  it('renders the DashboardLink when in edit mode', () => {
-    render(
-      <GeminiConnectorFields
-        readOnly={false}
-        isEdit={true}
-        registerPreSubmitValidator={function (validator: ConnectorValidationFunc): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
+    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(geminiConnector.config.apiUrl);
+    expect(getAllByTestId('config.defaultModel-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.defaultModel-input')[0]).toHaveValue(
+      geminiConnector.config.defaultModel
     );
-
-    expect(screen.getByText('Open Gemini dashboard')).toBeInTheDocument(); // Assuming this is the link text
+    expect(getAllByTestId('gemini-api-doc')[0]).toBeInTheDocument();
+    expect(getAllByTestId('gemini-api-model-doc')[0]).toBeInTheDocument();
   });
 
-  it('does not render the DashboardLink when not in edit mode', () => {
-    render(
-      <GeminiConnectorFields
-        readOnly={false}
-        isEdit={false}
-        registerPreSubmitValidator={function (validator: ConnectorValidationFunc): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
-    );
-    expect(screen.queryByText('Open Gemini dashboard')).toBeNull();
+  describe('Dashboard link', () => {
+    it('Does not render if isEdit is false and dashboardUrl is defined', async () => {
+      const { queryByTestId } = render(
+        <ConnectorFormTestProvider connector={geminiConnector}>
+          <GeminiConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+    });
+    it('Does not render if isEdit is true and dashboardUrl is null', async () => {
+      mockDashboard.mockImplementation((id: string) => ({
+        dashboardUrl: null,
+      }));
+      const { queryByTestId } = render(
+        <ConnectorFormTestProvider connector={geminiConnector}>
+          <GeminiConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+    });
+    it('Renders if isEdit is true and dashboardUrl is defined', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={geminiConnector}>
+          <GeminiConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      expect(getByTestId('link-gen-ai-token-dashboard')).toBeInTheDocument();
+    });
+    it('On click triggers redirect with correct saved object id', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={geminiConnector}>
+          <GeminiConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
+      expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
+    });
   });
 
-  it('disables fields when readOnly is true', () => {
-    render(
-      <GeminiConnectorFields
-        readOnly={true}
-        isEdit={false}
-        registerPreSubmitValidator={function (validator: ConnectorValidationFunc): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
-    );
+  describe('Validation', () => {
+    const onSubmit = jest.fn();
 
-    expect(screen.getByLabelText('API Key')).toBeDisabled();
-    expect(screen.getByLabelText('API Secret')).toBeDisabled();
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('connector validation succeeds when connector config is valid', async () => {
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={geminiConnector} onSubmit={onSubmit}>
+          <GeminiConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      await waitFor(async () => {
+        expect(onSubmit).toHaveBeenCalled();
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: geminiConnector,
+        isValid: true,
+      });
+    });
+
+    it('validates correctly if the apiUrl is empty', async () => {
+      const connector = {
+        ...geminiConnector,
+        config: {
+          ...geminiConnector.config,
+          apiUrl: '',
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <GeminiConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+      await waitFor(async () => {
+        expect(onSubmit).toHaveBeenCalled();
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+
+    const tests: Array<[string, string]> = [
+      ['config.apiUrl-input', 'not-valid'],
+      ['secrets.accessKey-input', ''],
+    ];
+    it.each(tests)('validates correctly %p', async (field, value) => {
+      const connector = {
+        ...geminiConnector,
+        config: {
+          ...geminiConnector.config,
+          headers: [],
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <GeminiConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+      await waitFor(async () => {
+        expect(onSubmit).toHaveBeenCalled();
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
   });
-  // Add more tests for the form submit
 });

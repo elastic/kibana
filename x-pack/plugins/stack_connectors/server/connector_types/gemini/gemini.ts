@@ -135,8 +135,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
     });
 
-    console.log('In getAccessToken');
-
     const token = await auth.getAccessToken();
     if (token) {
       GeminiConnector.token = token;
@@ -166,7 +164,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    const currentModel = reqModel ?? this.model;
    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
    const token = await this.getAccessToken();
-   console.log('Token', token);
 
    const requestArgs = {
     url: `${this.url}${path}`,
@@ -189,7 +186,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       const response = await this.request(requestArgs);
       const candidate = response.data.candidates[0];
       const completionText = candidate.content.parts[0].text;
-      console.log('TEXT', completionText)
       return { completion: completionText };
 
     } catch (error) {

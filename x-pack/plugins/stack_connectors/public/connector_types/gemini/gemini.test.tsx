@@ -1,74 +1,89 @@
-import { getConnectorType } from './gemini';
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
+import { registerConnectorTypes } from '..';
+import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { SUB_ACTION } from '../../../common/gemini/constants';
-import { GEMINI_CONNECTOR_ID, GEMINI_TITLE } from '../../../common/gemini/constants';
-import { GeminiActionParams } from './types';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
-// Mock lazy imports to avoid actual loading in tests
-jest.mock('react', () => ({
-  lazy: jest.fn((callback) => callback()),
-}));
-jest.mock('./logo', () => ({ default: 'GeminiLogo' })); // Replace with actual logo component if needed
-jest.mock('./connector', () => ({ default: 'GeminiConnectorFields' }));
-jest.mock('./params', () => ({ default: 'GeminiActionParamsFields' }));
-jest.mock('./dashboard_link', () => ({ default: 'GeminiDashboardLink' }));
 
-// Mock i18n translations
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: jest.fn((key, options) => options?.defaultMessage || key),
-  },
-}));
+const ACTION_TYPE_ID = '.gemini';
+let actionTypeModel: ActionTypeModel;
 
-describe('getConnectorType', () => {
-  it('returns the correct connector type object', async () => {
-    const connectorType = getConnectorType();
-    expect(connectorType).toEqual({
-      id: GEMINI_CONNECTOR_ID,
-      iconClass: expect.any(Function),
-      selectMessage: 'Send a request to Google Gemini.',
-      actionTypeTitle: GEMINI_TITLE,
-      validateParams: expect.any(Function),
-      actionConnectorFields: expect.any(Function),
-      actionParamsFields: expect.any(Function),
-      actionReadOnlyExtraComponent: expect.any(Function),
+beforeAll(() => {
+  const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
+  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
+  registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
+  const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
+  if (getResult !== null) {
+    actionTypeModel = getResult;
+  }
+});
+
+describe('actionTypeRegistry.get() works', () => {
+  test('connector type static data is as expected', () => {
+    expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
+    expect(actionTypeModel.selectMessage).toBe('Send a request to Google Gemini.');
+    expect(actionTypeModel.actionTypeTitle).toBe('Google Gemini');
+  });
+});
+
+describe('gemini action params validation', () => {
+
+  test('action params validation succeeds when action params is valid', async () => {
+    const actionParams = {
+      subAction: SUB_ACTION.RUN,
+      subActionParams: { body: '{"message": "test"}' },
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: { body: [], subAction: [] },
     });
   });
 
-  describe('validateParams', () => {
-    it('returns no errors for valid RUN params with JSON body', async () => {
-      const actionParams: GeminiActionParams = {
-        subAction: SUB_ACTION.RUN,
-        subActionParams: { body: '{"message": "Hello!"}' },
-      };
-      const result = await getConnectorType().validateParams(actionParams);
-      expect(result).toEqual({ errors: { body: [], subAction: [] } });
-    });
+  test('params validation fails when body is not an object', async () => {
+    const actionParams = {
+      subAction: SUB_ACTION.RUN,
+      subActionParams: { body: 'message {test}' },
+    };
 
-    it('returns errors for empty body in RUN/TEST params', async () => {
-      const actionParams: GeminiActionParams = {
-        subAction: SUB_ACTION.RUN,
-        subActionParams: { body: '' },
-      };
-      const result = await getConnectorType().validateParams(actionParams);
-      expect(result).toEqual({ errors: { body: ['BODY_REQUIRED'], subAction: [] } }); // Replace with actual translation
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: { body: ['Body does not have a valid JSON format.'], subAction: [] },
     });
+  });
 
-    it('returns errors for invalid JSON body in RUN/TEST params', async () => {
-      const actionParams: GeminiActionParams = {
-        subAction: SUB_ACTION.RUN,
-        subActionParams: { body: '{invalid json}' },
-      };
-      const result = await getConnectorType().validateParams(actionParams);
-      expect(result).toEqual({ errors: { body: ['BODY_INVALID'], subAction: [] } }); // Replace with actual translation
+  test('params validation fails when subAction is missing', async () => {
+    const actionParams = {
+      subActionParams: { body: '{"message": "test"}' },
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        body: [],
+        subAction: ['Action is required.'],
+      },
     });
+  });
 
-    it('returns no errors for valid TEST params with JSON body', async () => {
-      const actionParams: GeminiActionParams = {
-        subActionParams: { body: '{"message": "Hello!"}' },
-        subAction: SUB_ACTION.TEST,
-      };
-      const result = await getConnectorType().validateParams(actionParams);
-      expect(result).toEqual({ errors: { body: [], subAction: ['ACTION_REQUIRED'] } }); // Replace with actual translation
+  test('params validation fails when subActionParams is missing', async () => {
+    const actionParams = {
+      subAction: SUB_ACTION.RUN,
+      subActionParams: {},
+    };
+
+    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        body: ['Body is required.'],
+        subAction: [],
+      },
     });
   });
 });
+
