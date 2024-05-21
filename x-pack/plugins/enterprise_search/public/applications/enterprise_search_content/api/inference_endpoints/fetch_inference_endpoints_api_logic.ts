@@ -29,4 +29,4 @@ export const FetchInferenceEndpointsAPILogic = createApiLogic(
   fetchInferenceEndpoints
 );
 
-export type FetchInferenceEdnpointsApiActions = Actions<{}, FetchInferenceEndpointsResponse>;
+export type FetchInferenceEdnpointsApiActions = Actions<void, FetchInferenceEndpointsResponse>;

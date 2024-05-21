@@ -20,7 +20,7 @@ export interface InferenceEndpointsActions {
   apiError: FetchInferenceEndpointsApiActions['apiError'];
   apiSuccess: FetchInferenceEndpointsApiActions['apiSuccess'];
   cancelSuccess: CancelSyncsActions['apiSuccess'];
-  fetchInferenceEndpoints: () => {};
+  fetchInferenceEndpoints: () => void;
   makeRequest: FetchInferenceEndpointsApiActions['makeRequest'];
 }
 export interface InferenceEndpointsValues {
@@ -33,7 +33,7 @@ export const InferenceEndpointsLogic = kea<
   MakeLogicType<InferenceEndpointsValues, InferenceEndpointsActions>
 >({
   actions: {
-    fetchInferenceEndpoints: () => ({}),
+    fetchInferenceEndpoints: true,
   },
   connect: {
     actions: [
@@ -45,9 +45,9 @@ export const InferenceEndpointsLogic = kea<
     values: [FetchInferenceEndpointsAPILogic, ['data', 'status']],
   },
   listeners: ({ actions }) => ({
-    fetchInferenceEndpoints: async (input, breakpoint) => {
+    fetchInferenceEndpoints: async (_, breakpoint) => {
       await breakpoint(150);
-      actions.makeRequest(input);
+      actions.makeRequest();
     },
   }),
   path: ['enterprise_search', 'content', 'inference_endpoints_logic'],
