@@ -30,6 +30,7 @@ export const disableRuleRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_disable`,
+      options: { access: 'public' },
       validate: {
         params: paramSchema,
         body: bodySchema,

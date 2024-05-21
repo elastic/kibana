@@ -40,6 +40,7 @@ export const healthRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/_health`,
+      options: { access: 'public' },
       validate: false,
     },
     router.handleLegacyErrors(

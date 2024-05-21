@@ -38,6 +38,7 @@ const buildGetRuleRoute = ({
   router.get(
     {
       path,
+      options: { access: 'public' },
       validate: {
         params: getRuleRequestParamsSchemaV1,
       },

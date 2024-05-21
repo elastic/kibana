@@ -21,6 +21,7 @@ export const deleteRuleRoute = (
   router.delete(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
+      options: { access: 'public' },
       validate: {
         params: deleteRuleRequestParamsSchemaV1,
       },
