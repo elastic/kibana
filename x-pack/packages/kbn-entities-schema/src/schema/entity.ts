@@ -15,6 +15,7 @@ export const entitySchema = z.intersection(
       indexPatterns: arrayOfStringsSchema,
       identityFields: arrayOfStringsSchema,
       metric: z.record(z.string(), z.number()),
+      spaceId: z.string(),
     }),
   }),
   z.record(z.string(), z.string().or(z.number()))
