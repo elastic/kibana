@@ -14,5 +14,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_slo'));
     loadTestFile(require.resolve('./update_slo'));
     loadTestFile(require.resolve('./reset_slo'));
+    loadTestFile(require.resolve('./fetch_historical_summary'));
   });
 }
