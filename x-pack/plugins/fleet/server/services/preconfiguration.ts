@@ -50,7 +50,7 @@ interface PreconfigurationResult {
 }
 
 export async function ensurePreconfiguredPackagesAndPolicies(
-  soClient: SavedObjectsClientContract,
+  defaultSoClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   policies: PreconfiguredAgentPolicy[] = [],
   packages: PreconfiguredPackage[] = [],
@@ -96,7 +96,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
   // Preinstall packages specified in Kibana config
   const preconfiguredPackages = await bulkInstallPackages({
-    savedObjectsClient: soClient,
+    savedObjectsClient: defaultSoClient,
     esClient,
     packagesToInstall,
     force: true, // Always force outdated packages to be installed if a later version isn't installed
@@ -127,7 +127,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
   // will occur between upgrading the package and reinstalling the previously failed package.
   // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
   // packages that are stuck in the installing state.
-  await ensurePackagesCompletedInstall(soClient, esClient);
+  await ensurePackagesCompletedInstall(defaultSoClient, esClient);
 
   // Create policies specified in Kibana config
   logger.debug(`Creating preconfigured policies`);
@@ -140,7 +140,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           searchFields: ['id'],
           search: escapeSearchQueryPhrase(preconfigurationId),
         };
-        const deletionRecords = await soClient.find({
+        const deletionRecords = await defaultSoClient.find({
           type: PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
           ...searchParams,
         });
@@ -176,7 +176,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
 
       const namespacedSoClient = preconfiguredAgentPolicy.space_id
         ? appContextService.getInternalUserSOClientForSpaceId(preconfiguredAgentPolicy.space_id)
-        : soClient;
+        : defaultSoClient;
 
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         namespacedSoClient,
@@ -250,7 +250,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         packagePolicies.map(async (preconfiguredPackagePolicy) => {
           const { package: pkg, ...newPackagePolicy } = preconfiguredPackagePolicy;
           const installedPackage = await getInstallation({
-            savedObjectsClient: soClient,
+            savedObjectsClient: defaultSoClient,
             pkgName: pkg.name,
           });
           if (!installedPackage) {
@@ -281,7 +281,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
               })
             );
           }
-          return { installedPackage, packagePolicy: newPackagePolicy };
+          return { installedPackage, packagePolicy: newPackagePolicy, namespacedSoClient };
         })
       );
 
@@ -296,7 +296,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       logger.debug(`Adding preconfigured package policies ${packagePoliciesToAdd}`);
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
-        namespacedSoClient,
+        defaultSoClient,
         esClient,
         policy!,
         packagePoliciesToAdd!,
@@ -363,11 +363,12 @@ export function comparePreconfiguredPolicyToCurrent(
 }
 
 async function addPreconfiguredPolicyPackages(
-  soClient: SavedObjectsClientContract,
+  defaultSoClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
   installedPackagePolicies: Array<{
     installedPackage: Installation;
+    namespacedSoClient: SavedObjectsClientContract;
     packagePolicy:
       | (Partial<Omit<NewPackagePolicy, 'inputs'>> & {
           id?: string | number;
@@ -384,13 +385,13 @@ async function addPreconfiguredPolicyPackages(
   const packageInfoMap = new Map<string, PackageInfo>();
 
   // Add packages synchronously to avoid overwriting
-  for (const { installedPackage, packagePolicy } of installedPackagePolicies) {
+  for (const { installedPackage, packagePolicy, namespacedSoClient } of installedPackagePolicies) {
     let packageInfo: PackageInfo;
     if (packageInfoMap.has(installedPackage.name)) {
       packageInfo = packageInfoMap.get(installedPackage.name)!;
     } else {
       packageInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
+        savedObjectsClient: defaultSoClient,
         pkgName: installedPackage.name,
         pkgVersion: installedPackage.version,
       });
@@ -399,7 +400,7 @@ async function addPreconfiguredPolicyPackages(
     if (Array.isArray(packagePolicy.inputs)) {
       const { id, name, description, inputs } = packagePolicy;
       await addPackageToAgentPolicy(
-        soClient,
+        namespacedSoClient,
         esClient,
         agentPolicy,
         packageInfo,
@@ -424,7 +425,7 @@ async function addPreconfiguredPolicyPackages(
         {}
       );
 
-      await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
+      await packagePolicyService.create(namespacedSoClient, esClient, newPackagePolicy, {
         id,
         bumpRevision: bumpAgentPolicyRevison,
         skipEnsureInstalled: true,
