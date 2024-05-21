@@ -62,7 +62,6 @@ export const RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE = i18n.translate(
   }
 );
 
-
 export const COLUMN_STATUS = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.statusColumn',
   {
