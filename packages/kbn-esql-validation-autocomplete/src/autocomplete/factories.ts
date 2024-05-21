@@ -47,7 +47,7 @@ export function getSuggestionFunctionDefinition(fn: FunctionDefinition): Suggest
     kind: 'Function',
     detail: fn.description,
     documentation: {
-      value: buildFunctionDocumentation(fullSignatures),
+      value: buildFunctionDocumentation(fullSignatures, fn.examples),
     },
     // agg functgions have priority over everything else
     sortText: fn.type === 'agg' ? '1A' : 'C',

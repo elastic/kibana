@@ -97,8 +97,8 @@ export interface FunctionDefinition {
     }>;
     minParams?: number;
     returnType: FunctionReturnType;
-    examples?: string[];
   }>;
+  examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
