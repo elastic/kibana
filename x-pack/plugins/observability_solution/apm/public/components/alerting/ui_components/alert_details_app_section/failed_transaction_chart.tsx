@@ -6,12 +6,25 @@
  */
 /* Error Rate */
 
-import { EuiFlexItem, EuiPanel, EuiFlexGroup, EuiTitle, EuiIconTip } from '@elastic/eui';
+import React from 'react';
+import chroma from 'chroma-js';
+import {
+  EuiFlexItem,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiTitle,
+  EuiIconTip,
+  RecursivePartial,
+  useEuiTheme,
+  transparentize,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BoolQuery } from '@kbn/es-query';
-import React from 'react';
-import { RecursivePartial } from '@elastic/eui';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { Theme } from '@elastic/charts';
+import { AlertActiveTimeRangeAnnotation, AlertAnnotation } from '@kbn/observability-alert-details';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DEFAULT_DATE_FORMAT } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import * as get_timeseries_color from '../../../shared/charts/helper/get_timeseries_color';
@@ -50,6 +63,8 @@ function FailedTransactionChart({
   timeZone,
   kuery = '',
   filters,
+  alertStart,
+  alertEnd,
 }: {
   transactionType: string;
   transactionTypes?: string[];
@@ -63,7 +78,13 @@ function FailedTransactionChart({
   timeZone: string;
   kuery?: string;
   filters?: BoolQuery;
+  alertStart?: number;
+  alertEnd?: number;
 }) {
+  const { euiTheme } = useEuiTheme();
+  const {
+    services: { uiSettings },
+  } = useKibana();
   const { currentPeriodColor: currentPeriodColorErrorRate } =
     get_timeseries_color.getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
 
@@ -127,6 +148,28 @@ function FailedTransactionChart({
     },
   ];
   const showTransactionTypeSelect = setTransactionType && transactionTypes;
+  const getFailedTransactionChartAdditionalData = () => {
+    if (alertStart) {
+      return [
+        <AlertActiveTimeRangeAnnotation
+          alertStart={alertStart}
+          alertEnd={alertEnd}
+          color={chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase()}
+          id={'alertActiveRect'}
+          key={'alertActiveRect'}
+        />,
+        <AlertAnnotation
+          key={'alertAnnotationStart'}
+          id={'alertAnnotationStart'}
+          alertStart={alertStart}
+          color={euiTheme.colors.danger}
+          dateFormat={
+            (uiSettings && uiSettings.get(UI_SETTINGS.DATE_FORMAT)) || DEFAULT_DATE_FORMAT
+          }
+        />,
+      ];
+    }
+  };
   return (
     <EuiFlexItem>
       <EuiPanel hasBorder={true}>
@@ -158,7 +201,8 @@ function FailedTransactionChart({
         <TimeseriesChart
           id="errorRate"
           height={200}
-          showAnnotations={false}
+          showAnnotations={true}
+          annotations={getFailedTransactionChartAdditionalData()}
           fetchStatus={status}
           timeseries={timeseriesErrorRate}
           yLabelFormat={yLabelFormat}
