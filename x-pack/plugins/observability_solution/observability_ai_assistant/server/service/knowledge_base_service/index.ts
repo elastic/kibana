@@ -356,6 +356,9 @@ export class KnowledgeBaseService {
     const responsePromise = client.transport.request({
       method: 'GET',
       path: '_connector',
+      querystring: {
+        filter_path: 'results.index_name',
+      },
     });
 
     const customSearchConnectorIndex = await uiSettingsClient.get<string>(
