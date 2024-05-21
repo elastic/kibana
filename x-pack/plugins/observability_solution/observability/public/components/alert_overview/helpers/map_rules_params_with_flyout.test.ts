@@ -222,6 +222,44 @@ describe('Map rules params with flyout', () => {
       ],
     },
     {
+      ruleType: 'metrics.alert.inventory.threshold',
+      alert: {
+        fields: {
+          'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
+          'kibana.alert.rule.parameters': {
+            nodeType: 'host',
+            criteria: [
+              {
+                metric: 'rx',
+                comparator: '<',
+                threshold: [90],
+                timeSize: 1,
+                timeUnit: 'm',
+                customMetric: {
+                  type: 'custom',
+                  id: 'alert-custom-metric',
+                  field: 'system.memory.used.pct',
+                  aggregation: 'avg',
+                },
+              },
+            ],
+            sourceId: 'default',
+          },
+
+          'kibana.alert.evaluation.value': [130.4],
+          'kibana.alert.evaluation.threshold': 3000000,
+        },
+      },
+      results: [
+        {
+          comparator: '<',
+          observedValue: '13,040%',
+          pctAboveThreshold: ' (14388.89% above the threshold)',
+          threshold: '9,000%',
+        },
+      ],
+    },
+    {
       ruleType: 'apm.error_rate',
       alert: {
         fields: {
