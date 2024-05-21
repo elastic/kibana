@@ -54,7 +54,7 @@ export const PrivilegesLearnMoreWrapper = ({
   return (
     <EuiText size={fontSize} data-test-subj={`datasetQualityInsufficientPrivileges-${title}`}>
       {insufficientPrivilegesText}
-      <LearnMoreLink />
+      {/* <LearnMoreLink /> TODO: Add docs link when available */}
     </EuiText>
   );
 };
@@ -102,7 +102,7 @@ export const PrivilegesWarningIconWrapper = ({
       isOpen={isPopoverOpen}
       closePopover={handleClosePopover}
     >
-      {insufficientPrivilegesText} {<LearnMoreLink />}
+      {insufficientPrivilegesText} {/* <LearnMoreLink /> TODO: Add docs link when available */}
     </EuiPopover>
   ) : (
     <EuiToolTip content={insufficientPrivilegesText}>
