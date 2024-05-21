@@ -170,6 +170,35 @@ export const postActionsConnectorExecuteRoute = (
             });
             if (conversation?.title === NEW_CHAT && prevMessages) {
               try {
+                let messages = [];
+                if(actionTypeId == ".gemini"){
+                  // reversing the sequence in case of gemini because gemini always needs first prompt as a user prompt.
+
+                  messages.push(newMessage ?? prevMessages?.[0])
+
+                  messages.push({
+                    role: 'assistant',
+                    content: i18n.translate(
+                      'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
+                      {
+                        defaultMessage:
+                          'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+                      }
+                    ),
+                  });
+                } else {
+                  messages.push({
+                    role: 'assistant',
+                    content: i18n.translate(
+                      'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
+                      {
+                        defaultMessage:
+                          'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
+                      }
+                    ),
+                  });
+                  messages.push(newMessage ?? prevMessages?.[0])
+                }
                 const autoTitle = (await executeAction({
                   actions,
                   request,
@@ -179,19 +208,7 @@ export const postActionsConnectorExecuteRoute = (
                     subAction: 'invokeAI',
                     subActionParams: {
                       model: request.body.model,
-                      messages: [
-                        {
-                          role: 'assistant',
-                          content: i18n.translate(
-                            'xpack.elasticAssistantPlugin.server.autoTitlePromptDescription',
-                            {
-                              defaultMessage:
-                                'You are a helpful assistant for Elastic Security. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
-                            }
-                          ),
-                        },
-                        newMessage ?? prevMessages?.[0],
-                      ],
+                      messages,
                       ...(actionTypeId === '.gen-ai'
                         ? { n: 1, stop: null, temperature: 0.2 }
                         : { temperature: 0, stopSequences: [] }),
