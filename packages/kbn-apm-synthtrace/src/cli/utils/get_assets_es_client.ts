@@ -7,7 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { AssetsSynthtraceEsClient } from '../../lib/assets/assets_synthtrace_es_client';
+import { EntitiesSynthtraceEsClient } from '../../lib/assets/assets_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 
@@ -23,7 +23,7 @@ export function getAssetsEsClient({
     node: target,
   });
 
-  return new AssetsSynthtraceEsClient({
+  return new EntitiesSynthtraceEsClient({
     client,
     logger,
     concurrency,

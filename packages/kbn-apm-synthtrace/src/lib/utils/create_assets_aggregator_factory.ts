@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { appendHash, AssetDocument, Fields } from '@kbn/apm-synthtrace-client';
+import { appendHash, EntityDocument, Fields } from '@kbn/apm-synthtrace-client';
 import { Duplex, PassThrough } from 'stream';
 
 export function createAssetsAggregatorFactory<TFields extends Fields>() {
-  return function <TAsset extends AssetDocument>(
+  return function <TAsset extends EntityDocument>(
     {
       filter,
       getAggregateKey,

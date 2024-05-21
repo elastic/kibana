@@ -6,17 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { Asset, AssetDocument } from './asset';
+import { Entity, EntityDocument } from './entities';
 
-export interface ServiceAssetDocument extends AssetDocument {
+export interface ServiceEntityDocument extends EntityDocument {
   'service.language.name'?: string;
   'service.name': string;
   'service.node.name'?: string;
   'service.environment'?: string;
 }
 
-export class ServiceAsset extends Asset<ServiceAssetDocument> {
-  constructor(fields: Omit<ServiceAssetDocument, 'asset.type'>) {
-    super({ 'asset.type': 'service', ...fields });
+export class ServiceEntity extends Entity<ServiceEntityDocument> {
+  constructor(fields: Omit<ServiceEntityDocument, 'asset.type'>) {
+    super({ 'entity.definitionId': 'apm-service', ...fields });
   }
 }

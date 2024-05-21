@@ -9,18 +9,11 @@
 import { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
-type AssetType = 'host' | 'pod' | 'container' | 'service';
-
-export interface AssetDocument extends Fields {
-  'asset.id': string;
-  'asset.type': AssetType;
-  'asset.first_seen': string;
-  'asset.last_seen': string;
-  'asset.identifying_metadata': string[];
-  'asset.signalTypes': {
-    'asset.traces'?: boolean;
-    'asset.logs'?: boolean;
-  };
+export interface EntityDocument extends Fields {
+  'entity.id': string;
+  'entity.latestTimestamp': string;
+  'entity.indexPatterns': string[];
+  'entity.definitionId': string;
 }
 
-export class Asset<F extends AssetDocument> extends Serializable<F> {}
+export class Entity<F extends EntityDocument> extends Serializable<F> {}

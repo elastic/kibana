@@ -8,7 +8,7 @@
 
 import { Timerange } from '@kbn/apm-synthtrace-client';
 import { ApmSynthtraceEsClient, InfraSynthtraceEsClient, LogsSynthtraceEsClient } from '../..';
-import { AssetsSynthtraceEsClient } from '../lib/assets/assets_synthtrace_es_client';
+import { EntitiesSynthtraceEsClient } from '../lib/entities/entities_synthtrace_es_client';
 import { Logger } from '../lib/utils/create_logger';
 import { ScenarioReturnType } from '../lib/utils/with_client';
 import { RunOptions } from './utils/parse_run_cli_flags';
@@ -19,7 +19,7 @@ type Generate<TFields> = (options: {
     apmEsClient: ApmSynthtraceEsClient;
     logsEsClient: LogsSynthtraceEsClient;
     infraEsClient: InfraSynthtraceEsClient;
-    assetsEsClient: AssetsSynthtraceEsClient;
+    assetsEsClient: EntitiesSynthtraceEsClient;
   };
 }) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
@@ -28,7 +28,7 @@ export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Pr
     apmEsClient: ApmSynthtraceEsClient;
     logsEsClient: LogsSynthtraceEsClient;
     infraEsClient: InfraSynthtraceEsClient;
-    assetsEsClient: AssetsSynthtraceEsClient;
+    assetsEsClient: EntitiesSynthtraceEsClient;
   }) => Promise<void>;
   generate: Generate<TFields>;
 }>;

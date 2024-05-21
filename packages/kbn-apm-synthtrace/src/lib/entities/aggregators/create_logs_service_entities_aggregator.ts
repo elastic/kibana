@@ -7,14 +7,14 @@
  */
 
 import { hashKeysOf, LogDocument } from '@kbn/apm-synthtrace-client';
-import { ServiceAssetDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_assets';
+import { ServiceEntityDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_entities';
 import { identity, noop } from 'lodash';
 import { createLogsAssetsAggregator } from './create_logs_assets_aggregator';
 
 const KEY_FIELDS: Array<keyof LogDocument> = ['service.name'];
 
-export function createLogsServiceAssetsAggregator() {
-  return createLogsAssetsAggregator<ServiceAssetDocument>(
+export function createLogsServiceEntitiesAggregator() {
+  return createLogsAssetsAggregator<ServiceEntityDocument>(
     {
       filter: (event) => event['input.type'] === 'logs',
       getAggregateKey: (event) => {
@@ -23,15 +23,14 @@ export function createLogsServiceAssetsAggregator() {
       },
       init: (event, firstSeen, lastSeen) => {
         return {
-          'asset.id': event['service.name']!,
-          'asset.type': 'service',
-          'asset.identifying_metadata': ['service.name'],
-          'asset.first_seen': firstSeen,
-          'asset.last_seen': lastSeen,
-          'asset.signalTypes': {
-            'asset.logs': true,
+          'entity.id': `${event['service.name']}:${event['service.environment']!}`,
+          'entity.type': 'service',
+          'entity.identity': {
+            'service: environment': event['service.environment'],
+            'service.name': event['service.name']!,
           },
-          'service.name': event['service.name']!,
+          'entity.latestTimestamp': lastSeen,
+          'entity.indexPatterns': ['logs-*'],
         };
       },
     },

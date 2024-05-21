@@ -7,14 +7,14 @@
  */
 
 import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
-import { ServiceAssetDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_assets';
+import { ServiceEntityDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_entities';
 import { identity, noop } from 'lodash';
 import { createTracesAssetsAggregator } from './create_traces_assets_aggregator';
 
 const KEY_FIELDS: Array<keyof ApmFields> = ['service.name'];
 
-export function createTracesServiceAssetsAggregator() {
-  return createTracesAssetsAggregator<ServiceAssetDocument>(
+export function createTracesServiceEntitiesAggregator() {
+  return createTracesAssetsAggregator<ServiceEntityDocument>(
     {
       filter: (event) => event['processor.event'] === 'transaction',
       getAggregateKey: (event) => {
@@ -23,18 +23,14 @@ export function createTracesServiceAssetsAggregator() {
       },
       init: (event, firstSeen, lastSeen) => {
         return {
-          'asset.id': event['service.name']!,
-          'asset.type': 'service',
-          'asset.identifying_metadata': ['service.name'],
-          'asset.first_seen': firstSeen,
-          'asset.last_seen': lastSeen,
-          'asset.signalTypes': {
-            'asset.traces': true,
+          'entity.id': `${event['service.name']}:${event['service.environment']}`,
+          'entity.type': 'service',
+          'entity.identity': {
+            'service.environment': event['service.environment'],
+            'service.name': event['service.name']!,
           },
-          'service.environment': event['service.environment'],
-          'service.name': event['service.name']!,
-          'service.node.name': event['service.node.name'],
-          'service.language.name': event['service.language.name'],
+          'entity.latestTimestamp': lastSeen,
+          'entity.indexPatterns': ['metrics-*'],
         };
       },
     },

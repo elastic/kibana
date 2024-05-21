@@ -9,7 +9,7 @@
 import { Client } from '@elastic/elasticsearch';
 import {
   ApmFields,
-  AssetDocument,
+  EntityDocument,
   ESDocumentWithOperation,
   LogDocument,
 } from '@kbn/apm-synthtrace-client';
@@ -20,33 +20,34 @@ import { getDedotTransform } from '../shared/get_dedot_transform';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import { Logger } from '../utils/create_logger';
 import { fork } from '../utils/stream_utils';
-import { createLogsServiceAssetsAggregator } from './aggregators/create_logs_service_assets_aggregator';
-import { createTracesServiceAssetsAggregator } from './aggregators/create_traces_service_assets_aggregator';
+import { createLogsServiceEntitiesAggregator } from './aggregators/create_logs_service_entities_aggregator';
+import { createTracesServiceEntitiesAggregator } from './aggregators/create_traces_service_entities_aggregator';
 
-export type AssetsSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
+export type EntitiesSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
-export class AssetsSynthtraceEsClient extends SynthtraceEsClient<AssetDocument> {
-  constructor(options: { client: Client; logger: Logger } & AssetsSynthtraceEsClientOptions) {
+export class EntitiesSynthtraceEsClient extends SynthtraceEsClient<EntityDocument> {
+  constructor(options: { client: Client; logger: Logger } & EntitiesSynthtraceEsClientOptions) {
     super({
       ...options,
-      pipeline: assetsPipeline(),
+      pipeline: entitiesPipeline(),
     });
-    this.indices = ['assets'];
+    this.indices = ['entities'];
   }
 }
 
-function assetsPipeline() {
+function entitiesPipeline() {
   return (base: Readable) => {
     const aggregators = [
-      createTracesServiceAssetsAggregator(),
-      createLogsServiceAssetsAggregator(),
+      createTracesServiceEntitiesAggregator(),
+      // createLogsServiceAssetsAggregator(),
     ];
+
     return pipeline(
       base,
       getSerializeTransform(),
       fork(new PassThrough({ objectMode: true }), ...aggregators),
-      getAssetsFilterTransform(),
-      getMergeAssetsTransform(),
+      getEntitiesFilterTransform(),
+      getMergeEntitesTransform(),
       getRoutingTransform(),
       getDedotTransform(),
       (err: unknown) => {
@@ -58,15 +59,15 @@ function assetsPipeline() {
   };
 }
 
-function getAssetsFilterTransform() {
+function getEntitiesFilterTransform() {
   return new Transform({
     objectMode: true,
     transform(
-      document: ESDocumentWithOperation<AssetDocument | ApmFields | LogDocument>,
+      document: ESDocumentWithOperation<EntityDocument | ApmFields | LogDocument>,
       encoding,
       callback
     ) {
-      if ('asset.id' in document) {
+      if ('entity.id' in document) {
         callback(null, document);
       } else {
         callback();
@@ -75,20 +76,20 @@ function getAssetsFilterTransform() {
   });
 }
 
-function getMergeAssetsTransform() {
-  const mergedDocuments: Record<string, AssetDocument> = {};
+function getMergeEntitesTransform() {
+  const mergedDocuments: Record<string, EntityDocument> = {};
   return new Transform({
     objectMode: true,
-    transform(nextDocument: ESDocumentWithOperation<AssetDocument>, encoding, callback) {
-      const assetId = nextDocument['asset.id'];
-      if (!mergedDocuments[assetId]) {
-        mergedDocuments[assetId] = { ...nextDocument };
+    transform(nextDocument: ESDocumentWithOperation<EntityDocument>, encoding, callback) {
+      const entityId = nextDocument['entity.id'];
+      if (!mergedDocuments[entityId]) {
+        mergedDocuments[entityId] = { ...nextDocument };
       } else {
-        const mergedDocument = mergedDocuments[assetId];
-        mergedDocument['asset.signalTypes'] = merge(
-          mergedDocument['asset.signalTypes'],
-          nextDocument['asset.signalTypes']
-        );
+        const mergedDocument = mergedDocuments[entityId];
+        // mergedDocument['asset.signalTypes'] = merge(
+        //   mergedDocument['asset.signalTypes'],
+        //   nextDocument['asset.signalTypes']
+        // );
       }
       callback();
     },
@@ -102,9 +103,9 @@ function getMergeAssetsTransform() {
 function getRoutingTransform() {
   return new Transform({
     objectMode: true,
-    transform(document: ESDocumentWithOperation<AssetDocument>, encoding, callback) {
-      if ('asset.type' in document) {
-        document._index = `assets`;
+    transform(document: ESDocumentWithOperation<EntityDocument>, encoding, callback) {
+      if ('entity.id' in document) {
+        document._index = `entities`;
       } else {
         throw new Error(`Cannot determine index for event ${JSON.stringify(document)}`);
       }
