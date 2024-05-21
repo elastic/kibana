@@ -26,6 +26,7 @@ export const ViewCodeAction: React.FC = () => {
         fill
         onClick={() => setShowFlyout(true)}
         disabled={!selectedIndices || selectedIndices?.length === 0}
+        data-test-subj="viewCodeActionButton"
       >
         <FormattedMessage
           id="xpack.searchPlayground.viewCode.actionButtonLabel"
