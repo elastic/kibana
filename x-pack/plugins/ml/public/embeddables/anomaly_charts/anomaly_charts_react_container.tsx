@@ -34,7 +34,6 @@ import type { MlLocatorParams } from '../../../common/types/locator';
 import { useAnomalyChartsData } from './use_anomaly_charts_data';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
-const FETCH_RESULTS_DEBOUNCE_MS = 500;
 
 export interface EmbeddableAnomalyChartsContainerProps
   extends Partial<AnomalyChartsEmbeddableCustomInput> {

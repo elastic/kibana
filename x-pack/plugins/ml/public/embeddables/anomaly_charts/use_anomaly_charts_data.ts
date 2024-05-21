@@ -26,6 +26,8 @@ import {
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 import type { MlStartDependencies } from '../../plugin';
 
+const FETCH_RESULTS_DEBOUNCE_MS = 500;
+
 export function useAnomalyChartsData(
   api: AnomalyChartsApi,
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
