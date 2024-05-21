@@ -363,7 +363,6 @@ export class SearchSource {
         const searchRequest = this.flatten();
         this.history = [searchRequest];
         if (searchRequest.index) {
-          // todo
           options.indexPattern = searchRequest.index;
         }
 
