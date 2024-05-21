@@ -13,6 +13,7 @@ import {
 import {
   getBaseRuleParams,
   getEqlRuleParams,
+  getEsqlRuleParams,
   getMlRuleParams,
   getNewTermsRuleParams,
   getQueryRuleParams,
@@ -216,6 +217,27 @@ describe('rule_converters', () => {
       const rule = getThresholdRuleParams();
       expect(() => patchTypeSpecificSnakeToCamel(patchParams, rule)).toThrowError(
         'threshold.value: Expected number, received string'
+      );
+    });
+
+    test('should accept ES|QL alerts suppression params', () => {
+      const patchParams = {
+        alert_suppression: {
+          group_by: ['agent.name'],
+          duration: { value: 4, unit: 'h' as const },
+          missing_fields_strategy: 'doNotSuppress' as const,
+        },
+      };
+      const rule = getEsqlRuleParams();
+      const patchedParams = patchTypeSpecificSnakeToCamel(patchParams, rule);
+      expect(patchedParams).toEqual(
+        expect.objectContaining({
+          alertSuppression: {
+            groupBy: ['agent.name'],
+            missingFieldsStrategy: 'doNotSuppress',
+            duration: { value: 4, unit: 'h' },
+          },
+        })
       );
     });
 

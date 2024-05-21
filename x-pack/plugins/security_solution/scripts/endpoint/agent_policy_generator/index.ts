@@ -59,7 +59,6 @@ const agentPolicyGenerator: RunFn = async ({ flags, log }) => {
     username: flags.username as string,
     password: flags.password as string,
     apiKey: flags.apikey as string,
-    noCertForSsl: true,
     log,
   });
 
