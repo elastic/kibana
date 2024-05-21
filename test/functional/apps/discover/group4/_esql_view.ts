@@ -257,7 +257,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('inspector', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183847
+    describe.skip('inspector', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
