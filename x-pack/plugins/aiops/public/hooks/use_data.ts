@@ -119,11 +119,11 @@ export const useData = (
           time: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
         });
-        setLastRefresh(Date.now());
         if (typeof done === 'function') {
           done();
         }
       }
+      setLastRefresh(Date.now());
     });
 
     // This listens just for an initial update of the timefilter to be switched on.
