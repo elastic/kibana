@@ -72,23 +72,23 @@ export async function setupFleet(
 
   try {
     // check if fleet setup is already started
-    const settings = await settingsService.getSettingsOrUndefined(soClient);
+    // const settings = await settingsService.getSettingsOrUndefined(soClient);
 
-    if (settings && settings.fleet_setup_status === 'in_progress') {
-      logger.info('Fleet setup already in progress, aborting');
-      return {
-        isInitialized: false,
-        nonFatalErrors: [],
-      };
-    }
+    // if (settings && settings.fleet_setup_status === 'in_progress') {
+    //   logger.info('Fleet setup already in progress, aborting');
+    //   return {
+    //     isInitialized: false,
+    //     nonFatalErrors: [],
+    //   };
+    // }
 
-    try {
-      await settingsService.saveSettings(soClient, {
-        fleet_setup_status: 'in_progress',
-      });
-    } catch (error) {
-      logger.warn(`Error setting fleet setup status to in_progress: ${error}`);
-    }
+    // try {
+    //   await settingsService.saveSettings(soClient, {
+    //     fleet_setup_status: 'in_progress',
+    //   });
+    // } catch (error) {
+    //   logger.warn(`Error setting fleet setup status to in_progress: ${error}`);
+    // }
 
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {
@@ -97,13 +97,13 @@ export async function setupFleet(
     throw error;
   } finally {
     t.end();
-    try {
-      await settingsService.saveSettings(soClient, {
-        fleet_setup_status: 'completed',
-      });
-    } catch (error) {
-      logger.warn(`Error setting fleet setup status to completed: ${error}`);
-    }
+    // try {
+    //   await settingsService.saveSettings(soClient, {
+    //     fleet_setup_status: 'completed',
+    //   });
+    // } catch (error) {
+    //   logger.warn(`Error setting fleet setup status to completed: ${error}`);
+    // }
   }
 }
 
