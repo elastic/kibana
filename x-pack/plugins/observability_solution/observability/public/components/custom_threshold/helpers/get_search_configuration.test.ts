@@ -39,7 +39,7 @@ describe('getSearchConfiguration()', () => {
     expect(onWarning).toHaveBeenCalledTimes(1);
   });
 
-  it('should return filter without $state field', () => {
+  it('should return filter without $state field WITHOUT query', () => {
     const filter = [
       {
         meta: {
@@ -69,5 +69,41 @@ describe('getSearchConfiguration()', () => {
       filter: filter.map((aFilter) => ({ meta: aFilter.meta, query: aFilter.query })),
     });
     expect(onWarning).toHaveBeenCalledTimes(0);
+  });
+
+  it('should return filter without $state field WITH esql query', () => {
+    const filter = [
+      {
+        meta: {
+          alias: null,
+          disabled: false,
+          field: 'service.name',
+          index: 'dataset-logs-*-*',
+          key: 'service.name',
+          negate: false,
+          params: {
+            query: 'synth-node-0',
+          },
+          type: 'phrase',
+        },
+        query: {
+          match_phrase: {
+            'service.name': 'synth-node-0',
+          },
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+      },
+    ];
+    const query = {
+      esql: 'random esql',
+    };
+
+    expect(getSearchConfiguration({ filter, query }, onWarning)).toEqual({
+      filter: filter.map((aFilter) => ({ meta: aFilter.meta, query: aFilter.query })),
+      query: defaultQuery,
+    });
+    expect(onWarning).toHaveBeenCalledTimes(1);
   });
 });
