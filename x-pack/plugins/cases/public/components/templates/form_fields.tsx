@@ -14,20 +14,29 @@ import * as i18n from './translations';
 import { Connector } from './connector';
 import type { ActionConnector } from '../../containers/configure/types';
 import type { CasesConfigurationUI } from '../../containers/types';
+import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
-  isEditMode?: boolean;
   connectors: ActionConnector[];
-  configurationConnector: CasesConfigurationUI['connector'];
+  configurationConnector: CasesConfigurationUI['connector'] | null;
+  configurationCustomFields: CasesConfigurationUI['customFields'];
 }
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   isSubmitting = false,
-  isEditMode,
   connectors,
   configurationConnector,
+  configurationCustomFields,
 }) => {
+  const { owner } = useCasesContext();
+  const draftStorageKey = getMarkdownEditorStorageKey({
+    appId: owner[0],
+    caseId: 'createCaseTemplate',
+    commentId: 'description',
+  });
+
   const firstStep = useMemo(
     () => ({
       title: i18n.TEMPLATE_FIELDS,
@@ -66,9 +75,14 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   const secondStep = useMemo(
     () => ({
       title: i18n.CASE_FIELDS,
-      children: <CaseFormFields />,
+      children: (
+        <CaseFormFields
+          configurationCustomFields={configurationCustomFields}
+          draftStorageKey={draftStorageKey}
+        />
+      ),
     }),
-    []
+    [configurationCustomFields, draftStorageKey]
   );
 
   const thirdStep = useMemo(

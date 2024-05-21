@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
+import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -24,7 +24,7 @@ interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
   path?: string;
-  configurationConnector: CasesConfigurationUI['connector'];
+  configurationConnector: CasesConfigurationUI['connector'] | null;
 }
 
 const ConnectorComponent: React.FC<Props> = ({
@@ -39,12 +39,6 @@ const ConnectorComponent: React.FC<Props> = ({
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
   const hasReadPermissions = permissions.connectors && actions.read;
-
-  const defaultConnectorId = useMemo(() => {
-    return connectors.some((c) => c.id === configurationConnector.id)
-      ? configurationConnector.id
-      : 'none';
-  }, [configurationConnector.id, connectors]);
 
   const connectorIdConfig = getConnectorsFormValidators({
     config: schema.caseFields?.connectorId as FieldConfig,
@@ -66,7 +60,7 @@ const ConnectorComponent: React.FC<Props> = ({
           path={path ?? 'connectorId'}
           config={connectorIdConfig}
           component={ConnectorSelector}
-          defaultValue={defaultConnectorId}
+          defaultValue={configurationConnector !== null ? configurationConnector.id : ''}
           componentProps={{
             connectors,
             dataTestSubj: 'caseConnectors',

@@ -25,7 +25,8 @@ interface Props {
   onChange: (state: TemplateFormState) => void;
   initialValue: TemplateFormProps | null;
   connectors: ActionConnector[];
-  configurationConnector: CasesConfigurationUI['connector'];
+  configurationConnector: CasesConfigurationUI['connector'] | null;
+  configurationCustomFields: CasesConfigurationUI['customFields'];
 }
 
 const FormComponent: React.FC<Props> = ({
@@ -33,6 +34,7 @@ const FormComponent: React.FC<Props> = ({
   initialValue,
   connectors,
   configurationConnector,
+  configurationCustomFields,
 }) => {
   const keyDefaultValue = useMemo(() => uuidv4(), []);
 
@@ -60,9 +62,9 @@ const FormComponent: React.FC<Props> = ({
     <Form form={form}>
       <FormFields
         isSubmitting={isSubmitting}
-        isEditMode={Boolean(initialValue)}
         connectors={connectors}
         configurationConnector={configurationConnector}
+        configurationCustomFields={configurationCustomFields}
       />
     </Form>
   );

@@ -9,37 +9,26 @@ import React, { useMemo } from 'react';
 import { sortBy } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { CasesConfigurationUI } from '../../../common/ui';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import * as i18n from './translations';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { useGetAllCaseConfigurations } from '../../containers/configure/use_get_all_case_configurations';
-import { getConfigurationByOwner } from '../../containers/configure/utils';
 
 interface Props {
   isLoading: boolean;
+  path?: string;
+  setAsOptional?: boolean;
+  configurationCustomFields: CasesConfigurationUI['customFields'];
 }
 
-const CustomFieldsComponent: React.FC<Props> = ({ isLoading }) => {
-  const { owner } = useCasesContext();
-  const [{ selectedOwner }] = useFormData<{ selectedOwner: string }>({ watch: ['selectedOwner'] });
-  const { data: configurations, isLoading: isLoadingCaseConfiguration } =
-    useGetAllCaseConfigurations();
-
-  const configurationOwner: string | undefined = selectedOwner ? selectedOwner : owner[0];
-  const customFieldsConfiguration = useMemo(
-    () =>
-      getConfigurationByOwner({
-        configurations,
-        owner: configurationOwner,
-      }).customFields ?? [],
-    [configurations, configurationOwner]
-  );
-
+const CustomFieldsComponent: React.FC<Props> = ({
+  isLoading,
+  path,
+  setAsOptional,
+  configurationCustomFields,
+}) => {
   const sortedCustomFields = useMemo(
-    () => sortCustomFieldsByLabel(customFieldsConfiguration),
-    [customFieldsConfiguration]
+    () => sortCustomFieldsByLabel(configurationCustomFields),
+    [configurationCustomFields]
   );
 
   const customFieldsComponents = sortedCustomFields.map(
@@ -51,15 +40,17 @@ const CustomFieldsComponent: React.FC<Props> = ({ isLoading }) => {
 
       return (
         <CreateComponent
-          isLoading={isLoading || isLoadingCaseConfiguration}
+          isLoading={isLoading}
           customFieldConfiguration={customField}
           key={customField.key}
+          path={path}
+          setAsOptional={setAsOptional}
         />
       );
     }
   );
 
-  if (!customFieldsConfiguration.length) {
+  if (!configurationCustomFields.length) {
     return null;
   }
 
@@ -69,7 +60,7 @@ const CustomFieldsComponent: React.FC<Props> = ({ isLoading }) => {
         <h3>{i18n.ADDITIONAL_FIELDS}</h3>
       </EuiText>
       <EuiSpacer size="xs" />
-      <EuiFlexItem data-test-subj="create-case-custom-fields">{customFieldsComponents}</EuiFlexItem>
+      <EuiFlexItem data-test-subj="caseCustomFields">{customFieldsComponents}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

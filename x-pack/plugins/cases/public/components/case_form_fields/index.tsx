@@ -7,9 +7,7 @@
 
 import React, { memo } from 'react';
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { EuiThemeComputed } from '@elastic/eui';
-import { logicalCSS, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup } from '@elastic/eui';
 import { Title } from '../create/title';
 import { Tags } from '../create/tags';
 import { Category } from '../create/category';
@@ -17,57 +15,51 @@ import { Severity } from '../create/severity';
 import { Description } from '../create/description';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { Assignees } from '../create/assignees';
-import { CustomFields } from '../create/custom_fields';
+import { CustomFields } from './custom_fields';
 import { SyncAlertsToggle } from '../create/sync_alerts_toggle';
+import type { CasesConfigurationUI } from '../../containers/types';
 
-const containerCss = (euiTheme: EuiThemeComputed<{}>, big?: boolean) =>
-  big
-    ? css`
-        ${logicalCSS('margin-top', euiTheme.size.xl)};
-      `
-    : css`
-        ${logicalCSS('margin-top', euiTheme.size.base)};
-      `;
+interface Props {
+  configurationCustomFields: CasesConfigurationUI['customFields'];
+  draftStorageKey: string;
+}
 
-const CaseFormFieldsComponent: React.FC = () => {
+const CaseFormFieldsComponent: React.FC<Props> = ({
+  configurationCustomFields,
+  draftStorageKey,
+}) => {
   const { isSubmitting } = useFormContext();
   const { caseAssignmentAuthorized, isSyncAlertsEnabled } = useCasesFeatures();
-  const { euiTheme } = useEuiTheme();
 
   return (
-    <>
+    <EuiFlexGroup data-test-subj="case-form-fields" direction="column">
       <Title isLoading={isSubmitting} path="caseFields.title" />
       {caseAssignmentAuthorized ? (
-        <div css={containerCss(euiTheme)}>
-          <Assignees isLoading={isSubmitting} path="caseFields.assignees" />
-        </div>
+        <Assignees isLoading={isSubmitting} path="caseFields.assignees" />
       ) : null}
-      <div css={containerCss(euiTheme)}>
-        <Tags isLoading={isSubmitting} path="caseFields.tags" />
-      </div>
-      <div css={containerCss(euiTheme)}>
-        <Category isLoading={isSubmitting} path="caseFields.category" />
-      </div>
-      <div css={containerCss(euiTheme)}>
-        <Severity isLoading={isSubmitting} path="caseFields.severity" />
-      </div>
-      <div css={containerCss(euiTheme, true)}>
-        <Description isLoading={isSubmitting} draftStorageKey={''} path="caseFields.description" />
-      </div>
+      <Tags isLoading={isSubmitting} path="caseFields.tags" />
+
+      <Category isLoading={isSubmitting} path="caseFields.category" />
+
+      <Severity isLoading={isSubmitting} path="caseFields.severity" />
+
+      <Description
+        isLoading={isSubmitting}
+        path="caseFields.description"
+        draftStorageKey={draftStorageKey}
+      />
+
       {isSyncAlertsEnabled ? (
-        <div>
-          <SyncAlertsToggle isLoading={isSubmitting} path="caseFields.syncAlerts" />
-        </div>
+        <SyncAlertsToggle isLoading={isSubmitting} path="caseFields.syncAlerts" />
       ) : null}
-      <div css={containerCss(euiTheme)}>
-        <CustomFields
-          isLoading={isSubmitting}
-          path="caseFields.customFields"
-          setAsOptional={true}
-        />
-      </div>
-      <div />
-    </>
+
+      <CustomFields
+        isLoading={isSubmitting}
+        path="caseFields.customFields"
+        setAsOptional={true}
+        configurationCustomFields={configurationCustomFields}
+      />
+    </EuiFlexGroup>
   );
 };
 

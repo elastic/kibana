@@ -425,6 +425,7 @@ describe('ConfigureCases', () => {
         },
         closureType: 'close-by-user',
         customFields: [],
+        templates: [],
         id: '',
         version: '',
       });
@@ -521,6 +522,7 @@ describe('ConfigureCases', () => {
         },
         closureType: 'close-by-pushing',
         customFields: [],
+        templates: [],
         id: '',
         version: '',
       });
@@ -706,6 +708,7 @@ describe('ConfigureCases', () => {
             { ...customFieldsConfigurationMock[2] },
             { ...customFieldsConfigurationMock[3] },
           ],
+          templates: [],
           id: '',
           version: '',
         });
@@ -824,10 +827,29 @@ describe('ConfigureCases', () => {
     });
   });
 
-  describe('rendering with license limitations', () => {
+  describe('templates', () => {
     let appMockRender: AppMockRenderer;
     let persistCaseConfigure: jest.Mock;
 
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+      persistCaseConfigure = jest.fn();
+      usePersistConfigurationMock.mockImplementation(() => ({
+        ...usePersistConfigurationMockResponse,
+        mutate: persistCaseConfigure,
+      }));
+    });
+
+    it('should render template section', async () => {
+      appMockRender.render(<ConfigureCases />);
+      expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
+    });
+  });
+
+  describe('rendering with license limitations', () => {
+    let appMockRender: AppMockRenderer;
+    let persistCaseConfigure: jest.Mock;
     beforeEach(() => {
       // Default setup
       jest.clearAllMocks();

@@ -20,10 +20,8 @@ import {
 import type { CustomFieldFormState } from './form';
 import { CustomFieldsForm } from './form';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
-import { CustomFieldTypes } from '../../../common/types/domain';
 
 import * as i18n from './translations';
-import { isEmpty } from 'lodash';
 
 export interface CustomFieldFlyoutProps {
   disabled: boolean;

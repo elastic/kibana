@@ -38,8 +38,9 @@ export interface FlyoutProps {
   onSaveField: (data: CustomFieldConfiguration | TemplateFormProps | null) => void;
   data: CustomFieldConfiguration | TemplateConfiguration | null;
   type: 'customField' | 'template';
-  connectors: ActionConnector[];
-  configurationConnector: CasesConfigurationUI['connector'];
+  connectors?: ActionConnector[];
+  configurationConnector?: CasesConfigurationUI['connector'];
+  configurationCustomFields?: CasesConfigurationUI['customFields'];
 }
 
 const FlyoutComponent: React.FC<FlyoutProps> = ({
@@ -51,6 +52,7 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
   type,
   connectors,
   configurationConnector,
+  configurationCustomFields,
 }) => {
   const dataTestSubj = `${type}Flyout`;
 
@@ -92,8 +94,9 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
           <TemplateForm
             onChange={setFormState}
             initialValue={initialValue as TemplateFormProps}
-            connectors={connectors}
-            configurationConnector={configurationConnector}
+            connectors={connectors ?? []}
+            configurationConnector={configurationConnector ?? null}
+            configurationCustomFields={configurationCustomFields ?? []}
           />
         ) : null}
       </EuiFlyoutBody>

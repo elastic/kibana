@@ -14,13 +14,14 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { ConnectorTypes } from '../../../common';
 import { casesQueriesKeys } from '../constants';
+import { customFieldsConfigurationMock, templatesConfigurationMock } from '../mock';
 
 jest.mock('./api');
 jest.mock('../../common/lib/kibana');
 
 const useToastMock = useToasts as jest.Mock;
 
-describe('useCreateAttachments', () => {
+describe('usePersistConfiguration', () => {
   const addError = jest.fn();
   const addSuccess = jest.fn();
 
@@ -98,6 +99,34 @@ describe('useCreateAttachments', () => {
     });
   });
 
+  it('calls postCaseConfigure with correct data', async () => {
+    const spyPost = jest.spyOn(api, 'postCaseConfigure');
+
+    const { waitForNextUpdate, result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    const newRequest = {
+      ...request,
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
+    };
+
+    act(() => {
+      result.current.mutate({ ...newRequest, id: 'test-id' });
+    });
+
+    await waitForNextUpdate();
+
+    expect(spyPost).toHaveBeenCalledWith({
+      closure_type: 'close-by-user',
+      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
+      owner: 'securitySolution',
+    });
+  });
+
   it('calls patchCaseConfigure when the id and the version are not empty', async () => {
     const spyPost = jest.spyOn(api, 'postCaseConfigure');
     const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
@@ -118,6 +147,34 @@ describe('useCreateAttachments', () => {
       connector: { fields: null, id: 'none', name: 'none', type: '.none' },
       customFields: [],
       templates: [],
+      version: 'test-version',
+    });
+  });
+
+  it('calls patchCaseConfigure with correct data', async () => {
+    const spyPatch = jest.spyOn(api, 'patchCaseConfigure');
+
+    const { waitForNextUpdate, result } = renderHook(() => usePersistConfiguration(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    const newRequest = {
+      ...request,
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
+    };
+
+    act(() => {
+      result.current.mutate({ ...newRequest, id: 'test-id', version: 'test-version' });
+    });
+
+    await waitForNextUpdate();
+
+    expect(spyPatch).toHaveBeenCalledWith('test-id', {
+      closure_type: 'close-by-user',
+      connector: { fields: null, id: 'none', name: 'none', type: '.none' },
+      customFields: customFieldsConfigurationMock,
+      templates: templatesConfigurationMock,
       version: 'test-version',
     });
   });

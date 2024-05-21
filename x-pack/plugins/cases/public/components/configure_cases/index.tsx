@@ -414,6 +414,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
         data={flyoutType === 'template' ? templateToEdit : customFieldToEdit}
         connectors={connectors ?? []}
         configurationConnector={connector}
+        configurationCustomFields={customFields}
         onCloseFlyout={onCloseAddFieldFlyout}
         onSaveField={onFlyoutSave}
       />

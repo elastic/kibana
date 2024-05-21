@@ -81,7 +81,7 @@ const CategoryFormFieldComponent: React.FC<Props> = ({
             label={CATEGORY}
             error={errorMessage}
             isInvalid={isInvalid}
-            data-test-subj="case-create-form-category"
+            data-test-subj="caseCategory"
             fullWidth
           >
             <CategoryComponent

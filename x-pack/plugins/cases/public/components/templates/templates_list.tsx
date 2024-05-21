@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import type { CasesConfigurationUITemplate } from '../../../common/ui';
 
 export interface Props {
   templates: CasesConfigurationUITemplate[];
-  // onDeleteCustomField: (key: string) => void;
-  // onEditCustomField: (key: string) => void;
 }
 
 const TemplatesListComponent: React.FC<Props> = (props) => {
   const { templates } = props;
-  const [selectedItem, setSelectedItem] = useState<CasesConfigurationUITemplate | null>(null);
 
   return templates.length ? (
     <>
@@ -41,41 +38,12 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
-                  {/* <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj={`${customField.key}-custom-field-edit`}
-                          aria-label={`${customField.key}-custom-field-edit`}
-                          iconType="pencil"
-                          color="primary"
-                          onClick={() => onEditCustomField(customField.key)}
-                        />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj={`${customField.key}-custom-field-delete`}
-                          aria-label={`${customField.key}-custom-field-delete`}
-                          iconType="minusInCircle"
-                          color="danger"
-                          onClick={() => setSelectedItem(customField)}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem> */}
                 </EuiFlexGroup>
               </EuiPanel>
               <EuiSpacer size="s" />
             </React.Fragment>
           ))}
         </EuiFlexItem>
-        {/* {showModal && selectedItem ? (
-          <DeleteConfirmationModal
-            label={selectedItem.label}
-            onCancel={onCancel}
-            onConfirm={onConfirm}
-          />
-        ) : null} */}
       </EuiFlexGroup>
     </>
   ) : null;
