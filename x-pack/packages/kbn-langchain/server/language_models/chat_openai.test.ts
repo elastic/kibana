@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type OpenAI from 'openai';
+import { Stream } from 'openai/streaming';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientChatOpenAI, ActionsClientChatOpenAIParams } from './chat_openai';
 import { mockActionResponse, mockChatCompletion } from './mocks';
-import type OpenAI from 'openai';
-import { Stream } from 'openai/streaming';
 
 const connectorId = 'mock-connector-id';
 
@@ -69,7 +69,6 @@ const defaultArgs = {
   timeout: 999999,
   temperature: 0.2,
 };
-jest.mock('../..');
 
 describe('ActionsClientChatOpenAI', () => {
   beforeEach(() => {

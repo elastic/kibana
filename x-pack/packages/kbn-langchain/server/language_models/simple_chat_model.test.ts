@@ -93,7 +93,7 @@ const defaultArgs = {
   request: mockRequest,
   streaming: false,
 };
-jest.mock('../..');
+jest.mock('../utils/bedrock');
 
 describe('ActionsClientSimpleChatModel', () => {
   beforeEach(() => {
