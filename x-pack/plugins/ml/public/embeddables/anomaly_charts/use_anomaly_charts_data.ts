@@ -140,7 +140,6 @@ export function useAnomalyChartsData(
           setError(null);
           setChartsData(results);
           setIsLoading(false);
-          renderCallbacks.onLoading(false);
           renderCallbacks.onRenderComplete();
         }
       });

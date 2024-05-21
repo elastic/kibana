@@ -93,7 +93,7 @@ export const initializeAnomalyChartsControls = (
       query$,
       filters$,
       refresh$,
-      dataLoading$,
+      dataLoading: dataLoading$,
       setInterval,
       onRenderComplete,
       onLoading,

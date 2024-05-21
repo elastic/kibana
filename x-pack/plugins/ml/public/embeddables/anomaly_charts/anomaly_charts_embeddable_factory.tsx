@@ -24,6 +24,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
+import { css } from '@emotion/react';
 import type { MlPluginStart, MlStartDependencies } from '../../plugin';
 import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from '..';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
@@ -201,17 +202,26 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           return (
             <KibanaRenderContextProvider {...coreStartServices}>
               <KibanaContextProvider services={contextServices}>
-                <LazyEmbeddableAnomalyChartsContainer
-                  id={uuid}
-                  severityThreshold={initialState.severityThreshold}
-                  api={api}
-                  services={anomalyChartsDependencies}
-                  onLoading={onLoading}
-                  onRenderComplete={onRenderComplete}
-                  onError={onError}
-                  timeRange$={appliedTimeRange$}
-                  lastReloadRequestTime={lastReloadRequestTime}
-                />
+                <div
+                  css={css`
+                    width: 100%;
+                    padding: 8px;
+                  `}
+                  data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
+                  data-shared-item=""
+                >
+                  <LazyEmbeddableAnomalyChartsContainer
+                    id={uuid}
+                    severityThreshold={initialState.severityThreshold}
+                    api={api}
+                    services={anomalyChartsDependencies}
+                    onLoading={onLoading}
+                    onRenderComplete={onRenderComplete}
+                    onError={onError}
+                    timeRange$={appliedTimeRange$}
+                    lastReloadRequestTime={lastReloadRequestTime}
+                  />
+                </div>
               </KibanaContextProvider>
             </KibanaRenderContextProvider>
           );
