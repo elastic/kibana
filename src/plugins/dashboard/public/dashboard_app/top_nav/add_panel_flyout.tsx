@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import {
-  render as ReactDOMRender,
-  unmountComponentAtNode as ReactDOMUnmountComponentAtNode,
-} from 'react-dom';
 import React, { useEffect, useState, useRef } from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   EuiButtonEmpty,
   type EuiContextMenuPanelDescriptor,
@@ -44,15 +41,13 @@ export const gh = ({ overlays }: Pick<DashboardServices, 'overlays'>) =>
     // eslint-disable-next-line prefer-const
     let flyoutRef: ReturnType<DashboardServices['overlays']['openFlyout']>;
 
-    const closeFlyout = () => flyoutRef.close();
-
-    const mount = (element: HTMLElement) => {
-      const reactElement = <AddPanelFlyout close={closeFlyout} getPanels={getPanels} />;
-
-      ReactDOMRender(reactElement, element);
-
-      return () => ReactDOMUnmountComponentAtNode(element);
-    };
+    const mount = toMountPoint(
+      React.createElement(function () {
+        const closeFlyout = () => flyoutRef.close();
+        return <AddPanelFlyout close={closeFlyout} getPanels={getPanels} />;
+      }),
+      {}
+    );
 
     flyoutRef = overlays.openFlyout(mount, { size: 'm', 'aria-labelledby': 'add-panels-flyout' });
 
