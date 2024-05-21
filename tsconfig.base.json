@@ -776,6 +776,8 @@
       "@kbn/encrypted-saved-objects-plugin/*": ["x-pack/plugins/encrypted_saved_objects/*"],
       "@kbn/enterprise-search-plugin": ["x-pack/plugins/enterprise_search"],
       "@kbn/enterprise-search-plugin/*": ["x-pack/plugins/enterprise_search/*"],
+      "@kbn/entities-schema": ["x-pack/packages/kbn-entities-schema"],
+      "@kbn/entities-schema/*": ["x-pack/packages/kbn-entities-schema/*"],
       "@kbn/error-boundary-example-plugin": ["examples/error_boundary"],
       "@kbn/error-boundary-example-plugin/*": ["examples/error_boundary/*"],
       "@kbn/es": ["packages/kbn-es"],
