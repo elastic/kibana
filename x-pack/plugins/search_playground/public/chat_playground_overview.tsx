@@ -17,11 +17,7 @@ import { PlaygroundHeaderDocs } from './components/playground_header_docs';
 
 export const ChatPlaygroundOverview: React.FC = () => {
   return (
-    <PlaygroundProvider
-      defaultValues={{
-        indices: [],
-      }}
-    >
+    <PlaygroundProvider>
       <EuiPageTemplate
         offset={0}
         restrictWidth={false}
