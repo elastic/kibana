@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { useValues } from 'kea';
+import { useActions, useValues } from 'kea';
 
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
@@ -24,9 +24,8 @@ import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { EmptyPromptPage } from './empty_prompt_page';
+import { InferenceEndpointsLogic } from './inference_endpoints_logic';
 import { TabularPage } from './tabular_page';
-
-const inferenceEndpoints = [];
 
 const inferenceEndpointsBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.inferenceEndpoints.breadcrumb', {
@@ -43,6 +42,8 @@ const addEndpointLabel = i18n.translate(
 
 export const InferenceEndpoints: React.FC = () => {
   const { ml } = useValues(KibanaLogic);
+  const { fetchInferenceEndpoints } = useActions(InferenceEndpointsLogic);
+  const { inferenceEndpoints } = useValues(InferenceEndpointsLogic);
   const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const [inferenceAddError, setInferenceAddError] = useState<string | undefined>(undefined);
   const [isCreateInferenceApiLoading, setIsCreateInferenceApiLoading] = useState(false);
@@ -79,6 +80,10 @@ export const InferenceEndpoints: React.FC = () => {
     setInferenceAddError(undefined);
     setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
   }, [isInferenceFlyoutVisible]);
+
+  useEffect(() => {
+    fetchInferenceEndpoints();
+  }, []);
 
   useEffect(() => {
     const fetchAvailableTrainedModels = async () => {
