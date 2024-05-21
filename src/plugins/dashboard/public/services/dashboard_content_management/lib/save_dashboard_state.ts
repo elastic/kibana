@@ -186,19 +186,33 @@ export const saveDashboardState = async ({
    * Save the saved object using the content management
    */
   const idToSaveTo = saveOptions.saveAsCopy ? undefined : lastSavedId;
+
   try {
-    const result = await contentManagement.client.create<
-      DashboardCrudTypes['CreateIn'],
-      DashboardCrudTypes['CreateOut']
-    >({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      data: attributes,
-      options: {
-        id: idToSaveTo,
-        references: allReferences,
-        overwrite: true,
-      },
-    });
+    const result = idToSaveTo
+      ? await contentManagement.client.update<
+          DashboardCrudTypes['UpdateIn'],
+          DashboardCrudTypes['UpdateOut']
+        >({
+          id: idToSaveTo,
+          contentTypeId: DASHBOARD_CONTENT_ID,
+          data: attributes,
+          options: {
+            references: allReferences,
+            /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
+            mergeAttributes: false,
+          },
+        })
+      : await contentManagement.client.create<
+          DashboardCrudTypes['CreateIn'],
+          DashboardCrudTypes['CreateOut']
+        >({
+          contentTypeId: DASHBOARD_CONTENT_ID,
+          data: attributes,
+          options: {
+            references: allReferences,
+          },
+        });
+
     const newId = result.item.id;
 
     if (newId) {
