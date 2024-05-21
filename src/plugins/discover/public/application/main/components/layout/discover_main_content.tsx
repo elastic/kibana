@@ -158,7 +158,7 @@ export const DiscoverMainContent = ({
             <PatternAnalysisTab
               dataView={dataView}
               stateContainer={stateContainer}
-              onAddFilter={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+              switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
               trackUiMetric={trackUiMetric}
               renderViewModeToggle={renderViewModeToggle}
             />

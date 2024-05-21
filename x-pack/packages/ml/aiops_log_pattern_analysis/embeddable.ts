@@ -15,9 +15,6 @@ export interface EmbeddablePatternAnalysisInput<T = Query | AggregateQuery> {
   query?: T;
   filters?: Filter[];
   embeddingOrigin?: string;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  onAddFilter?: () => void;
+  switchToDocumentView?: () => void;
   lastReloadRequestTime?: number;
 }

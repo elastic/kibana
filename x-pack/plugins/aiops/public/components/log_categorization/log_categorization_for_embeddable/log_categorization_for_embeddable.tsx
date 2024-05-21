@@ -163,7 +163,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
 
   const onAddFilter = useCallback(
     (values: Filter, alias?: string) => {
-      if (input.onAddFilter === undefined) {
+      if (input.switchToDocumentView === undefined) {
         return;
       }
 
@@ -172,7 +172,7 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         filter.meta.alias = alias;
       }
       filter.query = values.query;
-      input.onAddFilter();
+      input.switchToDocumentView();
       filterManager.addFilters([filter]);
     },
     [dataView.id, filterManager, input]

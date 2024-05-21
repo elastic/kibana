@@ -49,7 +49,7 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
     () => ({
       input: Object.assign(
         {},
-        pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'onAddFilter']),
+        pick(props, ['dataView', 'savedSearch', 'query', 'filters', 'switchToDocumentView']),
         { lastReloadRequestTime }
       ),
       renderViewModeToggle: props.renderViewModeToggle,
