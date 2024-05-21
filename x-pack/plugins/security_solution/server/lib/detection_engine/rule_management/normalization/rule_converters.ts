@@ -24,6 +24,7 @@ import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
   RuleCreateProps,
+  RuleAction,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -492,12 +493,18 @@ export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
     required_fields?: RequiredFieldArray;
+    systemActions: RuleAction[];
   },
   immutable = false,
   defaultEnabled = true
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
+
+  const alertSystemActions = input.systemActions.map((action) => {
+    const { group, ...ruleAction } = transformRuleToAlertAction(action);
+    return ruleAction;
+  });
 
   const alertActions = input.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, input.throttle);
@@ -544,6 +551,7 @@ export const convertCreateAPIToInternalSchema = (
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
     actions,
+    systemActions: alertSystemActions,
   };
 };
 

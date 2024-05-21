@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 
 import type { RuleCreateProps } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { convertCreateAPIToInternalSchema } from '../../normalization/rule_converters';
@@ -14,6 +16,7 @@ import type { RuleParams } from '../../../rule_schema';
 
 export interface CreateRulesOptions<T extends RuleCreateProps = RuleCreateProps> {
   rulesClient: RulesClient;
+  actionsClient: ActionsClient;
   params: T;
   id?: string;
   immutable?: boolean;
@@ -22,6 +25,7 @@ export interface CreateRulesOptions<T extends RuleCreateProps = RuleCreateProps>
 }
 
 export const createRules = async ({
+  actionsClient,
   rulesClient,
   params,
   id,
@@ -29,7 +33,16 @@ export const createRules = async ({
   defaultEnabled = true,
   allowMissingConnectorSecrets,
 }: CreateRulesOptions): Promise<SanitizedRule<RuleParams>> => {
-  const internalRule = convertCreateAPIToInternalSchema(params, immutable, defaultEnabled);
+  const [oldActions, systemActions] = partition(params.actions, (action) =>
+    actionsClient.isSystemAction(action.action_type_id)
+  );
+  console.log('SYSTEM ACTIONS', systemActions);
+  console.log('OLD ACTIONS', oldActions);
+  const internalRule = convertCreateAPIToInternalSchema(
+    { ...params, actions: oldActions, systemActions },
+    immutable,
+    defaultEnabled
+  );
   const rule = await rulesClient.create<RuleParams>({
     options: {
       id,

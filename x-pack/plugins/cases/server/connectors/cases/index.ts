@@ -56,7 +56,7 @@ export const getCasesConnectorType = ({
     config: CasesConnectorConfigSchema,
     secrets: CasesConnectorSecretsSchema,
   },
-  supportedFeatureIds: [UptimeConnectorFeatureId, AlertingConnectorFeatureId],
+  supportedFeatureIds: [UptimeConnectorFeatureId, AlertingConnectorFeatureId, 'siem'],
   minimumLicenseRequired: 'platinum' as const,
   isSystemActionType: true,
   getKibanaPrivileges: ({ params } = { params: { subAction: 'run', subActionParams: {} } }) => {

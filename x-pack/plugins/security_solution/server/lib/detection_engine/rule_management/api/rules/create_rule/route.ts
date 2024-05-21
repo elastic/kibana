@@ -61,11 +61,13 @@ export const createRuleRoute = (
             'licensing',
             'alerting',
             'lists',
+            'actions',
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const exceptionsClient = ctx.lists?.getExceptionListClient();
+          const actionsClient = ctx.actions.getActionsClient();
 
           if (request.body.rule_id != null) {
             const rule = await readRules({
@@ -105,6 +107,7 @@ export const createRuleRoute = (
           await validateResponseActionsPermissions(ctx.securitySolution, request.body);
 
           const createdRule = await createRules({
+            actionsClient,
             rulesClient,
             params: request.body,
           });

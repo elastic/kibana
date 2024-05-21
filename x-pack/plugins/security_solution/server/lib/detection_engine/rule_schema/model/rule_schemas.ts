@@ -331,6 +331,7 @@ export interface InternalRuleCreate {
   };
   enabled: IsRuleEnabled;
   actions: RuleActionArrayCamel;
+  systemActions: RuleActionArrayCamel;
   params: RuleParams;
   throttle?: RuleActionThrottle | null;
   notifyWhen?: RuleActionNotifyWhen | null;
