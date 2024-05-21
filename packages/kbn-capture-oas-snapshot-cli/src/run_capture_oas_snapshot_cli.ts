@@ -34,17 +34,17 @@ const twoDeci = (num: number) => Math.round(num * 100) / 100;
 run(
   async ({ log, flagsReader, addCleanupTask }) => {
     const update = flagsReader.boolean('update');
+    const pathStartsWith = flagsReader.arrayOfStrings('include-path');
+    const excludePathsMatching = flagsReader.arrayOfStrings('exclude-path') ?? [];
 
     // internal consts
     const port = 5622;
-    const excludePathsMatching = [
+    // We are only including /api/status for now
+    excludePathsMatching.push(
       '/{path*}',
       // Our internal asset paths
-      '/XXXXXXXXXXXX/',
-      // Exclude APM and fleet paths for now
-      '/api/apm',
-      '/api/fleet',
-    ];
+      '/XXXXXXXXXXXX/'
+    );
 
     log.info('Starting es...');
     await log.indent(4, async () => {
@@ -64,8 +64,8 @@ run(
       const qs = encode({
         access: 'public',
         version: '2023-10-31',
+        pathStartsWith,
         excludePathsMatching,
-        pathStartsWith: ['/api'],
       });
       const url = `http://localhost:${port}/api/oas?${qs}`;
       log.info(`Fetching OAS at ${url}...`);
@@ -103,11 +103,14 @@ run(
     `,
     flags: {
       boolean: ['update'],
+      string: ['include-path', 'exclude-path'],
       default: {
         fix: false,
       },
       help: `
-        --update           Write the current OAS to ${chalk.cyan(OAS_FILE_PATH)}
+        --include-path            Path to include. Path must start with provided value. Can be passed multiple times.
+        --exclude-path            Path to exclude. Path must NOT start with provided value. Can be passed multiple times.
+        --update                  Write the current OAS to ${chalk.cyan(OAS_FILE_PATH)}.
       `,
     },
   }
