@@ -352,21 +352,22 @@ export class KnowledgeBaseService {
     client: ElasticsearchClient,
     uiSettingsClient: IUiSettingsClient
   ) {
-    const [customSearchConnectorIndex, connectorResponse] = await Promise.all([
-      uiSettingsClient.get<string>(aiAssistantSearchConnectorIndexPattern),
-      client.transport.request({
-        method: 'GET',
-        path: '_connector',
-      }),
-    ]);
+    // improve performance by running this in parallel with the `uiSettingsClient` request
+    const responsePromise = client.transport.request({
+      method: 'GET',
+      path: '_connector',
+    });
+
+    const customSearchConnectorIndex = await uiSettingsClient.get<string>(
+      aiAssistantSearchConnectorIndexPattern
+    );
 
     if (customSearchConnectorIndex) {
       return customSearchConnectorIndex.split(',');
     }
 
-    const connectorIndices = (
-      connectorResponse as { results: Array<{ index_name: string }> }
-    ).results.map((result) => result.index_name);
+    const response = (await responsePromise) as { results: Array<{ index_name: string }> };
+    const connectorIndices = response.results.map((result) => result.index_name);
 
     // preserve backwards compatibility with 8.14 (may not be needed in the future)
     if (isEmpty(connectorIndices)) {
