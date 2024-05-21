@@ -140,11 +140,11 @@ export const useRiskScoreKpi = ({
     }
 
     return {
-      [RiskSeverity.unknown]: result.kpiRiskScore[RiskSeverity.unknown] ?? 0,
-      [RiskSeverity.low]: result.kpiRiskScore[RiskSeverity.low] ?? 0,
-      [RiskSeverity.moderate]: result.kpiRiskScore[RiskSeverity.moderate] ?? 0,
-      [RiskSeverity.high]: result.kpiRiskScore[RiskSeverity.high] ?? 0,
-      [RiskSeverity.critical]: result.kpiRiskScore[RiskSeverity.critical] ?? 0,
+      [RiskSeverity.Unknown]: result.kpiRiskScore[RiskSeverity.Unknown] ?? 0,
+      [RiskSeverity.Low]: result.kpiRiskScore[RiskSeverity.Low] ?? 0,
+      [RiskSeverity.Moderate]: result.kpiRiskScore[RiskSeverity.Moderate] ?? 0,
+      [RiskSeverity.High]: result.kpiRiskScore[RiskSeverity.High] ?? 0,
+      [RiskSeverity.Critical]: result.kpiRiskScore[RiskSeverity.Critical] ?? 0,
     };
   }, [result, loading, error]);
 
