@@ -41,11 +41,7 @@ export const findPotentialMatches = async (
 const query = async (queryContext: QueryContext, searchAfter: any, size: number) => {
   const body = await queryBody(queryContext, searchAfter, size);
 
-  const params = {
-    body,
-  };
-
-  const response = await queryContext.search(params, 'getMonitorList-potentialMatches');
+  const response = await queryContext.search(body, 'getMonitorList-potentialMatches');
   return response;
 };
 
