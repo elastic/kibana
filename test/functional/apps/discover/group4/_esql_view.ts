@@ -267,11 +267,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await inspector.open();
         await retry.try(async () => {
+          await inspector.open();
           const requestNames = await inspector.getRequestNames();
           expect(requestNames).to.contain('Table');
           expect(requestNames).to.contain('Visualization');
+          await inspector.close();
         });
       });
     });
