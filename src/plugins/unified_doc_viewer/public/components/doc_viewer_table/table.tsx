@@ -17,6 +17,7 @@ import {
   EuiDataGrid,
   EuiDataGridProps,
   EuiI18n,
+  useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -54,6 +55,8 @@ interface ItemsEntry {
   restItems: FieldRecord[];
 }
 
+const MIN_NAME_COLUMN_WIDTH = 150;
+const MAX_NAME_COLUMN_WIDTH = 350;
 const PAGE_SIZE_OPTIONS = [25, 50, 100, 250, 500];
 const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
@@ -321,6 +324,8 @@ export const DocViewerTable = ({
     [rows, filter]
   );
 
+  const { width: containerWidth } = useResizeObserver(containerRef);
+
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
       {
@@ -328,7 +333,10 @@ export const DocViewerTable = ({
         displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
           defaultMessage: 'Field',
         }),
-        initialWidth: 200,
+        initialWidth: Math.min(
+          Math.max(Math.round(containerWidth * 0.3), MIN_NAME_COLUMN_WIDTH),
+          MAX_NAME_COLUMN_WIDTH
+        ),
         actions: false,
         visibleCellActions: 3,
         cellActions: fieldCellActions,
@@ -343,7 +351,7 @@ export const DocViewerTable = ({
         cellActions: fieldValueCellActions,
       },
     ],
-    [fieldCellActions, fieldValueCellActions]
+    [fieldCellActions, fieldValueCellActions, containerWidth]
   );
 
   const renderCellValue: EuiDataGridProps['renderCellValue'] = useCallback(
