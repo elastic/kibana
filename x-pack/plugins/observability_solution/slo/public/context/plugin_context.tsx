@@ -24,6 +24,6 @@ export interface OverviewEmbeddableContextValue {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
 }
 
-export const OverviewEmbeddableContext = createContext<OverviewEmbeddableContextValue | null>(null);
-
-export const PluginContext = createContext<PluginContextValue | null>(null);
+export const PluginContext = createContext(
+  {} as PluginContextValue | OverviewEmbeddableContextValue
+);
