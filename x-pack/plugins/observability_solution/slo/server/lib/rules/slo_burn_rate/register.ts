@@ -101,7 +101,7 @@ export function sloBurnRateRuleType(
         { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
         { name: 'suppressedAction', description: suppressedActionVariableDescription },
         {
-          name: 'errorBudgetExhaustionTime',
+          name: 'errorBudgetExhaustionTimeInHours',
           description: errorBudgetExhaustionTimeActionVariableDescription,
         },
       ],
@@ -188,6 +188,7 @@ export const suppressedActionVariableDescription = i18n.translate(
 export const errorBudgetExhaustionTimeActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.errorBudgetExhaustionTimeActionDescription',
   {
-    defaultMessage: 'Time in hour before we exhaust the full error budget.',
+    defaultMessage:
+      'Time in hours before we exhaust the full error budget at the current burn rate.',
   }
 );
