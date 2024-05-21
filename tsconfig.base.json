@@ -724,6 +724,8 @@
       "@kbn/default-nav-management/*": ["packages/default-nav/management/*"],
       "@kbn/default-nav-ml": ["packages/default-nav/ml"],
       "@kbn/default-nav-ml/*": ["packages/default-nav/ml/*"],
+      "@kbn/dependency-injection-example-plugin": ["examples/dependency_injection_example"],
+      "@kbn/dependency-injection-example-plugin/*": ["examples/dependency_injection_example/*"],
       "@kbn/dev-cli-errors": ["packages/kbn-dev-cli-errors"],
       "@kbn/dev-cli-errors/*": ["packages/kbn-dev-cli-errors/*"],
       "@kbn/dev-cli-runner": ["packages/kbn-dev-cli-runner"],

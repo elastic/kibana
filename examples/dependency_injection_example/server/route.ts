@@ -1,0 +1,43 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { inject, injectable } from 'inversify';
+import { schema, type TypeOf } from '@kbn/config-schema';
+import {
+  type IRouteHandler,
+  type KibanaRequest,
+  type KibanaResponseFactory,
+  ResponseToken,
+} from '@kbn/core-http-server';
+import { EchoService } from './service';
+
+export type EchoRequest = KibanaRequest<never, never, TypeOf<typeof EchoRoute.validate.body>>;
+
+@injectable()
+export class EchoRoute implements IRouteHandler {
+  static method = 'post' as const;
+  static path = '/api/di/echo';
+  static validate = {
+    body: schema.string(),
+  };
+  static options = {
+    xsrfRequired: false,
+  };
+
+  constructor(
+    @inject(EchoService) private readonly service: EchoService,
+    @inject(ResponseToken) private readonly response: KibanaResponseFactory
+  ) {}
+
+  handle() {
+    return this.response.ok({
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(this.service.echo()),
+    });
+  }
+}

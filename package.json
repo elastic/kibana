@@ -418,6 +418,7 @@
     "@kbn/default-nav-devtools": "link:packages/default-nav/devtools",
     "@kbn/default-nav-management": "link:packages/default-nav/management",
     "@kbn/default-nav-ml": "link:packages/default-nav/ml",
+    "@kbn/dependency-injection-example-plugin": "link:examples/dependency_injection_example",
     "@kbn/dev-tools-plugin": "link:src/plugins/dev_tools",
     "@kbn/developer-examples-plugin": "link:examples/developer_examples",
     "@kbn/discover-customization-examples-plugin": "link:examples/discover_customization_examples",
