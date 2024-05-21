@@ -64,7 +64,7 @@ import {
 } from './applications/enterprise_search_content/routes';
 
 import { docLinks } from './applications/shared/doc_links';
-import { type DynamicSideNavItems, getNavigationTreeDefinition } from './navigation_tree';
+import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
@@ -543,9 +543,11 @@ export class EnterpriseSearchPlugin implements Plugin {
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
 
-    plugins.navigation.addSolutionNavigation(
-      getNavigationTreeDefinition({ dynamicItems$: this.sideNavDynamicItems$ })
-    );
+    import('./navigation_tree').then(({ getNavigationTreeDefinition }) => {
+      return plugins.navigation.addSolutionNavigation(
+        getNavigationTreeDefinition({ dynamicItems$: this.sideNavDynamicItems$ })
+      );
+    });
 
     // Return empty start contract rather than void in order for plugins
     // that depend on the enterprise search plugin to determine whether it is enabled or not
