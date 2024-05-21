@@ -15,3 +15,33 @@ jest.doMock('./get_tls_options', () => {
     getServerTLSOptions: getServerTLSOptionsMock,
   };
 });
+
+export const createHttpServerMock = jest.fn(() => {
+  return {
+    on: jest.fn(),
+    setTimeout: jest.fn(),
+  };
+});
+
+jest.doMock('http', () => {
+  const actual = jest.requireActual('http');
+  return {
+    ...actual,
+    createServer: createHttpServerMock,
+  };
+});
+
+export const createHttpsServerMock = jest.fn(() => {
+  return {
+    on: jest.fn(),
+    setTimeout: jest.fn(),
+  };
+});
+
+jest.doMock('https', () => {
+  const actual = jest.requireActual('https');
+  return {
+    ...actual,
+    createServer: createHttpsServerMock,
+  };
+});
