@@ -14,10 +14,11 @@ echo '--- Lint: eslint'
 # disable "Exit immediately" mode so that we can run eslint, capture it's exit code, and respond appropriately
 # after possibly commiting fixed files to the repo
 set +e;
+npx @biomejs/biome check . --max-diagnostics=0
 if is_pr && ! is_auto_commit_disabled; then
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 4 npx @biomejs/biome check . --max-diagnostics=0 || true && node scripts/eslint --no-cache --fix
+  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 4 node scripts/eslint --no-cache --fix
 else
-  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 4 npx @biomejs/biome check . --max-diagnostics=0 || true && node scripts/eslint --no-cache
+  git ls-files | grep -E '\.(js|mjs|ts|tsx)$' | xargs -n 250 -P 4 node scripts/eslint --no-cache
 fi
 
 eslint_exit=$?
