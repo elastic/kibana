@@ -24,7 +24,6 @@ import { postDataView } from '../../../tasks/api_calls/common';
 
 const DATA_VIEW = 'auditbeat-*';
 
-// FLAKY: https://github.com/elastic/kibana/issues/178367
 describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     // illegal_argument_exception: unknown setting [index.lifecycle.name]

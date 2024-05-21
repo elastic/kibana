@@ -23,16 +23,13 @@ import { getHostIpFilter } from '../../../objects/filter';
 import { hostsUrl } from '../../../urls/navigation';
 import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 import { waitForPageToBeLoaded } from '../../../tasks/common';
-import { LOADING_INDICATOR } from '../../../screens/security_header';
 
-// Failing: See https://github.com/elastic/kibana/issues/182932
 describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     waitForAllHostsToBeLoaded();
     waitForPageToBeLoaded();
-    cy.get(LOADING_INDICATOR).should('not.exist');
   });
 
   it('adds correctly a filter to the global search bar', () => {

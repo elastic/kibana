@@ -6,7 +6,7 @@
  */
 
 import { recurse } from 'cypress-recurse';
-import { KIBANA_LOADING_ICON } from '../screens/security_header';
+import { KIBANA_LOADING_ICON, LOADING_INDICATOR } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 
@@ -97,4 +97,6 @@ export const waitForTabToBeLoaded = (tabId: string) => {
 export const waitForPageToBeLoaded = () => {
   cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
   cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
+  cy.get(LOADING_INDICATOR).should('be.visible');
+  cy.get(LOADING_INDICATOR).should('not.exist');
 };
