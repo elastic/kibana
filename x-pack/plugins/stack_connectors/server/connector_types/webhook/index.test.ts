@@ -12,19 +12,18 @@ import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/action
 import { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
-import {
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  getConnectorType,
-  WebhookConnectorType,
-  WebhookMethods,
-} from '.';
+import { ConnectorTypeConfigType, ConnectorTypeSecretsType, WebhookConnectorType } from './types';
+
+import { getConnectorType } from '.';
 
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { SSLCertType } from '../../../common/webhook/constants';
-import { AuthType as WebhookAuthType } from '../../../common/constants';
-import { PFX_FILE, CRT_FILE, KEY_FILE } from './mocks';
+import {
+  AuthType as WebhookAuthType,
+  SSLCertType,
+  WebhookMethods,
+} from '../../../common/constants';
+import { PFX_FILE, CRT_FILE, KEY_FILE } from '../../../common/mocks';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

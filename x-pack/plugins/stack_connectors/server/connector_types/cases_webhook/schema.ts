@@ -6,9 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CasesWebhookMethods } from './types';
-import { nullableType } from '../lib/nullable';
-import { AuthType as CasesWebhookAuthType } from '../../../common/constants';
+import { WebhookMethods as CasesWebhookMethods } from '../../../common/constants';
+import { AuthConfiguration, SecretConfigurationSchema } from '../../../common/schema';
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
@@ -51,26 +50,16 @@ export const ExternalIncidentServiceConfiguration = {
     )
   ),
   createCommentJson: schema.nullable(schema.string()),
-  headers: nullableType(HeadersSchema),
-  hasAuth: schema.boolean({ defaultValue: true }),
-  authType: schema.maybe(
-    schema.oneOf([schema.literal(CasesWebhookAuthType.Basic), schema.literal(null)], {
-      defaultValue: CasesWebhookAuthType.Basic,
-    })
-  ),
+  headers: schema.nullable(HeadersSchema),
+  hasAuth: AuthConfiguration.hasAuth,
+  authType: AuthConfiguration.authType,
+  certType: AuthConfiguration.certType,
+  ca: AuthConfiguration.ca,
+  verificationMode: AuthConfiguration.verificationMode,
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
   ExternalIncidentServiceConfiguration
-);
-
-export const ExternalIncidentServiceSecretConfiguration = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-};
-
-export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
-  ExternalIncidentServiceSecretConfiguration
 );
 
 export const ExecutorSubActionPushParamsSchema = schema.object({
@@ -99,3 +88,5 @@ export const ExecutorParamsSchema = schema.oneOf([
     subActionParams: ExecutorSubActionPushParamsSchema,
   }),
 ]);
+
+export const ExternalIncidentServiceSecretConfigurationSchema = SecretConfigurationSchema;

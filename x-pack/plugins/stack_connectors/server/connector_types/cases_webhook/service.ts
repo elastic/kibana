@@ -7,12 +7,14 @@
 
 import axios, { AxiosResponse } from 'axios';
 
+import { isString } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import { validateAndNormalizeUrl, validateJson } from './validators';
+import { AuthType as WebhookAuthType } from '../../../common/constants';
 import {
   createServiceError,
   getObjectValueByKeyAsString,
@@ -25,7 +27,6 @@ import {
   ExternalServiceCredentials,
   ExternalService,
   CasesWebhookPublicConfigurationType,
-  CasesWebhookSecretConfigurationType,
   ExternalServiceIncidentResponse,
   GetIncidentResponse,
   UpdateIncidentParams,
@@ -51,28 +52,61 @@ export const createExternalService = (
     getIncidentResponseExternalTitleKey,
     getIncidentUrl,
     hasAuth,
+    authType,
     headers,
     viewIncidentUrl,
     updateIncidentJson,
     updateIncidentMethod,
     updateIncidentUrl,
+    verificationMode,
+    ca,
   } = config as CasesWebhookPublicConfigurationType;
-  const { password, user } = secrets as CasesWebhookSecretConfigurationType;
+
+  const basicAuth =
+    hasAuth &&
+    (authType === WebhookAuthType.Basic || !authType) &&
+    isString(secrets.user) &&
+    isString(secrets.password)
+      ? { auth: { username: secrets.user, password: secrets.password } }
+      : {};
+
   if (
     !getIncidentUrl ||
     !createIncidentUrlConfig ||
     !viewIncidentUrl ||
     !updateIncidentUrl ||
-    (hasAuth && (!password || !user))
+    (hasAuth &&
+      (authType === WebhookAuthType.Basic || !authType) &&
+      (!basicAuth.auth?.password || !basicAuth.auth?.username))
   ) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
+  const sslCertificate =
+    authType === WebhookAuthType.SSL &&
+    ((isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx))
+      ? isString(secrets.pfx)
+        ? {
+            pfx: Buffer.from(secrets.pfx, 'base64'),
+            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
+          }
+        : {
+            cert: Buffer.from(secrets.crt!, 'base64'),
+            key: Buffer.from(secrets.key!, 'base64'),
+            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
+          }
+      : {};
+
+  const sslOverrides = {
+    ...sslCertificate,
+    ...(verificationMode ? { verificationMode } : {}),
+    ...(ca ? { ca: Buffer.from(ca, 'base64') } : {}),
+  };
+
   const headersWithBasicAuth = hasAuth
     ? combineHeadersWithBasicAuthHeader({
-        username: user ?? undefined,
-        password: password ?? undefined,
+        username: basicAuth.auth?.username ?? undefined,
+        password: basicAuth.auth?.password ?? undefined,
         headers,
       })
     : {};
@@ -83,6 +117,8 @@ export const createExternalService = (
       ...headersWithBasicAuth,
     },
   });
+
+  const createIncidentUrl = removeSlash(createIncidentUrlConfig);
 
   const getIncident = async (id: string): Promise<GetIncidentResponse> => {
     try {
@@ -104,6 +140,7 @@ export const createExternalService = (
         url: normalizedUrl,
         logger,
         configurationUtilities,
+        sslOverrides,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -148,6 +185,7 @@ export const createExternalService = (
         method: createIncidentMethod,
         data: json,
         configurationUtilities,
+        sslOverrides,
       });
 
       const { status, statusText, data } = res;
@@ -231,6 +269,7 @@ export const createExternalService = (
         logger,
         data: json,
         configurationUtilities,
+        sslOverrides,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({
@@ -303,6 +342,7 @@ export const createExternalService = (
         logger,
         data: json,
         configurationUtilities,
+        sslOverrides,
       });
 
       throwDescriptiveErrorIfResponseIsNotValid({

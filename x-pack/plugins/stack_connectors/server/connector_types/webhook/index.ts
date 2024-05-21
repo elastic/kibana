@@ -8,16 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { schema, TypeOf } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
+
 import type {
-  ActionType as ConnectorType,
-  ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
+
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
   AlertingConnectorFeatureId,
@@ -26,91 +25,23 @@ import {
 } from '@kbn/actions-plugin/common/types';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
-import { SSLCertType } from '../../../common/webhook/constants';
+
+import type {
+  WebhookConnectorType,
+  ActionParamsType,
+  ConnectorTypeConfigType,
+  WebhookConnectorTypeExecutorOptions,
+  ConnectorTypeSecretsType,
+} from './types';
+
 import { AuthType as WebhookAuthType } from '../../../common/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
-import { nullableType } from '../lib/nullable';
 import { isOk, promiseResult, Result } from '../lib/result_type';
-
-// config definition
-export enum WebhookMethods {
-  POST = 'post',
-  PUT = 'put',
-}
-
-export type WebhookConnectorType = ConnectorType<
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  ActionParamsType,
-  unknown
->;
-export type WebhookConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  ActionParamsType
->;
-
-const HeadersSchema = schema.recordOf(schema.string(), schema.string());
-const configSchemaProps = {
-  url: schema.string(),
-  method: schema.oneOf([schema.literal(WebhookMethods.POST), schema.literal(WebhookMethods.PUT)], {
-    defaultValue: WebhookMethods.POST,
-  }),
-  headers: nullableType(HeadersSchema),
-  hasAuth: schema.boolean({ defaultValue: true }),
-  authType: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal(WebhookAuthType.Basic),
-        schema.literal(WebhookAuthType.SSL),
-        schema.literal(null),
-      ],
-      {
-        defaultValue: WebhookAuthType.Basic,
-      }
-    )
-  ),
-  certType: schema.maybe(
-    schema.oneOf([schema.literal(SSLCertType.CRT), schema.literal(SSLCertType.PFX)])
-  ),
-  ca: schema.maybe(schema.string()),
-  verificationMode: schema.maybe(
-    schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
-  ),
-};
-const ConfigSchema = schema.object(configSchemaProps);
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
-
-// secrets definition
-export type ConnectorTypeSecretsType = TypeOf<typeof SecretsSchema>;
-const secretSchemaProps = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  crt: schema.nullable(schema.string()),
-  key: schema.nullable(schema.string()),
-  pfx: schema.nullable(schema.string()),
-};
-const SecretsSchema = schema.object(secretSchemaProps, {
-  validate: (secrets) => {
-    // user and password must be set together (or not at all)
-    if (!secrets.password && !secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
-    if (secrets.password && secrets.user && !secrets.crt && !secrets.key && !secrets.pfx) return;
-    if (secrets.crt && secrets.key && !secrets.user && !secrets.pfx) return;
-    if (!secrets.crt && !secrets.key && !secrets.user && secrets.pfx) return;
-    return i18n.translate('xpack.stackConnectors.webhook.invalidUsernamePassword', {
-      defaultMessage:
-        'must specify one of the following schemas: user and password; crt and key (with optional password); or pfx (with optional password)',
-    });
-  },
-});
-
-// params definition
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-export const ParamsSchema = schema.object({
-  body: schema.maybe(schema.string()),
-});
+import { ConfigSchema, ParamsSchema } from './schema';
+import { SecretConfigurationSchema } from '../../../common/schema';
 
 export const ConnectorTypeId = '.webhook';
+
 // connector type definition
 export function getConnectorType(): WebhookConnectorType {
   return {
@@ -130,7 +61,7 @@ export function getConnectorType(): WebhookConnectorType {
         customValidator: validateConnectorTypeConfig,
       },
       secrets: {
-        schema: SecretsSchema,
+        schema: SecretConfigurationSchema,
       },
       params: {
         schema: ParamsSchema,

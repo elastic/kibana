@@ -37,8 +37,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { SSLCertType } from '../../../common/webhook/constants';
-import { AuthType as WebhookAuthType } from '../../../common/constants';
+import { AuthType as WebhookAuthType, SSLCertType } from '../../../common/constants';
 
 import * as i18n from './translations';
 
