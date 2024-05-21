@@ -13,6 +13,7 @@ export interface ConnectionDetailsOpts {
   endpoints?: ConnectionDetailsOptsEndpoints;
   apiKeys?: ConnectionDetailsOptsApiKeys;
   navigateToUrl?: (url: string) => void;
+  onTelemetryEvent?: (event: ConnectionDetailsTelemetryEvents) => void;
 }
 
 export interface ConnectionDetailsOptsLinks {
@@ -32,5 +33,21 @@ export interface ConnectionDetailsOptsApiKeys {
   }>;
   hasPermission: () => Promise<boolean>;
 }
+
+export type ConnectionDetailsTelemetryEvent<EventId extends string, EventPayload = void> = [
+  id: EventId,
+  payload?: EventPayload
+];
+
+export type ConnectionDetailsTelemetryEvents =
+  | ConnectionDetailsTelemetryEvent<'learn_more_clicked'>
+  | ConnectionDetailsTelemetryEvent<'tab_switched', { tab: string }>
+  | ConnectionDetailsTelemetryEvent<'copy_endpoint_url_clicked'>
+  | ConnectionDetailsTelemetryEvent<'show_cloud_id_toggled'>
+  | ConnectionDetailsTelemetryEvent<'copy_cloud_id_clicked'>
+  | ConnectionDetailsTelemetryEvent<'new_api_key_created'>
+  | ConnectionDetailsTelemetryEvent<'manage_api_keys_clicked'>
+  | ConnectionDetailsTelemetryEvent<'key_encoding_changed', { format: string }>
+  | ConnectionDetailsTelemetryEvent<'copy_api_key_clicked', { format: string }>;
 
 export type TabID = 'endpoints' | 'apiKeys';
