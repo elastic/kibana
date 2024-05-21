@@ -36,14 +36,12 @@ export const initializeAnomalyChartsControls = (
   const interval$ = new BehaviorSubject<number | undefined>(undefined);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-  const query$ =
-    // @ts-ignore
-    (rawState.query ? new BehaviorSubject(rawState.query) : parentApi?.query$) ??
-    new BehaviorSubject(undefined);
-  const filters$ =
-    // @ts-ignore
-    (rawState.query ? new BehaviorSubject(rawState.filters) : parentApi?.filters$) ??
-    new BehaviorSubject(undefined);
+  // Anomaly charts embeddable should consume parent api (i.e. from dashboard global search bar)
+  // since it doesn't need to have its own query and filters
+  // @ts-expect-error Embeddable parentApi has query$
+  const query$ = parentApi?.query$ ?? new BehaviorSubject<Query | undefined>(undefined);
+  // @ts-expect-error Embeddable parentApi has filter$
+  const filters$ = parentApi?.filters$ ?? new BehaviorSubject<Filter[] | undefined>(undefined);
   const refresh$ = new BehaviorSubject<void>(undefined);
 
   const updateUserInput = (update: AnomalyChartsEmbeddableState) => {
@@ -64,6 +62,8 @@ export const initializeAnomalyChartsControls = (
       maxSeriesToPlot: maxSeriesToPlot$.value,
       severityThreshold: severityThreshold$.value,
       selectedEntities: selectedEntities$.value,
+      filters: filters$.value,
+      query: query$.value,
     };
   };
 

@@ -38,7 +38,7 @@ describe('AnomalyChartsInitializer', () => {
       maxSeriesToPlot: 12,
       jobIds,
     };
-    const { getByTestId } = render(
+    render(
       <KibanaContextProvider services={kibanaContextMock.services}>
         <AnomalyChartsInitializer
           initialInput={input}
