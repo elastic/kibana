@@ -75,6 +75,7 @@ import {
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -109,6 +110,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     storage,
     timelines,
   } = useKibana().services;
+  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
   const {
     [RuleDetailTabs.executionResults]: {
@@ -543,12 +545,14 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                 updatedAt: dataUpdatedAt,
               })}
             </UtilityBarText>
-            <UtilitySwitch
-              label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
-              checked={showSourceEventTimeRange}
-              compressed={true}
-              onChange={(e) => onShowSourceEventTimeRange(e.target.checked)}
-            />
+            {isManualRuleRunEnabled && (
+              <UtilitySwitch
+                label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
+                checked={showSourceEventTimeRange}
+                compressed={true}
+                onChange={(e) => onShowSourceEventTimeRange(e.target.checked)}
+              />
+            )}
             <UtilitySwitch
               label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
               checked={showMetricColumns}

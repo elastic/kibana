@@ -18,7 +18,7 @@ import {
   RuleRunTypeEnum,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import { ExecutionStatusFilter, ExecutionRunTypeFilter } from '../../../../rule_monitoring';
-
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import * as i18n from './translations';
 
 export const EXECUTION_LOG_SCHEMA_MAPPING = {
@@ -81,6 +81,7 @@ export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
       },
       [onSearch]
     );
+    const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
     return (
       <EuiFlexGroup gutterSize={'s'}>
@@ -98,13 +99,15 @@ export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize={'s'}>
-            <EuiFlexItem grow={true}>
-              <ExecutionRunTypeFilter
-                items={RUN_TYPE_FILTERS}
-                selectedItems={selectedRunTypes}
-                onChange={onRunTypeFitlerChange}
-              />
-            </EuiFlexItem>
+            {isManualRuleRunEnabled && (
+              <EuiFlexItem grow={true}>
+                <ExecutionRunTypeFilter
+                  items={RUN_TYPE_FILTERS}
+                  selectedItems={selectedRunTypes}
+                  onChange={onRunTypeFitlerChange}
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={true}>
               <ExecutionStatusFilter
                 items={STATUS_FILTERS}
