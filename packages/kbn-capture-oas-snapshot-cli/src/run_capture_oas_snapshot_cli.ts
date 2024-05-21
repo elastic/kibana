@@ -63,7 +63,7 @@ run(
     try {
       const qs = encode({
         access: 'public',
-        version: '2023-10-31',
+        version: '2023-10-31', // hard coded for now, we can make this configurable later
         pathStartsWith,
         excludePathsMatching,
       });
