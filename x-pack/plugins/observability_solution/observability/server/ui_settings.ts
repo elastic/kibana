@@ -45,6 +45,7 @@ import {
   enableInfrastructureAssetCustomDashboards,
   apmEnableServiceInventoryTableSearchBar,
   profilingFetchTopNFunctionsFromStacktraces,
+  enableInfrastructureContainerAssetView,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -244,6 +245,20 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.boolean(),
   },
+  [enableInfrastructureContainerAssetView]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureContainerAssetView', {
+      defaultMessage: 'Container view',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureContainerAssetViewDescription',
+      {
+        defaultMessage: 'Enable the Container asset view in the Infrastructure app.',
+      }
+    ),
+    schema: schema.boolean(),
+  },
   [enableInfrastructureProfilingIntegration]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableInfrastructureProfilingIntegration', {
@@ -263,7 +278,7 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
       defaultMessage: 'Custom dashboards for asset details in Infrastructure',
     }),
-    value: false,
+    value: true,
     description: i18n.translate(
       'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
       {

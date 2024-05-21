@@ -201,6 +201,36 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
+    describe('route.httpVersion property', () => {
+      it('returns the version from the raw request', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '7.4',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.httpVersion).toEqual('7.4');
+      });
+    });
+
+    describe('route.protocol property', () => {
+      it('return a static value for now as only http1 is supported', () => {
+        const request = hapiMocks.createRequest({
+          raw: {
+            req: {
+              httpVersion: '2.0',
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.protocol).toEqual('http1');
+      });
+    });
+
     describe('route.options.authRequired property', () => {
       it('handles required auth: undefined', () => {
         const auth: RouteOptions['auth'] = undefined;
@@ -367,6 +397,17 @@ describe('CoreKibanaRequest', () => {
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isFakeRequest).toBe(true);
+      });
+    });
+
+    describe('httpVersion', () => {
+      it('should be 1.0', () => {
+        const request: FakeRawRequest = {
+          headers: {},
+          path: '/',
+        };
+        const kibanaRequest = CoreKibanaRequest.from(request);
+        expect(kibanaRequest.httpVersion).toEqual('1.0');
       });
     });
 

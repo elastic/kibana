@@ -954,6 +954,7 @@ export interface FramePublicAPI {
   filters: Filter[];
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
+  absDateRange: DateRange;
   /**
    * Data of the chart currently rendered in the preview.
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
