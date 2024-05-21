@@ -65,9 +65,13 @@ const renderReactEmbeddable = ({
       <ReactEmbeddableRenderer
         type={type}
         maybeId={uuid}
-        parentApi={canvasApi}
+        getParentApi={(): CanvasContainerApi => ({
+          ...container,
+          getSerializedStateForChild: () => ({
+            rawState: input,
+          }),
+        })}
         key={`${type}_${uuid}`}
-        state={{ rawState: input }}
         onAnyStateChange={(newState) => {
           const newExpression = embeddableInputToExpression(
             newState.rawState as unknown as EmbeddableInput,
