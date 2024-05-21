@@ -428,11 +428,15 @@ export class MonacoEditorActionsProvider {
         prefix = '\n';
       }
     } else {
-      // if not inside a request, insert the request at the cursor position
-      if (!position) {
-        // if no cursor position, insert at the beginning
+      // if not inside a request, insert the request at the cursor line
+      if (position) {
+        // insert at the beginning of the cursor line
+        position = { lineNumber: position.lineNumber, column: 1 };
+      } else {
+        // otherwise insert on line 1
         position = { lineNumber: 1, column: 1 };
       }
+      suffix = '\n';
     }
     const edit: monaco.editor.IIdentifiedSingleEditOperation = {
       range: {

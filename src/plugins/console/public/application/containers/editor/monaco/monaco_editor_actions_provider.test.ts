@@ -338,5 +338,34 @@ describe('Editor actions provider', () => {
       expect(editor.executeEdits).toHaveBeenCalledTimes(1);
       expect(editor.executeEdits).toHaveBeenCalledWith('restoreFromHistory', [expectedEdit]);
     });
+
+    it('insert at the beginning of the line, if no selected request', async () => {
+      // mock no parsed requests
+      mockGetParsedRequests.mockReturnValue([]);
+      // the position of the cursor is at the end of line 4
+      editor.getPosition.mockReturnValue({
+        lineNumber: 4,
+        column: 2,
+      } as monaco.Position);
+      editor.getSelection.mockReturnValue({
+        startLineNumber: 4,
+        endLineNumber: 4,
+      } as monaco.Selection);
+      await editorActionsProvider.restoreRequestFromHistory(testHistoryRequest);
+      const expectedRange = {
+        startLineNumber: 4,
+        startColumn: 1,
+        endLineNumber: 4,
+        endColumn: 1,
+      };
+      const expectedText = testHistoryRequest + '\n';
+      const expectedEdit = {
+        range: expectedRange,
+        text: expectedText,
+        forceMoveMarkers: true,
+      };
+      expect(editor.executeEdits).toHaveBeenCalledTimes(1);
+      expect(editor.executeEdits).toHaveBeenCalledWith('restoreFromHistory', [expectedEdit]);
+    });
   });
 });
