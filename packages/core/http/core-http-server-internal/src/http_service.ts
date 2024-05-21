@@ -251,8 +251,16 @@ export class HttpService
       method: 'GET',
       handler: async (req, h) => {
         const version = req.query?.version;
-        const pathStartsWith = req.query?.pathStartsWith;
-        const excludePathsMatching = req.query?.excludePathsMatching;
+        let pathStartsWith: string[] = req.query?.pathStartsWith;
+        if (!Array.isArray(pathStartsWith)) {
+          pathStartsWith = [pathStartsWith];
+        }
+
+        let excludePathsMatching: string[] = req.query?.excludePathsMatching;
+        if (!Array.isArray(excludePathsMatching)) {
+          excludePathsMatching = [excludePathsMatching];
+        }
+
         const pluginId = req.query?.pluginId;
 
         const access = req.query?.access as 'public' | 'internal' | undefined;
