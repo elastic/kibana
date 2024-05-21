@@ -279,7 +279,7 @@ export function getDataStateContainer({
             autoRefreshDone = undefined;
           }
 
-          await profilesManager.resolveDataSourceContext({
+          await profilesManager.resolveDataSourceProfile({
             dataSource: getAppState().dataSource,
             dataView: getSavedSearch().searchSource.getField('index'),
             query: getAppState().query,

@@ -56,7 +56,7 @@ export class ProfilesManager {
     private readonly documentProfileService: DocumentProfileService
   ) {}
 
-  public async resolveRootContext(params: RootProfileProviderParams) {
+  public async resolveRootProfile(params: RootProfileProviderParams) {
     const serializedParams = this.serializeRootProfileParams(params);
 
     if (this.rootProfile$.getValue() && isEqual(this.prevRootProfileParams, serializedParams)) {
@@ -77,7 +77,7 @@ export class ProfilesManager {
     this.prevRootProfileParams = serializedParams;
   }
 
-  public async resolveDataSourceContext(params: DataSourceProfileProviderParams) {
+  public async resolveDataSourceProfile(params: DataSourceProfileProviderParams) {
     const serializedParams = this.serializeDataSourceProfileParams(params);
 
     if (
@@ -101,7 +101,7 @@ export class ProfilesManager {
     this.prevDataSourceProfileParams = serializedParams;
   }
 
-  public createDocumentContextCollector() {
+  public createDocumentProfilesCollector() {
     const documentProfiles = new Map<string, ComposableProfile<DocumentProfile>>();
 
     return {

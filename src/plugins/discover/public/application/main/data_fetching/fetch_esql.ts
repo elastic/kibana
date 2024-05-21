@@ -62,7 +62,7 @@ export function fetchEsql(
         let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
-        const contextCollector = profilesManager.createDocumentContextCollector();
+        const contextCollector = profilesManager.createDocumentProfilesCollector();
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | EsqlErrorResponse;
           if (response.type === 'error') {

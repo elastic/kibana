@@ -23,7 +23,7 @@ export const useRootProfile = ({
 
     setRootProfileLoading(true);
 
-    profilesManager.resolveRootContext({ solutionNavId }).then(() => {
+    profilesManager.resolveRootProfile({ solutionNavId }).then(() => {
       if (!aborted) {
         setRootProfileLoading(false);
       }
