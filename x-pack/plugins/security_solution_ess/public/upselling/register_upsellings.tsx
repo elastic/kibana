@@ -7,7 +7,6 @@
 
 import type { ILicense, LicenseType } from '@kbn/licensing-plugin/public';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
-import { withSuspenseUpsell } from '@kbn/security-solution-upselling/helpers';
 import {
   ALERT_SUPPRESSION_RULE_DETAILS,
   ALERT_SUPPRESSION_RULE_FORM,
@@ -22,24 +21,11 @@ import type {
   UpsellingSectionId,
   UpsellingService,
 } from '@kbn/security-solution-upselling/service';
-import React, { lazy } from 'react';
-
+import React from 'react';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
-
-const EntityAnalyticsUpsellingLazy = lazy(
-  () => import('@kbn/security-solution-upselling/pages/entity_analytics')
-);
-
-export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
-  lazy(() =>
-    import('@kbn/security-solution-upselling/sections/entity_analytics').then(
-      ({ EntityAnalyticsUpsellingSection }) => ({
-        default: EntityAnalyticsUpsellingSection,
-      })
-    )
-  )
-);
+import { EntityAnalyticsUpsellingPage } from './pages/entity_analytics_upselling';
+import { EntityAnalyticsUpsellingSection } from './sections/entity_analytics_upselling';
 
 interface UpsellingsConfig {
   minimumLicenseRequired: LicenseType;
@@ -61,7 +47,7 @@ export const registerUpsellings = (
   license: ILicense,
   services: Services
 ) => {
-  const upsellingPagesToRegister = upsellingPages(services).reduce<PageUpsellings>(
+  const upsellingPagesToRegister = upsellingPages.reduce<PageUpsellings>(
     (pageUpsellings, { pageName, minimumLicenseRequired, component }) => {
       if (!license.hasAtLeast(minimumLicenseRequired)) {
         pageUpsellings[pageName] = withServicesProvider(component, services);
@@ -71,7 +57,7 @@ export const registerUpsellings = (
     {}
   );
 
-  const upsellingSectionsToRegister = upsellingSections(services).reduce<SectionUpsellings>(
+  const upsellingSectionsToRegister = upsellingSections.reduce<SectionUpsellings>(
     (sectionUpsellings, { id, minimumLicenseRequired, component }) => {
       if (!license.hasAtLeast(minimumLicenseRequired)) {
         sectionUpsellings[id] = withServicesProvider(component, services);
@@ -97,36 +83,22 @@ export const registerUpsellings = (
 };
 
 // Upsellings for entire pages, linked to a SecurityPageName
-export const upsellingPages: (services: Services) => UpsellingPages = (services) => [
+export const upsellingPages: UpsellingPages = [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
     pageName: SecurityPageName.entityAnalytics,
     minimumLicenseRequired: 'platinum',
-    component: () => (
-      <EntityAnalyticsUpsellingLazy
-        requiredLicense="Platinum"
-        subscriptionUrl={services.application.getUrlForApp('management', {
-          path: 'stack/license_management',
-        })}
-      />
-    ),
+    component: () => <EntityAnalyticsUpsellingPage />,
   },
 ];
 
 // Upsellings for sections, linked by arbitrary ids
-export const upsellingSections: (services: Services) => UpsellingSections = (services) => [
+export const upsellingSections: UpsellingSections = [
   // It is highly advisable to make use of lazy loaded components to minimize bundle size.
   {
     id: 'entity_analytics_panel',
     minimumLicenseRequired: 'platinum',
-    component: () => (
-      <EntityAnalyticsUpsellingSectionLazy
-        requiredLicense="Platinum"
-        subscriptionUrl={services.application.getUrlForApp('management', {
-          path: 'stack/license_management',
-        })}
-      />
-    ),
+    component: () => <EntityAnalyticsUpsellingSection />,
   },
 ];
 

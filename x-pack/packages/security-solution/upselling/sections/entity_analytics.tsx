@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import {
-  EuiCard,
-  EuiIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiButton,
-  EuiTextColor,
-} from '@elastic/eui';
-import { useNavigation } from '@kbn/security-solution-navigation';
+import React, { memo } from 'react';
+import { EuiCard, EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import styled from '@emotion/styled';
+
+import { LinkButton } from '@kbn/security-solution-navigation/src/links';
 import * as i18n from '../pages/translations';
 
 const StyledEuiCard = styled(EuiCard)`
@@ -29,31 +22,17 @@ const StyledEuiCard = styled(EuiCard)`
 
 export const EntityAnalyticsUpsellingSection = memo(
   ({
-    requiredLicense,
-    requiredProduct,
-    subscriptionUrl,
+    upgradeMessage,
+    upgradeHref,
+    upgradeToLabel,
   }: {
-    requiredLicense?: string;
-    requiredProduct?: string;
-    subscriptionUrl?: string;
+    upgradeMessage?: string;
+    upgradeToLabel: string;
+    upgradeHref?: string;
   }) => {
-    if (!requiredProduct && !requiredLicense) {
-      throw new Error('requiredProduct or requiredLicense must be defined');
-    }
-
-    const requiredProductOrLicense = requiredProduct ?? requiredLicense ?? '';
-    const upgradeMessage = requiredProduct
-      ? i18n.UPGRADE_PRODUCT_MESSAGE(requiredProduct)
-      : i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense ?? '');
-    const { navigateTo } = useNavigation();
-
-    const goToSubscription = useCallback(() => {
-      navigateTo({ url: subscriptionUrl });
-    }, [navigateTo, subscriptionUrl]);
-
     return (
       <StyledEuiCard
-        betaBadgeProps={{ label: requiredProductOrLicense }}
+        betaBadgeProps={{ label: upgradeToLabel }}
         icon={<EuiIcon size="xl" type="lock" />}
         display="subdued"
         title={
@@ -77,11 +56,11 @@ export const EntityAnalyticsUpsellingSection = memo(
               </p>
             </EuiFlexItem>
             <EuiFlexItem>
-              {subscriptionUrl && (
+              {upgradeHref && (
                 <div>
-                  <EuiButton onClick={goToSubscription} fill>
-                    {i18n.UPGRADE_BUTTON(requiredProductOrLicense)}
-                  </EuiButton>
+                  <LinkButton path={upgradeHref} fill id="upgrade-button">
+                    {i18n.UPGRADE_BUTTON(upgradeToLabel)}
+                  </LinkButton>
                 </div>
               )}
             </EuiFlexItem>
