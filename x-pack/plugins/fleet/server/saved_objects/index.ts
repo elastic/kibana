@@ -85,6 +85,7 @@ import {
   migratePackagePolicyEvictionsFromV81102,
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
+import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
 import { migratePackagePolicySetRequiresRootToV8150 } from './migrations/to_v8_15_0';
 
 /*
@@ -543,6 +544,14 @@ export const getSavedObjectTypes = (
           ],
         },
         '10': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV10OnWriteScanFix,
+            },
+          ],
+        }, 
+        '11': {      
           changes: [
             {
               type: 'mappings_addition',
