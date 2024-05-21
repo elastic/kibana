@@ -8,6 +8,7 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
 import { UnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { Pipeline, Processor } from '../../../../common/types';
@@ -50,6 +51,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   canEditName,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
+  const [areProcessorsDirty, setAreProcessorsDirty] = useState<boolean>(false);
 
   const {
     processors: initialProcessors,
@@ -110,13 +112,26 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   );
 
   const onProcessorsChangeHandler = useCallback<OnUpdateHandler>(
-    (arg) => (processorStateRef.current = arg),
-    []
+    (arg) => {
+      processorStateRef.current = arg;
+
+      const currentProcessorsState = processorStateRef.current?.getData();
+
+      // Calculate if the current processor state has changed compared to the
+      // initial processors state.
+      setAreProcessorsDirty(
+        !isEqual(processorsState, {
+          processors: currentProcessorsState?.processors || [],
+          onFailure: currentProcessorsState?.on_failure || [],
+        })
+      );
+    },
+    [processorsState]
   );
 
   return (
     <>
-      <UnsavedChangesPrompt hasUnsavedChanges={isFormDirty && !form.isValid} />
+      <UnsavedChangesPrompt hasUnsavedChanges={isFormDirty || areProcessorsDirty} />
 
       <Form
         form={form}
