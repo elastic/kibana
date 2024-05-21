@@ -47,6 +47,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       }) => {
         createNewEmbeddable(panelType, initialState);
       },
+      disableTriggers: true,
     } as CanvasContainerApi;
   }, [createNewEmbeddable]);
 

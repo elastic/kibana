@@ -17,6 +17,7 @@ import {
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import React, { FC, useMemo } from 'react';
 import ReactDOM from 'react-dom';
+import { omit } from 'lodash';
 import { pluginServices } from '../../../public/services';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
@@ -41,14 +42,14 @@ const embeddablesRegistry: {
 const renderReactEmbeddable = ({
   type,
   uuid,
-  input,
+  serializedState,
   container,
   handlers,
   core,
 }: {
   type: string;
   uuid: string;
-  input: EmbeddableInput;
+  serializedState: object;
   container: CanvasContainerApi;
   handlers: RendererHandlers;
   core: CoreStart;
@@ -67,7 +68,7 @@ const renderReactEmbeddable = ({
         maybeId={uuid}
         parentApi={canvasApi}
         key={`${type}_${uuid}`}
-        state={{ rawState: input }}
+        state={{ rawState: serializedState }}
         onAnyStateChange={(newState) => {
           const newExpression = embeddableInputToExpression(
             newState.rawState as unknown as EmbeddableInput,
@@ -139,7 +140,7 @@ export const embeddableRendererFactory = (
          */
         ReactDOM.render(
           renderReactEmbeddable({
-            input,
+            serializedState: omit(input, 'disableTriggers'),
             handlers,
             uuid: uniqueId,
             type: embeddableType,
