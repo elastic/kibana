@@ -231,7 +231,10 @@ export function GroupListView({
                     activePage={page}
                     onChangePage={handlePageClick}
                     itemsPerPage={itemsPerPage}
-                    onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
+                    onChangeItemsPerPage={(perPage) => {
+                      setPage(0);
+                      setItemsPerPage(perPage);
+                    }}
                   />
                 ) : null}
               </>
