@@ -61,9 +61,9 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
             'resource.attributes.k8s.pod.name',
             ],
             query: {
-            bool: {
-                must: podmusts,
-            },
+              bool: {
+                  must: podmusts,
+              },
             },
             aggs: {
                 unique_values: {
@@ -100,6 +100,22 @@ export const registerPodsRoute = (router: IRouter, logger: Logger) => {
 
         if (podNames.length === 1) {
           const podObject = await getPodStatus(client, podNames[0], request.query.namespace);
+          if (Object.keys(podObject).length === 0) {
+            var fullName = podNames[0];
+            if (request.query.namespace !== undefined) {
+              fullName = request.query.namespace + "/" + podNames[0];
+            };
+            const message =  `Pod ${fullName} not found`
+            return response.ok({
+                body: {
+                  time: '',
+                  message: message,
+                  name: podNames[0],
+                  namespace: request.query.namespace,
+                  reason: "Not found",
+                },
+              });
+          }
           return response.ok({
             body: {
               time: podObject.time,

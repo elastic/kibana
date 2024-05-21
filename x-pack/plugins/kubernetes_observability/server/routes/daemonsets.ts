@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import {extractFieldValue, phaseToState, Event, checkDefaultNamespace} from '../lib/utils';
+import {extractFieldValue, phaseToState, Event, Daemonset, checkDefaultNamespace} from '../lib/utils';
 import {getPodEvents} from './pods';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
@@ -27,7 +27,7 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              name: schema.string(),
+              name: schema.maybe(schema.string()),
               namespace: schema.maybe(schema.string()),
             }),
           },
@@ -36,159 +36,269 @@ export const registerDaemonsetsRoute = (router: IRouter, logger: Logger) => {
       async (context, request, response) => {
         var namespace = checkDefaultNamespace(request.query.namespace);
         const client = (await context.core).elasticsearch.client.asCurrentUser;
-        const musts = [
-            {
-                term: {
-                  'resource.attributes.k8s.daemonset.name': request.query.name,
+
+        var daemonsetNames = new Array();
+        if (request.query.name !== undefined) {
+          daemonsetNames.push(request.query.name);
+        };
+        if (request.query.name === undefined) {
+          var daemonmusts = new Array();
+          daemonmusts.push(
+            { exists: { field: 'resource.attributes.k8s.daemonset.name' } }
+          )
+          if (request.query.namespace !== undefined) {
+            daemonmusts.push(
+                {
+                    term: {
+                        'resource.attributes.k8s.namespace.name': request.query.namespace,
+                    },
                 },
-            },
-            {
-                term: {
-                  'resource.attributes.k8s.namespace.name': request.query.namespace,
-                },
-            },
-            {   exists: { field: 'metrics.k8s.daemonset.ready_nodes' } 
-            }
-          ];
-        const dsl: estypes.SearchRequest = {
+            )
+          };
+          const dslDaemons: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
-            size: 1,
-            sort: [{ '@timestamp': 'desc' }],
             _source: false,
             fields: [
-              '@timestamp',
-              'metrics.k8s.daemonset.ready_nodes',
-              'metrics.k8s.daemonset.desired_scheduled_nodes',
-              'resource.attributes.k8s.*',
+            'resource.attributes.k8s.daemonset.name',
             ],
             query: {
               bool: {
-                must: musts,
+                  must: daemonmusts,
               },
             },
-        };
-        console.log(musts);
-        console.log(dsl);
-        const esResponse = await client.search(dsl);
-        console.log(esResponse);
-        if (esResponse.hits.hits.length > 0) {
-            const hit = esResponse.hits.hits[0];
-            const { fields = {} } = hit;
-            const readyNodes = extractFieldValue(fields['metrics.k8s.daemonset.ready_nodes']);
-            const desiredNodes = extractFieldValue(fields['metrics.k8s.daemonset.desired_scheduled_nodes']);
-            var message = '';
-            var reason = '';
-            const time = extractFieldValue(fields['@timestamp']);
-            if (readyNodes == desiredNodes) {
-                message = `Daemonset ${namespace}/${request.query.name} has as many ready nodes as desired`;
-                return response.ok({
-                    body: {
-                    time: time,
-                    message: message,
-                    readyNodes: readyNodes,
-                    desiredNodes: desiredNodes,
-                    name: request.query.name,
-                    namespace: namespace,
-                    reason: reason,
-                    },
-                });
-            } else {
-                console.log("replicas desired not equal to available");
-                const musts = [
-                    {
-                        term: {
-                        'resource.attributes.k8s.daemonset.name': request.query.name,
-                        },
-                    },
-                    {
-                        term: {
-                        'resource.attributes.k8s.namespace.name': namespace,
-                        },
-                    },
-                    { exists: { field: 'metrics.k8s.pod.phase' } }
-                ];
-                var size: number = +desiredNodes;
-                const dslPods: estypes.SearchRequest = {
-                    index: ["metrics-otel.*"],
-                    size: size,
-                    sort: [{ '@timestamp': 'desc' }],
-                    _source: false,
-                    fields: [
-                    '@timestamp',
-                    'metrics.k8s.pod.phase',
-                    'resource.attributes.k8s.*',
-                    ],
-                    query: {
-                    bool: {
-                        must: musts,
-                    },
-                    },
-                    aggs: {
-                        unique_values: {
-                            terms: { field: 'resource.attributes.k8s.pod.name' },
-                        },
-                    },
-                };
-                const esResponsePods = await client.search(dslPods);
-                console.log(esResponsePods);
-                const hits = esResponsePods.hits.hits;
-                var notRunningPods = new Array();
-                for (const hit of hits) {
-                    const { fields = {} } = hit;
-                    const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
-                    const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
-                    message = `Daemonset ${namespace}/${request.query.name} has ${desiredNodes} desired nodes desired but ${readyNodes} are ready`;
-                    if (podPhase !== 2 && podPhase !== 3) {
-                        console.log(podName);
-                        console.log(podPhase);
-                        const state = phaseToState(podPhase);
-                        var failingReason = {} as Event;
-                        const event = await getPodEvents(client, podName, namespace);
-                        if (event.note != '') {
-                            failingReason = event;
-                        }
-                        var pod = {
-                            'name': podName,
-                            'state': state,
-                            'event': failingReason,
-                        };
-                        notRunningPods.push(pod);
-                    }
-                }
-                var reasons = new Array();
-                var events = new Array();
-                for (const pod of notRunningPods) {
-                    reason += `Pod ${namespace}/${pod.name} is in ${pod.state} state`;
-                    reasons.push(reason)
-                    if (Object.keys(pod.event).length !== 0) {
-                        events.push(pod.event);
-                    }
-                }
-                return response.ok({
-                    body: {
-                    time: time,
-                    message: message,
-                    readyNodes: readyNodes,
-                    desiredNodes: desiredNodes,
-                    name: request.query.name,
-                    namespace: namespace,
-                    reason: reasons.join(" & "),
-                    events: events,
-                    },
-                });
-            }
-        } else {
-            message =  `Daemonset ${namespace}/${request.query.name} not found`
-            return response.ok({
-                body: {
+            aggs: {
+                unique_values: {
+                    terms: { field: 'resource.attributes.k8s.daemonset.name', size: 500 },
+                },
+            },
+          };
+          const daemonEsResponse = await client.search(dslDaemons);
+          const { after_key: _, buckets = [] } = (daemonEsResponse.aggregations?.unique_values || {}) as any;
+          if (buckets.length > 0) {
+            buckets.map((bucket: any) => {
+              const daemonName = bucket.key;
+              daemonsetNames.push(daemonName);
+            });
+          }
+          console.log(daemonsetNames);
+        }
+
+        if (daemonsetNames.length === 0){
+          const message =  `No daemonsets found`
+          return response.ok({
+              body: {
                 time: '',
                 message: message,
                 name: request.query.name,
-                namespace: namespace,
+                namespace: request.query.namespace,
                 reason: "Not found",
-                },
+              },
             });
         }
+
+        if (daemonsetNames.length === 1) {
+          const daemonObject = await getDaemonStatus(client, daemonsetNames[0], request.query.namespace);
+          if (Object.keys(daemonObject).length === 0) {
+            var fullName = daemonsetNames[0];
+            if (request.query.namespace !== undefined) {
+              fullName = request.query.namespace + "/" + daemonsetNames[0];
+            };
+            const message =  `Daemonset ${fullName} not found`
+            return response.ok({
+                body: {
+                  time: '',
+                  message: message,
+                  name: daemonsetNames[0],
+                  namespace: request.query.namespace,
+                  reason: "Not found",
+                },
+              });
+          }
+          return response.ok({
+            body: {
+              time: daemonObject.time,
+              message: daemonObject.message,
+              readyNodes: daemonObject.readyNodes,
+              desiredNodes: daemonObject.desiredNodes,
+              name: daemonObject.name,
+              namespace: daemonObject.namespace,
+              reason: daemonObject.reason,
+              events: daemonObject.events
+            },
+          });
+        }
+
+        var daemonObjects = new Array();
+        for (const name of daemonsetNames) {
+           const daemonObject = await getDaemonStatus(client, name, request.query.namespace);
+           daemonObjects.push(daemonObject);
+        }
+        return response.ok({
+          body: {
+            time: daemonObjects[0].time,
+            daemonsets: daemonObjects
+          },
+        });
       }
     );
 };
+
+
+
+export async function getDaemonStatus(client: any, daemonName: string, namespace?: string): Promise<Daemonset>{
+  var musts = new Array();
+  musts.push(
+    {
+      term: {
+        'resource.attributes.k8s.daemonset.name': daemonName,
+      },
+    },
+    { exists: { field: 'metrics.k8s.daemonset.ready_nodes' } }
+  )
+  if (namespace !== undefined) {
+    musts.push(
+       {
+        term: {
+          'resource.attributes.k8s.namespace.name': namespace,
+        },
+      }
+    )
+  }
+
+  const dsl: estypes.SearchRequest = {
+    index: ["metrics-otel.*"],
+    size: 1,
+    sort: [{ '@timestamp': 'desc' }],
+    _source: false,
+    fields: [
+      '@timestamp',
+      'metrics.k8s.daemonset.ready_nodes',
+      'metrics.k8s.daemonset.desired_scheduled_nodes',
+      'resource.attributes.k8s.*',
+    ],
+    query: {
+      bool: {
+        must: musts,
+      },
+    },
+  };
+  const esResponse = await client.search(dsl);
+  var daemonset = {} as Daemonset;
+  if (esResponse.hits.hits.length > 0) {
+    const hit = esResponse.hits.hits[0];
+    const { fields = {} } = hit;
+    const readyNodes = extractFieldValue(fields['metrics.k8s.daemonset.ready_nodes']);
+    const desiredNodes = extractFieldValue(fields['metrics.k8s.daemonset.desired_scheduled_nodes']);
+    const daemonNamespace =  extractFieldValue(fields['resource.attributes.k8s.namespace.name']);
+    var message = '';
+    var reason = '';
+    const time = extractFieldValue(fields['@timestamp']);
+    
+    if (readyNodes == desiredNodes) {
+      message = `Daemonset ${daemonNamespace}/${daemonName} has as many ready nodes as desired`;
+      daemonset = {
+          time: time,
+          message: message,
+          readyNodes: readyNodes,
+          desiredNodes: desiredNodes,
+          name: daemonName,
+          namespace: daemonNamespace,
+          reason: reason,
+          events: []
+        }
+    } else {
+        console.log("replicas desired not equal to available");
+        daemonset = await getDaemonPods(client, daemonName, daemonNamespace, readyNodes, desiredNodes)
+        daemonset.time = time;
+        return daemonset;
+    }
+  }
+  return daemonset;
+
+}
+
+export async function getDaemonPods(client: any, daemonName: string, namespace: string, readyNodes: string, desiredNodes: string): Promise<Daemonset>{
+  const musts = [
+    {
+      term: {
+        'resource.attributes.k8s.daemonset.name': daemonName,
+      },
+    },
+    {
+      term: {
+        'resource.attributes.k8s.namespace.name': namespace,
+      },
+    },
+    { exists: { field: 'metrics.k8s.pod.phase' } }
+  ];
+  var size: number = +desiredNodes;
+  const dslPods: estypes.SearchRequest = {
+    index: ["metrics-otel.*"],
+    size: size,
+    sort: [{ '@timestamp': 'desc' }],
+    _source: false,
+    fields: [
+      '@timestamp',
+      'metrics.k8s.pod.phase',
+      'resource.attributes.k8s.*',
+    ],
+    query: {
+      bool: {
+        must: musts,
+      },
+    },
+    aggs: {
+      unique_values: {
+        terms: { field: 'resource.attributes.k8s.pod.name' },
+      },
+    },
+  };
+  const esResponsePods = await client.search(dslPods);
+  console.log(esResponsePods);
+  const hits = esResponsePods.hits.hits;
+  var notRunningPods = new Array();
+  var message = '';
+  var reason = '';
+  var daemonset = {} as Daemonset;
+  for (const hit of hits) {
+    const { fields = {} } = hit;
+    const podPhase = extractFieldValue(fields['metrics.k8s.pod.phase']);
+    const podName = extractFieldValue(fields['resource.attributes.k8s.pod.name']);
+    message = `Daemonset ${namespace}/${daemonName} has ${desiredNodes} desired nodes desired but ${readyNodes} are ready`;
+    if (podPhase !== 2 && podPhase !== 3) {
+      const state = phaseToState(podPhase);
+      reason = `Pod ${namespace}/${podName} is in ${state} state`;
+      var failingReason = {} as Event;
+      const event = await getPodEvents(client, podName, namespace);
+      if (event.note != '') {
+        failingReason = event;
+      }
+      var pod = {
+        'name': podName,
+        'state': state,
+        'event': failingReason,
+      };
+      notRunningPods.push(pod);
+    }
+  }
+  var reasons = new Array();
+  var events = new Array();
+  for (const pod of notRunningPods) {
+    reason = `Pod ${namespace}/${pod.name} is in ${pod.state} state`;
+    reasons.push(reason);
+    if (Object.keys(pod.event).length !== 0) {
+      events.push(pod.event);
+    }
+  }
+  daemonset = {
+    time: '',
+    message: message,
+    readyNodes: readyNodes,
+    desiredNodes: desiredNodes,
+    name: daemonName,
+    namespace: namespace,
+    reason: reasons.join(" & "),
+    events: events,
+  }
+  return daemonset
+}

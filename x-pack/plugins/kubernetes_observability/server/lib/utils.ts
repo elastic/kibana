@@ -26,6 +26,28 @@ export type Pod = {
     failingReason: Event;
 };
 
+export type Deployment = {
+    message: string;
+    namespace: string;
+    time: string;
+    name: string;
+    replicasAvailable: string;
+    replicasDesired: string;
+    reason: string
+    events: Event[];
+};
+
+export type Daemonset = {
+    message: string;
+    namespace: string;
+    time: string;
+    name: string;
+    readyNodes: string;
+    desiredNodes: string;
+    reason: string
+    events: Event[];
+};
+
 export type PodMem = {
     name: string;
     namespace: string;
