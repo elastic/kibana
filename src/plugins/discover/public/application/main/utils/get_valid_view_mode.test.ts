@@ -35,7 +35,7 @@ describe('getValidViewMode', () => {
     expect(
       getValidViewMode({
         viewMode: VIEW_MODE.PATTERN_LEVEL,
-        isTextBasedQueryMode: false,
+        isEsqlMode: false,
       })
     ).toBe(VIEW_MODE.PATTERN_LEVEL);
   });
@@ -65,7 +65,7 @@ describe('getValidViewMode', () => {
     expect(
       getValidViewMode({
         viewMode: VIEW_MODE.PATTERN_LEVEL,
-        isTextBasedQueryMode: true,
+        isEsqlMode: true,
       })
     ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
   });
