@@ -86,6 +86,7 @@ import {
 } from './migrations/security_solution/to_v8_11_0_2';
 import { settingsV1 } from './model_versions/v1';
 import { packagePolicyV10OnWriteScanFix } from './model_versions/security_solution';
+import { migratePackagePolicySetRequiresRootToV8150 } from './migrations/to_v8_15_0';
 
 /*
  * Saved object types and mappings
@@ -444,6 +445,7 @@ export const getSavedObjectTypes = (
               name: { type: 'keyword' },
               title: { type: 'keyword' },
               version: { type: 'keyword' },
+              requires_root: { type: 'boolean' },
             },
           },
           elasticsearch: {
@@ -557,6 +559,20 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: packagePolicyV10OnWriteScanFix,
+            },
+          ],
+        },
+        '11': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                package: { properties: { requires_root: { type: 'boolean' } } },
+              },
+            },
+            {
+              type: 'data_backfill',
+              backfillFn: migratePackagePolicySetRequiresRootToV8150,
             },
           ],
         },

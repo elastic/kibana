@@ -602,6 +602,7 @@
     "overrides",
     "package",
     "package.name",
+    "package.requires_root",
     "package.title",
     "package.version",
     "policy_id",

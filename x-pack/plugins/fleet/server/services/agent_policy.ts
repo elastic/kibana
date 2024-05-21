@@ -387,7 +387,10 @@ class AgentPolicyService {
       throw new FleetError(agentPolicySO.error.message);
     }
 
-    const agentPolicy = { id: agentPolicySO.id, ...agentPolicySO.attributes };
+    const agentPolicy = {
+      id: agentPolicySO.id,
+      ...agentPolicySO.attributes,
+    };
 
     if (withPackagePolicies) {
       agentPolicy.package_policies =

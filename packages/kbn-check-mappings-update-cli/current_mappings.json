@@ -2017,6 +2017,9 @@
           "name": {
             "type": "keyword"
           },
+          "requires_root": {
+            "type": "boolean"
+          },
           "title": {
             "type": "keyword"
           },
