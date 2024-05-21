@@ -57,6 +57,10 @@ export interface KueryQueryOptions {
    * (See https://www.elastic.co/guide/en/elasticsearch/reference/8.6/query-dsl-term-query.html#term-field-params)
    */
   caseInsensitive?: boolean;
+  /**
+   * The ML model to use for text expansion semantic searches.
+   */
+  textExpansionModel?: string;
 }
 
 /** @public */

@@ -354,9 +354,9 @@ describe('kuery AST API', () => {
     });
 
     test('should allow escaping of special characters with a backslash', () => {
-      const expected = nodeTypes.literal.buildNode('\\():<>"*');
+      const expected = nodeTypes.literal.buildNode('\\():~<>"*');
       // yo dawg
-      const actual = fromLiteralExpression('\\\\\\(\\)\\:\\<\\>\\"\\*');
+      const actual = fromLiteralExpression('\\\\\\(\\)\\:\\~\\<\\>\\"\\*');
       expect(actual).toEqual(expected);
     });
 
@@ -367,8 +367,8 @@ describe('kuery AST API', () => {
     });
 
     test('should support double quoted strings that do not need escapes except for quotes', () => {
-      const expected = nodeTypes.literal.buildNode('\\():<>"*');
-      const actual = fromLiteralExpression('"\\():<>\\"*"');
+      const expected = nodeTypes.literal.buildNode('\\():~<>"*');
+      const actual = fromLiteralExpression('"\\():~<>\\"*"');
       expect(actual.value).toEqual(expected.value);
     });
 

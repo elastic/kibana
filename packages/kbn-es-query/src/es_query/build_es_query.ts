@@ -68,6 +68,7 @@ export function buildEsQuery(
       filtersInMustClause: config.filtersInMustClause,
       nestedIgnoreUnmapped: config.nestedIgnoreUnmapped,
       caseInsensitive: config.caseInsensitive,
+      textExpansionModel: config.textExpansionModel,
     }
   );
   const luceneQuery = buildQueryFromLucene(

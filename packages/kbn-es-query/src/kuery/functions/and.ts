@@ -7,7 +7,10 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { difference } from 'lodash';
+import type { JsonObject } from '@kbn/utility-types';
 import * as ast from '../ast';
+import * as infer from './infer';
 import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { KqlFunctionNode } from '../node_types';
 import type { KqlContext } from '../types';
@@ -37,14 +40,23 @@ export function toElasticsearchQuery(
 ): QueryDslQueryContainer {
   const { filtersInMustClause } = config;
   const children = node.arguments || [];
-  const key = filtersInMustClause ? 'must' : 'filter';
+  const queries: { must: JsonObject[]; filter: JsonObject[] } = { must: [], filter: [] };
+  const toQuery = (child: KueryNode) => {
+    return ast.toElasticsearchQuery(child, indexPattern, config, context);
+  };
+
+  if (filtersInMustClause) {
+    queries.must = children.map(toQuery);
+  } else {
+    const inferNodes = children.filter(infer.nodeContains);
+    const otherNodes = difference(children, inferNodes);
+
+    queries.must = inferNodes.map(toQuery);
+    queries.filter = otherNodes.map(toQuery);
+  }
 
   return {
-    bool: {
-      [key]: children.map((child: KueryNode) => {
-        return ast.toElasticsearchQuery(child, indexPattern, config, context);
-      }),
-    },
+    bool: queries,
   };
 }
 

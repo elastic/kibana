@@ -77,6 +77,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildEsQuery,
   Filter,
+  fromKueryExpression,
+  functions,
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
@@ -889,13 +891,28 @@ export class SearchSource {
       body.fields = filteredDocvalueFields;
     }
 
-    // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
-    const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
+    const hasScoreSort = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>
       sort.hasOwnProperty('_score')
     );
+
+    if (!hasScoreSort) {
+      const queryArray = Array.isArray(query) ? query : [query];
+      const anyQueryHasInferNode = queryArray.some(
+        (currentQuery) =>
+          isOfQueryType(currentQuery) &&
+          currentQuery.language === 'kuery' &&
+          functions.infer.nodeContains(fromKueryExpression(currentQuery.query))
+      );
+
+      if (anyQueryHasInferNode) {
+        body.sort = [{ _score: { order: 'desc' } }, ...(body.sort ?? [])];
+      }
+    }
+
     const esQueryConfigs = {
       ...getEsQueryConfig({ get: getConfig }),
-      filtersInMustClause,
+      // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
+      filtersInMustClause: hasScoreSort,
     };
     body.query = buildEsQuery(index, query, filters, esQueryConfigs);
 

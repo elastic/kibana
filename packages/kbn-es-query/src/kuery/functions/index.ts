@@ -7,6 +7,7 @@
  */
 
 import * as is from './is';
+import * as infer from './infer';
 import * as and from './and';
 import * as or from './or';
 import * as not from './not';
@@ -17,6 +18,7 @@ import * as nested from './nested';
 export { KQL_FUNCTION_AND } from './and';
 export { KQL_FUNCTION_EXISTS } from './exists';
 export { KQL_FUNCTION_IS } from './is';
+export { KQL_FUNCTION_INFER } from './infer';
 export { KQL_FUNCTION_NESTED } from './nested';
 export { KQL_FUNCTION_NOT } from './not';
 export { KQL_FUNCTION_OR } from './or';
@@ -24,6 +26,7 @@ export { KQL_FUNCTION_RANGE } from './range';
 
 export const functions = {
   is,
+  infer,
   and,
   or,
   not,

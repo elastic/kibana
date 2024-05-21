@@ -115,6 +115,7 @@ export {
   toKqlExpression,
   nodeBuilder,
   nodeTypes,
+  functions,
   toElasticsearchQuery,
   escapeKuery,
   escapeQuotes,
