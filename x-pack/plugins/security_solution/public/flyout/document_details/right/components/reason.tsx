@@ -12,6 +12,8 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getField } from '../../shared/utils';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
@@ -23,14 +25,16 @@ import {
 } from './test_ids';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useRightPanelContext } from '../context';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Displays the information provided by the rowRenderer. Supports multiple types of documents.
  */
 export const Reason: FC = () => {
   const { telemetry } = useKibana().services;
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
+  const { indexName, scopeId, dataFormattedForFieldBrowser, getFieldsData } =
     useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const alertReason = getField(getFieldsData(ALERT_REASON));
 

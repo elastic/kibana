@@ -9,6 +9,8 @@ import type { VFC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexItem, EuiLink } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../common/utils/sentinelone_alert_check';
 import {
@@ -30,6 +32,7 @@ import {
   HIGHLIGHTED_FIELDS_CELL_TEST_ID,
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
+import { selectEventId } from '../../../shared/store/selectors';
 
 interface LinkFieldCellProps {
   /**
@@ -43,7 +46,8 @@ interface LinkFieldCellProps {
  * // Currently we can use the same component for both host name and username
  */
 const LinkFieldCell: VFC<LinkFieldCellProps> = ({ value }) => {
-  const { scopeId, eventId, indexName } = useRightPanelContext();
+  const { scopeId, indexName } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToInsightsEntities = useCallback(() => {

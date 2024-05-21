@@ -9,6 +9,7 @@ import type { Store, Dispatch, Action, Middleware, CombinedState } from 'redux';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { DataTableState } from '@kbn/securitysolution-data-table';
+import type { FlyoutPluginState } from '../../flyout/shared/store';
 import type { StartPlugins } from '../../types';
 import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
@@ -29,7 +30,6 @@ import type { AnalyzerState } from '../../resolver/types';
 export type State = HostsPluginState &
   UsersPluginState &
   NetworkPluginState &
-  UsersPluginState &
   TimelinePluginState &
   ManagementPluginState & {
     app: AppState;
@@ -40,7 +40,9 @@ export type State = HostsPluginState &
     discover: SecuritySolutionDiscoverState;
   } & DataTableState &
   GroupState &
-  AnalyzerState;
+  AnalyzerState &
+  FlyoutPluginState;
+
 /**
  * The Redux store type for the Security app.
  */

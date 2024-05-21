@@ -11,6 +11,8 @@ import { combineReducers } from 'redux';
 import type { DataTableState } from '@kbn/securitysolution-data-table';
 import { dataTableReducer } from '@kbn/securitysolution-data-table';
 import { enableMapSet } from 'immer';
+import { flyoutReducer } from '../../flyout/shared/store/reducer';
+import type { FlyoutState } from '../../flyout/shared/store/types';
 import { appReducer, initialAppState } from './app';
 import { dragAndDropReducer, initialDragAndDropState } from './drag_and_drop';
 import { createInitialInputsState, inputsReducer } from './inputs';
@@ -66,7 +68,8 @@ export const createInitialState = (
   },
   dataTableState: DataTableState,
   groupsState: GroupState,
-  analyzerState: AnalyzerState
+  analyzerState: AnalyzerState,
+  flyoutState: FlyoutState
 ): State => {
   const initialPatterns = {
     [SourcererScopeName.default]: getScopePatternListSelection(
@@ -128,6 +131,7 @@ export const createInitialState = (
       internal: undefined,
       savedSearch: undefined,
     },
+    flyout: flyoutState,
   };
 
   return preloadedState;
@@ -150,4 +154,5 @@ export const createReducer: (
     analyzer: analyzerReducer,
     discover: securitySolutionDiscoverReducer,
     ...pluginsReducer,
+    flyout: flyoutReducer,
   });

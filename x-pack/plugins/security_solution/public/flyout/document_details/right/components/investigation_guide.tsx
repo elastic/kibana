@@ -9,6 +9,8 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSkeletonText } from 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useRightPanelContext } from '../context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
@@ -18,6 +20,7 @@ import {
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Render either the investigation guide button that opens Investigation section in the left panel,
@@ -25,8 +28,8 @@ import {
  */
 export const InvestigationGuide: React.FC = () => {
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreview } =
-    useRightPanelContext();
+  const { indexName, scopeId, dataFormattedForFieldBrowser, isPreview } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
 
   const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
     dataFormattedForFieldBrowser,

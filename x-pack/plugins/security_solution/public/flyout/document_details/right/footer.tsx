@@ -10,10 +10,13 @@ import React, { useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../common/store';
 import { DocumentDetailsIsolateHostPanelKey } from '../shared/constants/panel_keys';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
 import { useRightPanelContext } from './context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
+import { selectEventId } from '../../shared/store/selectors';
 
 const ContainerDiv = styled('div')`
   .side-panel-flyout-footer {
@@ -34,13 +37,13 @@ interface PanelFooterProps {
 export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
   const { closeFlyout, openRightPanel } = useExpandableFlyoutApi();
   const {
-    eventId,
     indexName,
     dataFormattedForFieldBrowser,
     dataAsNestedObject,
     refetchFlyoutData,
     scopeId,
   } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { isHostIsolationPanelOpen, showHostIsolationPanel } = useHostIsolationTools();
 
   const showHostIsolationPanelCallback = useCallback(

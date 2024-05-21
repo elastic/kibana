@@ -65,7 +65,8 @@ export type SecuritySubPluginKeyStore =
   | 'timeline'
   | 'hostList'
   | 'alertList'
-  | 'management';
+  | 'management'
+  | 'flyout';
 
 /**
  * Returned by the various 'SecuritySubPlugin' classes from the `start` method.

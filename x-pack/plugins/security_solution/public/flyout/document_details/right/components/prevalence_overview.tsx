@@ -10,6 +10,8 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
@@ -18,6 +20,7 @@ import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import { InsightsSummaryRow } from './insights_summary_row';
+import { selectEventId } from '../../../shared/store/selectors';
 
 const PERCENTAGE_THRESHOLD = 0.1; // we show the prevalence if its value is below 10%
 const DEFAULT_FROM = 'now-30d';
@@ -28,8 +31,9 @@ const DEFAULT_TO = 'now';
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
 export const PrevalenceOverview: FC = () => {
-  const { eventId, indexName, dataFormattedForFieldBrowser, scopeId, investigationFields } =
+  const { indexName, dataFormattedForFieldBrowser, scopeId, investigationFields } =
     useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goPrevalenceTab = useCallback(() => {

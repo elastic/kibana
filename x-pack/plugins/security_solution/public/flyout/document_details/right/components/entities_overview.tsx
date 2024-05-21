@@ -9,6 +9,8 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { INSIGHTS_ENTITIES_TEST_ID } from './test_ids';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useRightPanelContext } from '../context';
@@ -18,12 +20,14 @@ import { UserEntityOverview } from './user_entity_overview';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Entities section under Insights section, overview tab. It contains a preview of host and user information.
  */
 export const EntitiesOverview: React.FC = () => {
-  const { eventId, getFieldsData, indexName, scopeId } = useRightPanelContext();
+  const { getFieldsData, indexName, scopeId } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { openLeftPanel } = useExpandableFlyoutApi();
   const hostName = getField(getFieldsData('host.name'));
   const userName = getField(getFieldsData('user.name'));

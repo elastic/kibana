@@ -11,6 +11,8 @@ import { find } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import type {
   EnrichedFieldInfo,
@@ -22,6 +24,7 @@ import { useRightPanelContext } from '../context';
 import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
 import { CellActions } from './cell_actions';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Checks if the field info has data to convert EnrichedFieldInfo into EnrichedFieldInfoWithValues
@@ -35,8 +38,9 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
  */
 export const DocumentStatus: FC = () => {
   const { closeFlyout } = useExpandableFlyoutApi();
-  const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
+  const { browserFields, dataFormattedForFieldBrowser, scopeId, isPreview } =
     useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
 
   const statusData = useMemo(() => {
     const item = find(

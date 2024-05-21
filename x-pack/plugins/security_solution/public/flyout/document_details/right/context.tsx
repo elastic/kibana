@@ -10,20 +10,18 @@ import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TableId } from '@kbn/securitysolution-data-table';
 
+import { useDispatch } from 'react-redux';
+import { useFetchEventDetails } from '../shared/hooks/use_fetch_event_details';
+import { flyoutActions } from '../../shared/store';
 import { useEventDetails } from '../shared/hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
-import type { SearchHit } from '../../../../common/search_strategy';
 import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 import type { RightPanelProps } from '.';
 import type { GetFieldsData } from '../../../common/hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 
 export interface RightPanelContext {
-  /**
-   * Id of the document
-   */
-  eventId: string;
   /**
    * Name of the index used in the parent's page
    */
@@ -44,10 +42,6 @@ export interface RightPanelContext {
    * An array of field objects with category and value
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
-  /**
-   * The actual raw document object
-   */
-  searchHit: SearchHit;
   /**
    * User defined fields to highlight (defined on the rule)
    */
@@ -77,6 +71,8 @@ export type RightPanelProviderProps = {
 
 export const RightPanelProvider = memo(
   ({ id, indexName, scopeId, children }: RightPanelProviderProps) => {
+    const dispatch = useDispatch();
+
     const {
       browserFields,
       dataAsNestedObject,
@@ -84,8 +80,8 @@ export const RightPanelProvider = memo(
       getFieldsData,
       loading,
       refetchFlyoutData,
-      searchHit,
     } = useEventDetails({ eventId: id, indexName });
+    const { data: searchHit } = useFetchEventDetails({ eventId: id || '' });
 
     const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const { rule: maybeRule } = useRuleWithFallback(ruleId);
@@ -99,13 +95,11 @@ export const RightPanelProvider = memo(
         dataFormattedForFieldBrowser &&
         searchHit
           ? {
-              eventId: id,
               indexName,
               scopeId,
               browserFields,
               dataAsNestedObject,
               dataFormattedForFieldBrowser,
-              searchHit,
               investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
               refetchFlyoutData,
               getFieldsData,
@@ -132,6 +126,10 @@ export const RightPanelProvider = memo(
 
     if (!contextValue) {
       return <FlyoutError />;
+    }
+
+    if (id) {
+      dispatch(flyoutActions.setEventId({ eventId: id }));
     }
 
     return <RightPanelContext.Provider value={contextValue}>{children}</RightPanelContext.Provider>;

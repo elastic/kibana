@@ -10,6 +10,8 @@ import React, { memo } from 'react';
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NewChatByTitle } from '@kbn/elastic-assistant';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useAssistant } from '../hooks/use_assistant';
@@ -19,12 +21,14 @@ import {
 } from '../../../../common/components/event_details/translations';
 import { useRightPanelContext } from '../context';
 import { SHARE_BUTTON_TEST_ID } from './test_ids';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Actions displayed in the header menu in the right section of alerts flyout
  */
 export const HeaderActions: VFC = memo(() => {
-  const { dataFormattedForFieldBrowser, eventId, indexName } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, indexName } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { isAlert, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   const alertDetailsLink = useGetAlertDetailsFlyoutLink({
