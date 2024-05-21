@@ -1,7 +1,7 @@
 openapi: 3.0.0
 
 info:
-  version: 1.0.0
+  version: '1'
   title: Risk Scoring API
   description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
 
@@ -50,11 +50,11 @@ components:
           example: 'my.host'
         identifier_type:
           description: Used to define the type of entity.
-          $ref: './common.schema.yaml#/components/schemas/IdentifierType'
+          $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
         refresh:
-            type: string
-            enum: [wait_for]
-            description: If 'wait_for' the request will wait for the index refresh.
+          type: string
+          enum: [wait_for]
+          description: If 'wait_for' the request will wait for the index refresh.
 
     RiskScoresEntityCalculationResponse:
       type: object
@@ -64,4 +64,4 @@ components:
         success:
           type: boolean
         score:
-          $ref: './common.schema.yaml#/components/schemas/RiskScore'
+          $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
