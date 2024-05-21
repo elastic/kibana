@@ -46,6 +46,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -84,7 +85,6 @@ import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
-
 export type SortOrder = [string, string];
 
 export enum DataLoadingState {
@@ -338,6 +338,10 @@ export interface UnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
+   * An optional prop to provide awareness of additional field groups when paired with the Unified Field List.
+   */
+  additionalFieldGroups?: AdditionalFieldGroups;
+  /**
    * An optional settings for customising the column
    */
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
@@ -434,6 +438,7 @@ export const UnifiedDataTable = ({
   rowsPerPageOptions,
   visibleCellActions,
   externalCustomRenderers,
+  additionalFieldGroups,
   consumer = 'discover',
   componentsTourSteps,
   gridStyleOverride,
@@ -1030,6 +1035,7 @@ export const UnifiedDataTable = ({
               dataView={dataView}
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
+              additionalFieldGroups={additionalFieldGroups}
               selectedDocs={selectedDocs}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}

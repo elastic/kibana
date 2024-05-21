@@ -30,8 +30,14 @@ export const useAdditionalFieldGroups = () => {
         aggregatable: false,
       }),
     ];
+    // For functionality that cannot support smart fields, we need to provide fallback fields.
+    const fallbackFields = {
+      [constants.RESOURCE_FIELD]: constants.RESOURCE_FIELD_CONFIGURATION.fallbackFields,
+      [constants.CONTENT_FIELD]: constants.CONTENT_FIELD_CONFIGURATION.fallbackFields,
+    };
     return {
       smartFields,
+      fallbackFields,
     };
   }
 };
