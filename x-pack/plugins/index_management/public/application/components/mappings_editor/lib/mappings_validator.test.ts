@@ -33,6 +33,9 @@ describe('Mappings configuration validator', () => {
         required: false,
       },
       dynamic: true,
+      _data_stream_timestamp: {
+        enabled: true,
+      },
       // Mapper-size plugin
       _size: {
         enabled: true,

@@ -24,6 +24,10 @@ import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { getLlmType } from '../utils';
 
+const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
+const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
+const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
+
 export const postAttackDiscoveryRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ) => {
@@ -33,6 +37,9 @@ export const postAttackDiscoveryRoute = (
       path: ATTACK_DISCOVERY,
       options: {
         tags: ['access:elasticAssistant'],
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
       },
     })
     .addVersion(
@@ -109,6 +116,7 @@ export const postAttackDiscoveryRoute = (
             logger,
             request,
             temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
+            timeout: CONNECTOR_TIMEOUT,
             traceOptions,
           });
 
@@ -117,6 +125,7 @@ export const postAttackDiscoveryRoute = (
             anonymizationFields,
             esClient,
             latestReplacements,
+            langChainTimeout: LANG_CHAIN_TIMEOUT,
             llm,
             onNewReplacements,
             request,

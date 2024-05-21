@@ -35,7 +35,7 @@ export const previewRuleWithExceptionEntries = async ({
   invocationCount,
   timeframeEnd,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
   rule: RuleCreateProps;
   entries: NonEmptyEntriesArray[];

@@ -10,8 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useNodeDetailsRedirect } from './use_node_details_redirect';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-
-const coreStartMock = coreMock.createStart();
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -21,8 +20,20 @@ jest.mock('react-router-dom', () => ({
   })),
 }));
 
+const MOCK_HREF = '/app/r?l=ASSET_DETAILS_LOCATOR&v=8.15.0&lz=MoCkLoCaToRvAlUe';
+const coreStartMock = coreMock.createStart();
+const shareMock = sharePluginMock.createSetupContract();
+
+// @ts-expect-error This object is missing some properties that we're not using in the UI
+shareMock.url.locators.get = (id: string) => ({
+  getRedirectUrl: (params: Record<string, any>): string | undefined => MOCK_HREF,
+  navigate: () => {},
+});
+
 const wrapper = ({ children }: { children: React.ReactNode }): JSX.Element => (
-  <KibanaContextProvider services={{ ...coreStartMock }}>{children}</KibanaContextProvider>
+  <KibanaContextProvider services={{ ...coreStartMock, share: shareMock }}>
+    {children}
+  </KibanaContextProvider>
 );
 
 describe('useNodeDetailsRedirect', () => {
@@ -32,21 +43,18 @@ describe('useNodeDetailsRedirect', () => {
     const fromDateStrig = '2019-01-01T11:00:00Z';
     const toDateStrig = '2019-01-01T12:00:00Z';
 
-    expect(
-      result.current.getNodeDetailUrl({
-        assetType: 'pod',
-        assetId: 'example-01',
-        search: {
-          from: new Date(fromDateStrig).getTime(),
-          to: new Date(toDateStrig).getTime(),
-        },
-      })
-    ).toStrictEqual({
-      app: 'metrics',
-      pathname: 'link-to/pod-detail/example-01',
-      search: { from: '1546340400000', to: '1546344000000' },
-      state: {},
+    const getLinkProps = result.current.getNodeDetailUrl({
+      assetType: 'pod',
+      assetId: 'example-01',
+      search: {
+        from: new Date(fromDateStrig).getTime(),
+        to: new Date(toDateStrig).getTime(),
+      },
     });
+
+    expect(getLinkProps).toHaveProperty('href');
+    expect(getLinkProps.href).toEqual(MOCK_HREF);
+    expect(getLinkProps).toHaveProperty('onClick');
   });
 
   it('should return the LinkProperties for assetType host', () => {
@@ -55,25 +63,18 @@ describe('useNodeDetailsRedirect', () => {
     const fromDateStrig = '2019-01-01T11:00:00Z';
     const toDateStrig = '2019-01-01T12:00:00Z';
 
-    expect(
-      result.current.getNodeDetailUrl({
-        assetType: 'host',
-        assetId: 'example-01',
-        search: {
-          from: new Date(fromDateStrig).getTime(),
-          to: new Date(toDateStrig).getTime(),
-          name: 'example-01',
-        },
-      })
-    ).toStrictEqual({
-      app: 'metrics',
-      pathname: 'link-to/host-detail/example-01',
+    const getLinkProps = result.current.getNodeDetailUrl({
+      assetType: 'host',
+      assetId: 'example-01',
       search: {
-        from: '1546340400000',
-        to: '1546344000000',
-        assetDetails: '(name:example-01)',
+        from: new Date(fromDateStrig).getTime(),
+        to: new Date(toDateStrig).getTime(),
+        name: 'example-01',
       },
-      state: {},
     });
+
+    expect(getLinkProps).toHaveProperty('href');
+    expect(getLinkProps.href).toEqual(MOCK_HREF);
+    expect(getLinkProps).toHaveProperty('onClick');
   });
 });

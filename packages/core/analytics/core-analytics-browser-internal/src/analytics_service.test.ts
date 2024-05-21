@@ -23,10 +23,22 @@ function findRegisteredEventTypeByName(eventTypeName: string) {
     ([{ eventType }]) => eventType === eventTypeName
   )!;
 }
+interface MockEntryList {
+  getEntries: () => [object];
+}
+type ObsCallback = (_entries: MockEntryList, _obs: object) => undefined;
 
 describe('AnalyticsService', () => {
   let analyticsService: AnalyticsService;
   beforeEach(() => {
+    const mockObs = { observe: jest.fn, disconnect: jest.fn };
+    const mockPerformanceObserver = function (callback: ObsCallback) {
+      callback({ getEntries: () => [{}] }, mockObs);
+      return mockObs;
+    };
+
+    (global.PerformanceObserver as unknown) = mockPerformanceObserver;
+
     jest.clearAllMocks();
     analyticsService = new AnalyticsService(coreContextMock.create());
   });

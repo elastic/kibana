@@ -12,9 +12,10 @@ import { i18n } from '@kbn/i18n';
 
 export interface CopyInputProps {
   value: string;
+  onCopyClick?: React.MouseEventHandler<HTMLAnchorElement>;
 }
 
-export const CopyInput: React.FC<CopyInputProps> = ({ value }) => {
+export const CopyInput: React.FC<CopyInputProps> = ({ value, onCopyClick }) => {
   const textRef = React.useRef<HTMLSpanElement>(null);
 
   return (
@@ -52,7 +53,10 @@ export const CopyInput: React.FC<CopyInputProps> = ({ value }) => {
           <EuiCopy textToCopy={value}>
             {(copy) => (
               <EuiButtonIcon
-                onClick={copy}
+                onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                  onCopyClick?.(event);
+                  copy();
+                }}
                 iconType="copyClipboard"
                 size="m"
                 color={'text'}

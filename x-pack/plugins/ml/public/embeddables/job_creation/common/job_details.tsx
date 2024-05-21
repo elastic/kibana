@@ -205,6 +205,12 @@ export const JobDetails: FC<PropsWithChildren<Props>> = ({
 
       if (validationResults.contains('bucket_span_invalid')) {
         setBucketSpanValidationError(invalidTimeIntervalMessage(bucketSpan));
+      } else if (validationResults.contains('bucket_span_empty')) {
+        setBucketSpanValidationError(
+          i18n.translate('xpack.ml.newJob.wizard.validateJob.bucketSpanMustBeSetErrorMessage', {
+            defaultMessage: 'Bucket span must be set',
+          })
+        );
       }
       setState(STATE.DEFAULT);
     },

@@ -9,7 +9,7 @@
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Filter, FilterMeta, FILTERS } from './types';
 import { getPhraseScript, PhraseFilterValue } from './phrase_filter';
-import type { DataViewFieldBase, DataViewBase } from '../../es_query';
+import type { DataViewFieldBase, DataViewBaseNoFields } from '../../es_query';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: PhraseFilterValue[]; // The unformatted values
@@ -50,7 +50,7 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
 export const buildPhrasesFilter = (
   field: DataViewFieldBase,
   params: PhraseFilterValue[],
-  indexPattern: DataViewBase
+  indexPattern: DataViewBaseNoFields
 ) => {
   const index = indexPattern.id;
   const type = FILTERS.PHRASES;

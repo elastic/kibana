@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
     async function enablementPut(role: RoleName = 'admin', expectedStatus: number = 200) {
       return supertestWithoutAuth
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-        .set(internalRequestHeader)
+        .set(internalRequestHeader as unknown as Record<string, string>)
         .set(await svlUserManager.getApiCredentialsForRole(role))
         .expect(expectedStatus);
     }
@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
     async function enablementDelete(role: RoleName = 'admin', expectedStatus: number = 200) {
       return supertestWithoutAuth
         .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
-        .set(internalRequestHeader)
+        .set(internalRequestHeader as unknown as Record<string, string>)
         .set(await svlUserManager.getApiCredentialsForRole(role))
         .expect(expectedStatus);
     }

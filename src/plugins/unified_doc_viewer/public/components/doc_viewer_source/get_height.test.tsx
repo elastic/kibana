@@ -8,6 +8,7 @@
 
 import { monaco } from '@kbn/monaco';
 import { getHeight } from './get_height';
+import { MARGIN_BOTTOM } from './source';
 
 describe('getHeight', () => {
   Object.defineProperty(window, 'innerHeight', { writable: true, configurable: true, value: 500 });
@@ -32,7 +33,7 @@ describe('getHeight', () => {
     const monacoMock = getMonacoMock(500, 0);
 
     const height = getHeight(monacoMock, true);
-    expect(height).toBe(475);
+    expect(height).toBe(500 - MARGIN_BOTTOM);
   });
 
   test('when using document explorer, returning the available height in the flyout has a minimun guarenteed height', () => {

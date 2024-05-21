@@ -104,7 +104,7 @@ export const getAssetCriticalityDoc = async (opts: {
 };
 
 export const assetCriticalityRouteHelpersFactory = (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   namespace?: string
 ) => ({
   status: async () =>
@@ -170,7 +170,7 @@ export const assetCriticalityRouteHelpersFactory = (
 });
 
 export const assetCriticalityRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  supertestWithoutAuth: SuperTest.Agent,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>

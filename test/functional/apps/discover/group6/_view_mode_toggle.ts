@@ -99,7 +99,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.existOrFail('dscViewModeToggle');
         });
 
-        it('should not show view mode toggle for text-based searches', async () => {
+        it('should not show view mode toggle for ES|QL searches', async () => {
           await testSubjects.click('dscViewModeDocumentButton');
 
           await retry.try(async () => {
@@ -118,7 +118,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         });
 
-        it('should show text-based columns callout', async () => {
+        it('should show ES|QL columns callout', async () => {
           await testSubjects.missingOrFail('dscSelectedColumnsCallout');
           await PageObjects.unifiedFieldList.clickFieldListItemAdd('extension');
           await PageObjects.header.waitUntilLoadingHasFinished();

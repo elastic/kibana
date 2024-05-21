@@ -17,7 +17,7 @@ import { dataViewWithNoTimefieldMock } from '../../../../__mocks__/data_view_no_
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
-const mount = (dataView = dataViewMock, isPlainRecord = false) => {
+const mount = (dataView = dataViewMock, isEsqlMode = false) => {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.actions.setDataView(dataView);
   return mountWithIntl(
@@ -26,7 +26,7 @@ const mount = (dataView = dataViewMock, isPlainRecord = false) => {
         stateContainer={stateContainer}
         anchorElement={document.createElement('div')}
         adHocDataViews={[]}
-        isPlainRecord={isPlainRecord}
+        isEsqlMode={isEsqlMode}
         services={discoverServiceMock}
         onClose={jest.fn()}
       />

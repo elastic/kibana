@@ -28,7 +28,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       docLinks: {
         links: {
           securitySolution: {
-            ruleUiAdvancedParams: 'http://link-to-docs',
+            createDetectionRules: 'http://link-to-docs',
           },
         },
       },
@@ -669,82 +669,6 @@ describe('RelatedIntegrations form part', () => {
         });
       });
     });
-
-    describe('sticky last form row', () => {
-      it('does not remove the last item', async () => {
-        render(<TestForm />, { wrapper: createReactQueryWrapper() });
-
-        await addRelatedIntegrationRow();
-        await removeLastRelatedIntegrationRow();
-
-        expect(screen.getAllByTestId(RELATED_INTEGRATION_ROW)).toHaveLength(1);
-      });
-
-      it('disables remove button after clicking remove button on the last item', async () => {
-        render(<TestForm />, { wrapper: createReactQueryWrapper() });
-
-        await addRelatedIntegrationRow();
-        await removeLastRelatedIntegrationRow();
-
-        expect(screen.getByTestId(REMOVE_INTEGRATION_ROW_BUTTON_TEST_ID)).toBeDisabled();
-      });
-
-      it('clears selected integration when clicking remove the last form row button', async () => {
-        render(<TestForm />, { wrapper: createReactQueryWrapper() });
-
-        await addRelatedIntegrationRow();
-        await selectFirstEuiComboBoxOption({
-          comboBoxToggleButton: getLastByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
-        });
-        await removeLastRelatedIntegrationRow();
-
-        expect(screen.queryByTestId(COMBO_BOX_SELECTION_TEST_ID)).not.toBeInTheDocument();
-      });
-
-      it('submits an empty integration after clicking remove the last form row button', async () => {
-        const handleSubmit = jest.fn();
-
-        render(<TestForm onSubmit={handleSubmit} />, { wrapper: createReactQueryWrapper() });
-
-        await addRelatedIntegrationRow();
-        await selectFirstEuiComboBoxOption({
-          comboBoxToggleButton: getLastByTestId(COMBO_BOX_TOGGLE_BUTTON_TEST_ID),
-        });
-        await removeLastRelatedIntegrationRow();
-        await submitForm();
-        await waitFor(() => {
-          expect(handleSubmit).toHaveBeenCalled();
-        });
-
-        expect(handleSubmit).toHaveBeenCalledWith({
-          data: [{ package: '', version: '' }],
-          isValid: true,
-        });
-      });
-
-      it('submits an empty integration after previously saved integrations were removed', async () => {
-        const initialRelatedIntegrations: RelatedIntegration[] = [
-          { package: 'package-a', version: '^1.2.3' },
-        ];
-        const handleSubmit = jest.fn();
-
-        render(<TestForm initialState={initialRelatedIntegrations} onSubmit={handleSubmit} />, {
-          wrapper: createReactQueryWrapper(),
-        });
-
-        await waitForIntegrationsToBeLoaded();
-        await removeLastRelatedIntegrationRow();
-        await submitForm();
-        await waitFor(() => {
-          expect(handleSubmit).toHaveBeenCalled();
-        });
-
-        expect(handleSubmit).toHaveBeenCalledWith({
-          data: [{ package: '', version: '' }],
-          isValid: true,
-        });
-      });
-    });
   });
 });
 
@@ -776,11 +700,6 @@ function TestForm({ initialState, onSubmit }: TestFormProps): JSX.Element {
       </button>
     </Form>
   );
-}
-
-function getLastByTestId(testId: string): HTMLElement {
-  // getAllByTestId throws an error when there are no `testId` elements found
-  return screen.getAllByTestId(testId).at(-1)!;
 }
 
 function waitForIntegrationsToBeLoaded(): Promise<void> {

@@ -184,7 +184,7 @@ const nodeToEuiCollapsibleNavProps = (
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
-  const { id, path, href, renderAs } = navNode;
+  const { id, path, href, renderAs, isCollapsible = DEFAULT_IS_COLLAPSIBLE } = navNode;
   const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
 
   const isAccordion = hasChildren && !isItem;
@@ -222,6 +222,9 @@ const nodeToEuiCollapsibleNavProps = (
   }
 
   const onClick = (e: React.MouseEvent) => {
+    // Do not navigate if it is a collapsible accordion, link will be used in the breadcrumb
+    if (isAccordion && isCollapsible) return;
+
     if (href !== undefined) {
       e.preventDefault();
       navigateToUrl(href);

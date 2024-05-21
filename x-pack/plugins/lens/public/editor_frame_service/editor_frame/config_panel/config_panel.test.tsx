@@ -392,6 +392,7 @@ describe('ConfigPanel', () => {
             a: expect.anything(),
           },
           dateRange: expect.anything(),
+          absDateRange: expect.anything(),
           filters: [],
           now: expect.anything(),
           query: undefined,

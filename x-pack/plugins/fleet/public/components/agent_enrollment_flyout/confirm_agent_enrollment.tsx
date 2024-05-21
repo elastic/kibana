@@ -41,7 +41,10 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  * @param policyId
  * @returns agentIds
  */
-export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCountOptions) => {
+export const usePollingAgentCount = (
+  policyId: string,
+  opts?: UsePollingAgentCountOptions
+): { enrolledAgentIds: string[] } => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
   const [didPollInitially, setDidPollInitially] = useState(false);
   const timeout = useRef<number | undefined>(undefined);
@@ -89,7 +92,7 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
       isAborted = true;
     };
   }, [agentIds, policyId, kuery, getNewAgentIds]);
-  return agentIds;
+  return { enrolledAgentIds: agentIds };
 };
 
 export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({

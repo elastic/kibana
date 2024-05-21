@@ -273,7 +273,7 @@ async function getTraceDocsPerPage({
           type: 'number',
           script: {
             lang: 'painless',
-            source: `if (doc['${TRANSACTION_DURATION}'].size() > 0) { return doc['${TRANSACTION_DURATION}'].value } else { return doc['${SPAN_DURATION}'].value }`,
+            source: `$('${TRANSACTION_DURATION}', $('${SPAN_DURATION}', 0))`,
           },
           order: 'desc',
         },

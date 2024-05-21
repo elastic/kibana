@@ -5,6 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import { sloWithDataResponseSchema } from '../slo';
 
 const sortDirectionSchema = t.union([t.literal('asc'), t.literal('desc')]);
@@ -23,6 +24,7 @@ const findSLOParamsSchema = t.partial({
     perPage: t.string,
     sortBy: sortBySchema,
     sortDirection: sortDirectionSchema,
+    hideStale: toBooleanRt,
   }),
 });
 

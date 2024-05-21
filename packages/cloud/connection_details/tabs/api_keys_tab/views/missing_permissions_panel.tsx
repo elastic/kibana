@@ -7,25 +7,32 @@
  */
 
 import * as React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ManageKeysLink } from '../components/manage_keys_link';
 
 export const MissingPermissionsPanel: React.FC = () => {
   return (
-    <EuiCallOut
-      color={'warning'}
-      iconType={'iInCircle'}
-      title={i18n.translate('cloud.connectionDetails.tabs.apiKeys.missingPermPanel.title', {
-        defaultMessage: 'Missing permissions',
-      })}
-    >
-      <p>
-        {i18n.translate('cloud.connectionDetails.tabs.apiKeys.missingPermPanel.description', {
-          defaultMessage:
-            'Your assigned role does not have the necessary permissions to create an API key. ' +
-            'Please contact your administrator.',
+    <>
+      <EuiCallOut
+        color={'warning'}
+        iconType={'iInCircle'}
+        title={i18n.translate('cloud.connectionDetails.tabs.apiKeys.missingPermPanel.title', {
+          defaultMessage: 'Missing permissions',
         })}
-      </p>
-    </EuiCallOut>
+      >
+        <p>
+          {i18n.translate('cloud.connectionDetails.tabs.apiKeys.missingPermPanel.description', {
+            defaultMessage:
+              'Your assigned role does not have the necessary permissions to create an API key. ' +
+              'Please contact your administrator.',
+          })}
+        </p>
+      </EuiCallOut>
+
+      <EuiSpacer size={'m'} />
+
+      <ManageKeysLink />
+    </>
   );
 };

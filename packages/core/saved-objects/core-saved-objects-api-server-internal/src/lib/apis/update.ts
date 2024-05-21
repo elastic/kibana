@@ -246,18 +246,24 @@ export const executeUpdate = async <T>(
     // at this point, we already know 1. the document exists 2. we're not doing an upsert
     // therefor we can safely process with the "standard" update sequence.
 
-    const updatedAttributes = mergeForUpdate({
-      targetAttributes: {
-        ...(migrated!.attributes as Record<string, unknown>),
-      },
-      updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
-        type,
-        id,
-        namespace,
-        attributes
-      ),
-      typeMappings: typeDefinition.mappings,
-    });
+    const mergeAttributes = options.mergeAttributes ?? true;
+    const encryptedUpdatedAttributes = await encryptionHelper.optionallyEncryptAttributes(
+      type,
+      id,
+      namespace,
+      attributes
+    );
+
+    const updatedAttributes = mergeAttributes
+      ? mergeForUpdate({
+          targetAttributes: {
+            ...(migrated!.attributes as Record<string, unknown>),
+          },
+          updatedAttributes: encryptedUpdatedAttributes,
+          typeMappings: typeDefinition.mappings,
+        })
+      : encryptedUpdatedAttributes;
+
     const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
       ...migrated!,
       id,

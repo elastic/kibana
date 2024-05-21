@@ -10,11 +10,6 @@ import { ShareContext, ShareMenuProvider } from '../types';
 
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
-  newVersionEnabled: boolean;
-
-  constructor({ newVersionEnabled }: { newVersionEnabled: boolean }) {
-    this.newVersionEnabled = newVersionEnabled;
-  }
 
   public setup() {
     return {
@@ -26,25 +21,12 @@ export class ShareMenuRegistry {
        * @param shareMenuProvider
        */
       register: (shareMenuProvider: ShareMenuProvider) => {
-        if (
-          !this.newVersionEnabled &&
-          (shareMenuProvider.id === 'csvReports' ||
-            shareMenuProvider.id === 'screenCaptureReports' ||
-            shareMenuProvider.id === 'csvDownloadLens')
-        ) {
-          if (this.shareMenuProviders.has(shareMenuProvider.id)) {
-            throw new Error(
-              `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
-            );
-          }
-          this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
-        } else if (
-          shareMenuProvider.id === 'csvReportsModal' ||
-          shareMenuProvider.id === 'modalImageReports' ||
-          shareMenuProvider.id === 'csvDownloadLens'
-        ) {
-          this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
+        if (this.shareMenuProviders.has(shareMenuProvider.id)) {
+          throw new Error(
+            `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
+          );
         }
+        this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
       },
     };
   }

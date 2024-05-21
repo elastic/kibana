@@ -10,6 +10,7 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getPostKnowledgeBaseRequest } from '../../__mocks__/request';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Post Knowledge Base Route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -19,10 +20,18 @@ describe('Post Knowledge Base Route', () => {
   clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
   const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
+  const mockUser = {
+    username: 'my_username',
+    authentication_realm: {
+      type: 'my_realm_type',
+      name: 'my_realm_name',
+    },
+  } as AuthenticatedUser;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
+    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
 
     postKnowledgeBaseRoute(server.router, mockGetElser);
   });
@@ -38,7 +47,7 @@ describe('Post Knowledge Base Route', () => {
     });
 
     test('returns 500 if error is thrown when creating resources', async () => {
-      context.core.elasticsearch.client.asCurrentUser.indices.exists.mockRejectedValue(
+      context.core.elasticsearch.client.asInternalUser.indices.exists.mockRejectedValue(
         new Error('Test error')
       );
       const response = await server.inject(

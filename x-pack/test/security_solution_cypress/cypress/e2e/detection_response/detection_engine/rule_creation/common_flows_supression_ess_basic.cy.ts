@@ -14,6 +14,7 @@ import {
   selectIndicatorMatchType,
   selectNewTermsRuleType,
   selectThresholdRuleType,
+  selectEsqlRuleType,
   openSuppressionFieldsTooltipAndCheckLicense,
 } from '../../../../tasks/create_new_rule';
 import { startBasicLicense } from '../../../../tasks/api_calls/licensing';
@@ -46,6 +47,9 @@ describe(
         openSuppressionFieldsTooltipAndCheckLicense();
 
         selectNewTermsRuleType();
+        openSuppressionFieldsTooltipAndCheckLicense();
+
+        selectEsqlRuleType();
         openSuppressionFieldsTooltipAndCheckLicense();
 
         selectThresholdRuleType();

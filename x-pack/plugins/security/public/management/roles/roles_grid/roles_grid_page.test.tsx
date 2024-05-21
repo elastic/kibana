@@ -57,6 +57,12 @@ describe('<RolesGridPage />', () => {
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
       {
+        name: 'test-role-with-description',
+        description: 'role-description',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
         name: 'reserved-role',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
@@ -162,6 +168,10 @@ describe('<RolesGridPage />', () => {
 
     expect(wrapper.find('a[data-test-subj="edit-role-action-disabled-role"]')).toHaveLength(1);
     expect(wrapper.find('a[data-test-subj="clone-role-action-disabled-role"]')).toHaveLength(1);
+
+    expect(findTestSubject(wrapper, 'roleRowDescription-test-role-with-description')).toHaveLength(
+      1
+    );
   });
 
   it('hides reserved roles when instructed to', async () => {
@@ -201,6 +211,12 @@ describe('<RolesGridPage />', () => {
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },
+      {
+        name: 'test-role-with-description',
+        description: 'role-description',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
     ]);
 
     findTestSubject(wrapper, 'showReservedRolesSwitch').simulate('click');
@@ -219,6 +235,12 @@ describe('<RolesGridPage />', () => {
       },
       {
         name: 'test-role-1',
+        elasticsearch: { cluster: [], indices: [], run_as: [] },
+        kibana: [{ base: [], spaces: [], feature: {} }],
+      },
+      {
+        name: 'test-role-with-description',
+        description: 'role-description',
         elasticsearch: { cluster: [], indices: [], run_as: [] },
         kibana: [{ base: [], spaces: [], feature: {} }],
       },

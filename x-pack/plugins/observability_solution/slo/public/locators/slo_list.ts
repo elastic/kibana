@@ -10,7 +10,6 @@ import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import deepmerge from 'deepmerge';
 import { sloListLocatorID } from '@kbn/observability-plugin/common';
-import { SLO_PREFIX } from '../../common/locators/paths';
 import {
   DEFAULT_STATE,
   SearchState,
@@ -36,7 +35,7 @@ export class SloListLocatorDefinition implements LocatorDefinition<SloListLocato
           useHash: false,
           storeInHashQuery: false,
         },
-        SLO_PREFIX
+        '/'
       ),
       state: {},
     };

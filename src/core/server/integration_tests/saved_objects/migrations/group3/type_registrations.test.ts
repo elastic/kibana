@@ -49,6 +49,7 @@ const previouslyRegisteredTypes = [
   'event-annotation-group',
   'endpoint:user-artifact',
   'endpoint:user-artifact-manifest',
+  'endpoint:unified-user-artifact-manifest',
   'enterprise_search_telemetry',
   'epm-packages',
   'epm-packages-assets',

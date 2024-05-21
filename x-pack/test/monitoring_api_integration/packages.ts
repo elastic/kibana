@@ -30,10 +30,7 @@ export const getPackagesArgs = (): string[] => {
 
 export const bundledPackagesLocation = path.join(path.dirname(__filename), '/fixtures/packages');
 
-export function installPackage(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  packageName: SupportedPackage
-) {
+export function installPackage(supertest: SuperTest.Agent, packageName: SupportedPackage) {
   const pkg = PACKAGES.find(({ name }) => name === packageName);
   const request = supertest
     .post('/api/fleet/epm/packages')

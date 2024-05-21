@@ -27,7 +27,15 @@ contentManagement.client.create = jest.fn().mockImplementation(({ options }) => 
   if (options.id === undefined) {
     return { item: { id: 'newlyGeneratedId' } };
   }
-  return { item: { id: options.id } };
+
+  throw new Error('Update should be used when id is provided');
+});
+
+contentManagement.client.update = jest.fn().mockImplementation(({ id }) => {
+  if (id === undefined) {
+    throw new Error('Update needs an id');
+  }
+  return { item: { id } };
 });
 
 const allServices = {
@@ -61,10 +69,8 @@ describe('Save dashboard state', () => {
     });
 
     expect(result.id).toBe('Boogaloo');
-    expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        options: expect.objectContaining({ id: 'Boogaloo', overwrite: true }),
-      })
+    expect(allServices.contentManagement.client.update).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'Boogaloo' })
     );
     expect(allServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
       title: `Dashboard 'BOO' was saved`,
@@ -88,7 +94,7 @@ describe('Save dashboard state', () => {
     expect(result.redirectRequired).toBe(true);
     expect(allServices.contentManagement.client.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        options: expect.objectContaining({ id: undefined, overwrite: true }),
+        options: { references: [] },
       })
     );
     expect(allServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({

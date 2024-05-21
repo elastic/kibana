@@ -7,6 +7,7 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { Platform } from '../../../management/components/endpoint_responder/components/header_info/platforms';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
 import type { ThirdPartyAgentInfo } from '../../../../common/types';
@@ -165,6 +166,7 @@ export const useResponderActionData = ({
         agentType: 'endpoint',
         capabilities: (hostInfo.metadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
         hostName: hostInfo.metadata.host.name,
+        platform: hostInfo.metadata.host.os.name.toLowerCase() as Platform,
       });
     }
     if (onClick) onClick();

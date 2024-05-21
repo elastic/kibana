@@ -18,6 +18,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
   EmbeddableApiContext,
+  HasEditCapabilities,
   HasParentApi,
   HasType,
   PublishesUnifiedSearch,
@@ -154,6 +155,7 @@ export interface SingleMetricViewerEmbeddableState
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
     PublishesWritablePanelTitle &
+    HasEditCapabilities &
     SingleMetricViewerComponentApi;
 
 /**

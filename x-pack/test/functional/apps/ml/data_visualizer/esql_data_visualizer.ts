@@ -35,7 +35,7 @@ export interface TestData {
 
 const esqlFarequoteData = {
   suiteTitle: 'ES|QL farequote',
-  query: 'from `ft_farequote`',
+  query: 'from ft_farequote',
   sourceIndexOrSavedSearch: 'ft_farequote',
   expected: {
     hasDocCountChart: true,
@@ -310,8 +310,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
     });
 
-    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/183046
-    describe.skip('with farequote', function () {
+    describe('with farequote', function () {
       runTests(esqlFarequoteData);
     });
 

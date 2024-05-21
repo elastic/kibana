@@ -204,8 +204,7 @@ export const EmbedContent = ({
     setUrlHelper();
     getUrlParamExtensions(url);
     window.addEventListener('hashchange', resetUrl, false);
-    isMounted();
-  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url, isMounted]);
+  }, [getUrlParamExtensions, resetUrl, setUrlHelper, url]);
 
   const renderUrlParamExtensions = () => {
     if (!urlParamExtensions) {
@@ -265,7 +264,7 @@ export const EmbedContent = ({
               >
                 <FormattedMessage
                   id="share.link.copyEmbedCodeButton"
-                  defaultMessage="Copy Embed Code"
+                  defaultMessage="Copy embed code"
                 />
               </EuiButton>
             )}

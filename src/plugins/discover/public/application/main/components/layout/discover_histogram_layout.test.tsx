@@ -17,7 +17,6 @@ import {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
-  RecordRawType,
 } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import { FetchStatus, SidebarToggleState } from '../../../types';
@@ -34,13 +33,14 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
 
   stateContainer.appState.update({
-    index: dataView?.id,
+    dataSource: createDataViewDataSource({ dataViewId: dataView?.id! }),
     interval: 'auto',
     hideChart: false,
   });
@@ -51,12 +51,12 @@ function getStateContainer(savedSearch?: SavedSearch) {
 }
 
 const mountComponent = async ({
-  isPlainRecord = false,
+  isEsqlMode = false,
   storage,
   savedSearch = savedSearchMockWithTimeField,
   searchSessionId = '123',
 }: {
-  isPlainRecord?: boolean;
+  isEsqlMode?: boolean;
   isTimeBased?: boolean;
   storage?: Storage;
   savedSearch?: SavedSearch;
@@ -85,7 +85,6 @@ const mountComponent = async ({
 
   const main$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    recordRawType: isPlainRecord ? RecordRawType.PLAIN : RecordRawType.DOCUMENT,
     foundDocuments: true,
   }) as DataMain$;
 
@@ -120,7 +119,6 @@ const mountComponent = async ({
   stateContainer.actions.undoSavedSearchChanges = jest.fn();
 
   const props: DiscoverHistogramLayoutProps = {
-    isPlainRecord,
     dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
@@ -175,8 +173,8 @@ describe('Discover histogram layout component', () => {
       expect(component.isEmptyRender()).toBe(false);
     }, 10000);
 
-    it('should not render null if there is no search session, but isPlainRecord is true', async () => {
-      const { component } = await mountComponent({ isPlainRecord: true });
+    it('should not render null if there is no search session, but isEsqlMode is true', async () => {
+      const { component } = await mountComponent({ isEsqlMode: true });
       expect(component.isEmptyRender()).toBe(false);
     });
 

@@ -109,6 +109,11 @@ export function defineRoutes({
 
       try {
         sourceFields = JSON.parse(data.source_fields);
+        sourceFields = Object.keys(sourceFields).reduce((acc, key) => {
+          // @ts-ignore
+          acc[key] = sourceFields[key][0];
+          return acc;
+        }, {});
       } catch (e) {
         logger.error('Failed to parse the source fields', e);
         throw Error(e);

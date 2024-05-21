@@ -22,7 +22,11 @@ export const EditContextAction: React.FC = () => {
   return (
     <>
       {showFlyout && <EditContextFlyout onClose={closeFlyout} />}
-      <EuiButtonEmpty onClick={() => setShowFlyout(true)} disabled={selectedIndices?.length === 0}>
+      <EuiButtonEmpty
+        onClick={() => setShowFlyout(true)}
+        disabled={selectedIndices?.length === 0}
+        data-test-subj="editContextActionButton"
+      >
         <FormattedMessage
           id="xpack.searchPlayground.editContext.actionButtonLabel"
           defaultMessage="Edit context"

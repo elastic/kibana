@@ -56,4 +56,6 @@ export const DATA_TIERS = ['data_hot'];
 
 export const FLEET_ENROLLMENT_API_PREFIX = 'fleet-enrollment-api-keys';
 
+export const REQUEST_DIAGNOSTICS_TIMEOUT_MS = 3 * 60 * 60 * 1000; // 3 hours;
+
 export * from './mappings';

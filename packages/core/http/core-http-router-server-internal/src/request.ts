@@ -29,6 +29,7 @@ import {
   KibanaRequestRouteOptions,
   RawRequest,
   FakeRawRequest,
+  HttpProtocol,
 } from '@kbn/core-http-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
@@ -131,6 +132,10 @@ export class CoreKibanaRequest<
   public readonly isInternalApiRequest: boolean;
   /** {@inheritDoc KibanaRequest.rewrittenUrl} */
   public readonly rewrittenUrl?: URL;
+  /** {@inheritDoc KibanaRequest.httpVersion} */
+  public readonly httpVersion: string;
+  /** {@inheritDoc KibanaRequest.protocol} */
+  public readonly protocol: HttpProtocol;
 
   /** @internal */
   protected readonly [requestSymbol]!: Request;
@@ -166,6 +171,10 @@ export class CoreKibanaRequest<
       value: request,
       enumerable: false,
     });
+
+    this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
+    // hardcoded for now as only supporting http1
+    this.protocol = 'http1';
 
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = isRealReq

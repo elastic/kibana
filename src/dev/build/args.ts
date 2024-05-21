@@ -31,6 +31,7 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-contexts',
       'skip-docker-ubi',
       'skip-docker-ubuntu',
+      'skip-docker-chainguard',
       'skip-docker-cloud',
       'skip-docker-serverless',
       'skip-docker-fips',
@@ -139,6 +140,8 @@ export function readCliArgs(argv: string[]) {
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubuntu']),
+    createDockerChainguard:
+      isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-chainguard']),
     createDockerCloud: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-cloud']),
     createDockerServerless:
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless']),

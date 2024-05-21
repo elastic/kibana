@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
@@ -121,7 +121,7 @@ export const importTestCaseFailures = {
     condition !== false ? { failureType: 'missing_references' } : {},
 };
 
-export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
+export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbidden = (action: string, typeOrTypes: string | string[]) =>
     expectResponses.forbiddenTypes(action)(typeOrTypes);
   const expectResponseBody =
@@ -310,7 +310,7 @@ export function importTestSuiteFactory(es: Client, esArchiver: any, supertest: S
               : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_import${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')
               .expect(test.responseStatusCode)
               .then(test.responseBody);

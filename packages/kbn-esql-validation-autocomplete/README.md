@@ -11,6 +11,8 @@ src
  | code_actions         // => the quick fixes service logic
  | definitions          // => static assets to define all components behaviour of a ES|QL query: commands, functions, etc...
  | validation           // => the validation logic
+
+scripts                 // => scripts used to manage the validation engine code
 ```
 
 ### Basic usage
@@ -45,12 +47,12 @@ import { validateQuery } from '@kbn/esql-validation-autocomplete';
 
 // define only the getSources callback
 const myCallbacks = {
-  getSources: async () => [{name: 'index', hidden: false}],
+  getSources: async () => [{ name: 'index', hidden: false }],
 };
 
 // ignore errors that might be triggered by the lack of some callbacks (i.e. "Unknown columns", etc...)
 const { errors, warnings } = await validateQuery(
-  "from index | stats 1 + avg(myColumn)",
+  'from index | stats 1 + avg(myColumn)',
   getAstAndSyntaxErrors,
   { ignoreOnMissingCallbacks: true },
   myCallbacks
@@ -161,12 +163,12 @@ For instance to show contextual information on Hover the `getAstContext` functio
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { getAstContext } from '@kbn/esql-validation-autocomplete';
 
-const queryString = "from index2 | stats 1 + avg(myColumn)";
-const offset = queryString.indexOf("avg");
+const queryString = 'from index2 | stats 1 + avg(myColumn)';
+const offset = queryString.indexOf('avg');
 
 const astContext = getAstContext(queryString, getAstAndSyntaxErrors(queryString), offset);
 
-if(astContext.type === "function"){
+if (astContext.type === 'function') {
   const fnNode = astContext.node;
   const fnDefinition = getFunctionDefinition(fnNode.name);
 
@@ -174,7 +176,6 @@ if(astContext.type === "function"){
   console.log(getFunctionSignature(fnDefinition));
 }
 ```
-
 
 ### How does it work
 
@@ -211,9 +212,9 @@ The most complex case is the `expression` as it can cover a moltitude of cases. 
 ### Adding new commands/options/functions/erc...
 
 To update the definitions:
+
 1. open either approriate definition file within the `definitions` folder and add a new entry to the relative array
-2. write new tests for validation and autocomplete
-  * if a new function is added tests are automatically generated fro both validation and autocomplete with some standard checks
-  * if a new function requires a new field types, make sure to add the new type to the initial part of the test file
-    * this will be automatically picked up by the test generator to produce new test cases
-  * if a new function requires a new type of test, make sure to write it manually
+2. if you are adding a function, run `yarn maketests` to add a set of fundamental validation tests for the new definition. If any of the suggested tests are wrong, feel free to correct them by hand. If it seems like a general problem, open an issue with the details so that we can update the generator code.
+3. write new tests for validation and autocomplete
+
+- if a new function requires a new type of test, make sure to write it manually

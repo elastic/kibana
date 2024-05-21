@@ -9,11 +9,11 @@ import type { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/type
 import type { WriteSamplesPostBody } from '@kbn/assetManager-plugin/server';
 import { apm, infra, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 
 const SAMPLE_ASSETS_ENDPOINT = '/api/asset-manager/assets/sample';
 
-export type KibanaSupertest = SuperTest<Test>;
+export type KibanaSupertest = SuperTestAgent;
 
 // NOTE: In almost every case in tests, you want { refresh: true }
 // in the options of this function, so it is defaulted to that value.

@@ -19,7 +19,9 @@ export const consoleDefinition: Partial<LanguageDefinition> = {
     }
   }
 }`,
-  ingestData: `POST _bulk?pretty
+  ingestData: ({ ingestPipeline }) => `POST _bulk?pretty${
+    ingestPipeline ? `&pipeline=${ingestPipeline}` : ''
+  }
 { "index" : { "_index" : "books" } }
 {"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470}
 { "index" : { "_index" : "books" } }

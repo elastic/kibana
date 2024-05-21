@@ -16,7 +16,11 @@ export {
 } from './package_to_package_policy';
 export { fullAgentPolicyToYaml } from './full_agent_policy_to_yaml';
 export { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from './limited_package';
-export { isValidNamespace, INVALID_NAMESPACE_CHARACTERS } from './is_valid_namespace';
+export {
+  isValidDataset,
+  isValidNamespace,
+  INVALID_NAMESPACE_CHARACTERS,
+} from './is_valid_namespace';
 export { isDiffPathProtocol } from './is_diff_path_protocol';
 export { LicenseService } from './license';
 export * from './is_agent_upgradeable';

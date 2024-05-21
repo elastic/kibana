@@ -35,8 +35,11 @@ export const LinkedAgentCount = memo<
     count
   );
   const kuery = `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}${
-    privilegeMode &&
-    ` and ${privilegeMode === 'unprivileged' ? UNPRIVILEGED_AGENT_KUERY : PRIVILEGED_AGENT_KUERY}`
+    privilegeMode
+      ? ` and ${
+          privilegeMode === 'unprivileged' ? UNPRIVILEGED_AGENT_KUERY : PRIVILEGED_AGENT_KUERY
+        }`
+      : ''
   }`;
 
   return count > 0 ? (

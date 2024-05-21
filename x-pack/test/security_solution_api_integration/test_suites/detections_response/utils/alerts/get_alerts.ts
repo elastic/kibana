@@ -18,7 +18,7 @@ import { refreshIndex } from '..';
 import { getAlertsByIds, waitForRuleStatus } from '../../../../../common/utils/security_solution';
 
 export type GetAlerts = (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   es: Client,
   rule: RuleResponse,

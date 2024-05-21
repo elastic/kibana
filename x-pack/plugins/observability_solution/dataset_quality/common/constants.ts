@@ -25,6 +25,7 @@ export const DEFAULT_DATEPICKER_REFRESH = { value: 60000, pause: false };
 export const DEFAULT_DEGRADED_DOCS = {
   percentage: 0,
   count: 0,
+  docsCount: 0,
   quality: 'good' as QualityIndicators,
 };
 

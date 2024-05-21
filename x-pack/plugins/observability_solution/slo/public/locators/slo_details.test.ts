@@ -13,12 +13,12 @@ describe('SloDetailsLocator', () => {
   it('returns correct url when empty params are provided', async () => {
     const location = await locator.getLocation({});
     expect(location.app).toEqual('slo');
-    expect(location.path).toEqual('/slos');
+    expect(location.path).toEqual('/');
   });
 
   it('returns correct url when sloId is provided', async () => {
     const location = await locator.getLocation({ sloId: 'foo' });
-    expect(location.path).toEqual('/slos/foo');
+    expect(location.path).toEqual('/foo');
   });
 
   it('returns correct url when sloId and instanceId are provided', async () => {
@@ -26,7 +26,7 @@ describe('SloDetailsLocator', () => {
       sloId: 'some-slo_id',
       instanceId: 'another-instance_id',
     });
-    expect(location.path).toEqual('/slos/some-slo_id?instanceId=another-instance_id');
+    expect(location.path).toEqual('/some-slo_id?instanceId=another-instance_id');
   });
 
   it("returns correct url when sloId and instanceId='*' is provided", async () => {
@@ -34,6 +34,6 @@ describe('SloDetailsLocator', () => {
       sloId: 'some-slo_id',
       instanceId: '*',
     });
-    expect(location.path).toEqual('/slos/some-slo_id');
+    expect(location.path).toEqual('/some-slo_id');
   });
 });

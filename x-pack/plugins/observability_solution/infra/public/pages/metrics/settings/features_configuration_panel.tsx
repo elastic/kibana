@@ -13,6 +13,7 @@ import React from 'react';
 import {
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureContainerAssetView,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -83,6 +84,12 @@ export function FeaturesConfigurationPanel({
             unsavedChange={unsavedChanges[enableInfrastructureProfilingIntegration]}
           />
         )}
+        <FieldRow
+          field={fields[enableInfrastructureContainerAssetView]}
+          isSavingEnabled={true}
+          onFieldChange={handleFieldChange}
+          unsavedChange={unsavedChanges[enableInfrastructureContainerAssetView]}
+        />
       </FieldRowProvider>
     </EuiForm>
   );

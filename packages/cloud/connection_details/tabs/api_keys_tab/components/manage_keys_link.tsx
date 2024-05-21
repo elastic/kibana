@@ -21,7 +21,10 @@ export const ManageKeysLink: React.FC = () => {
   return (
     <SpaNoRouterLink
       url={link}
-      go={service.opts?.navigateToUrl}
+      go={() => {
+        service.emitTelemetryEvent(['manage_api_keys_clicked']);
+        service.opts?.navigateToUrl?.(link);
+      }}
       data-test-subj={'connectionDetailsManageApiKeysLink'}
     >
       {i18n.translate('cloud.connectionDetails.apiKeys.managerLinkLabel', {

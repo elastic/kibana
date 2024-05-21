@@ -348,6 +348,111 @@
                     ]
                   }
                 ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                "id": "def-common.MarkdownStorybookMock.propArguments.enableTooltipSupport",
+                "type": "Object",
+                "tags": [],
+                "label": "enableTooltipSupport",
+                "description": [],
+                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                    "id": "def-common.MarkdownStorybookMock.propArguments.enableTooltipSupport.control",
+                    "type": "string",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                    "id": "def-common.MarkdownStorybookMock.propArguments.enableTooltipSupport.defaultValue",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                "id": "def-common.MarkdownStorybookMock.propArguments.validateLinks",
+                "type": "Object",
+                "tags": [],
+                "label": "validateLinks",
+                "description": [],
+                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                    "id": "def-common.MarkdownStorybookMock.propArguments.validateLinks.control",
+                    "type": "string",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                    "id": "def-common.MarkdownStorybookMock.propArguments.validateLinks.defaultValue",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                "id": "def-common.MarkdownStorybookMock.propArguments.enableSoftLineBreaks",
+                "type": "Object",
+                "tags": [],
+                "label": "enableSoftLineBreaks",
+                "description": [],
+                "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                    "id": "def-common.MarkdownStorybookMock.propArguments.enableSoftLineBreaks.control",
+                    "type": "string",
+                    "tags": [],
+                    "label": "control",
+                    "description": [],
+                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/shared-ux-markdown-mocks",
+                    "id": "def-common.MarkdownStorybookMock.propArguments.enableSoftLineBreaks.defaultValue",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "defaultValue",
+                    "description": [],
+                    "path": "packages/shared-ux/markdown/mocks/storybook.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ]
           },

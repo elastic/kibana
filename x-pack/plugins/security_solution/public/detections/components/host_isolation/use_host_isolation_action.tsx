@@ -25,7 +25,7 @@ import { ISOLATE_HOST, UNISOLATE_HOST } from './translations';
 import { getFieldValue } from './helpers';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
-import { useAgentStatusHook } from './use_sentinelone_host_isolation';
+import { useAgentStatusHook } from '../../../management/hooks/agents/use_get_agent_status';
 
 interface UseHostIsolationActionProps {
   closePopover: () => void;

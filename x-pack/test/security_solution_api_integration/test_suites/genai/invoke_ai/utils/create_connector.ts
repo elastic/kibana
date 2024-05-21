@@ -45,7 +45,7 @@ const connectorSetup = {
  * @param spaceId The space id
  */
 export const createConnector = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   objectRemover: ObjectRemover,
   apiUrl: string,
   connectorType: 'bedrock' | 'openai',

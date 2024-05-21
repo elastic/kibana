@@ -434,7 +434,8 @@
             "text": "HttpMethod"
           },
           ", path: string) => ",
-          "Test"
+          "SuperTestStatic",
+          ".Test"
         ],
         "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
         "deprecated": false,
@@ -833,7 +834,8 @@
                 "text": "Root"
               },
               ", path: string) => ",
-              "Test"
+              "SuperTestStatic",
+              ".Test"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
             "deprecated": false,
@@ -895,7 +897,8 @@
                 "text": "Root"
               },
               ", path: string) => ",
-              "Test"
+              "SuperTestStatic",
+              ".Test"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
             "deprecated": false,
@@ -957,7 +960,8 @@
                 "text": "Root"
               },
               ", path: string) => ",
-              "Test"
+              "SuperTestStatic",
+              ".Test"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
             "deprecated": false,
@@ -1019,7 +1023,8 @@
                 "text": "Root"
               },
               ", path: string) => ",
-              "Test"
+              "SuperTestStatic",
+              ".Test"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
             "deprecated": false,
@@ -1081,7 +1086,8 @@
                 "text": "Root"
               },
               ", path: string) => ",
-              "Test"
+              "SuperTestStatic",
+              ".Test"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
             "deprecated": false,
@@ -1143,7 +1149,8 @@
                 "text": "Root"
               },
               ", path: string) => ",
-              "Test"
+              "SuperTestStatic",
+              ".Test"
             ],
             "path": "packages/core/test-helpers/core-test-helpers-kbn-server/src/create_root.ts",
             "deprecated": false,

@@ -15,7 +15,8 @@ import { useGetCaseConnectors } from './use_get_case_connectors';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetCaseConnectors', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174356
+describe.skip('useGetCaseConnectors', () => {
   const caseId = 'test-id';
   const abortCtrl = new AbortController();
   const addSuccess = jest.fn();

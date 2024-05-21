@@ -35,6 +35,7 @@ import type {
   PostBulkUpdateAgentTagsRequestSchema,
   GetActionStatusRequestSchema,
   GetAgentUploadFileRequestSchema,
+  DeleteAgentUploadFileRequestSchema,
   PostRetrieveAgentsByActionsRequestSchema,
 } from '../../types';
 import { defaultFleetErrorHandler } from '../../errors';
@@ -425,6 +426,20 @@ export const getAgentUploadFileHandler: RequestHandler<
     );
 
     return response.ok(resp);
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const deleteAgentUploadFileHandler: RequestHandler<
+  TypeOf<typeof DeleteAgentUploadFileRequestSchema.params>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  try {
+    const resp = await AgentService.deleteAgentUploadFile(esClient, request.params.fileId);
+
+    return response.ok({ body: resp });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

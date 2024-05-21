@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 }
 
-export async function deleteAllActionConnectors(supertest: SuperTest<Test>): Promise<any> {
+export async function deleteAllActionConnectors(supertest: SuperTestAgent): Promise<any> {
   const res = await supertest.get(`/api/actions/connectors`);
 
   const body = res.body as Array<{ id: string; connector_type_id: string; name: string }>;

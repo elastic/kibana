@@ -17,7 +17,7 @@ import { useAsyncMemo } from '../hooks/use_async_memo';
 
 const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
-  const { http, docLinks } = start.core;
+  const { http, docLinks, analytics } = start.core;
   const locator = start.plugins?.share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = await locator?.getUrl({ sectionId: 'security', appId: 'api_keys' });
   const result: ConnectionDetailsOpts = {
@@ -35,6 +35,7 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
     endpoints: {
       id: start.plugins?.cloud?.cloudId,
       url: start.plugins?.cloud?.elasticsearchUrl,
+      cloudIdLearMoreLink: docLinks?.links?.cloud?.beatsAndLogstashConfiguration,
       ...options?.endpoints,
     },
     apiKeys: {
@@ -67,6 +68,51 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
       hasPermission: async () => true,
       ...options?.apiKeys,
     },
+    onTelemetryEvent: (event) => {
+      if (!analytics) return;
+      switch (event[0]) {
+        case 'learn_more_clicked': {
+          analytics.reportEvent('connection_details_learn_more_clicked', {});
+          break;
+        }
+        case 'tab_switched': {
+          analytics.reportEvent('connection_details_tab_switched', { tab: event[1]!.tab });
+          break;
+        }
+        case 'copy_endpoint_url_clicked': {
+          analytics.reportEvent('connection_details_copy_endpoint_url_clicked', {});
+          break;
+        }
+        case 'show_cloud_id_toggled': {
+          analytics.reportEvent('connection_details_show_cloud_id_toggled', {});
+          break;
+        }
+        case 'copy_cloud_id_clicked': {
+          analytics.reportEvent('connection_details_copy_cloud_id_clicked', {});
+          break;
+        }
+        case 'new_api_key_created': {
+          analytics.reportEvent('connection_details_new_api_key_created', {});
+          break;
+        }
+        case 'manage_api_keys_clicked': {
+          analytics.reportEvent('connection_details_manage_api_keys_clicked', {});
+          break;
+        }
+        case 'key_encoding_changed': {
+          analytics.reportEvent('connection_details_key_encoding_changed', {
+            format: event[1]!.format,
+          });
+          break;
+        }
+        case 'copy_api_key_clicked': {
+          analytics.reportEvent('connection_details_copy_api_key_clicked', {
+            format: event[1]!.format,
+          });
+          break;
+        }
+      }
+    },
   };
 
   return result;
@@ -82,6 +128,7 @@ export interface KibanaConnectionDetailsProviderProps {
       theme: CoreStart['theme'];
       http?: CoreStart['http'];
       application?: CoreStart['application'];
+      analytics?: CoreStart['analytics'];
     };
     plugins?: {
       cloud?: CloudStart;

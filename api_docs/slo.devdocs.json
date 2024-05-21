@@ -231,7 +231,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; isNewVersion: () => boolean; }"
+              ") => void; }"
             ],
             "path": "x-pack/plugins/observability_solution/slo/public/types.ts",
             "deprecated": false,
@@ -1511,6 +1511,26 @@
                 "text": "SpacesPluginStart"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_solution/slo/server/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "slo",
+            "id": "def-server.PluginStart.ruleRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleRegistry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleRegistryPluginStartContract",
+                "text": "RuleRegistryPluginStartContract"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/slo/server/plugin.ts",
             "deprecated": false,

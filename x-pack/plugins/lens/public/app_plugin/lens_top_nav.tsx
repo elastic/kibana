@@ -623,15 +623,19 @@ export const LensTopNavMenu = ({
             share.toggleShareContextMenu({
               anchorElement,
               allowEmbed: false,
-              allowShortUrl: false, // we'll manage this implicitly via the new service
-              shareableUrl: shareableUrl || '',
-              shareableUrlForSavedObject: savedObjectURL.href,
+              allowShortUrl: false,
+              delegatedShareUrlHandler: () => {
+                return isCurrentStateDirty ? shareableUrl! : savedObjectURL.href;
+              },
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
-              objectTypeTitle: i18n.translate('xpack.lens.app.share.panelTitle', {
-                defaultMessage: 'visualization',
-              }),
+              objectTypeMeta: {
+                title: i18n.translate('xpack.lens.app.shareModal.title', {
+                  defaultMessage: 'Share this Lens visualization',
+                }),
+              },
               sharingData,
+              // only want to know about changes when savedObjectURL.href
               isDirty: isCurrentStateDirty,
               // disable the menu if both shortURL permission and the visualization has not been saved
               // TODO: improve here the disabling state with more specific checks

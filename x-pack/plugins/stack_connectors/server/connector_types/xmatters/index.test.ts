@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-jest.mock('./post_xmatters', () => ({
-  postXmatters: jest.fn(),
-}));
-import { postXmatters } from './post_xmatters';
-
+import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import {
   ConnectorTypeConfigType,
@@ -28,8 +24,22 @@ import {
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
+import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
 
-const postxMattersMock = postXmatters as jest.Mock;
+jest.mock('axios');
+jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+  return {
+    ...originalUtils,
+    request: jest.fn(),
+    patch: jest.fn(),
+  };
+});
+
+axios.create = jest.fn(() => axios);
+const requestMock = utils.request as jest.Mock;
+axios.create = jest.fn(() => axios);
+
 const services: Services = actionsMock.createServices();
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
 
@@ -383,8 +393,8 @@ describe('connector validation', () => {
 
 describe('execute()', () => {
   beforeEach(() => {
-    postxMattersMock.mockReset();
-    postxMattersMock.mockResolvedValue({
+    requestMock.mockReset();
+    requestMock.mockResolvedValue({
       status: 200,
       statusText: '',
       data: '',
@@ -415,14 +425,10 @@ describe('execute()', () => {
       logger: mockedLogger,
     });
 
-    expect(postxMattersMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+    const { method, url, headers, data } = requestMock.mock.calls[0][0];
+
+    expect({ method, url, headers, data }).toMatchInlineSnapshot(`
       Object {
-        "basicAuth": Object {
-          "auth": Object {
-            "password": "123",
-            "username": "abc",
-          },
-        },
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "date": "2022-01-18T19:01:08.818Z",
@@ -432,6 +438,10 @@ describe('execute()', () => {
           "spaceId": "default",
           "tags": "test1, test2",
         },
+        "headers": Object {
+          "Authorization": "Basic YWJjOjEyMw==",
+        },
+        "method": "post",
         "url": "https://abc.def/my-xmatters",
       }
     `);
@@ -442,7 +452,7 @@ describe('execute()', () => {
       configUrl: 'https://abc.def/my-xmatters',
       usesBasic: true,
     };
-    postxMattersMock.mockRejectedValueOnce({
+    requestMock.mockRejectedValueOnce({
       tag: 'err',
       message: 'maxContentLength size of 1000000 exceeded',
     });
@@ -496,9 +506,10 @@ describe('execute()', () => {
       logger: mockedLogger,
     });
 
-    expect(postxMattersMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+    const { method, url, headers, data } = requestMock.mock.calls[0][0];
+
+    expect({ method, url, headers, data }).toMatchInlineSnapshot(`
       Object {
-        "basicAuth": undefined,
         "data": Object {
           "alertActionGroupName": "Small t-shirt",
           "date": "2022-01-18T19:01:08.818Z",
@@ -508,6 +519,8 @@ describe('execute()', () => {
           "spaceId": "default",
           "tags": "test1, test2",
         },
+        "headers": undefined,
+        "method": "post",
         "url": "https://abc.def/my-xmatters?apiKey=someKey",
       }
     `);

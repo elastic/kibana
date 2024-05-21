@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
 import type {
   Action,
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { Serializable } from '@kbn/utility-types';
+import type { Serializable } from '@kbn/utility-types';
 import type { CellActionsMode } from './constants';
 
 export * from './actions/types';

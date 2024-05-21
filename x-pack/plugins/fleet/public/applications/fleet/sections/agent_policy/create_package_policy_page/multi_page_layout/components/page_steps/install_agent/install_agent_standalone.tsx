@@ -12,6 +12,7 @@ import { safeDump } from 'js-yaml';
 
 import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
 import { API_VERSIONS } from '../../../../../../../../../../common/constants';
+import { getRootIntegrations } from '../../../../../../../../../../common/services';
 import {
   AgentStandaloneBottomBar,
   StandaloneModeWarningCallout,
@@ -112,6 +113,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       isComplete: yaml && commandCopied,
       fullCopyButton: true,
       onCopy: () => setCommandCopied(true),
+      rootIntegrations: getRootIntegrations(agentPolicy?.package_policies ?? []),
     }),
   ];
 

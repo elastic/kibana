@@ -34,7 +34,7 @@ export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState | SavedSearch,
   services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
-  isPlainRecord?: boolean
+  isEsqlMode?: boolean
 ) {
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
@@ -61,7 +61,7 @@ export async function getSharingData(
     // conditionally add the time field column:
     let timeFieldName: string | undefined;
     const hideTimeColumn = uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING);
-    if (!hideTimeColumn && index && index.timeFieldName && !isPlainRecord) {
+    if (!hideTimeColumn && index && index.timeFieldName && !isEsqlMode) {
       timeFieldName = index.timeFieldName;
     }
     if (timeFieldName && !columns.includes(timeFieldName)) {

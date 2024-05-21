@@ -29,7 +29,7 @@ export async function waitForRuleStatus({
 }: {
   id: string;
   expectedStatus: string;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   retryService: RetryService;
   logger: ToolingLog;
 }): Promise<Record<string, any>> {

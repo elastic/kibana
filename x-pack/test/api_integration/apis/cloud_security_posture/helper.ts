@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
@@ -43,7 +43,7 @@ export const addIndex = async <T>(es: Client, findingsMock: T[], indexName: stri
 };
 
 export async function createPackagePolicy(
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   agentPolicyId: string,
   policyTemplate: string,
   input: string,

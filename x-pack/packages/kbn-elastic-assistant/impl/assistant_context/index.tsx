@@ -13,7 +13,7 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { useLocalStorage, useSessionStorage } from 'react-use';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { updatePromptContexts } from './helpers';
 import type {
   PromptContext,
@@ -97,6 +97,7 @@ export interface UseAssistantContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   alertsIndexPattern: string | undefined;
   assistantAvailability: AssistantAvailability;
+  assistantFeatures: AssistantFeatures;
   assistantStreamingEnabled: boolean;
   assistantTelemetry?: AssistantTelemetry;
   augmentMessageCodeBlocks: (
@@ -127,7 +128,6 @@ export interface UseAssistantContext {
   knowledgeBase: KnowledgeBaseConfig;
   getLastConversationId: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
-  modelEvaluatorEnabled: boolean;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
   selectedSettingsTab: SettingsTabs;
@@ -276,15 +276,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   );
 
   // Fetch assistant capabilities
-  const { data: capabilities } = useCapabilities({ http, toasts });
-  const { assistantModelEvaluation: modelEvaluatorEnabled } =
-    capabilities ?? defaultAssistantFeatures;
+  const { data: assistantFeatures } = useCapabilities({ http, toasts });
 
   const value = useMemo(
     () => ({
       actionTypeRegistry,
       alertsIndexPattern,
       assistantAvailability,
+      assistantFeatures: assistantFeatures ?? defaultAssistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       allQuickPrompts: localStorageQuickPrompts ?? [],
@@ -297,7 +296,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       knowledgeBase: { ...DEFAULT_KNOWLEDGE_BASE_SETTINGS, ...localStorageKnowledgeBase },
-      modelEvaluatorEnabled,
       promptContexts,
       nameSpace,
       registerPromptContext,
@@ -324,6 +322,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       actionTypeRegistry,
       alertsIndexPattern,
       assistantAvailability,
+      assistantFeatures,
       assistantTelemetry,
       augmentMessageCodeBlocks,
       localStorageQuickPrompts,
@@ -336,7 +335,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       localStorageKnowledgeBase,
-      modelEvaluatorEnabled,
       promptContexts,
       nameSpace,
       registerPromptContext,

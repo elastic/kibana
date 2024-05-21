@@ -84,7 +84,16 @@ describe('getChatParams', () => {
       context: true,
       type: 'anthropic',
     });
-    expect(ActionsClientLlm).toHaveBeenCalledWith(expect.anything());
+    expect(ActionsClientLlm).toHaveBeenCalledWith({
+      temperature: 0,
+      llmType: 'bedrock',
+      traceId: 'test-uuid',
+      request: expect.anything(),
+      logger: expect.anything(),
+      model: 'custom-model',
+      connectorId: '2',
+      actions: expect.anything(),
+    });
     expect(result.chatPrompt).toContain('How does it work?');
   });
 

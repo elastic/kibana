@@ -64,6 +64,7 @@ export const fetchAgentMetrics = async (
     upgrading_step: await getUpgradingSteps(esClient, abortController),
     unhealthy_reason: await getUnhealthyReason(esClient, abortController),
   };
+
   return usage;
 };
 

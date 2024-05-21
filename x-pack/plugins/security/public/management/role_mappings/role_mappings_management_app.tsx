@@ -47,17 +47,20 @@ export const roleMappingsManagementApp = Object.freeze({
           { EditRoleMappingPage },
           { RoleMappingsAPIClient },
           { RolesAPIClient },
+          { SecurityFeaturesAPIClient },
         ] = await Promise.all([
           getStartServices(),
           import('./role_mappings_grid'),
           import('./edit_role_mapping'),
           import('./role_mappings_api_client'),
           import('../roles'),
+          import('../security_features'),
         ]);
 
         core.chrome.docTitle.change(title);
 
         const roleMappingsAPIClient = new RoleMappingsAPIClient(core.http);
+        const securityFeaturesAPIClient = new SecurityFeaturesAPIClient(core.http);
 
         const EditRoleMappingsPageWithBreadcrumbs = ({ action }: { action: 'edit' | 'clone' }) => {
           const { name } = useParams<{ name?: string }>();
@@ -81,6 +84,7 @@ export const roleMappingsManagementApp = Object.freeze({
                 action={action}
                 name={decodedName}
                 roleMappingsAPI={roleMappingsAPIClient}
+                securityFeaturesAPI={securityFeaturesAPIClient}
                 rolesAPIClient={new RolesAPIClient(core.http)}
                 notifications={core.notifications}
                 docLinks={core.docLinks}
@@ -114,6 +118,7 @@ export const roleMappingsManagementApp = Object.freeze({
                         notifications={core.notifications}
                         rolesAPIClient={new RolesAPIClient(core.http)}
                         roleMappingsAPI={roleMappingsAPIClient}
+                        securityFeaturesAPI={securityFeaturesAPIClient}
                         docLinks={core.docLinks}
                         history={history}
                         navigateToApp={core.application.navigateToApp}

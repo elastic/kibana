@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Asset Criticality Common Schema
- *   version: 1.0.0
+ *   version: 1
  */
 
 export type IdField = z.infer<typeof IdField>;
@@ -33,13 +33,23 @@ export const AssetCriticalityRecordIdParts = z.object({
   id_field: IdField,
 });
 
+/**
+ * The criticality level of the asset.
+ */
+export type AssetCriticalityLevel = z.infer<typeof AssetCriticalityLevel>;
+export const AssetCriticalityLevel = z.enum([
+  'low_impact',
+  'medium_impact',
+  'high_impact',
+  'extreme_impact',
+]);
+export type AssetCriticalityLevelEnum = typeof AssetCriticalityLevel.enum;
+export const AssetCriticalityLevelEnum = AssetCriticalityLevel.enum;
+
 export type CreateAssetCriticalityRecord = z.infer<typeof CreateAssetCriticalityRecord>;
 export const CreateAssetCriticalityRecord = AssetCriticalityRecordIdParts.merge(
   z.object({
-    /**
-     * The criticality level of the asset.
-     */
-    criticality_level: z.enum(['low_impact', 'medium_impact', 'high_impact', 'extreme_impact']),
+    criticality_level: AssetCriticalityLevel,
     /**
      * If 'wait_for' the request will wait for the index refresh.
      */

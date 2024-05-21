@@ -36,7 +36,7 @@ describe('Delete Knowledge Base Route', () => {
     });
 
     test('returns 500 if error is thrown when deleting resources', async () => {
-      context.core.elasticsearch.client.asCurrentUser.indices.delete.mockRejectedValue(
+      context.core.elasticsearch.client.asInternalUser.indices.delete.mockRejectedValue(
         new Error('Test error')
       );
       const response = await server.inject(

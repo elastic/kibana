@@ -28,6 +28,10 @@ const StyledDiv = euiStyled.div<StyledDivProps>`
         pointer-events: none;
         opacity: 0;
         transition: opacity ${getOr(250, 'eui.euiAnimSpeedNormal', theme)} ease;
+        &:focus-visible {
+          pointer-events: auto;
+          opacity: 1;
+        }
       }
 
       ${targetClassNames.map((cn) => `&:hover .${cn}`).join(', ')} {

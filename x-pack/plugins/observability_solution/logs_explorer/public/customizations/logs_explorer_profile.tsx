@@ -15,9 +15,6 @@ import type { LogsExplorerController } from '../controller';
 import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
-import { createCustomCellRenderer } from './custom_cell_renderer';
-import { createCustomGridColumnsConfiguration } from './custom_column';
-import { smartFields } from './custom_field_list';
 import { createCustomUnifiedHistogram } from './custom_unified_histogram';
 
 const LazyCustomDataSourceFilters = dynamic(() => import('./custom_data_source_filters'));
@@ -83,8 +80,7 @@ export const createLogsExplorerProfileCustomizations =
 
     customizations.set({
       id: 'data_table',
-      customCellRenderer: createCustomCellRenderer({ data }),
-      customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
+      logsEnabled: true,
       customControlColumnsConfiguration: await import('./custom_control_column').then((module) =>
         module.createCustomControlColumnsConfiguration(service)
       ),
@@ -92,9 +88,7 @@ export const createLogsExplorerProfileCustomizations =
 
     customizations.set({
       id: 'field_list',
-      additionalFieldGroups: {
-        smartFields,
-      },
+      logsFieldsEnabled: true,
     });
 
     // Fix bug where filtering on histogram does not work

@@ -18,12 +18,12 @@ describe('getPanelTitle', () => {
     expect(getPanelTitle(api)).toBe('default title');
   });
 
-  test('should return default title when title is empty string', () => {
+  test('should return empty title when title is empty string', () => {
     const api = {
       panelTitle: new BehaviorSubject<string | undefined>(''),
       defaultPanelTitle: new BehaviorSubject<string | undefined>('default title'),
     };
-    expect(getPanelTitle(api)).toBe('default title');
+    expect(getPanelTitle(api)).toBe('');
   });
 
   test('should return title when title is provided', () => {

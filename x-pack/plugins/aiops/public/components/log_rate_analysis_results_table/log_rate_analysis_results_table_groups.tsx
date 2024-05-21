@@ -15,11 +15,10 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
-  EuiIcon,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
-  EuiToolTip,
+  EuiIconTip,
   RIGHT_ALIGNMENT,
   useEuiTheme,
   euiPaletteColorBlind,
@@ -176,25 +175,28 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       'data-test-subj': 'aiopsLogRateAnalysisResultsGroupsTableColumnGroup',
       field: 'group',
       name: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.aiops.logRateAnalysis.resultsTableGroups.groupColumnTooltip',
-            {
-              defaultMessage:
-                'Displays up to {maxItemCount} group items sorted by uniqueness and document count. Expand row to see all field/value pairs.',
-              values: { maxItemCount: MAX_GROUP_BADGES },
-            }
-          )}
-        >
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTableGroups.groupLabel"
-              defaultMessage="Group"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
+        <>
+          <FormattedMessage
+            id="xpack.aiops.logRateAnalysis.resultsTableGroups.groupLabel"
+            defaultMessage="Group"
+          />
+          &nbsp;
+          <EuiIconTip
+            position="top"
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            content={i18n.translate(
+              'xpack.aiops.logRateAnalysis.resultsTableGroups.groupColumnTooltip',
+              {
+                defaultMessage:
+                  'Displays up to {maxItemCount} group items sorted by uniqueness and document count. Expand row to see all field/value pairs.',
+                values: { maxItemCount: MAX_GROUP_BADGES },
+              }
+            )}
+          />
+        </>
       ),
       render: (_, { uniqueItemsCount, groupItemsSortedByUniqueness }) => {
         const valuesBadges = [];
@@ -262,24 +264,27 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateColumnTooltip',
-            {
-              defaultMessage:
-                'A visual representation of the impact of the group on the message rate difference.',
-            }
-          )}
-        >
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTableGroups.logRateLabel"
-              defaultMessage="Log rate"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
+        <>
+          <FormattedMessage
+            id="xpack.aiops.logRateAnalysis.resultsTableGroups.logRateLabel"
+            defaultMessage="Log rate"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="top"
+            content={i18n.translate(
+              'xpack.aiops.logRateAnalysis.resultsTableGroups.logRateColumnTooltip',
+              {
+                defaultMessage:
+                  'A visual representation of the impact of the group on the message rate difference.',
+              }
+            )}
+          />
+        </>
       ),
       render: (_, { histogram, id }) => (
         <MiniHistogram
@@ -313,24 +318,27 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.aiops.logRateAnalysis.resultsTableGroups.pValueColumnTooltip',
-            {
-              defaultMessage:
-                'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
-            }
-          )}
-        >
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTableGroups.pValueLabel"
-              defaultMessage="p-value"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
+        <>
+          <FormattedMessage
+            id="xpack.aiops.logRateAnalysis.resultsTableGroups.pValueLabel"
+            defaultMessage="p-value"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="top"
+            content={i18n.translate(
+              'xpack.aiops.logRateAnalysis.resultsTableGroups.pValueColumnTooltip',
+              {
+                defaultMessage:
+                  'The significance of changes in the frequency of values; lower values indicate greater change; sorting this column will automatically do a secondary sort on the doc count column.',
+              }
+            )}
+          />
+        </>
       ),
       render: (pValue: number | null) => pValue?.toPrecision(3) ?? NOT_AVAILABLE,
       sortable: true,
@@ -342,23 +350,26 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       width: NARROW_COLUMN_WIDTH,
       field: 'pValue',
       name: (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate(
-            'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
-            {
-              defaultMessage: 'The level of impact of the group on the message rate difference',
-            }
-          )}
-        >
-          <>
-            <FormattedMessage
-              id="xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabel"
-              defaultMessage="Impact"
-            />
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
+        <>
+          <FormattedMessage
+            id="xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabel"
+            defaultMessage="Impact"
+          />
+          &nbsp;
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            position="top"
+            content={i18n.translate(
+              'xpack.aiops.logRateAnalysis.resultsTableGroups.impactLabelColumnTooltip',
+              {
+                defaultMessage: 'The level of impact of the group on the message rate difference',
+              }
+            )}
+          />
+        </>
       ),
       render: (_, { pValue }) => {
         if (!pValue) return NOT_AVAILABLE;

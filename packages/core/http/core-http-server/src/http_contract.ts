@@ -402,3 +402,11 @@ export interface HttpServerInfo {
   /** The protocol used by the server */
   protocol: 'http' | 'https' | 'socket';
 }
+
+/**
+ * Defines an http protocol.
+ * (Only supporting http1 for now)
+ *
+ * - http1: regroups all http/1.x protocols
+ */
+export type HttpProtocol = 'http1';

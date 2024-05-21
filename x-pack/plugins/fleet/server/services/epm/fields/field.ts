@@ -41,6 +41,7 @@ export interface Field {
   default_field?: boolean;
   runtime?: boolean | string;
   subobjects?: boolean;
+  store?: boolean;
 
   // Fields specific of the aggregate_metric_double type
   metrics?: string[];

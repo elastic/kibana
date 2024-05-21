@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { HTTPError } from 'superagent';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
@@ -167,7 +168,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/gzip')
         .send(buf)
         .expect(400);
-      expect(res.error.text).to.equal(
+      expect((res.error as HTTPError).text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Archive seems empty. Assumed content type was application/gzip, check if this matches the archive type."}'
       );
     });
@@ -180,7 +181,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(400);
-      expect(res.error.text).to.equal(
+      expect((res.error as HTTPError).text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of package: Error: end of central directory record signature not found. Assumed content type was application/zip, check if this matches the archive type."}'
       );
     });
@@ -193,7 +194,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(400);
-      expect(res.error.text).to.equal(
+      expect((res.error as HTTPError).text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Package contains more than one top-level directory; top-level directory found: apache-0.1.4; filePath: apache-0.1.3/manifest.yml"}'
       );
     });
@@ -206,7 +207,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(400);
-      expect(res.error.text).to.equal(
+      expect((res.error as HTTPError).text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Manifest file apache-0.1.4/manifest.yml not found in paths."}'
       );
     });
@@ -219,7 +220,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(400);
-      expect(res.error.text).to.equal(
+      expect((res.error as HTTPError).text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Could not parse top-level package manifest at top-level directory apache-0.1.4: YAMLException: bad indentation of a mapping entry at line 2, column 7:\\n      name: apache\\n          ^."}'
       );
     });
@@ -232,7 +233,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(400);
-      expect(res.error.text).to.equal(
+      expect((res.error as HTTPError).text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Invalid top-level package manifest at top-level directory apache-0.1.4 (package name: apache): one or more fields missing of name, version, description, title, format_version, owner."}'
       );
     });
@@ -245,7 +246,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(400);
-      expect(res.error.text).to.equal(
+      expect((res.error as HTTPError).text).to.equal(
         '{"statusCode":400,"error":"Bad Request","message":"Name thisIsATypo and version 0.1.4 do not match top-level directory apache-0.1.4"}'
       );
     });

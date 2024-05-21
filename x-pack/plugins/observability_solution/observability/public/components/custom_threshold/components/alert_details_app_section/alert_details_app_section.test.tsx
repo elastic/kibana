@@ -107,7 +107,7 @@ describe('AlertDetailsAppSection', () => {
   it('should render rule and alert data', async () => {
     const result = renderComponent();
 
-    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(7);
+    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(6);
     expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
@@ -136,7 +136,6 @@ describe('AlertDetailsAppSection', () => {
               <EuiLink
                 data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
                 href="/view-in-app-url"
-                target="_blank"
               >
                 View related logs
               </EuiLink>
@@ -184,7 +183,7 @@ describe('AlertDetailsAppSection', () => {
       { ['kibana.alert.end']: '2023-03-28T14:40:00.000Z' }
     );
 
-    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(7);
+    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(6);
     expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
   });
 

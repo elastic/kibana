@@ -23,7 +23,7 @@ import { routeWithNamespace } from '../route_with_namespace';
  * @param ids Array of the rule ids
  */
 export const getAlertsByIds = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   ids: string[],
   size?: number,

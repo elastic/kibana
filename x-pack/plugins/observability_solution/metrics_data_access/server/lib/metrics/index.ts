@@ -39,6 +39,14 @@ export const query = async (
     },
   };
   const hasGroupBy = Array.isArray(options.groupBy) && options.groupBy.length > 0;
+  const groupInstanceFilter =
+    options.groupInstance?.reduce<Array<Record<string, unknown>>>((acc, group, index) => {
+      const key = options.groupBy?.[index];
+      if (key && group) {
+        acc.push({ term: { [key]: group } });
+      }
+      return acc;
+    }, []) ?? [];
   const filter: Array<Record<string, any>> = [
     {
       range: {
@@ -50,6 +58,7 @@ export const query = async (
       },
     },
     ...(options.groupBy?.map((field) => ({ exists: { field } })) ?? []),
+    ...groupInstanceFilter,
   ];
 
   const params = {

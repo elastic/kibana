@@ -39,17 +39,10 @@ export const DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT = 750;
 export const AGENTLESS_POLICY_ID = 'agentless'; // the policy id defined here: https://github.com/elastic/project-controller/blob/main/internal/project/security/security_kibana_config.go#L86
 
 export const AGENT_LOG_LEVELS = {
-  ERROR: 'error',
-  WARNING: 'warning',
-  INFO: 'info',
-  DEBUG: 'debug',
+  info: 'info',
+  debug: 'debug',
+  warning: 'warning',
+  error: 'error',
 };
 
-export const DEFAULT_LOG_LEVEL = AGENT_LOG_LEVELS.INFO;
-
-export const agentLoggingLevels = {
-  Info: 'info',
-  Debug: 'debug',
-  Warning: 'warning',
-  Error: 'error',
-} as const;
+export const DEFAULT_LOG_LEVEL = AGENT_LOG_LEVELS.info;

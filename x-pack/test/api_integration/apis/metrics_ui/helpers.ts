@@ -6,9 +6,6 @@
  */
 
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { SuperTest, Test } from 'supertest';
-
-export type KibanaSupertest = SuperTest<Test>;
 
 // generates traces, metrics for services
 export function generateServicesData({

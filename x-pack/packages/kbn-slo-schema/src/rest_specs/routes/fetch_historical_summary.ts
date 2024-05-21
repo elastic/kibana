@@ -14,6 +14,7 @@ import {
 import {
   allOrAnyString,
   allOrAnyStringOrArray,
+  dateRangeSchema,
   dateType,
   summarySchema,
 } from '../../schema/common';
@@ -33,10 +34,7 @@ const fetchHistoricalSummaryParamsSchema = t.type({
         }),
         t.partial({
           remoteName: t.string,
-          range: t.type({
-            from: t.string,
-            to: t.string,
-          }),
+          range: dateRangeSchema,
         }),
       ])
     ),

@@ -27,7 +27,7 @@ export const previewRule = async ({
   invocationCount = 1,
   timeframeEnd = new Date(),
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   rule: RuleCreateProps;
   invocationCount?: number;
   timeframeEnd?: Date;

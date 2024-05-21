@@ -45,6 +45,7 @@ describe('FindSLO', () => {
             "page": 1,
             "perPage": 25,
           },
+          undefined,
         ]
       `);
 
@@ -139,6 +140,7 @@ describe('FindSLO', () => {
             "page": 2,
             "perPage": 10,
           },
+          undefined,
         ]
       `);
     });

@@ -31,7 +31,7 @@ describe('getRiskScoreSummaryAttributes', () => {
       () =>
         useLensAttributes({
           lensAttributes: getRiskScoreSummaryAttributes({
-            severity: RiskSeverity.low,
+            severity: RiskSeverity.Low,
             query: `user.name: test.user`,
             spaceId: 'default',
             riskEntity: RiskScoreEntity.user,
@@ -48,7 +48,7 @@ describe('getRiskScoreSummaryAttributes', () => {
       () =>
         useLensAttributes({
           lensAttributes: getRiskScoreSummaryAttributes({
-            severity: RiskSeverity.low,
+            severity: RiskSeverity.Low,
             query: `user.name: test.user`,
             spaceId: 'default',
             riskEntity: RiskScoreEntity.user,
@@ -67,7 +67,7 @@ describe('getRiskScoreSummaryAttributes', () => {
       () =>
         useLensAttributes({
           lensAttributes: getRiskScoreSummaryAttributes({
-            severity: RiskSeverity.low,
+            severity: RiskSeverity.Low,
             query,
             spaceId: 'default',
             riskEntity: RiskScoreEntity.user,

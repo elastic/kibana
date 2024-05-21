@@ -14,7 +14,10 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/types';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+} from '@kbn/actions-plugin/common/types';
 import { postXmatters } from './post_xmatters';
 
 export type XmattersConnectorType = ConnectorType<
@@ -66,7 +69,7 @@ export function getConnectorType(): XmattersConnectorType {
     name: i18n.translate('xpack.stackConnectors.xmatters.title', {
       defaultMessage: 'xMatters',
     }),
-    supportedFeatureIds: [AlertingConnectorFeatureId],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: {
         schema: ConfigSchema,

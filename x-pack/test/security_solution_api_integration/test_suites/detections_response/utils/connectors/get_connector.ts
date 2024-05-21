@@ -9,7 +9,7 @@ import { Connector } from '@kbn/actions-plugin/server/application/connector/type
 import type SuperTest from 'supertest';
 
 export async function getConnector(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   connectorId: string
 ): Promise<Connector> {
   const response = await supertest

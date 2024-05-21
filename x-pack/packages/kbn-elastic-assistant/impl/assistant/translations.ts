@@ -69,3 +69,8 @@ export const WELCOME_SCREEN_DESCRIPTION = i18n.translate(
       "First things first, we'll need to set up a Generative AI Connector to get this chat experience going!",
   }
 );
+
+export const DISCLAIMER = i18n.translate('xpack.elasticAssistant.assistant.disclaimer', {
+  defaultMessage:
+    'Responses from Al systems may not always be entirely accurate, although they can seem convincing. For more information on the assistant feature and its usage, please reference the documentation.',
+});

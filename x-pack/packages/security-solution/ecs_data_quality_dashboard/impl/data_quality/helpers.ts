@@ -457,6 +457,8 @@ export const getErrorSummaries = (
 };
 
 export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
+export const RESULTS_INDICES_LATEST_ROUTE =
+  '/internal/ecs_data_quality_dashboard/results/indices_latest/{pattern}';
 
 export interface StorageResult {
   batchId: string;
@@ -565,11 +567,11 @@ export async function getStorageResults({
   abortController: AbortController;
 }): Promise<StorageResult[]> {
   try {
-    const results = await httpFetch<StorageResult[]>(RESULTS_API_ROUTE, {
+    const route = RESULTS_INDICES_LATEST_ROUTE.replace('{pattern}', pattern);
+    const results = await httpFetch<StorageResult[]>(route, {
       method: 'GET',
       signal: abortController.signal,
       version: INTERNAL_API_VERSION,
-      query: { pattern },
     });
     return results;
   } catch (err) {

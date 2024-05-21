@@ -79,7 +79,6 @@ const cliRunner: RunFn = async (cliContext) => {
     elasticsearchUrl,
     asSuperuser,
     log,
-    noCertForSsl: true,
   });
 
   const coreServices: ExternalEdrServerEmulatorCoreServices = {

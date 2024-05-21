@@ -13,7 +13,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  describe('Lists API', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/151636
+  describe.skip('Lists API', () => {
     before(async () => await esArchiver.load('x-pack/test/functional/es_archives/lists'));
 
     after(async () => await esArchiver.unload('x-pack/test/functional/es_archives/lists'));

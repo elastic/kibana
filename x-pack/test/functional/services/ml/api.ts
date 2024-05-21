@@ -226,6 +226,32 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async getInferenceEndpoint(inferenceId: string) {
+      const { status } = await esSupertest.get(`/_inference/${inferenceId}`);
+      return status === 200;
+    },
+
+    async createInferenceEndpoint(inferenceId: string, taskType: string, requestBody: object) {
+      const found = await this.getInferenceEndpoint(inferenceId);
+      if (found) {
+        log.debug(`Inference endpoint '${inferenceId}' already exists. Nothing to create.`);
+        return;
+      }
+      const { body, status } = await esSupertest
+        .put(`/_inference/${taskType}/${inferenceId}`)
+        .send(requestBody);
+      this.assertResponseStatusCode(200, status, body);
+
+      return body;
+    },
+
+    async deleteInferenceEndpoint(inferenceId: string, taskType: string) {
+      const { body, status } = await esSupertest.delete(`/_inference/${taskType}/${inferenceId}`);
+      this.assertResponseStatusCode(200, status, body);
+
+      return body;
+    },
+
     async createIndex(
       indices: string,
       mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping,

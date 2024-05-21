@@ -290,7 +290,7 @@ export class DataGridService extends FtrService {
 
   public async getControlColumnHeaderFields(): Promise<string[]> {
     const result = await this.find.allByCssSelector(
-      '.euiDataGridHeaderCell--controlColumn > .euiDataGridHeaderCell__content'
+      '.euiDataGridHeaderCell--controlColumn .euiDataGridHeaderCell__content'
     );
 
     const textArr = [];

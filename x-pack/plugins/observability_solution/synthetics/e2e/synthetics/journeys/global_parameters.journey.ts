@@ -7,14 +7,11 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { byTestId } from '../../helpers/utils';
-import { recordVideo } from '../../helpers/record_video';
 import { cleanTestParams } from './services/add_monitor';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 
 journey(`GlobalParameters`, async ({ page, params }) => {
-  recordVideo(page);
-
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   before(async () => {
     await cleanTestParams(params);

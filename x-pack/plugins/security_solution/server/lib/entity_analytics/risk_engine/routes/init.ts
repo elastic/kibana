@@ -7,9 +7,13 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type {
+  RiskEngineInitResponse,
+  RiskEngineInitResult,
+} from '../../../../../common/api/entity_analytics/risk_engine/engine_init_route.gen';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { EntityAnalyticsRoutesDeps, InitRiskEngineResultResponse } from '../../types';
+import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { withRiskEnginePrivilegeCheck } from '../risk_engine_privileges';
 import { RiskEngineAuditActions } from '../audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
@@ -60,12 +64,16 @@ export const riskEngineInitRoute = (
             riskScoreDataClient,
           });
 
-          const initResultResponse: InitRiskEngineResultResponse = {
+          const result: RiskEngineInitResult = {
             risk_engine_enabled: initResult.riskEngineEnabled,
             risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
             risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
             legacy_risk_engine_disabled: initResult.legacyRiskEngineDisabled,
             errors: initResult.errors,
+          };
+
+          const initResponse: RiskEngineInitResponse = {
+            result,
           };
 
           if (
@@ -76,13 +84,13 @@ export const riskEngineInitRoute = (
             return siemResponse.error({
               statusCode: 400,
               body: {
-                message: initResultResponse.errors.join('\n'),
-                full_error: initResultResponse,
+                message: result.errors.join('\n'),
+                full_error: result,
               },
               bypassErrorFormat: true,
             });
           }
-          return response.ok({ body: { result: initResultResponse } });
+          return response.ok({ body: initResponse });
         } catch (e) {
           const error = transformError(e);
 

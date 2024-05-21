@@ -26,11 +26,13 @@ interface LogRateQueryAggregation {
   services: estypes.AggregationsTermsAggregateBase<LogErrorsAggregation>;
 }
 
+export interface LogsRatesMetrics {
+  logRatePerMinute: number;
+  logErrorRate: null | number;
+}
+
 export interface LogsRatesServiceReturnType {
-  [serviceName: string]: {
-    logRatePerMinute: number;
-    logErrorRate: null | number;
-  };
+  [serviceName: string]: LogsRatesMetrics;
 }
 
 export function createGetLogsRatesService(params: RegisterServicesParams) {
@@ -47,6 +49,12 @@ export function createGetLogsRatesService(params: RegisterServicesParams) {
       query: {
         bool: {
           filter: [
+            {
+              exists: {
+                // For now, we don't want to count APM server logs or any other logs that don't have the log.level field.
+                field: 'log.level',
+              },
+            },
             {
               terms: {
                 [identifyingMetadata]: serviceNames,

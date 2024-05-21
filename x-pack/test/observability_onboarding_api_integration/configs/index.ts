@@ -8,11 +8,11 @@
 import { mapValues } from 'lodash';
 import { createTestConfig, CreateTestConfig } from '../common/config';
 
-export const MOCKED_PUBLIC_BASE_URL = 'http://mockedPublicBaseUrl';
+export const MOCKED_PUBLIC_BASE_URL = 'http://mockedpublicbaseurl';
 // my.mocked.domain$myMockedEsUr$myKibanaMockedUrl
 export const MOCKED_ENCODED_CLOUD_ID =
   'bXkubW9ja2VkLmRvbWFpbiRteU1vY2tlZEVzVXJsJG15TW9ja2VkS2liYW5hVXJs';
-export const MOCKED_KIBANA_URL = 'https://myMockedKibanaUrl.my.mocked.domain:443';
+export const MOCKED_KIBANA_URL = 'https://mymockedkibanaurl.my.mocked.domain';
 
 export const observabilityOnboardingDebugLogger = {
   name: 'plugins.observabilityOnboarding',

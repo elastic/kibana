@@ -328,6 +328,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           logger,
         });
       }
+
+      if (enrichedPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+        enrichedPackagePolicy.package = {
+          ...enrichedPackagePolicy.package,
+          requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+        };
+      }
     }
 
     const isoDate = new Date().toISOString();
@@ -457,6 +464,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             : inputs;
 
           elasticsearch = pkgInfo?.elasticsearch;
+
+          if (packagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+            packagePolicy.package = {
+              ...packagePolicy.package,
+              requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+            };
+          }
         }
 
         policiesToCreate.push({
@@ -862,6 +876,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         assetsMap
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+
+      if (restOfPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+        restOfPackagePolicy.package = {
+          ...restOfPackagePolicy.package,
+          requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+        };
+      }
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -1042,6 +1063,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               assetsMap
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+
+            if (restOfPackagePolicy.package && pkgInfo?.agent?.privileges?.root) {
+              restOfPackagePolicy.package = {
+                ...restOfPackagePolicy.package,
+                requires_root: pkgInfo?.agent?.privileges?.root ?? false,
+              };
+            }
           }
         }
 

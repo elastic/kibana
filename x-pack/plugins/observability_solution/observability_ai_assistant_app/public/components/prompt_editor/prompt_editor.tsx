@@ -17,6 +17,7 @@ import {
 import { FunctionListPopover } from '../chat/function_list_popover';
 import { PromptEditorFunction } from './prompt_editor_function';
 import { PromptEditorNaturalLanguage } from './prompt_editor_natural_language';
+import { useLastUsedPrompts } from '../../hooks/use_last_used_prompts';
 
 export interface PromptEditorProps {
   disabled: boolean;
@@ -48,6 +49,8 @@ export function PromptEditor({
   );
 
   const [hasFocus, setHasFocus] = useState(false);
+
+  const { lastUsedPrompts, addLastUsedPrompt } = useLastUsedPrompts();
 
   const initialInnerMessage = initialRole
     ? {
@@ -97,9 +100,13 @@ export function PromptEditor({
     }
   };
 
-  const handleSubmit = useCallback(async () => {
+  const handleSubmit = useCallback(() => {
     if (loading || !innerMessage) {
       return;
+    }
+
+    if (innerMessage.content) {
+      addLastUsedPrompt(innerMessage.content);
     }
 
     const oldMessage = innerMessage;
@@ -123,7 +130,7 @@ export function PromptEditor({
       setInnerMessage(oldMessage);
       setMode(oldMessage.function_call?.name ? 'function' : 'prompt');
     }
-  }, [innerMessage, loading, onSendTelemetry, onSubmit]);
+  }, [addLastUsedPrompt, innerMessage, loading, onSendTelemetry, onSubmit]);
 
   // Submit on Enter
   useEffect(() => {
@@ -174,6 +181,7 @@ export function PromptEditor({
           <PromptEditorNaturalLanguage
             disabled={disabled}
             prompt={innerMessage?.content}
+            lastUsedPrompts={lastUsedPrompts}
             onChange={handleChangeMessageInner}
             onChangeHeight={onChangeHeight}
             onFocus={() => setHasFocus(true)}

@@ -34,6 +34,8 @@
     "@kbn/i18n-react",
     "@kbn/logging",
     "@kbn/core-http-request-handler-context-server",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme"
   ]
 }

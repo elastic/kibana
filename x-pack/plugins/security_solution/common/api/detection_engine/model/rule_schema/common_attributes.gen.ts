@@ -303,11 +303,38 @@ export const TimestampOverride = z.string();
 export type TimestampOverrideFallbackDisabled = z.infer<typeof TimestampOverrideFallbackDisabled>;
 export const TimestampOverrideFallbackDisabled = z.boolean();
 
+/**
+ * Describes an Elasticsearch field that is needed for the rule to function
+ */
 export type RequiredField = z.infer<typeof RequiredField>;
 export const RequiredField = z.object({
+  /**
+   * Name of an Elasticsearch field
+   */
   name: NonEmptyString,
+  /**
+   * Type of the Elasticsearch field
+   */
   type: NonEmptyString,
+  /**
+   * Whether the field is an ECS field
+   */
   ecs: z.boolean(),
+});
+
+/**
+ * Input parameters to create a RequiredField. Does not include the `ecs` field, because `ecs` is calculated on the backend based on the field name and type.
+ */
+export type RequiredFieldInput = z.infer<typeof RequiredFieldInput>;
+export const RequiredFieldInput = z.object({
+  /**
+   * Name of an Elasticsearch field
+   */
+  name: NonEmptyString,
+  /**
+   * Type of an Elasticsearch field
+   */
+  type: NonEmptyString,
 });
 
 export type RequiredFieldArray = z.infer<typeof RequiredFieldArray>;

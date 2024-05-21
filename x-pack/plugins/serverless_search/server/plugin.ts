@@ -29,6 +29,7 @@ import type {
 import { registerConnectorsRoutes } from './routes/connectors_routes';
 import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import { registerMappingRoutes } from './routes/mapping_routes';
+import { registerIngestPipelineRoutes } from './routes/ingest_pipeline_routes';
 
 export interface RouteDependencies {
   http: CoreSetup<StartDependencies>['http'];
@@ -95,6 +96,7 @@ export class ServerlessSearchPlugin
     registerConnectorsRoutes(dependencies);
     registerIndicesRoutes(dependencies);
     registerMappingRoutes(dependencies);
+    registerIngestPipelineRoutes(dependencies);
 
     if (usageCollection) {
       registerTelemetryUsageCollector(usageCollection, this.logger);

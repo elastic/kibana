@@ -59,7 +59,18 @@
  */
 
 import { setWith } from '@kbn/safer-lodash-set';
-import { difference, isEqual, isFunction, isObject, keyBy, pick, uniqueId, concat } from 'lodash';
+import {
+  difference,
+  isEqual,
+  isFunction,
+  isObject,
+  keyBy,
+  pick,
+  uniqueId,
+  concat,
+  omitBy,
+  isNil,
+} from 'lodash';
 import { catchError, finalize, first, last, map, shareReplay, switchMap, tap } from 'rxjs';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -769,7 +780,7 @@ export class SearchSource {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
-    const { body, index, query, filters, highlightAll, pit } = searchRequest;
+    const { body, index, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);
     const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
@@ -867,32 +878,12 @@ export class SearchSource {
         // remove _source, since everything's coming from fields API, scripted, or stored fields
         body._source = false;
 
-        // if items that are in the docvalueFields are provided, we should
-        // inject the format from the computed fields if one isn't given
-        const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
-        const bodyFields = this.getFieldsWithoutSourceFilters(index, body.fields);
-
-        const uniqueFieldNames = new Set();
-        const uniqueFields = [];
-        for (const field of bodyFields.concat(filteredDocvalueFields)) {
-          const fieldName = this.getFieldName(field);
-          if (metaFields.includes(fieldName) || uniqueFieldNames.has(fieldName)) {
-            continue;
-          }
-          uniqueFieldNames.add(fieldName);
-          if (Object.keys(docvaluesIndex).includes(fieldName)) {
-            // either provide the field object from computed docvalues,
-            // or merge the user-provided field with the one in docvalues
-            uniqueFields.push(
-              typeof field === 'string'
-                ? docvaluesIndex[field]
-                : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, field, index)
-            );
-          } else {
-            uniqueFields.push(field);
-          }
-        }
-        body.fields = uniqueFields;
+        body.fields = this.getUniqueFields({
+          index,
+          fields: body.fields,
+          metaFields,
+          filteredDocvalueFields,
+        });
       }
     } else {
       body.fields = filteredDocvalueFields;
@@ -932,11 +923,54 @@ export class SearchSource {
       delete searchRequest.highlightAll;
     }
 
-    if (pit) {
-      body.pit = pit;
-    }
+    const omitByIsNil = (object: Record<string, any>) => omitBy(object, isNil);
 
-    return searchRequest;
+    const bodyToReturn = {
+      ...searchRequest.body,
+      pit: searchRequest.pit,
+    };
+
+    return omitByIsNil({ ...searchRequest, body: omitByIsNil(bodyToReturn) }) as SearchRequest;
+  }
+
+  private getUniqueFields({
+    index,
+    fields,
+    metaFields,
+    filteredDocvalueFields,
+  }: {
+    index?: DataView;
+    fields: any;
+    metaFields: string;
+    filteredDocvalueFields: any;
+  }) {
+    const bodyFields = this.getFieldsWithoutSourceFilters(index, fields);
+    // if items that are in the docvalueFields are provided, we should
+    // inject the format from the computed fields if one isn't given
+    const docvaluesIndex = keyBy(filteredDocvalueFields, 'field');
+    const docValuesIndexKeys = new Set(Object.keys(docvaluesIndex));
+
+    const uniqueFieldNames = new Set();
+    const uniqueFields = [];
+    for (const field of bodyFields.concat(filteredDocvalueFields)) {
+      const fieldName = this.getFieldName(field);
+      if (metaFields.includes(fieldName) || uniqueFieldNames.has(fieldName)) {
+        continue;
+      }
+      uniqueFieldNames.add(fieldName);
+      if (docValuesIndexKeys.has(fieldName)) {
+        // either provide the field object from computed docvalues,
+        // or merge the user-provided field with the one in docvalues
+        uniqueFields.push(
+          typeof field === 'string'
+            ? docvaluesIndex[field]
+            : this.getFieldFromDocValueFieldsOrIndexPattern(docvaluesIndex, field, index)
+        );
+      } else {
+        uniqueFields.push(field);
+      }
+    }
+    return uniqueFields;
   }
 
   /**

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { UserAtSpaceScenarios } from '../../../scenarios';
@@ -16,17 +16,17 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   supertestWithoutAuth: any
 ) => {
-  // FLAKY: https://github.com/elastic/kibana/issues/182314
-  describe.skip(describeType, () => {
-    afterEach(() => objectRemover.removeAll());
+  describe(describeType, () => {
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
-      // FLAKY: https://github.com/elastic/kibana/issues/182314
-      describe.skip(scenario.id, () => {
+      describe(scenario.id, () => {
         it('should handle find alert request appropriately', async () => {
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -581,7 +581,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   describe('find with post', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);
   });

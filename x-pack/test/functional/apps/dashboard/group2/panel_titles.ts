@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const dashboardCustomizePanel = getService('dashboardCustomizePanel');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
     'dashboard',
@@ -23,11 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'lens',
   ]);
 
-  const DASHBOARD_NAME = 'Panel Title Test';
-  const CUSTOM_TITLE = 'Test Custom Title';
   const EMPTY_TITLE = '[No Title]';
-  const LIBRARY_TITLE_FOR_CUSTOM_TESTS = 'Library Title for Custom Title Tests';
-  const LIBRARY_TITLE_FOR_EMPTY_TESTS = 'Library Title for Empty Title Tests';
 
   describe('panel titles', () => {
     before(async () => {
@@ -39,13 +36,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
+      await PageObjects.dashboard.saveDashboard('Panel Title Test');
+      await PageObjects.lens.createAndAddLensFromDashboard({});
+    });
+
+    beforeEach(async () => {
+      // close any open flyouts to prevent dirty state between tests
+      if (await testSubjects.exists('euiFlyoutCloseButton')) {
+        await testSubjects.click('euiFlyoutCloseButton');
+      }
     });
 
     describe('by value', () => {
       it('new panel by value has empty title', async () => {
-        await PageObjects.lens.createAndAddLensFromDashboard({});
-        const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
+        const [newPanelTitle] = await PageObjects.dashboard.getPanelTitles();
         expect(newPanelTitle).to.equal(EMPTY_TITLE);
       });
 
@@ -58,78 +62,115 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('custom title causes unsaved changes and saving clears it', async () => {
         await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
+        await dashboardCustomizePanel.setCustomPanelTitle('Custom title');
         await dashboardCustomizePanel.clickSaveButton();
-        const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-        expect(panelTitle).to.equal(CUSTOM_TITLE);
+        const [panelTitle] = await PageObjects.dashboard.getPanelTitles();
+        expect(panelTitle).to.equal('Custom title');
         await PageObjects.dashboard.clearUnsavedChanges();
       });
 
-      it('resetting title on a by value panel sets it to the empty string', async () => {
-        const BY_VALUE_TITLE = 'Reset Title - By Value';
+      it('reset title should be hidden on a by value panel', async () => {
         await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.setCustomPanelTitle(BY_VALUE_TITLE);
+        await dashboardCustomizePanel.setCustomPanelTitle('Some title');
         await dashboardCustomizePanel.clickSaveButton();
+        await dashboardPanelActions.customizePanel();
+        expect(await testSubjects.exists('resetCustomEmbeddablePanelTitleButton')).to.be(false);
+      });
 
+      it('reset description should be hidden on a by value panel', async () => {
         await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.resetCustomPanelTitle();
+        await dashboardCustomizePanel.setCustomPanelDescription('Some description');
         await dashboardCustomizePanel.clickSaveButton();
-        const panelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-        expect(panelTitle).to.equal(EMPTY_TITLE);
-        await PageObjects.dashboard.clearUnsavedChanges();
+        await dashboardPanelActions.customizePanel();
+        expect(await testSubjects.exists('resetCustomEmbeddablePanelDescriptionButton')).to.be(
+          false
+        );
       });
     });
 
-    describe('by reference', () => {
+    describe('nick by reference', () => {
+      const VIS_LIBRARY_DESCRIPTION = 'Vis library description';
+
+      let count = 0;
+      const getVisTitle = (increment = false) =>
+        `Vis Library Title - ${increment ? ++count : count}`;
+
       it('linking a by value panel with a custom title to the library will overwrite the custom title with the library title', async () => {
         await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
+        await dashboardCustomizePanel.setCustomPanelTitle('Custom title');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.legacySaveToLibrary(LIBRARY_TITLE_FOR_CUSTOM_TESTS);
-        await retry.try(async () => {
+        await dashboardPanelActions.legacySaveToLibrary(getVisTitle(true));
+        await retry.tryForTime(500, async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
-          const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-          expect(newPanelTitle).to.equal(LIBRARY_TITLE_FOR_CUSTOM_TESTS);
+          const [newPanelTitle] = await PageObjects.dashboard.getPanelTitles();
+          expect(newPanelTitle).to.equal(getVisTitle());
         });
       });
 
       it('resetting title on a by reference panel sets it to the library title', async () => {
         await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.setCustomPanelTitle('This should go away');
+        await dashboardCustomizePanel.setCustomPanelTitle('Custom Title');
         await dashboardCustomizePanel.clickSaveButton();
-
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.resetCustomPanelTitle();
         await dashboardCustomizePanel.clickSaveButton();
-        const resetPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-        expect(resetPanelTitle).to.equal(LIBRARY_TITLE_FOR_CUSTOM_TESTS);
+        await dashboardPanelActions.customizePanel();
+        expect(await dashboardCustomizePanel.getCustomPanelTitle()).to.equal(getVisTitle());
+      });
+
+      it('resetting description on a by reference panel sets it to the library title', async () => {
+        await dashboardPanelActions.openContextMenu();
+        await dashboardPanelActions.navigateToEditorFromFlyout();
+        // legacySaveToLibrary UI cannot set description
+        await PageObjects.lens.save(
+          getVisTitle(true),
+          false,
+          undefined,
+          undefined,
+          undefined,
+          undefined,
+          VIS_LIBRARY_DESCRIPTION
+        );
+
+        await dashboardPanelActions.customizePanel();
+        await dashboardCustomizePanel.setCustomPanelDescription('Custom description');
+        await dashboardCustomizePanel.clickSaveButton();
+
+        await dashboardPanelActions.customizePanel();
+        await dashboardCustomizePanel.resetCustomPanelDescription();
+        await dashboardCustomizePanel.clickSaveButton();
+
+        await dashboardPanelActions.customizePanel();
+        expect(await dashboardCustomizePanel.getCustomPanelDescription()).to.equal(
+          VIS_LIBRARY_DESCRIPTION
+        );
       });
 
       it('unlinking a by reference panel with a custom title will keep the current title', async () => {
         await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
+        await dashboardCustomizePanel.setCustomPanelTitle('Custom title');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.legacyUnlinkFromLibary();
-        const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-        expect(newPanelTitle).to.equal(CUSTOM_TITLE);
+        await dashboardPanelActions.legacyUnlinkFromLibrary();
+        const [newPanelTitle] = await PageObjects.dashboard.getPanelTitles();
+        expect(newPanelTitle).to.equal('Custom title');
       });
 
       it("linking a by value panel with a blank title to the library will set the panel's title to the library title", async () => {
         await dashboardPanelActions.customizePanel();
         await dashboardCustomizePanel.setCustomPanelTitle('');
         await dashboardCustomizePanel.clickSaveButton();
-        await dashboardPanelActions.legacySaveToLibrary(LIBRARY_TITLE_FOR_EMPTY_TESTS);
-        await retry.try(async () => {
+        await dashboardPanelActions.legacySaveToLibrary(getVisTitle(true));
+        await retry.tryForTime(500, async () => {
           // need to surround in 'retry' due to delays in HTML updates causing the title read to be behind
-          const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-          expect(newPanelTitle).to.equal(LIBRARY_TITLE_FOR_EMPTY_TESTS);
+          const [newPanelTitle] = await PageObjects.dashboard.getPanelTitles();
+          expect(newPanelTitle).to.equal(getVisTitle());
         });
       });
 
       it('unlinking a by reference panel without a custom title will keep the library title', async () => {
-        await dashboardPanelActions.legacyUnlinkFromLibary();
-        const newPanelTitle = (await PageObjects.dashboard.getPanelTitles())[0];
-        expect(newPanelTitle).to.equal(LIBRARY_TITLE_FOR_EMPTY_TESTS);
+        await dashboardPanelActions.legacyUnlinkFromLibrary();
+        const [newPanelTitle] = await PageObjects.dashboard.getPanelTitles();
+        expect(newPanelTitle).to.equal(getVisTitle());
       });
     });
   });

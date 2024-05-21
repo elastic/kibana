@@ -34,6 +34,7 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
+    isNonAggregatable,
     fieldFormats,
     timeRange,
     loadingState,
@@ -60,6 +61,7 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
                 dataStreamDetails={dataStreamDetails}
                 dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
                 timeRange={timeRange}
+                isNonAggregatable={isNonAggregatable}
               />
             </EuiPanel>
 

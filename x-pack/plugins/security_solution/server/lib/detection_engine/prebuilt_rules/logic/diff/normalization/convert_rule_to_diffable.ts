@@ -53,6 +53,7 @@ import { extractRuleNameOverrideObject } from './extract_rule_name_override_obje
 import { extractRuleSchedule } from './extract_rule_schedule';
 import { extractTimelineTemplateReference } from './extract_timeline_template_reference';
 import { extractTimestampOverrideObject } from './extract_timestamp_override_object';
+import { addEcsToRequiredFields } from '../../../../rule_management/utils/utils';
 
 /**
  * Normalizes a given rule to the form which is suitable for passing to the diff algorithm.
@@ -133,7 +134,7 @@ const extractDiffableCommonFields = (
     note: rule.note ?? '',
     setup: rule.setup ?? '',
     related_integrations: rule.related_integrations ?? [],
-    required_fields: rule.required_fields ?? [],
+    required_fields: addEcsToRequiredFields(rule.required_fields),
     author: rule.author ?? [],
     license: rule.license ?? '',
 

@@ -103,6 +103,7 @@ export function useFetchSloList({
           ...(page !== undefined && { page }),
           ...(perPage !== undefined && { perPage }),
           ...(filters && { filters }),
+          hideStale: true,
         },
         signal,
       });

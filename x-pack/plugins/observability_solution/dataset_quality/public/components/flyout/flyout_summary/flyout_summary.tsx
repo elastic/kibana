@@ -6,8 +6,19 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { OnRefreshProps, OnTimeChangeProps, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import {
+  OnRefreshProps,
+  OnTimeChangeProps,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCallOut,
+  EuiLink,
+  EuiCode,
+} from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { DegradedDocs } from '../degraded_docs_trend/degraded_docs';
 import { DataStreamDetails } from '../../../../common/api_types';
 import { DEFAULT_TIME_RANGE, DEFAULT_DATEPICKER_REFRESH } from '../../../../common/constants';
@@ -16,10 +27,60 @@ import { FlyoutDataset, TimeRangeConfig } from '../../../state_machines/dataset_
 import { FlyoutSummaryHeader } from './flyout_summary_header';
 import { FlyoutSummaryKpis, FlyoutSummaryKpisLoading } from './flyout_summary_kpis';
 
+const nonAggregatableWarningTitle = i18n.translate('xpack.datasetQuality.nonAggregatable.title', {
+  defaultMessage: 'Your request may take longer to complete',
+});
+
+const nonAggregatableWarningDescription = (dataset: string) => (
+  <FormattedMessage
+    id="xpack.datasetQuality.flyout.nonAggregatable.description"
+    defaultMessage="{description}"
+    values={{
+      description: (
+        <FormattedMessage
+          id="xpack.datasetQuality.flyout.nonAggregatable.warning"
+          defaultMessage="{dataset}does not support _ignored aggregation and may cause delays when querying data. {howToFixIt}"
+          values={{
+            dataset: (
+              <EuiCode language="json" transparentBackground>
+                {dataset}
+              </EuiCode>
+            ),
+            howToFixIt: (
+              <FormattedMessage
+                id="xpack.datasetQuality.flyout.nonAggregatable.howToFixIt"
+                defaultMessage="Manually {rolloverLink} this dataset to prevent future delays."
+                values={{
+                  rolloverLink: (
+                    <EuiLink
+                      external
+                      target="_blank"
+                      data-test-subj="datasetQualityFlyoutNonAggregatableHowToFixItLink"
+                      href="https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-rollover-index.html"
+                    >
+                      {i18n.translate(
+                        'xpack.datasetQuality.flyout.nonAggregatableDatasets.link.title',
+                        {
+                          defaultMessage: 'rollover',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ),
+          }}
+        />
+      ),
+    }}
+  />
+);
+
 export function FlyoutSummary({
   dataStream,
   dataStreamStat,
   dataStreamDetails,
+  isNonAggregatable,
   dataStreamDetailsLoading,
   timeRange = { ...DEFAULT_TIME_RANGE, refresh: DEFAULT_DATEPICKER_REFRESH },
 }: {
@@ -28,6 +89,7 @@ export function FlyoutSummary({
   dataStreamDetails?: DataStreamDetails;
   dataStreamDetailsLoading: boolean;
   timeRange?: TimeRangeConfig;
+  isNonAggregatable?: boolean;
 }) {
   const { service } = useDatasetQualityContext();
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
@@ -72,6 +134,18 @@ export function FlyoutSummary({
 
   return (
     <>
+      {isNonAggregatable && (
+        <EuiFlexGroup
+          data-test-subj="datasetQualityFlyoutNonAggregatableWarning"
+          style={{ marginBottom: '24px' }}
+        >
+          <EuiFlexItem>
+            <EuiCallOut title={nonAggregatableWarningTitle} color="warning" iconType="warning">
+              <p>{nonAggregatableWarningDescription(dataStream)}</p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <FlyoutSummaryHeader
         timeRange={timeRange}
         onTimeChange={handleTimeChange}

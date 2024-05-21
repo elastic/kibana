@@ -18,11 +18,10 @@ import {
   DataDocumentsMsg,
   DataMainMsg,
   DataTotalHitsMsg,
-  RecordRawType,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
 import { fetchDocuments } from './fetch_documents';
-import { fetchTextBased } from './fetch_text_based';
+import { fetchEsql } from './fetch_esql';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';
 import { searchResponseIncompleteWarningLocalCluster } from '@kbn/search-response-warnings/src/__mocks__/search_response_warnings';
@@ -31,12 +30,12 @@ jest.mock('./fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue([]),
 }));
 
-jest.mock('./fetch_text_based', () => ({
-  fetchTextBased: jest.fn().mockResolvedValue([]),
+jest.mock('./fetch_esql', () => ({
+  fetchEsql: jest.fn().mockResolvedValue([]),
 }));
 
 const mockFetchDocuments = fetchDocuments as unknown as jest.MockedFunction<typeof fetchDocuments>;
-const mockfetchTextBased = fetchTextBased as unknown as jest.MockedFunction<typeof fetchTextBased>;
+const mockfetchEsql = fetchEsql as unknown as jest.MockedFunction<typeof fetchEsql>;
 
 function subjectCollector<T>(subject: Subject<T>): () => Promise<T[]> {
   const promise = firstValueFrom(
@@ -90,7 +89,7 @@ describe('test fetchAll', () => {
     };
 
     mockFetchDocuments.mockReset().mockResolvedValue({ records: [] });
-    mockfetchTextBased.mockReset().mockResolvedValue({ records: [] });
+    mockfetchEsql.mockReset().mockResolvedValue({ records: [] });
   });
 
   test('changes of fetchStatus when starting with FetchStatus.UNINITIALIZED', async () => {
@@ -120,10 +119,9 @@ describe('test fetchAll', () => {
     await waitForNextTick();
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
+      { fetchStatus: FetchStatus.LOADING },
       {
         fetchStatus: FetchStatus.COMPLETE,
-        recordRawType: 'document',
         result: documents,
       },
     ]);
@@ -141,21 +139,19 @@ describe('test fetchAll', () => {
 
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
-      recordRawType: RecordRawType.DOCUMENT,
     });
     fetchAll(subjects, false, deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
-      recordRawType: RecordRawType.DOCUMENT,
       result: 42,
     });
 
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
-      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document', result: 2 },
-      { fetchStatus: FetchStatus.COMPLETE, recordRawType: 'document', result: 42 },
+      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.PARTIAL, result: 2 },
+      { fetchStatus: FetchStatus.COMPLETE, result: 42 },
     ]);
   });
 
@@ -164,21 +160,19 @@ describe('test fetchAll', () => {
     searchSource.getField('index')!.isTimeBased = () => true;
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
-      recordRawType: RecordRawType.DOCUMENT,
     });
     fetchAll(subjects, false, deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
-      recordRawType: RecordRawType.DOCUMENT,
       result: 32,
     });
 
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
-      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document', result: 0 }, // From documents query
-      { fetchStatus: FetchStatus.COMPLETE, recordRawType: 'document', result: 32 },
+      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.PARTIAL, result: 0 }, // From documents query
+      { fetchStatus: FetchStatus.COMPLETE, result: 32 },
     ]);
   });
 
@@ -191,31 +185,28 @@ describe('test fetchAll', () => {
     mockFetchDocuments.mockResolvedValue({ records: documents });
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
-      recordRawType: RecordRawType.DOCUMENT,
     });
     fetchAll(subjects, false, deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.ERROR,
-      recordRawType: RecordRawType.DOCUMENT,
       error: { msg: 'Oh noes!' } as unknown as Error,
     });
 
     expect(await collectTotalHits()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
-      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document', result: 1 },
-      { fetchStatus: FetchStatus.ERROR, recordRawType: 'document', error: { msg: 'Oh noes!' } },
+      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.PARTIAL, result: 1 },
+      { fetchStatus: FetchStatus.ERROR, error: { msg: 'Oh noes!' } },
     ]);
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
-      { fetchStatus: FetchStatus.PARTIAL, recordRawType: 'document' },
+      { fetchStatus: FetchStatus.LOADING },
+      { fetchStatus: FetchStatus.PARTIAL },
       {
         fetchStatus: FetchStatus.COMPLETE,
         foundDocuments: true,
         error: undefined,
-        recordRawType: 'document',
       },
     ]);
   });
@@ -226,23 +217,20 @@ describe('test fetchAll', () => {
     mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.LOADING,
-      recordRawType: RecordRawType.DOCUMENT,
     });
     fetchAll(subjects, false, deps);
     await waitForNextTick();
     subjects.totalHits$.next({
       fetchStatus: FetchStatus.COMPLETE,
-      recordRawType: RecordRawType.DOCUMENT,
       result: 5,
     });
 
     expect(await collectMain()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'document' },
+      { fetchStatus: FetchStatus.LOADING },
       {
         fetchStatus: FetchStatus.ERROR,
         error: { msg: 'This query failed' },
-        recordRawType: 'document',
       },
       // Here should be no COMPLETE coming anymore
     ]);
@@ -255,9 +243,9 @@ describe('test fetchAll', () => {
       { _id: '2', _index: 'logs' },
     ];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    mockfetchTextBased.mockResolvedValue({
+    mockfetchEsql.mockResolvedValue({
       records: documents,
-      textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+      esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
     });
     const query = { esql: 'from foo' };
     deps = {
@@ -284,12 +272,11 @@ describe('test fetchAll', () => {
 
     expect(await collect()).toEqual([
       { fetchStatus: FetchStatus.UNINITIALIZED },
-      { fetchStatus: FetchStatus.LOADING, recordRawType: 'plain', query },
+      { fetchStatus: FetchStatus.LOADING, query },
       {
         fetchStatus: FetchStatus.PARTIAL,
-        recordRawType: 'plain',
         result: documents,
-        textBasedQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
+        esqlQueryColumns: [{ id: '1', name: 'test1', meta: { type: 'number' } }],
         query,
       },
     ]);
@@ -308,7 +295,6 @@ describe('test fetchAll', () => {
       mockFetchDocuments.mockResolvedValue({ records: moreRecords, interceptedWarnings });
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
-        recordRawType: RecordRawType.DOCUMENT,
         result: initialRecords,
       });
       fetchMoreDocuments(subjects, deps);
@@ -318,17 +304,14 @@ describe('test fetchAll', () => {
         { fetchStatus: FetchStatus.UNINITIALIZED },
         {
           fetchStatus: FetchStatus.COMPLETE,
-          recordRawType: RecordRawType.DOCUMENT,
           result: initialRecords,
         },
         {
           fetchStatus: FetchStatus.LOADING_MORE,
-          recordRawType: RecordRawType.DOCUMENT,
           result: initialRecords,
         },
         {
           fetchStatus: FetchStatus.COMPLETE,
-          recordRawType: RecordRawType.DOCUMENT,
           result: [...initialRecords, ...moreRecords],
           interceptedWarnings,
         },
@@ -346,7 +329,6 @@ describe('test fetchAll', () => {
       mockFetchDocuments.mockRejectedValue({ msg: 'This query failed' });
       subjects.documents$.next({
         fetchStatus: FetchStatus.COMPLETE,
-        recordRawType: RecordRawType.DOCUMENT,
         result: initialRecords,
       });
       fetchMoreDocuments(subjects, deps);
@@ -356,17 +338,14 @@ describe('test fetchAll', () => {
         { fetchStatus: FetchStatus.UNINITIALIZED },
         {
           fetchStatus: FetchStatus.COMPLETE,
-          recordRawType: RecordRawType.DOCUMENT,
           result: initialRecords,
         },
         {
           fetchStatus: FetchStatus.LOADING_MORE,
-          recordRawType: RecordRawType.DOCUMENT,
           result: initialRecords,
         },
         {
           fetchStatus: FetchStatus.COMPLETE,
-          recordRawType: RecordRawType.DOCUMENT,
           result: initialRecords,
         },
       ]);
@@ -385,7 +364,7 @@ describe('test fetchAll', () => {
 
     test('should swallow abort errors', async () => {
       const collect = subjectCollector(subjects.documents$);
-      mockfetchTextBased.mockRejectedValue({ msg: 'The query was aborted' });
+      mockfetchEsql.mockRejectedValue({ msg: 'The query was aborted' });
       const query = { esql: 'from foo' };
       deps = {
         abortController: new AbortController(),

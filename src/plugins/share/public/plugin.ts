@@ -23,7 +23,7 @@ import { AnonymousAccessServiceContract } from '../common';
 import { LegacyShortUrlLocatorDefinition } from '../common/url_service/locators/legacy_short_url_locator';
 import { ShortUrlRedirectLocatorDefinition } from '../common/url_service/locators/short_url_redirect_locator';
 import { registrations } from './lib/registrations';
-import type { BrowserUrlService, ClientConfigType } from './types';
+import type { BrowserUrlService } from './types';
 
 /** @public */
 export type SharePublicSetup = ShareMenuRegistrySetup & {
@@ -42,11 +42,6 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
-  /**
-   * Allows for canvas to register the older versioned way whereas reporting for Discover/Lens/Dashboard
-   * can use the new share version and show the share context modals
-   */
-  isNewVersion: () => boolean;
 };
 
 /** @public */
@@ -78,19 +73,13 @@ export class SharePlugin
       SharePublicStartDependencies
     >
 {
-  private config: ClientConfigType;
-  private readonly shareMenuRegistry?: ShareMenuRegistry;
+  private readonly shareMenuRegistry?: ShareMenuRegistry = new ShareMenuRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<ClientConfigType>();
-    this.shareMenuRegistry = new ShareMenuRegistry({
-      newVersionEnabled: this.config.new_version.enabled,
-    });
-  }
+  constructor(private readonly initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup): SharePublicSetup {
     const { analytics, http } = core;
@@ -143,7 +132,6 @@ export class SharePlugin
         }
         this.anonymousAccessServiceProvider = provider;
       },
-      isNewVersion: () => this.config.new_version.enabled,
     };
   }
 
@@ -154,7 +142,6 @@ export class SharePlugin
       this.url!,
       this.shareMenuRegistry!.start(),
       disableEmbed,
-      this.config.new_version.enabled ?? false,
       this.anonymousAccessServiceProvider
     );
 

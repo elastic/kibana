@@ -8,7 +8,7 @@
 
 import React, { useMemo } from 'react';
 import { css, CSSObject } from '@emotion/react';
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getTextBasedColumnIconType } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
@@ -129,11 +129,9 @@ export const DataTableTimeColumnHeader = ({
         text-align: left;
       `}
     >
-      <EuiToolTip content={primaryTimeTooltip}>
-        <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-          {timeFieldName} <EuiIcon type="clock" />
-        </ColumnHeaderTruncateContainer>
-      </EuiToolTip>
+      <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
+        {timeFieldName} <EuiIconTip type="clock" content={primaryTimeTooltip} />
+      </ColumnHeaderTruncateContainer>
     </div>
   );
 };

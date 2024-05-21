@@ -13,9 +13,10 @@ import { CopyInput } from '../../../components/copy_input';
 
 export interface EndpointUrlProps {
   url: string;
+  onCopyClick?: () => void;
 }
 
-export const EndpointUrlRow: React.FC<EndpointUrlProps> = ({ url }) => {
+export const EndpointUrlRow: React.FC<EndpointUrlProps> = ({ url, onCopyClick }) => {
   return (
     <EuiFormRow
       label={i18n.translate('cloud.connectionDetails.tab.endpoints.endpointField.label', {
@@ -27,7 +28,7 @@ export const EndpointUrlRow: React.FC<EndpointUrlProps> = ({ url }) => {
       fullWidth
       data-test-subj="connectionDetailsEsUrl"
     >
-      <CopyInput value={url} />
+      <CopyInput value={url} onCopyClick={() => onCopyClick?.()} />
     </EuiFormRow>
   );
 };

@@ -18,12 +18,14 @@ export interface SuccessFormControlledProps {
   apiKey: ApiKey;
   format: Format;
   onFormatChange: (format: Format) => void;
+  onCopyClick?: () => void;
 }
 
 export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
   apiKey,
   format,
   onFormatChange,
+  onCopyClick,
 }) => {
   const keyValue = format === 'encoded' ? apiKey.encoded : `${apiKey.id}:${apiKey.key}`;
 
@@ -62,7 +64,7 @@ export const SuccessFormControlled: React.FC<SuccessFormControlledProps> = ({
           fullWidth
           data-test-subj={'connectionDetailsApiKeyValueRow'}
         >
-          <CopyInput value={keyValue} />
+          <CopyInput value={keyValue} onCopyClick={onCopyClick} />
         </EuiFormRow>
       </EuiCallOut>
 

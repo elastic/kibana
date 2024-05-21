@@ -237,7 +237,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         );
         const { body, status } = await esSupertest
           .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
-          .set(headers)
+          .set(headers as Record<string, string>)
           .send(transformConfig);
         this.assertResponseStatusCode(200, status, body);
       } else {

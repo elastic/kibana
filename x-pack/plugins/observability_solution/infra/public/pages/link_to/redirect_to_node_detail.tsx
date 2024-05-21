@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Redirect, useLocation, useRouteMatch } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useLocation, useRouteMatch } from 'react-router-dom';
 import rison from '@kbn/rison';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { replaceStateKeyInQueryString } from '../../../common/url_state_storage_service';
-import { replaceMetricTimeInQueryString } from '../metrics/metric_detail/hooks/use_metrics_time';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/public';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { AssetDetailsUrlState } from '../../components/asset_details/types';
 import { ASSET_DETAILS_URL_STATE_KEY } from '../../components/asset_details/constants';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const REDIRECT_NODE_DETAILS_FROM_KEY = 'from';
 export const REDIRECT_NODE_DETAILS_TO_KEY = 'to';
@@ -23,43 +24,61 @@ const getHostDetailSearch = (queryParams: URLSearchParams) => {
   const to = queryParams.get(REDIRECT_NODE_DETAILS_TO_KEY);
   const assetDetailsParam = queryParams.get(REDIRECT_ASSET_DETAILS_KEY);
 
-  return replaceStateKeyInQueryString(ASSET_DETAILS_URL_STATE_KEY, {
-    ...(assetDetailsParam ? (rison.decode(assetDetailsParam) as AssetDetailsUrlState) : undefined),
-    dateRange: {
-      from: from ? new Date(parseFloat(from)).toISOString() : undefined,
-      to: to ? new Date(parseFloat(to)).toISOString() : undefined,
+  return {
+    [ASSET_DETAILS_URL_STATE_KEY]: {
+      ...(assetDetailsParam
+        ? (rison.decode(assetDetailsParam) as AssetDetailsUrlState)
+        : undefined),
+      dateRange: {
+        from: from ? new Date(parseFloat(from)).toISOString() : undefined,
+        to: to ? new Date(parseFloat(to)).toISOString() : undefined,
+      },
     },
-  } as AssetDetailsUrlState)('');
+  } as AssetDetailsUrlState;
 };
 
 const getNodeDetailSearch = (queryParams: URLSearchParams) => {
   const from = queryParams.get(REDIRECT_NODE_DETAILS_FROM_KEY);
   const to = queryParams.get(REDIRECT_NODE_DETAILS_TO_KEY);
 
-  return replaceMetricTimeInQueryString(
-    from ? parseFloat(from) : NaN,
-    to ? parseFloat(to) : NaN
-  )('');
+  return {
+    _a: {
+      time:
+        from && to
+          ? {
+              from: new Date(parseFloat(from)).toISOString(),
+              interval: '>=1m',
+              to: new Date(parseFloat(to)).toISOString(),
+            }
+          : undefined,
+    },
+  };
 };
+
+export const getSearchParams = (nodeType: InventoryItemType, queryParams: URLSearchParams) =>
+  nodeType === 'host' ? getHostDetailSearch(queryParams) : getNodeDetailSearch(queryParams);
 
 export const RedirectToNodeDetail = () => {
   const {
     params: { nodeType, nodeId },
   } = useRouteMatch<{ nodeType: InventoryItemType; nodeId: string }>();
-
+  const {
+    services: { share },
+  } = useKibanaContextForPlugin();
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
+  const baseLocator = share.url.locators.get(ASSET_DETAILS_LOCATOR_ID);
 
-  const search =
-    nodeType === 'host' ? getHostDetailSearch(queryParams) : getNodeDetailSearch(queryParams);
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const search = getSearchParams(nodeType, queryParams);
 
-  return (
-    <Redirect
-      to={{
-        pathname: `/detail/${nodeType}/${nodeId}`,
-        search,
-        state: location.state,
-      }}
-    />
-  );
+    baseLocator?.navigate({
+      ...search,
+      assetType: nodeType,
+      assetId: nodeId,
+      state: location.state as SerializableRecord,
+    });
+  }, [baseLocator, location.search, location.state, nodeId, nodeType]);
+
+  return null;
 };

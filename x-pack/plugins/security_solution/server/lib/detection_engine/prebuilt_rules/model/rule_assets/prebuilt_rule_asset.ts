@@ -7,7 +7,6 @@
 
 import * as z from 'zod';
 import {
-  RequiredFieldArray,
   RuleSignatureId,
   RuleVersion,
   BaseCreateProps,
@@ -33,6 +32,5 @@ export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).an
   z.object({
     rule_id: RuleSignatureId,
     version: RuleVersion,
-    required_fields: RequiredFieldArray.optional(),
   })
 );

@@ -24,6 +24,7 @@ export const AlertSummaryWidget = ({
   onClick = () => {},
   timeRange,
   hideChart,
+  hideStats,
   onLoaded,
   dependencies: { charts },
 }: AlertSummaryWidgetProps & AlertSummaryWidgetDependencies) => {
@@ -63,6 +64,7 @@ export const AlertSummaryWidget = ({
         dateFormat={timeRange.dateFormat}
         recoveredAlertCount={recoveredAlertCount}
         hideChart={hideChart}
+        hideStats={hideStats}
         dependencyProps={dependencyProps}
       />
     ) : null

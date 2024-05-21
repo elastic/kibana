@@ -56,12 +56,11 @@ export const systemMemory = {
   script: {
     lang: 'painless',
     source: `
-    if(doc.containsKey('${METRIC_SYSTEM_FREE_MEMORY}') && doc.containsKey('${METRIC_SYSTEM_TOTAL_MEMORY}')){
-      double freeMemoryValue =  doc['${METRIC_SYSTEM_FREE_MEMORY}'].value;
-      double totalMemoryValue = doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
-      return 1 - freeMemoryValue / totalMemoryValue
+    def freeMemory = (double)$('${METRIC_SYSTEM_FREE_MEMORY}', 0);
+    def totalMemory = (double)$('${METRIC_SYSTEM_TOTAL_MEMORY}', -1);
+    if (freeMemory >= 0 && totalMemory > 0) {
+      return 1 - freeMemory / totalMemory;
     }
-    
     return null;
   `,
   },
@@ -87,15 +86,14 @@ export const cgroupMemory = {
     */
     double CGROUP_LIMIT_MAX_VALUE = 9223372036854771712L;
 
-    String limitKey = '${METRIC_CGROUP_MEMORY_LIMIT_BYTES}';
+    //Should use cgroupLimit when value is not empty and not equals to the max limit value.
+    double cgroupLimit = $('${METRIC_CGROUP_MEMORY_LIMIT_BYTES}', 0);
+    double total = (double)((cgroupLimit != 0 && cgroupLimit != CGROUP_LIMIT_MAX_VALUE) ? cgroupLimit : $('${METRIC_SYSTEM_TOTAL_MEMORY}', 0));
+    if (total <= 0) {
+      return null;
+    }
 
-    //Should use cgropLimit when value is not empty and not equals to the max limit value.
-    boolean useCgroupLimit = doc.containsKey(limitKey) && !doc[limitKey].empty && doc[limitKey].value != CGROUP_LIMIT_MAX_VALUE;
-
-    double total = useCgroupLimit ? doc[limitKey].value : doc['${METRIC_SYSTEM_TOTAL_MEMORY}'].value;
-
-    double used = doc['${METRIC_CGROUP_MEMORY_USAGE_BYTES}'].value;
-
+    double used = (double)$('${METRIC_CGROUP_MEMORY_USAGE_BYTES}', 0);
     return used / total;
     `,
   },

@@ -17,22 +17,27 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiSpacer,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEqual } from 'lodash';
+import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../common/constants';
 import { useGetSettings } from './use_get_settings';
 import { usePutSloSettings } from './use_put_slo_settings';
 
 export function SettingsForm() {
   const [useAllRemoteClusters, setUseAllRemoteClusters] = useState(false);
   const [selectedRemoteClusters, setSelectedRemoteClusters] = useState<string[]>([]);
+  const [staleThresholdInHours, setStaleThresholdInHours] = useState(
+    DEFAULT_STALE_SLO_THRESHOLD_HOURS
+  );
 
   const { http } = useKibana().services;
 
   const { data: currentSettings } = useGetSettings();
-  const { mutateAsync: updateSettings } = usePutSloSettings();
+  const { mutateAsync: updateSettings, isLoading: isUpdating } = usePutSloSettings();
 
   const { data, loading } = useFetcher(() => {
     return http?.get<Array<{ name: string }>>('/api/remote_clusters');
@@ -42,6 +47,7 @@ export function SettingsForm() {
     if (currentSettings) {
       setUseAllRemoteClusters(currentSettings.useAllRemoteClusters);
       setSelectedRemoteClusters(currentSettings.selectedRemoteClusters);
+      setStaleThresholdInHours(currentSettings.staleThresholdInHours);
     }
   }, [currentSettings]);
 
@@ -50,6 +56,7 @@ export function SettingsForm() {
       settings: {
         useAllRemoteClusters,
         selectedRemoteClusters,
+        staleThresholdInHours,
       },
     });
   };
@@ -119,18 +126,57 @@ export function SettingsForm() {
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h3>
+            {i18n.translate('xpack.slo.settingsForm.h3.staleThresholdLabel', {
+              defaultMessage: 'Stale SLOs threshold',
+            })}
+          </h3>
+        }
+        description={
+          <p>
+            {i18n.translate('xpack.slo.settingsForm.select.staleThresholdLabel', {
+              defaultMessage:
+                'SLOs not updated within the defined stale threshold will be hidden by default from the overview list.',
+            })}
+          </p>
+        }
+      >
+        <EuiFormRow
+          label={i18n.translate('xpack.slo.settingsForm.euiFormRow.select.selectThresholdLabel', {
+            defaultMessage: 'Select threshold',
+          })}
+        >
+          <EuiFieldNumber
+            data-test-subj="sloSettingsFormFieldNumber"
+            value={staleThresholdInHours}
+            onChange={(evt) => {
+              setStaleThresholdInHours(Number(evt.target.value));
+            }}
+            append={i18n.translate('xpack.slo.settingsForm.euiFormRow.select.hours', {
+              defaultMessage: 'Hours',
+            })}
+          />
+        </EuiFormRow>
+        <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              isLoading={loading}
+              isLoading={loading || isUpdating}
               data-test-subj="o11ySettingsFormCancelButton"
               onClick={() => {
                 setUseAllRemoteClusters(currentSettings?.useAllRemoteClusters || false);
                 setSelectedRemoteClusters(currentSettings?.selectedRemoteClusters || []);
+                setStaleThresholdInHours(
+                  currentSettings?.staleThresholdInHours ?? DEFAULT_STALE_SLO_THRESHOLD_HOURS
+                );
               }}
               isDisabled={isEqual(currentSettings, {
                 useAllRemoteClusters,
                 selectedRemoteClusters,
+                staleThresholdInHours,
               })}
             >
               {i18n.translate('xpack.slo.settingsForm.euiButtonEmpty.cancelLabel', {
@@ -140,7 +186,7 @@ export function SettingsForm() {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              isLoading={loading}
+              isLoading={loading || isUpdating}
               data-test-subj="o11ySettingsFormSaveButton"
               color="primary"
               fill
@@ -148,6 +194,7 @@ export function SettingsForm() {
               isDisabled={isEqual(currentSettings, {
                 useAllRemoteClusters,
                 selectedRemoteClusters,
+                staleThresholdInHours,
               })}
             >
               {i18n.translate('xpack.slo.settingsForm.applyButtonEmptyLabel', {

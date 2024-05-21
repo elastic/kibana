@@ -44,6 +44,15 @@ export const fetchDegradedStatsFailedNotifier = (toasts: IToasts, error: Error) 
   });
 };
 
+export const fetchNonAggregatableDatasetsFailedNotifier = (toasts: IToasts, error: Error) => {
+  toasts.addDanger({
+    title: i18n.translate('xpack.datasetQuality.fetchNonAggregatableDatasetsFailed', {
+      defaultMessage: "We couldn't get non aggregatable datasets information.",
+    }),
+    text: error.message,
+  });
+};
+
 export const fetchIntegrationDashboardsFailedNotifier = (toasts: IToasts, error: Error) => {
   toasts.addDanger({
     title: i18n.translate('xpack.datasetQuality.fetchIntegrationDashboardsFailed', {

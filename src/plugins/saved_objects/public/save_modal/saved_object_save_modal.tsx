@@ -214,7 +214,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       >
         <EuiTextArea
           fullWidth
-          data-test-subj="viewDescription"
+          data-test-subj="savedObjectDescription"
           value={this.state.visualizationDescription}
           onChange={this.onDescriptionChange}
         />

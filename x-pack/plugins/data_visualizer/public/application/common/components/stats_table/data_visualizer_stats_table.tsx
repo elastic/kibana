@@ -15,6 +15,7 @@ import {
   EuiInMemoryTable,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
   EuiResizeObserver,
@@ -230,19 +231,13 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             {i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnName', {
               defaultMessage: 'Documents (%)',
             })}
-            {
-              <EuiToolTip
-                content={i18n.translate(
-                  'xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip',
-                  {
-                    defaultMessage:
-                      'Document count found is based on a smaller set of sampled records.',
-                  }
-                )}
-              >
-                <EuiIcon type="questionInCircle" />
-              </EuiToolTip>
-            }
+            <EuiIconTip
+              content={i18n.translate('xpack.dataVisualizer.dataGrid.documentsCountColumnTooltip', {
+                defaultMessage:
+                  'Document count found is based on a smaller set of sampled records.',
+              })}
+              type="questionInCircle"
+            />
           </div>
         ),
 

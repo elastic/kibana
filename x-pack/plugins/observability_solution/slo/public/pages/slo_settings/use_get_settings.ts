@@ -7,6 +7,7 @@
 
 import { GetSLOSettingsResponse } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
+import { DEFAULT_STALE_SLO_THRESHOLD_HOURS } from '../../../common/constants';
 import { useKibana } from '../../utils/kibana_react';
 
 export const useGetSettings = () => {
@@ -30,4 +31,5 @@ export const useGetSettings = () => {
 const defaultSettings: GetSLOSettingsResponse = {
   useAllRemoteClusters: false,
   selectedRemoteClusters: [],
+  staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
 };

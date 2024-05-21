@@ -22,11 +22,11 @@ import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 import { CreateAlertRuleButton } from '../../shared/alerts/links/create_alert_rule_button';
-import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToNodeDetails } from '../links';
 import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
+import { getApmField } from '../utils';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -157,7 +157,7 @@ const useTabs = (tabs: Tab[]) => {
     app: 'apm',
     hash: 'traces',
     search: {
-      kuery: `${APM_HOST_FILTER_FIELD}:"${asset.name}"`,
+      kuery: `${getApmField(asset.type)}:"${asset.id}"`,
     },
   });
 

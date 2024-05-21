@@ -12,10 +12,10 @@ import {
   Pagination,
   sloGroupWithSummaryResponseSchema,
 } from '@kbn/slo-schema';
+import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
-import { getListOfSummaryIndices } from './slo_settings';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import { getElasticsearchQueryOrThrow } from './transform_generators';
 
@@ -56,8 +56,8 @@ export class FindSLOGroups {
     } catch (e) {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
-
-    const indices = await getListOfSummaryIndices(this.soClient, this.esClient);
+    const settings = await getSloSettings(this.soClient);
+    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 

@@ -13,14 +13,14 @@ import {
   summaryPanelDatasetsActivityTooltipText,
   tableSummaryOfText,
 } from '../../../../common/translations';
-import { LastDayDataPlaceholder } from './last_day_data_placeholder';
+import { DataPlaceholder } from './data_placeholder';
 
 export function DatasetsActivity() {
   const { datasetsActivity, isDatasetsActivityLoading } = useSummaryPanelContext();
   const text = `${datasetsActivity.active} ${tableSummaryOfText} ${datasetsActivity.total}`;
 
   return (
-    <LastDayDataPlaceholder
+    <DataPlaceholder
       title={summaryPanelDatasetsActivityText}
       tooltip={summaryPanelDatasetsActivityTooltipText}
       value={text}

@@ -23,6 +23,7 @@ import { PassThrough } from 'stream';
 import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const actionsClient = actionsClientMock.create();
 jest.mock('../lib/build_response', () => ({
@@ -92,6 +93,7 @@ const mockContext = {
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClient),
     },
     getRegisteredTools: jest.fn(() => []),
+    getRegisteredFeatures: jest.fn(() => defaultAssistantFeatures),
     logger: loggingSystemMock.createLogger(),
     telemetry: { ...coreMock.createSetup().analytics, reportEvent },
     getCurrentUser: () => ({

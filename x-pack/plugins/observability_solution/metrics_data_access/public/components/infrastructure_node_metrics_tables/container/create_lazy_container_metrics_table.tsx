@@ -21,7 +21,6 @@ export function createLazyContainerMetricsTable(core: CoreStart, metricsClient: 
         <LazyIntegratedContainerMetricsTable
           core={core}
           metricsClient={metricsClient}
-          theme$={core.theme.theme$}
           sourceId={sourceId || 'default'}
           timerange={timerange}
           filterClauseDsl={filterClauseDsl}

@@ -76,7 +76,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('prebuilt', () => {
+  // FAILING ES SERVERLESS PROMOTION: https://github.com/elastic/kibana/issues/169787
+  describe.skip('prebuilt', () => {
     let packName: string;
     let packId: string;
     let savedQueryId: string;

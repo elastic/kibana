@@ -522,6 +522,7 @@ export type UploadedFileInfo = Pick<
 > & {
   actionId: string;
   agentId: string;
+  agentType: ResponseActionAgentType;
 };
 
 export interface ActionFileInfoApiResponse {

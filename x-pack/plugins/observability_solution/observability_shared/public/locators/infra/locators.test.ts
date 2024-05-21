@@ -9,6 +9,8 @@ import rison from '@kbn/rison';
 import { AssetDetailsLocatorDefinition } from './asset_details_locator';
 import { AssetDetailsFlyoutLocatorDefinition } from './asset_details_flyout_locator';
 import { HostsLocatorDefinition } from './hosts_locator';
+import { InventoryLocatorDefinition } from './inventory_locator';
+import querystring from 'querystring';
 
 const setupAssetDetailsLocator = async () => {
   const assetDetailsLocator = new AssetDetailsLocatorDefinition();
@@ -25,6 +27,14 @@ const setupHostsLocator = async () => {
 
   return {
     hostsLocator,
+  };
+};
+
+const setupInventoryLocator = async () => {
+  const inventoryLocator = new InventoryLocatorDefinition();
+
+  return {
+    inventoryLocator,
   };
 };
 
@@ -158,6 +168,61 @@ describe('Infra Locators', () => {
 
       expect(app).toBe('metrics');
       expect(path).toBe(`/hosts?_a=${searchString}&tableProperties=${tablePropertiesString}`);
+      expect(state).toBeDefined();
+      expect(Object.keys(state)).toHaveLength(0);
+    });
+  });
+
+  describe('Inventory Locator', () => {
+    const params = {
+      waffleFilter: { kind: 'kuery', expression: '' },
+      waffleTime: {
+        currentTime: 1715688477985,
+        isAutoReloading: false,
+      },
+      waffleOptions: {
+        accountId: '',
+        autoBounds: true,
+        boundsOverride: { max: 1, min: 0 },
+      },
+      customMetrics: undefined,
+      customOptions: undefined,
+      groupBy: { field: 'cloud.provider' },
+      legend: { palette: 'cool', reverseColors: false, steps: 10 },
+      metric: '(type:cpu)',
+      nodeType: 'host',
+      region: '',
+      sort: { by: 'name', direction: 'desc' as const },
+      timelineOpen: false,
+      view: 'map' as const,
+    };
+
+    const expected = Object.keys(params).reduce((acc: Record<string, string | undefined>, key) => {
+      acc[key] =
+        key === 'metric' || key === 'customOptions' || key === 'customMetrics'
+          ? params[key]
+          : rison.encodeUnknown(params[key as keyof typeof params]);
+      return acc;
+    }, {});
+
+    const queryStringParams = querystring.stringify(expected);
+
+    it('should create a link to Inventory with no state', async () => {
+      const { inventoryLocator } = await setupInventoryLocator();
+      const { app, path, state } = await inventoryLocator.getLocation(params);
+
+      expect(app).toBe('metrics');
+      expect(path).toBe(`/inventory?${queryStringParams}`);
+      expect(state).toBeDefined();
+      expect(Object.keys(state)).toHaveLength(0);
+    });
+
+    it('should return correct structured url', async () => {
+      const { inventoryLocator } = await setupInventoryLocator();
+      const { app, path, state } = await inventoryLocator.getLocation(params);
+
+      expect(app).toBe('metrics');
+      expect(path).toBe(`/inventory?${queryStringParams}`);
       expect(state).toBeDefined();
       expect(Object.keys(state)).toHaveLength(0);
     });

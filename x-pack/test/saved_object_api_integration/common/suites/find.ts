@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import querystring from 'querystring';
 import {
   SAVED_OBJECT_TEST_CASES,
@@ -187,7 +187,7 @@ export const createRequest = ({ query }: FindTestCase) => ({ query });
 const getTestTitle = ({ failure, title }: FindTestCase) =>
   `${failure?.reason || 'success'} ["${title}"]`;
 
-export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function findTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectResponseBody =
     (testCase: FindTestCase, user?: TestUser): ExpectResponseBody =>
     async (response: Record<string, any>) => {
@@ -298,7 +298,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
 
             await supertest
               .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
           });

@@ -30,6 +30,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsOverviewTab');
     },
 
+    async getOverviewTab() {
+      return testSubjects.find('infraAssetDetailsOverviewTab');
+    },
+
     async getAssetDetailsKPITileValue(type: string) {
       const element = await testSubjects.find(`infraAssetDetailsKPI${type}`);
       const div = await element.findByClassName('echMetricText__value');
@@ -100,6 +104,15 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const section = await container.findByTestSubject(
         `infraAssetDetailsHostChartsSection${metric}`
       );
+      return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
+    },
+
+    async getOverviewTabDockerMetricCharts(metric: string) {
+      const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      const section = await container.findByTestSubject(
+        `infraAssetDetailsDockerChartsSection${metric}`
+      );
+
       return section.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricChart"]');
     },
 

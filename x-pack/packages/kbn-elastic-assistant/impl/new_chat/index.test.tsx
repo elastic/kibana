@@ -23,6 +23,7 @@ const defaultProps: Props = {
   description: 'Test description',
   getPromptContext: () => Promise.resolve('Test prompt context'),
   tooltip: 'Test tooltip',
+  isAssistantEnabled: true,
 };
 
 describe('NewChat', () => {
@@ -32,6 +33,14 @@ describe('NewChat', () => {
 
   it('renders the default New Chat button with a discuss icon', () => {
     render(<NewChat {...defaultProps} />);
+
+    const newChatButton = screen.getByTestId('newChat');
+
+    expect(newChatButton.querySelector('[data-euiicon-type="discuss"]')).toBeInTheDocument();
+  });
+
+  it('renders the default New Chat button even if the Assistant is disabled', () => {
+    render(<NewChat {...defaultProps} isAssistantEnabled={false} />);
 
     const newChatButton = screen.getByTestId('newChat');
 

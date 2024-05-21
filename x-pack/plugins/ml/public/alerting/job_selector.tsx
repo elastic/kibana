@@ -202,6 +202,7 @@ export const JobSelectorControl: FC<JobSelectorControlProps> = ({
 
   return (
     <EuiFormRow
+      data-test-subj="mlAnomalyJobSelectionControls"
       fullWidth
       label={
         label ?? (

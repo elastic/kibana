@@ -38,7 +38,7 @@ const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
   setSelectedSettingsTab,
   http: {},
-  modelEvaluatorEnabled: true,
+  assistantFeatures: { assistantModelEvaluation: true },
   selectedSettingsTab: 'CONVERSATIONS_TAB',
   assistantAvailability: {
     isAssistantEnabled: true,

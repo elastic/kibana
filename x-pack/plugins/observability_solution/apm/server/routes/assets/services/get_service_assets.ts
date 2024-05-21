@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
 import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/server';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { AssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { ServiceAssetDocument } from './types';
 import { getAssets } from '../get_assets';
+import { getServiceNamesPerSignalType } from '../utils/get_service_names_per_signal_type';
+import { getServicesTransactionStats } from './get_services_transaction_stats';
+import { ServiceAssetDocument } from './types';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 
@@ -20,12 +26,24 @@ export async function getServiceAssets({
   end,
   kuery,
   logger,
+  apmEventClient,
+  logsDataAccessStart,
+  esClient,
+  documentType,
+  rollupInterval,
+  useDurationSummary,
 }: {
   assetsESClient: AssetsESClient;
   start: number;
   end: number;
   kuery: string;
   logger: Logger;
+  apmEventClient: APMEventClient;
+  logsDataAccessStart: LogsDataAccessPluginStart;
+  esClient: ElasticsearchClient;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
 }) {
   return withApmSpan('get_service_assets', async () => {
     try {
@@ -38,7 +56,7 @@ export async function getServiceAssets({
         assetType: 'service',
       });
 
-      return response.hits.hits.map((hit) => {
+      const services = response.hits.hits.map((hit) => {
         const serviceAsset = hit._source as ServiceAssetDocument;
 
         return {
@@ -50,6 +68,41 @@ export async function getServiceAssets({
             name: serviceAsset.service.name,
             environment: serviceAsset.service.environment,
           },
+        };
+      });
+
+      const { logsServiceNames, tracesServiceNames } = getServiceNamesPerSignalType(services);
+
+      const [traceMetrics = {}, logsMetrics = {}] = await Promise.all([
+        tracesServiceNames.length
+          ? getServicesTransactionStats({
+              apmEventClient,
+              start,
+              end,
+              kuery,
+              serviceNames: tracesServiceNames,
+              documentType,
+              rollupInterval,
+              useDurationSummary,
+            })
+          : undefined,
+        logsServiceNames.length
+          ? logsDataAccessStart.services.getLogsRatesService({
+              esClient,
+              identifyingMetadata: 'service.name',
+              timeFrom: start,
+              timeTo: end,
+              serviceNames: logsServiceNames,
+            })
+          : undefined,
+      ]);
+
+      return services.map((item) => {
+        const serviceTraceMetrics = traceMetrics[item.service.name];
+        const serviceLogsMetrics = logsMetrics[item.service.name];
+        return {
+          ...item,
+          metrics: { ...serviceTraceMetrics, ...serviceLogsMetrics },
         };
       });
     } catch (error) {

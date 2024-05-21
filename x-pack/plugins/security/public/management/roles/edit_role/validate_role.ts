@@ -85,7 +85,6 @@ export class RoleValidator {
     }
     return valid();
   }
-
   public validateRemoteClusterPrivileges(role: Role): RoleValidationResult {
     if (!this.shouldValidate) {
       return valid();

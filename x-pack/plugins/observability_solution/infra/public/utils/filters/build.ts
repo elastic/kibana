@@ -16,7 +16,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraCustomDashboardAssetType } from '../../../common/custom_dashboards';
 
-export const buildCombinedHostsFilter = ({
+export const buildCombinedAssetFilter = ({
   field,
   values,
   dataView,

@@ -18,7 +18,7 @@ export const InstallElasticAgentPageStep: React.FC<MultiPageStepLayoutProps> = (
   const [localIsManaged, setLocalIsManaged] = useState(props.isManaged);
   const [useLocalState, setUseLocalState] = useState(false);
 
-  const enrolledAgentIds = usePollingAgentCount(props.agentPolicy?.id || '', {
+  const { enrolledAgentIds } = usePollingAgentCount(props.agentPolicy?.id || '', {
     noLowerTimeLimit: true,
     pollImmediately: true,
   });

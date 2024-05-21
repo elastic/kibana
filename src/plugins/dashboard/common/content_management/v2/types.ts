@@ -32,7 +32,7 @@ export type DashboardCrudTypes = ContentManagementCrudTypes<
   DashboardContentType,
   DashboardAttributes,
   Pick<SavedObjectCreateOptions, 'id' | 'references' | 'overwrite'>,
-  Pick<SavedObjectUpdateOptions, 'references'>,
+  Pick<SavedObjectUpdateOptions, 'references' | 'mergeAttributes'>,
   {
     /** Flag to indicate to only search the text on the "title" field */
     onlyTitle?: boolean;

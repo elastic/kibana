@@ -197,6 +197,12 @@ export const GetAgentUploadFileRequestSchema = {
   }),
 };
 
+export const DeleteAgentUploadFileRequestSchema = {
+  params: schema.object({
+    fileId: schema.string(),
+  }),
+};
+
 export const PostBulkAgentReassignRequestSchema = {
   body: schema.object({
     policy_id: schema.string(),

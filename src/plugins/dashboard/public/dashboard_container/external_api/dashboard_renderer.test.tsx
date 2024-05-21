@@ -32,6 +32,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       select: jest.fn(),
       navigateToDashboard: jest.fn().mockResolvedValue({}),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     mockDashboardFactory = {
       create: jest.fn().mockReturnValue(mockDashboardContainer),
@@ -148,6 +149,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       navigateToDashboard: jest.fn(),
       select: jest.fn(),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
@@ -242,6 +244,7 @@ describe('dashboard renderer', () => {
       render: jest.fn(),
       navigateToDashboard: jest.fn(),
       select: jest.fn().mockReturnValue('WhatAnExpandedPanel'),
+      getInput: jest.fn().mockResolvedValue({}),
     } as unknown as DashboardContainer;
     const mockSuccessFactory = {
       create: jest.fn().mockReturnValue(mockSuccessEmbeddable),
@@ -262,5 +265,35 @@ describe('dashboard renderer', () => {
     expect(
       wrapper!.find('#superParent').getDOMNode().classList.contains('dshDashboardViewportWrapper')
     ).toBe(true);
+  });
+
+  test('adds a class to apply default background color when dashboard has use margin option set to false', async () => {
+    const mockUseMarginFalseEmbeddable = {
+      ...mockDashboardContainer,
+      getInput: jest.fn().mockResolvedValue({ useMargins: false }),
+    } as unknown as DashboardContainer;
+
+    const mockUseMarginFalseFactory = {
+      create: jest.fn().mockReturnValue(mockUseMarginFalseEmbeddable),
+    } as unknown as DashboardContainerFactory;
+    pluginServices.getServices().embeddable.getEmbeddableFactory = jest
+      .fn()
+      .mockReturnValue(mockUseMarginFalseFactory);
+
+    let wrapper: ReactWrapper;
+    await act(async () => {
+      wrapper = await mountWithIntl(
+        <div id="superParent">
+          <DashboardRenderer savedObjectId="saved_object_kibanana" />
+        </div>
+      );
+    });
+
+    expect(
+      wrapper!
+        .find('#superParent')
+        .getDOMNode()
+        .classList.contains('dshDashboardViewportWrapper--defaultBg')
+    ).not.toBe(null);
   });
 });

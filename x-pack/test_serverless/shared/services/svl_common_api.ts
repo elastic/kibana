@@ -18,13 +18,15 @@ const INTERNAL_REQUEST_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
 };
 
+export type InternalRequestHeader = typeof INTERNAL_REQUEST_HEADERS;
+
 export function SvlCommonApiServiceProvider({}: FtrProviderContext) {
   return {
     getCommonRequestHeader() {
       return COMMON_REQUEST_HEADERS;
     },
 
-    getInternalRequestHeader() {
+    getInternalRequestHeader(): InternalRequestHeader {
       return INTERNAL_REQUEST_HEADERS;
     },
 

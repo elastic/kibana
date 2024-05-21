@@ -7,6 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  CPU_USAGE_LABEL,
+  LOAD_15M_LABEL,
+  LOAD_1M_LABEL,
+  LOAD_5M_LABEL,
+  NORMALIZED_LOAD_LABEL,
+} from '../../../shared/charts/constants';
 
 export const cpuUsageIowait: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.iowaitLabel', {
@@ -72,45 +79,35 @@ export const cpuUsageUser: LensBaseLayer = {
 };
 
 export const cpuUsage: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage', {
-    defaultMessage: 'CPU Usage',
-  }),
+  label: CPU_USAGE_LABEL,
   value: '(average(system.cpu.user.pct) + average(system.cpu.system.pct)) / max(system.cpu.cores)',
   format: 'percent',
   decimals: 0,
 };
 
 export const load1m: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.load1m', {
-    defaultMessage: 'Load (1m)',
-  }),
+  label: LOAD_1M_LABEL,
   value: 'average(system.load.1)',
   format: 'number',
   decimals: 1,
 };
 
 export const load5m: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.load5m', {
-    defaultMessage: 'Load (5m)',
-  }),
+  label: LOAD_5M_LABEL,
   value: 'average(system.load.5)',
   format: 'number',
   decimals: 1,
 };
 
 export const load15m: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.load15m', {
-    defaultMessage: 'Load (15m)',
-  }),
+  label: LOAD_15M_LABEL,
   value: 'average(system.load.15)',
   format: 'number',
   decimals: 1,
 };
 
 export const normalizedLoad1m: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.normalizedLoad1m', {
-    defaultMessage: 'Normalized Load',
-  }),
+  label: NORMALIZED_LOAD_LABEL,
   value: 'average(system.load.1) / max(system.load.cores)',
   format: 'percent',
   decimals: 0,

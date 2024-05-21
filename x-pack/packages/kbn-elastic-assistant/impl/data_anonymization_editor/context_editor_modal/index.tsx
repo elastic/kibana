@@ -113,8 +113,12 @@ const SelectedPromptContextEditorModalComponent = ({ onClose, onSave, promptCont
             } else {
               acc.create?.push({
                 field: item.field,
-                allowed: item.operation === 'add',
-                anonymized: item.operation === 'add',
+                allowed:
+                  item.operation === 'add' &&
+                  (item.update === 'allow' || item.update === 'defaultAllow'),
+                anonymized:
+                  item.operation === 'add' &&
+                  (item.update === 'allowReplacement' || item.update === 'defaultAllowReplacement'),
               });
               acc.create = uniqBy(acc.create, 'field');
             }

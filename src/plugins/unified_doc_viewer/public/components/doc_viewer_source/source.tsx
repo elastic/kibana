@@ -36,7 +36,7 @@ interface SourceViewerProps {
 // inline limitation was necessary to enable virtualized scrolling, which improves performance
 export const MAX_LINES_CLASSIC_TABLE = 500;
 // Displayed margin of the code editor to the window bottom when rendered in the document explorer flyout
-export const MARGIN_BOTTOM = 25;
+export const MARGIN_BOTTOM = 80; // DocViewer flyout has a footer
 // Minimum height for the source content to guarantee minimum space when the flyout is scrollable.
 export const MIN_HEIGHT = 400;
 
@@ -54,9 +54,9 @@ export const DocViewerSource = ({
   const [jsonValue, setJsonValue] = useState<string>('');
   const { uiSettings } = getUnifiedDocViewerServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
-  const useDocExplorer = isLegacyTableEnabled({
+  const useDocExplorer = !isLegacyTableEnabled({
     uiSettings,
-    isTextBasedQueryMode: Array.isArray(textBasedHits),
+    isEsqlMode: Array.isArray(textBasedHits),
   });
   const [requestState, hit] = useEsDocSearch({
     id,

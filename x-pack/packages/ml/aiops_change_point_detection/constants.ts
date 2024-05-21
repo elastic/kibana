@@ -15,6 +15,8 @@ export const CASES_ATTACHMENT_CHANGE_POINT_CHART = 'aiopsChangePointChart';
 
 export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiopsChangePointChart' as const;
 
+export const CHANGE_POINT_CHART_DATA_VIEW_REF_NAME = 'aiopsChangePointChartDataViewId';
+
 export type EmbeddableChangePointType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
 export const CHANGE_POINT_DETECTION_VIEW_TYPE = {

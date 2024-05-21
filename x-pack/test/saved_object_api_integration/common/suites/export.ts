@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import {
   SAVED_OBJECT_TEST_CASES,
   CONFLICT_TEST_CASES,
@@ -154,7 +154,7 @@ const EMPTY_RESULT = {
   missingReferences: [],
 };
 
-export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
+export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbiddenBulkGet = expectResponses.forbiddenTypes('bulk_get');
   const expectResponseBody =
     (testCase: ExportTestCase): ExpectResponseBody =>
@@ -259,7 +259,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_export`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .send(test.request)
               .expect(test.responseStatusCode)
               .then(test.responseBody);

@@ -26,6 +26,11 @@ const embedTabReducer: IEmbedTab['reducer'] = (state = { url: '', isNotSaved: fa
         ...state,
         isNotSaved: action.payload,
       };
+    case EMBED_TAB_ACTIONS.SET_IS_NOT_SAVED:
+      return {
+        ...state,
+        isNotSaved: action.payload,
+      };
     default:
       return state;
   }
@@ -67,10 +72,6 @@ export const embedTab: IEmbedTab = {
   id: 'embed',
   name: i18n.translate('share.contextMenu.embedCodeTab', {
     defaultMessage: 'Embed',
-  }),
-  description: i18n.translate('share.dashboard.embed.description', {
-    defaultMessage:
-      'Embed this dashboard into another webpage. Select which menu items to include in the embeddable view.',
   }),
   reducer: embedTabReducer,
   content: EmbedTabContent,

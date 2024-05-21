@@ -17,7 +17,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/esql-rest.html",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

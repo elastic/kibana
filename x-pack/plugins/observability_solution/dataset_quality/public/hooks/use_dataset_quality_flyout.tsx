@@ -22,6 +22,7 @@ export const useDatasetQualityFlyout = () => {
     datasetDetails: dataStreamDetails,
     insightsTimeRange,
     breakdownField,
+    isNonAggregatable,
   } = useSelector(service, (state) => state.context.flyout) ?? {};
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
@@ -36,6 +37,7 @@ export const useDatasetQualityFlyout = () => {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
+    isNonAggregatable,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
     breakdownField,

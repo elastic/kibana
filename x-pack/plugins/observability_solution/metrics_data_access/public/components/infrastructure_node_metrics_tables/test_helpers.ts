@@ -25,7 +25,6 @@ export function createStartServicesAccessorMock() {
 
   const coreProvidersPropsMock: CoreProvidersProps = {
     core,
-    theme$: core.theme.theme$,
   };
   const getStartServices = () => [coreProvidersPropsMock.core];
 

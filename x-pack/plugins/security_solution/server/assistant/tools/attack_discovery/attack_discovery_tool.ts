@@ -53,6 +53,7 @@ export const ATTACK_DISCOVERY_TOOL: AssistantTool = {
       alertsIndexPattern,
       anonymizationFields,
       esClient,
+      langChainTimeout,
       llm,
       onNewReplacements,
       replacements,
@@ -102,6 +103,7 @@ export const ATTACK_DISCOVERY_TOOL: AssistantTool = {
 
         const result = await answerFormattingChain.call({
           query: getAttackDiscoveryPrompt({ anonymizedAlerts }),
+          timeout: langChainTimeout,
         });
         const attackDiscoveries = result.records;
 

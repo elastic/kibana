@@ -23,7 +23,7 @@ export const downloadFile = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   fileId: string;
   kind: string;
   mimeType: string;
@@ -49,7 +49,7 @@ export const deleteFileForFileKind = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   fileKind: string;
   id: string;
   expectedHttpCode?: number;
@@ -72,7 +72,7 @@ export const deleteFiles = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   files: string[];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -91,7 +91,7 @@ export const deleteAllFilesForKind = async ({
   auth = { user: superUser, space: null },
   expectedHttpCode = 200,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   kind: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -124,7 +124,7 @@ export const deleteAllFiles = async ({
   expectedHttpCode = 200,
   ignoreErrors = true,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
   ignoreErrors?: boolean;
@@ -165,7 +165,7 @@ export const getFileById = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   id: string;
   kind: string;
   expectedHttpCode?: number;
@@ -185,7 +185,7 @@ export const listFiles = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   params: Parameters<BaseFilesClient['list']>[0];
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -213,7 +213,7 @@ export const createFile = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   params: CreateFileSchema;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
@@ -238,7 +238,7 @@ export const uploadFile = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   data: string | object;
   kind: string;
   fileId: string;
@@ -264,7 +264,7 @@ export const createAndUploadFile = async ({
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   data: string | object;
   createFileParams: CreateFileSchema;
   expectedHttpCode?: number;

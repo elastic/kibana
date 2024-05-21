@@ -69,6 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(stats.body.dataStreamsStats[0].size).not.empty();
           expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
         });
 
         after(async () => {
@@ -99,6 +100,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(stats.body.dataStreamsStats[0].size).not.empty();
           expect(stats.body.dataStreamsStats[0].sizeBytes).greaterThan(0);
           expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
+          expect(stats.body.dataStreamsStats[0].totalDocs).greaterThan(0);
         });
 
         after(async () => {

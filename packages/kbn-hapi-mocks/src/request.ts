@@ -39,6 +39,7 @@ export const createRequestMock = (customization: DeepPartial<Request> = {}): Req
         req: {
           url: path,
           socket: {},
+          httpVersion: '1.1',
         },
         res: {
           addListener: jest.fn(),

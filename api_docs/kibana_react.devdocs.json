@@ -510,56 +510,7 @@
         "path": "src/plugins/kibana_react/public/theme.tsx",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/observability_solution/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "metricsDataAccess",
-            "path": "x-pack/plugins/observability_solution/metrics_data_access/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "apm",
-            "path": "x-pack/plugins/observability_solution/apm/public/application/index.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
-          },
-          {
-            "plugin": "observabilityOnboarding",
-            "path": "x-pack/plugins/observability_solution/observability_onboarding/public/application/app.tsx"
-          }
-        ],
+        "references": [],
         "children": [
           {
             "parentPluginId": "kibanaReact",

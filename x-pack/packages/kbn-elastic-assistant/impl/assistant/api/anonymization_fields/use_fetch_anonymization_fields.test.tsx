@@ -13,11 +13,10 @@ import React from 'react';
 import { useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../../assistant_context';
-
-const statusResponse = { assistantModelEvaluation: true, assistantStreamingEnabled: false };
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {
-  fetch: jest.fn().mockResolvedValue(statusResponse),
+  fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
 } as unknown as HttpSetup;
 
 jest.mock('../../../assistant_context');

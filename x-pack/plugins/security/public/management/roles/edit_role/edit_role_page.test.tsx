@@ -186,7 +186,7 @@ function getProps({
       }
       return buildSpaces();
     }
-    if (path === '/internal/security/_check_role_mapping_features') {
+    if (path === '/internal/security/_check_security_features') {
       return { canUseRemoteIndices };
     }
     if (path === REMOTE_CLUSTERS_PATH) {
@@ -539,6 +539,69 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('IndexPrivileges[indexType="indices"]')).toHaveLength(1);
       expect(wrapper.find('IndexPrivileges[indexType="remote_indices"]')).toHaveLength(1);
       expectSaveFormButtons(wrapper);
+    });
+
+    it('can render a user defined role with description', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              spacesEnabled: false,
+              role: {
+                description: 'my custom role description',
+                name: 'my custom role',
+                metadata: {},
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('value')).toBe(
+        'my custom role description'
+      );
+      expect(
+        wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('disabled')
+      ).toBe(undefined);
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('can render a reserved role with description', async () => {
+      const wrapper = mountWithIntl(
+        <KibanaContextProvider services={coreStart}>
+          <EditRolePage
+            {...getProps({
+              action: 'edit',
+              spacesEnabled: false,
+              role: {
+                description: 'my reserved role description',
+                name: 'my custom role',
+                metadata: {
+                  _reserved: true,
+                },
+                elasticsearch: { cluster: ['all'], indices: [], run_as: ['*'] },
+                kibana: [],
+              },
+            })}
+          />
+        </KibanaContextProvider>
+      );
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('[data-test-subj="roleFormDescriptionTooltip"]')).toHaveLength(1);
+
+      expect(wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('value')).toBe(
+        'my reserved role description'
+      );
+      expect(
+        wrapper.find('input[data-test-subj="roleFormDescriptionInput"]').prop('disabled')
+      ).toBe(true);
     });
 
     it('can render when creating a new role', async () => {

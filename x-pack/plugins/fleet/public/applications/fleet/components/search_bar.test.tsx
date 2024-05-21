@@ -170,7 +170,7 @@ describe('SearchBar', () => {
 
 describe('getFieldSpecs', () => {
   it('returns fieldSpecs for fleet-agents', () => {
-    expect(getFieldSpecs(`.${AGENTS_PREFIX}`)).toHaveLength(66);
+    expect(getFieldSpecs(`.${AGENTS_PREFIX}`)).toHaveLength(67);
   });
   it('returns getFieldSpecs for fleet-enrollment-api-keys', () => {
     const indexPattern = `.${FLEET_ENROLLMENT_API_PREFIX}`;

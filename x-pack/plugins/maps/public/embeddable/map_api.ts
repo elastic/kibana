@@ -21,6 +21,7 @@ import type { ILayer } from '../classes/layers/layer';
 
 export type MapApi = HasType<'map'> & {
   getLayerList: () => ILayer[];
+  reload: () => void;
 } & PublishesDataViews &
   PublishesPanelTitle &
   PublishesUnifiedSearch &

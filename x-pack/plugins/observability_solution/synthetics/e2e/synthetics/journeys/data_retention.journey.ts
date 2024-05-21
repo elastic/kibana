@@ -13,9 +13,7 @@ import { byTestId, assertText } from '../../helpers/utils';
 
 let page1: Page;
 journey(`DataRetentionPage`, async ({ page, params }) => {
-  page.setDefaultTimeout(60 * 1000);
-  recordVideo(page);
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const getService = params.getService;
   const retry: RetryService = getService('retry');

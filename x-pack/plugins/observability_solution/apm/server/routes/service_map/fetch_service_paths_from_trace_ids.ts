@@ -76,18 +76,18 @@ export async function fetchServicePathsFromTraceIds({
             map_script: {
               lang: 'painless',
               source: `def id;
-                if (!doc['span.id'].empty) {
-                  id = doc['span.id'].value;
-                } else {
-                  id = doc['transaction.id'].value;
+                id = $('span.id', null);
+                if (id == null) {
+                  id = $('transaction.id', null);
                 }
 
                 def copy = new HashMap();
                 copy.id = id;
 
                 for(key in state.fieldsToCopy) {
-                  if (!doc[key].empty) {
-                    copy[key] = doc[key].value;
+                  def value = $(key, null);
+                  if (value != null) {
+                    copy[key] = value;
                   }
                 }
 

@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -14,7 +13,7 @@ const apiUrl = '/api/kibana/management/saved_objects/scroll/counts';
 const defaultTypes = ['visualization', 'index-pattern', 'search', 'dashboard'];
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest') as SuperTest<Test>;
+  const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
 

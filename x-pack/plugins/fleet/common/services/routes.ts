@@ -236,6 +236,8 @@ export const agentRouteService = {
       '{fileName}',
       fileName
     ),
+  getAgentFileDeletePath: (fileId: string) =>
+    AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN.replace('{fileId}', fileId),
   getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
 };
 

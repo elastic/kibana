@@ -66,6 +66,8 @@ const createResponseActionClientMock = (): jest.Mocked<ResponseActionsClient> =>
     release: jest.fn().mockReturnValue(Promise.resolve()),
     runningProcesses: jest.fn().mockReturnValue(Promise.resolve()),
     processPendingActions: jest.fn().mockReturnValue(Promise.resolve()),
+    getFileInfo: jest.fn().mockReturnValue(Promise.resolve()),
+    getFileDownload: jest.fn().mockReturnValue(Promise.resolve()),
   };
 };
 
