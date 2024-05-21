@@ -8,6 +8,7 @@
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
+import { ObservabilityOnboardingAppServices } from '../..';
 import { CustomCard, FeaturedCard, VirtualCard } from '../packages_list/types';
 import { Category } from './types';
 
@@ -22,8 +23,8 @@ export function useCustomCardsForCategory(
   const history = useHistory();
   const location = useLocation();
   const {
-    services: { application, http },
-  } = useKibana();
+    services: { application, http /* TODO add before merge: ,config */ },
+  } = useKibana<ObservabilityOnboardingAppServices>();
   const getUrlForApp = application?.getUrlForApp;
 
   const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
@@ -107,6 +108,7 @@ export function useCustomCardsForCategory(
       return [
         toFeaturedCard('kubernetes'),
         toFeaturedCard('docker'),
+        // TODO enable before merge: config.serverless.enabled ? toFeaturedCard('prometheus') : otelCard,
         otelCard,
         {
           id: 'azure-virtual',
@@ -187,6 +189,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
+        // TODO enable before merge: config.serverless.enabled ? toFeaturedCard('nginx') : otelCard,
         otelCard,
         {
           id: 'azure-logs-virtual',
