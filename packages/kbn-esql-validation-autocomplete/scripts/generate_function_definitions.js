@@ -302,9 +302,12 @@ import type { FunctionDefinition } from './types';
 }
 
 (async function main() {
+  const pathToElasticsearch = process.argv[2];
+
   const ESFunctionDefinitionsDirectory = join(
     __dirname,
-    '../../../elasticsearch/docs/reference/esql/functions/kibana/definition'
+    pathToElasticsearch,
+    'docs/reference/esql/functions/kibana/definition'
   );
 
   // read all ES function definitions (the directory is full of JSON files) and create an array of definitions
@@ -330,9 +333,4 @@ import type { FunctionDefinition } from './types';
     join(__dirname, '../src/definitions/functions.ts'),
     printGeneratedFunctionsFile(evalFunctionDefinitions)
   );
-
-  // await writeFile(
-  //   join(__dirname, 'agg_functions_generated.ts'),
-  //   printGeneratedFunctionsFile(aggFunctionDefinitions)
-  // );
 })();

@@ -4308,15 +4308,14 @@ const caseDefinition: FunctionDefinition = {
       ],
       minParams: 2,
       returnType: 'any',
-      examples: [
-        'from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")',
-      ],
     },
   ],
   supportedCommands: ['stats', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
   validate: undefined,
-  examples: [],
+  examples: [
+    'from index | eval type = case(languages <= 1, "monolingual", languages <= 2, "bilingual", "polyglot")',
+  ],
 };
 export const evalFunctionDefinitions = [
   absDefinition,
