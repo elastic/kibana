@@ -10,12 +10,7 @@ import { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
 import moment from 'moment';
 import supertest from 'supertest';
-import {
-  getServerOptions,
-  getListenerOptions,
-  createServer,
-  IHttpConfig,
-} from '@kbn/server-http-tools';
+import { getServerOptions, createServer, type IHttpConfig } from '@kbn/server-http-tools';
 import { ByteSizeValue } from '@kbn/config-schema';
 
 import { BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy_server';
@@ -51,8 +46,7 @@ describe('BasePathProxyServer', () => {
     };
 
     const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
-    server = createServer(serverOptions, listenerOptions);
+    server = createServer(serverOptions);
 
     // setup and start the proxy server
     const proxyConfig: IHttpConfig = { ...config, port: 10013 };
@@ -276,8 +270,7 @@ describe('BasePathProxyServer', () => {
       } as IHttpConfig;
 
       const serverOptions = getServerOptions(configWithBasePath);
-      const listenerOptions = getListenerOptions(configWithBasePath);
-      server = createServer(serverOptions, listenerOptions);
+      server = createServer(serverOptions);
 
       server.route({
         method: 'GET',
