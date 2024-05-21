@@ -57,8 +57,17 @@ export const SUPPORTED_AGGREGATIONS = [
   ...Object.values(BUCKET_TYPES),
 ] as const;
 
+// todo: get the type from elastic-charts library
 export enum XYLegendValue {
+  Average = 'average',
   CurrentAndLastValue = 'currentAndLastValue',
+  Count = 'count',
+  FirstValue = 'firstValue',
+  LastValue = 'lastValue',
+  Median = 'median',
+  Max = 'max',
+  Min = 'min',
+  Total = 'total',
 }
 
 export enum PartitionLegendValue {

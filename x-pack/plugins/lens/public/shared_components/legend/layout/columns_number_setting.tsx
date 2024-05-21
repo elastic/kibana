@@ -24,20 +24,20 @@ interface ColumnsNumberSettingProps {
   /**
    * Indicates if legend is located outside
    */
-  isLegendOutside: boolean;
+  isHidden: boolean;
 }
 
 export const ColumnsNumberSetting = ({
   floatingColumns,
   onFloatingColumnsChange = () => {},
-  isLegendOutside,
+  isHidden,
 }: ColumnsNumberSettingProps) => {
   const { inputValue, handleInputChange } = useDebouncedValue({
     value: floatingColumns ?? DEFAULT_FLOATING_COLUMNS,
     onChange: onFloatingColumnsChange,
   });
 
-  if (isLegendOutside) return null;
+  if (isHidden) return null;
 
   return (
     <EuiFormRow

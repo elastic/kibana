@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { LegendLayout, XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import {
+  LegendLayout,
+  LegendSize,
+  XYLegendValue,
+} from '@kbn/visualizations-plugin/common/constants';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState, AxesSettingsConfig } from '../types';
@@ -121,9 +124,84 @@ const axisKeyToTitleMapping: Record<keyof AxesSettingsConfig, 'xTitle' | 'yTitle
 
 const xyLegendValues = [
   {
+    value: XYLegendValue.Average,
+    label: i18n.translate('xpack.lens.shared.legendValues.average', {
+      defaultMessage: 'Average',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.averageDesc', {
+      defaultMessage: 'Mean of all returned values.',
+    }),
+  },
+  {
     value: XYLegendValue.CurrentAndLastValue,
     label: i18n.translate('xpack.lens.shared.legendValues.currentValue', {
       defaultMessage: 'Current value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.currentValueDesc', {
+      defaultMessage: 'Value of the bucket being hovered or last bucket value when not hovering.',
+    }),
+  },
+  {
+    value: XYLegendValue.Count,
+    label: i18n.translate('xpack.lens.shared.legendValues.count', {
+      defaultMessage: 'Count',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.countDesc', {
+      defaultMessage: 'Incremental count of returned values.',
+    }),
+  },
+  {
+    value: XYLegendValue.FirstValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.firstValue', {
+      defaultMessage: 'First value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.firstValueDesc', {
+      defaultMessage: 'First value in the returned data set.',
+    }),
+  },
+  {
+    value: XYLegendValue.LastValue,
+    label: i18n.translate('xpack.lens.shared.legendValues.lastValue', {
+      defaultMessage: 'Last value',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.lastValueDesc', {
+      defaultMessage: 'Last value in the returned data set.',
+    }),
+  },
+  {
+    value: XYLegendValue.Median,
+    label: i18n.translate('xpack.lens.shared.legendValues.median', {
+      defaultMessage: 'Median',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.medianDesc', {
+      defaultMessage: 'Middle value in the returned data set.',
+    }),
+  },
+  {
+    value: XYLegendValue.Max,
+    label: i18n.translate('xpack.lens.shared.legendValues.max', {
+      defaultMessage: 'Maximum',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.maxDesc', {
+      defaultMessage: 'Maximum value in the returned data set.',
+    }),
+  },
+  {
+    value: XYLegendValue.Min,
+    label: i18n.translate('xpack.lens.shared.legendValues.min', {
+      defaultMessage: 'Minimum',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.minDesc', {
+      defaultMessage: 'Minimum value in the returned data set.',
+    }),
+  },
+  {
+    value: XYLegendValue.Total,
+    label: i18n.translate('xpack.lens.shared.legendValues.total', {
+      defaultMessage: 'Sum',
+    }),
+    toolTipContent: i18n.translate('xpack.lens.shared.legendValues.totalDesc', {
+      defaultMessage: 'Total of all returned values.',
     }),
   },
 ];
@@ -346,8 +424,6 @@ export const XyToolbar = memo(function XyToolbar(
 
   const legendSize = state.legend.legendSize;
 
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
-
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
@@ -368,6 +444,21 @@ export const XyToolbar = memo(function XyToolbar(
                 legend: {
                   ...state.legend,
                   isInside: location === 'inside',
+                },
+              });
+            }}
+            titlePlaceholder={
+              frame.activeData?.[dataLayers[0].layerId].columns.find(
+                (col) => col.id === dataLayers[0].splitAccessor
+              )?.name
+            }
+            legendTitle={state?.legend.title}
+            onLegendTitleChange={(legendTitle) => {
+              setState({
+                ...state,
+                legend: {
+                  ...state.legend,
+                  title: legendTitle,
                 },
               });
             }}
@@ -446,7 +537,18 @@ export const XyToolbar = memo(function XyToolbar(
             }}
             allowedLegendStats={nonOrdinalXAxis ? xyLegendValues : undefined}
             legendStats={state?.legend.legendStats}
-            onLegendStatsChange={(legendStats) => {
+            onLegendStatsChange={(legendStats, hasConvertedToTable) => {
+              if (hasConvertedToTable) {
+                setState({
+                  ...state,
+                  legend: {
+                    ...state.legend,
+                    legendStats,
+                    legendSize: LegendSize.AUTO,
+                  },
+                });
+                return;
+              }
               setState({
                 ...state,
                 legend: {
@@ -486,7 +588,7 @@ export const XyToolbar = memo(function XyToolbar(
                 },
               });
             }}
-            showAutoLegendSizeOption={hadAutoLegendSize}
+            showAutoLegendSizeOption={true}
           />
         </EuiFlexGroup>
       </EuiFlexItem>

@@ -21,11 +21,13 @@ import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/chart
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { XYLegendValue, LegendLayout } from '@kbn/visualizations-plugin/common/constants';
+import { Stats } from '@kbn/usage-collection-plugin/common/types';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
 import { LegendSizeSettings } from './size/legend_size_settings';
 import { nonNullable } from '../../utils';
+import { LegendTitleSettings } from './title/legend_title_settings';
 
 export interface LegendSettingsPopoverProps<LegendStats extends string = XYLegendValue> {
   /**
@@ -123,11 +125,11 @@ export interface LegendSettingsPopoverProps<LegendStats extends string = XYLegen
   /**
    * legend statistics that are allowed
    */
-  allowedLegendStats?: Array<{ label: string; value: LegendStats }>;
+  allowedLegendStats?: Array<{ label: string; value: LegendStats; toolTipContent?: string }>;
   /**
    * Callback on value in legend stats change
    */
-  onLegendStatsChange?: (legendStats?: LegendStats[]) => void;
+  onLegendStatsChange?: (legendStats?: LegendStats[], hasConvertedToTable?: boolean) => void;
 
   /**
    * Button group position
@@ -146,6 +148,9 @@ export interface LegendSettingsPopoverProps<LegendStats extends string = XYLegen
    * (We're trying to get people to stop using it so it can eventually be removed.)
    */
   showAutoLegendSizeOption: boolean;
+  titlePlaceholder?: string;
+  legendTitle?: string;
+  onLegendTitleChange?: (title?: string) => void;
 }
 
 const DEFAULT_TRUNCATE_LINES = 1;
@@ -192,28 +197,30 @@ const noop = () => {};
 const PANEL_STYLE = {
   width: '500px',
 };
-const legendLayoutOptions = [
-  {
-    id: `lns_legend_table`,
-    value: LegendLayout.Table,
-    label: i18n.translate('xpack.lens.xyChart.legendLayout.table', {
-      defaultMessage: 'Table',
-    }),
-  },
-  {
-    id: `lns_legend_list`,
-    value: LegendLayout.List,
-    label: i18n.translate('xpack.lens.xyChart.legendLayout.list', {
-      defaultMessage: 'List',
-    }),
-  },
-];
+// const legendLayoutOptions = [
+//   {
+//     id: `lns_legend_table`,
+//     value: LegendLayout.Table,
+//     label: i18n.translate('xpack.lens.xyChart.legendLayout.table', {
+//       defaultMessage: 'Table',
+//     }),
+//   },
+//   {
+//     id: `lns_legend_list`,
+//     value: LegendLayout.List,
+//     label: i18n.translate('xpack.lens.xyChart.legendLayout.list', {
+//       defaultMessage: 'List',
+//     }),
+//   },
+// ];
 
 export function LegendSettingsPopover<LegendStats extends string = XYLegendValue>({
   allowedLegendStats,
   legendOptions,
   mode,
   legendLayout,
+  legendTitle,
+  onLegendTitleChange,
   onLegendLayoutChange = noop,
   onDisplayChange,
   position,
@@ -238,7 +245,11 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
   legendSize,
   onLegendSizeChange,
   showAutoLegendSizeOption,
+  titlePlaceholder,
 }: LegendSettingsPopoverProps<LegendStats>) {
+  const shouldDisplayTable = (stats?: LegendStats[]) =>
+    !!(stats && stats.filter((v) => v !== XYLegendValue.CurrentAndLastValue).length);
+
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.shared.legendLabel', {
@@ -268,7 +279,7 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
           onChange={onDisplayChange}
         />
       </EuiFormRow>
-      {allowedLegendStats && (
+      {allowedLegendStats && allowedLegendStats.length > 1 && (
         <EuiFormRow
           display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.legendValues', {
@@ -287,14 +298,52 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
             selectedOptions={allowedLegendStats.filter(({ value }) => legendStats?.includes(value))}
             onChange={(options) => {
               const values = options.map(({ value }) => value).filter(nonNullable);
-              onLegendStatsChange(values);
+              const hasConvertedToTable =
+                !shouldDisplayTable(legendStats) && shouldDisplayTable(values);
+              onLegendStatsChange(values, hasConvertedToTable);
             }}
             isClearable={true}
             compressed
           />
         </EuiFormRow>
       )}
-      {allowedLegendStats && legendStats?.length !== 0 && (
+      {!!(
+        allowedLegendStats?.length &&
+        allowedLegendStats?.length > 1 &&
+        legendStats?.length &&
+        onLegendTitleChange
+      ) && (
+        <LegendTitleSettings
+          title={legendTitle}
+          updateTitleState={onLegendTitleChange}
+          placeholder={titlePlaceholder}
+        />
+      )}
+      {allowedLegendStats && allowedLegendStats.length === 1 && (
+        <EuiFormRow
+          display="columnCompressedSwitch"
+          label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
+            defaultMessage: 'Show value',
+          })}
+          fullWidth
+        >
+          <EuiSwitch
+            compressed
+            label={i18n.translate('xpack.lens.shared.valueInLegendLabel', {
+              defaultMessage: 'Show value',
+            })}
+            data-test-subj="lens-legend-show-value"
+            showLabel={false}
+            checked={!!legendStats?.length}
+            onChange={(ev) => {
+              onLegendStatsChange(ev.target.checked ? [allowedLegendStats[0].value] : []);
+            }}
+          />
+        </EuiFormRow>
+      )}
+
+      {/* TODO: This setting will be used when implementing list option */}
+      {/* {allowedLegendStats && legendStats?.length !== 0 && (
         <EuiFormRow
           display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.legendLayout', {
@@ -319,7 +368,7 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
             }}
           />
         </EuiFormRow>
-      )}
+      )} */}
 
       {mode !== 'hide' && (
         <>
@@ -346,7 +395,7 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
             <ColumnsNumberSetting
               floatingColumns={floatingColumns}
               onFloatingColumnsChange={onFloatingColumnsChange}
-              isLegendOutside={location === 'outside'}
+              isHidden={location === 'outside' || shouldDisplayTable(legendStats ?? [])}
             />
           )}
           {legendLayout !== LegendLayout.List && (

@@ -106,6 +106,12 @@ export const legendConfigFunction: LegendConfigFn = {
         defaultMessage: 'Specifies the legend stats.',
       }),
     },
+    title: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.legendConfig.title.help', {
+        defaultMessage: 'Specifies the legend title.',
+      }),
+    },
     layout: {
       types: ['string'],
       help: i18n.translate('expressionXY.legendConfig.legendLayout.help', {

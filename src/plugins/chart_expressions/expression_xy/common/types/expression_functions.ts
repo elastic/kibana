@@ -224,6 +224,7 @@ export interface LegendConfig {
 
   legendStats?: XYLegendValue[];
   layout?: LegendLayout;
+  title?: string;
 }
 
 // Arguments to XY chart expression, with computed properties

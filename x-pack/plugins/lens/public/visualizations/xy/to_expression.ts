@@ -310,6 +310,7 @@ export const buildXYExpression = (
         : [],
     maxLines: state.legend.maxLines,
     legendStats: state.legend.legendStats,
+    title: state.legend.title,
     shouldTruncate:
       state.legend.shouldTruncate ??
       getDefaultVisualValuesForLayer(state, datasourceLayers).truncateText,

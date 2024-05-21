@@ -134,6 +134,7 @@ describe('Legend Settings', () => {
         {
           label: 'Current and last value',
           value: XYLegendValue.CurrentAndLastValue,
+          toolTipContent: 'Shows the current and last value',
         },
       ],
       onLegendStatsChange,

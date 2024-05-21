@@ -828,13 +828,10 @@ export function XYChart({
             showLegend={showLegend}
             legendPosition={legend?.isInside ? legendInsideParams : legend.position}
             legendSize={LegendSizeToPixels[legend.legendSize ?? DEFAULT_LEGEND_SIZE]}
-            // TODO: use these types
-
+            // TODO: use legendLayout when list is implemented
             // legendLayout={legend.layout}
-
-            showLegendExtra={
-              isHistogramViz && legend.legendStats?.[0] === XYLegendValue.CurrentAndLastValue
-            }
+            legendValues={legend.legendStats}
+            legendTitle={getLegendTitle(legend.title, dataLayers[0])}
             theme={[
               {
                 barSeriesStyle: {
@@ -1044,4 +1041,21 @@ export function XYChart({
       </LegendColorPickerWrapperContext.Provider>
     </div>
   );
+}
+
+const defaultLegendTitle = i18n.translate('expressionXY.xyChart.legendTitle', {
+  defaultMessage: 'Legend',
+});
+
+function getLegendTitle(title: string | undefined, layer?: CommonXYDataLayerConfig) {
+  if (title) {
+    return title;
+  }
+  if (!layer) {
+    return defaultLegendTitle;
+  }
+  const breakdownByColumn = layer.splitAccessors?.[0]
+    ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)
+    : undefined;
+  return breakdownByColumn?.name || defaultLegendTitle;
 }
