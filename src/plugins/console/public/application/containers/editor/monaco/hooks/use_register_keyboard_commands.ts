@@ -9,8 +9,6 @@
 import { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/monaco';
-// eslint-disable-next-line @kbn/eslint/module_migration,@kbn/imports/no_unresolvable_imports
-import { IDisposable } from 'monaco-editor';
 
 interface RegisterKeyboardCommandsParams {
   /** The current Monaco editor instance. */
@@ -40,12 +38,12 @@ const MOVE_TO_LINE_ACTION_ID = 'moveToLine';
  * @param params The {@link RegisterKeyboardCommandsParams} to use.
  */
 export const useKeyboardCommandsUtils = () => {
-  const sendRequestAction = useRef<IDisposable | null>(null);
-  const autoIndentAction = useRef<IDisposable | null>(null);
-  const openDocsAction = useRef<IDisposable | null>(null);
-  const moveToPreviousAction = useRef<IDisposable | null>(null);
-  const moveToNextAction = useRef<IDisposable | null>(null);
-  const moveToLineAction = useRef<IDisposable | null>(null);
+  const sendRequestAction = useRef<monaco.IDisposable | null>(null);
+  const autoIndentAction = useRef<monaco.IDisposable | null>(null);
+  const openDocsAction = useRef<monaco.IDisposable | null>(null);
+  const moveToPreviousAction = useRef<monaco.IDisposable | null>(null);
+  const moveToNextAction = useRef<monaco.IDisposable | null>(null);
+  const moveToLineAction = useRef<monaco.IDisposable | null>(null);
 
   const disposeAllActions = () => {
     if (sendRequestAction.current) {
