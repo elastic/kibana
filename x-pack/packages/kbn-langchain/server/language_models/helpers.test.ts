@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { Message } from '../../impl/schemas';
 import { getMessageContentAndRole } from './helpers';
 
 describe('helpers', () => {
   describe('getMessageContentAndRole', () => {
-    const testCases: Array<[string, Pick<Message, 'content' | 'role'>]> = [
+    const testCases: Array<[string, { content: string; role: string }]> = [
       ['Prompt 1', { content: 'Prompt 1', role: 'user' }],
       ['Prompt 2', { content: 'Prompt 2', role: 'user' }],
       ['', { content: '', role: 'user' }],

@@ -12,12 +12,7 @@ import { get } from 'lodash/fp';
 
 import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
-import {
-  ChatCompletion,
-  ChatCompletionChunk,
-  ChatCompletionCreateParamsStreaming,
-  ChatCompletionCreateParamsNonStreaming,
-} from 'openai/resources/chat/completions';
+import type OpenAI from 'openai';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import { InvokeAIActionParamsSchema, RunActionParamsSchema } from './types';
 
@@ -128,16 +123,18 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   }
 
   async completionWithRetry(
-    request: ChatCompletionCreateParamsStreaming
-  ): Promise<AsyncIterable<ChatCompletionChunk>>;
+    request: OpenAI.ChatCompletionCreateParamsStreaming
+  ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk>>;
 
   async completionWithRetry(
-    request: ChatCompletionCreateParamsNonStreaming
-  ): Promise<ChatCompletion>;
+    request: OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<OpenAI.ChatCompletion>;
 
   async completionWithRetry(
-    completionRequest: ChatCompletionCreateParamsStreaming | ChatCompletionCreateParamsNonStreaming
-  ): Promise<AsyncIterable<ChatCompletionChunk> | ChatCompletion> {
+    completionRequest:
+      | OpenAI.ChatCompletionCreateParamsStreaming
+      | OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk> | OpenAI.ChatCompletion> {
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
       this.#logger.debug(
@@ -156,16 +153,16 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       }
 
       if (!this.streaming) {
-        // typecasting as the `run` subaction returns the ChatCompletion directly from OpenAI
-        const chatCompletion = get('data', actionResult) as ChatCompletion;
+        // typecasting as the `run` subaction returns the OpenAI.ChatCompletion directly from OpenAI
+        const chatCompletion = get('data', actionResult) as OpenAI.ChatCompletion;
 
         return chatCompletion;
       }
 
       // cast typing as this is the contract of the actions client
       const result = get('data', actionResult) as {
-        consumerStream: Stream<ChatCompletionChunk>;
-        tokenCountStream: Stream<ChatCompletionChunk>;
+        consumerStream: Stream<OpenAI.ChatCompletionChunk>;
+        tokenCountStream: Stream<OpenAI.ChatCompletionChunk>;
       };
 
       if (result.consumerStream == null) {
@@ -176,7 +173,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     });
   }
   formatRequestForActionsClient(
-    completionRequest: ChatCompletionCreateParamsNonStreaming | ChatCompletionCreateParamsStreaming
+    completionRequest:
+      | OpenAI.ChatCompletionCreateParamsNonStreaming
+      | OpenAI.ChatCompletionCreateParamsStreaming
   ): {
     actionId: string;
     params: {
@@ -208,8 +207,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return {
       actionId: this.#connectorId,
       params: {
-        // langchain expects stream to be of type AsyncIterator<ChatCompletionChunk>
-        // for non-stream, use `run` instead of `invokeAI` in order to get the entire ChatCompletion response,
+        // langchain expects stream to be of type AsyncIterator<OpenAI.ChatCompletionChunk>
+        // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
         // which may contain non-content messages like functions
         subAction: completionRequest.stream ? 'invokeAsyncIterator' : 'run',
         subActionParams: {

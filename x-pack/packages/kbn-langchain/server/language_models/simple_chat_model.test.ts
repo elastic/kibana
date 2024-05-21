@@ -10,7 +10,7 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientSimpleChatModel, CustomChatModelInput } from './simple_chat_model';
-import { mockActionResponse } from '../../impl/mock/mock_action_response';
+import { mockActionResponse } from './mocks';
 import { BaseMessage } from '@langchain/core/messages';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { parseBedrockStream } from '../..';

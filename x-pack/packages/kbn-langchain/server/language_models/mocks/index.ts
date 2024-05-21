@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ChatCompletion } from 'openai/src/resources/chat/completions';
+import type OpenAI from 'openai';
 
 export const mockActionResponse = {
   message: 'Yes, your name is Andrew. How can I assist you further, Andrew?',
   usage: { prompt_tokens: 4, completion_tokens: 10, total_tokens: 14 },
 };
 
-export const mockChatCompletion: ChatCompletion = {
+export const mockChatCompletion: OpenAI.ChatCompletion = {
   id: 'abc123',
   choices: [
     {

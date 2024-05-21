@@ -9,13 +9,8 @@ import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plu
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { ActionsClientChatOpenAI, ActionsClientChatOpenAIParams } from './chat_openai';
-import { mockActionResponse, mockChatCompletion } from '../../impl/mock/mock_action_response';
-import {
-  ChatCompletion,
-  ChatCompletionChunk,
-  ChatCompletionCreateParamsNonStreaming,
-  ChatCompletionCreateParamsStreaming,
-} from 'openai/resources/chat/completions';
+import { mockActionResponse, mockChatCompletion } from './mocks';
+import type OpenAI from 'openai';
 import { Stream } from 'openai/streaming';
 
 const connectorId = 'mock-connector-id';
@@ -103,7 +98,7 @@ describe('ActionsClientChatOpenAI', () => {
   });
 
   describe('completionWithRetry streaming: false', () => {
-    const defaultNonStreamingArgs: ChatCompletionCreateParamsNonStreaming = {
+    const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
       messages: [{ content: prompt, role: 'user' }],
       stream: false,
       model: 'gpt-4',
@@ -111,7 +106,7 @@ describe('ActionsClientChatOpenAI', () => {
     it('returns the expected data', async () => {
       const actionsClientChatOpenAI = new ActionsClientChatOpenAI(defaultArgs);
 
-      const result: ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
+      const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
         defaultNonStreamingArgs
       );
       expect(mockExecute).toHaveBeenCalledWith({
@@ -160,13 +155,13 @@ describe('ActionsClientChatOpenAI', () => {
       jest.clearAllMocks();
       mockStreamExecute.mockImplementation(() => ({
         data: {
-          consumerStream: asyncGenerator() as unknown as Stream<ChatCompletionChunk>,
-          tokenCountStream: asyncGenerator() as unknown as Stream<ChatCompletionChunk>,
+          consumerStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
+          tokenCountStream: asyncGenerator() as unknown as Stream<OpenAI.ChatCompletionChunk>,
         },
         status: 'ok',
       }));
     });
-    const defaultStreamingArgs: ChatCompletionCreateParamsStreaming = {
+    const defaultStreamingArgs: OpenAI.ChatCompletionCreateParamsStreaming = {
       messages: [{ content: prompt, role: 'user' }],
       stream: true,
       model: 'gpt-4',
@@ -181,7 +176,7 @@ describe('ActionsClientChatOpenAI', () => {
         actions: mockStreamActions,
       });
 
-      const result: AsyncIterable<ChatCompletionChunk> =
+      const result: AsyncIterable<OpenAI.ChatCompletionChunk> =
         await actionsClientChatOpenAI.completionWithRetry(defaultStreamingArgs);
       expect(mockStreamExecute).toHaveBeenCalledWith({
         actionId: connectorId,
