@@ -34,6 +34,9 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   private model;
   private gcpRegion;
   private gcpProjectID;
+  private static token: string | null;
+  private static tokenExpiryTimeout: NodeJS.Timeout;
+
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -124,7 +127,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /** Retrieve access token based on the GCP service account credential json file */
-  private async getAccessToken(): Promise<string> {
+  private async getAccessToken(): Promise<string | null> {
     const credentials = JSON.parse(this.secrets.credentialsJson);
 
     const auth = new GoogleAuth({
@@ -132,8 +135,20 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
     });
 
+    console.log('In getAccessToken');
+
     const token = await auth.getAccessToken();
-    return token || ''; 
+    if (token) {
+      GeminiConnector.token = token;
+      // Clear any existing timeout
+      clearTimeout(GeminiConnector.tokenExpiryTimeout);
+
+      // Set a timeout to reset the token after 55 minutes (it expires after 60 minutes)
+      GeminiConnector.tokenExpiryTimeout = setTimeout(() => {
+        GeminiConnector.token = null;
+      }, 55 * 60 * 1000);
+    }
+    return token || null;
   }
 
   /**
@@ -151,26 +166,50 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
    const currentModel = reqModel ?? this.model;
    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
    const token = await this.getAccessToken();
+   console.log('Token', token);
 
    const requestArgs = {
-     url: `${this.url}${path}`,
-     method: 'post' as Method,
-     data: body,
-     headers: {
-       'Authorization': `Bearer ${token}`,
-       'Content-Type': 'application/json'
-     },
-     signal,
-     timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-     responseSchema: RunApiResponseSchema,
-    } as SubActionRequestParams<RunApiResponse>;
+    url: `${this.url}${path}`,
+    method: 'post' as Method,
+    data: body,
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    signal,
+    timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+    responseSchema: RunApiResponseSchema,
+   } as SubActionRequestParams<RunApiResponse>;
 
-    const response = await this.request(requestArgs);
-    const candidate = response.data.candidates[0];
-    const completionText = candidate.content.parts[0].text;
-    return { completion: completionText };
-   
- }
+   try {
+      if (!GeminiConnector.token) {
+        GeminiConnector.token = (await this.getAccessToken()) as string;
+      }
+
+      const response = await this.request(requestArgs);
+      const candidate = response.data.candidates[0];
+      const completionText = candidate.content.parts[0].text;
+      console.log('TEXT', completionText)
+      return { completion: completionText };
+
+    } catch (error) {
+      if (error.code === 401) {
+        GeminiConnector.token = null;
+        return this.runApi({body, model: reqModel,
+          signal,
+          timeout
+        });
+      }
+
+      return { completion: '' };
+    }
 }
+   
+    // const response = await this.request(requestArgs);
+    // const candidate = response.data.candidates[0];
+    // const completionText = candidate.content.parts[0].text;
+    // return { completion: completionText };
+ }
+
 
 
