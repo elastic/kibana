@@ -98,7 +98,7 @@ export function SloList() {
             error={isError}
             sloView={view}
           />
-          {total > 0 ? (
+          {total > 0 && total > perPage ? (
             <EuiFlexItem>
               <EuiTablePagination
                 pageCount={Math.ceil(total / perPage)}
