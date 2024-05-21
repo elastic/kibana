@@ -268,9 +268,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await inspector.open();
-        const requestNames = await inspector.getRequestNames();
-        expect(requestNames).to.contain('Table');
-        expect(requestNames).to.contain('Visualization');
+        await retry.try(async () => {
+          const requestNames = await inspector.getRequestNames();
+          expect(requestNames).to.contain('Table');
+          expect(requestNames).to.contain('Visualization');
+        });
       });
     });
 
