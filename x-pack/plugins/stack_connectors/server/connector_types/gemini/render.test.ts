@@ -20,7 +20,7 @@ const mockLogger: Logger = {
     get: jest.fn((...childContextPaths: string[]) => mockLogger), // Return the same mock for child loggers
   };
 
-describe('renderParameterTemplates', () => {
+describe('Gemini - renderParameterTemplates', () => {
   const variables = { someVar: 'someValue' }; // Sample variables for rendering
 
   it('should return params unchanged for non-RUN/TEST subActions', () => {

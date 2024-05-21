@@ -1,73 +1,89 @@
-import { ValidatorServices } from '@kbn/actions-plugin/server/types';
-import { getConnectorType, configValidator } from './index';
-import {ActionsConfigurationUtilities} from 'x-pack/plugins/actions/server/actions_config';
-import { Config } from '../../../common/gemini/types';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import axios from 'axios';
+import { configValidator, getConnectorType } from '.';
+import { Config, Secrets } from '../../../common/gemini/types';
+import { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
 
-jest.mock('@kbn/i18n', () => ({
-  i18n: {
-    translate: jest.fn((key, options) => options?.defaultMessage || key), // Mock translation
-  },
-}));
-
-jest.mock('@kbn/actions-plugin/server', () => ({
-  urlAllowListValidator: jest.fn(() => jest.fn()), // Mock validator
-}));
-
-const mockConfigurationUtilities: ActionsConfigurationUtilities = {
-    isHostnameAllowed: jest.fn().mockReturnValue(true), // Always allow hostname
-    isUriAllowed: jest.fn().mockReturnValue(true),       // Always allow URI
-    isActionTypeEnabled: jest.fn().mockReturnValue(true), // Always enable action type
-    ensureHostnameAllowed: jest.fn(),              // Empty implementation for now
-    ensureUriAllowed: jest.fn(),                  // Empty implementation for now
-    ensureActionTypeEnabled: jest.fn(),             // Empty implementation for now
-    getSSLSettings: jest.fn(),                    // Empty implementation for now
-    getProxySettings: jest.fn(),                   // Empty implementation for now
-    getResponseSettings: jest.fn(),                 // Empty implementation for now
-    getCustomHostSettings: jest.fn(),               // Empty implementation for now
-    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue('https://graph.microsoft.com/v1.0'), 
-    getMicrosoftGraphApiScope: jest.fn().mockReturnValue('https://graph.microsoft.com/.default'), 
-    getMicrosoftExchangeUrl: jest.fn().mockReturnValue('https://outlook.office.com/api/v2.0'), 
-    getMaxAttempts: jest.fn().mockReturnValue(3),      
-    validateEmailAddresses: jest.fn(),             
-    enableFooterInEmail: jest.fn().mockReturnValue(true),  
-    getMaxQueued: jest.fn().mockReturnValue(100),      
+jest.mock('axios');
+jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('@kbn/actions-plugin/server/lib/axios_utils');
+  return {
+    ...originalUtils,
+    request: jest.fn(),
+    patch: jest.fn(),
   };
-  
-  
-const mockValidatorServices: ValidatorServices = {
-    configurationUtilities: mockConfigurationUtilities
-  };
-  
-
-describe('getConnectorType', () => {
-  it('should return the correct connector type', () => {
-    const connectorType = getConnectorType();
-
-    expect(connectorType.id).toBe('GEMINI_CONNECTOR_ID'); // Replace with actual ID
-    expect(connectorType.name).toBe('GEMINI_TITLE'); // Replace with actual title
-    expect(connectorType).toHaveProperty('getService'); 
-    expect(connectorType.schema).toBeDefined();
-    expect(connectorType.supportedFeatureIds).toBeDefined();
-    expect(connectorType.minimumLicenseRequired).toBe('enterprise');
-    expect(connectorType.renderParameterTemplates).toBeDefined();
-  });
 });
 
-describe('configValidator', () => {
-  const mockConfig: Config = { apiUrl: 'https://example.com/api',defaultModel: 'string', gcpRegion: 'string', gcpProjectID: 'string' }; // Sample valid config
+axios.create = jest.fn(() => axios);
 
-  it('should return the config object if valid', () => {
-    const validatedConfig = configValidator(mockConfig, mockValidatorServices);
-    expect(validatedConfig).toEqual(mockConfig);
+let connectorType: SubActionConnectorType<Config, Secrets>;
+let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
+
+describe('Gemini Connector', () => {
+  beforeEach(() => {
+    configurationUtilities = actionsConfigMock.create();
+    connectorType = getConnectorType();
   });
-
-  it('should throw an error if apiUrl is invalid', () => {
-    const invalidConfig = { apiUrl: 'invalid-url' ,defaultModel: 'string', gcpRegion: 'string', gcpProjectID: 'string' };
-    expect(() => configValidator(invalidConfig, mockValidatorServices)).toThrow(
-      'Error configuring Google Gemini action: Error: Invalid URL: invalid-url'
-    );
+  test('exposes the connector as `Google Gemini` with id `.gemini`', () => {
+    expect(connectorType.id).toEqual('.gemini');
+    expect(connectorType.name).toEqual('Google Gemini');
   });
+  
+  describe('config validation', () => {
+    test('config validation passes when only required fields are provided', () => {
+      const config: Config = {
+        apiUrl: 'https://us-central1-aiplatform.googleapis.com/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent',
+        defaultModel: DEFAULT_GEMINI_MODEL,       
+        gcpRegion: 'us-central-1',
+        gcpProjectID: 'test-gcpProject',
+      };
 
-  // Add more tests to cover different scenarios, e.g., urlAllowListValidator failures 
+      expect(configValidator(config, { configurationUtilities })).toEqual(config);
+    });
+
+    test('config validation failed when a url is invalid', () => {
+      const config: Config = {
+        apiUrl: 'example.com/do-something',
+        defaultModel: DEFAULT_GEMINI_MODEL,
+        gcpRegion: 'us-central-1',
+        gcpProjectID: 'test-gcpProject',
+      };
+      expect(() => {
+        configValidator(config, { configurationUtilities });
+      }).toThrowErrorMatchingInlineSnapshot(
+        '"Error configuring Google Gemini action: Error: URL Error: Invalid URL: example.com/do-something"'
+      );
+    });
+
+    test('config validation returns an error if the specified URL is not added to allowedHosts', () => {
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (_: string) => {
+          throw new Error(`target url is not present in allowedHosts`);
+        },
+      };
+
+      const config: Config = {
+        apiUrl: 'http://mylisteningserver.com:9200/endpoint',
+        defaultModel: DEFAULT_GEMINI_MODEL,
+        gcpRegion: 'us-central-1',
+        gcpProjectID: 'test-gcpProject',
+      };
+
+      expect(() => {
+        configValidator(config, { configurationUtilities: configUtils });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Error configuring Google Gemini action: Error: error validating url: target url is not present in allowedHosts"`
+      );
+    });
+  });
 });

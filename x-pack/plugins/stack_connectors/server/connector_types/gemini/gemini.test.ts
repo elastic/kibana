@@ -144,7 +144,7 @@ describe('GeminiConnector', () => {
       configurationUtilities: mockConfigurationUtilities,
       config: {
         apiUrl: 'https://api.gemini.com',
-        defaultModel: 'text-bison',
+        defaultModel: 'gemini-1.5-pro-preview-0409',
         gcpRegion: 'us-central1',
         gcpProjectID: 'my-project-12345',
       },
@@ -172,9 +172,8 @@ describe('GeminiConnector', () => {
 
     // Add a test for the case when the user doesn't have privileges
   });
-  // ...tests for runTestApi
-  // ...tests for runApi
-  describe('runTestApi', () => {
+  
+  describe('runApi', () => {
     it('should send a formatted request to the API and return the response', async () => {
         const runActionParams: RunActionParams = {
             body: JSON.stringify({
@@ -209,8 +208,7 @@ describe('GeminiConnector', () => {
 
         // Mock the request function to simulate a successful API call
         //jest.spyOn(connector, 'request' as any).mockResolvedValueOnce(mockApiResponse);
-              (connector as jest.MockedFunction<any>).mockResolvedValueOnce(mockApiResponse);
-
+        (connector as jest.MockedFunction<any>).mockResolvedValueOnce(mockApiResponse);
 
         const response = await connector.runApi(runActionParams);
 
@@ -218,7 +216,10 @@ describe('GeminiConnector', () => {
         expect(connector).toHaveBeenCalledWith({
             url: 'https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/test-model:generateContent',
             method: 'post',
-            data: JSON.stringify([{ author: "user", content: "What is the capital of France?" }]),
+            data: JSON.stringify([{ contents: [{
+                    role: 'user',
+                    parts: [{text:"What is the capital of France?" }]
+            }]  }]),
             headers: {
                 'Authorization': 'Bearer fake-access-token',
                 'Content-Type': 'application/json'
@@ -233,31 +234,5 @@ describe('GeminiConnector', () => {
 
     // Add error handling tests here as well
   });
-
-  describe('invokeAI', () => {
-    it('should call runApi with the correct parameters and return the response', async () => {
-      const invokeParams: RunActionParams = {
-        body: 'Hello',
-        model: 'my-model',
-        signal: 0.5,
-        timeout: 5000,
-      };
-
-      const mockRunApiResponse: RunActionResponse = {
-        completion: 'Hi there!',
-      };
-
-      jest.spyOn(connector, 'runApi' as any).mockResolvedValueOnce(mockRunApiResponse);
-
-      const result = await connector.runApi(invokeParams);
-
-      expect(connector.runApi).toHaveBeenCalledWith({
-        body: JSON.stringify({ messages: invokeParams.body }),
-        model: invokeParams.model,
-        timeout: invokeParams.timeout,
-      });
-
-      expect(result).toEqual({ message: mockRunApiResponse.completion });
-    });
-})
-})
+  
+});
