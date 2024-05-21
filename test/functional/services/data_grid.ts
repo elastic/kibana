@@ -457,22 +457,28 @@ export class DataGridService extends FtrService {
     return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
   }
 
-  public async expandFieldCellPopoverInFlyout(
-    fieldName: string,
-    actionName: string
-  ): Promise<void> {
+  public async showFieldCellActionInFlyout(fieldName: string, actionName: string): Promise<void> {
     const cellSelector = ['addFilterForValueButton', 'addFilterOutValueButton'].includes(actionName)
       ? `tableDocViewRow-${fieldName}-value`
       : `tableDocViewRow-${fieldName}-name`;
     await this.testSubjects.click(cellSelector);
-    await this.retry.waitFor('grid cell popover to appear', async () => {
+    await this.retry.waitFor('grid cell actions to appear', async () => {
       return this.testSubjects.exists(`${actionName}-${fieldName}`);
     });
   }
 
   public async clickFieldActionInFlyout(fieldName: string, actionName: string): Promise<void> {
-    await this.expandFieldCellPopoverInFlyout(fieldName, actionName);
+    await this.showFieldCellActionInFlyout(fieldName, actionName);
     await this.testSubjects.click(`${actionName}-${fieldName}`);
+  }
+
+  public async expandFieldNameCellInFlyout(fieldName: string): Promise<void> {
+    const buttonSelector = 'euiDataGridCellExpandButton';
+    await this.testSubjects.click(`tableDocViewRow-${fieldName}-name`);
+    await this.retry.waitFor('grid cell actions to appear', async () => {
+      return this.testSubjects.exists(buttonSelector);
+    });
+    await this.testSubjects.click(buttonSelector);
   }
 
   public async hasNoResults() {

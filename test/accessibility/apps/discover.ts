@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('a11y test for actions on a field', async () => {
       await PageObjects.discover.clickDocViewerTab('doc_view_table');
-      await dataGrid.expandFieldCellPopoverInFlyout('Cancelled', 'addExistsFilterButton');
+      await dataGrid.showFieldCellActionInFlyout('Cancelled', 'addExistsFilterButton');
       await a11y.testAppSnapshot();
     });
 
