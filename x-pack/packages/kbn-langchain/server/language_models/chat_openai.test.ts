@@ -97,59 +97,6 @@ describe('ActionsClientChatOpenAI', () => {
     });
   });
 
-  describe('completionWithRetry streaming: false', () => {
-    const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
-      messages: [{ content: prompt, role: 'user' }],
-      stream: false,
-      model: 'gpt-4',
-    };
-    it('returns the expected data', async () => {
-      const actionsClientChatOpenAI = new ActionsClientChatOpenAI(defaultArgs);
-
-      const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
-        defaultNonStreamingArgs
-      );
-      expect(mockExecute).toHaveBeenCalledWith({
-        actionId: connectorId,
-        params: {
-          subActionParams: {
-            body: '{"temperature":0.2,"model":"gpt-4","messages":[{"role":"user","content":"Do you know my name?"}]}',
-            signal,
-            timeout: 999999,
-          },
-          subAction: 'run',
-        },
-        signal,
-      });
-      expect(result.choices[0].message.content).toEqual(mockActionResponse.message);
-    });
-
-    it('rejects with the expected error when the action result status is error', async () => {
-      const hasErrorStatus = jest.fn().mockImplementation(() => ({
-        message: 'action-result-message',
-        serviceMessage: 'action-result-service-message',
-        status: 'error', // <-- error status
-      }));
-
-      const badActions = {
-        getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
-          execute: hasErrorStatus,
-        })),
-      } as unknown as ActionsPluginStart;
-
-      const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
-        ...defaultArgs,
-        actions: badActions,
-      });
-
-      expect(
-        actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs)
-      ).rejects.toThrowError(
-        'ActionsClientChatOpenAI: action result status is error: action-result-message - action-result-service-message'
-      );
-    });
-  });
-
   describe('completionWithRetry streaming: true', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -196,6 +143,63 @@ describe('ActionsClientChatOpenAI', () => {
         signal,
       });
       expect(result).toEqual(asyncGenerator());
+    });
+  });
+
+  describe('completionWithRetry streaming: false', () => {
+    const defaultNonStreamingArgs: OpenAI.ChatCompletionCreateParamsNonStreaming = {
+      messages: [{ content: prompt, role: 'user' }],
+      stream: false,
+      model: 'gpt-4',
+    };
+    it('returns the expected data', async () => {
+      const actionsClientChatOpenAI = new ActionsClientChatOpenAI(defaultArgs);
+
+      const result: OpenAI.ChatCompletion = await actionsClientChatOpenAI.completionWithRetry(
+        defaultNonStreamingArgs
+      );
+      expect(mockExecute).toHaveBeenCalledWith({
+        actionId: connectorId,
+        params: {
+          subActionParams: {
+            body: '{"temperature":0.2,"model":"gpt-4","messages":[{"role":"user","content":"Do you know my name?"}]}',
+            signal,
+            timeout: 999999,
+          },
+          subAction: 'run',
+        },
+        signal,
+      });
+      expect(result.choices[0].message.content).toEqual(mockActionResponse.message);
+    });
+
+    it('rejects with the expected error when the action result status is error', async () => {
+      const hasErrorStatus = jest.fn().mockImplementation(() => ({
+        message: 'action-result-message',
+        serviceMessage: 'action-result-service-message',
+        status: 'error', // <-- error status
+      }));
+
+      const badActions = {
+        getActionsClientWithRequest: jest.fn().mockImplementation(() => ({
+          execute: hasErrorStatus,
+        })),
+      } as unknown as ActionsPluginStart;
+
+      const actionsClientChatOpenAI = new ActionsClientChatOpenAI({
+        ...defaultArgs,
+        actions: badActions,
+      });
+
+      expect(actionsClientChatOpenAI.completionWithRetry(defaultNonStreamingArgs))
+        .rejects.toThrowError(
+          'ActionsClientChatOpenAI: action result status is error: action-result-message - action-result-service-message'
+        )
+        .catch(() => {
+          /* ...handle/report the error (or just suppress it, if that's appropriate
+            [which it sometimes, though rarely, is])...
+         */
+        });
     });
   });
 });

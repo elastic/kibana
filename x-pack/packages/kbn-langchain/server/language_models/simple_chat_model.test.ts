@@ -168,7 +168,7 @@ describe('ActionsClientSimpleChatModel', () => {
         actions: badActions,
       });
 
-      expect(
+      await expect(
         actionsClientSimpleChatModel._call(callMessages, callOptions, callRunManager)
       ).rejects.toThrowError(
         'ActionsClientSimpleChatModel: action result status is error: action-result-message - action-result-service-message'
@@ -185,7 +185,7 @@ describe('ActionsClientSimpleChatModel', () => {
 
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel(defaultArgs);
 
-      expect(
+      await expect(
         actionsClientSimpleChatModel._call(callMessages, callOptions, callRunManager)
       ).rejects.toThrowError(
         'ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: number'
@@ -202,7 +202,7 @@ describe('ActionsClientSimpleChatModel', () => {
 
       const actionsClientSimpleChatModel = new ActionsClientSimpleChatModel(defaultArgs);
 
-      expect(
+      await expect(
         actionsClientSimpleChatModel._call(
           // @ts-ignore
           [{ ...callMessages[0], content: null }],

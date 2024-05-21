@@ -161,7 +161,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     const finalOutputStartToken = '"action":"FinalAnswer","action_input":"';
     let streamingFinished = false;
     const finalOutputStopRegex = /(?<!\\)\"/;
-    const handleLLMNewToken = (token: string) => {
+    const handleLLMNewToken = async (token: string) => {
       if (finalOutputIndex === -1) {
         // Remove whitespace to simplify parsing
         currentOutput += token.replace(/\s/g, '');
@@ -173,7 +173,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         if (finalOutputEndIndex !== -1) {
           streamingFinished = true;
         } else {
-          runManager?.handleLLMNewToken(token);
+          await runManager?.handleLLMNewToken(token);
         }
       }
     };
