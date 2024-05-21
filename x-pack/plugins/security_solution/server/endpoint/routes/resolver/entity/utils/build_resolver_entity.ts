@@ -40,6 +40,7 @@ export function resolverEntity(
           name: supportedSchema.name,
           schema: supportedSchema.schema,
           id,
+          agent: supportedSchema.agent,
         });
       }
     }

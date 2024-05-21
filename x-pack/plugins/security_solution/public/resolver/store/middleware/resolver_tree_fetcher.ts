@@ -24,6 +24,7 @@ import {
   serverReturnedResolverData,
 } from '../data/action';
 import type { State } from '../../../common/store/types';
+
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
  * This will make a request anytime the entityID changes (to something other than undefined.)
@@ -75,6 +76,12 @@ export function ResolverTreeFetcher(
         }
         ({ id: entityIDToFetch, schema: dataSourceSchema, name: dataSource } = matchingEntities[0]);
 
+        const relatedEvents = await dataAccessLayer.relatedEvents({
+          entityID: entityIDToFetch,
+          timeRange: timeRangeFilters,
+          indexPatterns: databaseParameters.indices,
+        });
+        const agentId = relatedEvents.events[0].agent?.id as string;
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
           schema: dataSourceSchema,
@@ -82,6 +89,7 @@ export function ResolverTreeFetcher(
           indices: databaseParameters.indices,
           ancestors: ancestorsRequestAmount(dataSourceSchema),
           descendants: descendantsRequestAmount(),
+          agentId,
         });
 
         const resolverTree: NewResolverTree = {
@@ -96,6 +104,7 @@ export function ResolverTreeFetcher(
             indices: databaseParameters.indices,
             ancestors: ancestorsRequestAmount(dataSourceSchema),
             descendants: descendantsRequestAmount(),
+            agentId,
           });
           if (unboundedTree.length > 0) {
             const timestamps = unboundedTree
@@ -109,7 +118,7 @@ export function ResolverTreeFetcher(
                 result: { ...resolverTree, nodes: unboundedTree },
                 dataSource,
                 schema: dataSourceSchema,
-                parameters: databaseParameters,
+                parameters: { ...databaseParameters, agentId },
                 detectedBounds: {
                   from: String(oldestTimestamp),
                   to: String(newestTimestamp),
@@ -125,7 +134,7 @@ export function ResolverTreeFetcher(
                 result: resolverTree,
                 dataSource,
                 schema: dataSourceSchema,
-                parameters: databaseParameters,
+                parameters: { ...databaseParameters, agentId },
               })
             );
           }
@@ -136,7 +145,7 @@ export function ResolverTreeFetcher(
               result: resolverTree,
               dataSource,
               schema: dataSourceSchema,
-              parameters: databaseParameters,
+              parameters: { ...databaseParameters, agentId },
             })
           );
         }

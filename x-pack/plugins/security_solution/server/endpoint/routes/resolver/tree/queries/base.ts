@@ -18,6 +18,7 @@ export interface ResolverQueryParams {
   readonly shouldExcludeColdAndFrozenTiers?: boolean;
   readonly timeRange: TimeRange | undefined;
   readonly resolverFields?: JsonValue[];
+  readonly agentId: string;
   getRangeFilter?: () => Array<{
     range: { '@timestamp': { gte: string; lte: string; format: string } };
   }>;
@@ -30,6 +31,7 @@ export class BaseResolverQuery implements ResolverQueryParams {
   readonly shouldExcludeColdAndFrozenTiers?: boolean;
   readonly timeRange: TimeRange | undefined;
   readonly resolverFields?: JsonValue[];
+  readonly agentId: string;
 
   constructor({
     schema,
@@ -37,6 +39,7 @@ export class BaseResolverQuery implements ResolverQueryParams {
     timeRange,
     isInternalRequest,
     shouldExcludeColdAndFrozenTiers,
+    agentId,
   }: ResolverQueryParams) {
     const schemaOrDefault = schema
       ? schema
@@ -50,6 +53,7 @@ export class BaseResolverQuery implements ResolverQueryParams {
     this.timeRange = timeRange;
     this.isInternalRequest = isInternalRequest;
     this.shouldExcludeColdAndFrozenTiers = shouldExcludeColdAndFrozenTiers;
+    this.agentId = agentId;
   }
 
   getColdAndFrozenTierFilter() {

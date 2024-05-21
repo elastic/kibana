@@ -28,6 +28,7 @@ export interface AnalyzerState {
 export interface AnalyzerById {
   [id: string]: ResolverState;
 }
+
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
  */
@@ -200,6 +201,8 @@ export interface TreeFetcherParameters {
   indices: string[];
 
   filters: TimeFilters;
+
+  agentId: string;
 }
 
 /**
@@ -520,6 +523,7 @@ export interface DurationDetails {
   duration: number | '<1';
   durationType: DurationTypes;
 }
+
 /**
  * Values shared between two vertices joined by an edge line.
  */
@@ -574,6 +578,7 @@ export type ProcessWithWidthMetadata = {
  */
 interface ResizeObserverConstructor {
   prototype: ResizeObserver;
+
   new (callback: ResizeObserverCallback): ResizeObserver;
 }
 
@@ -597,10 +602,12 @@ export interface SideEffectors {
    * Use instead of the `ResizeObserver` global.
    */
   ResizeObserver: ResizeObserverConstructor;
+
   /**
    * Use this instead of the Clipboard API's `writeText` method.
    */
   writeTextToClipboard(text: string): Promise<void>;
+
   /**
    * Use this instead of `Element.prototype.getBoundingClientRect` .
    */
@@ -769,6 +776,7 @@ export interface DataAccessLayer {
     indices,
     ancestors,
     descendants,
+    agentId,
   }: {
     dataId: string;
     schema: ResolverSchema;
@@ -776,6 +784,7 @@ export interface DataAccessLayer {
     indices: string[];
     ancestors: number;
     descendants: number;
+    agentId: string;
   }): Promise<ResolverNode[]>;
 
   /**

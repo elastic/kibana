@@ -391,6 +391,7 @@ export class TelemetryTimelineFetcher {
   async fetchTimeline(event: estypes.SearchHit<EnhancedAlertEvent>): Promise<TimelineResult> {
     const eventId = event._source ? event._source['event.id'] : 'unknown';
     const alertUUID = event._source ? event._source['kibana.alert.uuid'] : 'unknown';
+    const agentId = event._source ? event._source['agent.id'] : 'unknown';
 
     const entities = resolverEntity([event], this.receiver.getExperimentalFeatures());
 
@@ -399,7 +400,8 @@ export class TelemetryTimelineFetcher {
       entities[0].id,
       entities[0].schema,
       this.timeFrame.startOfDay,
-      this.timeFrame.endOfDay
+      this.timeFrame.endOfDay,
+      agentId
     );
 
     const nodeIds = Array.isArray(tree) ? tree.map((node) => node?.id.toString()) : [];

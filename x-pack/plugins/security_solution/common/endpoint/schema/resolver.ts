@@ -45,6 +45,7 @@ export const validateTree = {
     }),
     indexPatterns: schema.arrayOf(schema.string(), { minSize: 1 }),
     includeHits: schema.boolean({ defaultValue: false }),
+    agentId: schema.string(),
   }),
 };
 

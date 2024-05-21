@@ -217,7 +217,8 @@ export interface ITelemetryReceiver {
     entityId: string,
     resolverSchema: ResolverSchema,
     startOfDay: string,
-    endOfDay: string
+    endOfDay: string,
+    agentId: string
   ): TreeResponse;
 
   fetchTimelineEvents(
@@ -1034,7 +1035,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     entityId: string,
     resolverSchema: ResolverSchema,
     startOfDay: string,
-    endOfDay: string
+    endOfDay: string,
+    agentId: string
   ): TreeResponse {
     if (this.processTreeFetcher === undefined || this.processTreeFetcher === null) {
       throw Error(
@@ -1053,6 +1055,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       nodes: [entityId],
       indexPatterns: [`${this.alertsIndex}*`, 'logs-*'],
       descendantLevels: 20,
+      agentId,
     };
 
     return this.processTreeFetcher.tree(request, true);
