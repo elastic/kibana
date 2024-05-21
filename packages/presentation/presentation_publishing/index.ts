@@ -29,11 +29,11 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
+export { fetch$, type FetchContext } from './interfaces/fetch/fetch';
 export {
   initializeTimeRange,
   type SerializedTimeRange,
 } from './interfaces/fetch/initialize_time_range';
-export { fetch$, type FetchContext } from './interfaces/fetch/fetch';
 export {
   apiPublishesPartialUnifiedSearch,
   apiPublishesTimeRange,
@@ -51,8 +51,14 @@ export {
 export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
+  apiHasExecutionContext,
+  type HasExecutionContext,
+} from './interfaces/has_execution_context';
+export {
   apiHasLegacyLibraryTransforms,
   apiHasLibraryTransforms,
+  apiHasInPlaceLibraryTransforms,
+  type HasInPlaceLibraryTransforms,
   type HasLegacyLibraryTransforms,
   type HasLibraryTransforms,
 } from './interfaces/has_library_transforms';
@@ -68,10 +74,6 @@ export {
   type HasTypeDisplayName,
 } from './interfaces/has_type';
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
-export {
-  apiHasExecutionContext,
-  type HasExecutionContext,
-} from './interfaces/has_execution_context';
 export {
   apiPublishesBlockingError,
   type PublishesBlockingError,

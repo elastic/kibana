@@ -6,9 +6,12 @@
  * Side Public License, v 1.
  */
 
-export {
-  reactEmbeddableRegistryHasKey,
-  registerReactEmbeddableFactory,
-} from './react_embeddable_registry';
-export { ReactEmbeddableRenderer } from './react_embeddable_renderer';
-export type { DefaultEmbeddableApi, ReactEmbeddableFactory } from './types';
+import { Subject } from 'rxjs';
+
+export interface HasSaveNotification {
+  saveNotification$: Subject<void>; // a notification that state has been saved
+}
+
+export const apiHasSaveNotification = (api: unknown): api is HasSaveNotification => {
+  return Boolean(api && (api as HasSaveNotification).saveNotification$);
+};
