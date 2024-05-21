@@ -12,6 +12,7 @@ import {
   type ObservabilityAIAssistantChatService,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { Subject } from 'rxjs';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ObservabilityAIAssistantAppService } from '../service/create_app_service';
 import { ObservabilityAIAssistantAppServiceProvider } from '../context/observability_ai_assistant_app_service_provider';
 
@@ -20,6 +21,8 @@ const mockService: ObservabilityAIAssistantAppService = {
 };
 
 const mockChatService: ObservabilityAIAssistantChatService = createStorybookChatService();
+
+const coreStart = coreMock.createStart();
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
   const ObservabilityAIAssistantChatServiceContext = React.createContext(mockChatService);
@@ -31,35 +34,20 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
   return (
     <KibanaContextProvider
       services={{
-        application: {
-          navigateToApp: () => {},
-        },
-        http: {
-          basePath: {
-            prepend: () => '',
-          },
-        },
+        ...coreStart,
         licensing: {
           license$: new Subject(),
         },
-        observabilityAIAssistant: {
-          ObservabilityAIAssistantChatServiceContext,
-          ObservabilityAIAssistantMultipaneFlyoutContext,
-        },
+        // observabilityAIAssistant: {
+        //   ObservabilityAIAssistantChatServiceContext,
+        //   ObservabilityAIAssistantMultipaneFlyoutContext,
+        // },
         plugins: {
           start: {
             observabilityAIAssistant: {
               ObservabilityAIAssistantMultipaneFlyoutContext,
             },
             triggersActionsUi: { getAddRuleFlyout: {}, getAddConnectorFlyout: {} },
-          },
-        },
-        triggersActionsUi: { getAddRuleFlyout: {}, getAddConnectorFlyout: {} },
-        uiSettings: {
-          get: (setting: string) => {
-            if (setting === 'dateFormat') {
-              return 'MMM D, YYYY HH:mm';
-            }
           },
         },
       }}

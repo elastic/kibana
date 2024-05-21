@@ -8,7 +8,7 @@
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
 import { buildSystemMessage } from '../../utils/builders';
-import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 import { ChatFlyout as Component, FlyoutPositionMode } from './chat_flyout';
 
 export default {

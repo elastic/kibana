@@ -8,7 +8,7 @@
 import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
 import React from 'react';
 import { buildConversation } from '../../utils/builders';
-import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 import { ConversationList as Component } from './conversation_list';
 
 type ConversationListProps = React.ComponentProps<typeof Component>;

@@ -7,7 +7,7 @@
 
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
-import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
+import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator.stories';
 import { FunctionListPopover as Component } from './function_list_popover';
 
 export default {
