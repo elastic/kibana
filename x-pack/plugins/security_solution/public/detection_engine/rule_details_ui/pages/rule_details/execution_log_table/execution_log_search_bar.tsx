@@ -56,7 +56,7 @@ interface ExecutionLogTableSearchProps {
   onStatusFilterChange: (selectedStatuses: RuleExecutionStatus[]) => void;
   onSearch: (queryText: string) => void;
   selectedRunTypes: RuleRunType[];
-  onRunTypeFitlerChange: (selectedRunTypes: RuleRunType[]) => void;
+  onRunTypeFilterChange: (selectedRunTypes: RuleRunType[]) => void;
 }
 
 /**
@@ -73,7 +73,7 @@ export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
     onStatusFilterChange,
     onSearch,
     selectedRunTypes,
-    onRunTypeFitlerChange,
+    onRunTypeFilterChange,
   }) => {
     const handleSearch = useCallback(
       (queryText: string) => {
@@ -104,7 +104,7 @@ export const ExecutionLogSearchBar = React.memo<ExecutionLogTableSearchProps>(
                 <ExecutionRunTypeFilter
                   items={RUN_TYPE_FILTERS}
                   selectedItems={selectedRunTypes}
-                  onChange={onRunTypeFitlerChange}
+                  onChange={onRunTypeFilterChange}
                 />
               </EuiFlexItem>
             )}

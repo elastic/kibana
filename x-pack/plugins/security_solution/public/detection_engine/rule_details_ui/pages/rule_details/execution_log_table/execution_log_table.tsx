@@ -491,7 +491,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             onStatusFilterChange={onStatusFilterChangeCallback}
             onSearch={onSearchCallback}
             selectedRunTypes={runTypeFilters}
-            onRunTypeFitlerChange={setRunTypeFilters}
+            onRunTypeFilterChange={setRunTypeFilters}
           />
         </EuiFlexItem>
         <DatePickerEuiFlexItem>
