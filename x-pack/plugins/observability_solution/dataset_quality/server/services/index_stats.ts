@@ -16,10 +16,10 @@ interface IndexStatsResponse {
 class IndexStatsService {
   public async getIndicesDocCounts(
     esClient: ElasticsearchClient,
-    type: string
+    dataStreams: string[]
   ): Promise<IndexStatsResponse> {
     try {
-      const index = `${type}-*-*`;
+      const index = dataStreams;
 
       const { indices } = await esClient.indices.stats({ index, metric: ['docs'] });
 

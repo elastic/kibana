@@ -18,11 +18,14 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 
+import { PrivilegesLearnMoreWrapper } from '../../common';
+
 export function FlyoutSummaryKpiItem({
   title,
   value,
   link,
   isLoading,
+  userHasPrivilege,
 }: {
   title: string;
   value: string;
@@ -31,6 +34,7 @@ export function FlyoutSummaryKpiItem({
     href: string;
   };
   isLoading: boolean;
+  userHasPrivilege: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
 
@@ -73,15 +77,17 @@ export function FlyoutSummaryKpiItem({
         <EuiFlexItem
           css={{ alignItems: isLoading ? 'stretch' : 'flex-end', justifyContent: 'flex-end' }}
         >
-          <EuiSkeletonTitle
-            style={{ width: '50%', marginLeft: 'auto' }}
-            size="m"
-            isLoading={isLoading}
-          >
-            <EuiTitle data-test-subj={`datasetQualityFlyoutKpiValue-${title}`} size="s">
-              <h3 className="eui-textNoWrap">{value}</h3>
-            </EuiTitle>
-          </EuiSkeletonTitle>
+          <PrivilegesLearnMoreWrapper fontSize="xs" hasPrivileges={userHasPrivilege} title={title}>
+            <EuiSkeletonTitle
+              style={{ width: '50%', marginLeft: 'auto' }}
+              size="m"
+              isLoading={isLoading}
+            >
+              <EuiTitle data-test-subj={`datasetQualityFlyoutKpiValue-${title}`} size="s">
+                <h3 className="eui-textNoWrap">{value}</h3>
+              </EuiTitle>
+            </EuiSkeletonTitle>
+          </PrivilegesLearnMoreWrapper>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

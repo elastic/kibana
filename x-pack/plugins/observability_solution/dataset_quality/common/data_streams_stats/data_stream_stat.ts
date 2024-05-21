@@ -21,6 +21,7 @@ export class DataStreamStat {
   size?: DataStreamStatType['size']; // total datastream size
   sizeBytes?: DataStreamStatType['sizeBytes']; // total datastream size
   lastActivity?: DataStreamStatType['lastActivity'];
+  userPrivileges?: DataStreamStatType['userPrivileges'];
   totalDocs?: DataStreamStatType['totalDocs']; // total datastream docs count
   integration?: Integration;
   degradedDocs: {
@@ -39,6 +40,7 @@ export class DataStreamStat {
     this.size = dataStreamStat.size;
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
+    this.userPrivileges = dataStreamStat.userPrivileges;
     this.totalDocs = dataStreamStat.totalDocs;
     this.integration = dataStreamStat.integration;
     this.degradedDocs = {
@@ -61,6 +63,7 @@ export class DataStreamStat {
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.sizeBytes,
       lastActivity: dataStreamStat.lastActivity,
+      userPrivileges: dataStreamStat.userPrivileges,
       totalDocs: dataStreamStat.totalDocs,
       degradedDocs: DEFAULT_DEGRADED_DOCS,
     };

@@ -21,6 +21,7 @@ import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { useFlyoutIntegrationActions } from '../../hooks/use_flyout_integration_actions';
+import { PrivilegesWarningIconWrapper } from '../common';
 
 const integrationActionsText = i18n.translate('xpack.datasetQuality.flyoutIntegrationActionsText', {
   defaultMessage: 'Integration actions',
@@ -45,7 +46,8 @@ export function IntegrationActionsMenu({
   integration: Integration;
   dashboardsLoading: boolean;
 }) {
-  const { type, name } = useDatasetQualityFlyout().dataStreamStat!;
+  const { dataStreamStat, canUserAccessDashboards } = useDatasetQualityFlyout();
+  const { type, name } = dataStreamStat!;
   const { dashboards = [], version, name: integrationName } = integration;
   const {
     isOpen,
@@ -122,12 +124,22 @@ export function IntegrationActionsMenu({
       },
     ];
 
-    if (dashboards.length) {
+    if (dashboards.length || !canUserAccessDashboards) {
       firstLevelItems.push({
         icon: 'dashboardApp',
         panel: 1,
-        name: viewDashboardsText,
+        name: (
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={canUserAccessDashboards}
+            title={viewDashboardsText}
+            mode="tooltip"
+            iconColor="warning"
+          >
+            {viewDashboardsText}
+          </PrivilegesWarningIconWrapper>
+        ),
         'data-test-subj': 'datasetQualityFlyoutIntegrationActionViewDashboards',
+        disabled: !canUserAccessDashboards,
       });
     } else if (dashboardsLoading) {
       firstLevelItems.push({
@@ -172,6 +184,7 @@ export function IntegrationActionsMenu({
     type,
     version,
     dashboardsLoading,
+    canUserAccessDashboards,
   ]);
 
   return (

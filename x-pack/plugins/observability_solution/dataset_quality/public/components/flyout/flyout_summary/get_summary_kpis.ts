@@ -37,7 +37,12 @@ export function getSummaryKpis({
   hostsLocator?: ReturnType<
     typeof useKibanaContextForPlugin
   >['services']['observabilityShared']['locators']['infra']['hostsLocator'];
-}): Array<{ title: string; value: string; link?: { label: string; href: string } }> {
+}): Array<{
+  title: string;
+  value: string;
+  link?: { label: string; href: string };
+  userHasPrivilege: boolean;
+}> {
   const services = dataStreamDetails?.services ?? {};
   const serviceKeys = Object.keys(services);
   const countOfServices = serviceKeys
@@ -56,6 +61,7 @@ export function getSummaryKpis({
     {
       title: flyoutDocsCountTotalText,
       value: formatNumber(dataStreamDetails?.docsCount ?? 0, NUMBER_FORMAT),
+      userHasPrivilege: true,
     },
     // dataStreamDetails.sizeBytes = null indicates it's Serverless where `_stats` API isn't available
     ...(dataStreamDetails?.sizeBytes !== null // Only show when not in Serverless
@@ -63,6 +69,7 @@ export function getSummaryKpis({
           {
             title: flyoutSizeText,
             value: formatNumber(dataStreamDetails?.sizeBytes ?? 0, BYTE_NUMBER_FORMAT),
+            userHasPrivilege: dataStreamDetails?.userPrivileges?.canMonitor ?? true,
           },
         ]
       : []),
@@ -70,12 +77,14 @@ export function getSummaryKpis({
       title: flyoutServicesText,
       value: formatMetricValueForMax(countOfServices, MAX_HOSTS_METRIC_VALUE, NUMBER_FORMAT),
       link: servicesLink,
+      userHasPrivilege: true,
     },
     getHostsKpi(dataStreamDetails?.hosts, timeRange, hostsLocator),
     {
       title: flyoutDegradedDocsText,
       value: formatNumber(dataStreamDetails?.degradedDocsCount ?? 0, NUMBER_FORMAT),
       link: degradedDocsLink,
+      userHasPrivilege: true,
     },
   ];
 }
@@ -126,6 +135,7 @@ function getHostsKpi(
       NUMBER_FORMAT
     ),
     link: undefined,
+    userHasPrivilege: true,
   };
 }
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSummaryPanelContext } from '../../../hooks';
 import { DatasetsQualityIndicators } from './datasets_quality_indicators';
 import { DatasetsActivity } from './datasets_activity';
@@ -19,11 +19,16 @@ export default function SummaryPanel() {
   const { isEstimatedDataDisabled } = useSummaryPanelContext();
   return (
     <EuiFlexGroup gutterSize="m">
-      <DatasetsQualityIndicators />
-      <EuiFlexGroup gutterSize="m">
-        <DatasetsActivity />
-        {!isEstimatedDataDisabled && <EstimatedData />}
-      </EuiFlexGroup>
+      <EuiFlexItem>
+        <DatasetsQualityIndicators />
+      </EuiFlexItem>
+
+      <EuiFlexItem>
+        <EuiFlexGroup gutterSize="m">
+          <DatasetsActivity />
+          {!isEstimatedDataDisabled && <EstimatedData />}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

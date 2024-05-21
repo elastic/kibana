@@ -8,6 +8,7 @@
 import type {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
+  SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
@@ -16,17 +17,11 @@ import { streamPartsToIndexPattern } from '../../common/utils';
 class DataStreamService {
   public async getMatchingDataStreams(
     esClient: ElasticsearchClient,
-    dataStreamParts: {
-      dataset: string;
-      type: string;
-    }
+    datasetName: string
   ): Promise<IndicesDataStream[]> {
     try {
       const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
-        name: streamPartsToIndexPattern({
-          typePattern: dataStreamParts.type,
-          datasetPattern: dataStreamParts.dataset,
-        }),
+        name: datasetName,
       });
 
       return dataStreamsInfo;
@@ -63,6 +58,25 @@ class DataStreamService {
     }
   }
 
+  public async getStreamsStats(
+    esClient: ElasticsearchClient,
+    dataStreams: string[]
+  ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
+    try {
+      const { data_streams: dataStreamsStats } = await esClient.indices.dataStreamsStats({
+        name: dataStreams.join(','),
+        human: true,
+      });
+
+      return dataStreamsStats;
+    } catch (e) {
+      if (e.statusCode === 404) {
+        return [];
+      }
+      throw e;
+    }
+  }
+
   public async getDataSteamIndexSettings(
     esClient: ElasticsearchClient,
     dataStream: string
@@ -79,6 +93,24 @@ class DataStreamService {
       }
       throw e;
     }
+  }
+
+  public async getHasIndexPrivileges(
+    esClient: ElasticsearchClient,
+    indexes: string[],
+    privileges: SecurityIndexPrivilege[]
+  ): Promise<Awaited<Record<string, boolean>>> {
+    const indexPrivileges = await esClient.security.hasPrivileges({
+      index: indexes.map((dataStream) => ({ names: dataStream, privileges })),
+    });
+
+    const indexesList = Object.keys(indexPrivileges.index);
+    return indexesList.reduce((acc, index) => {
+      const privilegesList = Object.values(indexPrivileges.index[index]);
+      const hasAllPrivileges = privilegesList.every((hasPrivilege) => hasPrivilege);
+
+      return Object.assign(acc, { [index]: hasAllPrivileges });
+    }, {} as Record<string, boolean>);
   }
 }
 

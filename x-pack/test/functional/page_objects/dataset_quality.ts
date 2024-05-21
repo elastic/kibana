@@ -75,6 +75,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
     datasetQualityFlyoutKpiValue: 'datasetQualityFlyoutKpiValue',
     datasetQualityFlyoutKpiLink: 'datasetQualityFlyoutKpiLink',
+    datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
 
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
@@ -174,6 +175,11 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       const table = await testSubjects.find(testSubjectSelectors.datasetQualityTable);
       const tBody = await table.findByTagName('tbody');
       return tBody.findAllByTagName('tr');
+    },
+
+    async getDatasetTableHeaderTexts() {
+      const table = await this.getDatasetsTable();
+      return getDatasetTableHeaderTexts(table);
     },
 
     async parseDatasetTable() {
@@ -382,6 +388,13 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
   };
+}
+
+async function getDatasetTableHeaderTexts(tableWrapper: WebElementWrapper) {
+  const headerElementWrappers = await tableWrapper.findAllByCssSelector('thead th, thead td');
+  return Promise.all(
+    headerElementWrappers.map((headerElementWrapper) => headerElementWrapper.getVisibleText())
+  );
 }
 
 async function parseDatasetTable(tableWrapper: WebElementWrapper, columnNamesOrIndexes: string[]) {

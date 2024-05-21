@@ -8,6 +8,7 @@
 import { DoneInvokeEvent } from 'xstate';
 import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { QualityIndicators } from '../../../../common/types';
+import { UserPrivileges } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
@@ -71,6 +72,7 @@ export interface WithFilters {
 }
 
 export interface WithDataStreamStats {
+  datasetUserPrivileges: UserPrivileges;
   dataStreamStats: DataStreamStatType[];
 }
 
@@ -141,7 +143,9 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'flyout.initializing.integrationDashboards.fetching';
+      value:
+        | 'flyout.initializing.integrationDashboards.fetching'
+        | 'flyout.initializing.integrationDashboards.unauthorized';
       context: DefaultDatasetQualityStateContext;
     };
 

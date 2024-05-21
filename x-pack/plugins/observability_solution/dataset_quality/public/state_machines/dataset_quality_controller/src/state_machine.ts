@@ -300,13 +300,22 @@ export const createPureDatasetQualityControllerStateMachine = (
                           target: 'done',
                           actions: ['storeIntegrationDashboards'],
                         },
-                        onError: {
-                          target: 'done',
-                          actions: ['notifyFetchIntegrationDashboardsFailed'],
-                        },
+                        onError: [
+                          {
+                            target: 'unauthorized',
+                            cond: 'checkIfActionForbidden',
+                          },
+                          {
+                            target: 'done',
+                            actions: ['notifyFetchIntegrationDashboardsFailed'],
+                          },
+                        ],
                       },
                     },
                     done: {
+                      type: 'final',
+                    },
+                    unauthorized: {
                       type: 'final',
                     },
                   },
@@ -450,8 +459,9 @@ export const createPureDatasetQualityControllerStateMachine = (
         }),
         resetFlyoutOptions: assign((_context, _event) => ({ flyout: undefined })),
         storeDataStreamStats: assign((_context, event) => {
-          if ('data' in event) {
-            const dataStreamStats = event.data as DataStreamStat[];
+          if ('data' in event && 'dataStreamsStats' in event.data) {
+            const dataStreamStats = event.data.dataStreamsStats as DataStreamStat[];
+            const datasetUserPrivileges = event.data.datasetUserPrivileges;
 
             // Check if any DataStreamStat has null; to check for serverless
             const isSizeStatsAvailable = dataStreamStats.some((stat) => stat.totalDocs !== null);
@@ -459,6 +469,7 @@ export const createPureDatasetQualityControllerStateMachine = (
             return {
               dataStreamStats,
               isSizeStatsAvailable,
+              datasetUserPrivileges,
             };
           }
           return {};
@@ -556,6 +567,13 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+      },
+      guards: {
+        checkIfActionForbidden: (context, event) => {
+          return (
+            'data' in event && 'message' in event.data && /forbidden/i.test(event.data.message)
+          );
+        },
       },
     }
   );

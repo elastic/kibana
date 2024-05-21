@@ -43,13 +43,13 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         throw new GetDataStreamsStatsError(`Failed to fetch data streams stats: ${error}`);
       });
 
-    const { dataStreamsStats } = decodeOrThrow(
+    const { dataStreamsStats, datasetUserPrivileges } = decodeOrThrow(
       getDataStreamsStatsResponseRt,
       (message: string) =>
         new GetDataStreamsStatsError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
-    return dataStreamsStats;
+    return { dataStreamsStats, datasetUserPrivileges };
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {

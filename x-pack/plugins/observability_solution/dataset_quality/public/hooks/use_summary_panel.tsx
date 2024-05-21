@@ -14,7 +14,12 @@ import { filterInactiveDatasets } from '../utils';
 
 const useSummaryPanel = () => {
   const { service } = useDatasetQualityContext();
-  const { filteredItems, isSizeStatsAvailable } = useDatasetQualityTable();
+  const {
+    filteredItems,
+    isSizeStatsAvailable,
+    canUserMonitorDataset,
+    canUserMonitorAnyDataStream,
+  } = useDatasetQualityTable();
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
@@ -29,6 +34,15 @@ const useSummaryPanel = () => {
   const isDatasetsQualityLoading = useSelector(service, (state) =>
     state.matches('degradedDocs.fetching')
   );
+
+  /*
+    User Authorization
+  */
+  const isUserAuthorizedForDataset =
+    filteredItems.length > 0
+      ? canUserMonitorAnyDataStream &&
+        filteredItems.every((item) => item.userPrivileges?.canMonitor ?? true)
+      : canUserMonitorDataset;
 
   /*
     Datasets Activity
@@ -61,6 +75,8 @@ const useSummaryPanel = () => {
   return {
     datasetsQuality,
     isDatasetsQualityLoading,
+
+    isUserAuthorizedForDataset,
 
     isEstimatedDataLoading,
     estimatedData,
