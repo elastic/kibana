@@ -165,6 +165,9 @@ export const getSingleMetricViewerEmbeddableFactory = (
               selectedEntities={singleMetricViewerData?.selectedEntities}
               selectedJobId={singleMetricViewerData?.jobIds[0]}
               uuid={api.uuid}
+              onRenderComplete={() => {
+                dataLoading.next(false);
+              }}
             />
           );
         },

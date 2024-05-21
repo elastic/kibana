@@ -78,6 +78,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   functionDescription,
   lastRefresh,
   onError,
+  onRenderComplete,
   selectedDetectorIndex,
   selectedEntities,
   selectedJobId,
@@ -201,6 +202,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
           ref={resizeRef}
           className="ml-time-series-explorer"
           data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
+          data-rendering-count={1}
         >
           <KibanaRenderContextProvider {...startServices}>
             <KibanaContextProvider
@@ -236,6 +238,7 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
                       zoom={zoom}
                       functionDescription={functionDescription}
                       selectedJob={selectedJob}
+                      onRenderComplete={onRenderComplete}
                     />
                   )}
               </DatePickerContextProvider>
