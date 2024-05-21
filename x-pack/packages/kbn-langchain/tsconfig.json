@@ -16,6 +16,8 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
-    "@kbn/actions-plugin"
+    "@kbn/actions-plugin",
+    "@kbn/logging-mocks",
+    "@kbn/core-http-server"
   ]
 }
