@@ -57,12 +57,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       hasTimeField,
       hideTimeFieldColumnSetting,
       savedSearchSuffix,
-      isTextBased,
+      isEsqlMode,
     }: {
       hasTimeField: boolean;
       hideTimeFieldColumnSetting: boolean;
       savedSearchSuffix: string;
-      isTextBased?: boolean;
+      isEsqlMode?: boolean;
     }) {
       // check in Discover
       expect(await dataGrid.getHeaderFields()).to.eql(
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.saveSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      const isTimestampUnavailableInSidebar = isTextBased && !hasTimeField;
+      const isTimestampUnavailableInSidebar = isEsqlMode && !hasTimeField;
       if (!isTimestampUnavailableInSidebar) {
         await PageObjects.unifiedFieldList.clickFieldListItemAdd('@timestamp');
         await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -137,12 +137,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       hasTimeField,
       hideTimeFieldColumnSetting,
       savedSearchSuffix,
-      isTextBased,
+      isEsqlMode,
     }: {
       hasTimeField: boolean;
       hideTimeFieldColumnSetting: boolean;
       savedSearchSuffix: string;
-      isTextBased?: boolean;
+      isEsqlMode?: boolean;
     }) {
       // check in Discover
       await PageObjects.unifiedFieldList.clickFieldListItemAdd('bytes');
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField || isTextBased
+          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -183,7 +183,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.clickFieldListItemRemove('@timestamp');
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField || isTextBased
+          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -199,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField || isTextBased
+          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -292,7 +292,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               hasTimeField: true,
               hideTimeFieldColumnSetting,
               savedSearchSuffix: savedSearchSuffix + 'ESQL',
-              isTextBased: true,
+              isEsqlMode: true,
             });
           });
 
@@ -306,7 +306,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               hasTimeField: false,
               hideTimeFieldColumnSetting,
               savedSearchSuffix: savedSearchSuffix + 'ESQLdrop',
-              isTextBased: true,
+              isEsqlMode: true,
             });
           });
 
@@ -317,7 +317,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               hasTimeField: true,
               hideTimeFieldColumnSetting,
               savedSearchSuffix: savedSearchSuffix + 'ESQL',
-              isTextBased: true,
+              isEsqlMode: true,
             });
           });
         });
