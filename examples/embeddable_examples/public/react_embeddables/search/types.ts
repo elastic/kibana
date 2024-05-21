@@ -18,7 +18,7 @@ import {
   SerializedTimeRange,
 } from '@kbn/presentation-publishing';
 
-export type SearchSerializedState = SerializedTimeRange;
+export type SearchSerializedState = SerializedTimeRange & { dataViewId?: string };
 
 export type SearchApi = DefaultEmbeddableApi<SearchSerializedState> &
   PublishesDataViews &

@@ -21,10 +21,13 @@ import { DataTableApi } from './types';
 export const initializeDataTableQueries = async (
   services: StartDeps,
   api: DataTableApi,
-  queryLoading$: BehaviorSubject<boolean | undefined>
+  queryLoading$: BehaviorSubject<boolean | undefined>,
+  dataViewId?: string
 ) => {
   // initialize services
-  const defaultDataViewPromise = services.data.dataViews.getDefault();
+  const defaultDataViewPromise = dataViewId
+    ? services.data.dataViews.get(dataViewId)
+    : services.data.dataViews.getDefault();
   const searchSourcePromise = services.data.search.searchSource.create();
   const [defaultDataView, searchSource] = await Promise.all([
     defaultDataViewPromise,
@@ -111,6 +114,7 @@ export const initializeDataTableQueries = async (
           searchSource.setField('query', query);
           searchSource.setField('index', dataView);
 
+          console.log({ timeRange, filters });
           abortController?.abort();
           abortController = new AbortController();
           const { rawResponse: resp } = await lastValueFrom(
@@ -121,6 +125,7 @@ export const initializeDataTableQueries = async (
             })
           );
           queryLoading$.next(false);
+          console.log('response', resp);
           return resp.hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord, dataView));
         })
       )

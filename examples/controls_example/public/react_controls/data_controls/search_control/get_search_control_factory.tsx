@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { EuiFieldText, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
-import { OverlayStart } from '@kbn/core-overlays-browser';
+import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import React, { useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import React, { useEffect, useState } from 'react';
+import { BehaviorSubject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
 import { SearchControlState, SearchControlTechniques, SEARCH_CONTROL_TYPE } from './types';
@@ -73,17 +73,22 @@ export const getSearchEmbeddableFactory = ({
 
       const searchString = new BehaviorSubject<string>(initialState.searchString);
       const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
-        initialState.searchTechnique
+        initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
       );
 
       const editorStateManager = { searchTechnique };
 
-      const { dataControlApi, dataControlComparators } = initializeDataControl<
-        Omit<SearchControlState, 'searchString'>
-      >(SEARCH_CONTROL_TYPE, initialState, editorStateManager, parentApi, {
-        core,
-        dataViews: dataViewsService,
-      });
+      const { dataControlApi, dataControlComparators, dataControlStateManager } =
+        initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
+          SEARCH_CONTROL_TYPE,
+          initialState,
+          editorStateManager,
+          parentApi,
+          {
+            core,
+            dataViews: dataViewsService,
+          }
+        );
 
       const api = buildApi(dataControlApi, {
         ...dataControlComparators,
@@ -94,13 +99,48 @@ export const getSearchEmbeddableFactory = ({
         searchString: [searchString, (newString: string) => searchString.next(newString)],
       });
 
+      const onSearchStringChanged = searchString
+        .pipe(debounceTime(100), distinctUntilChanged())
+        .subscribe((newValue) => {
+          const currentDataView = dataControlApi.dataView.getValue();
+          const currentSearchTechnnique = searchTechnique.getValue();
+          const currentField = dataControlStateManager.fieldName.getValue();
+
+          if (currentDataView && currentField) {
+            if (newValue) {
+              api.setOutputFilter({
+                query: { match: { [currentField]: { query: newValue } } },
+                meta: { index: currentDataView.id },
+              });
+            } else {
+              api.setOutputFilter(undefined);
+            }
+          }
+        });
+
       return {
         api,
         Component: () => {
+          const [currentSearch, setCurrentSearch] = useState(searchString.getValue());
+
+          useEffect(() => {
+            return () => {
+              // cleanup on unmount
+              onSearchStringChanged.unsubscribe();
+            };
+          }, []);
+
           return (
-            <EuiFieldText
-              type="text"
-              controlOnly
+            <EuiFieldSearch
+              incremental={true}
+              value={currentSearch}
+              onChange={(event) => {
+                setCurrentSearch(event.target.value);
+              }}
+              onSearch={(searchTerm) => {
+                searchString.next(searchTerm);
+              }}
+              placeholder="Search..."
               className="euiFieldText--inGroup"
               id={uuid}
               fullWidth

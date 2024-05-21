@@ -7,43 +7,45 @@
  */
 
 import { ControlWidth } from '@kbn/controls-plugin/common';
+import { Filter } from '@kbn/es-query';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from './control_group/types';
-import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
+import {
+  ControlApiRegistration,
+  ControlStateManager,
+  DefaultControlApi,
+  DefaultControlState,
+} from './types';
 
-type DefaultControlStateManager = {
-  [key in keyof Required<DefaultControlState>]: BehaviorSubject<DefaultControlState[key]>;
-};
-
-type ControlApi = ControlApiRegistration<DefaultControlApi> & {
-  setDataLoading: (loading: boolean) => void;
-  setBlockingError: (error: Error | undefined) => void;
-};
+export type ControlApi = ControlApiRegistration<DefaultControlApi>;
 
 export const initializeDefaultControlApi = (
   controlGroup: ControlGroupApi,
   state: DefaultControlState
 ): {
   defaultControlApi: ControlApi;
-  defaultControlStateManager: DefaultControlStateManager;
+  defaultControlStateManager: ControlStateManager<DefaultControlState>;
   defaultControlComparators: StateComparators<DefaultControlState>;
 } => {
   const dataLoading = new BehaviorSubject<boolean | undefined>(false);
   const blockingError = new BehaviorSubject<Error | undefined>(undefined);
   const grow = new BehaviorSubject<boolean | undefined>(state.grow);
   const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
+  const filter = new BehaviorSubject<Filter | undefined>(undefined);
 
   const defaultControlApi: ControlApi = {
     grow,
     width,
     dataLoading,
     blockingError,
+    filter$: filter,
+    setOutputFilter: (newFilter: Filter | undefined) => filter.next(newFilter),
     setBlockingError: (error) => blockingError.next(error),
     setDataLoading: (loading) => dataLoading.next(loading),
   };
 
-  const defaultControlStateManager = {
+  const defaultControlStateManager: ControlStateManager<DefaultControlState> = {
     grow,
     width,
   };

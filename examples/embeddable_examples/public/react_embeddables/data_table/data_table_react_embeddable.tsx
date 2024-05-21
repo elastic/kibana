@@ -40,6 +40,7 @@ export const getDataTableFactory = (
     const storage = new Storage(localStorage);
     const timeRange = initializeTimeRange(state);
     const queryLoading$ = new BehaviorSubject<boolean | undefined>(true);
+    const dataViewId = new BehaviorSubject<string | undefined>(state.dataViewId);
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
     const allServices: UnifiedDataTableProps['services'] = {
       ...services,
@@ -56,14 +57,27 @@ export const getDataTableFactory = (
         dataLoading: queryLoading$,
         serializeState: () => {
           return {
-            rawState: { ...serializeTitles(), ...timeRange.serialize() },
+            rawState: {
+              ...serializeTitles(),
+              ...timeRange.serialize(),
+              dataViewId: state.dataViewId,
+            },
           };
         },
       },
-      { ...titleComparators, ...timeRange.comparators }
+      {
+        ...titleComparators,
+        ...timeRange.comparators,
+        dataViewId: [dataViewId, (value) => dataViewId.next(value)],
+      }
     );
 
-    const queryService = await initializeDataTableQueries(services, api, queryLoading$);
+    const queryService = await initializeDataTableQueries(
+      services,
+      api,
+      queryLoading$,
+      state.dataViewId
+    );
 
     // Create the React Embeddable component
     return {

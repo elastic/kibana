@@ -8,6 +8,7 @@
 
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 import {
   HasParentApi,
   HasType,
@@ -22,6 +23,7 @@ import {
   PublishingSubject,
   StateComparators,
 } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from './control_group/types';
 
 export interface PublishesControlDisplaySettings {
@@ -43,7 +45,11 @@ export type DefaultControlApi = PublishesDataLoading &
   Partial<PublishesFilter & PublishesTimeslice & PublishesPanelTitle & HasCustomPrepend> & // can publish either filters or timeslice
   HasType &
   HasUniqueId &
-  HasParentApi<ControlGroupApi>;
+  HasParentApi<ControlGroupApi> & {
+    setDataLoading: (loading: boolean) => void;
+    setBlockingError: (error: Error | undefined) => void;
+    setOutputFilter: (filter: Filter | undefined) => void;
+  };
 
 export interface DefaultControlState {
   grow?: boolean;
@@ -53,7 +59,11 @@ export interface DefaultControlState {
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
   'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' // | 'grow' | 'width'
->;
+> & {
+  setDataLoading: (loading: boolean) => void;
+  setBlockingError: (error: Error | undefined) => void;
+  setOutputFilter: (filter: Filter | undefined) => void;
+};
 
 // export type ControlStateRegistration<
 //   ControlState extends DefaultControlState = DefaultControlState
@@ -78,3 +88,7 @@ export interface ControlFactory<
     parentApi: ControlGroupApi
   ) => { api: ControlApi; Component: React.FC<{}> };
 }
+
+export type ControlStateManager<State extends object = object> = {
+  [key in keyof Required<State>]: BehaviorSubject<State[key]>;
+};

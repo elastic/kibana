@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import React, { useEffect } from 'react';
+import { BehaviorSubject, combineLatest, map, Observable, of, switchMap } from 'rxjs';
 
 import {
   ControlsPanels,
@@ -23,7 +23,11 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  apiPublishesFilter,
+  PublishesFilter,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 
 import { ControlRenderer } from '../control_renderer';
 import { DefaultControlApi } from '../types';
@@ -59,6 +63,24 @@ export const getControlGroupEmbeddableFactory = (services: {
       const ignoreParentSettings = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         initialState.ignoreParentSettings
       );
+
+      /** Subscribe to all children's output filters, combine them, and output them to parent */
+      const outputFiltersSubscription = children$
+        .pipe(
+          switchMap((children) => {
+            const childrenThatPublishFilter: PublishesFilter[] = [];
+            for (const child of Object.values(children)) {
+              if (apiPublishesFilter(child)) childrenThatPublishFilter.push(child);
+            }
+            if (childrenThatPublishFilter.length === 0) return of([]);
+            return combineLatest(childrenThatPublishFilter.map((child) => child.filter$));
+          }),
+          map((nextFilters) => nextFilters.flat().filter((filter) => Boolean(filter)) as Filter[])
+        )
+        .subscribe((filters) => {
+          console.log('filters', filters);
+          filters$.next(filters);
+        });
 
       const embeddable = buildApi(
         {
@@ -101,6 +123,13 @@ export const getControlGroupEmbeddableFactory = (services: {
         api: embeddable,
         Component: () => {
           const panels = useStateFromPublishingSubject(panels$);
+
+          useEffect(() => {
+            return () => {
+              outputFiltersSubscription.unsubscribe();
+            };
+          }, []);
+
           return (
             <>
               {Object.keys(panels).map((id) => (

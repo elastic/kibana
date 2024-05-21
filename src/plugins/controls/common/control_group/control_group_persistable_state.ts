@@ -27,8 +27,6 @@ export const createControlGroupInject = (
   persistableStateService: EmbeddablePersistableStateService
 ): EmbeddablePersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
-    console.log('state', state, 'references', references);
-    debugger;
     const workingState = { ...state } as EmbeddableStateWithType | ControlGroupInputWithType;
 
     if ('panels' in workingState) {

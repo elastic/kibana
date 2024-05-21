@@ -51,12 +51,8 @@ import {
   getControlTypeErrorMessage,
   getDataControlFieldRegistry,
 } from './data_control_editor_utils';
-import {
-  DataControlFactory,
-  DataControlStateManager,
-  DefaultDataControlState,
-  isDataControlFactory,
-} from './types';
+import { DataControlFactory, DefaultDataControlState, isDataControlFactory } from './types';
+import { ControlStateManager } from '../types';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -64,7 +60,7 @@ export interface ControlEditorProps<
   controlType?: string; // if provided, then editing existing control; otherwise, creating a new control
   onCancel: () => void;
   onSave: (type?: string) => void;
-  stateManager: DataControlStateManager<State>;
+  stateManager: ControlStateManager<State>;
   parentApi: ControlGroupApi; // controls must always have a parent API
   services: {
     dataViews: DataViewsPublicPluginStart;

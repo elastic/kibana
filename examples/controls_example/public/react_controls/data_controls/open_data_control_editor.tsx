@@ -19,12 +19,13 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { ControlGroupApi } from '../control_group/types';
 import { DataControlEditor } from './data_control_editor';
-import { DataControlStateManager, DefaultDataControlState } from './types';
+import { DefaultDataControlState } from './types';
+import { ControlStateManager } from '../types';
 
 export const openDataControlEditor = async <
   State extends DefaultDataControlState = DefaultDataControlState
 >(
-  stateManager: DataControlStateManager<State>,
+  stateManager: ControlStateManager<State>,
   controlGroupApi: ControlGroupApi,
   services: {
     core: CoreStart;
@@ -37,14 +38,14 @@ export const openDataControlEditor = async <
      * Duplicate all state into a new manager because we do not want to actually apply the changes
      * to the control until the user hits save.
      */
-    const editorStateManager: DataControlStateManager<State> = Object.keys(stateManager).reduce(
+    const editorStateManager: ControlStateManager<State> = Object.keys(stateManager).reduce(
       (prev, key) => {
         return {
           ...prev,
           [key as keyof State]: new BehaviorSubject(stateManager[key as keyof State].getValue()),
         };
       },
-      {} as DataControlStateManager<State>
+      {} as ControlStateManager<State>
     );
 
     const closeOverlay = (overlayRef: OverlayRef) => {

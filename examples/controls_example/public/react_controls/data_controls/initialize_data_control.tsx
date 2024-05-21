@@ -13,28 +13,14 @@ import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject, distinctUntilChanged, skip } from 'rxjs';
 import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
-import { ControlApiRegistration, DefaultControlState } from '../types';
+import { ControlApiRegistration, ControlStateManager } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
-import { DataControlApi, DataControlStateManager, DefaultDataControlState } from './types';
+import { DataControlApi, DefaultDataControlState } from './types';
 
-type DiffDefaultDataControlState<State> = Omit<
-  DefaultDataControlState,
-  keyof DefaultControlState & State
->;
-
-/** This defines the control-type specific settings/state that can be modified through the custom editor component */
-export type EditorStateManager<State> = {
-  [key in keyof Required<DiffDefaultDataControlState<State>>]: BehaviorSubject<
-    DiffDefaultDataControlState<State>[key]
-  >;
-};
-
-export const initializeDataControl = <
-  State extends DefaultDataControlState = DefaultDataControlState
->(
+export const initializeDataControl = <EditorState extends object = {}>(
   controlType: string,
-  state: State,
-  editorStateManager: DataControlStateManager<State>,
+  state: DefaultDataControlState,
+  editorStateManager: ControlStateManager<EditorState>,
   controlGroup: ControlGroupApi,
   services: {
     core: CoreStart;
@@ -43,6 +29,7 @@ export const initializeDataControl = <
 ): {
   dataControlApi: ControlApiRegistration<DataControlApi>;
   dataControlComparators: StateComparators<DefaultDataControlState>;
+  dataControlStateManager: ControlStateManager<DefaultDataControlState>;
 } => {
   const { defaultControlApi, defaultControlComparators, defaultControlStateManager } =
     initializeDefaultControlApi(controlGroup, state);
@@ -60,7 +47,7 @@ export const initializeDataControl = <
     fieldName: [fieldName, (value: string) => fieldName.next(value)],
   };
 
-  const stateManager: DataControlStateManager = {
+  const stateManager: ControlStateManager<DefaultDataControlState> = {
     ...defaultControlStateManager,
     dataViewId,
     fieldName,
@@ -85,8 +72,10 @@ export const initializeDataControl = <
   });
 
   const onEdit = async () => {
-    openDataControlEditor<State>(
-      { ...editorStateManager, ...stateManager },
+    openDataControlEditor<DefaultDataControlState & EditorState>(
+      { ...stateManager, ...editorStateManager } as ControlStateManager<
+        DefaultDataControlState & EditorState
+      >,
       controlGroup,
       services,
       controlType
@@ -106,5 +95,6 @@ export const initializeDataControl = <
   return {
     dataControlApi,
     dataControlComparators,
+    dataControlStateManager: stateManager,
   };
 };

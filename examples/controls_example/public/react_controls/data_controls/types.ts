@@ -9,23 +9,23 @@
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { HasEditCapabilities, PublishesPanelTitle } from '@kbn/presentation-publishing';
 import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import { BehaviorSubject } from 'rxjs';
-import { ControlFactory, DefaultControlApi, DefaultControlState } from '../types';
+import {
+  ControlFactory,
+  ControlStateManager,
+  DefaultControlApi,
+  DefaultControlState,
+} from '../types';
 
 export type DataControlApi = DefaultControlApi &
   Pick<PublishesPanelTitle, 'panelTitle' | 'defaultPanelTitle'> & // does not need to be writable because control group does not have control - internally writable but not externally
   HasEditCapabilities &
   PublishesDataView;
 
-export type DataControlStateManager<State extends object = object> = {
-  [key in keyof Required<State>]: BehaviorSubject<State[key]>;
-};
-
 export interface DataControlFactory<State extends DefaultDataControlState = DefaultDataControlState>
   extends ControlFactory<State, DataControlApi> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{
-    stateManager: DataControlStateManager<State>;
+    stateManager: ControlStateManager<State>;
     setControlEditorValid: (valid: boolean) => void; // Remove?
   }>;
 }

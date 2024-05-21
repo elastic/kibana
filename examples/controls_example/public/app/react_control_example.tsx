@@ -18,8 +18,9 @@ import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { OverlayStart } from '@kbn/core-overlays-browser';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
@@ -38,6 +39,9 @@ const toggleViewButtons = [
 ];
 
 const viewMode = new BehaviorSubject<ViewMode | undefined>(ViewMode.EDIT);
+const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+const query$ = new BehaviorSubject<Query | undefined>(undefined);
+const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
 
 export const ReactControlExample = ({
   overlays,
@@ -57,9 +61,21 @@ export const ReactControlExample = ({
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
   const viewModeSelected = useStateFromPublishingSubject(viewMode);
 
+  useEffect(() => {
+    if (!controlGroupApi) return;
+
+    const subscription = controlGroupApi.filters$.subscribe((controlGroupFilters) => {
+      filters$.next(controlGroupFilters);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [controlGroupApi]);
+
   if (loading || !dataViews || !dataViews[0].id) return <EuiLoadingSpinner />;
 
-  const fakeParentApi = { viewMode };
+  const fakeParentApi = { viewMode, filters$, query$, timeRange$ };
   return (
     <>
       <EuiFlexGroup>
@@ -97,7 +113,7 @@ export const ReactControlExample = ({
             chainingSystem: 'HIERARCHICAL',
             showApplySelections: false,
             panelsJSON:
-              '{"a957862f-beae-4f0c-8a3a-a6ea4c235651":{"type":"searchControl","order":0,"grow":true,"width":"medium","explicitInput":{"id":"a957862f-beae-4f0c-8a3a-a6ea4c235651","fieldName":"message","title":"Message","grow":true,"width":"medium","searchString": "test","enhancements":{}}}}',
+              '{"a957862f-beae-4f0c-8a3a-a6ea4c235651":{"type":"searchControl","order":0,"grow":true,"width":"medium","explicitInput":{"id":"a957862f-beae-4f0c-8a3a-a6ea4c235651","fieldName":"message","title":"Message","grow":true,"width":"medium","searchString": "this","enhancements":{}}}}',
             ignoreParentSettingsJSON:
               '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
           } as object,
@@ -109,6 +125,20 @@ export const ReactControlExample = ({
             },
           ],
         }}
+      />
+      <EuiSpacer size="l" />
+      <ReactEmbeddableRenderer
+        type={'searchEmbeddableDemo'}
+        // type={'data_table'}
+        state={{
+          rawState: {
+            timeRange: { from: 'now-60d/d', to: 'now+60d/d' },
+            dataViewId: dataViews[0].id,
+          },
+          references: [],
+        }}
+        parentApi={fakeParentApi}
+        hidePanelChrome={false}
       />
     </>
   );
