@@ -17,17 +17,18 @@ import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { PassThrough, Stream } from 'stream';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel,
-} from '@kbn/langchain';
+import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 import { AgentExecutorParams } from '../executors/types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
-jest.mock('@kbn/langchain', () => ({
-  ActionsClientChatOpenAI: jest.fn(),
-  ActionsClientSimpleChatModel: jest.fn(),
-}));
+jest.mock('@kbn/langchain/server', () => {
+  const original = jest.requireActual('@kbn/langchain/server');
+  return {
+    ...original,
+    ActionsClientChatOpenAI: jest.fn(),
+    ActionsClientSimpleChatModel: jest.fn(),
+  };
+});
 
 const mockConversationChain = {
   call: jest.fn(),

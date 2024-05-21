@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 import { Logger } from '@kbn/core/server';
-import { parseBedrockStream } from '@kbn/langchain';
+import { parseBedrockStream } from '@kbn/langchain/server';
 
 type StreamParser = (
   responseStream: Readable,

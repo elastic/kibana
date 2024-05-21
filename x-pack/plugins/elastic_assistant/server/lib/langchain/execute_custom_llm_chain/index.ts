@@ -16,7 +16,7 @@ import {
   getDefaultArguments,
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
-} from '@kbn/langchain';
+} from '@kbn/langchain/server';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';

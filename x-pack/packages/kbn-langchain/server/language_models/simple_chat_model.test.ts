@@ -13,7 +13,7 @@ import { ActionsClientSimpleChatModel, CustomChatModelInput } from './simple_cha
 import { mockActionResponse } from './mocks';
 import { BaseMessage } from '@langchain/core/messages';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { parseBedrockStream } from '../..';
+import { parseBedrockStream } from '../utils/bedrock';
 
 const connectorId = 'mock-connector-id';
 
