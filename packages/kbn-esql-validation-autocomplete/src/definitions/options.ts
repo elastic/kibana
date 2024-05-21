@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ESQLCommandOption, ESQLMessage } from '@kbn/esql-ast';
-import { isLiteralItem } from '../shared/helpers';
+import { isLiteralItem, isColumnItem } from '../shared/helpers';
 import { getMessageFromId } from '../validation/errors';
 import type { CommandOptionsDefinition } from './types';
 
@@ -35,7 +35,7 @@ export const metadataOption: CommandOptionsDefinition = {
   },
   optional: true,
   skipCommonValidation: true,
-  validate: (option, command) => {
+  validate: (option, command, references) => {
     const messages: ESQLMessage[] = [];
     // need to test the parent command here
     if (/\[metadata/i.test(command.text)) {
@@ -46,6 +46,24 @@ export const metadataOption: CommandOptionsDefinition = {
           locations: option.location,
         })
       );
+    }
+    const fields = option.args.filter(isColumnItem);
+    const metadataFieldsAvailable = references as unknown as Set<string>;
+    if (metadataFieldsAvailable.size > 0) {
+      for (const field of fields) {
+        if (!metadataFieldsAvailable.has(field.name)) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownMetadataField',
+              values: {
+                value: field.name,
+                availableFields: Array.from(metadataFieldsAvailable).join(', '),
+              },
+              locations: field.location,
+            })
+          );
+        }
+      }
     }
     return messages;
   },

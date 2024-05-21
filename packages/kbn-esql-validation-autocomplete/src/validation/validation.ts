@@ -71,6 +71,7 @@ import {
   retrieveFieldsFromStringSources,
 } from './resources';
 import { collapseWrongArgumentTypeMessages } from './helpers';
+import { METADATA_FIELDS } from '../shared/constants';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -595,7 +596,8 @@ function validateOption(
   }
   // use dedicate validate fn if provided
   if (optionDef.validate) {
-    messages.push(...optionDef.validate(option, command, []));
+    const fields = METADATA_FIELDS;
+    messages.push(...optionDef.validate(option, command, new Set(fields)));
   }
   if (!optionDef.skipCommonValidation) {
     option.args.forEach((arg) => {

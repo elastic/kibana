@@ -18,6 +18,7 @@ import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
+import { METADATA_FIELDS } from '../shared/constants';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
 
 const fieldTypes = [
@@ -365,7 +366,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from index ${setWrapping('METADATA _id, _source2')}`,
           [
-            'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
+            `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+              ', '
+            )}]`,
           ],
           addBracketsWarning()
         );
