@@ -46,7 +46,7 @@ import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
-import type { AnomalyChartsEmbeddableInput } from '../../embeddables';
+import type { AnomalyChartsEmbeddableState } from '../../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
 import { useMlKibana } from '../contexts/kibana';
 import type { AppStateSelectedCells, ExplorerJob } from './explorer_utils';
@@ -182,7 +182,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
     ({ dashboardId, newTitle, newDescription }) => {
       const stateTransfer = embeddable!.getStateTransfer();
 
-      const embeddableInput: Partial<AnomalyChartsEmbeddableInput> = {
+      const embeddableInput: Partial<AnomalyChartsEmbeddableState> = {
         ...getEmbeddableInput(),
         title: newTitle,
         description: newDescription,

@@ -21,7 +21,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnomalyChartsEmbeddableInput } from '..';
+import type { AnomalyChartsEmbeddableState } from '..';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import { JobSelectorControl } from '../../alerting/job_selector';
 import { ML_PAGES } from '../../../common/constants/locator';
@@ -33,10 +33,10 @@ import type { MlApiServices } from '../../application/services/ml_api_service';
 export const MAX_ANOMALY_CHARTS_ALLOWED = 50;
 export interface AnomalyChartsInitializerProps {
   initialInput?: Partial<
-    Pick<AnomalyChartsEmbeddableInput, 'title' | 'jobIds' | 'maxSeriesToPlot'>
+    Pick<AnomalyChartsEmbeddableState, 'title' | 'jobIds' | 'maxSeriesToPlot'>
   >;
   onCreate: (props: {
-    jobIds: AnomalyChartsEmbeddableInput['jobIds'];
+    jobIds: AnomalyChartsEmbeddableState['jobIds'];
     title: string;
     maxSeriesToPlot?: number;
   }) => void;

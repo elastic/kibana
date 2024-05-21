@@ -66,8 +66,7 @@ export class ExplorerChartSingleMetric extends React.Component {
     this.chartScales = undefined;
   }
   componentDidMount() {
-    const chartScales = this.renderChart();
-    this.updateChartScales(chartScales);
+    this.renderChart();
 
     this.cursor = this.props.cursor$.pipe(filter((c) => c.isDateHistogram)).subscribe((cursor) => {
       this.drawCursor(cursor.cursor);
@@ -79,12 +78,7 @@ export class ExplorerChartSingleMetric extends React.Component {
   }
 
   componentDidUpdate() {
-    const chartScales = this.renderChart();
-    this.updateChartScales(chartScales);
-  }
-
-  updateChartScales(chartScales) {
-    this.chartScales = chartScales;
+    this.renderChart();
   }
 
   drawCursor(cursor) {
@@ -616,7 +610,7 @@ export class ExplorerChartSingleMetric extends React.Component {
       });
     }
 
-    return { lineChartXScale, margin };
+    this.chartScales = { lineChartXScale, margin };
   }
 
   shouldComponentUpdate() {

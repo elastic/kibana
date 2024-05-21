@@ -67,9 +67,7 @@ export class ExplorerChartDistribution extends React.Component {
     this.cursor = undefined;
   }
   componentDidMount() {
-    const chartScales = this.renderChart();
-    this.updateChartScales(chartScales);
-
+    this.renderChart();
     this.cursor = this.props.cursor$.pipe(filter((c) => c.isDateHistogram)).subscribe((cursor) => {
       this.drawCursor(cursor.cursor);
     });
@@ -80,12 +78,7 @@ export class ExplorerChartDistribution extends React.Component {
   }
 
   componentDidUpdate() {
-    const chartScales = this.renderChart();
-    this.updateChartScales(chartScales);
-  }
-
-  updateChartScales(chartScales) {
-    this.chartScales = chartScales;
+    this.renderChart();
   }
 
   drawCursor(cursor) {
@@ -669,7 +662,7 @@ export class ExplorerChartDistribution extends React.Component {
         y: LINE_CHART_ANOMALY_RADIUS * 2,
       });
     }
-    return { lineChartXScale, margin };
+    this.chartScales = { lineChartXScale, margin };
   }
 
   shouldComponentUpdate() {

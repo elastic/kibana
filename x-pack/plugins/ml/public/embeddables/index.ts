@@ -14,7 +14,6 @@ import {
 } from './constants';
 
 export * from './constants';
-export { getEmbeddableComponent } from './get_embeddable_component';
 export * from './types';
 
 export function registerEmbeddables(embeddable: EmbeddableSetup, core: MlCoreSetup) {

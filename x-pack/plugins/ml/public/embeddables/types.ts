@@ -7,13 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type {
-  DefaultEmbeddableApi,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
@@ -173,9 +167,6 @@ export interface AnomalyChartsEmbeddableState
   extends SerializedTitles,
     AnomalyChartsEmbeddableCustomInput {}
 
-// @TODO: DELETE
-export type AnomalyChartsEmbeddableInput = EmbeddableInput & AnomalyChartsEmbeddableCustomInput;
-
 /** Manual input by the user */
 export interface SingleMetricViewerEmbeddableUserInput {
   jobIds: JobId[];
@@ -257,15 +248,8 @@ export type SingleMetricViewerEmbeddableServices = [
   MlDependencies,
   SingleMetricViewerServices
 ];
-export interface AnomalyChartsCustomOutput {
-  entityFields?: MlEntityField[];
-  severity?: number;
-  indexPatterns: DataView[];
-}
-// @TODO: DELETE
-export type AnomalyChartsEmbeddableOutput = EmbeddableOutput & AnomalyChartsCustomOutput;
 export interface EditAnomalyChartsPanelContext {
-  embeddable: IEmbeddable<AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableOutput>;
+  embeddable: AnomalyChartsEmbeddableApi;
 }
 
 export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPanelContext {
@@ -277,5 +261,5 @@ export interface AnomalyChartsFieldSelectionContext extends EditAnomalyChartsPan
 
 export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
   TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
-    ? AnomalyChartsEmbeddableInput
+    ? AnomalyChartsEmbeddableState
     : unknown;

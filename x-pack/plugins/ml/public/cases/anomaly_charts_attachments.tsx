@@ -24,7 +24,7 @@ import { initializeAnomalyChartsControls } from '../embeddables/anomaly_charts/i
 import type {
   AnomalyChartsApi,
   AnomalyChartsEmbeddableCustomInput,
-  AnomalyChartsEmbeddableInput,
+  AnomalyChartsEmbeddableState,
   AnomalyChartsEmbeddableServices,
 } from '../embeddables';
 
@@ -103,7 +103,7 @@ export const initializeAnomalyChartsAttachment = memoize(
         });
 
         const inputProps =
-          persistableStateAttachmentState as unknown as AnomalyChartsEmbeddableInput;
+          persistableStateAttachmentState as unknown as AnomalyChartsEmbeddableState;
 
         const descriptions = useMemo(() => {
           const listItems = [

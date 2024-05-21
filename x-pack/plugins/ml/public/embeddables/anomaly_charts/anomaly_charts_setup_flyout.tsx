@@ -11,7 +11,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { HttpService } from '../../application/services/http_service';
-import type { AnomalyChartsEmbeddableInput, AnomalyChartsEmbeddableState } from '..';
+import type { AnomalyChartsEmbeddableState } from '..';
 import { AnomalyChartsInitializer } from './anomaly_charts_initializer';
 import { jobsApiProvider } from '../../application/services/ml_api_service/jobs';
 import { getMlGlobalServices } from '../../application/util/get_services';
@@ -22,7 +22,7 @@ export async function resolveEmbeddableAnomalyChartsUserInput(
   pluginStart: MlStartDependencies,
   parentApi: unknown,
   focusedPanelId: string,
-  input?: Partial<Pick<AnomalyChartsEmbeddableInput, 'title' | 'jobIds' | 'maxSeriesToPlot'>>
+  input?: Partial<Pick<AnomalyChartsEmbeddableState, 'title' | 'jobIds' | 'maxSeriesToPlot'>>
 ): Promise<Pick<AnomalyChartsEmbeddableState, 'jobIds' | 'title' | 'maxSeriesToPlot'>> {
   const { http, overlays, ...startServices } = coreStart;
   const adJobsApiService = jobsApiProvider(new HttpService(http));
