@@ -23,8 +23,11 @@ import {
   EuiTitle,
   EuiFieldSearch,
   EuiText,
+  useEuiTheme,
+  EuiFlyoutProps,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { pluginServices } from '../../services/plugin_services';
 import type { DashboardServices } from '../../services/types';
 
 interface OpenAddPanelFlyoutArgs {
@@ -36,25 +39,36 @@ interface Props extends Pick<OpenAddPanelFlyoutArgs, 'getPanels'> {
   close: () => void;
 }
 
-export const gh = ({ overlays }: Pick<DashboardServices, 'overlays'>) =>
-  function openAddPanelFlyout({ getPanels }: OpenAddPanelFlyoutArgs) {
-    // eslint-disable-next-line prefer-const
-    let flyoutRef: ReturnType<DashboardServices['overlays']['openFlyout']>;
+export function openAddPanelFlyout({ getPanels }: OpenAddPanelFlyoutArgs) {
+  const {
+    overlays,
+    analytics,
+    settings: { i18n, theme },
+  } = pluginServices.getServices();
+  // eslint-disable-next-line prefer-const
+  let flyoutRef: ReturnType<DashboardServices['overlays']['openFlyout']>;
 
-    const mount = toMountPoint(
-      React.createElement(function () {
-        const closeFlyout = () => flyoutRef.close();
-        return <AddPanelFlyout close={closeFlyout} getPanels={getPanels} />;
-      }),
-      {}
-    );
+  const paddingSize: EuiFlyoutProps['paddingSize'] = 'l';
 
-    flyoutRef = overlays.openFlyout(mount, { size: 'm', 'aria-labelledby': 'add-panels-flyout' });
+  const mount = toMountPoint(
+    React.createElement(function () {
+      const closeFlyout = () => flyoutRef.close();
+      return <AddPanelFlyout close={closeFlyout} getPanels={getPanels} />;
+    }),
+    { analytics, theme, i18n }
+  );
 
-    return flyoutRef;
-  };
+  flyoutRef = overlays.openFlyout(mount, {
+    size: 'm',
+    paddingSize,
+    'aria-labelledby': 'add-panels-flyout',
+  });
+
+  return flyoutRef;
+}
 
 export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
+  const { euiTheme } = useEuiTheme();
   const panels = useRef(getPanels(close));
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [panelsSearchResult, setPanelsSearchResult] = useState(panels.current);
@@ -67,16 +81,15 @@ export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
     // TODO: handle search
   }, [searchTerm]);
 
-  console.log('panels:: %o \n', panels.current);
-
   return (
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h1>
-            {i18n.translate('dashboard.solutionToolbar.addPanelFlyout.headingText', {
-              defaultMessage: 'Add Panel',
-            })}
+            <FormattedMessage
+              id="dashboard.solutionToolbar.addPanelFlyout.headingText"
+              defaultMessage="Add Panel"
+            />
           </h1>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -86,7 +99,8 @@ export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
             grow={false}
             css={{
               position: 'sticky',
-              top: '24px',
+              top: euiTheme.size.l,
+              zIndex: 1,
             }}
           >
             <EuiForm component="form" fullWidth>
@@ -101,8 +115,8 @@ export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
               </EuiFormRow>
             </EuiForm>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" css={{ overflowY: 'auto' }}>
               {Object.values(panelsSearchResult).map(({ id, title, items }) => (
                 <React.Fragment key={id}>
                   <EuiFlexItem>
@@ -110,14 +124,17 @@ export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
                       <h3>{title}</h3>
                     </EuiText>
                     <EuiListGroup>
-                      {items?.map((item, idx) => (
-                        <EuiListGroupItem
-                          key={`${id}.${idx}`}
-                          label={item.name}
-                          iconType={item.icon!}
-                          data-test-subj={item['data-test-subj']}
-                        />
-                      ))}
+                      {items?.map((item, idx) => {
+                        return (
+                          <EuiListGroupItem
+                            key={`${id}.${idx}`}
+                            label={item.name}
+                            onClick={item?.onClick}
+                            iconType={item.icon}
+                            data-test-subj={item['data-test-subj']}
+                          />
+                        );
+                      })}
                     </EuiListGroup>
                   </EuiFlexItem>
                 </React.Fragment>
@@ -129,10 +146,11 @@ export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={close} flush="left">
-              {i18n.translate('dashboard.solutionToolbar.addPanelFlyout.cancelButtonText', {
-                defaultMessage: 'Close',
-              })}
+            <EuiButtonEmpty>
+              <FormattedMessage
+                id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
+                defaultMessage="Close"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

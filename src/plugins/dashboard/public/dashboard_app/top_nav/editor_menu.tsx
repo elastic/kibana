@@ -31,7 +31,7 @@ import {
   getAddPanelActionMenuItems,
   type GroupedAddPanelActions,
 } from './add_panel_action_menu_items';
-import { gh } from './add_panel_flyout';
+import { openAddPanelFlyout } from './add_panel_flyout';
 
 export interface FactoryGroup {
   id: string;
@@ -213,6 +213,9 @@ export const EditorMenu = ({
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
   const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
   const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
+
+  console.log('tool vis types:: %o \n', toolVisTypes);
+
   const visTypeAliases = getVisTypeAliases()
     .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
@@ -380,8 +383,6 @@ export const EditorMenu = ({
       ...additionalPanels,
     ];
   };
-
-  const openAddPanelFlyout = useMemo(() => gh({ overlays }), [overlays]);
 
   return (
     <ToolbarButton
