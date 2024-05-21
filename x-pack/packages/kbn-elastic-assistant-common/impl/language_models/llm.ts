@@ -109,6 +109,7 @@ export class ActionsClientLlm extends LLM {
 
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
+
     const actionResult = await actionsClient.execute(requestBody);
 
     if (actionResult.status === 'error') {
