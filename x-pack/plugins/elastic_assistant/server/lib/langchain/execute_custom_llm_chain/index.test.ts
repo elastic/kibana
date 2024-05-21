@@ -14,10 +14,15 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 
 import { mockActionResponse } from '../../../__mocks__/action_result_data';
 import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
-import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
+import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { callAgentExecutor } from '.';
 import { PassThrough, Stream } from 'stream';
-import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain';
+import { AgentExecutorParams } from '../executors/types';
+import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
 jest.mock('@kbn/langchain', () => ({
   ActionsClientChatOpenAI: jest.fn(),
@@ -82,18 +87,23 @@ const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
 const mockLogger = loggerMock.create();
 const mockTelemetry = coreMock.createSetup().analytics;
 const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-const defaultProps = {
+const esStoreMock = new ElasticsearchStore(
+  esClientMock,
+  KNOWLEDGE_BASE_INDEX_PATTERN,
+  mockLogger,
+  mockTelemetry
+);
+const defaultProps: AgentExecutorParams<true> = {
   actions: mockActions,
   isEnabledKnowledgeBase: true,
   connectorId: mockConnectorId,
   esClient: esClientMock,
+  esStore: esStoreMock,
   llmType: 'openai',
   langChainMessages,
   logger: mockLogger,
   onNewReplacements: jest.fn(),
   request: mockRequest,
-  kbResource: ESQL_RESOURCE,
-  telemetry: mockTelemetry,
   replacements: {},
 };
 const bedrockProps = {

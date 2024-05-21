@@ -17,8 +17,6 @@ import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import { AgentExecutor } from '../executors/types';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
@@ -38,9 +36,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
-  elserId,
   esClient,
-  kbResource,
+  esStore,
   langChainMessages,
   llmType,
   logger,
@@ -50,7 +47,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   replacements,
   request,
   size,
-  telemetry,
   traceOptions,
 }) => {
   const isOpenAI = llmType === 'openai';
@@ -85,16 +81,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     outputKey: 'output',
     returnMessages: true,
   });
-
-  // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(
-    esClient,
-    KNOWLEDGE_BASE_INDEX_PATTERN,
-    logger,
-    telemetry,
-    elserId,
-    kbResource
-  );
 
   const modelExists = await esStore.isModelInstalled();
 

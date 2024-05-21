@@ -17,7 +17,6 @@ import type {
   IRouter,
   KibanaRequest,
   Logger,
-  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
@@ -43,6 +42,7 @@ import {
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
+import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 
@@ -111,6 +111,9 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
   getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
+  getAIAssistantKnowledgeBaseDataClient: (
+    initializeKnowledgeBase: boolean
+  ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;
   getAIAssistantPromptsDataClient: () => Promise<AIAssistantDataClient | null>;
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   telemetry: AnalyticsServiceSetup;
@@ -130,10 +133,7 @@ export type ElasticAssistantPluginCoreSetupDependencies = CoreSetup<
   ElasticAssistantPluginStart
 >;
 
-export type GetElser = (
-  request: KibanaRequest,
-  savedObjectsClient: SavedObjectsClientContract
-) => Promise<string> | never;
+export type GetElser = () => Promise<string> | never;
 
 export interface InitAssistantResult {
   assistantResourcesInstalled: boolean;
@@ -145,30 +145,30 @@ export interface InitAssistantResult {
 export interface AssistantResourceNames {
   componentTemplate: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
   };
   indexTemplate: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
   };
   aliases: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
   };
   indexPatterns: {
     conversations: string;
+    knowledgeBase: string;
     prompts: string;
     anonymizationFields: string;
-    kb: string;
   };
   pipelines: {
-    kb: string;
+    knowledgeBase: string;
   };
 }
 
