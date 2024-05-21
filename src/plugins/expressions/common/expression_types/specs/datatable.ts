@@ -8,6 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
+import { Table, tableFromJSON } from 'apache-arrow';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
@@ -198,6 +199,28 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
         return { id: colName, name: val.expression, meta: { type: val.type } };
       }),
     }),
+    arrow: (value: { type: 'arrow'; table: Table }): Datatable => {
+      const columns = value.table.schema.fields.map((field) => field.name);
+
+      const jsArray = [];
+
+      for (let i = 0; i < value.table.numRows; i++) {
+        jsArray.push(value.table.get(i)!.toJSON());
+      }
+
+      return {
+        type: 'datatable',
+        columns: value.table.schema.fields.map((field) => ({
+          id: field.name,
+          name: field.name,
+          type: field.type,
+          meta: {
+            type: field.type,
+          },
+        })),
+        rows: jsArray,
+      };
+    },
   },
   to: {
     render: (table): ExpressionValueRender<RenderedDatatable> => ({
@@ -226,6 +249,9 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
         }, {}),
         rows,
       };
+    },
+    arrow: (value: Datatable): { type: 'arrow'; table: Table } => {
+      return { type: 'arrow', table: tableFromJSON(value.rows) };
     },
   },
 };
