@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type EmbeddableApiContext, apiHasType, apiIsOfType, areTriggersDisabled } from '@kbn/presentation-publishing';
+import {
+  type EmbeddableApiContext,
+  apiHasType,
+  apiIsOfType,
+  areTriggersDisabled,
+} from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import { type FilterByMapExtentActionApi } from './types';
