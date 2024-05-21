@@ -25,6 +25,10 @@ import type {
 
 import { getEmptyValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
+import {
+  RULE_EXECUTION_TYPE_BACKFILL,
+  RULE_EXECUTION_TYPE_STANDARD,
+} from '../../../../../common/translations';
 import { ExecutionStatusIndicator } from '../../../../rule_monitoring';
 import { PopoverTooltip } from '../../../../rule_management_ui/components/rules_table/popover_tooltip';
 import { TableHeaderTooltipCell } from '../../../../rule_management_ui/components/rules_table/table_header_tooltip_cell';
@@ -78,6 +82,19 @@ export const EXECUTION_LOG_COLUMNS: Array<EuiBasicTableColumn<RuleExecutionResul
     sortable: false,
     truncateText: false,
     width: '10%',
+  },
+  {
+    name: i18n.COLUMN_TYPE,
+    field: 'type',
+    sortable: false,
+    width: '10%',
+    render: (value, record) => {
+      return (
+        <EuiText size="s">
+          {record.backfill ? RULE_EXECUTION_TYPE_BACKFILL : RULE_EXECUTION_TYPE_STANDARD}
+        </EuiText>
+      );
+    },
   },
   {
     field: 'timestamp',
@@ -138,6 +155,33 @@ export const getMessageColumn = (width: string) => ({
   sortable: false,
   width,
 });
+
+export const getSourceEventTimeRangeColumns = () => [
+  {
+    name: (
+      <TableHeaderTooltipCell
+        title={i18n.COLUMN_SOURCE_EVENT_TIME_RANGE}
+        tooltipContent={i18n.COLUMN_SOURCE_EVENT_TIME_RANGE_TOOLTIP}
+      />
+    ),
+    field: 'backfill',
+    render: (backfill: { start: string; end: string }) => {
+      return backfill ? (
+        <div>
+          <div>
+            <FormattedDate value={backfill.start} fieldName="backfill.start" />
+          </div>
+          <div>
+            <FormattedDate value={backfill.end} fieldName="backfill.end" />
+          </div>
+        </div>
+      ) : (
+        getEmptyValue()
+      );
+    },
+    width: '15%',
+  },
+];
 
 export const getExecutionLogMetricsColumns = (
   docLinks: DocLinksStart

@@ -13,6 +13,7 @@ import type {
   RuleExecutionEventType,
   RuleExecutionResult,
   RuleExecutionStatus,
+  RuleRunType,
 } from '../../../../common/api/detection_engine/rule_monitoring';
 
 export interface IRuleMonitoringApiClient {
@@ -139,4 +140,9 @@ export interface FetchRuleExecutionResultsArgs extends RuleMonitoringApiCallArgs
    * Number of results to fetch per page.
    */
   perPage?: number;
+
+  /**
+   * Array of `runTypeFilters` (e.g. `manual,scheduled`)
+   */
+  runTypeFilters?: RuleRunType[];
 }

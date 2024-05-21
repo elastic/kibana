@@ -30,7 +30,10 @@ import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 
-import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
+import {
+  RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY,
+  RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
+} from '../../../../../../common/constants';
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
@@ -69,6 +72,7 @@ import {
   getMessageColumn,
   getExecutionLogMetricsColumns,
   expanderColumn,
+  getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
 
@@ -112,7 +116,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         superDatePicker: { recentlyUsedRanges, refreshInterval, isPaused, start, end },
         queryText,
         statusFilters,
+        runTypeFilters,
         showMetricColumns,
+        showSourceEventTimeRange,
         pagination: { pageIndex, pageSize },
         sort: { sortField, sortDirection },
       },
@@ -129,6 +135,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         setSortField,
         setStart,
         setStatusFilters,
+        setRunTypeFilters,
+        setShowSourceEventTimeRange,
       },
     },
   } = useRuleDetailsContext();
@@ -197,6 +205,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     end,
     queryText,
     statusFilters,
+    runTypeFilters,
     page: pageIndex,
     perPage: pageSize,
     sortField,
@@ -336,6 +345,17 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     ]
   );
 
+  const onShowSourceEventTimeRange = useCallback(
+    (showEventTimeRange: boolean) => {
+      storage.set(
+        RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
+        showEventTimeRange
+      );
+      setShowSourceEventTimeRange(showEventTimeRange);
+    },
+    [setShowSourceEventTimeRange, storage]
+  );
+
   const onShowMetricColumnsCallback = useCallback(
     (showMetrics: boolean) => {
       storage.set(RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY, showMetrics);
@@ -420,11 +440,21 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
   const executionLogColumns = useMemo(() => {
     const columns = [...EXECUTION_LOG_COLUMNS];
+    let messageColumnWidth = 50;
+
+    if (showSourceEventTimeRange) {
+      columns.push(...getSourceEventTimeRangeColumns());
+      messageColumnWidth = 35;
+    }
 
     if (showMetricColumns) {
-      columns.push(getMessageColumn('20%'), ...getExecutionLogMetricsColumns(docLinks));
+      messageColumnWidth = 20;
+      columns.push(
+        getMessageColumn(`${messageColumnWidth}%`),
+        ...getExecutionLogMetricsColumns(docLinks)
+      );
     } else {
-      columns.push(getMessageColumn('50%'));
+      columns.push(getMessageColumn(`${messageColumnWidth}%`));
     }
 
     columns.push(
@@ -436,7 +466,14 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     );
 
     return columns;
-  }, [actions, docLinks, showMetricColumns, rows.toggleRowExpanded, rows.isRowExpanded]);
+  }, [
+    actions,
+    docLinks,
+    showMetricColumns,
+    showSourceEventTimeRange,
+    rows.toggleRowExpanded,
+    rows.isRowExpanded,
+  ]);
 
   return (
     <EuiPanel hasBorder>
@@ -451,6 +488,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             selectedStatuses={statusFilters}
             onStatusFilterChange={onStatusFilterChangeCallback}
             onSearch={onSearchCallback}
+            selectedRunTypes={runTypeFilters}
+            onRunTypeFitlerChange={setRunTypeFilters}
           />
         </EuiFlexItem>
         <DatePickerEuiFlexItem>
@@ -504,6 +543,12 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                 updatedAt: dataUpdatedAt,
               })}
             </UtilityBarText>
+            <UtilitySwitch
+              label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
+              checked={showSourceEventTimeRange}
+              compressed={true}
+              onChange={(e) => onShowSourceEventTimeRange(e.target.checked)}
+            />
             <UtilitySwitch
               label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
               checked={showMetricColumns}
