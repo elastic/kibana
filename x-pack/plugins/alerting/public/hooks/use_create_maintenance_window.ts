@@ -43,7 +43,7 @@ export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowPro
     onError: (error: IHttpFetchError<KibanaServerError>) => {
       toasts.addDanger(
         i18n.translate('xpack.alerting.maintenanceWindowsCreateFailure', {
-          defaultMessage: 'Failed to create maintenance window.',
+          defaultMessage: `Failed to create maintenance window. ${error.body?.message ?? ''}`,
         })
       );
       onError?.(error);
