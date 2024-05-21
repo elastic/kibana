@@ -331,7 +331,7 @@ function InferenceIdCombo({ setValue }: InferenceProps) {
         },
       });
     },
-    [dispatch]
+    [dispatch, inferenceToModelIdMap]
   );
 
   if (type === undefined || type[0]?.value !== 'semantic_text') {

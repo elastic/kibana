@@ -157,7 +157,7 @@ export const SelectInferenceId = ({
         setIsCreateInferenceApiLoading(false);
       }
     },
-    [isInferenceFlyoutVisible, resendRequest, ml]
+    [isInferenceFlyoutVisible, resendRequest, ml, setNewInferenceEndpoint]
   );
   useEffect(() => {
     const subscription = subscribe((updateData) => {
