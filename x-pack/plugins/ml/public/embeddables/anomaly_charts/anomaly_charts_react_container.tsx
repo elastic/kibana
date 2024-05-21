@@ -9,7 +9,6 @@ import type { FC } from 'react';
 import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import { EuiCallOut, EuiLoadingChart, EuiResizeObserver, EuiText } from '@elastic/eui';
 import type { Observable } from 'rxjs';
-import { combineLatest, tap, debounceTime, switchMap, skipWhile, startWith, of } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
@@ -19,15 +18,11 @@ import {
   ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
-import { Subject, catchError } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { TimeRange } from '@kbn/es-query';
-import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
-import type { CoreStart } from '@kbn/core/public';
 import type {
   AnomalyChartsEmbeddableCustomInput,
   AnomalyChartsEmbeddableServices,
-  AnomalyChartsServices,
   AnomalyChartsApi,
 } from '..';
 
@@ -36,17 +31,7 @@ import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import type { MlLocatorParams } from '../../../common/types/locator';
-import { getJobsObservable } from '../common/get_jobs_observable';
-import { OVERALL_LABEL, SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import { processFilters } from '../common/process_filters';
-import type { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
-import {
-  getSelectionInfluencers,
-  getSelectionJobIds,
-  getSelectionTimeRange,
-} from '../../application/explorer/explorer_utils';
-import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
-import type { MlStartDependencies } from '../../plugin';
+import { useAnomalyChartsData } from './use_anomaly_charts_data';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 const FETCH_RESULTS_DEBOUNCE_MS = 500;
@@ -61,150 +46,6 @@ export interface EmbeddableAnomalyChartsContainerProps
   onRenderComplete: () => void;
   onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
-}
-function useAnomalyChartsData(
-  api: AnomalyChartsApi,
-  services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
-  timeRange$: Observable<TimeRange | undefined>,
-  chartWidth: number,
-  severity: number,
-  renderCallbacks: {
-    onRenderComplete: () => void;
-    onLoading: (v: boolean) => void;
-    onError: (error: Error) => void;
-  }
-): {
-  chartsData: ExplorerChartsData | undefined;
-  isLoading: boolean;
-  error: Error | null | undefined;
-} {
-  const [, , { anomalyDetectorService, anomalyExplorerService }] = services;
-
-  const [chartsData, setChartsData] = useState<ExplorerChartsData>();
-  const [error, setError] = useState<Error | null>();
-  const [isLoading, setIsLoading] = useState(false);
-
-  const chartWidth$ = useMemo(() => new Subject<number>(), []);
-  const severity$ = useMemo(() => new Subject<number>(), []);
-
-  useEffect(() => {
-    const subscription = combineLatest([
-      getJobsObservable(api.jobIds$, anomalyDetectorService, setError),
-      api.maxSeriesToPlot$,
-      timeRange$,
-      api.filters$,
-      api.query$,
-      chartWidth$.pipe(skipWhile((v) => !v)),
-      severity$,
-      api.refresh$.pipe(startWith(null)),
-    ])
-      .pipe(
-        tap(setIsLoading.bind(null, true)),
-        debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
-        tap(() => {
-          renderCallbacks.onLoading(true);
-        }),
-        switchMap((args) => {
-          const [
-            explorerJobs,
-            maxSeriesToPlot,
-            timeRangeInput,
-            filters,
-            query,
-            embeddableContainerWidth,
-            severityValue,
-          ] = args;
-          if (!explorerJobs) {
-            // couldn't load the list of jobs
-            return of(undefined);
-          }
-
-          const viewBySwimlaneFieldName = OVERALL_LABEL;
-
-          if (timeRangeInput) {
-            anomalyExplorerService.setTimeRange(timeRangeInput);
-          }
-
-          let influencersFilterQuery: InfluencersFilterQuery | undefined;
-          try {
-            if (filters || query) {
-              influencersFilterQuery = processFilters(filters, query);
-            }
-          } catch (e) {
-            // handle query syntax errors
-            setError(e);
-            return of(undefined);
-          }
-
-          const bounds = anomalyExplorerService.getTimeBounds();
-
-          // Can be from input time range or from the timefilter bar
-          const selections: AppStateSelectedCells = {
-            lanes: [OVERALL_LABEL],
-            times: [bounds.min?.unix()!, bounds.max?.unix()!],
-            type: SWIMLANE_TYPE.OVERALL,
-          };
-
-          const selectionInfluencers = getSelectionInfluencers(selections, viewBySwimlaneFieldName);
-
-          const jobIds = getSelectionJobIds(selections, explorerJobs);
-
-          const timeRange = getSelectionTimeRange(selections, bounds);
-
-          return anomalyExplorerService.getAnomalyData$(
-            jobIds,
-            embeddableContainerWidth,
-            timeRange.earliestMs,
-            timeRange.latestMs,
-            influencersFilterQuery,
-            selectionInfluencers,
-            severityValue ?? 0,
-            maxSeriesToPlot
-          );
-        }),
-        catchError((e) => {
-          // eslint-disable-next-line no-console
-          console.error(`Error occured fetching anomaly charts data for embeddable\n`, e);
-          setError(e.body);
-          return of(undefined);
-        })
-      )
-      .subscribe((results) => {
-        if (results !== undefined) {
-          setError(null);
-          setChartsData(results);
-          setIsLoading(false);
-          renderCallbacks.onLoading(false);
-          renderCallbacks.onRenderComplete();
-        }
-      });
-
-    return () => {
-      subscription?.unsubscribe();
-      chartWidth$.complete();
-      severity$.complete();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    chartWidth$.next(chartWidth);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chartWidth]);
-
-  useEffect(() => {
-    severity$.next(severity);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity]);
-
-  useEffect(() => {
-    if (error) {
-      renderCallbacks.onError(error);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [error]);
-
-  return { chartsData, isLoading, error };
 }
 
 const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
