@@ -441,10 +441,10 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
           ...prev[id],
           isCollapsed: !prevValue,
           doCollapseFromActiveState: isCollapsible
-            ? // if the accordion is collapsible we don't want to auto-close it when URL changes
-              // once the user has interracted with the accordion
+            ? // if the accordion is collapsible & the user has interacted with the accordion
+              // we don't want to auto-close it when URL changes to not interfere with the user's choice
               false
-            : // if the accordion is **not** collapsible we do want to auto-close it when URL changes
+            : // if the accordion is **not** collapsible we do want to auto-close it when the URL changes
               prevState.doCollapseFromActiveState,
         },
       };
