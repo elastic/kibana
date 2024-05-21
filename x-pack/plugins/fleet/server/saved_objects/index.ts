@@ -550,8 +550,8 @@ export const getSavedObjectTypes = (
               backfillFn: packagePolicyV10OnWriteScanFix,
             },
           ],
-        }, 
-        '11': {      
+        },
+        '11': {
           changes: [
             {
               type: 'mappings_addition',
