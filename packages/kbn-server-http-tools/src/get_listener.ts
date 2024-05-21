@@ -39,6 +39,9 @@ const configureHttp1Listener = (
       });
 
   listener.setTimeout(config.socketTimeout);
+  listener.on('timeout', (socket) => {
+    socket.destroy();
+  });
   listener.on('clientError', (err, socket) => {
     if (socket.writable) {
       socket.end(Buffer.from('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));

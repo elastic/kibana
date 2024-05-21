@@ -21,9 +21,7 @@ jest.mock('fs', () => {
   };
 });
 
-const createConfig = (
-  parts: Partial<Omit<IHttpConfig, 'ssl'>> & { ssl?: Partial<IHttpConfig['ssl']> }
-): IHttpConfig => ({
+const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
   host: 'localhost',
   port: 5601,
   socketTimeout: 120000,

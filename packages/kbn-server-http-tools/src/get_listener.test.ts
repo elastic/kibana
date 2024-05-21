@@ -16,9 +16,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { IHttpConfig } from './types';
 import { getServerListener } from './get_listener';
 
-const createConfig = (
-  parts: Partial<Omit<IHttpConfig, 'ssl'>> & { ssl?: Partial<IHttpConfig['ssl']> }
-): IHttpConfig => ({
+const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
   host: 'localhost',
   port: 5601,
   socketTimeout: 120000,
@@ -78,8 +76,9 @@ describe('getServerListener', () => {
       expect(server.setTimeout).toHaveBeenCalledTimes(1);
       expect(server.setTimeout).toHaveBeenCalledWith(config.socketTimeout);
 
-      expect(server.on).toHaveBeenCalledTimes(1);
+      expect(server.on).toHaveBeenCalledTimes(2);
       expect(server.on).toHaveBeenCalledWith('clientError', expect.any(Function));
+      expect(server.on).toHaveBeenCalledWith('timeout', expect.any(Function));
     });
 
     it('returns the https server', () => {
@@ -122,8 +121,9 @@ describe('getServerListener', () => {
       expect(server.setTimeout).toHaveBeenCalledTimes(1);
       expect(server.setTimeout).toHaveBeenCalledWith(config.socketTimeout);
 
-      expect(server.on).toHaveBeenCalledTimes(1);
+      expect(server.on).toHaveBeenCalledTimes(2);
       expect(server.on).toHaveBeenCalledWith('clientError', expect.any(Function));
+      expect(server.on).toHaveBeenCalledWith('timeout', expect.any(Function));
     });
 
     it('returns the http server', () => {

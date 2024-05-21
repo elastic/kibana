@@ -10,7 +10,7 @@ import { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
 import moment from 'moment';
 import supertest from 'supertest';
-import { getServerOptions, createServer, IHttpConfig } from '@kbn/server-http-tools';
+import { getServerOptions, createServer, type IHttpConfig } from '@kbn/server-http-tools';
 import { ByteSizeValue } from '@kbn/config-schema';
 
 import { BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy_server';
