@@ -8,7 +8,7 @@
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
-import { CustomCard, FeaturedCard } from '../packages_list/types';
+import { CustomCard, FeaturedCard, VirtualCard } from '../packages_list/types';
 import { Category } from './types';
 
 function toFeaturedCard(name: string): FeaturedCard {
@@ -29,6 +29,24 @@ export function useCustomCardsForCategory(
   const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
   const { href: otelLogsUrl } = reactRouterNavigate(history, `/otelLogs/${location.search}`);
+
+  const otelCard: VirtualCard = {
+    id: 'otel-logs',
+    type: 'virtual',
+    title: 'OTel Logs and host metrics',
+    description: 'Collect logs using the OTel collector',
+    name: 'custom-logs-virtual',
+    categories: ['observability'],
+    icons: [
+      {
+        type: 'svg',
+        src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
+      },
+    ],
+    url: otelLogsUrl,
+    version: '',
+    integration: '',
+  };
 
   switch (category) {
     case 'apm':
@@ -88,8 +106,8 @@ export function useCustomCardsForCategory(
     case 'infra':
       return [
         toFeaturedCard('kubernetes'),
-        toFeaturedCard('prometheus'),
         toFeaturedCard('docker'),
+        otelCard,
         {
           id: 'azure-virtual',
           type: 'virtual',
@@ -169,24 +187,7 @@ export function useCustomCardsForCategory(
           version: '',
           integration: '',
         },
-        {
-          id: 'otel-logs',
-          type: 'virtual',
-          title: 'OTel Logs and host metrics',
-          description: 'Collect logs using the OTel collector',
-          name: 'custom-logs-virtual',
-          categories: ['observability'],
-          icons: [
-            {
-              type: 'svg',
-              src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
-            },
-          ],
-          url: otelLogsUrl,
-          version: '',
-          integration: '',
-        },
-        toFeaturedCard('nginx'),
+        otelCard,
         {
           id: 'azure-logs-virtual',
           type: 'virtual',
