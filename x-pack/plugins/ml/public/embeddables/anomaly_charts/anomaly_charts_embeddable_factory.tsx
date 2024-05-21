@@ -208,7 +208,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     padding: 8px;
                   `}
                   data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
-                  data-shared-item=""
                 >
                   <LazyEmbeddableAnomalyChartsContainer
                     id={uuid}
