@@ -663,6 +663,10 @@ export class Embeddable
         fromDate: mergedSearchContext.timeRange?.from ?? '',
         toDate: mergedSearchContext.timeRange?.to ?? '',
       },
+      absDateRange: {
+        fromDate: mergedSearchContext.timeRange?.from ?? '',
+        toDate: mergedSearchContext.timeRange?.to ?? '',
+      },
       activeData: this.activeData,
     };
 

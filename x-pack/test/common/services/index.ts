@@ -11,6 +11,7 @@ import { InfraLogViewsServiceProvider } from './infra_log_views';
 import { SpacesServiceProvider } from './spaces';
 import { BsearchSecureService } from './bsearch_secure';
 import { ApmSynthtraceKibanaClientProvider } from './apm_synthtrace_kibana_client';
+import { InfraSynthtraceKibanaClientProvider } from './infra_synthtrace_kibana_client';
 
 export const services = {
   ...kibanaCommonServices,
@@ -19,4 +20,5 @@ export const services = {
   spaces: SpacesServiceProvider,
   secureBsearch: BsearchSecureService,
   apmSynthtraceKibanaClient: ApmSynthtraceKibanaClientProvider,
+  infraSynthtraceKibanaClient: InfraSynthtraceKibanaClientProvider,
 };
