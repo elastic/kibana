@@ -94,7 +94,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
     expect(await screen.findByTestId('webhookCreateCommentJson')).toBeInTheDocument();
   });
 
-  it('Toggles work properly', async () => {
+  it('connector auth toggles work as expected', async () => {
     render(
       <ConnectorFormTestProvider connector={actionConnector}>
         <CasesWebhookActionConnectorFields

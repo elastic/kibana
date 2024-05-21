@@ -26,6 +26,7 @@ import {
   TextField,
   PasswordField,
   CardRadioGroupField,
+  HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { AuthType as CasesWebhookAuthType } from '../../../../common/constants';
@@ -105,7 +106,7 @@ export const AuthStep: FunctionComponent<Props> = ({ display, readOnly }) => {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       {/* I wonder if this is necessary but I am leaving it for now because the Webhook connector does too.*/}
-      <UseField path="config.hasAuth" component={() => null} />
+      <UseField path="config.hasAuth" component={HiddenField} />
       <UseField
         path="config.authType"
         defaultValue={authTypeDefaultValue}
