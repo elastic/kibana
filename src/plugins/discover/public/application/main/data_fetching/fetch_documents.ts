@@ -51,7 +51,7 @@ export const fetchDocuments = (
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
-  const contextCollector = profilesManager.createDocumentContextCollector();
+  const contextCollector = profilesManager.createDocumentProfilesCollector();
 
   const fetch$ = searchSource
     .fetch$({
