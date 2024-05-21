@@ -66,6 +66,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
     name: 'essql',
     type: 'datatable',
     inputTypes: ['kibana_context', 'null'],
+    allowCache: true,
     help: i18n.translate('data.search.essql.help', {
       defaultMessage: 'Queries Elasticsearch using Elasticsearch SQL.',
     }),
