@@ -195,7 +195,11 @@ class AgentPolicyService {
     created: boolean;
     policy?: AgentPolicy;
   }> {
-    const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
+    const {
+      id,
+      kibana_namespace: kibanaNamespace,
+      ...preconfiguredAgentPolicy
+    } = omit(config, 'package_policies');
     const newAgentPolicyDefaults: Pick<NewAgentPolicy, 'namespace' | 'monitoring_enabled'> = {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],

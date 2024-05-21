@@ -174,14 +174,20 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       }
 
+      const namespacedSoClient = preconfiguredAgentPolicy.kibana_namespace
+        ? appContextService.getInternalUserSOClientForSpaceId(
+            preconfiguredAgentPolicy.kibana_namespace
+          )
+        : soClient;
+
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
-        soClient,
+        namespacedSoClient,
         esClient,
-        omit(preconfiguredAgentPolicy, 'is_managed') // Don't add `is_managed` until the policy has been fully configured
+        omit(preconfiguredAgentPolicy, 'is_managed', 'kibana_namespace') // Don't add `is_managed` until the policy has been fully configured
       );
 
       if (!created) {
-        if (!policy) return { created, policy };
+        if (!policy) return { created, policy, namespacedSoClient };
         if (!policy.is_managed && !preconfiguredAgentPolicy.is_managed) return { created, policy };
         const { hasChanged, fields } = comparePreconfiguredPolicyToCurrent(
           preconfiguredAgentPolicy,
@@ -194,7 +200,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         };
         if (hasChanged) {
           const updatedPolicy = await agentPolicyService.update(
-            soClient,
+            namespacedSoClient,
             esClient,
             String(preconfiguredAgentPolicy.id),
             newFields,
@@ -202,14 +208,15 @@ export async function ensurePreconfiguredPackagesAndPolicies(
               force: true,
             }
           );
-          return { created, policy: updatedPolicy };
+          return { created, policy: updatedPolicy, namespacedSoClient };
         }
-        return { created, policy };
+        return { created, policy, namespacedSoClient };
       }
 
       return {
         created,
         policy,
+        namespacedSoClient,
         shouldAddIsManagedFlag: preconfiguredAgentPolicy.is_managed,
       };
     })
@@ -227,13 +234,17 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       continue;
     }
     fulfilledPolicies.push(policyResult.value);
-    const { created, policy, shouldAddIsManagedFlag } = policyResult.value;
+    const { created, policy, shouldAddIsManagedFlag, namespacedSoClient } = policyResult.value;
+
     if (created || policies[i].is_managed) {
+      if (!namespacedSoClient) {
+        throw new Error('No soClient created for that policy');
+      }
       const preconfiguredAgentPolicy = policies[i];
       const { package_policies: packagePolicies } = preconfiguredAgentPolicy;
 
       const agentPolicyWithPackagePolicies = await agentPolicyService.get(
-        soClient,
+        namespacedSoClient,
         policy!.id,
         true
       );
@@ -287,7 +298,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       logger.debug(`Adding preconfigured package policies ${packagePoliciesToAdd}`);
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
-        soClient,
+        namespacedSoClient,
         esClient,
         policy!,
         packagePoliciesToAdd!,
@@ -299,7 +310,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       // Add the is_managed flag after configuring package policies to avoid errors
       if (shouldAddIsManagedFlag) {
         await agentPolicyService.update(
-          soClient,
+          namespacedSoClient,
           esClient,
           policy!.id,
           { is_managed: true },
@@ -338,7 +349,13 @@ export function comparePreconfiguredPolicyToCurrent(
 ) {
   // Namespace is omitted from being compared because even for managed policies, we still
   // want users to be able to pick their own namespace: https://github.com/elastic/kibana/issues/110533
-  const configTopLevelFields = omit(policyFromConfig, 'package_policies', 'id', 'namespace');
+  const configTopLevelFields = omit(
+    policyFromConfig,
+    'package_policies',
+    'id',
+    'namespace',
+    'kibana_namespace'
+  );
   const currentTopLevelFields = pick(currentPolicy, ...Object.keys(configTopLevelFields));
 
   return {
