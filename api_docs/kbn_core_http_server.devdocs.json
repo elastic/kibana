@@ -7245,6 +7245,14 @@
                 "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
               },
               {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/create.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/reset.ts"
+              },
+              {
                 "plugin": "profiling",
                 "path": "x-pack/plugins/observability_solution/profiling/server/routes/setup/route.ts"
               },
@@ -9661,6 +9669,10 @@
               {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/sample_assets.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/observability_solution/asset_manager/server/routes/entities/delete.ts"
               },
               {
                 "plugin": "synthetics",
@@ -13993,7 +14005,7 @@
               },
               {
                 "plugin": "ecsDataQualityDashboard",
-                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_results.ts"
+                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_results_indices_latest.ts"
               },
               {
                 "plugin": "ml",
@@ -16004,6 +16016,10 @@
               {
                 "plugin": "synthetics",
                 "path": "x-pack/plugins/observability_solution/synthetics/server/server.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/entries/create_route.ts"
               },
               {
                 "plugin": "controls",
