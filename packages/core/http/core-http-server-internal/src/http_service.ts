@@ -251,14 +251,19 @@ export class HttpService
       method: 'GET',
       handler: async (req, h) => {
         const version = req.query?.version;
-        let pathStartsWith: string[] = req.query?.pathStartsWith;
-        if (!Array.isArray(pathStartsWith)) {
-          pathStartsWith = [pathStartsWith];
+
+        let pathStartsWith: undefined | string[];
+        if (typeof req.query?.pathStartsWith === 'string') {
+          pathStartsWith = [req.query.pathStartsWith];
+        } else {
+          pathStartsWith = req.query?.pathStartsWith;
         }
 
-        let excludePathsMatching: string[] = req.query?.excludePathsMatching;
-        if (!Array.isArray(excludePathsMatching)) {
-          excludePathsMatching = [excludePathsMatching];
+        let excludePathsMatching: undefined | string[];
+        if (typeof req.query?.excludePathsMatching === 'string') {
+          excludePathsMatching = [req.query.excludePathsMatching];
+        } else {
+          excludePathsMatching = req.query?.excludePathsMatching;
         }
 
         const pluginId = req.query?.pluginId;
