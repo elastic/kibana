@@ -54,7 +54,7 @@ describe('useFetchCurrentUserConversations', () => {
             page: 1,
             perPage: 100,
           },
-          version: '2023-10-31',
+          version: '1',
           signal: undefined,
         }
       );

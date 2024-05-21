@@ -40,7 +40,7 @@ describe('conversations api', () => {
         {
           method: 'DELETE',
           signal: undefined,
-          version: '2023-10-31',
+          version: '1',
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('conversations api', () => {
         {
           method: 'GET',
           signal: undefined,
-          version: '2023-10-31',
+          version: '1',
         }
       );
       expect(toasts.addError).not.toHaveBeenCalled();
