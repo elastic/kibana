@@ -80,7 +80,7 @@ Before you upgrade to 8.14.0, review the breaking changes, then mitigate the imp
 
 [discrete]
 [[breaking-182074]]
-.Renamed the an advanced setting to enable {esql}.
+.Renamed an advanced setting to enable {esql}.
 [%collapsible]
 ====
 *Details* +
@@ -107,7 +107,7 @@ The unified search filter builder (OR / AND) is out of technical preview. For mo
       
 [discrete]
 [[breaking-177549]]
-.The region map visualization type is Generally Available.
+.The region map visualization type is Generally Available in Lens.
 [%collapsible]
 ====
 *Details* +
@@ -209,14 +209,15 @@ Dashboard::
 * Reorganized panel actions in the actions menu ({kibana-pull}178596[#178596]).
 * Adds panel styling improvements ({kibana-pull}178139[#178139]).
 * Adds "Apply" button to stop controls selections being automatically applied ({kibana-pull}174714[#174714]).
+Discover::
+* Support field stats for {esql} query ({kibana-pull}178433[#178433]).
 Elastic Security::
 For the Elastic Security 8.14.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 ES|QL::
 * Implicit casting changes ({kibana-pull}182989[#182989]).
 * Adds validation and auto-complete for `date_diff` ({kibana-pull}182513[#182513]).
 * Adds more functions to the validator ({kibana-pull}180640[#180640]).
-* Adds improvements to the AI assistants handling where a generated {esql} query has syntax errors ({kibana-pull}179919[#179919]).
-* Adds a chart switcher to {esql} in *Lens* ({kibana-pull}177790[#177790]).
+* Adds an enhanced chart switcher to the *Lens* inline editing flyout ({kibana-pull}177790[#177790]).
 Fleet::
 * Adds support for dimension mappings in dynamic templates ({kibana-pull}180023[#180023]).
 * Adds CPU metrics to request diagnostics ({kibana-pull}179819[#179819]).
@@ -251,9 +252,9 @@ Observability::
 * Implements contextual actions ({kibana-pull}178405[#178405]).
 * Adds the ability to create an SLI based on the availability of your synthetics monitors ({kibana-pull}177842[#177842]).
 * Adds setting for user's preferred language for the AI assistant ({kibana-pull}176444[#176444]).
+* Adds improvements to the AI assistants handling where a generated {esql} query has syntax errors ({kibana-pull}179919[#179919]).
 * Adds grouping by multiple values when creating SLOs, allowing for dynamic creation of multiple SLOs from a single SLI definition({kibana-pull}175063[#175063]).
 Platform::
-* Support field stats for {esql} query ({kibana-pull}178433[#178433]).
 * Adds a new option, `system`, to  the `theme:darkMode` Kibana advanced setting, that can be used to have Kibana's theme follow the system's (light or dark) ({kibana-pull}173044[#173044]).
 Reporting::
 * A feature has been deprecated which allowed users to download a CSV file from a saved search panel in a dashboard, without having a report generated. Now, when users need to access saved search data from a dashboard panel as CSV, a normal report will be generated. To access the deprecated functionality, you can add `xpack.reporting.csv.enablePanelActionDownload: true` to kibana.yml, but this ability will be removed in a future version of Kibana ({kibana-pull}178159[#178159]).
