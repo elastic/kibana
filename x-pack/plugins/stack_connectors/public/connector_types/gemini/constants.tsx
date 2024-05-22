@@ -17,7 +17,7 @@ import {
 } from '../../../common/gemini/constants';
 import * as i18n from './translations';
 
-const generation_config = {
+const generationConfig = {
   temperature: 0,
   maxOutputTokens: DEFAULT_TOKEN_LIMIT,
 };
@@ -35,7 +35,7 @@ const contents = [
 
 export const DEFAULT_BODY = JSON.stringify({
   contents,
-  generation_config,
+  generation_config: generationConfig,
 });
 
 export const geminiConfig: ConfigFieldSchema[] = [
