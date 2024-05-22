@@ -7,7 +7,6 @@
 
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import type { AnomalySwimLaneEmbeddableState } from '@kbn/ml-plugin/public';
-import type { AnomalyChartsEmbeddableInput } from '@kbn/ml-plugin/public/embeddables';
 import { stringHash } from '@kbn/ml-string-hash';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
@@ -521,7 +520,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const expectedAttachment = {
               jobIds: [testData.jobConfig.job_id],
               maxSeriesToPlot: 6,
-            } as AnomalyChartsEmbeddableInput;
+            };
 
             // @ts-expect-error Setting id to be undefined here
             // since time range expected is of the chart plotEarliest/plotLatest, not of the global time range

@@ -52,7 +52,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           pluginsStartServices
         );
 
-        const theme = coreStartServices.theme.getTheme();
         const [, , mlServices] = anomalyChartsDependencies;
 
         const subscriptions = new Subscription();
@@ -145,7 +144,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           ...coreStartServices,
           ...pluginsStartServices,
         };
-        const initialState = api.serializeState().rawState;
 
         return {
           api,
@@ -190,7 +188,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                   >
                     <LazyEmbeddableAnomalyChartsContainer
                       id={uuid}
-                      severityThreshold={initialState.severityThreshold}
+                      severityThreshold={state.severityThreshold}
                       api={api}
                       services={anomalyChartsDependencies}
                       onLoading={onLoading}
