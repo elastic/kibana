@@ -48,7 +48,7 @@ export const TOUR_STORAGE_KEYS = {
   AGENT_ACTIVITY: 'fleet.agentActivityTour',
   ADD_AGENT_POPOVER: 'fleet.addAgentPopoverTour',
   INACTIVE_AGENTS: 'fleet.inactiveAgentsTour',
-  GRANULAR_PRIVILEGES: 'fleet.inactiveAgentsTour',
+  GRANULAR_PRIVILEGES: 'fleet.granularPrivileges',
 };
 
 export interface TourConfig {
