@@ -31,7 +31,7 @@ describe('lazy', () => {
   const object: Type<RecursiveType> = schema.object(
     {
       name: schema.string(),
-      self: lazy<RecursiveType>(id),
+      self: schema.lazy<RecursiveType>(id),
     },
     { meta: { id } }
   );
