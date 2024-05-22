@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const find = getService('find');
   const esql = getService('esql');
+  const elasticChart = getService('elasticChart');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
@@ -267,6 +268,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
+        await elasticChart.waitForRenderComplete();
         await retry.try(async () => {
           await inspector.open();
           const requestNames = await inspector.getRequestNames();
