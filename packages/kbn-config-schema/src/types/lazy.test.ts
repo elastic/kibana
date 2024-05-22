@@ -28,7 +28,7 @@ interface RecursiveType {
 
 describe('lazy', () => {
   const id = 'recursive';
-  const object: Type<RecursiveType> = schema.object(
+  const object = schema.object(
     {
       name: schema.string(),
       self: schema.lazy<RecursiveType>(id),
