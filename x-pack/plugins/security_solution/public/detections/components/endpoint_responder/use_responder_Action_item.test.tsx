@@ -87,7 +87,7 @@ describe('useResponderActionItem', () => {
     mockIsAlertFromCrowdstrikeEvent.mockReturnValue(false);
     mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
 
-    const { result } = renderHook(() => useResponderActionItem([], jest.fn()));
+    renderHook(() => useResponderActionItem([], jest.fn()));
 
     expect(mockUseResponderActionData).toHaveBeenCalledWith({
       agentType: 'endpoint',
@@ -109,7 +109,7 @@ describe('useResponderActionItem', () => {
     mockIsAlertFromCrowdstrikeEvent.mockReturnValue(true);
     mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
 
-    const { result } = renderHook(() => useResponderActionItem([], jest.fn()));
+    renderHook(() => useResponderActionItem([], jest.fn()));
 
     expect(mockUseResponderActionData).toHaveBeenCalledWith({
       agentType: 'crowdstrike',
@@ -132,7 +132,7 @@ describe('useResponderActionItem', () => {
     mockIsAlertFromCrowdstrikeEvent.mockReturnValue(false);
     mockIsAlertFromSentinelOneEvent.mockReturnValue(true);
 
-    const { result } = renderHook(() => useResponderActionItem([], jest.fn()));
+    renderHook(() => useResponderActionItem([], jest.fn()));
 
     expect(mockUseResponderActionData).toHaveBeenCalledWith({
       agentType: 'sentinel_one',
