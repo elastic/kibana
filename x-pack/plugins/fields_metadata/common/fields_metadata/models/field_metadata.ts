@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import pick from 'lodash/pick';
-import { FieldAttribute, FieldMetadataPlain } from '../types';
+import { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldMetadata extends FieldMetadataPlain {}
@@ -23,12 +25,24 @@ export class FieldMetadata {
     return Object.assign({}, this);
   }
 
-  public static create(fieldMetadata: FieldMetadataPlain) {
+  public static create(fieldMetadata: PartialFieldMetadataPlain) {
+    const name = fieldMetadata.name ?? '';
+    const flat_name = fieldMetadata.flat_name ?? name;
+    const dashed_name = fieldMetadata.dashed_name ?? FieldMetadata.toDashedName(flat_name);
+    const normalize = fieldMetadata.normalize ?? [];
+    const short = fieldMetadata.short ?? fieldMetadata.description;
+    const source = fieldMetadata.source ?? 'unknown';
+    const type = fieldMetadata.type ?? 'unknown';
+
     const fieldMetadataProps = {
       ...fieldMetadata,
-      dashed_name: fieldMetadata.dashed_name ?? FieldMetadata.toDashedName(fieldMetadata.flat_name),
-      normalize: fieldMetadata.normalize ?? [],
-      short: fieldMetadata.short ?? fieldMetadata.description,
+      name,
+      flat_name,
+      dashed_name,
+      normalize,
+      short,
+      source,
+      type,
     };
 
     return new FieldMetadata(fieldMetadataProps);

@@ -8,18 +8,17 @@
 import { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import hash from 'object-hash';
-import { FindFieldsMetadataResponsePayload } from '../../../common/latest';
-import { FieldAttribute, FieldName } from '../../../common';
+import {
+  FindFieldsMetadataRequestQuery,
+  FindFieldsMetadataResponsePayload,
+} from '../../../common/latest';
 import { IFieldsMetadataClient } from '../../services/fields_metadata';
 
 interface UseFieldsMetadataFactoryDeps {
   fieldsMetadataClient: IFieldsMetadataClient;
 }
 
-interface UseFieldsMetadataParams {
-  attributes?: FieldAttribute[];
-  fieldNames?: FieldName[];
-}
+type UseFieldsMetadataParams = FindFieldsMetadataRequestQuery;
 
 interface UseFieldsMetadataReturnType {
   fieldsMetadata: FindFieldsMetadataResponsePayload['fields'] | undefined;

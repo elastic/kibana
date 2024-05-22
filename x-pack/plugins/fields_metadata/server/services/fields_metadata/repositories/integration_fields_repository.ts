@@ -7,7 +7,12 @@
 
 import hash from 'object-hash';
 import { HashedCache } from '../../../../common/hashed_cache';
-import { FieldMetadata, FieldMetadataPlain, IntegrationFieldName } from '../../../../common';
+import {
+  FieldMetadata,
+  FieldMetadataPlain,
+  IntegrationFieldName,
+  PartialFieldMetadataPlain,
+} from '../../../../common';
 import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './types';
 interface IntegrationFieldsRepositoryDeps {
   integrationFieldsExtractor: IntegrationFieldsExtractor;
@@ -106,7 +111,7 @@ export class IntegrationFieldsRepository {
   private getCacheKey = (params: IntegrationFieldsSearchParams) => hash(params);
 
   private mapExtractedFieldsToFieldMetadataInstances = (
-    extractedFields: Record<string, Record<string, FieldMetadataPlain>>
+    extractedFields: Record<string, Record<string, PartialFieldMetadataPlain>>
   ) => {
     return Object.entries(extractedFields).reduce(
       (integrationGroup, [datasetName, datasetGroup]) => {

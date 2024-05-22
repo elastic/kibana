@@ -11,6 +11,7 @@ import * as rt from 'io-ts';
 export const fieldSourceRT = rt.keyof({
   ecs: null,
   integration: null,
+  unknown: null,
 });
 
 export const allowedValueRT = rt.intersection([
