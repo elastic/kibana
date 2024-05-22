@@ -1345,6 +1345,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/functional/test_suites/common/management/landing_page.ts @elastic/kibana-management
 /x-pack/test_serverless/functional/test_suites/common/dev_tools/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/grok_debugger/ @elastic/kibana-management
+/x-pack/test/api_integration/apis/management/ @elastic/kibana-management
+/x-pack/test/functional/apps/rollup_job/ @elastic/kibana-management
 
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
