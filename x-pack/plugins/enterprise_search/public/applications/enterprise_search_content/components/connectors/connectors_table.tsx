@@ -135,9 +135,9 @@ export const ConnectorsTable: React.FC<ConnectorsTableProps> = ({
         }
       ),
       render: (connector: ConnectorViewItem) => {
-        const label = connectorStatusToText(connector.status, !!connector.index_name);
+        const label = connectorStatusToText(connector, !!connector.index_name);
         return (
-          <EuiBadge color={connectorStatusToColor(connector.status, !!connector.index_name)}>
+          <EuiBadge color={connectorStatusToColor(connector, !!connector.index_name)}>
             {label}
           </EuiBadge>
         );
