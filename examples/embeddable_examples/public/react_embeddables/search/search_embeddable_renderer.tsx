@@ -28,13 +28,15 @@ export function SearchEmbeddableRenderer(props: Props) {
     // only run onMount
   }, []);
 
+  const searchApi = useSearchApi({ timeRange: props.timeRange });
+
   return (
     <ReactEmbeddableRenderer<SearchSerializedState, SearchApi>
       type={SEARCH_EMBEDDABLE_ID}
-      getParentApi={() => {
+      getParentApi={() => ({
         ...searchApi,
         getSerializedStateForChild: () => initialState,
-      }}
+      })}
       hidePanelChrome={true}
     />
   );
