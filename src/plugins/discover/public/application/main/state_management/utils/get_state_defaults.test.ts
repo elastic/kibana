@@ -98,14 +98,23 @@ describe('getStateDefaults', () => {
     });
     expect(actualForUndefinedViewMode.viewMode).toBeUndefined();
 
-    const actualForEsqlWithInvalidViewMode = getStateDefaults({
+    const actualForEsqlWithInvalidAggLevelViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMockWithESQL,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForEsqlWithInvalidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+    expect(actualForEsqlWithInvalidAggLevelViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
+
+    const actualForEsqlWithInvalidPatternLevelViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMockWithESQL,
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+      },
+    });
+    expect(actualForEsqlWithInvalidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
 
     const actualForEsqlWithValidViewMode = getStateDefaults({
       services: discoverServiceMock,
@@ -117,15 +126,29 @@ describe('getStateDefaults', () => {
     expect(actualForEsqlWithValidViewMode.viewMode).toBe(VIEW_MODE.DOCUMENT_LEVEL);
     expect(actualForEsqlWithValidViewMode.dataSource).toEqual(createEsqlDataSource());
 
-    const actualForWithValidViewMode = getStateDefaults({
+    const actualForWithValidAggLevelViewMode = getStateDefaults({
       services: discoverServiceMock,
       savedSearch: {
         ...savedSearchMock,
         viewMode: VIEW_MODE.AGGREGATED_LEVEL,
       },
     });
-    expect(actualForWithValidViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
-    expect(actualForWithValidViewMode.dataSource).toEqual(
+    expect(actualForWithValidAggLevelViewMode.viewMode).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+    expect(actualForWithValidAggLevelViewMode.dataSource).toEqual(
+      createDataViewDataSource({
+        dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
+      })
+    );
+
+    const actualForWithValidPatternLevelViewMode = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: {
+        ...savedSearchMock,
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+      },
+    });
+    expect(actualForWithValidPatternLevelViewMode.viewMode).toBe(VIEW_MODE.PATTERN_LEVEL);
+    expect(actualForWithValidPatternLevelViewMode.dataSource).toEqual(
       createDataViewDataSource({
         dataViewId: savedSearchMock.searchSource.getField('index')?.id!,
       })
