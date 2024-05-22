@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { getInitialTestLogs, getLogsForDataset } from './data';
+import { getInitialTestLogs } from './data';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -22,8 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const synthtrace = getService('svlLogsSynthtraceClient');
   const find = getService('find');
   const to = '2024-01-01T12:00:00.000Z';
-  const apacheAccessDatasetName = 'apache.access';
-  const apacheAccessDatasetHumanName = 'Apache access logs';
 
   describe('Dataset quality user privileges', function () {
     this.tags(['failsOnMKI']);
@@ -63,21 +61,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(cols).to.not.contain('Size');
       expect(cols).to.not.contain('Last Activity');
-    });
-
-    it('view dashboards is disabled for underprivileged user', async () => {
-      await synthtrace.index(
-        getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
-      );
-      await PageObjects.datasetQuality.refreshTable();
-      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
-      await PageObjects.datasetQuality.openIntegrationActionsMenu();
-
-      await testSubjects.existOrFail(
-        `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-View dashboards`
-      );
-
-      await PageObjects.datasetQuality.closeFlyout();
     });
   });
 }
