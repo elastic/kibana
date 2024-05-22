@@ -9,7 +9,7 @@
 import { useMemo } from 'react';
 import { getMergedAccessor } from './composable_profile';
 import { GetProfilesOptions } from './profiles_manager';
-import { useProfiles } from './profiles_provider';
+import { useProfiles } from './use_profiles';
 import type { Profile } from './types';
 
 export const useProfileAccessor = <TKey extends keyof Profile>(

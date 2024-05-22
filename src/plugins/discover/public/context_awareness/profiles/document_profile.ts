@@ -32,5 +32,3 @@ export class DocumentProfileService extends ProfileService<
 > {}
 
 export type DocumentProfileProvider = Parameters<DocumentProfileService['registerProvider']>[0];
-
-export const documentProfileService = new DocumentProfileService();

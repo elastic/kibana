@@ -36,5 +36,3 @@ export class DataSourceProfileService extends AsyncProfileService<
 > {}
 
 export type DataSourceProfileProvider = Parameters<DataSourceProfileService['registerProvider']>[0];
-
-export const dataSourceProfileService = new DataSourceProfileService();

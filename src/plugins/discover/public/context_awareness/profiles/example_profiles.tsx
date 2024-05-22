@@ -18,13 +18,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { capitalize } from 'lodash';
 import React from 'react';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
-import {
-  DataSourceCategory,
-  DataSourceProfileProvider,
-  dataSourceProfileService,
-} from './data_source_profile';
-import { DocumentProfileProvider, documentProfileService, DocumentType } from './document_profile';
-import { RootProfileProvider, rootProfileService, SolutionType } from './root_profile';
+import { DataSourceCategory, DataSourceProfileProvider } from './data_source_profile';
+import { DocumentProfileProvider, DocumentType } from './document_profile';
+import { RootProfileProvider, SolutionType } from './root_profile';
 
 export const o11yRootProfileProvider: RootProfileProvider = {
   order: 0,
@@ -161,10 +157,6 @@ export const logDocumentProfileProvider: DocumentProfileProvider = {
     return { isMatch: false };
   },
 };
-
-rootProfileService.registerProvider(o11yRootProfileProvider);
-dataSourceProfileService.registerProvider(logsDataSourceProfileProvider);
-documentProfileService.registerProvider(logDocumentProfileProvider);
 
 const getFieldValue = (record: DataTableRecord, field: string) => {
   const value = record.flattened[field];
