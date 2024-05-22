@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { FieldMetadataPlain } from '../../../../common';
+import type { PartialFieldMetadataPlain } from '../../../../common';
 
 export interface IntegrationFieldsSearchParams {
   integration: string;
   dataset?: string;
 }
 
-export type ExtractedIntegrationFields = Record<string, Record<string, FieldMetadataPlain>>;
+export type ExtractedIntegrationFields = Record<string, Record<string, PartialFieldMetadataPlain>>;
 
 export type IntegrationFieldsExtractor = ({
   integration,
