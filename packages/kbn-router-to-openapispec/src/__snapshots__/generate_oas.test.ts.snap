@@ -3,12 +3,7 @@
 exports[`generateOpenApiDocument @kbn/config-schema generates references in the expected format 1`] = `
 Object {
   "components": Object {
-    "schemas": Object {
-      "my.name": Object {
-        "minLength": 1,
-        "type": "string",
-      },
-    },
+    "schemas": Object {},
     "securitySchemes": Object {
       "apiKeyAuth": Object {
         "in": "header",
@@ -46,7 +41,7 @@ Object {
             },
           },
           Object {
-            "description": undefined,
+            "description": "test",
             "in": "path",
             "name": "id",
             "required": true,
@@ -63,7 +58,8 @@ Object {
                 "additionalProperties": false,
                 "properties": Object {
                   "name": Object {
-                    "$ref": "#/components/schemas/my.name",
+                    "minLength": 1,
+                    "type": "string",
                   },
                   "other": Object {
                     "type": "string",

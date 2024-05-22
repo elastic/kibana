@@ -30,8 +30,8 @@ describe('generateOpenApiDocument', () => {
     });
 
     it('generates references in the expected format', () => {
-      const sharedIdSchema = schema.string({ minLength: 1, meta: { id: 'my.id' } });
-      const sharedNameSchema = schema.string({ minLength: 1, meta: { id: 'my.name' } });
+      const sharedIdSchema = schema.string({ minLength: 1, meta: { description: 'test' } });
+      const sharedNameSchema = schema.string({ minLength: 1 });
       const otherSchema = schema.object({ name: sharedNameSchema, other: schema.string() });
       expect(
         generateOpenApiDocument(
