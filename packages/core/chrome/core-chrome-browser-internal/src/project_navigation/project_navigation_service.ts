@@ -162,6 +162,7 @@ export class ProjectNavigationService {
           chromeBreadcrumbs$,
           this.projectName$,
           this.solutionNavDefinitions$,
+          this.nextSolutionNavDefinitionId$,
           this.activeSolutionNavDefinitionId$,
           this.cloudLinks$,
         ]).pipe(
@@ -172,12 +173,13 @@ export class ProjectNavigationService {
               chromeBreadcrumbs,
               projectName,
               solutionNavDefinitions,
+              nextSolutionNavDefinitionId,
               activeSolutionNavDefinitionId,
               cloudLinks,
             ]) => {
               const solutionNavigations =
                 Object.keys(solutionNavDefinitions).length > 0 &&
-                activeSolutionNavDefinitionId !== null
+                (nextSolutionNavDefinitionId !== null || activeSolutionNavDefinitionId !== null)
                   ? {
                       definitions: solutionNavDefinitions,
                       activeId: activeSolutionNavDefinitionId,

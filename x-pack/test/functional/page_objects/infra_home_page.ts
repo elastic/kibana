@@ -212,10 +212,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       return testSubjects.click('goToPods');
     },
 
-    async goToDocker() {
+    async goToContainer() {
       await testSubjects.click('openInventorySwitcher');
       await testSubjects.find('goToHost');
-      return testSubjects.click('goToDocker');
+      return testSubjects.click('goToContainer');
     },
 
     async goToSettings() {
