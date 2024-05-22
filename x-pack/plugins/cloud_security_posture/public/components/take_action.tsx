@@ -200,6 +200,7 @@ export const TakeAction = ({
       aria-label="show actions"
       iconType="boxesHorizontal"
       color="text"
+      isLoading={isLoading}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     />
   );
