@@ -250,7 +250,7 @@ export const TakeAction = ({
   );
 };
 
-export const CreateDetectionRule = ({
+const CreateDetectionRule = ({
   createRuleFn,
   setIsLoading,
   closePopover,
