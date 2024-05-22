@@ -29,6 +29,7 @@ export const InstallManagedAgentStep = ({
   isComplete,
   fullCopyButton,
   onCopy,
+  rootIntegrations,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
@@ -40,6 +41,7 @@ export const InstallManagedAgentStep = ({
   isComplete?: boolean;
   fullCopyButton?: boolean;
   onCopy?: () => void;
+  rootIntegrations?: Array<{ name: string; title: string }>;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
@@ -58,6 +60,7 @@ export const InstallManagedAgentStep = ({
           onCopy={onCopy}
           fullCopyButton={fullCopyButton}
           fleetServerHost={fleetServerHost}
+          rootIntegrations={rootIntegrations}
         />
       ) : (
         <React.Fragment />
