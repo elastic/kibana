@@ -403,7 +403,7 @@ describe('Editor actions provider', () => {
     });
   });
 
-    describe('restoreRequestFromHistory', () => {
+  describe('restoreRequestFromHistory', () => {
     const testHistoryRequest = 'GET _alias';
     beforeEach(() => {
       /*
