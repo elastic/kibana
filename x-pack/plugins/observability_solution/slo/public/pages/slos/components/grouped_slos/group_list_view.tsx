@@ -218,12 +218,14 @@ export function GroupListView({
             {isAccordionOpen && (
               <>
                 <EuiSpacer size="m" />
-                <SlosView
-                  sloList={results}
-                  loading={isLoading || isRefetching}
-                  error={isError}
-                  sloView={sloView}
-                />
+                <div data-test-subj="sloGroupViewOpenAccordion">
+                  <SlosView
+                    sloList={results}
+                    loading={isLoading || isRefetching}
+                    error={isError}
+                    sloView={sloView}
+                  />
+                </div>
                 <EuiSpacer size="m" />
                 {total > 0 && total > itemsPerPage ? (
                   <EuiTablePagination

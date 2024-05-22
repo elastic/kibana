@@ -19,6 +19,10 @@ const SLO_GROUP_OVERVIEW_CONFIGURATION_GROUP = 'sloGroupOverviewConfigurationGro
 const SLO_GROUP_OVERVIEW_CONFIGURATION_KQLBAR = 'sloGroupOverviewConfigurationKqlBar';
 const SLO_SINGLE_OVERVIEW_PANEL = 'sloSingleOverviewPanel';
 const SLO_GROUP_OVERVIEW_PANEL = 'sloGroupOverviewPanel';
+const SLO_GROUP_VIEW = 'sloGroupView';
+const SLO_GROUP_VIEW_PANEL = 'sloGroupViewPanel';
+const SLO_GROUP_VIEW_OPEN_ACCORDION = 'sloGroupViewOpenAccordion';
+const SLO_ERROR_BOUNDARY = 'euiErrorBoundary';
 
 export function SloUiCommonServiceProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -132,6 +136,32 @@ export function SloUiCommonServiceProvider({ getService }: FtrProviderContext) {
     async assertGroupOverviewPanelExists() {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(SLO_GROUP_OVERVIEW_PANEL);
+      });
+    },
+
+    async assertSloGroupViewExists() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(SLO_GROUP_VIEW);
+      });
+    },
+
+    async assertSloGroupViewPanelExists() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(SLO_GROUP_VIEW_PANEL);
+      });
+    },
+
+    async clickGroupViewPanelAccordion() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await this.assertSloGroupViewPanelExists();
+        await testSubjects.clickWhenNotDisabledWithoutRetry(SLO_GROUP_VIEW_PANEL);
+      });
+    },
+
+    async assertGroupViewAccordionIsOpenWithNoError() {
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(SLO_GROUP_VIEW_OPEN_ACCORDION);
+        await testSubjects.missingOrFail(SLO_ERROR_BOUNDARY);
       });
     },
   };
