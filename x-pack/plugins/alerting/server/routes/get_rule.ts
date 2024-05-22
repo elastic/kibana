@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from '@kbn/core/server';
+import { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext, rewriteRuleLastRun } from './lib';
 import {
@@ -75,16 +75,19 @@ interface BuildGetRulesRouteParams {
   path: string;
   router: IRouter<AlertingRequestHandlerContext>;
   excludeFromPublicApi?: boolean;
+  options?: RouteConfigOptions<RouteMethod>;
 }
 const buildGetRuleRoute = ({
   licenseState,
   path,
   router,
   excludeFromPublicApi = false,
+  options,
 }: BuildGetRulesRouteParams) => {
   router.get(
     {
       path,
+      options,
       validate: {
         params: paramSchema,
       },
@@ -115,6 +118,10 @@ export const getRuleRoute = (
     licenseState,
     path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    options: {
+      access: 'public',
+      description: `Get rule details`,
+    },
   });
 
 export const getInternalRuleRoute = (
