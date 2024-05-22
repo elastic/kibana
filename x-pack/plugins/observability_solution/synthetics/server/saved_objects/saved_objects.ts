@@ -96,10 +96,6 @@ const getUptimeDynamicSettings = async (client: SavedObjectsClientContract) => {
     );
     return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
   } catch (getErr) {
-    if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-      // If the object doesn't exist, check to see if uptime settings exist
-      return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
-    }
-    throw getErr;
+    return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
   }
 };
