@@ -24,7 +24,7 @@ import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema'
 import moment from 'moment';
 import React, { useRef } from 'react';
 import { TimeBounds } from '../../../slo_details/types';
-import { getBrushData } from '../../../../utils/slo/duration';
+import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { useKibana } from '../../../../utils/kibana_react';
 import { openInDiscover } from '../../../../utils/slo/get_discover_link';
 
@@ -120,7 +120,7 @@ export function GoodBadEventsChart({
             locale={i18n.getLocale()}
             onElementClick={barClickHandler as ElementClickListener}
             onBrushEnd={(brushArea) => {
-              onBrushed?.(getBrushData(brushArea));
+              onBrushed?.(getBrushTimeBounds(brushArea));
             }}
           />
           {annotation}

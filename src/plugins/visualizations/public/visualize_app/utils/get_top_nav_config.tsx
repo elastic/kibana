@@ -397,6 +397,11 @@ export const getTopNavConfig = (
             shareableUrl: unhashUrl(window.location.href),
             objectId: savedVis?.id,
             objectType: 'visualization',
+            objectTypeMeta: {
+              title: i18n.translate('visualizations.share.shareModal.title', {
+                defaultMessage: 'Share this visualization',
+              }),
+            },
             sharingData: {
               title:
                 savedVis?.title ||

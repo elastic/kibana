@@ -120,7 +120,7 @@ const mockRiskScoreResponse = {
 const mockRelatedUsersResponse = {
   inspect: jest.fn(),
   refetch: jest.fn(),
-  relatedUsers: [{ user: 'test user', ip: ['100.XXX.XXX'], risk: RiskSeverity.low }],
+  relatedUsers: [{ user: 'test user', ip: ['100.XXX.XXX'], risk: RiskSeverity.Low }],
   loading: false,
 };
 
