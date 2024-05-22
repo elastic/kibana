@@ -21,6 +21,7 @@ const ALL_ENABLED = {
   canEnable: true,
   isEnabled: true,
   isValidApiKey: true,
+  isServiceAllowed: false,
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -188,6 +189,7 @@ export default function ({ getService }: FtrProviderContext) {
           canEnable: false,
           isEnabled: true,
           isValidApiKey: true,
+          isServiceAllowed: false,
         });
       });
 
@@ -201,6 +203,7 @@ export default function ({ getService }: FtrProviderContext) {
           canEnable: false,
           isEnabled: true,
           isValidApiKey: true,
+          isServiceAllowed: false,
         });
       });
     });
