@@ -181,7 +181,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
       const { created, policy } = await agentPolicyService.ensurePreconfiguredAgentPolicy(
         namespacedSoClient,
         esClient,
-        omit(preconfiguredAgentPolicy, 'is_managed', 'space_id') // Don't add `is_managed` until the policy has been fully configured
+        omit(preconfiguredAgentPolicy, 'is_managed', 'space_id') // Don't add `is_managed` until the policy has been fully configured and not persist space_id
       );
 
       if (!created) {
