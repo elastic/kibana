@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
@@ -28,22 +28,19 @@ interface BuildGetRulesRouteParams {
   path: string;
   router: IRouter<AlertingRequestHandlerContext>;
   excludeFromPublicApi?: boolean;
+  options?: RouteConfigOptions<RouteMethod>;
 }
 const buildGetRuleRoute = ({
   licenseState,
   path,
   router,
   excludeFromPublicApi = false,
+  options,
 }: BuildGetRulesRouteParams) => {
   router.get(
     {
       path,
-      options: excludeFromPublicApi
-        ? undefined
-        : {
-            access: 'public',
-            description: `Get rule details`,
-          },
+      options,
       validate: {
         params: getRuleRequestParamsSchemaV1,
       },
@@ -90,4 +87,8 @@ export const getInternalRuleRoute = (
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    options: {
+      access: 'public',
+      description: `Get rule details`,
+    },
   });
