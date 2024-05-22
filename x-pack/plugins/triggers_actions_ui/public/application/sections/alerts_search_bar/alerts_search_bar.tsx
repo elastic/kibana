@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
@@ -30,7 +30,7 @@ export function AlertsSearchBar({
   featureIds,
   ruleTypeId,
   query,
-  filters,
+  initialFilters,
   quickFilters = [],
   onQueryChange,
   onQuerySubmit,
@@ -49,6 +49,7 @@ export function AlertsSearchBar({
     unifiedSearch: {
       ui: { SearchBar },
     },
+    data: dataService,
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
@@ -130,8 +131,8 @@ export function AlertsSearchBar({
             ...menuItem,
             icon: qf.icon ?? 'filterInCircle',
             onClick: () => {
-              if (!filters?.some((f) => compareFilters(f, filter))) {
-                onFiltersUpdated?.([...(filters ?? []), filter]);
+              if (!initialFilters?.some((f) => compareFilters(f, filter))) {
+                onFiltersUpdated?.([...(initialFilters ?? []), filter]);
               }
             },
             'data-test-subj': `quick-filters-item-${qf.name}`,
@@ -150,7 +151,25 @@ export function AlertsSearchBar({
         panels: [],
       };
     }
-  }, [filters, onFiltersUpdated, quickFilters, showFilterBar]);
+  }, [initialFilters, onFiltersUpdated, quickFilters, showFilterBar]);
+
+  useEffect(() => {
+    if (initialFilters) {
+      dataService.query.filterManager.addFilters(initialFilters);
+    }
+
+    const subscription = dataService.query.state$.subscribe((state) => {
+      if (state.changes.filters) {
+        onFiltersUpdated?.(state.state.filters ?? []);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      dataService.query.filterManager.removeAll();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <SearchBar
@@ -160,14 +179,12 @@ export function AlertsSearchBar({
       indexPatterns={loading || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
-      filters={filters}
       additionalQueryBarMenuItems={additionalQueryBarMenuItems}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
       displayStyle="inPage"
       showFilterBar={showFilterBar}
       onQuerySubmit={onSearchQuerySubmit}
-      onFiltersUpdated={onFiltersUpdated}
       onRefresh={onRefresh}
       showDatePicker={showDatePicker}
       showQueryInput={true}

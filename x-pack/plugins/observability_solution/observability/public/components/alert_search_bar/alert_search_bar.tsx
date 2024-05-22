@@ -165,7 +165,7 @@ export function ObservabilityAlertSearchBar({
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           showFilterBar={showFilterBar}
-          filters={filters}
+          initialFilters={filters}
           onFiltersUpdated={onFilterUpdated}
           savedQuery={savedQuery}
           onSavedQueryUpdated={setSavedQuery}

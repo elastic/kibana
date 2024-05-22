@@ -91,9 +91,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
   const [isScopedQueryEnabled, setIsScopedQueryEnabled] = useState(!!initialValue?.scopedQuery);
   const [query, setQuery] = useState<string>(initialValue?.scopedQuery?.kql || '');
-  const [filters, setFilters] = useState<Filter[]>(
-    (initialValue?.scopedQuery?.filters as Filter[]) || []
-  );
+  const [filters, setFilters] = useState<Filter[]>(initialValue?.scopedQuery?.filters || []);
   const [scopedQueryErrors, setScopedQueryErrors] = useState<string[]>([]);
   const hasSetInitialCategories = useRef<boolean>(false);
   const categoryIdsHistory = useRef<string[]>([]);
@@ -468,7 +466,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 <MaintenanceWindowScopedQuery
                   featureIds={featureIds}
                   query={query}
-                  filters={filters}
+                  initialFilters={initialValue?.scopedQuery?.filters}
                   isLoading={isLoadingRuleTypes}
                   isEnabled={isScopedQueryEnabled}
                   errors={scopedQueryErrors}

@@ -13,14 +13,14 @@ import { QuickFiltersMenuItem } from './quick_filters';
 export type QueryLanguageType = 'lucene' | 'kuery';
 
 export interface AlertsSearchBarProps
-  extends Omit<Partial<SearchBarProps>, 'query' | 'onQueryChange' | 'onQuerySubmit'> {
+  extends Omit<Partial<SearchBarProps>, 'query' | 'onQueryChange' | 'onQuerySubmit' | 'filters'> {
   appName: string;
   disableQueryLanguageSwitcher?: boolean;
   featureIds: ValidFeatureId[];
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
-  filters?: Filter[];
+  initialFilters?: Filter[];
   quickFilters?: QuickFiltersMenuItem[];
   showFilterBar?: boolean;
   showDatePicker?: boolean;
