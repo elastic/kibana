@@ -15,9 +15,10 @@ import {
   ReactEmbeddableRenderer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 import ReactDOM from 'react-dom';
 import { useSearchApi } from '@kbn/presentation-publishing';
+import { omit } from 'lodash';
 import { pluginServices } from '../../../public/services';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
@@ -55,27 +56,23 @@ const renderReactEmbeddable = ({
   core: CoreStart;
 }) => {
   // wrap in functional component to allow usage of hooks
-  const RendererWrapper: FC<{ canvasApi: CanvasContainerApi }> = ({ canvasApi }) => {
+  const RendererWrapper: FC<{}> = () => {
     const getAppContext = useGetAppContext(core);
     const searchApi = useSearchApi({ filters: input.filters });
-
-    useMemo(() => {
-      canvasApi.getAppContext = getAppContext;
-    }, [canvasApi, getAppContext]);
-
-    useMemo(() => {
-      canvasApi.filters$ = searchApi.filters$;
-      canvasApi.query$ = searchApi.query$;
-      canvasApi.timeRange$ = searchApi.timeRange$;
-    }, [canvasApi, searchApi]);
 
     return (
       <ReactEmbeddableRenderer
         type={type}
         maybeId={uuid}
-        parentApi={canvasApi}
+        getParentApi={(): CanvasContainerApi => ({
+          ...container,
+          getAppContext,
+          getSerializedStateForChild: () => ({
+            rawState: omit(input, ['disableTriggers', 'filters']),
+          }),
+          ...searchApi,
+        })}
         key={`${type}_${uuid}`}
-        state={{ rawState: input }}
         onAnyStateChange={(newState) => {
           const newExpression = embeddableInputToExpression(
             newState.rawState as unknown as EmbeddableInput,
@@ -95,7 +92,7 @@ const renderReactEmbeddable = ({
         className={CANVAS_EMBEDDABLE_CLASSNAME}
         style={{ width: '100%', height: '100%', cursor: 'auto' }}
       >
-        <RendererWrapper canvasApi={container} />
+        <RendererWrapper />
       </div>
     </KibanaRenderContextProvider>
   );

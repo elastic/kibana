@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { fromKueryExpression } from '@kbn/es-query';
+import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { getKueryFields } from './utils/get_kuery_fields';
 import {
   AGENT_NAME,
   SERVICE_NAME,
@@ -51,7 +50,7 @@ export function validateServiceGroupKuery(kuery: string): {
   message?: string;
 } {
   try {
-    const kueryFields = getKueryFields([fromKueryExpression(kuery)]);
+    const kueryFields = getKqlFieldNamesFromExpression(kuery);
     const unsupportedKueryFields = kueryFields.filter((fieldName) => !isSupportedField(fieldName));
     if (unsupportedKueryFields.length === 0) {
       return { isValidFields: true, isValidSyntax: true };

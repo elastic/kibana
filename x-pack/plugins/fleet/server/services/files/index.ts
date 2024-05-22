@@ -147,7 +147,7 @@ export async function fileIdsWithoutChunksByIndex(
  */
 export function updateFilesStatus(
   esClient: ElasticsearchClient,
-  abortController: AbortController,
+  abortController: AbortController | undefined,
   fileIdsByIndex: FileIdsByIndex,
   status: FileStatus
 ): Promise<UpdateByQueryResponse[]> {
@@ -168,7 +168,7 @@ export function updateFilesStatus(
               lang: 'painless',
             },
           },
-          { signal: abortController.signal }
+          abortController ? { signal: abortController.signal } : {}
         )
         .catch((err) => {
           Error.captureStackTrace(err);
