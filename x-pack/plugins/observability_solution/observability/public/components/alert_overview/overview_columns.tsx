@@ -128,7 +128,10 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
               {ruleCriteria.map((criteria, criticalIndex) => {
                 const { threshold, comparator } = criteria;
                 let formattedComparator = comparator.toUpperCase();
-                if (comparator === COMPARATORS.NOT_BETWEEN || LEGACY_COMPARATORS.OUTSIDE_RANGE) {
+                if (
+                  comparator === COMPARATORS.NOT_BETWEEN ||
+                  comparator === LEGACY_COMPARATORS.OUTSIDE_RANGE
+                ) {
                   // No need for i18n as we are using the enum value, we only need a space.
                   formattedComparator = 'NOT BETWEEN';
                 }
