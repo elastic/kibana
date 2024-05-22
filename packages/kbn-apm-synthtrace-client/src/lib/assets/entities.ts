@@ -17,6 +17,7 @@ export interface EntityDocument extends Fields {
   'entity.data_stream.type': string[];
   'entity.identity.service.environment'?: string;
   'entity.identity.service.name': string;
+  'entity.agent.name'?: string;
 }
 
 export class Entity<F extends EntityDocument> extends Serializable<F> {}

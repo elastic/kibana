@@ -30,6 +30,7 @@ export function createTracesServiceEntitiesAggregator() {
           'entity.firstSeen': firstSeen,
           'entity.indexPatterns': ['metrics-*'],
           'entity.data_stream.type': ['metrics'],
+          'entity.agent.name': event['agent.name'],
         };
       },
     },
