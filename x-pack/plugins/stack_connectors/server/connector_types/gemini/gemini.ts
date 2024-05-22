@@ -119,25 +119,36 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
   /** Retrieve access token based on the GCP service account credential json file */
   private async getAccessToken(): Promise<string | null> {
-    const credentials = JSON.parse(this.secrets.credentialsJson);
+    let credentials;
 
-    const auth = new GoogleAuth({
-      credentials,
-      scopes: 'https://www.googleapis.com/auth/cloud-platform',
-    });
-
-    const token = await auth.getAccessToken();
-    if (token) {
-      GeminiConnector.token = token;
-      // Clear any existing timeout
-      clearTimeout(GeminiConnector.tokenExpiryTimeout);
-
-      // Set a timeout to reset the token after 55 minutes (it expires after 60 minutes)
-      GeminiConnector.tokenExpiryTimeout = setTimeout(() => {
-        GeminiConnector.token = null;
-      }, 55 * 60 * 1000);
+    // Validate the service account credentials JSON file input
+    try {
+      credentials = JSON.parse(this.secrets.credentialsJson);
+    } catch (error) {
+      return `Failed to parse credentials JSON file: Invalid JSON format: ${error.message ?? ''}`;
     }
-    return token || null;
+
+    try {
+      const auth = new GoogleAuth({
+        credentials,
+        scopes: 'https://www.googleapis.com/auth/cloud-platform',
+      });
+
+      const token = await auth.getAccessToken();
+      if (token) {
+        GeminiConnector.token = token;
+        // Clear any existing timeout
+        clearTimeout(GeminiConnector.tokenExpiryTimeout);
+
+        // Set a timeout to reset the token after 55 minutes (it expires after 60 minutes)
+        GeminiConnector.tokenExpiryTimeout = setTimeout(() => {
+          GeminiConnector.token = null;
+        }, 55 * 60 * 1000);
+      }
+      return token || null;
+    } catch (error) {
+      return `Failed to get access token ${error.message ?? ''}`;
+    }
   }
 
   /**

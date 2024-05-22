@@ -18,9 +18,12 @@ export const GCP_REGION = i18n.translate('xpack.stackConnectors.components.gemin
   defaultMessage: 'GCP Region',
 });
 
-export const GCP_PROJECT_ID = i18n.translate('xpack.stackConnectors.components.gemini.gcpProjectID', {
-  defaultMessage: 'GCP Project ID',
-});
+export const GCP_PROJECT_ID = i18n.translate(
+  'xpack.stackConnectors.components.gemini.gcpProjectID',
+  {
+    defaultMessage: 'GCP Project ID',
+  }
+);
 
 export const DEFAULT_MODEL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.gemini.defaultModelTextFieldLabel',
@@ -33,9 +36,12 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.gemini.se
   defaultMessage: 'Secret',
 });
 
-export const CREDENTIALS_JSON = i18n.translate('xpack.stackConnectors.components.gemini.credentialsJSON', {
-  defaultMessage: 'Credentials JSON',
-});
+export const CREDENTIALS_JSON = i18n.translate(
+  'xpack.stackConnectors.components.gemini.credentialsJSON',
+  {
+    defaultMessage: 'Credentials JSON',
+  }
+);
 
 export const gemini = i18n.translate('xpack.stackConnectors.components.gemini.title', {
   defaultMessage: 'Google Gemini',
