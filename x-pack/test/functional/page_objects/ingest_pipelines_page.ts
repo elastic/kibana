@@ -32,7 +32,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
-      await PageObjects.common.sleep(250);
+      await pageObjects.common.sleep(250);
       await testSubjects.click('createPipelineDropdown');
       await testSubjects.click('createNewPipeline');
 
@@ -83,7 +83,7 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async createPipelineFromCsv({ name }: { name: string }) {
-      await PageObjects.common.sleep(250);
+      await pageObjects.common.sleep(250);
       await testSubjects.click('createPipelineDropdown');
       await testSubjects.click('createPipelineFromCsv');
 
