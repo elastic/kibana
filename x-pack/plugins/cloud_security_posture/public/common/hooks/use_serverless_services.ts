@@ -38,8 +38,9 @@ const fetchUpsellingService = async (pluginsOnStart: PluginContractResolver) => 
 };
 
 export const useServerlessServices = (pluginsOnStart: PluginContractResolver) => {
-  const { cloud } = useKibana().services;
+  const { cloud, plugins, ...rest } = useKibana().services;
   const isServerless = !!cloud.serverless?.projectType;
+  console.log(rest);
 
   const { data: upsellingService } = useQuery({
     queryKey: [CSP_UPSELLING_SERVICES_KEY],

@@ -21,40 +21,6 @@ import type {
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import { SetupContext } from './application/setup_context';
 
-// const LazyCspPolicyTemplateForm = lazy(
-//   () => import('./components/fleet_extensions/policy_template_form')
-// );
-
-// const LazyCspPolicyTemplateForm = React.lazy(async ({ props, core }) => {
-//   const { CspPolicyTemplateForm } = await import(
-//     './components/fleet_extensions/policy_template_form'
-//   );
-//
-//   console.log(props, core);
-//
-//   // Wrap the lazy-loaded component with the HOC
-//   return {
-//     default: CspPolicyTemplateForm({ props, core }),
-//   };
-// });
-
-// const LazyCspPolicyTemplateForm = (props: any, core: CoreStart) => {
-//   const [upselling, setUpselling] = React.useState();
-//
-//   React.useEffect(() => {
-//     const getUpselling = async () => {
-//       const res = await core.plugins.onStart('securitySolution');
-//       const service = await res.securitySolution?.contract.getUpselling();
-//       console.log(service?.sections?.get('cloud_security_posture'));
-//       setUpselling(service);
-//     };
-//     getUpselling();
-//   }, [core.plugins]);
-//
-//   if (!upselling?.sections) return <></>;
-//   return <CspPolicyTemplateForm {...props} upselling={upselling} />;
-// };
-
 const LazyCspPolicyTemplateForm = lazy(
   () => import('./components/fleet_extensions/policy_template_form')
 );
@@ -91,16 +57,6 @@ export class CspPlugin
   }
 
   public start(core: CoreStart, plugins: CspClientPluginStartDeps): CspClientPluginStart {
-    // core.plugins.onStart('securitySolution').then((res) => {
-    //   console.log('securitySolution plugin started successfully:', res);
-    // });
-
-    // plugins.fleet.registerExtension({
-    //   package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-    //   view: 'package-policy-replace-define-step',
-    //   Component: LazyCspPolicyTemplateForm,
-    // });
-
     plugins.fleet.registerExtension({
       package: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
       view: 'package-policy-replace-define-step',

@@ -440,6 +440,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+      hi
+    </CreatePackagePolicySinglePageLayout>
+  );
+
+  return (
+    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
         {formState === 'CONFIRM' && agentPolicy && (
           <ConfirmDeployAgentPolicyModal
