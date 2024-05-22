@@ -24,6 +24,7 @@ import {
   RISK_ENGINE_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { removeLegacyTransforms } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { EntityRiskScoreRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/common';
 import {
   createRule,
@@ -75,7 +76,7 @@ export const createAndSyncRuleAndAlertsFactory =
     log,
     namespace,
   }: {
-    supertest: SuperTest.SuperTest<SuperTest.Test>;
+    supertest: SuperTest.Agent;
     log: ToolingLog;
     namespace?: string;
   }) =>
@@ -397,14 +398,11 @@ export const clearLegacyTransforms = async ({
   es: Client;
   log: ToolingLog;
 }): Promise<void> => {
-  const transforms = legacyTransformIds.map((transform) =>
-    es.transform.deleteTransform({
-      transform_id: transform,
-      force: true,
-    })
-  );
   try {
-    await Promise.all(transforms);
+    await removeLegacyTransforms({
+      namespace: 'default',
+      esClient: es,
+    });
   } catch (e) {
     log.warning(`Error deleting legacy transforms: ${e.message}`);
   }
@@ -414,7 +412,7 @@ export const clearLegacyDashboards = async ({
   supertest,
   log,
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   log: ToolingLog;
 }): Promise<void> => {
   try {
@@ -424,8 +422,7 @@ export const clearLegacyDashboards = async ({
       )
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200);
+      .send();
 
     await supertest
       .post(
@@ -433,8 +430,7 @@ export const clearLegacyDashboards = async ({
       )
       .set('kbn-xsrf', 'true')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .send()
-      .expect(200);
+      .send();
   } catch (e) {
     log.warning(`Error deleting legacy dashboards: ${e.message}`);
   }
@@ -485,10 +481,7 @@ export const getLegacyRiskScoreDashboards = async ({
   return savedObejectLens?.saved_objects.filter((s) => s?.attributes?.title?.includes('Risk'));
 };
 
-export const riskEngineRouteHelpersFactory = (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  namespace?: string
-) => ({
+export const riskEngineRouteHelpersFactory = (supertest: SuperTest.Agent, namespace?: string) => ({
   init: async (expectStatusCode: number = 200) =>
     await supertest
       .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
@@ -540,7 +533,7 @@ interface Credentials {
 }
 
 export const riskEngineRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  supertestWithoutAuth: SuperTest.Agent,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: Credentials) =>
@@ -580,11 +573,7 @@ export const riskEngineRouteHelpersFactoryNoAuth = (
       .expect(expectStatusCode),
 });
 
-export const installLegacyRiskScore = async ({
-  supertest,
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-}) => {
+export const installLegacyRiskScore = async ({ supertest }: { supertest: SuperTest.Agent }) => {
   await supertest
     .post('/internal/risk_score')
     .set('kbn-xsrf', 'true')

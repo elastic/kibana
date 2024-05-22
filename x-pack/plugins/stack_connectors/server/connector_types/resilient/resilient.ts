@@ -7,7 +7,7 @@
 
 import { AxiosError } from 'axios';
 import { omitBy, isNil } from 'lodash/fp';
-import { CaseConnector, ServiceParams } from '@kbn/actions-plugin/server';
+import { CaseConnector, getBasicAuthHeader, ServiceParams } from '@kbn/actions-plugin/server';
 import { schema, Type } from '@kbn/config-schema';
 import { getErrorMessage } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
@@ -96,12 +96,10 @@ export class ResilientConnector extends CaseConnector<
   }
 
   private getAuthHeaders() {
-    const token = Buffer.from(
-      this.secrets.apiKeyId + ':' + this.secrets.apiKeySecret,
-      'utf8'
-    ).toString('base64');
-
-    return { Authorization: `Basic ${token}` };
+    return getBasicAuthHeader({
+      username: this.secrets.apiKeyId,
+      password: this.secrets.apiKeySecret,
+    });
   }
 
   private getOrgUrl() {
