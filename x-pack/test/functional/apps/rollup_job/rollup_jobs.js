@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }) {
 
   // FLAKY: https://github.com/elastic/kibana/issues/183925
   // FLAKY: https://github.com/elastic/kibana/issues/183926
+  // FLAKY: https://github.com/elastic/kibana/issues/183928
   describe.skip('rollup job', function () {
     // Since rollups can only be created once with the same name (even if you delete it),
     // we add the Date.now() to avoid name collision.
