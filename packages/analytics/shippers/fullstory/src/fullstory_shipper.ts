@@ -30,7 +30,7 @@ const PAGE_VARS_KEYS = [
 
   // Deployment-specific keys
   'version', // x4, split to version_major, version_minor, version_patch for easier filtering
-  'buildNum', // May be useful for Serverless, TODO: replace with buildHash
+  'buildSha', // Useful for Serverless
   'cloudId',
   'deploymentId',
   'projectId', // projectId and deploymentId are mutually exclusive. They shouldn't be sent in the same offering.
