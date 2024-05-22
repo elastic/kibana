@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { EuiFlyout } from '@elastic/eui';
+import { action } from '@storybook/addon-actions';
 import {
   StoriesProvider,
   StoriesProviderKeyCreationError,
@@ -22,7 +23,7 @@ export default {
 export const Default = () => {
   return (
     <EuiFlyout size="s" onClose={() => {}}>
-      <StoriesProvider>
+      <StoriesProvider onTelemetryEvent={action('onTelemetryEvent')}>
         <ConnectionDetailsFlyoutContent />
       </StoriesProvider>
     </EuiFlyout>
