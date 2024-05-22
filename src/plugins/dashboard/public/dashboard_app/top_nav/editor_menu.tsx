@@ -31,8 +31,7 @@ import {
   getAddPanelActionMenuItems,
   type GroupedAddPanelActions,
 } from './add_panel_action_menu_items';
-import { openAddPanelFlyout } from './add_panel_flyout';
-
+import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
 export interface FactoryGroup {
   id: string;
   appName: string;
@@ -393,7 +392,7 @@ export const EditorMenu = ({
         defaultMessage: 'Add panel',
       })}
       onClick={() =>
-        openAddPanelFlyout({
+        openDashboardPanelSelectionFlyout({
           getPanels: getEditorMenuPanels,
         })
       }

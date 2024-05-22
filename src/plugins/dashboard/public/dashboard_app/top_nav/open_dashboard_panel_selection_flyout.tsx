@@ -24,22 +24,28 @@ import {
   EuiFieldSearch,
   EuiText,
   useEuiTheme,
-  EuiFlyoutProps,
+  type EuiFlyoutProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pluginServices } from '../../services/plugin_services';
 import type { DashboardServices } from '../../services/types';
 
-interface OpenAddPanelFlyoutArgs {
+interface OpenDashboardPanelSelectionFlyoutArgs {
   getPanels: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
+  flyoutPanelPaddingSize?: EuiFlyoutProps['paddingSize'];
 }
 
-interface Props extends Pick<OpenAddPanelFlyoutArgs, 'getPanels'> {
+interface Props extends Pick<OpenDashboardPanelSelectionFlyoutArgs, 'getPanels'> {
   /** Handler to close flyout */
   close: () => void;
+  /** Padding for flyout  */
+  paddingSize: NonNullable<OpenDashboardPanelSelectionFlyoutArgs['flyoutPanelPaddingSize']>;
 }
 
-export function openAddPanelFlyout({ getPanels }: OpenAddPanelFlyoutArgs) {
+export function openDashboardPanelSelectionFlyout({
+  getPanels,
+  flyoutPanelPaddingSize = 'l',
+}: OpenDashboardPanelSelectionFlyoutArgs) {
   const {
     overlays,
     analytics,
@@ -48,26 +54,33 @@ export function openAddPanelFlyout({ getPanels }: OpenAddPanelFlyoutArgs) {
   // eslint-disable-next-line prefer-const
   let flyoutRef: ReturnType<DashboardServices['overlays']['openFlyout']>;
 
-  const paddingSize: EuiFlyoutProps['paddingSize'] = 'l';
-
   const mount = toMountPoint(
     React.createElement(function () {
       const closeFlyout = () => flyoutRef.close();
-      return <AddPanelFlyout close={closeFlyout} getPanels={getPanels} />;
+      return (
+        <DashboardPanelSelectionListFlyout
+          close={closeFlyout}
+          {...{ paddingSize: flyoutPanelPaddingSize, getPanels }}
+        />
+      );
     }),
     { analytics, theme, i18n }
   );
 
   flyoutRef = overlays.openFlyout(mount, {
     size: 'm',
-    paddingSize,
+    paddingSize: flyoutPanelPaddingSize,
     'aria-labelledby': 'add-panels-flyout',
   });
 
   return flyoutRef;
 }
 
-export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
+export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
+  close,
+  getPanels,
+  paddingSize,
+}) => {
   const { euiTheme } = useEuiTheme();
   const panels = useRef(getPanels(close));
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -99,7 +112,7 @@ export const AddPanelFlyout: React.FC<Props> = ({ close, getPanels }) => {
             grow={false}
             css={{
               position: 'sticky',
-              top: euiTheme.size.l,
+              top: euiTheme.size[paddingSize],
               zIndex: 1,
             }}
           >
