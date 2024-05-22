@@ -21,7 +21,7 @@ export interface AIAssistantDataClientParams {
   kibanaVersion: string;
   spaceId: string;
   logger: Logger;
-  indexPatternsResorceName: string;
+  indexPatternsResourceName: string;
   currentUser: AuthenticatedUser | null;
 }
 
@@ -38,7 +38,7 @@ export class AIAssistantDataClient {
 
   constructor(public readonly options: AIAssistantDataClientParams) {
     this.indexTemplateAndPattern = getIndexTemplateAndPattern(
-      this.options.indexPatternsResorceName,
+      this.options.indexPatternsResourceName,
       this.options.spaceId ?? DEFAULT_NAMESPACE_STRING
     );
     this.currentUser = this.options.currentUser;
