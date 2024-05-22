@@ -256,7 +256,7 @@ export const getCloudSecurityUsageRecord = async ({
   try {
     const searchFrom = getSearchStartDate(lastSuccessfulReport);
     const foo = await indexHasDataInDateRange(esClient, cloudSecuritySolution, searchFrom);
-    logger.error(`is index contains data: ${foo}`);
+    logger.error(`${cloudSecuritySolution} is index contains data: ${foo}`);
     if (!(await indexHasDataInDateRange(esClient, cloudSecuritySolution, searchFrom))) return;
 
     const periodSeconds = Math.floor((new Date().getTime() - searchFrom.getTime()) / 1000);
@@ -267,7 +267,7 @@ export const getCloudSecurityUsageRecord = async ({
       searchFrom
     );
 
-    logger.error(`Assest Aggregation: ${assetCountAggregations}`);
+    logger.error(`Assest Aggregation: ${JSON.stringify(assetCountAggregations)}`);
 
     const usageRecords = await getUsageRecords(
       assetCountAggregations,
@@ -279,7 +279,7 @@ export const getCloudSecurityUsageRecord = async ({
       logger
     );
 
-    logger.error(`usage records: ${usageRecords}`);
+    logger.error(`usage records: ${JSON.stringify(usageRecords)}`);
 
     return usageRecords;
   } catch (err) {
