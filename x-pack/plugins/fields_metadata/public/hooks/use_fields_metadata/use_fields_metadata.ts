@@ -18,9 +18,9 @@ interface UseFieldsMetadataFactoryDeps {
   fieldsMetadataClient: IFieldsMetadataClient;
 }
 
-type UseFieldsMetadataParams = FindFieldsMetadataRequestQuery;
+export type UseFieldsMetadataParams = FindFieldsMetadataRequestQuery;
 
-interface UseFieldsMetadataReturnType {
+export interface UseFieldsMetadataReturnType {
   fieldsMetadata: FindFieldsMetadataResponsePayload['fields'] | undefined;
   loading: boolean;
   error: Error | undefined;

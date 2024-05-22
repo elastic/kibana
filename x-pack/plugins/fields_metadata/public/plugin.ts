@@ -6,7 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
-import { createUseFieldsMetadataHook } from './hooks/use_fields_metadata/use_fields_metadata';
+import { createUseFieldsMetadataHook } from './hooks/use_fields_metadata';
 import { FieldsMetadataService } from './services/fields_metadata';
 import {
   FieldsMetadataClientCoreSetup,

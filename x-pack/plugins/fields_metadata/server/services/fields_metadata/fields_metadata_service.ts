@@ -14,7 +14,7 @@ import { IntegrationFieldsExtractor } from './repositories/types';
 import { FieldsMetadataServiceSetup, FieldsMetadataServiceStart } from './types';
 
 export class FieldsMetadataService {
-  private integrationFieldsExtractor: IntegrationFieldsExtractor = () => ({});
+  private integrationFieldsExtractor: IntegrationFieldsExtractor = () => Promise.resolve({});
 
   constructor(private readonly logger: Logger) {}
 

@@ -11,20 +11,14 @@ import {
 } from './services/fields_metadata/fields_metadata_service.mock';
 import { FieldsMetadataServerSetup, FieldsMetadataServerStart } from './types';
 
-const createFieldsMetadataSetupMock = () => {
-  const fieldsMetadataSetupMock: jest.Mocked<FieldsMetadataServerSetup> = {
-    fieldsMetadata: createFieldsMetadataServiceSetupMock(),
-  };
+const createFieldsMetadataSetupMock = (): jest.Mocked<FieldsMetadataServerSetup> => ({
+  registerIntegrationFieldsExtractor:
+    createFieldsMetadataServiceSetupMock().registerIntegrationFieldsExtractor,
+});
 
-  return fieldsMetadataSetupMock;
-};
-
-const createFieldsMetadataStartMock = () => {
-  const fieldsMetadataStartMock: jest.Mocked<FieldsMetadataServerStart> = {
-    fieldsMetadata: createFieldsMetadataServiceStartMock(),
-  };
-  return fieldsMetadataStartMock;
-};
+const createFieldsMetadataStartMock = (): jest.Mocked<FieldsMetadataServerStart> => ({
+  client: createFieldsMetadataServiceStartMock().getClient(),
+});
 
 export const fieldsMetadataPluginMock = {
   createSetupContract: createFieldsMetadataSetupMock,
