@@ -101,7 +101,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       await Promise.all([
         createSynthtraceErrors(), // create synthtrace
-        ui.auth.login(), // login
+        ui.auth.login('editor'), // login
       ]);
     });
 
