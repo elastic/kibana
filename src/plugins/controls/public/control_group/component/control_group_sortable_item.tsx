@@ -74,7 +74,7 @@ const SortableControlInner = forwardRef<
     const grow = panels[embeddableId].grow;
     const width = panels[embeddableId].width;
     const title = panels[embeddableId].explicitInput.title;
-    console.log('grow', grow, 'width', width);
+
     const dragHandle = (
       <button
         ref={dragHandleRef}

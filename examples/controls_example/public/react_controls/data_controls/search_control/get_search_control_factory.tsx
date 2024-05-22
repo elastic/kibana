@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useState } from 'react';
+import deepEqual from 'react-fast-compare';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged } from 'rxjs';
+
 import { EuiFieldSearch, EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, merge } from 'rxjs';
+
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
 import { SearchControlState, SearchControlTechniques, SEARCH_CONTROL_TYPE } from './types';
@@ -69,9 +71,7 @@ export const getSearchEmbeddableFactory = ({
       );
     },
     buildControl: (initialState, buildApi, uuid, parentApi) => {
-      console.log(initialState);
-
-      const searchString = new BehaviorSubject<string>(initialState.searchString);
+      const searchString = new BehaviorSubject<string | undefined>(initialState.searchString);
       const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
       );
@@ -96,22 +96,41 @@ export const getSearchEmbeddableFactory = ({
           searchTechnique,
           (newTechnique: SearchControlTechniques | undefined) => searchTechnique.next(newTechnique),
         ],
-        searchString: [searchString, (newString: string) => searchString.next(newString)],
+        searchString: [
+          searchString,
+          (newString: string | undefined) =>
+            searchString.next(newString?.length === 0 ? undefined : newString),
+        ],
       });
 
-      const onSearchStringChanged = searchString
-        .pipe(debounceTime(100), distinctUntilChanged())
-        .subscribe((newValue) => {
+      /**
+       * If either the search string or the search technique changes, recalulate the output filter
+       */
+      const onSearchStringChanged = combineLatest([searchString, searchTechnique])
+        .pipe(debounceTime(100), distinctUntilChanged(deepEqual))
+        .subscribe(([newSearchString, currentSearchTechnnique]) => {
           const currentDataView = dataControlApi.dataViews.getValue()?.[0];
-          const currentSearchTechnnique = searchTechnique.getValue();
           const currentField = dataControlStateManager.fieldName.getValue();
 
           if (currentDataView && currentField) {
-            if (newValue) {
-              api.setOutputFilter({
-                query: { match: { [currentField]: { query: newValue } } },
-                meta: { index: currentDataView.id },
-              });
+            if (newSearchString) {
+              api.setOutputFilter(
+                currentSearchTechnnique === 'match'
+                  ? {
+                      query: { match: { [currentField]: { query: newSearchString } } },
+                      meta: { index: currentDataView.id },
+                    }
+                  : {
+                      query: {
+                        simple_query_string: {
+                          query: newSearchString,
+                          fields: [currentField],
+                          default_operator: 'and',
+                        },
+                      },
+                      meta: { index: currentDataView.id },
+                    }
+              );
             } else {
               api.setOutputFilter(undefined);
             }
@@ -119,20 +138,16 @@ export const getSearchEmbeddableFactory = ({
         });
 
       /**
-       *  When the field changes (which can happen if either the field name or the data view id changes),
+       *  When the field changes (which can happen if either the field name or the dataview id changes),
        *  clear the previous search string.
        */
       const onFieldChanged = combineLatest([
         dataControlStateManager.fieldName,
         dataControlStateManager.dataViewId,
       ])
-        .pipe(
-          distinctUntilChanged(([oldFieldName, oldDataViewId], [newFieldName, newDataViewId]) => {
-            return oldFieldName === newFieldName && oldDataViewId === newDataViewId;
-          })
-        )
-        .subscribe(([newFieldName, newDataViewId]) => {
-          console.log('result', { newFieldName, newDataViewId });
+        .pipe(distinctUntilChanged(deepEqual))
+        .subscribe(() => {
+          searchString.next(undefined);
         });
 
       return {
@@ -144,20 +159,23 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               // cleanup on unmount
               onSearchStringChanged.unsubscribe();
+              onFieldChanged.unsubscribe();
             };
           }, []);
 
           return (
             <EuiFieldSearch
               incremental={true}
-              value={currentSearch}
+              value={currentSearch ?? ''}
               onChange={(event) => {
                 setCurrentSearch(event.target.value);
               }}
               onSearch={(searchTerm) => {
                 searchString.next(searchTerm);
               }}
-              placeholder="Search..."
+              placeholder={i18n.translate('controls.searchControl.placeholder', {
+                defaultMessage: 'Search...',
+              })}
               className="euiFieldText--inGroup"
               id={uuid}
               fullWidth
