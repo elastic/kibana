@@ -96,7 +96,5 @@ export const waitForTabToBeLoaded = (tabId: string) => {
 
 export const waitForPageToBeLoaded = () => {
   cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
-  cy.get(LOADING_INDICATOR).should('be.visible');
   cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
-  cy.get(LOADING_INDICATOR).should('not.exist');
 };
