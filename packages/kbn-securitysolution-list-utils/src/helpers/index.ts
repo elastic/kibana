@@ -1031,11 +1031,13 @@ export const getMappingConflictsInfo = (field: DataViewField): FieldConflictsInf
  */
 export const getHasWrongOperator = (items: ExceptionsBuilderReturnExceptionItem[]): boolean => {
   return items[0]?.entries.some((e) => {
-    return (
-      validateHasWildcardWithWrongOperator({
-        operator: (e as ExceptionsBuilderReturnExceptionItem[number]).type,
-        value: (e as ExceptionsBuilderReturnExceptionItem[number]).value,
-      }) === true
-    );
+    if(e.type !== 'list' && 'value' in e) {
+      return (
+        validateHasWildcardWithWrongOperator({
+          operator: e.type,
+          value: e.value,
+        })
+      );
+    }
   });
 };

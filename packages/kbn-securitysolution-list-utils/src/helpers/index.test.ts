@@ -184,16 +184,19 @@ describe('Helpers', () => {
   describe('getHasWrongOperator', () => {
     test('it returns true if there is at least one exception entry with a wildcard and the wrong operator', () => {
       expect(
-        getHasWrongOperator([{ entries: [{ type: 'match', value: 'withwildcard*' }] }])
+        getHasWrongOperator([
+          { description: '', name:'', type:'simple', entries: [{ type: 'match', value: 'withwildcard*', field: '', operator: 'included' }] },
+        ])
       ).toBeTruthy();
     });
     test('it returns false if there are no exception entries with a wildcard and the wrong operator', () => {
       expect(
         getHasWrongOperator([
           {
+            description: '', name:'', type:'simple',
             entries: [
-              { type: 'match', value: 'nowildcard' },
-              { type: 'wildcard', value: 'withwildcard*' },
+              { type: 'match', value: 'nowildcard', field: '', operator: 'excluded' },
+              { type: 'wildcard', value: 'withwildcard*', field: '', operator: 'included' },
             ],
           },
         ])

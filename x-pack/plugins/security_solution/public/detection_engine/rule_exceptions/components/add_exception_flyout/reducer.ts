@@ -134,7 +134,7 @@ export type Action =
     }
   | {
       type: 'setWildcardWithWrongOperator';
-      wildcardWarningExists: boolean;
+      warningExists: boolean;
     };
 
 export const createExceptionItemsReducer =
@@ -263,7 +263,6 @@ export const createExceptionItemsReducer =
       }
       case 'setListType': {
         const { listType } = action;
-
         return {
           ...state,
           listType,
