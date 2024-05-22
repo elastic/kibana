@@ -15,7 +15,10 @@ import { syntheticsMonitorType, syntheticsParamType } from '../common/types/save
 import { SYNTHETICS_RULE_TYPES } from '../common/constants/synthetics_alerts';
 import { privateLocationsSavedObjectName } from '../common/saved_objects/private_locations';
 import { PLUGIN } from '../common/constants/plugin';
-import { settingsObjectType, uptimeSettingsObjectType } from './saved_objects/synthetics_settings';
+import {
+  syntheticsSettingsObjectType,
+  uptimeSettingsObjectType,
+} from './saved_objects/synthetics_settings';
 import { syntheticsApiKeyObjectType } from './saved_objects/service_api_key';
 
 const UPTIME_RULE_TYPES = [
@@ -63,7 +66,7 @@ export const uptimeFeature = {
       api: ['uptime-read', 'uptime-write', 'lists-all', 'rac'],
       savedObject: {
         all: [
-          settingsObjectType,
+          syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
           privateLocationsSavedObjectName,
@@ -94,10 +97,12 @@ export const uptimeFeature = {
         all: [],
         read: [
           syntheticsParamType,
-          settingsObjectType,
+          syntheticsSettingsObjectType,
           syntheticsMonitorType,
           syntheticsApiKeyObjectType,
           privateLocationsSavedObjectName,
+          // uptime settings object is also registered here since feature is shared between synthetics and uptime
+          uptimeSettingsObjectType,
         ],
       },
       alerting: {

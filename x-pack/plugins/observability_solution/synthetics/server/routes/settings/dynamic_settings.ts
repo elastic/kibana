@@ -21,7 +21,7 @@ export const createGetDynamicSettingsRoute: SyntheticsRestApiRouteFactory<
   validate: false,
   handler: async ({ savedObjectsClient }) => {
     const dynamicSettingsAttributes: DynamicSettingsAttributes =
-      await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+      await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
     return fromAttribute(dynamicSettingsAttributes);
   },
 });
@@ -35,9 +35,9 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () 
   writeAccess: true,
   handler: async ({ savedObjectsClient, request }): Promise<DynamicSettingsAttributes> => {
     const newSettings = request.body;
-    const prevSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
+    const prevSettings = await savedObjectsAdapter.getSyntheticsDynamicSettings(savedObjectsClient);
 
-    const attr = await savedObjectsAdapter.setUptimeDynamicSettings(savedObjectsClient, {
+    const attr = await savedObjectsAdapter.setSyntheticsDynamicSettings(savedObjectsClient, {
       ...prevSettings,
       ...newSettings,
     } as DynamicSettingsAttributes);
@@ -48,7 +48,6 @@ export const createPostDynamicSettingsRoute: SyntheticsRestApiRouteFactory = () 
 
 const fromAttribute = (attr: DynamicSettingsAttributes) => {
   return {
-    heartbeatIndices: attr.heartbeatIndices,
     certExpirationThreshold: attr.certExpirationThreshold,
     certAgeThreshold: attr.certAgeThreshold,
     defaultConnectors: attr.defaultConnectors,

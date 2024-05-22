@@ -12,7 +12,13 @@ import {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import { syntheticsSettings } from './synthetics_settings';
+import {
+  syntheticsSettings,
+  syntheticsSettingsObjectId,
+  syntheticsSettingsObjectType,
+  uptimeSettingsObjectId,
+  uptimeSettingsObjectType,
+} from './synthetics_settings';
 import {
   SYNTHETICS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
@@ -20,7 +26,6 @@ import {
 import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 import { DynamicSettingsAttributes } from '../runtime_types/settings';
-import { settingsObjectId, settingsObjectType } from './uptime_settings';
 import {
   getSyntheticsMonitorSavedObjectType,
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
@@ -48,37 +53,53 @@ export const registerUptimeSavedObjects = (
   encryptedSavedObjects.registerType(SYNTHETICS_SECRET_ENCRYPTED_TYPE);
 };
 
-export const savedObjectsAdapter: UMSavedObjectsAdapter = {
-  getUptimeDynamicSettings: async (
+export const savedObjectsAdapter = {
+  getSyntheticsDynamicSettings: async (
     client: SavedObjectsClientContract
   ): Promise<DynamicSettingsAttributes> => {
     try {
-      const obj = await client.get<DynamicSettingsAttributes>(settingsObjectType, settingsObjectId);
+      const obj = await client.get<DynamicSettingsAttributes>(
+        syntheticsSettingsObjectType,
+        syntheticsSettingsObjectId
+      );
       return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
     } catch (getErr) {
-      const config = savedObjectsAdapter.config;
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
-        if (config?.index) {
-          return { ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES };
-        }
-        return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+        // If the object doesn't exist, check to see if uptime settings exist
+        return getUptimeDynamicSettings(client);
       }
       throw getErr;
     }
   },
-  setUptimeDynamicSettings: async (
+  setSyntheticsDynamicSettings: async (
     client: SavedObjectsClientContract,
     settings: DynamicSettingsAttributes
   ) => {
     const settingsObject = await client.create<DynamicSettingsAttributes>(
-      settingsObjectType,
+      syntheticsSettingsObjectType,
       settings,
       {
-        id: settingsObjectId,
+        id: syntheticsSettingsObjectId,
         overwrite: true,
       }
     );
 
     return settingsObject.attributes;
   },
+};
+
+const getUptimeDynamicSettings = async (client: SavedObjectsClientContract) => {
+  try {
+    const obj = await client.get<DynamicSettingsAttributes>(
+      uptimeSettingsObjectType,
+      uptimeSettingsObjectId
+    );
+    return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+  } catch (getErr) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
+      // If the object doesn't exist, check to see if uptime settings exist
+      return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
+    }
+    throw getErr;
+  }
 };

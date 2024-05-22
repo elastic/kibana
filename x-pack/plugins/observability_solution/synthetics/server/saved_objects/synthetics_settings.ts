@@ -9,11 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 export const uptimeSettingsObjectType = 'uptime-dynamic-settings';
-export const settingsObjectType = 'synthetics-dynamic-settings';
-export const settingsObjectId = 'synthetics-dynamic-settings-singleton';
+export const uptimeSettingsObjectId = 'uptime-dynamic-settings-singleton';
+
+export const syntheticsSettingsObjectType = 'synthetics-dynamic-settings';
+export const syntheticsSettingsObjectId = 'synthetics-dynamic-settings-singleton';
 
 export const syntheticsSettings: SavedObjectsType = {
-  name: settingsObjectType,
+  name: syntheticsSettingsObjectType,
   hidden: false,
   namespaceType: 'single',
   mappings: {
