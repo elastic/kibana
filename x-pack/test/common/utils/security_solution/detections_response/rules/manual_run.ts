@@ -29,6 +29,7 @@ export const manualRuleRun = async ({
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'Kibana')
     .send([
       {
         rule_id: ruleId,
