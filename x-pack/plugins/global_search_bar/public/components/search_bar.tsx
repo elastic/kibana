@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';
 import useMountedState from 'react-use/lib/useMountedState';
@@ -49,7 +49,15 @@ const EmptyMessage = () => (
 );
 
 export const SearchBar: FC<SearchBarProps> = (opts) => {
-  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
+  const {
+    globalSearch,
+    taggingApi,
+    navigateToUrl,
+    reportEvent,
+    chromeStyle$,
+    openInNewTab,
+    ...props
+  } = opts;
 
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
@@ -197,6 +205,12 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
   );
 
+  const opensInNewTab = useCallback((selectedKey: string, url: string) => {
+    if (selectedKey === 'command') {
+      return window.open(url, '_blank');
+    }
+  }, []);
+
   const onChange = useCallback(
     (selection: EuiSelectableTemplateSitewideOption[]) => {
       let selectedRank: number | null = null;
@@ -249,7 +263,10 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      navigateToUrl(url, { openInNewTab: true });
+      if (openInNewTab) {
+        opensInNewTab(selected.key ?? 'unknown', url);
+      }
+      navigateToUrl(url);
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
@@ -257,7 +274,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [reportEvent, navigateToUrl, searchRef, searchValue]
+    [openInNewTab, opensInNewTab, reportEvent, navigateToUrl, searchRef, searchValue]
   );
 
   const clearField = () => setSearchValue('');
@@ -357,7 +374,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         panelStyle: { marginTop: '6px' },
       }}
       popoverButton={
-        <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton}>
+        <EuiHeaderSectionItemButton aria-label={i18nStrings.popoverButton} currentTarget="_blank">
           <EuiIcon type="search" size="m" />
         </EuiHeaderSectionItemButton>
       }
