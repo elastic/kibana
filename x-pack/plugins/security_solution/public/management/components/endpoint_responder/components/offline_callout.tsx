@@ -49,12 +49,19 @@ export const OfflineCallout = memo<OfflineCalloutProps>(({ agentType, endpointId
       (crowdstrikeManualHostActionsEnabled && isCrowdstrikeAgent) ||
       (isEndpointAgent && agentStatusClientEnabled),
   });
-  // TODO: simplify this to use the yet to be implemented agentStatus API hook
   const showOfflineCallout = useMemo(
     () =>
       (isEndpointAgent && endpointDetails?.host_status === HostStatus.OFFLINE) ||
-      (isSentinelOneAgent && data?.[endpointId].status === HostStatus.OFFLINE),
-    [data, endpointDetails?.host_status, endpointId, isEndpointAgent, isSentinelOneAgent]
+      (isSentinelOneAgent && data?.[endpointId].status === HostStatus.OFFLINE) ||
+      (isCrowdstrikeAgent && data?.[endpointId].status === HostStatus.OFFLINE),
+    [
+      data,
+      endpointDetails?.host_status,
+      endpointId,
+      isEndpointAgent,
+      isCrowdstrikeAgent,
+      isSentinelOneAgent,
+    ]
   );
 
   if (
