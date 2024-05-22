@@ -820,7 +820,6 @@
     "@kbn/slo-plugin": "link:x-pack/plugins/observability_solution/slo",
     "@kbn/slo-schema": "link:x-pack/packages/kbn-slo-schema",
     "@kbn/snapshot-restore-plugin": "link:x-pack/plugins/snapshot_restore",
-    "@kbn/solution-nav-es": "link:packages/solution-nav/es",
     "@kbn/solution-nav-oblt": "link:packages/solution-nav/oblt",
     "@kbn/sort-predicates": "link:packages/kbn-sort-predicates",
     "@kbn/spaces-plugin": "link:x-pack/plugins/spaces",

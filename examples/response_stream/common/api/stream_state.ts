@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/solution-nav/es'],
-};
+export interface StreamState {
+  errors: string[];
+  progress: number;
+  entities: Record<string, number>;
+}
+
+export const getInitialState = (): StreamState => ({
+  errors: [],
+  progress: 0,
+  entities: {},
+});

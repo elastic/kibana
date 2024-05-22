@@ -55,4 +55,5 @@ export type {
   NavigationTreeDefinitionUI,
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
+  EuiSideNavItemTypeEnhanced,
 } from './project_navigation';
