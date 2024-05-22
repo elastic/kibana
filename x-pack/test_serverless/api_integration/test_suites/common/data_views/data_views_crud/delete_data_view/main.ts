@@ -74,8 +74,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           .post(config.path)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             [config.serviceKey]: {
               title,

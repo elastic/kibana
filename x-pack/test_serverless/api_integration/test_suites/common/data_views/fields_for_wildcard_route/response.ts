@@ -10,6 +10,7 @@ import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/con
 import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -79,12 +80,17 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('fields_for_wildcard_route response', () => {
-    before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
-    );
-    after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
-    );
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+    });
+    after(async () => {
+      await esArchiver.unload(
+        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('returns a flattened version of the fields in es', async () => {
       await supertestWithoutAuth

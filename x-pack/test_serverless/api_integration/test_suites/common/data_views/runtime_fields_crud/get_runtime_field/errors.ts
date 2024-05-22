@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 
@@ -21,6 +22,14 @@ export default function ({ getService }: FtrProviderContext) {
     const basicIndex = '*asic_index';
     let indexPattern: any;
 
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
+
     configArray.forEach((config) => {
       describe(config.name, () => {
         before(async () => {
@@ -31,8 +40,8 @@ export default function ({ getService }: FtrProviderContext) {
           indexPattern = (
             await supertestWithoutAuth
               .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader())
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .send({
                 [config.serviceKey]: {
                   title: basicIndex,
@@ -49,8 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
           if (indexPattern) {
             await supertestWithoutAuth
               .delete(`${config.path}/${indexPattern.id}`)
-              // TODO: API requests in Serverless require internal request headers
-              .set(svlCommonApi.getInternalRequestHeader());
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader);
           }
         });
 

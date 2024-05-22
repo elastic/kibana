@@ -143,8 +143,8 @@ export default function ({ getService }: FtrProviderContext) {
         const res = await supertestWithoutAuth
           .post(DATA_VIEW_SWAP_REFERENCES_PATH)
           .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION)
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
+          .set(internalReqHeader)
+          .set(roleAuthc.apiKeyHeader)
           .send({
             fromId: '8963ca30-3224-11e8-a572-ffca06da1357',
             toId: '91200a00-9efd-11e7-acb3-3dab96693fab',
