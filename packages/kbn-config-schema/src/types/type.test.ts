@@ -24,7 +24,7 @@ describe('meta', () => {
     });
     const meta = type.getSchema().describe();
     expect(get(meta, 'flags.description')).toBe('my description');
-    expect(get(meta, `metas[1].${META_FIELD_X_OAS_DEPRECATED}`)).toBe(true);
+    expect(get(meta, `metas[0].${META_FIELD_X_OAS_DEPRECATED}`)).toBe(true);
   });
 
   it('does not set meta when no provided', () => {
