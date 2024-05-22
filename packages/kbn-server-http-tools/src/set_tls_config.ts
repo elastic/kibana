@@ -7,18 +7,17 @@
  */
 
 import type { Server as HapiServer } from '@hapi/hapi';
-import type { Server as HttpServer } from 'http';
 import type { Server as TlsServer } from 'https';
-import type { ISslConfig } from './types';
-import { getServerTLSOptions } from './get_server_options';
+import type { ISslConfig, ServerListener } from './types';
+import { getServerTLSOptions } from './get_tls_options';
 
-function isServerTLS(server: HttpServer): server is TlsServer {
+function isTLSListener(server: ServerListener): server is TlsServer {
   return 'setSecureContext' in server;
 }
 
 export const setTlsConfig = (hapiServer: HapiServer, sslConfig: ISslConfig) => {
   const server = hapiServer.listener;
-  if (!isServerTLS(server)) {
+  if (!isTLSListener(server)) {
     throw new Error('tried to set TLS config on a non-TLS http server');
   }
   const tlsOptions = getServerTLSOptions(sslConfig);
