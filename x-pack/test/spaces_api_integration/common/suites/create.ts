@@ -19,7 +19,7 @@ interface CreateTests {
   newSpace: CreateTest;
   alreadyExists: CreateTest;
   reservedSpecified: CreateTest;
-  solutionSpecified?: CreateTest;
+  solutionSpecified: CreateTest;
 }
 
 interface CreateTestDefinition {
@@ -65,14 +65,14 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   };
 
   const expectSolutionSpecifiedResult = (resp: Record<string, any>) => {
-    console.log(resp.error);
-    // expect(resp.body).to.eql({
-    //   name: 'reserved space',
-    //   id: 'reserved',
-    //   description: 'a description',
-    //   color: '#5c5959',
-    //   disabledFeatures: [],
-    // });
+    expect(resp.body).to.eql({
+      id: 'solution',
+      name: 'space with solution',
+      description: 'a description',
+      color: '#5c5959',
+      disabledFeatures: [],
+      solution: 'search',
+    });
   };
 
   const makeCreateTest =
@@ -141,23 +141,21 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
             });
           });
 
-          describe.only('when solution is specified', () => {
+          describe('when solution is specified', () => {
             it(`should return ${tests.solutionSpecified.statusCode}`, async () => {
-              return (
-                supertest
-                  .post(`${urlPrefix}/api/spaces/space`)
-                  .auth(user.username, user.password)
-                  .send({
-                    name: 'space with solution',
-                    id: 'solution',
-                    description: 'a description',
-                    color: '#5c5959',
-                    solution: 'search',
-                    disabledFeatures: [],
-                  })
-                  // .expect(tests.solutionSpecified.statusCode)
-                  .then(tests.solutionSpecified.response)
-              );
+              return supertest
+                .post(`${urlPrefix}/api/spaces/space`)
+                .auth(user.username, user.password)
+                .send({
+                  name: 'space with solution',
+                  id: 'solution',
+                  description: 'a description',
+                  color: '#5c5959',
+                  solution: 'search',
+                  disabledFeatures: [],
+                })
+                .expect(tests.solutionSpecified.statusCode)
+                .then(tests.solutionSpecified.response);
             });
           });
         });
