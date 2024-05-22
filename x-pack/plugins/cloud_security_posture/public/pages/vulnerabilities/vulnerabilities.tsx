@@ -11,7 +11,7 @@ import { NoVulnerabilitiesStates } from '../../components/no_vulnerabilities_sta
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { findingsNavigation } from '../../common/navigation/constants';
-import { useDataView } from '../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../common/api/use_data_view';
 import { LatestVulnerabilitiesContainer } from './latest_vulnerabilities_container';
 import { DataViewContext } from '../../common/contexts/data_view_context';
 

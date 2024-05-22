@@ -12,7 +12,7 @@ import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { useDataView } from '../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../common/api/use_data_view';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 import { DataViewContext } from '../../common/contexts/data_view_context';

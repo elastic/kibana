@@ -15,7 +15,7 @@ import {
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
 import { useKibana } from './use_kibana';
-import { useDataView } from '../api/use_latest_findings_data_view';
+import { useDataView } from '../api/use_data_view';
 
 interface NegatedValue {
   value: string | number;

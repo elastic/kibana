@@ -8,7 +8,7 @@ import React from 'react';
 import Chance from 'chance';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { of } from 'rxjs';
-import { useDataView } from '../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../common/api/use_data_view';
 import { Configurations } from './configurations';
 import { TestProvider } from '../../test/test_provider';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -27,7 +27,7 @@ import { expectIdsInDoc } from '../../test/utils';
 import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../../components/cloud_posture_page';
 import { useLicenseManagementLocatorApi } from '../../common/api/use_license_management_locator_api';
 
-jest.mock('../../common/api/use_latest_findings_data_view');
+jest.mock('../../common/api/use_data_view');
 jest.mock('../../common/api/use_setup_status_api');
 jest.mock('../../common/api/use_license_management_locator_api');
 jest.mock('../../common/hooks/use_subscription_status');
