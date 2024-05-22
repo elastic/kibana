@@ -254,7 +254,7 @@ describe('Map rules params with flyout', () => {
         {
           comparator: '<',
           observedValue: '13,040%',
-          pctAboveThreshold: ' (14388.89% above the threshold)',
+          pctAboveThreshold: ' (14388.89% below the threshold)',
           threshold: '9,000%',
         },
       ],
