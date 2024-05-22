@@ -1212,56 +1212,47 @@ describe('#start()', () => {
         expect(removeListenerSpy).toHaveBeenCalledTimes(1);
         expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
       });
-      it('opens in a new tab with the openInNewTab option', async () => {
-        const windowOpenSpy = jest.spyOn(window, 'open');
-        parseAppUrlMock.mockReturnValue({ app: 'foo', path: '/an-app-path' });
-        service.setup(setupDeps);
-        const { navigateToUrl } = await service.start(startDeps);
-
-        await navigateToUrl('/an-app-path', { openInNewTab: true });
-        expect(windowOpenSpy).toHaveBeenCalledWith('/base-path/app/foo/an-app-path', '_blank');
-      });
     });
   });
+});
 
-  describe('#stop()', () => {
-    let addListenerSpy: jest.SpyInstance;
-    let removeListenerSpy: jest.SpyInstance;
+describe('#stop()', () => {
+  let addListenerSpy: jest.SpyInstance;
+  let removeListenerSpy: jest.SpyInstance;
 
-    beforeEach(() => {
-      addListenerSpy = jest.spyOn(window, 'addEventListener');
-      removeListenerSpy = jest.spyOn(window, 'removeEventListener');
+  beforeEach(() => {
+    addListenerSpy = jest.spyOn(window, 'addEventListener');
+    removeListenerSpy = jest.spyOn(window, 'removeEventListener');
 
-      MockHistory.push.mockReset();
-      const http = httpServiceMock.createSetupContract({ basePath: '/test' });
-      const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
-      setupDeps = {
-        http,
-        analytics,
-      };
-      startDeps = {
-        http,
-        overlays: overlayServiceMock.createStartContract(),
-        theme: themeServiceMock.createStartContract(),
-        customBranding: customBrandingServiceMock.createStartContract(),
-        analytics: analyticsServiceMock.createAnalyticsServiceStart(),
-      };
-      service = new ApplicationService();
-    });
+    MockHistory.push.mockReset();
+    const http = httpServiceMock.createSetupContract({ basePath: '/test' });
+    const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
+    setupDeps = {
+      http,
+      analytics,
+    };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+      customBranding: customBrandingServiceMock.createStartContract(),
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    };
+    service = new ApplicationService();
+  });
 
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    it('removes the beforeunload listener', async () => {
-      service.setup(setupDeps);
-      await service.start(startDeps);
-      expect(addListenerSpy).toHaveBeenCalledTimes(1);
-      expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
-      const handler = addListenerSpy.mock.calls[0][1];
-      service.stop();
-      expect(removeListenerSpy).toHaveBeenCalledTimes(1);
-      expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
-    });
+  it('removes the beforeunload listener', async () => {
+    service.setup(setupDeps);
+    await service.start(startDeps);
+    expect(addListenerSpy).toHaveBeenCalledTimes(1);
+    expect(addListenerSpy).toHaveBeenCalledWith('beforeunload', expect.any(Function));
+    const handler = addListenerSpy.mock.calls[0][1];
+    service.stop();
+    expect(removeListenerSpy).toHaveBeenCalledTimes(1);
+    expect(removeListenerSpy).toHaveBeenCalledWith('beforeunload', handler);
   });
 });

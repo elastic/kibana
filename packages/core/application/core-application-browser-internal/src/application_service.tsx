@@ -346,17 +346,9 @@ export class ApplicationService {
       navigateToApp,
       navigateToUrl: async (
         url: string,
-        {
-          skipAppLeave = false,
-          forceRedirect = false,
-          openInNewTab = false,
-          state,
-        }: NavigateToUrlOptions = {}
+        { skipAppLeave = false, forceRedirect = false, state }: NavigateToUrlOptions = {}
       ) => {
         const appInfo = parseAppUrl(url, http.basePath, this.apps);
-        if (openInNewTab && appInfo) {
-          return this.openInNewTab!(getAppUrl(availableMounters, appInfo.app, appInfo.path));
-        }
         if ((forceRedirect || !appInfo) === true) {
           if (skipAppLeave) {
             window.removeEventListener('beforeunload', this.onBeforeUnload);

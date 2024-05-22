@@ -193,8 +193,4 @@ export interface NavigateToUrlOptions {
    * optional state to forward to the application
    */
   state?: unknown;
-  /**
-   * if true, will open the app in new tab, will share session information via window.open if base
-   */
-  openInNewTab?: boolean;
 }
