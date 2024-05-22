@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { expect as jestExpect } from 'expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
@@ -437,6 +438,85 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(policy.package_policies[0].name).be('system-457');
       });
+
+      it('should create policy with global data tags given valid tags', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'global data tag test',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName2', value: 123 },
+            ],
+          })
+          .expect(200);
+
+        let res = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`).expect(200);
+        jestExpect(res.body.item.global_data_tags).toEqual([
+          { name: 'testName', value: 'testValue' },
+          { name: 'testName2', value: 123 },
+        ]);
+
+        res = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}/full`).expect(200);
+        for (const input of res.body.item.inputs) {
+          jestExpect(input.processors).not.toBeUndefined();
+          jestExpect(input.processors.length).toEqual(1);
+          const addFields = input.processors[0].add_fields;
+          jestExpect(addFields).toEqual({ testName: 'testValue', testName2: 123 });
+        }
+      });
+
+      it('should not create agent policy if provided with global data tag values that are not strings or numbers', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'global data tag test',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName2', value: false },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('should not create agent policy if provided with global data tag names that have spaces in them', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'global data tag test',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: ' testName2', value: 123 },
+              { name: 'test name 3', value: 123 },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('should not create agent policy if provided with duplicate tag names', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'global data tag test',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName', value: 123 },
+            ],
+          })
+          .expect(400);
+      });
+      // TODO: complete the excluded inputs
+      // it('should not add add_fields processor to the excluded inputs', async () => { });
     });
 
     describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {
@@ -838,13 +918,43 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(409);
       });
+
+      it('should copy global data tags', async () => {
+        const {
+          body: { item: policyWithGlobalDataTags },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Global Data Tag Test',
+            namespace: 'default',
+            global_data_tags: [{ name: 'testName', value: 'testValue' }],
+          })
+          .expect(200);
+
+        const {
+          body: { item: newPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies/${policyWithGlobalDataTags.id}/copy`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Global Data Tag Test Copy',
+            description: 'Test',
+          })
+          .expect(200);
+
+        jestExpect(newPolicy.global_data_tags).toEqual([{ name: 'testName', value: 'testValue' }]);
+      });
     });
 
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
+      setupFleetAndAgents(providerContext);
       const createdPolicyIds: string[] = [];
+
       after(async () => {
         const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
           supertest
@@ -854,9 +964,9 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200)
         );
         await Promise.all(deletedPromises);
-      });
-      after(async () => {
+
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
       let agentPolicyId: undefined | string;
       it('should work with valid values', async () => {
@@ -1031,7 +1141,7 @@ export default function (providerContext: FtrProviderContext) {
           (item: any) => item.status === 'installed'
         );
 
-        expect(installedPackages.length).to.be(0);
+        expect(installedPackages.length).to.be(0); // TODO: this is failing, there is one package that is installed
 
         agentPolicyId = originalPolicy.id;
         const {
@@ -1159,6 +1269,94 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
+
+      it('should overwrite data tags if provided with valid input', async () => {
+        const {
+          body: { item: originalPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName2', value: 123 },
+            ],
+          })
+          .expect(200);
+        createdPolicyIds.push(originalPolicy.id as string);
+
+        const {
+          body: { item: updatedPolicy },
+        } = await supertest
+          .put(`/api/fleet/agent_policies/${originalPolicy.id}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: originalPolicy.name,
+            namespace: 'default',
+            global_data_tags: [{ name: 'newTag', value: 'newValue' }],
+          })
+          .expect(200);
+
+        jestExpect(updatedPolicy.global_data_tags).toEqual([{ name: 'newTag', value: 'newValue' }]);
+        const res = await supertest
+          .get(`/api/fleet/agent_policies/${updatedPolicy.id}/full`)
+          .expect(200);
+        for (const input of res.body.item.inputs) {
+          jestExpect(input.processors).not.toBeUndefined();
+          jestExpect(input.processors.length).toEqual(1);
+          const addFields = input.processors[0].add_fields;
+          jestExpect(addFields).toEqual({ newTag: 'newValue' });
+        }
+      });
+
+      it('should not update the data tags if provided with invalid data types', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName2', value: false },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('should not update the data tags if provided with tag names with spaces in it', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName2 ', value: false },
+            ],
+          })
+          .expect(400);
+      });
+
+      it('should not update the data tags if provided with duplicate data tag names', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'TEST',
+            namespace: 'default',
+            global_data_tags: [
+              { name: 'testName', value: 'testValue' },
+              { name: 'testName', value: false },
+            ],
+          })
+          .expect(400);
+      });
+
+      // TODO: add excluded input tests
     });
 
     describe('POST /api/fleet/agent_policies/delete', () => {
