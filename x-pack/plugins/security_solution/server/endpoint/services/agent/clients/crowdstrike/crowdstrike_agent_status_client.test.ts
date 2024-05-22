@@ -97,8 +97,8 @@ describe('CrowdstrikeAgentStatusClient', () => {
                             host: {
                               id: 'agent1',
                               last_seen: '2023-01-01',
+                              status: CROWDSTRIKE_NETWORK_STATUS.NORMAL,
                             },
-                            status: CROWDSTRIKE_NETWORK_STATUS.NORMAL,
                           },
                         },
                       },
@@ -155,8 +155,66 @@ describe('CrowdstrikeAgentStatusClient', () => {
                             host: {
                               id: 'agent2',
                               last_seen: '2023-01-01',
+                              status: CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
                             },
-                            status: CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+      constructorOptions.esClient.search.mockResolvedValueOnce(
+        searchResponse as unknown as SearchResponse<unknown, unknown>
+      );
+
+      const agentStatusResponse = {
+        agent2: { id: 'agent2', state: CROWDSTRIKE_STATUS_RESPONSE.OFFLINE },
+      };
+
+      // @ts-expect-error private method
+      (client.getAgentStatusFromConnectorAction as Jest.Mock).mockResolvedValue(
+        agentStatusResponse
+      );
+
+      const result = await client.getAgentStatuses(agentIds);
+
+      expect(constructorOptions.esClient.search).toHaveBeenCalled();
+      expect(result).toEqual({
+        agent2: {
+          agentId: 'agent2',
+          agentType: 'crowdstrike',
+          found: true,
+          isolated: true,
+          lastSeen: '2023-01-01',
+          status: HostStatus.OFFLINE,
+          pendingActions: {},
+        },
+      });
+    });
+    it('should set isolated to true if host is pending release', async () => {
+      const agentIds = ['agent2'];
+      const searchResponse = {
+        hits: {
+          hits: [
+            {
+              fields: { 'crowdstrike.host.id': ['agent2'] },
+              inner_hits: {
+                most_recent: {
+                  hits: {
+                    hits: [
+                      {
+                        _source: {
+                          crowdstrike: {
+                            host: {
+                              id: 'agent2',
+                              last_seen: '2023-01-01',
+                              status: CROWDSTRIKE_NETWORK_STATUS.LIFT_CONTAINMENT_PENDING,
+                            },
                           },
                         },
                       },

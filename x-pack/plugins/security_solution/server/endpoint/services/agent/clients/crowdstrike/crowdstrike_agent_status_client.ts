@@ -13,6 +13,7 @@ import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type { CrowdstrikeGetAgentOnlineStatusResponse } from '@kbn/stack-connectors-plugin/common/crowdstrike/types';
 import { keyBy } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import type { RawCrowdstrikeInfo } from './types';
 import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary, NormalizedExternalConnectorClient } from '../../..';
@@ -87,7 +88,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           {
             index: CROWDSTRIKE_AGENT_INDEX_PATTERN,
             from: 0,
-            size: 10000,
+            size: DEFAULT_MAX_TABLE_QUERY_SIZE,
             query,
             collapse: {
               // TODO: check if we should use crowdstrike.cid instead
@@ -146,7 +147,9 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           agentType: this.agentType,
           // TODO: check if we should use crowdstrike.cid instead
           found: agentInfo?.host.id === agentId,
-          isolated: agentInfo?.host.status === CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
+          isolated:
+            agentInfo?.host.status === CROWDSTRIKE_NETWORK_STATUS.CONTAINED ||
+            agentInfo?.host.status === CROWDSTRIKE_NETWORK_STATUS.LIFT_CONTAINMENT_PENDING,
           lastSeen: agentInfo?.host.last_seen || '',
           status:
             agentStatus?.state === CROWDSTRIKE_STATUS_RESPONSE.ONLINE
