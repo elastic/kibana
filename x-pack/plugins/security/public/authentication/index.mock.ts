@@ -26,8 +26,10 @@ export const authenticationMock = {
 export const authorizationMock = {
   createSetup: (): jest.Mocked<AuthorizationServiceSetup> => ({
     isRoleManagementEnabled: jest.fn(),
+    getCurrentUserApiKeyPrivileges: jest.fn(),
   }),
   createStart: (): jest.Mocked<AuthorizationServiceStart> => ({
     isRoleManagementEnabled: jest.fn(),
+    getCurrentUserApiKeyPrivileges: jest.fn(),
   }),
 };

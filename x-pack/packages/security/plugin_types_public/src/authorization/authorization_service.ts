@@ -10,6 +10,17 @@ export interface AuthorizationServiceSetup {
    * Determines if role management is enabled.
    */
   isRoleManagementEnabled: () => boolean | undefined;
+
+  /**
+   * Retrieve current user's API key privileges.
+   */
+  getCurrentUserApiKeyPrivileges: () => Promise<AuthorizationCurrentUserApiKeyPrivilegesResponse>;
+}
+
+export interface AuthorizationCurrentUserApiKeyPrivilegesResponse {
+  canManageApiKeys: boolean;
+  canManageCrossClusterApiKeys: boolean;
+  canManageOwnApiKeys: boolean;
 }
 
 /**

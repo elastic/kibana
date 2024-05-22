@@ -22,5 +22,7 @@
     "@kbn/cloud-plugin",
     "@kbn/share-plugin",
     "@kbn/security-plugin-types-server",
+    "@kbn/security-plugin-types-public",
+    "@kbn/core",
   ]
 }

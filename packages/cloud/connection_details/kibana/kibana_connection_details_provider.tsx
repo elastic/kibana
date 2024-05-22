@@ -11,15 +11,18 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import { ConnectionDetailsOptsProvider } from '../context';
 import { ConnectionDetailsOpts } from '../types';
 import { useAsyncMemo } from '../hooks/use_async_memo';
 
-const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
+export const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
   const { options, start } = props;
   const { http, docLinks, analytics } = start.core;
   const locator = start.plugins?.share?.url?.locators.get('MANAGEMENT_APP_LOCATOR');
   const manageKeysLink = await locator?.getUrl({ sectionId: 'security', appId: 'api_keys' });
+  const security = start.plugins?.security;
+
   const result: ConnectionDetailsOpts = {
     ...options,
     navigateToUrl: start.core.application
@@ -65,7 +68,18 @@ const createOpts = async (props: KibanaConnectionDetailsProviderProps) => {
           },
         };
       },
-      hasPermission: async () => true,
+      hasPermission: security
+        ? async () => {
+            try {
+              return (await security.authz.getCurrentUserApiKeyPrivileges()).canManageOwnApiKeys;
+            } catch (error) {
+              if (error instanceof Error && error.message === 'Forbidden') {
+                return false;
+              }
+              throw error;
+            }
+          }
+        : async () => true,
       ...options?.apiKeys,
     },
     onTelemetryEvent: (event) => {
@@ -133,6 +147,7 @@ export interface KibanaConnectionDetailsProviderProps {
     plugins?: {
       cloud?: CloudStart;
       share?: SharePluginStart;
+      security?: SecurityPluginStart;
     };
   };
 }
