@@ -201,6 +201,7 @@
     "@kbn/deeplinks-security",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/core-saved-objects-api-server-mocks"
   ]
 }
