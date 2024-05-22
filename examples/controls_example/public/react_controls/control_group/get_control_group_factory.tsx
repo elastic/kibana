@@ -31,9 +31,9 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
+import { combineCompatibleApis } from '@kbn/presentation-containers';
 import { ControlRenderer } from '../control_renderer';
 import { DefaultControlApi } from '../types';
-import { publishChildrenChangesToParent } from './publish_children_changes_to_parent';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
@@ -105,18 +105,19 @@ export const getControlGroupEmbeddableFactory = (services: {
         {}
       );
 
-      /** Subscribe to all children's output filters, combine them, and output them to parent */
-      const outputFiltersSubscription = publishChildrenChangesToParent<PublishesFilters, Filter[]>(
+      /** Subscribe to all children's output filters, combine them, and output them */
+      const outputFiltersSubscription = combineCompatibleApis<PublishesFilters, Filter[]>(
         api,
         'filters$',
         apiPublishesFilters
-      );
+      ).subscribe((newFilters) => filters$.next(newFilters));
 
-      /** Subscribe to all children's output data views, combine them, and output them to parent */
-      const childDataViewsSubscription = publishChildrenChangesToParent<
-        PublishesDataViews,
-        DataView[]
-      >(api, 'dataViews', apiPublishesDataViews);
+      /** Subscribe to all children's output data views, combine them, and output them */
+      const childDataViewsSubscription = combineCompatibleApis<PublishesDataViews, DataView[]>(
+        api,
+        'dataViews',
+        apiPublishesDataViews
+      ).subscribe((newDataViews) => dataViews.next(newDataViews));
 
       return {
         api,

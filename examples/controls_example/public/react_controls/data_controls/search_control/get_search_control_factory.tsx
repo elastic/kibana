@@ -13,7 +13,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import React, { useEffect, useState } from 'react';
-import { BehaviorSubject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, distinctUntilChanged, merge } from 'rxjs';
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
 import { SearchControlState, SearchControlTechniques, SEARCH_CONTROL_TYPE } from './types';
@@ -116,6 +116,23 @@ export const getSearchEmbeddableFactory = ({
               api.setOutputFilter(undefined);
             }
           }
+        });
+
+      /**
+       *  When the field changes (which can happen if either the field name or the data view id changes),
+       *  clear the previous search string.
+       */
+      const onFieldChanged = combineLatest([
+        dataControlStateManager.fieldName,
+        dataControlStateManager.dataViewId,
+      ])
+        .pipe(
+          distinctUntilChanged(([oldFieldName, oldDataViewId], [newFieldName, newDataViewId]) => {
+            return oldFieldName === newFieldName && oldDataViewId === newDataViewId;
+          })
+        )
+        .subscribe(([newFieldName, newDataViewId]) => {
+          console.log('result', { newFieldName, newDataViewId });
         });
 
       return {

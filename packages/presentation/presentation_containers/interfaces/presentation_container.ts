@@ -12,6 +12,7 @@ import {
   PublishesViewMode,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
 import { PublishesSettings } from './publishes_settings';
 
@@ -79,4 +80,33 @@ export const listenForCompatibleApi = <ApiType extends unknown>(
     subscription.unsubscribe();
     lastCleanupFunction?.();
   };
+};
+
+export const combineCompatibleApis = <ApiType extends unknown, PublishingSubjectType>(
+  api: PresentationContainer,
+  observableKey: keyof ApiType,
+  isCompatible: (api: unknown) => api is ApiType,
+  flattenMethod?: (array: PublishingSubjectType[]) => PublishingSubjectType
+): Observable<PublishingSubjectType> => {
+  return api.children$.pipe(
+    switchMap((children) => {
+      const compatibleChildren: ApiType[] = [];
+      for (const child of Object.values(children)) {
+        if (isCompatible(child) && isObservable(child[observableKey]))
+          compatibleChildren.push(child);
+      }
+      if (compatibleChildren.length === 0) return of([]);
+      return combineLatest(
+        compatibleChildren.map(
+          (child) => child[observableKey] as BehaviorSubject<PublishingSubjectType>
+        )
+      );
+    }),
+    map(
+      flattenMethod
+        ? flattenMethod
+        : (nextCompatible) =>
+            nextCompatible.flat().filter((value) => Boolean(value)) as PublishingSubjectType
+    )
+  );
 };

@@ -22,6 +22,7 @@ export {
   apiIsPresentationContainer,
   getContainerParentFromAPI,
   listenForCompatibleApi,
+  combineCompatibleApis,
   type PanelPackage,
   type PresentationContainer,
 } from './interfaces/presentation_container';

@@ -55,7 +55,7 @@ const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
 const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
 const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
 const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
-const fakeParentApi: MockedDashboardApi = {
+const mockedParentApi: MockedDashboardApi = {
   viewMode,
   filters$,
   query$,
@@ -134,7 +134,7 @@ export const ReactControlExample = ({
         }}
         hidePanelChrome={true}
         type={CONTROL_GROUP_TYPE}
-        parentApi={fakeParentApi} // should be the dashboard
+        parentApi={mockedParentApi} // should be the dashboard
         key={`control_group`}
         state={{
           rawState: {
@@ -164,7 +164,7 @@ export const ReactControlExample = ({
           },
           references: [],
         }}
-        parentApi={fakeParentApi}
+        parentApi={mockedParentApi}
         hidePanelChrome={false}
         onApiAvailable={(api) => {
           children$.next({ ...children$.getValue(), [api.uuid]: api });
