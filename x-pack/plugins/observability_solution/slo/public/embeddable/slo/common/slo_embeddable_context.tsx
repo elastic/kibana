@@ -22,12 +22,18 @@ export interface SloEmbeddableContextProps {
 
 export function SloEmbeddableContext({ deps, children }: SloEmbeddableContextProps) {
   const { observabilityRuleTypeRegistry } = deps.observability;
+  const { navigation } = deps.observabilityShared;
 
   return (
     <Router history={createBrowserHistory()}>
       <EuiThemeProvider darkMode={true}>
         <KibanaContextProvider services={deps}>
-          <PluginContext.Provider value={{ observabilityRuleTypeRegistry }}>
+          <PluginContext.Provider
+            value={{
+              observabilityRuleTypeRegistry,
+              ObservabilityPageTemplate: navigation.PageTemplate,
+            }}
+          >
             <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
           </PluginContext.Provider>
         </KibanaContextProvider>
