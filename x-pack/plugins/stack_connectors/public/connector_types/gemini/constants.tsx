@@ -47,7 +47,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
     helpText: (
       <FormattedMessage
         defaultMessage="The Google Gemini API endpoint URL. For more information on the URL, refer to the {geminiAPIUrlDocs}."
-        id="xpack.stackConnectors.components.gemini.geminiDocumentation"
+        id="xpack.stackConnectors.components.gemini.geminiAPIDocumentation"
         values={{
           geminiAPIUrlDocs: (
             <EuiLink
@@ -70,7 +70,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
     helpText: (
       <FormattedMessage
         defaultMessage="Please provide the GCP region where the Vertex AI API(s) is enabled. For more information, refer to the {geminiVertexAIDocs}."
-        id="xpack.stackConnectors.components.gemini.geminiDocumentation"
+        id="xpack.stackConnectors.components.gemini.geminiRegionDocumentation"
         values={{
           geminiVertexAIDocs: (
             <EuiLink
@@ -92,7 +92,7 @@ export const geminiConfig: ConfigFieldSchema[] = [
     helpText: (
       <FormattedMessage
         defaultMessage="The GCP Project ID which has Vertex AI API(s) enabled . For more information on the URL, refer to the {geminiVertexAIDocs}."
-        id="xpack.stackConnectors.components.gemini.geminiDocumentation"
+        id="xpack.stackConnectors.components.gemini.geminiProjectDocumentation"
         values={{
           geminiVertexAIDocs: (
             <EuiLink
@@ -113,12 +113,12 @@ export const geminiConfig: ConfigFieldSchema[] = [
     helpText: (
       <FormattedMessage
         defaultMessage="Current support is for the Gemini models. For more information, refer to the {geminiAPIModelDocs}."
-        id="xpack.stackConnectors.components.gemini.geminiDocumentationModel"
+        id="xpack.stackConnectors.components.gemini.geminiModelDocumentation"
         values={{
           geminiAPIModelDocs: (
             <EuiLink
               data-test-subj="gemini-api-model-doc"
-              href="https://ai.google.dev/docs/"
+              href="https://cloud.google.com/vertex-ai/generative-ai/docs/learn/models/"
               target="_blank"
             >
               {`${i18n.gemini} ${i18n.DOCUMENTATION}`}

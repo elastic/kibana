@@ -18,16 +18,10 @@ export const GCP_REGION = i18n.translate('xpack.stackConnectors.components.gemin
   defaultMessage: 'GCP Region',
 });
 
-export const GCP_PROJECT_ID = i18n.translate('xpack.stackConnectors.components.gemini.gcpRegion', {
+export const GCP_PROJECT_ID = i18n.translate('xpack.stackConnectors.components.gemini.gcpProjectID', {
   defaultMessage: 'GCP Project ID',
 });
 
-export const ACCESS_KEY_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.gemini.accessKeySecret',
-  {
-    defaultMessage: 'Access Key',
-  }
-);
 export const DEFAULT_MODEL_LABEL = i18n.translate(
   'xpack.stackConnectors.components.gemini.defaultModelTextFieldLabel',
   {
@@ -39,7 +33,7 @@ export const SECRET = i18n.translate('xpack.stackConnectors.components.gemini.se
   defaultMessage: 'Secret',
 });
 
-export const CREDENTIALS_JSON = i18n.translate('xpack.stackConnectors.components.gemini.apiKey', {
+export const CREDENTIALS_JSON = i18n.translate('xpack.stackConnectors.components.gemini.credentialsJSON', {
   defaultMessage: 'Credentials JSON',
 });
 
@@ -103,7 +97,7 @@ export const MODEL = i18n.translate('xpack.stackConnectors.components.gemini.mod
 });
 
 export const USAGE_DASHBOARD_LINK = (apiProvider: string, connectorName: string) =>
-  i18n.translate('xpack.stackConnectors.components.genAi.dashboardLink', {
+  i18n.translate('xpack.stackConnectors.components.gemini.dashboardLink', {
     values: { apiProvider, connectorName },
     defaultMessage: 'View {apiProvider} Usage Dashboard for "{ connectorName }" Connector',
   });
