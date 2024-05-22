@@ -19,18 +19,18 @@ import { MonitorOverviewItem } from '../types';
 describe('ActionsPopover', () => {
   let testMonitor: MonitorOverviewItem;
 
-  jest.spyOn(enablementHook, 'useEnablement').mockReturnValue({
-    isServiceAllowed: true,
-    areApiKeysEnabled: true,
-    canManageApiKeys: true,
-    canEnable: true,
-    isEnabled: true,
-    invalidApiKeyError: false,
-    loading: false,
-    error: null,
-  });
-
   beforeEach(() => {
+    jest.spyOn(enablementHook, 'useEnablement').mockReturnValue({
+      isServiceAllowed: true,
+      areApiKeysEnabled: true,
+      canManageApiKeys: true,
+      canEnable: true,
+      isEnabled: true,
+      invalidApiKeyError: false,
+      loading: false,
+      error: null,
+    });
+
     testMonitor = {
       location: {
         id: 'us_central',
@@ -118,6 +118,7 @@ describe('ActionsPopover', () => {
         locationId={testMonitor.location.id}
       />
     );
+
     expect(getByRole('link')?.getAttribute('href')).toBe('/a/test/edit/url');
   });
 

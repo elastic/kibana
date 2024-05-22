@@ -101,7 +101,6 @@ export const MonitorEditPage: React.FC = () => {
         canUsePublicLocations={canUsePublicLocations}
       >
         <MonitorSteps
-          canUsePublicLocations={canUsePublicLocations}
           stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
           isEditFlow={true}
           readOnly={isReadOnly}

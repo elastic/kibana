@@ -16,7 +16,6 @@ import { MonitorTypePortal } from './monitor_type_portal';
 import { ReadOnlyCallout } from './read_only_callout';
 
 export const MonitorSteps = ({
-  canUsePublicLocations,
   stepMap,
   projectId,
   isEditFlow = false,
@@ -24,7 +23,6 @@ export const MonitorSteps = ({
 }: {
   stepMap: StepMap;
   readOnly?: boolean;
-  canUsePublicLocations?: boolean;
   isEditFlow?: boolean;
   projectId?: string;
 }) => {
@@ -34,9 +32,7 @@ export const MonitorSteps = ({
 
   return (
     <>
-      {isEditFlow && (
-        <ReadOnlyCallout projectId={projectId} canUsePublicLocations={canUsePublicLocations} />
-      )}
+      {isEditFlow && <ReadOnlyCallout projectId={projectId} />}
       {isEditFlow ? (
         steps.map((step) => (
           <div key={step.title}>
