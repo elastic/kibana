@@ -29,7 +29,6 @@ import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { InternalState } from './discover_internal_state_container';
 import { getMergedAccessor } from '../../../context_awareness';
-import { ProfilesManager } from '../../../context_awareness/profiles_manager';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -142,7 +141,6 @@ export interface DiscoverDataStateContainer {
 export function getDataStateContainer({
   services,
   searchSessionManager,
-  profilesManager,
   getAppState,
   getInternalState,
   getSavedSearch,
@@ -151,14 +149,13 @@ export function getDataStateContainer({
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
-  profilesManager: ProfilesManager;
   getAppState: () => DiscoverAppState;
   getInternalState: () => InternalState;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
   updateAppState: DiscoverAppStateContainer['update'];
 }): DiscoverDataStateContainer {
-  const { data, uiSettings, toastNotifications } = services;
+  const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
 
@@ -234,7 +231,6 @@ export function getDataStateContainer({
             getInternalState,
             savedSearch: getSavedSearch(),
             useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
-            profilesManager,
           };
 
           abortController?.abort();

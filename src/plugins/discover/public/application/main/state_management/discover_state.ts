@@ -59,7 +59,6 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import { ProfilesManager } from '../../../context_awareness/profiles_manager';
 
 export interface DiscoverStateContainerParams {
   /**
@@ -82,7 +81,6 @@ export interface DiscoverStateContainerParams {
    * a custom url state storage
    */
   stateStorageContainer?: IKbnUrlStateStorage;
-  profilesManager: ProfilesManager;
 }
 
 export interface LoadParams {
@@ -221,7 +219,6 @@ export function getDiscoverStateContainer({
   services,
   customizationContext,
   stateStorageContainer,
-  profilesManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -293,7 +290,6 @@ export function getDiscoverStateContainer({
   const dataStateContainer = getDataStateContainer({
     services,
     searchSessionManager,
-    profilesManager,
     getAppState: appStateContainer.getState,
     getInternalState: internalStateContainer.getState,
     getSavedSearch: savedSearchContainer.getState,

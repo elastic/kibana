@@ -69,7 +69,6 @@ export function DiscoverMainRoute({
     http: { basePath },
     dataViewEditor,
     share,
-    profilesManager,
     getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
@@ -78,7 +77,6 @@ export function DiscoverMainRoute({
     services,
     customizationContext,
     stateStorageContainer,
-    profilesManager,
   });
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
     useDiscoverCustomizationService({
@@ -342,7 +340,7 @@ export function DiscoverMainRoute({
   ]);
 
   const { solutionNavId } = customizationContext;
-  const { rootProfileLoading } = useRootProfile({ profilesManager, solutionNavId });
+  const { rootProfileLoading } = useRootProfile({ solutionNavId });
 
   if (error) {
     return <DiscoverError error={error} />;

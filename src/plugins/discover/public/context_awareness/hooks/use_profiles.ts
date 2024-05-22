@@ -8,8 +8,8 @@
 
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { useDiscoverServices } from '../hooks/use_discover_services';
-import { GetProfilesOptions } from './profiles_manager';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { GetProfilesOptions } from '../profiles_manager';
 
 export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
   const { profilesManager } = useDiscoverServices();

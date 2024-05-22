@@ -7,15 +7,10 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { ProfilesManager } from './profiles_manager';
+import { useDiscoverServices } from '../../hooks/use_discover_services';
 
-export const useRootProfile = ({
-  profilesManager,
-  solutionNavId,
-}: {
-  profilesManager: ProfilesManager;
-  solutionNavId: string | null;
-}) => {
+export const useRootProfile = ({ solutionNavId }: { solutionNavId: string | null }) => {
+  const { profilesManager } = useDiscoverServices();
   const [rootProfileLoading, setRootProfileLoading] = useState(true);
 
   useEffect(() => {
