@@ -6,14 +6,15 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { map, orderBy } from 'lodash';
+import { isEmpty, map, orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
+import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
@@ -347,19 +348,55 @@ export class KnowledgeBaseService {
     }));
   }
 
+  private async getConnectorIndices(
+    client: ElasticsearchClient,
+    uiSettingsClient: IUiSettingsClient
+  ) {
+    // improve performance by running this in parallel with the `uiSettingsClient` request
+    const responsePromise = client.transport.request({
+      method: 'GET',
+      path: '_connector',
+      querystring: {
+        filter_path: 'results.index_name',
+      },
+    });
+
+    const customSearchConnectorIndex = await uiSettingsClient.get<string>(
+      aiAssistantSearchConnectorIndexPattern
+    );
+
+    if (customSearchConnectorIndex) {
+      return customSearchConnectorIndex.split(',');
+    }
+
+    const response = (await responsePromise) as { results: Array<{ index_name: string }> };
+    const connectorIndices = response.results.map((result) => result.index_name);
+
+    // preserve backwards compatibility with 8.14 (may not be needed in the future)
+    if (isEmpty(connectorIndices)) {
+      return ['search-*'];
+    }
+
+    return connectorIndices;
+  }
+
   private async recallFromConnectors({
     queries,
     asCurrentUser,
+    uiSettingsClient,
     modelId,
   }: {
     queries: string[];
     asCurrentUser: ElasticsearchClient;
+    uiSettingsClient: IUiSettingsClient;
     modelId: string;
   }): Promise<RecalledEntry[]> {
     const ML_INFERENCE_PREFIX = 'ml.inference.';
 
+    const connectorIndices = await this.getConnectorIndices(asCurrentUser, uiSettingsClient);
+
     const fieldCaps = await asCurrentUser.fieldCaps({
-      index: 'search*',
+      index: connectorIndices,
       fields: `${ML_INFERENCE_PREFIX}*`,
       allow_no_indices: true,
       types: ['sparse_vector'],
@@ -404,7 +441,7 @@ export class KnowledgeBaseService {
     });
 
     const response = await asCurrentUser.search<unknown>({
-      index: 'search-*',
+      index: connectorIndices,
       query: {
         bool: {
           should: esQueries,
@@ -416,12 +453,14 @@ export class KnowledgeBaseService {
       },
     });
 
-    return response.hits.hits.map((hit) => ({
+    const results = response.hits.hits.map((hit) => ({
       text: JSON.stringify(hit._source),
       score: hit._score!,
       is_correction: false,
       id: hit._id,
     }));
+
+    return results;
   }
 
   recall = async ({
@@ -430,12 +469,14 @@ export class KnowledgeBaseService {
     categories,
     namespace,
     asCurrentUser,
+    uiSettingsClient,
   }: {
     queries: string[];
     categories?: string[];
     user?: { name: string };
     namespace: string;
     asCurrentUser: ElasticsearchClient;
+    uiSettingsClient: IUiSettingsClient;
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
@@ -457,6 +498,7 @@ export class KnowledgeBaseService {
       }),
       this.recallFromConnectors({
         asCurrentUser,
+        uiSettingsClient,
         queries,
         modelId,
       }).catch((error) => {
