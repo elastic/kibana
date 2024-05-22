@@ -25,7 +25,7 @@ import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
 import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
+import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1190,6 +1190,35 @@ describe('Action Executor', () => {
       }
 
       expect(executorResult?.errorSource).toBe(TaskErrorSource.FRAMEWORK);
+      expect(loggerMock.warn).toBeCalledWith(
+        'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true'
+      );
+      expect(loggerMock.error).toBeCalledWith(err, {
+        error: { stack_trace: 'foo error\n  stack 1\n  stack 2\n  stack 3' },
+        tags: ['test', '1', 'action-run-failed'],
+      });
+    });
+
+    test(`${label} logs warning captures source when executor throws error with error source`, async () => {
+      const err = createTaskRunError(
+        new Error('this action execution is intended to fail'),
+        TaskErrorSource.USER
+      );
+      err.stack = 'foo error\n  stack 1\n  stack 2\n  stack 3';
+      connectorType.executor.mockRejectedValueOnce(err);
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        connectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(connectorType);
+
+      let executorResult;
+      if (executeUnsecure) {
+        executorResult = await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        executorResult = await actionExecutor.execute(executeParams);
+      }
+
+      expect(executorResult?.errorSource).toBe(TaskErrorSource.USER);
       expect(loggerMock.warn).toBeCalledWith(
         'action execution failure: test:1: 1: an error occurred while running the action: this action execution is intended to fail; retry: true'
       );
