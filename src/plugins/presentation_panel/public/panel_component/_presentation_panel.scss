@@ -189,6 +189,7 @@
 .embPanel__floatingActionsWrapper {
   position: relative;
   height: 100%;
+  z-index: $euiZLevel1; // apply high z-index to all children
 
   .embPanel__floatingActions {
     opacity: 0;
