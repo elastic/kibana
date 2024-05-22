@@ -6,16 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { IHttpConfig } from './types';
+import { Subject } from 'rxjs';
 
-export interface ListenerOptions {
-  keepaliveTimeout: number;
-  socketTimeout: number;
+export interface HasSaveNotification {
+  saveNotification$: Subject<void>; // a notification that state has been saved
 }
 
-export function getListenerOptions(config: IHttpConfig): ListenerOptions {
-  return {
-    keepaliveTimeout: config.keepaliveTimeout,
-    socketTimeout: config.socketTimeout,
-  };
-}
+export const apiHasSaveNotification = (api: unknown): api is HasSaveNotification => {
+  return Boolean(api && (api as HasSaveNotification).saveNotification$);
+};

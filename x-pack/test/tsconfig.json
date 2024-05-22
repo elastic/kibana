@@ -176,5 +176,6 @@
     "@kbn/analytics-ftr-helpers-plugin",
     "@kbn/alerting-comparators",
     "@kbn/alerting-state-types",
+    "@kbn/reporting-server"
   ]
 }
