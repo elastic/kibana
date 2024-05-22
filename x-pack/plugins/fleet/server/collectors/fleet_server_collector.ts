@@ -29,6 +29,8 @@ export interface FleetServerUsage {
   unhealthy: number;
   offline: number;
   updating: number;
+  inactive: number;
+  unenrolled: number;
   total_all_statuses: number;
   num_host_urls: number;
 }
@@ -68,14 +70,15 @@ export const getFleetServerUsage = async (
     return DEFAULT_USAGE;
   }
 
-  const { total, inactive, online, error, updating, offline } = await getAgentStatusForAgentPolicy(
-    esClient,
-    soClient,
-    undefined,
-    Array.from(policyIds)
-      .map((policyId) => `(policy_id:"${policyId}")`)
-      .join(' or ')
-  );
+  const { total, inactive, online, error, updating, offline, unenrolled } =
+    await getAgentStatusForAgentPolicy(
+      esClient,
+      soClient,
+      undefined,
+      Array.from(policyIds)
+        .map((policyId) => `(policy_id:"${policyId}")`)
+        .join(' or ')
+    );
 
   return {
     total_enrolled: total,
@@ -83,6 +86,8 @@ export const getFleetServerUsage = async (
     unhealthy: error,
     offline,
     updating,
+    inactive,
+    unenrolled,
     total_all_statuses: total + inactive,
     num_host_urls: numHostsUrls,
   };
