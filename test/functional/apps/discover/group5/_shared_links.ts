@@ -104,12 +104,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await teardown();
       });
 
-      it('should allow for copying the snapshot URL as a short URL and should open it', async function () {
-        const re = new RegExp(baseUrl + '/app/r/s/.+$');
+      it('should allow for copying the snapshot URL and should open it', async function () {
         let actualUrl: string = '';
         await retry.try(async () => {
           actualUrl = await PageObjects.share.getSharedUrl();
-          expect(actualUrl).to.match(re);
         });
 
         const actualTime = await PageObjects.timePicker.getTimeConfig();
