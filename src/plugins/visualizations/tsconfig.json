@@ -74,7 +74,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/core-execution-context-common",
-    "@kbn/presentation-containers"
+    "@kbn/presentation-containers",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": [
     "target/**/*",
