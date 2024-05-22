@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import {
   CrowdstrikeAgentStatusClient,
   CROWDSTRIKE_NETWORK_STATUS,
@@ -16,13 +17,18 @@ import { HostStatus } from '../../../../../../common/endpoint/types';
 import { CrowdstrikeMock } from '../../../actions/clients/crowdstrike/mocks';
 import { responseActionsClientMock } from '../../../actions/clients/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { RawCrowdstrikeInfo } from './types';
 
 jest.mock('../../..', () => ({
   NormalizedExternalConnectorClient: jest.fn(),
   getPendingActionsSummary: jest.fn().mockResolvedValue([]),
 }));
 
+const baseResponse = {
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+};
 describe('CrowdstrikeAgentStatusClient', () => {
   let client: CrowdstrikeAgentStatusClient;
   const constructorOptions = responseActionsClientMock.createConstructorOptions();
@@ -82,16 +88,21 @@ describe('CrowdstrikeAgentStatusClient', () => {
     });
     it('should get agent statuses', async () => {
       const agentIds = ['agent1'];
-      const searchResponse = {
+      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = {
+        ...baseResponse,
         hits: {
           hits: [
             {
               fields: { 'crowdstrike.host.id': ['agent1'] },
+              _id: '1',
+              _index: 'index',
               inner_hits: {
                 most_recent: {
                   hits: {
                     hits: [
                       {
+                        _id: '1',
+                        _index: 'index',
                         _source: {
                           crowdstrike: {
                             host: {
@@ -110,9 +121,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
           ],
         },
       };
-      constructorOptions.esClient.search.mockResolvedValueOnce(
-        searchResponse as unknown as SearchResponse<unknown, unknown>
-      );
+      constructorOptions.esClient.search.mockResolvedValueOnce(searchResponse);
 
       const agentStatusResponse = {
         agent1: { id: 'agent1', state: CROWDSTRIKE_STATUS_RESPONSE.ONLINE },
@@ -140,16 +149,21 @@ describe('CrowdstrikeAgentStatusClient', () => {
 
     it('should handle unhealthy agent', async () => {
       const agentIds = ['agent2'];
-      const searchResponse = {
+      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = {
+        ...baseResponse,
         hits: {
           hits: [
             {
+              _id: '1',
+              _index: 'index',
               fields: { 'crowdstrike.host.id': ['agent2'] },
               inner_hits: {
                 most_recent: {
                   hits: {
                     hits: [
                       {
+                        _id: '1',
+                        _index: 'index',
                         _source: {
                           crowdstrike: {
                             host: {
@@ -168,9 +182,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
           ],
         },
       };
-      constructorOptions.esClient.search.mockResolvedValueOnce(
-        searchResponse as unknown as SearchResponse<unknown, unknown>
-      );
+      constructorOptions.esClient.search.mockResolvedValueOnce(searchResponse);
 
       const agentStatusResponse = {
         agent2: { id: 'agent2', state: CROWDSTRIKE_STATUS_RESPONSE.OFFLINE },
@@ -198,16 +210,21 @@ describe('CrowdstrikeAgentStatusClient', () => {
     });
     it('should set isolated to true if host is pending release', async () => {
       const agentIds = ['agent2'];
-      const searchResponse = {
+      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = {
+        ...baseResponse,
         hits: {
           hits: [
             {
+              _id: '1',
+              _index: 'index',
               fields: { 'crowdstrike.host.id': ['agent2'] },
               inner_hits: {
                 most_recent: {
                   hits: {
                     hits: [
                       {
+                        _id: '1',
+                        _index: 'index',
                         _source: {
                           crowdstrike: {
                             host: {
@@ -226,9 +243,7 @@ describe('CrowdstrikeAgentStatusClient', () => {
           ],
         },
       };
-      constructorOptions.esClient.search.mockResolvedValueOnce(
-        searchResponse as unknown as SearchResponse<unknown, unknown>
-      );
+      constructorOptions.esClient.search.mockResolvedValueOnce(searchResponse);
 
       const agentStatusResponse = {
         agent2: { id: 'agent2', state: CROWDSTRIKE_STATUS_RESPONSE.OFFLINE },
