@@ -31,7 +31,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
   const toasts = getService('toasts');
 
-  const { header, security } = getPageObjects(['header', 'security']);
+  const { header } = getPageObjects(['header', 'security']);
 
   const flyoutService = getService('flyout');
 
