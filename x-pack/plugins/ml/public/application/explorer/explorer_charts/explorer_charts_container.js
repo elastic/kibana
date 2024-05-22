@@ -388,8 +388,6 @@ export const ExplorerChartsContainerUI = ({
   showSelectedInterval,
   chartsService,
 }) => {
-  //@TODO: remove
-  console.log(`--@@ExplorerChartsContainerUI key`, uuid);
   const {
     services: {
       chrome: { recentlyAccessed },

@@ -42,7 +42,8 @@ export const initializeAnomalyChartsControls = (
   const query$ = parentApi?.query$ ?? new BehaviorSubject<Query | undefined>(undefined);
   // @ts-expect-error Embeddable parentApi has filter$
   const filters$ = parentApi?.filters$ ?? new BehaviorSubject<Filter[] | undefined>(undefined);
-  const refresh$ = new BehaviorSubject<void>(undefined);
+  // @ts-expect-error Embeddable lastReloadRequestTime has filter$
+  const refresh$ = parentApi?.lastReloadRequestTime$ ?? new BehaviorSubject<void>(undefined);
 
   const updateUserInput = (update: AnomalyChartsEmbeddableState) => {
     jobIds$.next(update.jobIds);

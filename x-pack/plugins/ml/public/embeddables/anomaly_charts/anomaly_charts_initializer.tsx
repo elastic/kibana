@@ -19,6 +19,7 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiSpacer,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AnomalyChartsEmbeddableState } from '..';
@@ -154,28 +155,33 @@ export const AnomalyChartsInitializer: FC<AnomalyChartsInitializerProps> = ({
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={onCancel} data-test-subj="mlAnomalyChartsInitializerCancelButton">
-          <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexGroup justifyContent={'spaceBetween'}>
+          <EuiButtonEmpty
+            onClick={onCancel}
+            data-test-subj="mlAnomalyChartsInitializerCancelButton"
+          >
+            <FormattedMessage
+              id="xpack.ml.anomalyChartsEmbeddable.setupModal.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
+          </EuiButtonEmpty>
 
-        <EuiButton
-          data-test-subj="mlAnomalyChartsInitializerConfirmButton"
-          isDisabled={!isFormValid}
-          onClick={onCreate.bind(null, {
-            title: panelTitle,
-            maxSeriesToPlot,
-            jobIds,
-          })}
-          fill
-        >
-          <FormattedMessage
-            id="xpack.ml.anomalyChartsEmbeddable.setupFlyout.confirmButtonLabel"
-            defaultMessage="Confirm"
-          />
-        </EuiButton>
+          <EuiButton
+            data-test-subj="mlAnomalyChartsInitializerConfirmButton"
+            isDisabled={!isFormValid}
+            onClick={onCreate.bind(null, {
+              title: panelTitle,
+              maxSeriesToPlot,
+              jobIds,
+            })}
+            fill
+          >
+            <FormattedMessage
+              id="xpack.ml.anomalyChartsEmbeddable.setupFlyout.confirmButtonLabel"
+              defaultMessage="Confirm"
+            />
+          </EuiButton>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </>
   );

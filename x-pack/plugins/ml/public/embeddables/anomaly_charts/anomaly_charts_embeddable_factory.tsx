@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { Observable } from 'rxjs';
-import { Subscription, map, skipWhile } from 'rxjs';
+import { Subscription, map } from 'rxjs';
 import { fetch$ } from '@kbn/presentation-publishing';
 import useUnmount from 'react-use/lib/useUnmount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -19,7 +19,6 @@ import {
   initializeTimeRange,
   initializeTitles,
 } from '@kbn/presentation-publishing';
-import useObservable from 'react-use/lib/useObservable';
 import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -152,16 +151,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
               throw new Error('Parent API does not have execution context');
             }
 
-            const reload$ = useMemo(
-              () =>
-                fetch$(api).pipe(
-                  skipWhile((fetchContext) => !fetchContext.isReload),
-                  map((fetchContext) => Date.now())
-                ),
-              []
-            );
-            const lastReloadRequestTime = useObservable(reload$, Date.now());
-
             useReactEmbeddableExecutionContext(
               coreStartServices.executionContext,
               parentApi.executionContext,
@@ -195,7 +184,6 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                       onRenderComplete={onRenderComplete}
                       onError={onError}
                       timeRange$={appliedTimeRange$}
-                      lastReloadRequestTime={lastReloadRequestTime}
                     />
                   </div>
                 </KibanaContextProvider>
