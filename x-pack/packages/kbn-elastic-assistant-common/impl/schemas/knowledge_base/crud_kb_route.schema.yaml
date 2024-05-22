@@ -60,7 +60,11 @@ paths:
                 properties:
                   elser_exists:
                     type: boolean
+                  esql_exists:
+                    type: boolean
                   index_exists:
+                    type: boolean
+                  is_setup_in_progress:
                     type: boolean
                   pipeline_exists:
                     type: boolean

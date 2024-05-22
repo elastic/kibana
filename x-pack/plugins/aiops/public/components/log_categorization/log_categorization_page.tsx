@@ -10,6 +10,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import {
   EuiButton,
   EuiSpacer,
@@ -27,10 +28,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { stringHash } from '@kbn/ml-string-hash';
 import { AIOPS_TELEMETRY_ID } from '@kbn/aiops-common/constants';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 
+import { useTableState } from '@kbn/ml-in-memory-table/hooks/use_table_state';
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -51,7 +52,9 @@ import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
-import type { DocumentStats } from '../../hooks/use_document_count_stats';
+import { createDocumentStatsHash } from './utils';
+import { TableHeader } from './category_table/table_header';
+import { useOpenInDiscover } from './category_table/use_open_in_discover';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -80,7 +83,8 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   );
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [highlightedCategory, setHighlightedCategory] = useState<Category | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<Category[]>([]);
   const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
   const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
   const [loading, setLoading] = useState(false);
@@ -94,6 +98,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+  const tableState = useTableState<Category>([], 'key');
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -152,6 +157,17 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
     undefined,
     undefined,
     BAR_TARGET
+  );
+
+  const openInDiscover = useOpenInDiscover(
+    dataView.id!,
+    selectedField,
+    selectedCategories,
+    stateFromUrl,
+    timefilter,
+    true,
+    undefined,
+    undefined
   );
 
   useEffect(() => {
@@ -253,8 +269,6 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           docCount,
         }))
       );
-      setData(null);
-      setFieldValidationResult(null);
       setTotalCount(documentStats.totalCount);
       if (fieldValidationResult !== null) {
         loadCategories();
@@ -371,7 +385,7 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
           <DocumentCountChart
             eventRate={eventRate}
             pinnedCategory={pinnedCategory}
-            selectedCategory={selectedCategory}
+            selectedCategory={highlightedCategory}
             totalCount={totalCount}
             documentCountStats={documentStats.documentCountStats}
           />
@@ -387,36 +401,33 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
         loading={loading}
         categoriesLength={data?.categories?.length ?? null}
         eventRateLength={eventRate.length}
-        fieldSelected={selectedField !== null}
       />
 
       {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
-        <CategoryTable
-          categories={data.categories}
-          aiopsListState={stateFromUrl}
-          dataViewId={dataView.id!}
-          eventRate={eventRate}
-          selectedField={selectedField}
-          pinnedCategory={pinnedCategory}
-          setPinnedCategory={setPinnedCategory}
-          selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
-          timefilter={timefilter}
-          displayExamples={data.displayExamples}
-        />
+        <>
+          <TableHeader
+            categoriesCount={data.categories.length}
+            selectedCategoriesCount={selectedCategories.length}
+            openInDiscover={openInDiscover}
+          />
+
+          <EuiSpacer size="xs" />
+          <EuiHorizontalRule margin="none" />
+
+          <CategoryTable
+            categories={data.categories}
+            eventRate={eventRate}
+            pinnedCategory={pinnedCategory}
+            setPinnedCategory={setPinnedCategory}
+            highlightedCategory={highlightedCategory}
+            setHighlightedCategory={setHighlightedCategory}
+            displayExamples={data.displayExamples}
+            setSelectedCategories={setSelectedCategories}
+            openInDiscover={openInDiscover}
+            tableState={tableState}
+          />
+        </>
       ) : null}
     </EuiPageBody>
   );
 };
-
-/**
- * Creates a hash from the document stats to determine if the document stats have changed.
- */
-function createDocumentStatsHash(documentStats: DocumentStats) {
-  const lastTimeStampMs = documentStats.documentCountStats?.lastDocTimeStampMs;
-  const totalCount = documentStats.documentCountStats?.totalCount;
-  const times = Object.keys(documentStats.documentCountStats?.buckets ?? {});
-  const firstBucketTimeStamp = times.length ? times[0] : undefined;
-  const lastBucketTimeStamp = times.length ? times[times.length - 1] : undefined;
-  return stringHash(`${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}`);
-}
