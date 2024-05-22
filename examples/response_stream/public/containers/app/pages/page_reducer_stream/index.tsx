@@ -35,6 +35,8 @@ import { useDeps } from '../../../../hooks/use_deps';
 import { BarChartRace } from '../../components/bar_chart_race';
 import { getStatusMessage } from '../../components/get_status_message';
 
+const initialState = getInitialState();
+
 export const PageReducerStream: FC = () => {
   const {
     core: { http, notifications },
@@ -49,7 +51,7 @@ export const PageReducerStream: FC = () => {
     RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
     '1',
     { compressResponse, flushFix, simulateErrors },
-    { reducer: reducerStreamReducer, initialState: getInitialState() }
+    { reducer: reducerStreamReducer, initialState }
   );
 
   const { progress, entities } = data;
