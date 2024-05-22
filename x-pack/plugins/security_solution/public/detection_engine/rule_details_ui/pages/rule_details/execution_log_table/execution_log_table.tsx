@@ -478,7 +478,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   ]);
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel data-test-subj="executionLogContainer" hasBorder>
       {/* Filter bar */}
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
@@ -573,6 +573,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         onChange={onTableChangeCallback}
         itemId={getItemId}
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
+        data-test-subj="executionsTable"
       />
     </EuiPanel>
   );

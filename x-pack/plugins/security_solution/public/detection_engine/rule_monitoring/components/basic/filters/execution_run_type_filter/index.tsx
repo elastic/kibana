@@ -38,7 +38,7 @@ const ExecutionRunTypeFilterComponent: React.FC<ExecutionRunTypeFilterProps> = (
 
   return (
     <MultiselectFilter<RuleRunType>
-      dataTestSubj="ExecutionRunTyoeFilter"
+      dataTestSubj="ExecutionRunTypeFilter"
       title={i18n.FILTER_TITLE}
       items={items}
       selectedItems={selectedItems}
