@@ -13,7 +13,7 @@ import React from 'react';
 import { useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../../assistant_context';
-import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const statusResponse = { assistantModelEvaluation: true, assistantStreamingEnabled: false };
 
