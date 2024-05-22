@@ -38,7 +38,6 @@ import React, { useEffect, useState } from 'react';
 import { generatePath } from 'react-router-dom';
 import {
   CONNECTORS_LABEL,
-  CONNECTOR_LABEL,
   COPY_CONNECTOR_ID_LABEL,
   DELETE_CONNECTOR_LABEL,
 } from '../../../../common/i18n_string';
@@ -297,7 +296,7 @@ const DeleteConnectorModalAction: React.FC<{ connector: Connector }> = ({ connec
         <DeleteConnectorModal
           closeDeleteModal={() => setModalIsOpen(false)}
           connectorId={connector.id}
-          connectorName={connector.name || CONNECTOR_LABEL}
+          connectorName={connector.name}
         />
       )}
       <EuiToolTip content={DELETE_CONNECTOR_LABEL}>
