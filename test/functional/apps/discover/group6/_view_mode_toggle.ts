@@ -88,6 +88,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('discoverErrorCalloutTitle');
         });
 
+        it('should not show Patterns tab (basic license)', async () => {
+          await testSubjects.missingOrFail('dscViewModePatternAnalysisButton');
+          await retry.try(async () => {
+            const documentTab = await testSubjects.find('dscViewModeDocumentButton');
+            expect(await documentTab.getAttribute('aria-selected')).to.be('true');
+          });
+        });
+
         it('should show Field Statistics tab', async () => {
           await testSubjects.click('dscViewModeFieldStatsButton');
 
