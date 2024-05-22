@@ -32,7 +32,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   const { getHref } = useLink();
   const { agents } = useConfig();
   const authz = useAuthz();
-  const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
+  const { agentTamperProtectionEnabled, subfeaturePrivileges } = ExperimentalFeaturesService.get();
 
   const { docLinks } = useStartServices();
   const granularPrivilegesCallout = useDismissableTour('GRANULAR_PRIVILEGES');
@@ -115,7 +115,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      {!authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
+      {!subfeaturePrivileges || !authz.fleet.all || granularPrivilegesCallout.isHidden ? null : (
         <EuiCallOut
           size="s"
           iconType="cheer"
