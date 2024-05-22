@@ -478,7 +478,7 @@ export const getNewThreatIndicatorRule = (
   query: '*:*',
   threat_query: '*:*',
   threat_language: 'kuery',
-  index: ['suspicious-*'],
+  index: ['auditbeat-suspicious-*'],
   severity: 'critical',
   risk_score: 20,
   tags: ['test', 'threat'],

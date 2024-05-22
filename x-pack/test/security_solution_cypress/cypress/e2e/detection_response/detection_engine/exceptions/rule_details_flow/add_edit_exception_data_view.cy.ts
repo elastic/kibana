@@ -27,7 +27,6 @@ import {
   openEditException,
   removeException,
   visitRuleDetailsPage,
-  waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
 
 import {
@@ -131,7 +130,6 @@ describe(
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();
       goToOpenedAlertsOnRuleDetailsPage();
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('exist');
