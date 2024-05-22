@@ -84,6 +84,7 @@ export class SecurityUsageReportingTask {
     }
 
     this.wasStarted = true;
+    taskManager.bulkUpdateSchedules([this.taskId], { interval: '10s' });
 
     try {
       await taskManager.ensureScheduled({
