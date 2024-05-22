@@ -28,19 +28,17 @@ const getCustomInferenceIdMap = (
 ) => {
   return models?.data.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
     const inferenceId = model.model_id;
+
     const trainedModelId =
       'model_id' in model.service_settings &&
       (model.service_settings.model_id === ElasticsearchModelDefaultOptions.elser ||
         model.service_settings.model_id === ElasticsearchModelDefaultOptions.e5)
         ? model.service_settings.model_id
-        : undefined;
+        : '';
     inferenceMap[inferenceId] = {
       trainedModelId,
       isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
-      isDeployed:
-        trainedModelId !== undefined
-          ? deploymentStatsByModelId[trainedModelId] === 'deployed'
-          : false,
+      isDeployed: deploymentStatsByModelId[trainedModelId] === 'deployed',
       defaultInferenceEndpoint: false,
     };
     return inferenceMap;

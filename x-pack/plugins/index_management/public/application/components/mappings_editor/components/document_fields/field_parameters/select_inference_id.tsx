@@ -30,7 +30,11 @@ import {
   TRAINED_MODEL_TYPE,
 } from '@kbn/ml-trained-models-utils';
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import { ModelConfig, Service } from '@kbn/inference_integration_flyout/types';
+import {
+  ElasticsearchModelDefaultOptions,
+  ModelConfig,
+  Service,
+} from '@kbn/inference_integration_flyout/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { InferenceFlyoutWrapper } from '@kbn/inference_integration_flyout/components/inference_flyout_wrapper';
 import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
@@ -140,23 +144,18 @@ export const SelectInferenceId = ({
         setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
         setIsCreateInferenceApiLoading(false);
         setInferenceAddError(undefined);
-
-        const trainedModelId =
-          'model_id' in modelConfig.service_settings &&
-          (modelConfig.service_settings.model_id === Service.elser ||
-            modelConfig.service_settings.model_id === Service.elasticsearch)
-            ? modelConfig.service_settings.model_id
-            : undefined;
-
+        const getTrainedModelId = () => {
+          if (modelConfig.service === Service.elser) return ElasticsearchModelDefaultOptions.elser;
+          else if (modelConfig.service === Service.elasticsearch)
+            return ElasticsearchModelDefaultOptions.e5;
+          else return '';
+        };
         const newModelId: InferenceToModelIdMap = {};
         newModelId[inferenceId] = {
-          trainedModelId,
+          trainedModelId: getTrainedModelId(),
           isDeployable:
             modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch,
-          isDeployed:
-            trainedModelId !== undefined
-              ? getTrainedModelStats()[trainedModelId] === 'deployed'
-              : false,
+          isDeployed: getTrainedModelStats()[getTrainedModelId()] === 'deployed',
           defaultInferenceEndpoint: false,
         };
         resendRequest();
