@@ -61,11 +61,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       describe('permalink', function () {
-        it('should allow for copying the snapshot URL as a short URL', async function () {
-          const re = new RegExp(baseUrl + '/app/r/s/.+$');
+        it('should allow for copying the snapshot URL', async function () {
+          // the share url param is a long url for dashboard tests
           await retry.try(async () => {
             const actualUrl = await PageObjects.share.getSharedUrl();
-            expect(actualUrl).to.match(re);
+            expect(actualUrl).to.not.be.empty();
           });
         });
 

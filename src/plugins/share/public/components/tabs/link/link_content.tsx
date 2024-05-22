@@ -93,6 +93,7 @@ export const LinkContent = ({
       return urlWithLoc;
     } else {
       const snapshotUrl = getSnapshotUrl();
+      setLongUrl(snapshotUrl);
       const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
       setShortUrlCache(shortUrl.url);
       return shortUrl.url;
@@ -156,7 +157,7 @@ export const LinkContent = ({
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              data-share-url={longUrl}
+              data-share-url={longUrl === '' ? getSnapshotUrl() : longUrl}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
               color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
