@@ -5,8 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import { EuiText, EuiLink, EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
@@ -16,16 +14,12 @@ import { HOST_METRIC_GROUP_TITLES } from '../translations';
 import { Section } from '../components/section';
 import { ChartsGrid } from '../charts_grid/charts_grid';
 import { Chart } from './chart';
-import { type HostMetricTypes, useHostCharts } from '../hooks/use_metrics_charts';
+import { useHostCharts } from '../hooks/use_host_metrics_charts';
 import { TitleWithTooltip } from '../components/section_title';
+import { MetricsChartsFields, HostMetricTypes } from './types';
 
-interface Props {
-  assetId: string;
-  dateRange: TimeRange;
-  dataView?: DataView;
-  overview?: boolean;
+interface Props extends MetricsChartsFields {
   metric: Exclude<HostMetricTypes, 'kpi'>;
-  onShowAll?: (metric: string) => void;
 }
 
 const FRAGMENT_BASE = 'key-metrics';
