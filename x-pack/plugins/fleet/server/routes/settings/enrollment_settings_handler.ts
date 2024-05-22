@@ -138,7 +138,7 @@ export const getFleetServerOrAgentPolicies = async (
   }
 
   // If an agent policy is not specified, return all fleet server policies
-  const fleetServerPolicies = await getFleetServerPolicies(soClient);
+  const fleetServerPolicies = (await getFleetServerPolicies(soClient)).map(mapPolicy);
   return { fleetServerPolicies };
 };
 
