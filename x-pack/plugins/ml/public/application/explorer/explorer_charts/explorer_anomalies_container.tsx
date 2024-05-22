@@ -98,6 +98,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             tooManyBucketsCalloutMsg,
             showSelectedInterval,
             chartsService,
+            id,
           }}
         />
       )}

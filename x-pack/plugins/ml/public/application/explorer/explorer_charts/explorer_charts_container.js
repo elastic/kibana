@@ -77,10 +77,9 @@ export function getEntitiesQuery(series) {
 
 // create a somewhat unique ID
 // from charts metadata for React's key attribute
-function getChartId(series) {
-  const { jobId, detectorLabel, entityFields } = series;
-  const entities = entityFields.map((ef) => `${ef.fieldName}/${ef.fieldValue}`).join(',');
-  const id = `${jobId}${detectorLabel}${entities}`.replace(/[^a-zA-Z]+/g, '');
+function getChartId(series, randomId) {
+  const { jobId, detectorLabel } = series;
+  const id = `${jobId}${detectorLabel}`.replace(/[^a-zA-Z]+/g, '') + randomId;
   return id;
 }
 
@@ -373,6 +372,7 @@ function ExplorerChartContainer({
 
 // Flex layout wrapper for all explorer charts
 export const ExplorerChartsContainerUI = ({
+  id: uuid,
   chartsPerRow,
   seriesToPlot,
   severity,
@@ -388,6 +388,8 @@ export const ExplorerChartsContainerUI = ({
   showSelectedInterval,
   chartsService,
 }) => {
+  //@TODO: remove
+  console.log(`--@@ExplorerChartsContainerUI key`, uuid);
   const {
     services: {
       chrome: { recentlyAccessed },
@@ -432,8 +434,8 @@ export const ExplorerChartsContainerUI = ({
         data-test-subj="mlExplorerChartsContainer"
       >
         {seriesToUse.length > 0 &&
-          seriesToUse.map((series) => {
-            const chartId = getChartId(series);
+          seriesToUse.map((series, idx) => {
+            const chartId = getChartId(series, '-' + (uuid ?? '') + idx);
             return (
               <EuiFlexItem
                 key={chartId}
@@ -441,6 +443,7 @@ export const ExplorerChartsContainerUI = ({
                 style={{ minWidth: chartsWidth }}
               >
                 <ExplorerChartContainer
+                  key={chartId}
                   id={chartId}
                   series={series}
                   severity={severity}
