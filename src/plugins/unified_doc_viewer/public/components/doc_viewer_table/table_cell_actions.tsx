@@ -25,6 +25,47 @@ interface TableActionsProps {
   row?: TableRow;
 }
 
+export function isFilterInOutPairDisabled(row: TableRow): boolean {
+  if (!row) {
+    return false;
+  }
+  const {
+    action: { onFilter },
+    field: { fieldMapping },
+    value: { ignored },
+  } = row;
+
+  return Boolean(onFilter && (!fieldMapping || !fieldMapping.filterable || ignored));
+}
+
+export function getFilterInOutPairDisabledWarning(row: TableRow): string | undefined {
+  if (!isFilterInOutPairDisabled(row)) {
+    return undefined;
+  }
+  const {
+    field: { fieldMapping },
+    value: { ignored },
+  } = row;
+
+  if (ignored) {
+    return i18n.translate(
+      'unifiedDocViewer.docViews.table.ignoredValuesCanNotBeSearchedWarningMessage',
+      {
+        defaultMessage: 'Ignored values cannot be searched',
+      }
+    );
+  }
+
+  return !fieldMapping
+    ? i18n.translate(
+        'unifiedDocViewer.docViews.table.unindexedFieldsCanNotBeSearchedWarningMessage',
+        {
+          defaultMessage: 'Unindexed fields cannot be searched',
+        }
+      )
+    : undefined;
+}
+
 export const FilterIn: React.FC<TableActionsProps> = ({ Component, row }) => {
   if (!row) {
     return null;
@@ -33,23 +74,15 @@ export const FilterIn: React.FC<TableActionsProps> = ({ Component, row }) => {
   const {
     action: { onFilter, flattenedField },
     field: { field, fieldMapping },
-    value: { ignored },
   } = row;
+
   // Filters pair
-  const filtersPairDisabled = Boolean(!fieldMapping || !fieldMapping.filterable || ignored);
   const filterAddLabel = i18n.translate(
     'unifiedDocViewer.docViews.table.filterForValueButtonTooltip',
     {
       defaultMessage: 'Filter for value',
     }
   );
-
-  // const filtersPairToolTip =
-  //   (filtersPairDisabled &&
-  //     i18n.translate('unifiedDocViewer.docViews.table.unindexedFieldsCanNotBeSearchedTooltip', {
-  //       defaultMessage: 'Unindexed fields or ignored values cannot be searched',
-  //     })) ||
-  //   undefined;
 
   if (!onFilter) {
     return null;
@@ -59,8 +92,7 @@ export const FilterIn: React.FC<TableActionsProps> = ({ Component, row }) => {
     <Component
       data-test-subj={`addFilterForValueButton-${field}`}
       iconType="plusInCircle"
-      // toolTipContent={filtersPairToolTip} // TODO: find a replacement
-      disabled={filtersPairDisabled}
+      disabled={isFilterInOutPairDisabled(row)}
       title={filterAddLabel}
       onClick={() => onFilter(fieldMapping, flattenedField, '+')}
     >
@@ -77,23 +109,15 @@ export const FilterOut: React.FC<TableActionsProps> = ({ Component, row }) => {
   const {
     action: { onFilter, flattenedField },
     field: { field, fieldMapping },
-    value: { ignored },
   } = row;
-  // Filters pair
-  const filtersPairDisabled = Boolean(!fieldMapping || !fieldMapping.filterable || ignored);
 
+  // Filters pair
   const filterOutLabel = i18n.translate(
     'unifiedDocViewer.docViews.table.filterOutValueButtonTooltip',
     {
       defaultMessage: 'Filter out value',
     }
   );
-  // const filtersPairToolTip =
-  //   (filtersPairDisabled &&
-  //     i18n.translate('unifiedDocViewer.docViews.table.unindexedFieldsCanNotBeSearchedTooltip', {
-  //       defaultMessage: 'Unindexed fields or ignored values cannot be searched',
-  //     })) ||
-  //   undefined;
 
   if (!onFilter) {
     return null;
@@ -103,8 +127,7 @@ export const FilterOut: React.FC<TableActionsProps> = ({ Component, row }) => {
     <Component
       data-test-subj={`addFilterOutValueButton-${field}`}
       iconType="minusInCircle"
-      // toolTipContent={filtersPairToolTip} // TODO: find a replacement
-      disabled={filtersPairDisabled}
+      disabled={isFilterInOutPairDisabled(row)}
       title={filterOutLabel}
       onClick={() => onFilter(fieldMapping, flattenedField, '-')}
     >
@@ -113,6 +136,36 @@ export const FilterOut: React.FC<TableActionsProps> = ({ Component, row }) => {
   );
 };
 
+export function isFilterExistsDisabled(row: TableRow): boolean {
+  if (!row) {
+    return false;
+  }
+  const {
+    action: { onFilter },
+    field: { fieldMapping },
+  } = row;
+
+  return Boolean(onFilter && (!fieldMapping || !fieldMapping.filterable || fieldMapping.scripted));
+}
+
+export function getFilterExistsDisabledWarning(row: TableRow): string | undefined {
+  if (!isFilterExistsDisabled(row)) {
+    return undefined;
+  }
+  const {
+    field: { fieldMapping },
+  } = row;
+
+  return fieldMapping?.scripted
+    ? i18n.translate(
+        'unifiedDocViewer.docViews.table.unableToFilterForPresenceOfScriptedFieldsWarningMessage',
+        {
+          defaultMessage: 'Unable to filter for presence of scripted fields',
+        }
+      )
+    : undefined;
+}
+
 export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => {
   if (!row) {
     return null;
@@ -120,7 +173,7 @@ export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => 
 
   const {
     action: { onFilter },
-    field: { field, fieldMapping },
+    field: { field },
   } = row;
 
   // Filter exists
@@ -128,23 +181,6 @@ export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => 
     'unifiedDocViewer.docViews.table.filterForFieldPresentButtonTooltip',
     { defaultMessage: 'Filter for field present' }
   );
-  const filtersExistsDisabled = !fieldMapping || !fieldMapping.filterable;
-  // const filtersExistsToolTip =
-  //   (filtersExistsDisabled &&
-  //     (fieldMapping && fieldMapping.scripted
-  //       ? i18n.translate(
-  //           'unifiedDocViewer.docViews.table.unableToFilterForPresenceOfScriptedFieldsTooltip',
-  //           {
-  //             defaultMessage: 'Unable to filter for presence of scripted fields',
-  //           }
-  //         )
-  //       : i18n.translate(
-  //           'unifiedDocViewer.docViews.table.unableToFilterForPresenceOfMetaFieldsTooltip',
-  //           {
-  //             defaultMessage: 'Unable to filter for presence of meta fields',
-  //           }
-  //         ))) ||
-  //   undefined;
 
   if (!onFilter) {
     return null;
@@ -154,8 +190,7 @@ export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => 
     <Component
       data-test-subj={`addExistsFilterButton-${field}`}
       iconType="filter"
-      // toolTipContent={filtersExistsToolTip} // TODO: find a replacement
-      disabled={filtersExistsDisabled}
+      disabled={isFilterExistsDisabled(row)}
       title={filterExistsLabel}
       onClick={() => onFilter('_exists_', field, '+')}
     >

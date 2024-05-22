@@ -16,7 +16,10 @@ import {
   EuiSelectableMessage,
   EuiDataGrid,
   EuiDataGridProps,
+  EuiDataGridCellPopoverElementProps,
   EuiI18n,
+  EuiText,
+  EuiCallOut,
   useResizeObserver,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -42,7 +45,13 @@ import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { getUnifiedDocViewerServices } from '../../plugin';
 import { TableFieldValue } from './table_cell_value';
-import { type TableRow, getFieldCellActions, getFieldValueCellActions } from './table_cell_actions';
+import {
+  type TableRow,
+  getFieldCellActions,
+  getFieldValueCellActions,
+  getFilterExistsDisabledWarning,
+  getFilterInOutPairDisabledWarning,
+} from './table_cell_actions';
 import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
@@ -62,6 +71,9 @@ const DEFAULT_PAGE_SIZE = 25;
 const PINNED_FIELDS_KEY = 'discover:pinnedFields';
 const PAGE_SIZE = 'discover:pageSize';
 const SEARCH_TEXT = 'discover:searchText';
+
+const GRID_COLUMN_FIELD_NAME = 'name';
+const GRID_COLUMN_FIELD_VALUE = 'value';
 
 const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> = {
   columnVisibility: {
@@ -329,7 +341,7 @@ export const DocViewerTable = ({
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
       {
-        id: 'name',
+        id: GRID_COLUMN_FIELD_NAME,
         displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.name', {
           defaultMessage: 'Field',
         }),
@@ -342,7 +354,7 @@ export const DocViewerTable = ({
         cellActions: fieldCellActions,
       },
       {
-        id: 'value',
+        id: GRID_COLUMN_FIELD_VALUE,
         displayAsText: i18n.translate('unifiedDocViewer.fieldChooser.discoverField.value', {
           defaultMessage: 'Value',
         }),
@@ -406,6 +418,34 @@ export const DocViewerTable = ({
       return null;
     },
     [rows, searchText]
+  );
+
+  const renderCellPopover = useCallback(
+    (props: EuiDataGridCellPopoverElementProps) => {
+      const { columnId, children, cellActions, rowIndex } = props;
+      const row = rows[rowIndex];
+
+      let warningMessage;
+      if (columnId === GRID_COLUMN_FIELD_VALUE) {
+        warningMessage = getFilterInOutPairDisabledWarning(row);
+      } else if (columnId === GRID_COLUMN_FIELD_NAME) {
+        warningMessage = getFilterExistsDisabledWarning(row);
+      }
+
+      return (
+        <>
+          <EuiText size="s">{children}</EuiText>
+          {cellActions}
+          {Boolean(warningMessage) && (
+            <div>
+              <EuiSpacer size="xs" />
+              <EuiCallOut title={warningMessage} color="warning" size="s" />
+            </div>
+          )}
+        </>
+      );
+    },
+    [rows]
   );
 
   const containerHeight = containerRef
@@ -474,6 +514,7 @@ export const DocViewerTable = ({
               toolbarVisibility={false}
               rowCount={rows.length}
               renderCellValue={renderCellValue}
+              renderCellPopover={renderCellPopover}
               pagination={pagination}
             />
           </EuiFlexItem>
