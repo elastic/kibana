@@ -28,5 +28,4 @@ export const dataViewConfig = {
   serviceKey: SERVICE_KEY,
 };
 
-// export const configArray = [legacyConfig, dataViewConfig];
-export const configArray = [legacyConfig];
+export const configArray = [legacyConfig, dataViewConfig];
