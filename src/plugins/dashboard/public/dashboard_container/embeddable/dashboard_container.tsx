@@ -25,7 +25,6 @@ import {
   EmbeddableFactoryNotFoundError,
   embeddableInputToSubject,
   isExplicitInputWithAttributes,
-  PanelIncompatibleError,
   PanelNotFoundError,
   ViewMode,
   type EmbeddableFactory,
@@ -97,6 +96,7 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -585,15 +585,14 @@ export class DashboardContainer
     } = pluginServices.getServices();
     const panel = this.getInput().panels[panelId];
     if (reactEmbeddableRegistryHasKey(panel.type)) {
-      const factory = await getReactEmbeddableFactory(panel.type);
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
-      const serialized = apiHasSerializableState(child)
-        ? await child.serializeState()
+      const runtimeState = apiHasSnapshottableState(child)
+        ? await child.snapshotRuntimeState()
         : { rawState: {} };
       return {
         type: panel.type,
-        explicitInput: { ...panel.explicitInput, ...deserialized },
+        explicitInput: { ...panel.explicitInput, ...runtimeState },
         gridData: panel.gridData,
       };
     }

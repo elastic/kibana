@@ -43,14 +43,12 @@ const serializeAllPanelState = async (
   > = [];
   for (const [uuid, panel] of Object.entries(dashboard.getInput().panels)) {
     const newUuid = saveAsCopy ? v4() : uuid;
-    if (!reactEmbeddableRegistryHasKey(panel.type)) {
-      newPanelsMap[newUuid] = {
-        ...panel,
-        gridData: { ...panel.gridData, i: newUuid },
-        explicitInput: { ...panel.explicitInput, id: newUuid },
-      };
-      continue;
-    }
+    newPanelsMap[newUuid] = {
+      ...panel,
+      gridData: { ...panel.gridData, i: newUuid },
+      explicitInput: { ...panel.explicitInput, id: newUuid },
+    };
+    if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.children$.value[uuid];
 
     if (api && apiHasSerializableState(api)) {
