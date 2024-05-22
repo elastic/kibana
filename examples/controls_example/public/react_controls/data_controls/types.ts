@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Data } from '@dnd-kit/core/dist/store';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { HasEditCapabilities, PublishesPanelTitle } from '@kbn/presentation-publishing';
-import { PublishesDataViews } from '@kbn/presentation-publishing';
+import {
+  HasEditCapabilities,
+  PublishesDataViews,
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import {
   ControlFactory,
   ControlStateManager,
