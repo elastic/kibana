@@ -26,19 +26,19 @@ import { fetchSignificantTermPValues } from './fetch_significant_term_p_values';
 // regarding a limit of abort signal listeners of more than 10.
 const MAX_CONCURRENT_QUERIES = 5;
 
-interface FieldCandidate {
-  fieldCandidate: string;
+interface KeywordFieldCandidate {
+  keywordFieldCandidate: string;
 }
-const isFieldCandidate = (d: unknown): d is FieldCandidate =>
-  isPopulatedObject(d, ['fieldCandidate']);
+const isKeywordFieldCandidate = (d: unknown): d is KeywordFieldCandidate =>
+  isPopulatedObject(d, ['keywordFieldCandidate']);
 
 interface TextFieldCandidate {
   textFieldCandidate: string;
 }
-const isTextFieldCandidate = (d: unknown): d is FieldCandidate =>
+const isTextFieldCandidate = (d: unknown): d is TextFieldCandidate =>
   isPopulatedObject(d, ['textFieldCandidate']);
 
-type Candidate = FieldCandidate | TextFieldCandidate;
+type QueueFieldCandidate = KeywordFieldCandidate | TextFieldCandidate;
 
 export interface LogRateChange {
   type: string;
@@ -118,7 +118,7 @@ export const fetchSimpleLogRateAnalysis = async (
 
   // FIELD CANDIDATES
 
-  const fieldCandidates: string[] = [];
+  const keywordFieldCandidates: string[] = [];
   const textFieldCandidates: string[] = [];
 
   const indexInfoParams: AiopsLogRateAnalysisSchema = {
@@ -162,7 +162,7 @@ export const fetchSimpleLogRateAnalysis = async (
     ...analysisWindowParameters,
   };
 
-  fieldCandidates.push(...indexInfo.fieldCandidates);
+  keywordFieldCandidates.push(...indexInfo.fieldCandidates);
   textFieldCandidates.push(...indexInfo.textFieldCandidates);
   const sampleProbability = getSampleProbability(
     indexInfo.deviationTotalDocCount + indexInfo.baselineTotalDocCount
@@ -177,27 +177,20 @@ export const fetchSimpleLogRateAnalysis = async (
   const significantTerms: SignificantItem[] = [];
   const fieldsToSample = new Set<string>();
 
-  const pValuesQueue = queue(async function (payload: Candidate) {
-    if (isFieldCandidate(payload)) {
-      const { fieldCandidate } = payload;
+  const pValuesQueue = queue(async function (payload: QueueFieldCandidate) {
+    if (isKeywordFieldCandidate(payload)) {
+      const { keywordFieldCandidate } = payload;
       let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>> = [];
 
-      try {
-        pValues = await fetchSignificantTermPValues(
-          esClient,
-          params,
-          [fieldCandidate],
-          undefined,
-          sampleProbability,
-          (e) => {
-            console.log('fetchSignificantTermPValues ERROR', e);
-          },
-          abortSignal
-        );
-      } catch (e) {
-        console.log('catch fetchSignificantTermPValues ERROR', e);
-        return;
-      }
+      pValues = await fetchSignificantTermPValues(
+        esClient,
+        params,
+        [keywordFieldCandidate],
+        undefined,
+        sampleProbability,
+        undefined,
+        abortSignal
+      );
 
       if (pValues.length > 0) {
         pValues.forEach((d) => {
@@ -214,9 +207,7 @@ export const fetchSimpleLogRateAnalysis = async (
         [textFieldCandidate],
         undefined,
         sampleProbability,
-        (e) => {
-          console.log('fetchSignificantCategories ERROR', e);
-        },
+        undefined,
         abortSignal
       );
 
@@ -229,11 +220,10 @@ export const fetchSimpleLogRateAnalysis = async (
   pValuesQueue.push(
     [
       ...textFieldCandidates.map((d) => ({ textFieldCandidate: d })),
-      ...fieldCandidates.map((d) => ({ fieldCandidate: d })),
+      ...keywordFieldCandidates.map((d) => ({ keywordFieldCandidate: d })),
     ],
     (err) => {
       if (err) {
-        console.error('queue push error', err);
         pValuesQueue.kill();
       }
     }
