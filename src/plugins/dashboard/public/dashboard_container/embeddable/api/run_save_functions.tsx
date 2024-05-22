@@ -10,7 +10,7 @@ import { Reference } from '@kbn/content-management-utils';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
-import { apiHasSerializableState } from '@kbn/presentation-containers';
+import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
@@ -36,15 +36,30 @@ const serializeAllPanelState = async (
   } = pluginServices.getServices();
   const references: Reference[] = [];
   const panels = cloneDeep(dashboard.getInput().panels);
+
+  const serializePromises: Array<
+    Promise<{ uuid: string; serialized: SerializedPanelState<object> }>
+  > = [];
   for (const [uuid, panel] of Object.entries(panels)) {
     if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
     const api = dashboard.children$.value[uuid];
+
     if (api && apiHasSerializableState(api)) {
-      const serializedState = api.serializeState();
-      panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
-      references.push(...prefixReferencesFromPanel(uuid, serializedState.references ?? []));
+      serializePromises.push(
+        (async () => {
+          const serialized = await api.serializeState();
+          return { uuid, serialized };
+        })()
+      );
     }
   }
+
+  const serializeResults = await Promise.all(serializePromises);
+  for (const result of serializeResults) {
+    panels[result.uuid].explicitInput = { ...result.serialized.rawState, id: result.uuid };
+    references.push(...prefixReferencesFromPanel(result.uuid, result.serialized.references ?? []));
+  }
+
   return { panels, references };
 };
 
@@ -145,7 +160,7 @@ export function runSaveAs(this: DashboardContainer) {
         });
       }
       this.savedObjectReferences = saveResult.references ?? [];
-      this.lastSavedState.next();
+      this.saveNotification$.next();
       resolve(saveResult);
       return saveResult;
     };
@@ -199,7 +214,7 @@ export async function runQuickSave(this: DashboardContainer) {
 
   this.savedObjectReferences = saveResult.references ?? [];
   this.dispatch.setLastSavedInput(dashboardStateToSave);
-  this.lastSavedState.next();
+  this.saveNotification$.next();
   if (this.controlGroup && persistableControlGroupInput) {
     this.controlGroup.setSavedState(persistableControlGroupInput);
   }
