@@ -65,7 +65,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a rule with defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const ruleUpdateProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
           max_signals: 200,
           setup: '# some setup markdown',
@@ -73,7 +73,13 @@ export default ({ getService }: FtrProviderContext) => {
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
         });
+
+        const expectedRule = {
+          ...ruleUpdateProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
 
         await securitySolutionApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
@@ -81,7 +87,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { body: updatedRulesBulkResponse } = await securitySolutionApi
           .bulkUpdateRules({
-            body: [expectedRule],
+            body: [ruleUpdateProperties],
           })
           .expect(200);
 
