@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ElasticsearchModelDefaultOptions, Service } from '@kbn/inference_integration_flyout/types';
 import { InferenceStatsResponse } from '@kbn/ml-plugin/public/application/services/ml_api_service/trained_models';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useCallback, useMemo } from 'react';
@@ -28,12 +29,18 @@ const getCustomInferenceIdMap = (
   return models?.data.reduce<InferenceToModelIdMap>((inferenceMap, model) => {
     const inferenceId = model.model_id;
     const trainedModelId =
-      'model_id' in model.service_settings ? model.service_settings.model_id : '';
-
+      'model_id' in model.service_settings &&
+      (model.service_settings.model_id === ElasticsearchModelDefaultOptions.elser ||
+        model.service_settings.model_id === ElasticsearchModelDefaultOptions.e5)
+        ? model.service_settings.model_id
+        : undefined;
     inferenceMap[inferenceId] = {
       trainedModelId,
-      isDeployable: model.service === 'elser' || model.service === 'elasticsearch',
-      isDeployed: deploymentStatsByModelId[trainedModelId] === 'deployed',
+      isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
+      isDeployed:
+        trainedModelId !== undefined
+          ? deploymentStatsByModelId[trainedModelId] === 'deployed'
+          : false,
       defaultInferenceEndpoint: false,
     };
     return inferenceMap;
