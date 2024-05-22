@@ -34,6 +34,7 @@ import {
 } from '../lib/servicenow/helpers';
 
 import * as i18n from '../lib/servicenow/translations';
+import { AdditionalFields } from '../lib/servicenow/additional_fields';
 
 const useGetChoicesFields = ['urgency', 'severity', 'impact', 'category', 'subcategory'];
 const defaultFields: Fields = {
@@ -263,6 +264,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionConnector, isTestResolveAction, isTestTriggerAction]);
 
+  const additionalFieldsOnChange = useCallback(
+    (value) => editSubActionProperty('additional_fields', value),
+    [editSubActionProperty]
+  );
+
   return (
     <>
       {executionMode === ActionConnectorMode.Test ? (
@@ -461,6 +467,14 @@ const ServiceNowParamsFields: React.FunctionComponent<
           editSubActionProperty={editSubActionProperty}
           isRequired={showOnlyCorrelationId}
           errors={errors}
+        />
+      )}
+      {!isDeprecatedActionConnector && (
+        <AdditionalFields
+          value={actionParams.subActionParams?.incident.additional_fields}
+          messageVariables={messageVariables}
+          errors={errors['subActionParams.incident.additional_fields'] as string[]}
+          onChange={additionalFieldsOnChange}
         />
       )}
     </>
