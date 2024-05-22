@@ -1096,6 +1096,7 @@ async function getFunctionArgsSuggestions(
   const arg = node.args[argIndex];
 
   // the first signature is used as reference
+  // TODO - take into consideration all signatures that match the current args
   const refSignature = fnDefinition.signatures[0];
 
   const hasMoreMandatoryArgs =

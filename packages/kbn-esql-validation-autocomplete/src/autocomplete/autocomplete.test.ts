@@ -1123,78 +1123,81 @@ describe('autocomplete', () => {
     );
 
     // Test suggestions for each possible param, within each signature variation, for each function
-    // for (const fn of evalFunctionDefinitions) {
-    //   // skip this fn for the moment as it's quite hard to test
-    //   if (fn.name !== 'bucket') {
-    //     for (const signature of fn.signatures) {
-    //       signature.params.forEach((param, i) => {
-    //         if (i < signature.params.length) {
-    //           const canHaveMoreArgs =
-    //             i + 1 < (signature.minParams ?? 0) ||
-    //             signature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
+    for (const fn of evalFunctionDefinitions) {
+      // skip this fn for the moment as it's quite hard to test
+      if (fn.name !== 'bucket') {
+        for (const signature of fn.signatures) {
+          signature.params.forEach((param, i) => {
+            if (i < signature.params.length) {
+              // This ref signature thing is probably wrong in a few cases, but it matches
+              // the logic in getFunctionArgsSuggestions. They should both be updated
+              const refSignature = fn.signatures[0];
+              const requiresMoreArgs =
+                i + 1 < (refSignature.minParams ?? 0) ||
+                refSignature.params.filter(({ optional }, j) => !optional && j > i).length > 0;
 
-    //           const allParamDefs = fn.signatures
-    //             .map((s) => getParamAtPosition(signature, i))
-    //             .filter(nonNullable);
+              const allParamDefs = fn.signatures
+                .map((s) => getParamAtPosition(s, i))
+                .filter(nonNullable);
 
-    //           // get all possible types for this param
-    //           const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
-    //             allParamDefs,
-    //             (p) => p.constantOnly || /_literal/.test(param.type)
-    //           );
+              // get all possible types for this param
+              const [constantOnlyParamDefs, acceptsFieldParamDefs] = partition(
+                allParamDefs,
+                (p) => p.constantOnly || /_literal/.test(p.type)
+              );
 
-    //           const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
-    //             Array.from(new Set(paramDefs.map((p) => p.type)));
+              const getTypesFromParamDefs = (paramDefs: FunctionArgSignature[]) =>
+                Array.from(new Set(paramDefs.map((p) => p.type)));
 
-    //           const suggestedConstants = param.literalSuggestions || param.literalOptions;
+              const suggestedConstants = param.literalSuggestions || param.literalOptions;
 
-    //           testSuggestions(
-    //             `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
-    //             suggestedConstants?.length
-    //               ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
-    //               : [
-    //                   ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
-    //                     (f) => (canHaveMoreArgs ? `${f},` : f)
-    //                   ),
-    //                   ...getFunctionSignaturesByReturnType(
-    //                     'eval',
-    //                     getTypesFromParamDefs(acceptsFieldParamDefs),
-    //                     { evalMath: true },
-    //                     undefined,
-    //                     [fn.name]
-    //                   ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-    //                   ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
-    //                     canHaveMoreArgs ? `${d},` : d
-    //                   ),
-    //                 ]
-    //           );
-    //           testSuggestions(
-    //             `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
-    //               i ? ',' : ''
-    //             } )`,
-    //             suggestedConstants?.length
-    //               ? suggestedConstants.map((option) => `"${option}"${canHaveMoreArgs ? ',' : ''}`)
-    //               : [
-    //                   ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
-    //                     (f) => (canHaveMoreArgs ? `${f},` : f)
-    //                   ),
-    //                   ...getFunctionSignaturesByReturnType(
-    //                     'eval',
-    //                     getTypesFromParamDefs(acceptsFieldParamDefs),
-    //                     { evalMath: true },
-    //                     undefined,
-    //                     [fn.name]
-    //                   ).map((l) => (canHaveMoreArgs ? `${l},` : l)),
-    //                   ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
-    //                     canHaveMoreArgs ? `${d},` : d
-    //                   ),
-    //                 ]
-    //           );
-    //         }
-    //       });
-    //     }
-    //   }
-    // }
+              testSuggestions(
+                `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
+                  : [
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
+                        (f) => (requiresMoreArgs ? `${f},` : f)
+                      ),
+                      ...getFunctionSignaturesByReturnType(
+                        'eval',
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        { evalMath: true },
+                        undefined,
+                        [fn.name]
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
+                        requiresMoreArgs ? `${d},` : d
+                      ),
+                    ]
+              );
+              testSuggestions(
+                `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
+                  i ? ',' : ''
+                } )`,
+                suggestedConstants?.length
+                  ? suggestedConstants.map((option) => `"${option}"${requiresMoreArgs ? ',' : ''}`)
+                  : [
+                      ...getFieldNamesByType(getTypesFromParamDefs(acceptsFieldParamDefs)).map(
+                        (f) => (requiresMoreArgs ? `${f},` : f)
+                      ),
+                      ...getFunctionSignaturesByReturnType(
+                        'eval',
+                        getTypesFromParamDefs(acceptsFieldParamDefs),
+                        { evalMath: true },
+                        undefined,
+                        [fn.name]
+                      ).map((l) => (requiresMoreArgs ? `${l},` : l)),
+                      ...getLiteralsByType(getTypesFromParamDefs(constantOnlyParamDefs)).map((d) =>
+                        requiresMoreArgs ? `${d},` : d
+                      ),
+                    ]
+              );
+            }
+          });
+        }
+      }
+    }
 
     testSuggestions('from a | eval var0 = bucket(@timestamp,', getUnitDuration(1));
 
