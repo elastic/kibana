@@ -14,18 +14,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('useReducer stream example', () => {
+  describe('string stream example', () => {
     it('navigates to the example', async () => {
-      await testSubjects.click('ndjson-usereducer-stream');
+      await testSubjects.click('simple-string-stream');
 
       await retry.try(async () => {
         expect(await testSubjects.getVisibleText('responseStreamPageTitle')).to.be(
-          'NDJSON useReducer stream'
+          'Simple string stream'
         );
-        expect(await testSubjects.getVisibleText('responseStreamProgressBadge')).to.be('0%');
-        expect(await testSubjects.getVisibleText('responseStreamStatusMessage')).to.be(
-          'Development did not start yet.'
-        );
+        expect(await testSubjects.exists('responseStreamStartButton')).to.be(true);
+        expect(await testSubjects.getVisibleText('responseStreamString')).to.be('');
       });
     });
 
@@ -33,18 +31,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('responseStreamStartButton');
 
       await retry.try(async () => {
-        expect(await testSubjects.getVisibleText('responseStreamProgressBadge')).not.to.be('0%');
-        expect(await testSubjects.getVisibleText('responseStreamStatusMessage')).to.be(
-          'Development is ongoing, the hype is real!'
-        );
+        expect(await testSubjects.getVisibleText('responseStreamString')).not.to.be('');
       });
     });
 
     it('finishes the stream', async () => {
       await retry.tryForTime(60000, async () => {
-        expect(await testSubjects.getVisibleText('responseStreamProgressBadge')).to.be('100%');
-        expect(await testSubjects.getVisibleText('responseStreamStatusMessage')).to.be(
-          'Development completed, the release got out the door!'
+        expect(await testSubjects.getVisibleText('responseStreamString')).to.be(
+          'Elasticsearch is a search engine based on the Lucene library. It provides a distributed, multitenant-capable full-text search engine with an HTTP web interface and schema-free JSON documents. Elasticsearch is developed in Java and is dual-licensed under the source-available Server Side Public License and the Elastic license, while other parts fall under the proprietary (source-available) Elastic License. Official clients are available in Java, .NET (C#), PHP, Python, Apache Groovy, Ruby and many other languages. According to the DB-Engines ranking, Elasticsearch is the most popular enterprise search engine.'
         );
       });
     });
