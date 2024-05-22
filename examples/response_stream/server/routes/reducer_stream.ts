@@ -101,6 +101,8 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
                 // Throw an error. It should not crash Kibana!
                 // It should be caught and logged to the Kibana server console.
                 // The stream will just stop but the client will note receive an error!
+                // In practice this pattern should be avoided as it will just end
+                // the stream without an explanation.
                 throw new Error('There was a (simulated) server side error!');
 
               case 'emit-error':
