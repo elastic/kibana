@@ -19,6 +19,7 @@ import {
   isEqualState,
 } from './discover_app_state_container';
 import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/common';
+import { createDataViewDataSource } from '../../../../common/data_sources';
 
 let history: History;
 let state: DiscoverAppStateContainer;
@@ -40,16 +41,22 @@ describe('Test discover app state container', () => {
   });
 
   test('hasChanged returns whether the current state has changed', async () => {
-    state.set({ index: 'modified' });
+    state.set({
+      dataSource: createDataViewDataSource({ dataViewId: 'modified' }),
+    });
     expect(state.hasChanged()).toBeTruthy();
     state.resetInitialState();
     expect(state.hasChanged()).toBeFalsy();
   });
 
   test('getPrevious returns the state before the current', async () => {
-    state.set({ index: 'first' });
+    state.set({
+      dataSource: createDataViewDataSource({ dataViewId: 'first' }),
+    });
     const stateA = state.getState();
-    state.set({ index: 'second' });
+    state.set({
+      dataSource: createDataViewDataSource({ dataViewId: 'second' }),
+    });
     expect(state.getPrevious()).toEqual(stateA);
   });
 
@@ -111,7 +118,7 @@ describe('Test discover app state container', () => {
           filters: [customFilter],
           grid: undefined,
           hideChart: true,
-          index: 'the-data-view-id',
+          dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
           interval: 'auto',
           query: customQuery,
           rowHeight: undefined,
@@ -147,7 +154,7 @@ describe('Test discover app state container', () => {
           filters: [customFilter],
           grid: undefined,
           hideChart: undefined,
-          index: 'the-data-view-id',
+          dataSource: createDataViewDataSource({ dataViewId: 'the-data-view-id' }),
           interval: 'auto',
           query: defaultQuery,
           rowHeight: undefined,
@@ -217,10 +224,24 @@ describe('Test discover app state container', () => {
         expect(isEqualState(initialState, { ...initialState, ...param })).toBeFalsy();
       });
     });
+
     test('allows to exclude variables from comparison', () => {
       expect(
-        isEqualState(initialState, { ...initialState, index: undefined }, ['index'])
+        isEqualState(initialState, { ...initialState, dataSource: undefined }, ['dataSource'])
       ).toBeTruthy();
     });
+  });
+
+  test('should automatically set ES|QL data source when query is ES|QL', () => {
+    state.update({
+      dataSource: createDataViewDataSource({ dataViewId: 'test' }),
+    });
+    expect(state.get().dataSource?.type).toBe('dataView');
+    state.update({
+      query: {
+        esql: 'from test',
+      },
+    });
+    expect(state.get().dataSource?.type).toBe('esql');
   });
 });

@@ -19,9 +19,12 @@ paths:
               schema:
                 type: object
                 properties:
+                  assistantKnowledgeBaseByDefault:
+                    type: boolean
                   assistantModelEvaluation:
                     type: boolean
                 required:
+                  - assistantKnowledgeBaseByDefault
                   - assistantModelEvaluation
         '400':
           description: Generic Error
