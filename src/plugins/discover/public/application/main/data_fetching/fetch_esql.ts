@@ -62,7 +62,7 @@ export function fetchEsql(
         let esqlQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         let esqlHeaderWarning: string | undefined;
-        const contextCollector = profilesManager.createDocumentProfilesCollector();
+        const profilesCollector = profilesManager.createDocumentProfilesCollector();
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | EsqlErrorResponse;
           if (response.type === 'error') {
@@ -79,7 +79,7 @@ export function fetchEsql(
                 flattened: row,
               };
 
-              contextCollector.collect({ record });
+              profilesCollector.collect({ record });
 
               return record;
             });
@@ -89,7 +89,7 @@ export function fetchEsql(
           if (error) {
             throw new Error(error);
           } else {
-            contextCollector.finalize(true);
+            profilesCollector.finalize(true);
 
             return {
               records: finalData || [],
