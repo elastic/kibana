@@ -5,39 +5,30 @@
  * 2.0.
  */
 
+import type {
+  LogRateChange,
+  SimpleSignificantItem,
+} from '@kbn/aiops-log-rate-analysis/queries/fetch_simple_log_rate_analysis';
+
 export interface GetAiopsLogRateAnalysisFunctionResponse {
   content:
     | string
     | {
-        logRateChange: {
-          type: string;
-          spikeLogRate?: number;
-          dipLogRate?: number;
-          averageLogRate: number;
-          logRateAggregationIntervalUsedForAnalysis: string;
-          documentSamplingFactorForAnalysis?: number;
-        };
-        significantItems: Array<{
-          field: string;
-          value: string | number;
-          type: 'metadata' | 'log message pattern';
-          documentCount: number;
-          baselineCount: number;
-          logIncrease: string;
-        }>;
+        logRateChange: Pick<
+          LogRateChange,
+          | 'type'
+          | 'logRateChangeCount'
+          | 'averageLogRateCount'
+          | 'logRateAggregationIntervalUsedForAnalysis'
+          | 'documentSamplingFactorForAnalysis'
+        >;
+        significantItems: SimpleSignificantItem[];
       };
+
   data: {
     dateHistogram: Record<string, number>;
     logRateAnalysisUILink: string;
-    logRateChange: {
-      type: string;
-      timestamp: string;
-      spikeLogRate?: number;
-      dipLogRate?: number;
-      averageLogRate: number;
-      logRateAggregationIntervalUsedForAnalysis: string;
-      documentSamplingFactorForAnalysis?: number;
-      extendedChangePoint: { startTs: number; endTs: number };
-    };
+    logRateChange: LogRateChange;
+    significantItems: SimpleSignificantItem[];
   };
 }
