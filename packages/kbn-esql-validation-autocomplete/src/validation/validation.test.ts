@@ -2472,14 +2472,6 @@ describe('validation logic', () => {
           []
         );
 
-        testErrorsAndWarnings(
-          'from a_index | eval coalesce(cartesianPointField, cartesianPointField)',
-          [
-            'Argument of [coalesce] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
-            'Argument of [coalesce] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
-          ]
-        );
-
         testErrorsAndWarnings('from a_index | eval var = coalesce(numberField)', []);
         testErrorsAndWarnings('from a_index | eval coalesce(numberField)', []);
         testErrorsAndWarnings('from a_index | eval var = coalesce(to_integer(booleanField))', []);

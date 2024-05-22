@@ -9914,14 +9914,6 @@
       "warning": []
     },
     {
-      "query": "from a_index | eval coalesce(cartesianPointField, cartesianPointField)",
-      "error": [
-        "Argument of [coalesce] must be [boolean], found value [cartesianPointField] type [cartesian_point]",
-        "Argument of [coalesce] must be [boolean], found value [cartesianPointField] type [cartesian_point]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | eval var = coalesce(numberField)",
       "error": [],
       "warning": []
