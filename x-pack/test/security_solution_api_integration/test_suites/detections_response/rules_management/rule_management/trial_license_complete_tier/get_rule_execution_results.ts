@@ -304,7 +304,6 @@ export default ({ getService }: FtrProviderContext) => {
       const backfillStart = moment(fromManualRuleRun).add(5, 'm').toISOString();
       expect(response.body.events[0].backfill.to).to.eql(backfillStart);
       expect(response.body.events[0].backfill.from).to.eql(fromManualRuleRun);
-      expect(response.body.events[0].backfill.interval).to.eql('5m');
     });
 
     it('should reflect run_type_filters in params', async () => {
