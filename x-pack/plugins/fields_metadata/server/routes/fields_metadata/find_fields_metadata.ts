@@ -10,6 +10,7 @@ import { FIND_FIELDS_METADATA_URL } from '../../../common/fields_metadata';
 import * as fieldsMetadataV1 from '../../../common/fields_metadata/v1';
 import { FieldsMetadataBackendLibs } from '../../lib/shared_types';
 import { FindFieldsMetadataResponsePayload } from '../../../common/fields_metadata/v1';
+import { PackageNotFoundError } from '../../services/fields_metadata/errors';
 
 export const initFindFieldsMetadataRoute = ({
   router,
@@ -54,6 +55,14 @@ export const initFindFieldsMetadataRoute = ({
             body: fieldsMetadataV1.findFieldsMetadataResponsePayloadRT.encode(responsePayload),
           });
         } catch (error) {
+          if (error instanceof PackageNotFoundError) {
+            return response.badRequest({
+              body: {
+                message: error.message,
+              },
+            });
+          }
+
           return response.customError({
             statusCode: error.statusCode ?? 500,
             body: {

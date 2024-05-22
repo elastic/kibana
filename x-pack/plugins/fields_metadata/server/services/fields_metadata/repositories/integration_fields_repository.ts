@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import hash from 'object-hash';
 import { HashedCache } from '../../../../common/hashed_cache';
-import {
-  FieldMetadata,
-  FieldMetadataPlain,
-  IntegrationFieldName,
-  PartialFieldMetadataPlain,
-} from '../../../../common';
+import { FieldMetadata, IntegrationFieldName, PartialFieldMetadataPlain } from '../../../../common';
 import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './types';
+import { PackageNotFoundError } from '../errors';
 interface IntegrationFieldsRepositoryDeps {
   integrationFieldsExtractor: IntegrationFieldsExtractor;
 }
 
 export class IntegrationFieldsRepository {
-  private cache: HashedCache<string, Record<string, Record<string, FieldMetadata>>>;
+  private cache: HashedCache<
+    IntegrationFieldsSearchParams,
+    Record<string, Record<string, FieldMetadata>>
+  >;
 
   private constructor(private readonly fieldsExtractor: IntegrationFieldsExtractor) {
     this.cache = new HashedCache();
@@ -32,16 +30,16 @@ export class IntegrationFieldsRepository {
     let field = this.getCachedField(fieldName, { integration, dataset });
 
     if (!field) {
-      await this.extractFields({ integration, dataset });
+      try {
+        await this.extractFields({ integration, dataset });
+      } catch (error) {
+        throw new PackageNotFoundError(error.message);
+      }
 
       field = this.getCachedField(fieldName, { integration, dataset });
     }
 
     return field;
-  }
-
-  async find({ fieldNames }: { fieldNames?: IntegrationFieldName[] } = {}) {
-    throw new Error('TODO: Implement the IntegrationFieldsRepository#getByName');
   }
 
   public static create({ integrationFieldsExtractor }: IntegrationFieldsRepositoryDeps) {
@@ -60,7 +58,7 @@ export class IntegrationFieldsRepository {
     }
 
     return this.fieldsExtractor({ integration, dataset })
-      .then(this.mapExtractedFieldsToFieldMetadataInstances)
+      .then(this.mapExtractedFieldsToFieldMetadataTree)
       .then((fieldMetadataTree) => this.storeFieldsInCache(cacheKey, fieldMetadataTree));
   }
 
@@ -96,7 +94,7 @@ export class IntegrationFieldsRepository {
   }
 
   private storeFieldsInCache = (
-    cacheKey: string,
+    cacheKey: IntegrationFieldsSearchParams,
     extractedFieldsMetadata: Record<string, Record<string, FieldMetadata>>
   ): void => {
     const cachedIntegration = this.cache.get(cacheKey);
@@ -108,17 +106,17 @@ export class IntegrationFieldsRepository {
     }
   };
 
-  private getCacheKey = (params: IntegrationFieldsSearchParams) => hash(params);
+  private getCacheKey = (params: IntegrationFieldsSearchParams) => params;
 
-  private mapExtractedFieldsToFieldMetadataInstances = (
+  private mapExtractedFieldsToFieldMetadataTree = (
     extractedFields: Record<string, Record<string, PartialFieldMetadataPlain>>
   ) => {
     return Object.entries(extractedFields).reduce(
       (integrationGroup, [datasetName, datasetGroup]) => {
         integrationGroup[datasetName] = Object.entries(datasetGroup).reduce(
-          (datasetGroupResult, [extractedFieldName, extractedField]) => {
-            datasetGroupResult[extractedFieldName] = FieldMetadata.create({
-              ...extractedField,
+          (datasetGroupResult, [fieldName, field]) => {
+            datasetGroupResult[fieldName] = FieldMetadata.create({
+              ...field,
               source: 'integration',
             });
             return datasetGroupResult;
