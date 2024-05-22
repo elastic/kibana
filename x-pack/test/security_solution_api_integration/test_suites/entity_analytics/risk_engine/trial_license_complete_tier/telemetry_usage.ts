@@ -43,6 +43,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await cleanRiskEngine({ kibanaServer, es, log });
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
     });
 
     beforeEach(async () => {
