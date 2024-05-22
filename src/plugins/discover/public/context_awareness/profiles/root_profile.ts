@@ -33,5 +33,3 @@ export class RootProfileService extends AsyncProfileService<
 > {}
 
 export type RootProfileProvider = Parameters<RootProfileService['registerProvider']>[0];
-
-export const rootProfileService = new RootProfileService();

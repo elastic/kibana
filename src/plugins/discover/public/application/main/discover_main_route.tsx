@@ -40,14 +40,7 @@ import {
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
-import {
-  dataSourceProfileService,
-  documentProfileService,
-  ProfilesProvider,
-  rootProfileService,
-} from '../../context_awareness';
-import { ProfilesManager } from '../../context_awareness/profiles_manager';
-import { useRootProfile } from '../../context_awareness/use_root_profile';
+import { useRootProfile } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -76,12 +69,10 @@ export function DiscoverMainRoute({
     http: { basePath },
     dataViewEditor,
     share,
+    profilesManager,
     getScopedHistory,
   } = services;
   const { id: savedSearchId } = useParams<DiscoverLandingParams>();
-  const [profilesManager] = useState(
-    () => new ProfilesManager(rootProfileService, dataSourceProfileService, documentProfileService)
-  );
   const [stateContainer, { reset: resetStateContainer }] = useDiscoverStateContainer({
     history,
     services,
@@ -363,14 +354,12 @@ export function DiscoverMainRoute({
 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
-      <ProfilesProvider value={profilesManager}>
-        <DiscoverMainProvider value={stateContainer}>
-          <>
-            <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />
-            {mainContent}
-          </>
-        </DiscoverMainProvider>
-      </ProfilesProvider>
+      <DiscoverMainProvider value={stateContainer}>
+        <>
+          <DiscoverTopNavInline stateContainer={stateContainer} hideNavMenuItems={loading} />
+          {mainContent}
+        </>
+      </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );
 }

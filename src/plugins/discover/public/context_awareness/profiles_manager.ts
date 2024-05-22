@@ -38,13 +38,16 @@ export interface GetProfilesOptions {
 }
 
 export class ProfilesManager {
-  private rootProfile$ = new BehaviorSubject<ComposableProfile<RootProfile> | undefined>(undefined);
-  private dataSourceProfile$ = new BehaviorSubject<
+  private readonly rootProfile$ = new BehaviorSubject<ComposableProfile<RootProfile> | undefined>(
+    undefined
+  );
+  private readonly dataSourceProfile$ = new BehaviorSubject<
     ComposableProfile<DataSourceProfile> | undefined
   >(undefined);
-  private documentProfiles$ = new BehaviorSubject<Map<string, ComposableProfile<DocumentProfile>>>(
-    new Map()
-  );
+  private readonly documentProfiles$ = new BehaviorSubject<
+    Map<string, ComposableProfile<DocumentProfile>>
+  >(new Map());
+
   private prevRootProfileParams?: SerializedRootProfileParams;
   private prevDataSourceProfileParams?: SerializedDataSourceProfileParams;
   private rootProfileAbortController?: AbortController;
