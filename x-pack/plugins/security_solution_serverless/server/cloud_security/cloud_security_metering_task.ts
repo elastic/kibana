@@ -255,7 +255,8 @@ export const getCloudSecurityUsageRecord = async ({
 }: CloudSecurityMeteringCallbackInput): Promise<UsageRecord[] | undefined> => {
   try {
     const searchFrom = getSearchStartDate(lastSuccessfulReport);
-
+    const foo = await indexHasDataInDateRange(esClient, cloudSecuritySolution, searchFrom);
+    logger.error(`is index contains data: ${foo}`);
     if (!(await indexHasDataInDateRange(esClient, cloudSecuritySolution, searchFrom))) return;
 
     const periodSeconds = Math.floor((new Date().getTime() - searchFrom.getTime()) / 1000);
@@ -266,6 +267,8 @@ export const getCloudSecurityUsageRecord = async ({
       searchFrom
     );
 
+    logger.error(`Assest Aggregation: ${assetCountAggregations}`);
+
     const usageRecords = await getUsageRecords(
       assetCountAggregations,
       cloudSecuritySolution,
@@ -275,6 +278,8 @@ export const getCloudSecurityUsageRecord = async ({
       periodSeconds,
       logger
     );
+
+    logger.error(`usage records: ${usageRecords}`);
 
     return usageRecords;
   } catch (err) {
