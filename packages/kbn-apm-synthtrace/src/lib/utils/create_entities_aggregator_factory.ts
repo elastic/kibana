@@ -79,7 +79,7 @@ export function createEntitiesAggregatorFactory<TFields extends Fields>() {
 
         if (entity) {
           // @ts-ignore
-          entity['asset.latestTimestamp'] = lastSeen;
+          entity['entity.latestTimestamp'] = lastSeen;
         } else {
           entity = init({ ...event }, firstSeen, lastSeen);
           entities.set(key, entity);

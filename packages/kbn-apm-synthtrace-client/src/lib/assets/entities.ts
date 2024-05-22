@@ -14,6 +14,9 @@ export interface EntityDocument extends Fields {
   'entity.latestTimestamp': string;
   'entity.firstSeen': string;
   'entity.indexPatterns': string[];
+  'entity.data_stream.type': string[];
+  'entity.identity.service.environment'?: string;
+  'entity.identity.service.name': string;
 }
 
 export class Entity<F extends EntityDocument> extends Serializable<F> {}

@@ -13,7 +13,6 @@ import {
   ESDocumentWithOperation,
   LogDocument,
 } from '@kbn/apm-synthtrace-client';
-import { merge } from 'lodash';
 import { PassThrough, pipeline, Readable, Transform } from 'stream';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
 import { getDedotTransform } from '../shared/get_dedot_transform';
@@ -31,7 +30,7 @@ export class EntitiesSynthtraceEsClient extends SynthtraceEsClient<EntityDocumen
       ...options,
       pipeline: entitiesPipeline(),
     });
-    this.indices = ['entities'];
+    this.indices = ['entities-synthtrace.summary'];
   }
 }
 
@@ -39,7 +38,7 @@ function entitiesPipeline() {
   return (base: Readable) => {
     const aggregators = [
       createTracesServiceEntitiesAggregator(),
-      // createLogsServiceAssetsAggregator(),
+      createLogsServiceEntitiesAggregator(),
     ];
 
     return pipeline(
@@ -81,15 +80,18 @@ function getMergeEntitesTransform() {
   return new Transform({
     objectMode: true,
     transform(nextDocument: ESDocumentWithOperation<EntityDocument>, encoding, callback) {
-      const entityId = nextDocument['entity.id'];
+      const entityId = nextDocument['entity.identity.service.name'];
       if (!mergedDocuments[entityId]) {
         mergedDocuments[entityId] = { ...nextDocument };
       } else {
         const mergedDocument = mergedDocuments[entityId];
-        // mergedDocument['asset.signalTypes'] = merge(
-        //   mergedDocument['asset.signalTypes'],
-        //   nextDocument['asset.signalTypes']
-        // );
+
+        mergedDocument['entity.data_stream.type'] = [
+          ...new Set([
+            ...mergedDocument['entity.data_stream.type'],
+            ...nextDocument['entity.data_stream.type'],
+          ]),
+        ];
       }
       callback();
     },

@@ -23,13 +23,11 @@ export function createLogsServiceEntitiesAggregator() {
       },
       init: (event, firstSeen, lastSeen) => {
         return {
-          'entity.id': `${event['service.name']}:${event['service.environment']!}`,
-          'entity.identity': {
-            'service: environment': event['service.environment'],
-            'service.name': event['service.name']!,
-          },
+          'entity.id': `${event['service.name']}`,
+          'entity.identity.service.name': event['service.name']!,
           'entity.latestTimestamp': lastSeen,
           'entity.indexPatterns': ['logs-*'],
+          'entity.data_stream.type': ['logs'],
         };
       },
     },

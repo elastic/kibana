@@ -35,8 +35,8 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
 
       const successfulTimestamps = range.interval('1m').rate(1);
       const failedTimestamps = range.interval('1m').rate(1);
-      const serviceNames = [...Array(numServices).keys()].map((index) => `synth-node-${index}`);
-
+      const serviceNames = [...Array(numServices).keys()].map((index) => `apm-only-${index}`);
+      serviceNames.push('multi-signal-service');
       const HOSTS = Array(numHosts)
         .fill(0)
         .map((_, idx) => infra.host(`my-host-${idx}`));
@@ -144,7 +144,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .create()
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service(serviceNames[0])
+                .service('multi-signal-service')
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',
@@ -183,14 +183,14 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .create()
                 .message(message.replace('<random>', generateShortId()))
                 .logLevel(level)
-                .service('synth-java')
+                .service('logs-only-services')
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'nodejs',
                   'orchestrator.cluster.name': CLUSTER.clusterName,
                   'orchestrator.cluster.id': CLUSTER.clusterId,
                   'orchestrator.namespace': CLUSTER.namespace,
-                  'container.name': `synth-java-${generateShortId()}`,
+                  'container.name': `logs-only-${generateShortId()}`,
                   'orchestrator.resource.id': generateShortId(),
                   'cloud.provider': 'gcp',
                   'cloud.region': 'eu-central-1',
