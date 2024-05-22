@@ -18,8 +18,8 @@ import {
   AuthType as CasesWebhookAuthType,
   WebhookMethods as CasesWebhookMethods,
   SSLCertType,
-} from '../../../common/constants';
-import { CRT_FILE, KEY_FILE } from '@kbn/stack-connectors-plugin/common/mocks';
+} from '../../../common/auth/constants';
+import { CRT_FILE, KEY_FILE } from '@kbn/stack-connectors-plugin/common/auth/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 

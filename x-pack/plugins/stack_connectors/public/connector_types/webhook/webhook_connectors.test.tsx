@@ -11,7 +11,7 @@ import WebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { AuthType as WebhookAuthType, SSLCertType } from '../../../common/constants';
+import { AuthType as WebhookAuthType, SSLCertType } from '../../../common/auth/constants';
 
 describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {

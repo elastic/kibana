@@ -11,7 +11,7 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
 } from '@kbn/actions-plugin/server/types';
 import { ParamsSchema, ConfigSchema } from './schema';
-import { SecretConfigurationSchema } from '../../../common/schema';
+import { SecretConfigurationSchema } from '../../../common/auth/schema';
 
 export type WebhookConnectorType = ConnectorType<
   ConnectorTypeConfigType,

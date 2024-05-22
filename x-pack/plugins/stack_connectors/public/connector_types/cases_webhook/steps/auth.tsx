@@ -29,7 +29,7 @@ import {
   HiddenField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { AuthType as CasesWebhookAuthType } from '../../../../common/constants';
+import { AuthType as CasesWebhookAuthType } from '../../../../common/auth/constants';
 import * as i18n from '../translations';
 
 const { emptyField } = fieldValidators;

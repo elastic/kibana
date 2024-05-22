@@ -7,14 +7,17 @@
 
 import axios, { AxiosResponse } from 'axios';
 
-import { isString } from 'lodash';
 import { Logger } from '@kbn/core/server';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
+import {
+  buildConnectorAuth,
+  isBasicAuth,
+  validateConnectorAuthConfiguration,
+} from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
-import { AuthType as WebhookAuthType } from '../../../common/constants';
 import {
   createServiceError,
   getObjectValueByKeyAsString,
@@ -22,7 +25,7 @@ import {
   removeSlash,
   throwDescriptiveErrorIfResponseIsNotValid,
 } from './utils';
-import {
+import type {
   CreateIncidentParams,
   ExternalServiceCredentials,
   ExternalService,
@@ -62,51 +65,30 @@ export const createExternalService = (
     ca,
   } = config as CasesWebhookPublicConfigurationType;
 
-  const basicAuth =
-    hasAuth &&
-    (authType === WebhookAuthType.Basic || !authType) &&
-    isString(secrets.user) &&
-    isString(secrets.password)
-      ? { auth: { username: secrets.user, password: secrets.password } }
-      : {};
+  const { basicAuth, sslOverrides } = buildConnectorAuth({
+    hasAuth,
+    authType,
+    secrets,
+    verificationMode,
+    ca,
+  });
 
-  if (
-    !getIncidentUrl ||
-    !createIncidentUrlConfig ||
-    !viewIncidentUrl ||
-    !updateIncidentUrl ||
-    (hasAuth &&
-      (authType === WebhookAuthType.Basic || !authType) &&
-      (!basicAuth.auth?.password || !basicAuth.auth?.username))
-  ) {
+  validateConnectorAuthConfiguration({
+    hasAuth,
+    authType,
+    basicAuth,
+    sslOverrides,
+    connectorName: i18n.NAME,
+  });
+
+  if (!getIncidentUrl || !createIncidentUrlConfig || !viewIncidentUrl || !updateIncidentUrl) {
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const sslCertificate =
-    authType === WebhookAuthType.SSL &&
-    ((isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx))
-      ? isString(secrets.pfx)
-        ? {
-            pfx: Buffer.from(secrets.pfx, 'base64'),
-            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
-          }
-        : {
-            cert: Buffer.from(secrets.crt!, 'base64'),
-            key: Buffer.from(secrets.key!, 'base64'),
-            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
-          }
-      : {};
-
-  const sslOverrides = {
-    ...sslCertificate,
-    ...(verificationMode ? { verificationMode } : {}),
-    ...(ca ? { ca: Buffer.from(ca, 'base64') } : {}),
-  };
-
-  const headersWithBasicAuth = hasAuth
+  const headersWithBasicAuth = isBasicAuth({ hasAuth, authType })
     ? combineHeadersWithBasicAuthHeader({
-        username: basicAuth.auth?.username ?? undefined,
-        password: basicAuth.auth?.password ?? undefined,
+        username: basicAuth.auth?.username,
+        password: basicAuth.auth?.password,
         headers,
       })
     : {};

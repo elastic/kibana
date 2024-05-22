@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isString } from 'lodash';
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -34,11 +33,11 @@ import type {
   ConnectorTypeSecretsType,
 } from './types';
 
-import { AuthType as WebhookAuthType } from '../../../common/constants';
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { isOk, promiseResult, Result } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
-import { SecretConfigurationSchema } from '../../../common/schema';
+import { buildConnectorAuth, isBasicAuth } from '../../../common/auth/utils';
+import { SecretConfigurationSchema } from '../../../common/auth/schema';
 
 export const ConnectorTypeId = '.webhook';
 
@@ -134,44 +133,23 @@ export async function executor(
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
-  // For backwards compatibility with connectors created before authType was added, interpret a
-  // hasAuth: true and undefined authType as basic auth
-  const basicAuth =
-    hasAuth &&
-    (authType === WebhookAuthType.Basic || !authType) &&
-    isString(secrets.user) &&
-    isString(secrets.password)
-      ? { auth: { username: secrets.user, password: secrets.password } }
-      : {};
-
-  const sslCertificate =
-    authType === WebhookAuthType.SSL &&
-    ((isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx))
-      ? isString(secrets.pfx)
-        ? {
-            pfx: Buffer.from(secrets.pfx, 'base64'),
-            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
-          }
-        : {
-            cert: Buffer.from(secrets.crt!, 'base64'),
-            key: Buffer.from(secrets.key!, 'base64'),
-            ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
-          }
-      : {};
+  const { basicAuth, sslOverrides } = buildConnectorAuth({
+    hasAuth,
+    authType,
+    secrets,
+    verificationMode,
+    ca,
+  });
 
   const axiosInstance = axios.create();
 
-  const sslOverrides = {
-    ...sslCertificate,
-    ...(verificationMode ? { verificationMode } : {}),
-    ...(ca ? { ca: Buffer.from(ca, 'base64') } : {}),
-  };
-
-  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
-    username: basicAuth.auth?.username,
-    password: basicAuth.auth?.password,
-    headers,
-  });
+  const headersWithBasicAuth = isBasicAuth({ hasAuth, authType })
+    ? combineHeadersWithBasicAuthHeader({
+        username: basicAuth.auth?.username,
+        password: basicAuth.auth?.password,
+        headers,
+      })
+    : {};
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({

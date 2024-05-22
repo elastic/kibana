@@ -22,8 +22,8 @@ import {
   AuthType as WebhookAuthType,
   SSLCertType,
   WebhookMethods,
-} from '../../../common/constants';
-import { PFX_FILE, CRT_FILE, KEY_FILE } from '../../../common/mocks';
+} from '../../../common/auth/constants';
+import { PFX_FILE, CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
 
 jest.mock('axios');
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {

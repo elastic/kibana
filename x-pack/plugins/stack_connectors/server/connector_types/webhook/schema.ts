@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { AuthConfiguration } from '../../../common/schema';
-import { WebhookMethods } from '../../../common/constants';
+import { AuthConfiguration } from '../../../common/auth/schema';
+import { WebhookMethods } from '../../../common/auth/constants';
 
 export const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 

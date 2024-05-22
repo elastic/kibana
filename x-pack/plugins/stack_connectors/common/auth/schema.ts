@@ -10,20 +10,24 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { AuthType as CasesWebhookAuthType, SSLCertType } from './constants';
 
+export const authTypeSchema = schema.maybe(
+  schema.oneOf(
+    [
+      schema.literal(CasesWebhookAuthType.Basic),
+      schema.literal(CasesWebhookAuthType.SSL),
+      schema.literal(null),
+    ],
+    {
+      defaultValue: CasesWebhookAuthType.Basic,
+    }
+  )
+);
+
+export const hasAuthSchema = schema.boolean({ defaultValue: true });
+
 export const AuthConfiguration = {
-  hasAuth: schema.boolean({ defaultValue: true }),
-  authType: schema.maybe(
-    schema.oneOf(
-      [
-        schema.literal(CasesWebhookAuthType.Basic),
-        schema.literal(CasesWebhookAuthType.SSL),
-        schema.literal(null),
-      ],
-      {
-        defaultValue: CasesWebhookAuthType.Basic,
-      }
-    )
-  ),
+  hasAuth: hasAuthSchema,
+  authType: authTypeSchema,
   certType: schema.maybe(
     schema.oneOf([schema.literal(SSLCertType.CRT), schema.literal(SSLCertType.PFX)])
   ),

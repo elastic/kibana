@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { WebhookMethods as CasesWebhookMethods } from '../../../common/constants';
-import { AuthConfiguration, SecretConfigurationSchema } from '../../../common/schema';
+import { WebhookMethods as CasesWebhookMethods } from '../../../common/auth/constants';
+import { AuthConfiguration, SecretConfigurationSchema } from '../../../common/auth/schema';
 
 const HeadersSchema = schema.recordOf(schema.string(), schema.string());
 
