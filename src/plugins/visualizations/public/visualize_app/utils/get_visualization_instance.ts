@@ -10,8 +10,9 @@ import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
-import { SerializedVis, Vis, VisSavedObject, VisualizeInput } from '../..';
+import { SerializedVis, Vis, VisSavedObject } from '../..';
 import type { VisInstance, VisualizeServices } from '../types';
+import { VisualizeSerializedState } from '../../react_embeddable/types';
 
 const createLinkedSavedSearch = async (vis: Vis, visualizeServices: VisualizeServices) => {
   const { savedSearch: savedSearchApi } = visualizeServices;
@@ -33,7 +34,7 @@ const createLinkedSavedSearch = async (vis: Vis, visualizeServices: VisualizeSer
 
 export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
-  input: VisualizeInput
+  input: VisualizeSerializedState
 ) => {
   const { data, spaces, savedObjectsTagging, ...startServices } = visualizeServices;
   const visState = input.savedVis as SerializedVis;

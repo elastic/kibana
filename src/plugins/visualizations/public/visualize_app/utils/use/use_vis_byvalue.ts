@@ -8,17 +8,17 @@
 
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
-import { VisualizeInput } from '../../..';
-import { ByValueVisInstance, VisualizeServices, IEditorController } from '../../types';
-import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
+import { VisualizeSerializedState } from '../../../react_embeddable/types';
+import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../types';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from '../breadcrumbs';
+import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 
 export const useVisByValue = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
   embeddableApiHandler: any,
-  valueInput?: VisualizeInput,
+  valueInput?: VisualizeSerializedState,
   originatingApp?: string,
   originatingPath?: string
 ) => {

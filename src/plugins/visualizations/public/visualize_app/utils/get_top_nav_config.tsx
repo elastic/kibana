@@ -6,42 +6,43 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import moment from 'moment';
-import EventEmitter from 'events';
-import { i18n } from '@kbn/i18n';
 import { EuiBetaBadgeProps } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import EventEmitter from 'events';
+import moment from 'moment';
 import { parse } from 'query-string';
+import React from 'react';
 
 import { Capabilities } from '@kbn/core/public';
+import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
+import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
 import { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import {
-  showSaveModal,
-  SavedObjectSaveModalOrigin,
-  SavedObjectSaveOpts,
-  OnSaveProps,
-} from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import { saveVisualization } from '../../utils/saved_visualize_utils';
-import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput, getFullPath } from '../..';
-
 import {
-  VisualizeServices,
+  OnSaveProps,
+  SavedObjectSaveModalOrigin,
+  SavedObjectSaveOpts,
+  showSaveModal,
+} from '@kbn/saved-objects-plugin/public';
+import { getFullPath, VISUALIZE_EMBEDDABLE_TYPE } from '../..';
+import { saveVisualization } from '../../utils/saved_visualize_utils';
+
+import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeLocatorParams, VISUALIZE_APP_LOCATOR } from '../../../common/locator';
+import { getUiActions } from '../../services';
+import { AGG_BASED_VISUALIZATION_TRIGGER, VISUALIZE_EDITOR_TRIGGER } from '../../triggers';
+import {
   VisualizeAppStateContainer,
   VisualizeEditorVisInstance,
+  VisualizeServices,
 } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from './breadcrumbs';
-import { VISUALIZE_APP_LOCATOR, VisualizeLocatorParams } from '../../../common/locator';
-import { getUiActions } from '../../services';
-import { VISUALIZE_EDITOR_TRIGGER, AGG_BASED_VISUALIZATION_TRIGGER } from '../../triggers';
 import { getVizEditorOriginatingAppUrl } from './utils';
 
+import { VisualizeSerializedState } from '../../react_embeddable/types';
 import './visualize_navigation.scss';
 
 interface VisualizeCapabilities {
@@ -248,7 +249,7 @@ export const getTopNavConfig = (
     const state = {
       input: {
         savedVis: vis.serialize(),
-      } as VisualizeInput,
+      } as VisualizeSerializedState,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,
       searchSessionId: data.search.session.getSessionId(),
@@ -515,7 +516,7 @@ export const getTopNavConfig = (
                         title: newTitle,
                         description: newDescription,
                       },
-                    } as VisualizeInput,
+                    } as VisualizeSerializedState,
                     embeddableId,
                     type: VISUALIZE_EMBEDDABLE_TYPE,
                     searchSessionId: data.search.session.getSessionId(),

@@ -79,7 +79,7 @@ import { xyDimension as xyDimensionExpressionFunction } from '../common/expressi
 import { visDimension as visDimensionExpressionFunction } from '../common/expression_functions/vis_dimension';
 import { range as rangeExpressionFunction } from '../common/expression_functions/range';
 import { TypesService } from './vis_types/types_service';
-import { createVisEmbeddableFromObject, VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './embeddable';
 import {
   setUISettings,
   setTypes,
@@ -112,14 +112,8 @@ import {
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { ListingViewRegistry, SerializedVis } from './types';
-import {
-  LATEST_VERSION,
-  CONTENT_ID,
-  VisualizationSavedObjectAttributes,
-} from '../common/content_management';
-import { SerializedVisData } from '../common';
-import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
+import { ListingViewRegistry } from './types';
+import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -325,7 +319,6 @@ export class VisualizationsPlugin
           embeddable: pluginsStart.embeddable,
           stateTransferService: pluginsStart.embeddable.getStateTransfer(),
           setActiveUrl,
-          createVisEmbeddableFromObject: createVisEmbeddableFromObject({ start }),
           scopedHistory: params.history,
           restorePreviousUrl,
           setHeaderActionMenu: params.setHeaderActionMenu,
@@ -408,37 +401,6 @@ export class VisualizationsPlugin
         latest: LATEST_VERSION,
       },
       name: 'Visualize Library',
-    });
-
-    embeddable.registerSavedObjectToPanelMethod<
-      VisualizationSavedObjectAttributes,
-      VisualizeByValueInput
-    >(CONTENT_ID, (savedObject) => {
-      const visState = savedObject.attributes.visState;
-
-      // not sure if visState actually is ever undefined, but following the type
-      if (!savedObject.managed || !visState) {
-        return {
-          savedObjectId: savedObject.id,
-        };
-      }
-
-      // data is not always defined, so I added a default value since the extract
-      // routine in the embeddable factory expects it to be there
-      const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
-        data?: SerializedVisData;
-      };
-
-      if (!savedVis.data) {
-        savedVis.data = {
-          searchSource: {},
-          aggs: [],
-        };
-      }
-
-      return {
-        savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
-      };
     });
 
     return {

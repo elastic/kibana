@@ -7,8 +7,8 @@
 
 import { omit } from 'lodash';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { VisualizeInput } from '@kbn/visualizations-plugin/public';
 import { SavedObjectReference } from '@kbn/core/types';
+import type { VisualizeSerializedState } from '@kbn/visualizations-plugin/public/react_embeddable/types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -26,7 +26,7 @@ interface Arguments {
   title: string | null;
 }
 
-type Output = EmbeddableExpression<VisualizeInput & { savedObjectId: string }>;
+type Output = EmbeddableExpression<VisualizeSerializedState & { savedObjectId: string }>;
 
 const defaultTimeRange = {
   from: 'now-15m',
@@ -75,7 +75,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
     fn: (input, { id, timerange, colors, hideLegend, title }) => {
       const filters = input ? input.and : [];
 
-      const visOptions: VisualizeInput['vis'] = {};
+      const visOptions = {};
 
       if (colors) {
         visOptions.colors = colors.reduce((reduction, color) => {
@@ -87,7 +87,6 @@ export function savedVisualization(): ExpressionFunctionDefinition<
       }
 
       if (hideLegend === true) {
-        // @ts-expect-error LegendOpen missing on VisualizeInput
         visOptions.legendOpen = false;
       }
 

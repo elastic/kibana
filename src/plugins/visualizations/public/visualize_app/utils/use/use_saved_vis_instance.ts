@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EventEmitter } from 'events';
 import { parse } from 'query-string';
-import { i18n } from '@kbn/i18n';
+import { useEffect, useRef, useState } from 'react';
 
-import { getVisualizationInstance } from '../get_visualization_instance';
-import {
-  getEditBreadcrumbs,
-  getCreateBreadcrumbs,
-  getCreateServerlessBreadcrumbs,
-  getEditServerlessBreadcrumbs,
-} from '../breadcrumbs';
-import { SavedVisInstance, VisualizeServices, IEditorController } from '../../types';
+import { VisualizeSerializedState } from '../../../react_embeddable/types';
 import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
+import { IEditorController, SavedVisInstance, VisualizeServices } from '../../types';
+import {
+  getCreateBreadcrumbs,
+  getCreateServerlessBreadcrumbs,
+  getEditBreadcrumbs,
+  getEditServerlessBreadcrumbs,
+} from '../breadcrumbs';
+import { getVisualizationInstance } from '../get_visualization_instance';
 import { redirectToSavedObjectPage } from '../utils';
-import type { VisualizeInput } from '../../..';
 
 /**
  * This effect is responsible for instantiating a saved vis or creating a new one
@@ -34,7 +34,7 @@ export const useSavedVisInstance = (
   isChromeVisible: boolean | undefined,
   originatingApp: string | undefined,
   visualizationIdFromUrl: string | undefined,
-  embeddableInput?: VisualizeInput
+  embeddableInput?: VisualizeSerializedState
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;

@@ -46,7 +46,6 @@ import { ContentManagementPublicStart } from '@kbn/content-management-plugin/pub
 import type { Vis, VisSavedObject, PersistedState, VisParams } from '..';
 
 import type { ListingViewRegistry, SavedVisState } from '../types';
-import type { createVisEmbeddableFromObject } from '../embeddable';
 import type { VisEditorsRegistry } from '../vis_editors_registry';
 import { EmbeddableApiHandler } from './utils/use/use_embeddable_api_handler';
 
@@ -100,8 +99,6 @@ export interface VisualizeServices extends CoreStart {
   visualizeCapabilities: Record<string, boolean | Record<string, boolean>>;
   dashboardCapabilities: Record<string, boolean | Record<string, boolean>>;
   setActiveUrl: (newUrl: string) => void;
-  /** @deprecated Use react_embeddable/visualize_embeddable.tsx */
-  createVisEmbeddableFromObject: ReturnType<typeof createVisEmbeddableFromObject>;
   restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
