@@ -101,7 +101,6 @@
     "@kbn/alerting-comparators",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
-    "@kbn/infra-plugin"
   ],
   "exclude": [
     "target/**/*"
