@@ -8,7 +8,7 @@
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { HasEditCapabilities, PublishesPanelTitle } from '@kbn/presentation-publishing';
-import { PublishesDataView } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { PublishesDataViews } from '@kbn/presentation-publishing';
 import {
   ControlFactory,
   ControlStateManager,
@@ -19,7 +19,7 @@ import {
 export type DataControlApi = DefaultControlApi &
   Pick<PublishesPanelTitle, 'panelTitle' | 'defaultPanelTitle'> & // does not need to be writable because control group does not have control - internally writable but not externally
   HasEditCapabilities &
-  PublishesDataView;
+  PublishesDataViews;
 
 export interface DataControlFactory<State extends DefaultDataControlState = DefaultDataControlState>
   extends ControlFactory<State, DataControlApi> {

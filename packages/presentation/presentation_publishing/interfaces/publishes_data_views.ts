@@ -9,10 +9,6 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { PublishingSubject } from '../publishing_subject';
 
-export interface PublishesDataView {
-  dataView: PublishingSubject<DataView | undefined>;
-}
-
 export interface PublishesDataViews {
   dataViews: PublishingSubject<DataView[] | undefined>;
   lastUsedDataViewId?: PublishingSubject<string | undefined>;

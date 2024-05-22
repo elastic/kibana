@@ -8,7 +8,6 @@
 
 import { EuiFormControlLayout, EuiFormLabel, htmlIdGenerator } from '@elastic/eui';
 // import { ControlError } from '@kbn/controls-plugin/public/control_group/component/control_error_component';
-import { isPromise } from '@kbn/std';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
@@ -17,6 +16,7 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
+import { isPromise } from '@kbn/std';
 import React, { useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { DefaultControlApi } from './types';
@@ -74,7 +74,6 @@ export const ControlPanel = <
     api?.width,
     viewModeSubject
   );
-  console.log(panelTitle, defaultPanelTitle, grow, width);
 
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
 
@@ -116,7 +115,7 @@ export const ControlPanel = <
           isLoading={loading || Boolean(dataLoading)}
           prepend={
             api?.getCustomPrepend ? (
-              api.getCustomPrepend()
+              <>{api.getCustomPrepend()}</>
             ) : (
               <EuiFormLabel>{panelTitle || defaultPanelTitle}</EuiFormLabel>
             )
@@ -124,7 +123,6 @@ export const ControlPanel = <
         >
           <ControlComponent
             ref={(newApi) => {
-              console.log(newApi);
               if (newApi && !api) setApi(newApi);
             }}
           />

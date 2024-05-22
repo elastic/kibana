@@ -46,7 +46,6 @@ function getFetchContext(api: unknown, isReload: boolean) {
   const typeApi = api as Partial<
     PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
   >;
-  console.log('getFetchContext', typeApi?.parentApi?.filters$?.value);
   return {
     isReload,
     filters: typeApi?.parentApi?.filters$?.value,

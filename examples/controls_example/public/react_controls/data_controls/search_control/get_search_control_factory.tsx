@@ -102,7 +102,7 @@ export const getSearchEmbeddableFactory = ({
       const onSearchStringChanged = searchString
         .pipe(debounceTime(100), distinctUntilChanged())
         .subscribe((newValue) => {
-          const currentDataView = dataControlApi.dataView.getValue();
+          const currentDataView = dataControlApi.dataViews.getValue()?.[0];
           const currentSearchTechnnique = searchTechnique.getValue();
           const currentField = dataControlStateManager.fieldName.getValue();
 

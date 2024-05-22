@@ -7,7 +7,6 @@
  */
 
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import {
   HasParentApi,
@@ -16,7 +15,7 @@ import {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesFilter,
+  PublishesFilters,
   PublishesPanelTitle,
   PublishesTimeslice,
   PublishesUnsavedChanges,
@@ -42,13 +41,13 @@ export type DefaultControlApi = PublishesDataLoading &
   Partial<PublishesDisabledActionIds> &
   PublishesControlDisplaySettings &
   Partial<PublishesPanelTitle & HasCustomPrepend> &
-  Partial<PublishesFilter & PublishesTimeslice & PublishesPanelTitle & HasCustomPrepend> & // can publish either filters or timeslice
+  Partial<PublishesFilters & PublishesTimeslice & PublishesPanelTitle & HasCustomPrepend> & // can publish either filters or timeslice
   HasType &
   HasUniqueId &
   HasParentApi<ControlGroupApi> & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
-    setOutputFilter: (filter: Filter | undefined) => void;
+    setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter
   };
 
 export interface DefaultControlState {

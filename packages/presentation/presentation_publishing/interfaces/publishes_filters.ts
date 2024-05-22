@@ -9,18 +9,10 @@
 import { Filter } from '@kbn/es-query';
 import { PublishingSubject } from '../publishing_subject';
 
-export interface PublishesFilter {
-  filter$: PublishingSubject<Filter | undefined>;
-}
-
-export const apiPublishesFilter = (unknownApi: unknown): unknownApi is PublishesFilter => {
-  return Boolean(unknownApi && (unknownApi as PublishesFilter)?.filter$ !== undefined);
-};
-
 export interface PublishesFilters {
   filters$: PublishingSubject<Filter[] | undefined>;
 }
 
-export const apiPublishesFilters = (unknownApi: unknown): unknownApi is PublishesFilter => {
+export const apiPublishesFilters = (unknownApi: unknown): unknownApi is PublishesFilters => {
   return Boolean(unknownApi && (unknownApi as PublishesFilters)?.filters$ !== undefined);
 };

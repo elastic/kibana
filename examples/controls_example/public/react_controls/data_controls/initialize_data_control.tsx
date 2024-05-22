@@ -38,7 +38,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.fieldName);
   const dataViewId = new BehaviorSubject<string>(state.dataViewId);
   const fieldName = new BehaviorSubject<string>(state.fieldName);
-  const dataView = new BehaviorSubject<DataView | undefined>(undefined);
+  const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
 
   const dataControlComparators: StateComparators<DefaultDataControlState> = {
     ...defaultControlComparators,
@@ -67,7 +67,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
    */
   dataViewId.pipe(distinctUntilChanged()).subscribe(async (id: string) => {
     defaultControlApi.setDataLoading(true);
-    dataView.next(await services.dataViews.get(id));
+    dataViews.next([await services.dataViews.get(id)]);
     defaultControlApi.setDataLoading(false);
   });
 
@@ -86,7 +86,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
     ...defaultControlApi,
     panelTitle,
     defaultPanelTitle,
-    dataView,
+    dataViews,
     onEdit,
     isEditingEnabled: () => true, // TODO
     getTypeDisplayName: () => 'Test', // TODO

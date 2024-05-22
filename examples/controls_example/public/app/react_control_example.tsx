@@ -18,8 +18,14 @@ import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { OverlayStart } from '@kbn/core-overlays-browser';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { PresentationContainer } from '@kbn/presentation-containers';
+import {
+  PublishesUnifiedSearch,
+  PublishesViewMode,
+  useStateFromPublishingSubject,
+  ViewMode as ViewModeType,
+} from '@kbn/presentation-publishing';
 import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { BehaviorSubject } from 'rxjs';
@@ -38,10 +44,31 @@ const toggleViewButtons = [
   },
 ];
 
-const viewMode = new BehaviorSubject<ViewMode | undefined>(ViewMode.EDIT);
+/**
+ * I am mocking the dashboard API so that the data table embeddble responds to changes to the
+ * data view publishing subject from the control group
+ */
+type MockedDashboardApi = PresentationContainer & PublishesViewMode & PublishesUnifiedSearch;
+
+const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
 const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
-const query$ = new BehaviorSubject<Query | undefined>(undefined);
+const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
 const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
+const fakeParentApi: MockedDashboardApi = {
+  viewMode,
+  filters$,
+  query$,
+  timeRange$,
+  children$,
+  removePanel: () => {},
+  replacePanel: () => {
+    return Promise.resolve('');
+  },
+  addNewPanel: () => {
+    return Promise.resolve(undefined);
+  },
+};
 
 export const ReactControlExample = ({
   overlays,
@@ -75,7 +102,6 @@ export const ReactControlExample = ({
 
   if (loading || !dataViews || !dataViews[0].id) return <EuiLoadingSpinner />;
 
-  const fakeParentApi = { viewMode, filters$, query$, timeRange$ };
   return (
     <>
       <EuiFlexGroup>
@@ -102,7 +128,10 @@ export const ReactControlExample = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <ReactEmbeddableRenderer
-        onApiAvailable={(api) => setControlGroupApi(api as ControlGroupApi)}
+        onApiAvailable={(api) => {
+          children$.next({ ...children$.getValue(), [api.uuid]: api });
+          setControlGroupApi(api as ControlGroupApi);
+        }}
         hidePanelChrome={true}
         type={CONTROL_GROUP_TYPE}
         parentApi={fakeParentApi} // should be the dashboard
@@ -128,17 +157,18 @@ export const ReactControlExample = ({
       />
       <EuiSpacer size="l" />
       <ReactEmbeddableRenderer
-        type={'searchEmbeddableDemo'}
-        // type={'data_table'}
+        type={'data_table'}
         state={{
           rawState: {
             timeRange: { from: 'now-60d/d', to: 'now+60d/d' },
-            dataViewId: dataViews[0].id,
           },
           references: [],
         }}
         parentApi={fakeParentApi}
         hidePanelChrome={false}
+        onApiAvailable={(api) => {
+          children$.next({ ...children$.getValue(), [api.uuid]: api });
+        }}
       />
     </>
   );

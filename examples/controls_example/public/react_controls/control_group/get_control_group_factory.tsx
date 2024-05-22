@@ -7,15 +7,15 @@
  */
 
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, map, Observable, of, switchMap } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 import {
+  ControlGroupChainingSystem,
   ControlsPanels,
   ControlWidth,
   CONTROL_GROUP_TYPE,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
-  ControlGroupChainingSystem,
 } from '@kbn/controls-plugin/common';
 import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { OverlayStart } from '@kbn/core/public';
@@ -24,13 +24,16 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import {
-  apiPublishesFilter,
-  PublishesFilter,
+  apiPublishesDataViews,
+  apiPublishesFilters,
+  PublishesDataViews,
+  PublishesFilters,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
 import { ControlRenderer } from '../control_renderer';
 import { DefaultControlApi } from '../types';
+import { publishChildrenChangesToParent } from './publish_children_changes_to_parent';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
 import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
@@ -64,25 +67,7 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialState.ignoreParentSettings
       );
 
-      /** Subscribe to all children's output filters, combine them, and output them to parent */
-      const outputFiltersSubscription = children$
-        .pipe(
-          switchMap((children) => {
-            const childrenThatPublishFilter: PublishesFilter[] = [];
-            for (const child of Object.values(children)) {
-              if (apiPublishesFilter(child)) childrenThatPublishFilter.push(child);
-            }
-            if (childrenThatPublishFilter.length === 0) return of([]);
-            return combineLatest(childrenThatPublishFilter.map((child) => child.filter$));
-          }),
-          map((nextFilters) => nextFilters.flat().filter((filter) => Boolean(filter)) as Filter[])
-        )
-        .subscribe((filters) => {
-          console.log('filters', filters);
-          filters$.next(filters);
-        });
-
-      const embeddable = buildApi(
+      const api = buildApi(
         {
           dataLoading: dataLoading$,
           children$,
@@ -119,14 +104,29 @@ export const getControlGroupEmbeddableFactory = (services: {
         },
         {}
       );
+
+      /** Subscribe to all children's output filters, combine them, and output them to parent */
+      const outputFiltersSubscription = publishChildrenChangesToParent<PublishesFilters, Filter[]>(
+        api,
+        'filters$',
+        apiPublishesFilters
+      );
+
+      /** Subscribe to all children's output data views, combine them, and output them to parent */
+      const childDataViewsSubscription = publishChildrenChangesToParent<
+        PublishesDataViews,
+        DataView[]
+      >(api, 'dataViews', apiPublishesDataViews);
+
       return {
-        api: embeddable,
+        api,
         Component: () => {
           const panels = useStateFromPublishingSubject(panels$);
 
           useEffect(() => {
             return () => {
               outputFiltersSubscription.unsubscribe();
+              childDataViewsSubscription.unsubscribe();
             };
           }, []);
 
@@ -138,7 +138,7 @@ export const getControlGroupEmbeddableFactory = (services: {
                   services={services}
                   type={panels[id].type}
                   state={panels[id]}
-                  parentApi={embeddable}
+                  parentApi={api}
                   onApiAvailable={(api) => {
                     children$.next({
                       ...children$.getValue(),

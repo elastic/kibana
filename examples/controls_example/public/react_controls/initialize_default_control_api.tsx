@@ -32,15 +32,16 @@ export const initializeDefaultControlApi = (
   const blockingError = new BehaviorSubject<Error | undefined>(undefined);
   const grow = new BehaviorSubject<boolean | undefined>(state.grow);
   const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
-  const filter = new BehaviorSubject<Filter | undefined>(undefined);
+  const filters = new BehaviorSubject<Filter[] | undefined>(undefined);
 
   const defaultControlApi: ControlApi = {
     grow,
     width,
     dataLoading,
     blockingError,
-    filter$: filter,
-    setOutputFilter: (newFilter: Filter | undefined) => filter.next(newFilter),
+    filters$: filters,
+    setOutputFilter: (newFilter: Filter | undefined) =>
+      filters.next(newFilter ? [newFilter] : undefined),
     setBlockingError: (error) => blockingError.next(error),
     setDataLoading: (loading) => dataLoading.next(loading),
   };
