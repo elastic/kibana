@@ -55,11 +55,16 @@ const timeRangeRT = rt.strict({
   }),
 });
 
+const degradedFieldRT = rt.strict({
+  table: tableRT,
+});
+
 export const flyoutRT = rt.exact(
   rt.partial({
     dataset: datasetRT,
     insightsTimeRange: timeRangeRT,
     breakdownField: rt.string,
+    degradedFields: degradedFieldRT,
   })
 );
 

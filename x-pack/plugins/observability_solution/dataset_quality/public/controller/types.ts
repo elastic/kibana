@@ -24,7 +24,10 @@ export type DatasetQualityTableOptions = Partial<
   Omit<WithTableOptions['table'], 'sort'> & { sort: TableSortOptions }
 >;
 
-export type DatasetQualityFlyoutOptions = Omit<WithFlyoutOptions['flyout'], 'datasetDetails'>;
+export type DatasetQualityFlyoutOptions = Omit<
+  WithFlyoutOptions['flyout'],
+  'datasetDetails' | 'degradedFields'
+> & { degradedFields: { table: DatasetQualityTableOptions } };
 
 export type DatasetQualityFilterOptions = Partial<WithFilters['filters']>;
 

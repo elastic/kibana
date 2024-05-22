@@ -35,7 +35,6 @@ import {
   fetchIntegrationsFailedNotifier,
   noDatasetSelected,
   fetchNonAggregatableDatasetsFailedNotifier,
-  fetchDegradedFieldsFailedNotifier,
 } from './notifications';
 import {
   DatasetQualityControllerContext,
@@ -44,6 +43,10 @@ import {
   DefaultDatasetQualityControllerState,
   FlyoutDataset,
 } from './types';
+import {
+  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+} from '../../../../common/constants';
 
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
@@ -324,7 +327,6 @@ export const createPureDatasetQualityControllerStateMachine = (
                         },
                         onError: {
                           target: 'done',
-                          actions: ['notifyFetchDegradedFieldsFailed'],
                         },
                       },
                     },
@@ -332,6 +334,11 @@ export const createPureDatasetQualityControllerStateMachine = (
                       on: {
                         UPDATE_INSIGHTS_TIME_RANGE: {
                           target: 'fetching',
+                          actions: ['resetDegradedFieldPage'],
+                        },
+                        UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA: {
+                          target: 'done',
+                          actions: ['storeDegradedFieldTableOptions'],
                         },
                       },
                     },
@@ -375,9 +382,22 @@ export const createPureDatasetQualityControllerStateMachine = (
     {
       actions: {
         storeTableOptions: assign((_context, event) => {
-          return 'criteria' in event
+          return 'dataset_criteria' in event
             ? {
-                table: event.criteria,
+                table: event.dataset_criteria,
+              }
+            : {};
+        }),
+        storeDegradedFieldTableOptions: assign((context, event) => {
+          return 'degraded_field_criteria' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  degradedFields: {
+                    ...context.flyout.degradedFields,
+                    table: event.degraded_field_criteria,
+                  },
+                },
               }
             : {};
         }),
@@ -385,6 +405,22 @@ export const createPureDatasetQualityControllerStateMachine = (
           table: {
             ...context.table,
             page: 0,
+          },
+        })),
+        resetDegradedFieldPage: assign((context, _event) => ({
+          flyout: {
+            ...context.flyout,
+            degradedFields: {
+              ...context.flyout.degradedFields,
+              table: {
+                page: 0,
+                rowsPerPage: 10,
+                sort: {
+                  field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+                  direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+                },
+              },
+            },
           },
         })),
         storeInactiveDatasetsVisibility: assign((context, _event) => {
@@ -501,7 +537,10 @@ export const createPureDatasetQualityControllerStateMachine = (
             ? {
                 flyout: {
                   ...context.flyout,
-                  degradedFields: (event.data ?? {}) as DegradedField[],
+                  degradedFields: {
+                    ...context.flyout.degradedFields,
+                    data: event.data as DegradedField[],
+                  },
                 },
               }
             : {};
@@ -615,8 +654,6 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDatasetStatsFailedNotifier(toasts, event.data),
       notifyFetchDegradedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDegradedStatsFailedNotifier(toasts, event.data),
-      notifyFetchDegradedFieldsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchDegradedFieldsFailedNotifier(toasts, event.data),
       notifyFetchNonAggregatableDatasetsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
       notifyFetchDatasetSettingsFailed: (_context, event: DoneInvokeEvent<Error>) =>
@@ -647,7 +684,7 @@ export const createDatasetQualityControllerStateMachine = ({
 
       loadDegradedFieldsPerDataStream: (context) => {
         if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {
-          fetchDatasetSettingsFailedNotifier(toasts, new Error(noDatasetSelected));
+          fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
 
           return Promise.resolve({});
         }

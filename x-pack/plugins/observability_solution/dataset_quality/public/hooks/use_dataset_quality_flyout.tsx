@@ -23,7 +23,6 @@ export const useDatasetQualityFlyout = () => {
     insightsTimeRange,
     breakdownField,
     isNonAggregatable,
-    degradedFields,
   } = useSelector(service, (state) => state.context.flyout) ?? {};
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
@@ -32,9 +31,6 @@ export const useDatasetQualityFlyout = () => {
     dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
     dataStreamSettingsLoading: state.matches('flyout.initializing.dataStreamSettings.fetching'),
     datasetIntegrationsLoading: state.matches('flyout.initializing.integrationDashboards.fetching'),
-    datasetDegradedFieldsLoading: state.matches(
-      'flyout.initializing.dataStreamDegradedFields.fetching'
-    ),
   }));
 
   return {
@@ -47,6 +43,5 @@ export const useDatasetQualityFlyout = () => {
     breakdownField,
     loadingState,
     flyoutLoading: !dataStreamStat,
-    degradedFields,
   };
 };

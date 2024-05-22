@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery, termQuery, existsQuery } from '@kbn/observability-plugin/server';
 import { DataStreamType } from '../../../../common/types';
 import { DegradedField } from '../../../../common/api_types';
-import { DEFAULT_DATASET_TYPE } from '../../../../common/constants';
+import { DEFAULT_DATASET_TYPE, MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
 import {
   _IGNORED,
@@ -48,6 +48,7 @@ export async function getDegradedFields({
   const aggs = {
     degradedFields: {
       terms: {
+        size: MAX_DEGRADED_FIELDS,
         field: _IGNORED,
       },
       aggs: {

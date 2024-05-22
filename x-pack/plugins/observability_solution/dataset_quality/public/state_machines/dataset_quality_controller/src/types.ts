@@ -7,9 +7,9 @@
 
 import { DoneInvokeEvent } from 'xstate';
 import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { QualityIndicators } from '../../../../common/types';
+import { QualityIndicators, SortDirection } from '../../../../common/types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
-import { Direction, SortField } from '../../../hooks';
+import { DatasetTableSortField, DegradedFieldSortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   DashboardType,
@@ -29,13 +29,18 @@ export type FlyoutDataset = Omit<
   'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
 > & { type: string };
 
-interface TableCriteria {
+interface TableCriteria<TSortField> {
   page: number;
   rowsPerPage: number;
   sort: {
-    field: SortField;
-    direction: Direction;
+    field: TSortField;
+    direction: SortDirection;
   };
+}
+
+interface DegradedFields {
+  table: TableCriteria<DegradedFieldSortField>;
+  data?: DegradedField[];
 }
 
 export type TimeRangeConfig = Pick<TimeRange, 'from' | 'to'> & {
@@ -53,7 +58,7 @@ interface FiltersCriteria {
 }
 
 export interface WithTableOptions {
-  table: TableCriteria;
+  table: TableCriteria<DatasetTableSortField>;
 }
 
 export interface WithFlyoutOptions {
@@ -63,7 +68,7 @@ export interface WithFlyoutOptions {
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
     breakdownField?: string;
-    degradedFields?: DegradedField[];
+    degradedFields: DegradedFields;
     isNonAggregatable?: boolean;
   };
 }
@@ -156,7 +161,11 @@ export type DatasetQualityControllerContext = DatasetQualityControllerTypeState[
 export type DatasetQualityControllerEvent =
   | {
       type: 'UPDATE_TABLE_CRITERIA';
-      criteria: TableCriteria;
+      dataset_criteria: TableCriteria<DatasetTableSortField>;
+    }
+  | {
+      type: 'UPDATE_DEGRADED_FIELDS_TABLE_CRITERIA';
+      degraded_field_criteria: TableCriteria<DegradedFieldSortField>;
     }
   | {
       type: 'OPEN_FLYOUT';

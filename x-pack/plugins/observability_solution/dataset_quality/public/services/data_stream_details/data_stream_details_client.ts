@@ -27,6 +27,7 @@ import {
   GetIntegrationDashboardsResponse,
 } from '../../../common/data_streams_stats';
 import { IDataStreamDetailsClient } from './types';
+import { GetDataStreamsDetailsError } from '../../../common/data_stream_details';
 
 export class DataStreamDetailsClient implements IDataStreamDetailsClient {
   constructor(private readonly http: HttpStart) {}
@@ -83,7 +84,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(
+        throw new GetDataStreamsDetailsError(
           `Failed to fetch data stream degraded fields": ${error}`
         );
       });
@@ -91,7 +92,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
     return decodeOrThrow(
       getDataStreamDegradedFieldsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(
+        new GetDataStreamsDetailsError(
           `Failed to decode data stream degraded fields response: ${message}"`
         )
     )(response);

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SortField } from '../hooks';
+import { DatasetTableSortField } from '../hooks';
 import {
   DatasetQualityControllerContext,
   DEFAULT_CONTEXT,
@@ -32,7 +32,7 @@ export const getContextFromPublicState = (
     sort: publicState.table?.sort
       ? {
           ...publicState.table?.sort,
-          field: publicState.table?.sort.field as SortField,
+          field: publicState.table?.sort.field as DatasetTableSortField,
         }
       : DEFAULT_CONTEXT.table.sort,
   },

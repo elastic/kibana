@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export * from './dataset_types';
-export * from './quality_types';
-
-export type SortDirection = 'asc' | 'desc';
+export class GetDataStreamsDetailsError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'GetDataStreamsDetailsError';
+  }
+}

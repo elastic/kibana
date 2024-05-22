@@ -11,3 +11,4 @@ export * from './use_degraded_docs_chart';
 export * from './use_link_to_logs_explorer';
 export * from './use_summary_panel';
 export * from './use_create_dataview';
+export * from './use_dataset_quality_degraded_field';
