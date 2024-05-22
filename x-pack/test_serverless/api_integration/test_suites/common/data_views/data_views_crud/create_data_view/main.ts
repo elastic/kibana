@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
-import type { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -20,7 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('main', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('editor');
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
     after(async () => {
@@ -32,7 +32,6 @@ export default function ({ getService }: FtrProviderContext) {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
             .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
@@ -48,7 +47,6 @@ export default function ({ getService }: FtrProviderContext) {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
             .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
@@ -68,7 +66,6 @@ export default function ({ getService }: FtrProviderContext) {
           const id = `test-id-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
             .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
@@ -91,7 +88,6 @@ export default function ({ getService }: FtrProviderContext) {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
             .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
@@ -127,7 +123,6 @@ export default function ({ getService }: FtrProviderContext) {
             const title = `basic_index*`;
             const response = await supertestWithoutAuth
               .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
               .set(internalReqHeader)
               .set(roleAuthc.apiKeyHeader)
               .send({
@@ -159,7 +154,6 @@ export default function ({ getService }: FtrProviderContext) {
             const title = `basic_index*`;
             const response = await supertestWithoutAuth
               .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
               .set(internalReqHeader)
               .set(roleAuthc.apiKeyHeader)
               .send({
@@ -192,7 +186,6 @@ export default function ({ getService }: FtrProviderContext) {
             const title = `basic_index*`;
             const response = await supertestWithoutAuth
               .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
               .set(internalReqHeader)
               .set(roleAuthc.apiKeyHeader)
               .send({
@@ -226,7 +219,6 @@ export default function ({ getService }: FtrProviderContext) {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
             .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
@@ -243,7 +235,6 @@ export default function ({ getService }: FtrProviderContext) {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
             .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
@@ -267,7 +258,6 @@ export default function ({ getService }: FtrProviderContext) {
           const title = `foo-${Date.now()}-${Math.random()}*`;
           const response = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
             .set(internalReqHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
@@ -292,7 +282,6 @@ export default function ({ getService }: FtrProviderContext) {
             const title = `foo-${Date.now()}-${Math.random()}*`;
             const response1 = await supertestWithoutAuth
               .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
               .set(internalReqHeader)
               .set(roleAuthc.apiKeyHeader)
               .send({
@@ -302,7 +291,6 @@ export default function ({ getService }: FtrProviderContext) {
               });
             const response2 = await supertestWithoutAuth
               .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
               .set(internalReqHeader)
               .set(roleAuthc.apiKeyHeader)
               .send({
@@ -319,7 +307,6 @@ export default function ({ getService }: FtrProviderContext) {
             const title = `foo-${Date.now()}-${Math.random()}*`;
             const response1 = await supertestWithoutAuth
               .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
               .set(internalReqHeader)
               .set(roleAuthc.apiKeyHeader)
               .send({
@@ -330,7 +317,6 @@ export default function ({ getService }: FtrProviderContext) {
               });
             const response2 = await supertestWithoutAuth
               .post(config.path)
-              // TODO: API requests in Serverless require internal request headers
               .set(internalReqHeader)
               .set(roleAuthc.apiKeyHeader)
               .send({
