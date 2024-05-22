@@ -87,19 +87,25 @@ export const defineReduxStreamRoute = (router: IRouter, logger: Logger) => {
             const randomEntity = entities[Math.floor(Math.random() * entities.length)];
             const randomAction = actions[Math.floor(Math.random() * actions.length)];
 
-            if (randomAction === 'add') {
-              const randomCommits = Math.floor(Math.random() * 100);
-              push(addToEntity({ entity: randomEntity, value: randomCommits }));
-            } else if (randomAction === 'delete') {
-              push(deleteEntity(randomEntity));
-            } else if (randomAction === 'throw-error') {
-              // Throw an error. It should not crash Kibana!
-              // It should be caught and logged to the Kibana server console.
-              throw new Error('There was a (simulated) server side error!');
-            } else if (randomAction === 'emit-error') {
-              // Emit an error as a stream action.
-              push(error('(Simulated) error pushed to the stream'));
-              return;
+            switch (randomAction) {
+              case 'add':
+                const randomCommits = Math.floor(Math.random() * 100);
+                push(addToEntity({ entity: randomEntity, value: randomCommits }));
+                break;
+
+              case 'delete':
+                push(deleteEntity(randomEntity));
+                break;
+
+              case 'throw-error':
+                // Throw an error. It should not crash Kibana!
+                // It should be caught and logged to the Kibana server console.
+                throw new Error('There was a (simulated) server side error!');
+
+              case 'emit-error':
+                // Emit an error as a stream action.
+                push(error('(Simulated) error pushed to the stream'));
+                return;
             }
 
             void pushStreamUpdate();
