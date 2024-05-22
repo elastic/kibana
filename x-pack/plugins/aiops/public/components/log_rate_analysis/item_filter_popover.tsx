@@ -27,26 +27,34 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { FieldFilterApplyButton } from './field_filter_apply_button';
+import { ItemFilterApplyButton } from './item_filter_apply_button';
 
-interface FieldFilterPopoverProps {
+interface ItemFilterPopoverProps {
   disabled?: boolean;
   disabledApplyButton?: boolean;
-  uniqueFieldNames: string[];
-  onChange: (skippedFields: string[]) => void;
+  disabledApplyTooltipContent?: string;
+  helpText: string;
+  itemType?: string;
+  selectedItemLimit?: number;
+  uniqueItemNames: string[];
+  onChange: (skippedItems: string[]) => void;
 }
 
 // This component is mostly inspired by EUI's Data Grid Column Selector
 // https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/column_selector.tsx
-export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
+export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
   disabled,
   disabledApplyButton,
-  uniqueFieldNames,
+  disabledApplyTooltipContent,
+  helpText,
+  itemType = 'fields',
+  selectedItemLimit = 2,
+  uniqueItemNames,
   onChange,
 }) => {
   const euiThemeContext = useEuiTheme();
   // Inspired by https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/_data_grid_column_selector.scss
-  const fieldSelectPopover = useMemo(
+  const itemSelectPopover = useMemo(
     () => css`
       ${euiYScrollWithShadows(euiThemeContext, {})}
       max-height: 400px;
@@ -55,38 +63,38 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
   );
 
   const [isTouched, setIsTouched] = useState(false);
-  const [fieldSearchText, setFieldSearchText] = useState('');
-  const [skippedFields, setSkippedFields] = useState<string[]>([]);
-  const setFieldsFilter = (fieldNames: string[], checked: boolean) => {
-    let updatedSkippedFields = [...skippedFields];
+  const [itemSearchText, setItemSearchText] = useState('');
+  const [skippedItems, setSkippedItems] = useState<string[]>([]);
+  const setItemsFilter = (itemNames: string[], checked: boolean) => {
+    let updatedSkippedItems = [...skippedItems];
     if (!checked) {
-      updatedSkippedFields.push(...fieldNames);
+      updatedSkippedItems.push(...itemNames);
     } else {
-      updatedSkippedFields = skippedFields.filter((d) => !fieldNames.includes(d));
+      updatedSkippedItems = skippedItems.filter((d) => !itemNames.includes(d));
     }
-    setSkippedFields(updatedSkippedFields);
+    setSkippedItems(updatedSkippedItems);
     setIsTouched(true);
   };
 
-  const [isFieldSelectionPopoverOpen, setIsFieldSelectionPopoverOpen] = useState(false);
-  const onFieldSelectionButtonClick = () => setIsFieldSelectionPopoverOpen((isOpen) => !isOpen);
-  const closePopover = () => setIsFieldSelectionPopoverOpen(false);
+  const [isItemSelectionPopoverOpen, setIsItemSelectionPopoverOpen] = useState(false);
+  const onItemSelectionButtonClick = () => setIsItemSelectionPopoverOpen((isOpen) => !isOpen);
+  const closePopover = () => setIsItemSelectionPopoverOpen(false);
 
-  const filteredUniqueFieldNames = useMemo(() => {
-    return uniqueFieldNames.filter(
-      (d) => d.toLowerCase().indexOf(fieldSearchText.toLowerCase()) !== -1
+  const filteredUniqueItemNames = useMemo(() => {
+    return uniqueItemNames.filter(
+      (d) => d.toLowerCase().indexOf(itemSearchText.toLowerCase()) !== -1
     );
-  }, [fieldSearchText, uniqueFieldNames]);
+  }, [itemSearchText, uniqueItemNames]);
 
   // If the supplied list of unique field names changes, do a sanity check to only
   // keep field names in the list of skipped fields that still are in the list of unique fields.
   useEffect(() => {
-    setSkippedFields((previousSkippedFields) =>
-      previousSkippedFields.filter((d) => uniqueFieldNames.includes(d))
+    setSkippedItems((previousSkippedItems) =>
+      previousSkippedItems.filter((d) => uniqueItemNames.includes(d))
     );
-  }, [uniqueFieldNames]);
+  }, [uniqueItemNames]);
 
-  const selectedFieldCount = uniqueFieldNames.length - skippedFields.length;
+  const selectedItemCount = uniqueItemNames.length - skippedItems.length;
 
   return (
     <EuiPopover
@@ -96,7 +104,7 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
       button={
         <EuiButton
           data-test-subj="aiopsFieldFilterButton"
-          onClick={onFieldSelectionButtonClick}
+          onClick={onItemSelectionButtonClick}
           disabled={disabled}
           size="s"
           iconType="arrowDown"
@@ -104,21 +112,25 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
           iconSize="s"
           color="text"
         >
-          <FormattedMessage
-            id="xpack.aiops.logRateAnalysis.page.fieldFilterButtonLabel"
-            defaultMessage="Filter fields"
-          />
+          {itemType === 'columns' ? (
+            <FormattedMessage
+              id="xpack.aiops.logRateAnalysis.page.columnsFilterButtonLabel"
+              defaultMessage="Columns"
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.aiops.logRateAnalysis.page.fieldFilterButtonLabel"
+              defaultMessage="Filter fields"
+            />
+          )}
         </EuiButton>
       }
-      isOpen={isFieldSelectionPopoverOpen}
+      isOpen={isItemSelectionPopoverOpen}
       closePopover={closePopover}
     >
       <EuiPopoverTitle>
         <EuiText size="xs" color="subdued" style={{ maxWidth: '400px' }}>
-          <FormattedMessage
-            id="xpack.aiops.logRateAnalysis.page.fieldFilterHelpText"
-            defaultMessage="Deselect non-relevant fields to remove them from groups and click the Apply button to rerun the grouping.  Use the search bar to filter the list, then select/deselect multiple fields with the actions below."
-          />
+          {helpText}
         </EuiText>
         <EuiSpacer size="s" />
         <EuiFieldText
@@ -127,25 +139,26 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
             defaultMessage: 'Search',
           })}
           aria-label={i18n.translate('xpack.aiops.analysis.fieldSelectorAriaLabel', {
-            defaultMessage: 'Filter fields',
+            defaultMessage: 'Filter {itemType}',
+            values: { itemType },
           })}
-          value={fieldSearchText}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => setFieldSearchText(e.currentTarget.value)}
+          value={itemSearchText}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => setItemSearchText(e.currentTarget.value)}
           data-test-subj="aiopsFieldSelectorSearch"
         />
       </EuiPopoverTitle>
-      <div css={fieldSelectPopover} data-test-subj="aiopsFieldSelectorFieldNameList">
-        {filteredUniqueFieldNames.map((fieldName) => (
+      <div css={itemSelectPopover} data-test-subj="aiopsFieldSelectorFieldNameList">
+        {filteredUniqueItemNames.map((fieldName) => (
           <div key={fieldName} css={{ padding: '4px' }}>
             <EuiSwitch
               data-test-subj={`aiopsFieldSelectorFieldNameListItem${
-                !skippedFields.includes(fieldName) ? ' checked' : ''
+                !skippedItems.includes(fieldName) ? ' checked' : ''
               }`}
               className="euiSwitch--mini"
               compressed
               label={fieldName}
-              onChange={(e) => setFieldsFilter([fieldName], e.target.checked)}
-              checked={!skippedFields.includes(fieldName)}
+              onChange={(e) => setItemsFilter([fieldName], e.target.checked)}
+              checked={!skippedItems.includes(fieldName)}
             />
           </div>
         ))}
@@ -162,19 +175,21 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
               <EuiButtonEmpty
                 size="xs"
                 flush="left"
-                onClick={() => setFieldsFilter(filteredUniqueFieldNames, true)}
-                disabled={fieldSearchText.length > 0 && filteredUniqueFieldNames.length === 0}
+                onClick={() => setItemsFilter(filteredUniqueItemNames, true)}
+                disabled={itemSearchText.length > 0 && filteredUniqueItemNames.length === 0}
                 data-test-subj="aiopsFieldSelectorSelectAllFieldsButton"
               >
-                {fieldSearchText.length > 0 ? (
+                {itemSearchText.length > 0 ? (
                   <FormattedMessage
                     id="xpack.aiops.logRateAnalysis.page.fieldSelector.selectAllSearchedFields"
-                    defaultMessage="Select filtered fields"
+                    defaultMessage="Select filtered {itemType}"
+                    values={{ itemType }}
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.aiops.logRateAnalysis.page.fieldSelector.selectAllFields"
-                    defaultMessage="Select all fields"
+                    defaultMessage="Select all {itemType}"
+                    values={{ itemType }}
                   />
                 )}
               </EuiButtonEmpty>
@@ -183,39 +198,37 @@ export const FieldFilterPopover: FC<FieldFilterPopoverProps> = ({
               <EuiButtonEmpty
                 size="xs"
                 flush="right"
-                onClick={() => setFieldsFilter(filteredUniqueFieldNames, false)}
-                disabled={fieldSearchText.length > 0 && filteredUniqueFieldNames.length === 0}
+                onClick={() => setItemsFilter(filteredUniqueItemNames, false)}
+                disabled={itemSearchText.length > 0 && filteredUniqueItemNames.length === 0}
                 data-test-subj="aiopsFieldSelectorDeselectAllFieldsButton"
               >
-                {fieldSearchText.length > 0 ? (
+                {itemSearchText.length > 0 ? (
                   <FormattedMessage
                     id="xpack.aiops.logRateAnalysis.page.fieldSelector.deselectAllSearchedFields"
-                    defaultMessage="Deselect filtered fields"
+                    defaultMessage="Deselect filtered {itemType}"
+                    values={{ itemType }}
                   />
                 ) : (
                   <FormattedMessage
                     id="xpack.aiops.logRateAnalysis.page.fieldSelector.deselectAllFields"
-                    defaultMessage="Deselect all fields"
+                    defaultMessage="Deselect all {itemType}"
+                    values={{ itemType }}
                   />
                 )}
               </EuiButtonEmpty>
             </EuiFlexItem>
           </>
           <EuiFlexItem grow={false}>
-            <FieldFilterApplyButton
+            <ItemFilterApplyButton
               onClick={() => {
-                onChange(skippedFields);
-                setFieldSearchText('');
-                setIsFieldSelectionPopoverOpen(false);
+                onChange(skippedItems);
+                setItemSearchText('');
+                setIsItemSelectionPopoverOpen(false);
                 closePopover();
               }}
-              disabled={disabledApplyButton || selectedFieldCount < 2 || !isTouched}
+              disabled={disabledApplyButton || selectedItemCount < selectedItemLimit || !isTouched}
               tooltipContent={
-                selectedFieldCount < 2
-                  ? i18n.translate('xpack.aiops.analysis.fieldSelectorNotEnoughFieldsSelected', {
-                      defaultMessage: 'Grouping requires at least 2 fields to be selected.',
-                    })
-                  : undefined
+                selectedItemCount < selectedItemLimit ? disabledApplyTooltipContent : undefined
               }
             />
           </EuiFlexItem>
