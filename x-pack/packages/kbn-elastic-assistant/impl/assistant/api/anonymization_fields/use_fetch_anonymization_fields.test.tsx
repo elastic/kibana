@@ -13,7 +13,7 @@ import React from 'react';
 import { useFetchAnonymizationFields } from './use_fetch_anonymization_fields';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../../assistant_context';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {
   fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
@@ -44,15 +44,18 @@ describe('useFetchAnonymizationFields', () => {
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() => useFetchAnonymizationFields());
       await waitForNextUpdate();
-      expect(http.fetch).toHaveBeenCalledWith('/api/elastic_assistant/anonymization_fields/_find', {
-        method: 'GET',
-        query: {
-          page: 1,
-          per_page: 1000,
-        },
-        version: '2023-10-31',
-        signal: undefined,
-      });
+      expect(http.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/anonymization_fields/_find',
+        {
+          method: 'GET',
+          query: {
+            page: 1,
+            per_page: 1000,
+          },
+          version: API_VERSIONS.internal.v1,
+          signal: undefined,
+        }
+      );
 
       expect(http.fetch).toHaveBeenCalled();
     });
