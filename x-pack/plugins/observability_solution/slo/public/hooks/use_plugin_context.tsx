@@ -6,9 +6,23 @@
  */
 
 import { useContext } from 'react';
-import { PluginContext } from '../context/plugin_context';
-import type { PluginContextValue } from '../context/plugin_context';
+import { PluginContext, OverviewEmbeddableContext } from '../context/plugin_context';
+import type { PluginContextValue, OverviewEmbeddableContextValue } from '../context/plugin_context';
 
-export function usePluginContext() {
-  return useContext(PluginContext) as PluginContextValue;
+export function usePluginContext(): PluginContextValue {
+  const context = useContext(PluginContext);
+  if (!context) {
+    throw new Error('Plugin context value is missing!');
+  }
+
+  return context;
+}
+
+export function useOverviewEmbeddableContext(): OverviewEmbeddableContextValue {
+  const context = useContext(OverviewEmbeddableContext);
+  if (!context) {
+    throw new Error('Overview Embeddable context value is missing!');
+  }
+
+  return context;
 }
