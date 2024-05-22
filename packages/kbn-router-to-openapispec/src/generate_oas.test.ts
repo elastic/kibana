@@ -7,8 +7,13 @@
  */
 
 import { generateOpenApiDocument } from './generate_oas';
-import { schema } from '@kbn/config-schema';
+import { schema, Type } from '@kbn/config-schema';
 import { createTestRouters, createRouter, createVersionedRouter } from './generate_oas.test.util';
+
+interface RecursiveType {
+  name: string;
+  self: undefined | RecursiveType;
+}
 
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
@@ -47,6 +52,52 @@ describe('generateOpenApiDocument', () => {
                       request: {
                         params: schema.object({ id: sharedIdSchema }),
                         body: otherSchema,
+                      },
+                      response: {
+                        [200]: {
+                          body: () => schema.string({ maxLength: 10, minLength: 1 }),
+                        },
+                      },
+                    },
+                    options: { tags: ['foo'] },
+                    handler: jest.fn(),
+                  },
+                ],
+              }),
+            ],
+            versionedRouters: [],
+          },
+          {
+            title: 'test',
+            baseUrl: 'https://test.oas',
+            version: '99.99.99',
+          }
+        )
+      ).toMatchSnapshot();
+    });
+
+    it('handles recursive schemas', () => {
+      const id = 'recursive';
+      const recursiveSchema: Type<RecursiveType> = schema.object(
+        {
+          name: schema.string(),
+          self: schema.lazy<RecursiveType>(id),
+        },
+        { meta: { id } }
+      );
+      expect(
+        generateOpenApiDocument(
+          {
+            routers: [
+              createRouter({
+                routes: [
+                  {
+                    isVersioned: false,
+                    path: '/recursive',
+                    method: 'get',
+                    validationSchemas: {
+                      request: {
+                        body: recursiveSchema,
                       },
                       response: {
                         [200]: {

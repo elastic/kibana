@@ -234,6 +234,7 @@ export const schema = {
   contextRef,
   duration,
   ip,
+  lazy,
   literal,
   mapOf,
   maybe,
