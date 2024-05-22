@@ -44,7 +44,7 @@ export const fetchDocuments = (
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
-  const contextCollector = services.profilesManager.createDocumentProfilesCollector();
+  const profilesCollector = services.profilesManager.createDocumentProfilesCollector();
 
   const fetch$ = searchSource
     .fetch$({
@@ -71,13 +71,13 @@ export const fetchDocuments = (
       map((res) => {
         return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView, {
           processRecord: (record) => {
-            contextCollector.collect({ record });
+            profilesCollector.collect({ record });
             return record;
           },
         });
       }),
       tap(() => {
-        contextCollector.finalize(!isFetchingMore);
+        profilesCollector.finalize(!isFetchingMore);
       })
     );
 
