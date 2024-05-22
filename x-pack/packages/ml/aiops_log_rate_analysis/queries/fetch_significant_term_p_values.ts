@@ -120,8 +120,8 @@ export const fetchSignificantTermPValues = async ({
 }: {
   esClient: ElasticsearchClient;
   abortSignal?: AbortSignal;
-  logger: Logger;
-  emitError: (m: string) => void;
+  logger?: Logger;
+  emitError?: (m: string) => void;
   arguments: AiopsLogRateAnalysisSchema & {
     fieldNames: string[];
     sampleProbability?: number;
@@ -148,14 +148,19 @@ export const fetchSignificantTermPValues = async ({
 
   function reportError(fieldName: string, error: unknown) {
     if (!isRequestAbortedError(error)) {
-      logger.error(
-        `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
-          error,
-          null,
-          2
-        )}`
-      );
-      emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      if (logger) {
+        logger.error(
+          `Failed to fetch p-value aggregation for fieldName "${fieldName}", got: \n${JSON.stringify(
+            error,
+            null,
+            2
+          )}`
+        );
+      }
+
+      if (emitError) {
+        emitError(`Failed to fetch p-value aggregation for fieldName "${fieldName}".`);
+      }
     }
   }
 
