@@ -46,7 +46,7 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
       const core = await context.core;
       const soClient = core.savedObjects.client;
       const esClient = core.elasticsearch.client.asCurrentUser;
-      const spaceId = spaces.spacesService.getSpaceId(req);
+      const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
 
       try {
         const definition = await saveEntityDefinition(soClient, req.body);

@@ -38,7 +38,7 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
       try {
         const soClient = (await context.core).savedObjects.client;
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const spaceId = spaces.spacesService.getSpaceId(req);
+        const spaceId = spaces?.spacesService.getSpaceId(req) ?? 'default';
 
         const definition = await readEntityDefinition(soClient, req.params.id, logger);
 

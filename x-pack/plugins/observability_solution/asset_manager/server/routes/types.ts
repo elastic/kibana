@@ -14,5 +14,5 @@ export interface SetupRouteOptions<T extends RequestHandlerContextBase> {
   router: IRouter<T>;
   assetClient: AssetClient;
   logger: Logger;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }

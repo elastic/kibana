@@ -20,7 +20,7 @@ export interface ElasticsearchAccessorOptions {
 export interface AssetManagerPluginSetupDependencies {
   apmDataAccess: ApmDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
-  spaces: SpacesPluginSetup;
+  spaces?: SpacesPluginSetup;
 }
 export interface AssetManagerPluginStartDependencies {
   apmDataAccess: ApmDataAccessPluginStart;
