@@ -2125,7 +2125,7 @@
             "section": "def-common.ElasticsearchClient",
             "text": "ElasticsearchClient"
           },
-          ", connectorId: string, indexName: string) => Promise<",
+          ", connectorId: string, indexName: string | null) => Promise<",
           "Result",
           ">"
         ],
@@ -2172,17 +2172,17 @@
           {
             "parentPluginId": "@kbn/search-connectors",
             "id": "def-common.updateConnectorIndexName.$3",
-            "type": "string",
+            "type": "CompoundType",
             "tags": [],
             "label": "indexName",
             "description": [],
             "signature": [
-              "string"
+              "string | null"
             ],
             "path": "packages/kbn-search-connectors/lib/update_connector_index_name.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
