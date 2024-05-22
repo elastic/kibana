@@ -38,11 +38,12 @@ const useSummaryPanel = () => {
   /*
     User Authorization
   */
+  const canUserMonitorAllFilteredDataStreams = filteredItems.every(
+    (item) => item.userPrivileges?.canMonitor ?? true
+  );
+
   const isUserAuthorizedForDataset =
-    filteredItems.length > 0
-      ? canUserMonitorAnyDataStream &&
-        filteredItems.every((item) => item.userPrivileges?.canMonitor ?? true)
-      : canUserMonitorDataset;
+    canUserMonitorDataset && canUserMonitorAnyDataStream && canUserMonitorAllFilteredDataStreams;
 
   /*
     Datasets Activity

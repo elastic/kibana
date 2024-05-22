@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const apacheAccessDatasetName = 'apache.access';
   const apacheAccessDatasetHumanName = 'Apache access logs';
 
-  describe('Dataset quality flyout', function () {
+  describe('Dataset quality user privileges', function () {
     this.tags(['failsOnMKI']);
 
     before(async () => {
@@ -58,27 +58,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(cols).to.not.contain('Last Activity');
     });
 
-    it('shows underprivileged warning when size and last activity cannot be accessed', async () => {
+    it('does not show size and last activity columns for underprivileged data stream', async () => {
+      const cols = await PageObjects.datasetQuality.getDatasetTableHeaderTexts();
+
+      expect(cols).to.not.contain('Size');
+      expect(cols).to.not.contain('Last Activity');
+    });
+
+    it('view dashboards is disabled for underprivileged user', async () => {
       await synthtrace.index(
         getLogsForDataset({ to, count: 10, dataset: apacheAccessDatasetName })
       );
       await PageObjects.datasetQuality.refreshTable();
-
-      const datasetWithMonitorPrivilege = apacheAccessDatasetHumanName;
-      const datasetWithoutMonitorPrivilege = 'synth.1';
-
-      // "Last Activity" should be available for `apacheAccessDatasetName`
-      await testSubjects.missingOrFail(
-        `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-lastActivity-${datasetWithMonitorPrivilege}`
-      );
-
-      // "Last Activity" should not be available for `datasetWithoutMonitorPrivilege`
-      await testSubjects.existOrFail(
-        `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-lastActivity-${datasetWithoutMonitorPrivilege}`
-      );
-    });
-
-    it('view dashboards is disabled for underprivileged user', async () => {
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
