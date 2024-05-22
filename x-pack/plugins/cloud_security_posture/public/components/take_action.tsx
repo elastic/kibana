@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
@@ -33,6 +34,7 @@ interface TakeActionProps {
   enableBenchmarkRuleFn?: () => Promise<void>;
   disableBenchmarkRuleFn?: () => Promise<void>;
   isCreateDetectionRuleDisabled?: boolean;
+  isDataGridControlColumn?: boolean;
 }
 
 export const showCreateDetectionRuleSuccessToast = (
@@ -170,6 +172,7 @@ export const TakeAction = ({
   enableBenchmarkRuleFn,
   disableBenchmarkRuleFn,
   isCreateDetectionRuleDisabled = false,
+  isDataGridControlColumn: isDataTableAction = false,
 }: TakeActionProps) => {
   const queryClient = useQueryClient();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -182,7 +185,7 @@ export const TakeAction = ({
     prefix: 'smallContextMenuPopover',
   });
 
-  const button = (
+  const button = !isDataTableAction ? (
     <EuiButton
       isLoading={isLoading}
       fill
@@ -192,6 +195,13 @@ export const TakeAction = ({
     >
       <FormattedMessage id="xpack.csp.flyout.takeActionButton" defaultMessage="Take action" />
     </EuiButton>
+  ) : (
+    <EuiButtonIcon
+      aria-label="show actions"
+      iconType="boxesHorizontal"
+      color="text"
+      onClick={() => setPopoverOpen(!isPopoverOpen)}
+    />
   );
   const actionsItems = [];
 
@@ -240,7 +250,7 @@ export const TakeAction = ({
   );
 };
 
-const CreateDetectionRule = ({
+export const CreateDetectionRule = ({
   createRuleFn,
   setIsLoading,
   closePopover,

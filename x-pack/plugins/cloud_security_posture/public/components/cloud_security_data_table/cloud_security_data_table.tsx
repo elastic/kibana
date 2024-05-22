@@ -8,9 +8,15 @@ import React, { useState, useMemo } from 'react';
 import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import { EuiDataGridCellValueElementProps, EuiDataGridStyle, EuiProgress } from '@elastic/eui';
+import {
+  EuiDataGridCellValueElementProps,
+  EuiDataGridControlColumn,
+  EuiDataGridStyle,
+  EuiProgress,
+} from '@elastic/eui';
 import { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -22,7 +28,9 @@ import { MAX_FINDINGS_TO_LOAD } from '../../common/constants';
 import { useStyles } from './use_styles';
 import { AdditionalControls } from './additional_controls';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
+import { TakeAction } from '../take_action';
 
+import { RuleResponse } from '../../common/types';
 export interface CloudSecurityDefaultColumn {
   id: string;
   width?: number;
@@ -77,6 +85,11 @@ export interface CloudSecurityDataTableProps {
    * Height override for the data grid.
    */
   height?: number | string;
+
+  /**
+   * This function will be used in the control column to create a rule for a specific finding.
+   */
+  createRuleFn?: (rowIndex: number) => ((http: HttpSetup) => Promise<RuleResponse>) | undefined;
 }
 
 export const CloudSecurityDataTable = ({
@@ -91,6 +104,7 @@ export const CloudSecurityDataTable = ({
   customCellRenderer,
   groupSelectorComponent,
   height,
+  createRuleFn,
   ...rest
 }: CloudSecurityDataTableProps) => {
   const {
@@ -229,6 +243,20 @@ export const CloudSecurityDataTable = ({
     />
   );
 
+  const externalControlColumns: EuiDataGridControlColumn[] | undefined = createRuleFn
+    ? [
+        {
+          id: 'select',
+          width: 30,
+          headerCellRender: () => null,
+          rowCellRender: ({ rowIndex }) =>
+            createRuleFn && (
+              <TakeAction isDataGridControlColumn createRuleFn={createRuleFn(rowIndex)} />
+            ),
+        },
+      ]
+    : undefined;
+
   const dataTableStyle = {
     // Change the height of the grid to fit the page
     // If there are filters, leave space for the filter bar
@@ -279,6 +307,7 @@ export const CloudSecurityDataTable = ({
           showTimeCol={false}
           settings={settings}
           onFetchMoreRecords={loadMore}
+          externalControlColumns={externalControlColumns}
           externalCustomRenderers={externalCustomRenderers}
           externalAdditionalControls={externalAdditionalControls}
           gridStyleOverride={gridStyle}
