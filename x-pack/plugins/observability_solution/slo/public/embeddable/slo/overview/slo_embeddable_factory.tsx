@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { EuiFlexItem, EuiLink, EuiFlexGroup } from '@elastic/eui';
-import { Router } from '@kbn/shared-ux-router';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitles,
@@ -17,10 +16,6 @@ import {
   fetch$,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { createBrowserHistory } from 'history';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from './constants';
@@ -34,9 +29,8 @@ import {
   GroupSloCustomInput,
 } from './types';
 import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
-import { OverviewEmbeddableContext } from '../../../context/plugin_context';
+import { SloEmbeddableContext } from '../common/slo_embeddable_context';
 
-const queryClient = new QueryClient();
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
     defaultMessage: 'SLO Overview',
@@ -123,7 +117,6 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             groupFilters$,
             remoteName$
           );
-          const { observabilityRuleTypeRegistry } = deps.observability;
 
           useEffect(() => {
             return () => {
@@ -188,21 +181,9 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             }
           };
           return (
-            <Router history={createBrowserHistory()}>
-              <EuiThemeProvider darkMode={true}>
-                <KibanaContextProvider services={deps}>
-                  <OverviewEmbeddableContext.Provider value={{ observabilityRuleTypeRegistry }}>
-                    <QueryClientProvider client={queryClient}>
-                      {showAllGroupByInstances ? (
-                        <SloCardChartList sloId={sloId!} />
-                      ) : (
-                        renderOverview()
-                      )}
-                    </QueryClientProvider>
-                  </OverviewEmbeddableContext.Provider>
-                </KibanaContextProvider>
-              </EuiThemeProvider>
-            </Router>
+            <SloEmbeddableContext deps={deps}>
+              {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
+            </SloEmbeddableContext>
           );
         },
       };

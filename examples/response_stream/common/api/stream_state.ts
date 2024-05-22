@@ -6,10 +6,14 @@
  * Side Public License, v 1.
  */
 
-export {
-  type FieldCategorizeButtonProps,
-  FieldCategorizeButton,
-  getFieldCategorizeButton,
-} from './field_categorize_button';
+export interface StreamState {
+  errors: string[];
+  progress: number;
+  entities: Record<string, number>;
+}
 
-export { triggerCategorizeActions, canCategorize } from './categorize_trigger_utils';
+export const getInitialState = (): StreamState => ({
+  errors: [],
+  progress: 0,
+  entities: {},
+});
