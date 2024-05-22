@@ -17,7 +17,7 @@ export const DisabledCallout = ({ total }: { total?: number }) => {
   const showDisableCallout = !isEnabled && total && total > 0;
   const showInvalidApiKeyCallout = invalidApiKeyError && total && total > 0;
 
-  if (!showDisableCallout && !showInvalidApiKeyCallout && isServiceAllowed) {
+  if ((!showDisableCallout && !showInvalidApiKeyCallout && isServiceAllowed) || loading) {
     return null;
   }
 
