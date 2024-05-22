@@ -8,7 +8,7 @@
 
 import React, { ReactElement } from 'react';
 import { FieldIcon } from '@kbn/field-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import {
   createStubDataView,
   stubLogstashDataView,
@@ -53,9 +53,9 @@ const stubDataViewWithNested = createStubDataView({
 
 describe('DataTableColumnHeader', function () {
   async function mountComponent(element: ReactElement) {
-    const component = mountWithIntl(element);
+    const component = mountWithI18nProvider(element);
     // wait for lazy modules
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 5));
     component.update();
 
     return component;
@@ -69,8 +69,8 @@ describe('DataTableColumnHeader', function () {
         showColumnTokens
       />
     );
-    expect(component.text()).toBe('NumberbytesDisplayName');
     expect(component.find(FieldIcon).first().prop('type')).toBe('number');
+    expect(component.text()).toBe('NumberbytesDisplayName');
   });
 
   it('should render a correct token for a custom column type (in case of text-based queries)', async () => {
