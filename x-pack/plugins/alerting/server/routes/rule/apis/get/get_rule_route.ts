@@ -38,10 +38,12 @@ const buildGetRuleRoute = ({
   router.get(
     {
       path,
-      options: {
-        access: 'public',
-        description: `Get rule details`,
-      },
+      options: excludeFromPublicApi
+        ? {
+            access: 'public',
+            description: `Get rule details`,
+          }
+        : undefined,
       validate: {
         params: getRuleRequestParamsSchemaV1,
       },
