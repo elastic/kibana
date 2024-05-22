@@ -88,8 +88,6 @@ export const bulkPatchRulesRoute = (router: SecuritySolutionPluginRouter, logger
                 });
 
                 const rule = await rulesManagementClient.patchRule({
-                  ruleId: payloadRule.rule_id,
-                  id: payloadRule.id,
                   nextParams: payloadRule,
                 });
 

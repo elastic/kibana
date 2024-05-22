@@ -26,7 +26,6 @@ import {
 import { formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import type {
   CreateRuleExceptionsRequestBodyDecoded,
@@ -296,7 +295,6 @@ export const createAndAssociateDefaultExceptionList = async ({
     : existingRuleExceptionLists;
 
   await rulesManagementClient.patchRule({
-    existingRule: rule,
     nextParams: {
       ...rule.params,
       exceptions_list: [

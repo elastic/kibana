@@ -81,8 +81,6 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
           );
 
           const rule = await rulesManagementClient.updateRule({
-            ruleId: request.body.rule_id,
-            id: request.body.id,
             ruleUpdate: request.body,
           });
 

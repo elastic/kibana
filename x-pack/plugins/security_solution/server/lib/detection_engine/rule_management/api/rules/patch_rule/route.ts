@@ -77,8 +77,6 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
           });
 
           const rule = await rulesManagementClient.patchRule({
-            ruleId: params.rule_id,
-            id: params.id,
             nextParams: params,
           });
 

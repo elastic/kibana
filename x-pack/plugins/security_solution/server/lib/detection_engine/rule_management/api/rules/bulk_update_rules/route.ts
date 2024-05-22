@@ -100,8 +100,6 @@ export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logge
                 });
 
                 const rule = await rulesManagementClient.updateRule({
-                  ruleId: payloadRule.rule_id,
-                  id: payloadRule.id,
                   ruleUpdate: payloadRule,
                 });
 

@@ -217,10 +217,9 @@ export const updateRule = async (
 
   const update = await _updateRule(rulesClient, { ruleUpdate, existingRule });
 
-  const enabled = ruleUpdate.enabled ?? existingRule.enabled;
-  await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, enabled);
+  await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, ruleUpdate.enabled);
 
-  return { ...update, enabled };
+  return { ...update, enabled: ruleUpdate.enabled ?? existingRule.enabled };
 };
 
 export const patchRule = async (
@@ -246,7 +245,7 @@ export const patchRule = async (
 
   const update = await _patchRule(rulesClient, { existingRule, nextParams });
 
-  await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, nextParams.enabled ?? false);
+  await _toggleRuleEnabledOnUpdate(rulesClient, existingRule, nextParams.enabled);
 
   if (nextParams.enabled != null) {
     return { ...update, enabled: nextParams.enabled };
@@ -417,11 +416,11 @@ const _upgradePrebuiltRuleWithTypeChange = async (
 const _toggleRuleEnabledOnUpdate = async (
   rulesClient: RulesClient,
   existingRule: RuleAlertType,
-  enabled: boolean
+  updatedRuleEnabled?: boolean
 ) => {
-  if (existingRule.enabled && enabled === false) {
+  if (existingRule.enabled && updatedRuleEnabled === false) {
     await rulesClient.disable({ id: existingRule.id });
-  } else if (!existingRule.enabled && enabled === true) {
+  } else if (!existingRule.enabled && updatedRuleEnabled === true) {
     await rulesClient.enable({ id: existingRule.id });
   }
 };
