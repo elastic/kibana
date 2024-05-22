@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import type {
   RuleFilterArray,
   TimestampOverride,
@@ -57,7 +56,6 @@ export const buildEsqlSearchRequest = ({
     // we limit size of the response to maxAlertNumber + 1
     // ES|QL currently does not support pagination and returns 10,000 results
     query: `${query} | limit ${size + 1}`,
-    version: ESQL_LATEST_VERSION,
     filter: {
       bool: {
         filter: requestFilter,

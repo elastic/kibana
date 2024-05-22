@@ -11,7 +11,6 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchReponse } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
-import { ESQL_LATEST_VERSION } from '../../constants';
 
 export async function getESQLQueryColumns({
   esqlQuery,
@@ -28,7 +27,6 @@ export async function getESQLQueryColumns({
         {
           params: {
             query: `${esqlQuery} | limit 0`,
-            version: ESQL_LATEST_VERSION,
           },
         },
         {
@@ -76,7 +74,6 @@ export async function getESQLQueryColumnsRaw({
         {
           params: {
             query: `${esqlQuery} | limit 0`,
-            version: ESQL_LATEST_VERSION,
           },
         },
         {
