@@ -30,7 +30,6 @@ import { DataMsg, SavedSearchData } from '../state_management/discover_data_stat
 import { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
 import { InternalState } from '../state_management/discover_internal_state_container';
-import { ProfilesManager } from '../../../context_awareness/profiles_manager';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -42,7 +41,6 @@ export interface FetchDeps {
   searchSessionId: string;
   services: DiscoverServices;
   useNewFieldsApi: boolean;
-  profilesManager: ProfilesManager;
 }
 
 /**
@@ -65,7 +63,6 @@ export function fetchAll(
     inspectorAdapters,
     savedSearch,
     abortController,
-    profilesManager,
   } = fetchDeps;
   const { data } = services;
   const searchSource = savedSearch.searchSource.createChild();
@@ -109,7 +106,7 @@ export function fetchAll(
           data,
           services.expressions,
           inspectorAdapters,
-          profilesManager,
+          services.profilesManager,
           abortController.signal
         )
       : fetchDocuments(searchSource, fetchDeps);

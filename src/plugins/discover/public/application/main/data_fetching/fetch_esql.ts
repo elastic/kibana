@@ -8,16 +8,16 @@
 import { pluck } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import type { Query, AggregateQuery, Filter } from '@kbn/es-query';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
 import type { RecordsFetchResponse } from '../../types';
-import { ProfilesManager } from '../../../context_awareness/profiles_manager';
+import type { ProfilesManager } from '../../../context_awareness';
 
 interface EsqlErrorResponse {
   error: {
@@ -75,11 +75,7 @@ export function fetchEsql(
             finalData = rows.map((row, idx) => {
               const record: DataTableRecord = {
                 id: String(idx),
-                raw: {
-                  _id: '',
-                  _index: '',
-                  ...row,
-                },
+                raw: row as EsHitRecord,
                 flattened: row,
               };
 

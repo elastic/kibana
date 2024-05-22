@@ -23,14 +23,7 @@ import { FetchDeps } from './fetch_all';
  */
 export const fetchDocuments = (
   searchSource: ISearchSource,
-  {
-    abortController,
-    inspectorAdapters,
-    searchSessionId,
-    services,
-    getAppState,
-    profilesManager,
-  }: FetchDeps
+  { abortController, inspectorAdapters, searchSessionId, services, getAppState }: FetchDeps
 ): Promise<RecordsFetchResponse> => {
   const sampleSize = getAppState().sampleSize;
   searchSource.setField('size', getAllowedSampleSize(sampleSize, services.uiSettings));
@@ -51,7 +44,7 @@ export const fetchDocuments = (
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
-  const contextCollector = profilesManager.createDocumentProfilesCollector();
+  const contextCollector = services.profilesManager.createDocumentProfilesCollector();
 
   const fetch$ = searchSource
     .fetch$({

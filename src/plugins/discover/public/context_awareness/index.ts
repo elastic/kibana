@@ -10,5 +10,5 @@ export * from './types';
 export * from './profiles';
 export { type ComposableProfile, getMergedAccessor } from './composable_profile';
 export { type GetProfilesOptions, ProfilesManager } from './profiles_manager';
-export { useProfileAccessor } from './use_profile_accessor';
-export { useRootProfile } from './use_root_profile';
+export { useProfileAccessor } from './hooks/use_profile_accessor';
+export { useRootProfile } from './hooks/use_root_profile';
