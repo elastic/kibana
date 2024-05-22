@@ -16,7 +16,6 @@ import {
   AGENT_POLICY_API_ROUTES,
   API_VERSIONS,
   FLEET_SERVER_PACKAGE,
-  FLEET_SERVER_SERVERS_INDEX,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type {
@@ -735,7 +734,7 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
           method: 'POST',
           path: '/api/console/proxy',
           query: {
-            path: `${FLEET_SERVER_SERVERS_INDEX}/_search`,
+            path: `.fleet-servers/_search`,
             method: 'GET',
           },
           body: {
