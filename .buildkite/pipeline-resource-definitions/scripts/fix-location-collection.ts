@@ -11,7 +11,7 @@ import jsYaml from 'js-yaml';
 import path from 'path';
 import { execSync } from 'child_process';
 
-const EXCLUDE_LIST = ['locations.yml', '_template/template.yml'];
+const EXCLUDE_LIST = ['locations.yml', '_templates'];
 const REPO_FILES_BASE = 'https://github.com/elastic/kibana/blob/main';
 
 type BackstageLocationResource = object & {
@@ -20,19 +20,19 @@ type BackstageLocationResource = object & {
 
 async function main() {
   const repoRoot = execSync('git rev-parse --show-toplevel').toString().trim();
-  const resourceDefinitionsFolder = path.resolve(
+  const resourceDefinitionsRoot = path.resolve(
     repoRoot,
     '.buildkite',
     'pipeline-resource-definitions'
   );
   const resourceDefinitionsBaseUrl = `${REPO_FILES_BASE}/.buildkite/pipeline-resource-definitions`;
-  const locationFile = path.resolve(resourceDefinitionsFolder, 'locations.yml');
+  const locationFile = path.resolve(resourceDefinitionsRoot, 'locations.yml');
   const locationFileLines = fs.readFileSync(locationFile, 'utf8').split('\n');
 
-  const pipelines = readDirRecursively(resourceDefinitionsFolder)
+  const pipelines = readDirRecursively(resourceDefinitionsRoot)
     .filter((file) => file.endsWith('.yml'))
-    .map((file) => file.replace(`${resourceDefinitionsFolder}/`, ''))
-    .filter((f) => !EXCLUDE_LIST.includes(f));
+    .map((file) => file.replace(`${resourceDefinitionsRoot}/`, ''))
+    .filter((f) => EXCLUDE_LIST.every((excludeExpr) => !f.match(excludeExpr)));
 
   const preamble = locationFileLines.slice(0, 1);
 
