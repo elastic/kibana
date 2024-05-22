@@ -94,6 +94,52 @@ export default function ({ getService }: FtrProviderContext) {
           expect(result.body.name).to.be('test_cc_api_key');
         }
       });
+
+      if (!basic) {
+        it(`Elasticsearch should reject an invalid cross cluster API Key configuration`, async () => {
+          await supertest
+            .post('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              name: 'test_cc_api_key_failure',
+              metadata: {},
+              access: {
+                search: [
+                  {
+                    names: ['logs*'],
+                    query: { bool: { must_not: { term: { field2: 'value2' } } } },
+                  },
+                ],
+                // replication section is not allowed if earch contains query or field_security
+                replication: {
+                  names: ['logs*'],
+                }
+              },
+            }).expect(400);
+
+          await supertest
+            .post('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              name: 'test_cc_api_key_failure',
+              metadata: {},
+              access: {
+                search: [
+                  {
+                    names: ['logs*'],
+                    field_security: { grant: ['field2'] },
+                  },
+                ],
+                // replication section is not allowed if earch contains query or field_security
+                replication: {
+                  names: ['logs*'],
+                }
+              },
+            }).expect(400);
+          });
+      }
     });
 
     describe('PUT /internal/security/api_key', () => {
@@ -231,6 +277,74 @@ export default function ({ getService }: FtrProviderContext) {
           ]);
         }
       });
+
+      if (!basic) {
+        it(`Elasticsearch should reject an invalid cross cluster API Key configuration`, async () => {
+          const createResult = await supertest
+            .post('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              name: 'test_cc_api_key',
+              metadata: {},
+              access: {
+                search: [
+                  {
+                    names: ['logs*'],
+                  },
+                ],
+              },
+            });
+          expect(createResult.status).to.be(200);
+          const id = createResult.body.id;
+
+          await supertest
+            .put('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              id,
+              metadata: {
+                foo: 'bar',
+              },
+              access: {
+                search: [
+                  {
+                    names: ['logs*'],
+                    query: { bool: { must_not: { term: { field2: 'value2' } } } },
+                  },
+                ],
+                // replication section is not allowed if earch contains query or field_security
+                replication: {
+                  names: ['logs*'],
+                }
+              },
+            }).expect(400);
+
+          await supertest
+            .put('/internal/security/api_key')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              type: 'cross_cluster',
+              id,
+              metadata: {
+                foo: 'bar',
+              },
+              access: {
+                search: [
+                  {
+                    names: ['logs*'],
+                    field_security: { grant: ['field2'] },
+                  },
+                ],
+                // replication section is not allowed if earch contains query or field_security
+                replication: {
+                  names: ['logs*'],
+                }
+              },
+            }).expect(400);
+          });
+      }
     });
 
     describe('with kibana privileges', () => {
