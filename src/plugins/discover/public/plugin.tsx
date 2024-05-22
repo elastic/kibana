@@ -220,8 +220,6 @@ export interface DiscoverStartPlugins {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
-export type StartRenderServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
-
 /**
  * Contains Discover, one of the oldest parts of Kibana
  * Discover provides embeddables for Dashboards
