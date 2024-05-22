@@ -50,6 +50,7 @@ export const LinkContent = ({
   delegatedShareUrlHandler,
 }: LinkProps) => {
   const [url, setUrl] = useState<string>('');
+  const [longUrl, setLongUrl] = useState<string>('');
   const [urlParams] = useState<UrlParams | undefined>(undefined);
   const [isTextCopied, setTextCopied] = useState(false);
   const [, setShortUrlCache] = useState<string | undefined>(undefined);
@@ -72,6 +73,7 @@ export const LinkContent = ({
 
       // persist updated url to state
       setUrl(urlWithUpdatedParams);
+      setLongUrl(urlWithUpdatedParams);
 
       return urlWithUpdatedParams;
     },
@@ -154,7 +156,7 @@ export const LinkContent = ({
             <EuiButton
               fill
               data-test-subj="copyShareUrlButton"
-              data-share-url={url}
+              data-share-url={longUrl}
               onBlur={() => (objectType === 'lens' && isDirty ? null : setTextCopied(false))}
               onClick={copyUrlHelper}
               color={objectType === 'lens' && isDirty ? 'warning' : 'primary'}
