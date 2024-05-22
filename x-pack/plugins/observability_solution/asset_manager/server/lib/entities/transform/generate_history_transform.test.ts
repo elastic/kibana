@@ -6,11 +6,11 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
-import { generateTransform } from './generate_transform';
+import { generateHistoryTransform } from './generate_history_transform';
 
-describe('generateTransform(definition)', () => {
+describe('generateHistoryTransform(definition)', () => {
   it('should generate a valid summary transform', () => {
-    const transform = generateTransform(entityDefinition);
+    const transform = generateHistoryTransform(entityDefinition);
     expect(transform).toMatchSnapshot();
   });
 });

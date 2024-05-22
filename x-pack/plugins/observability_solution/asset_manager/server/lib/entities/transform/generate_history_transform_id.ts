@@ -6,8 +6,8 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_BASE_PREFIX } from '../../../../common/constants_entities';
+import { ENTITY_HISTORY_TRANSFORM_PREFIX } from '../../../../common/constants_entities';
 
-export function generateIngestPipelineId(definition: EntityDefinition) {
-  return `${ENTITY_BASE_PREFIX}.${definition.id}`;
+export function generateHistoryTransformId(definition: EntityDefinition) {
+  return `${ENTITY_HISTORY_TRANSFORM_PREFIX}-${definition.id}`;
 }

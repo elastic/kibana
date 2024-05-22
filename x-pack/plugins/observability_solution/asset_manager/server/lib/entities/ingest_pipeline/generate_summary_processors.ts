@@ -6,13 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateIndexName } from '../helpers/generate_index_name';
-
-function createIdTemplate(definition: EntityDefinition) {
-  return definition.identityFields.reduce((template, id) => {
-    return template.replaceAll(id.field, `entity.identity.${id.field}`);
-  }, definition.identityTemplate);
-}
+import { generateSummaryIndexName } from '../helpers/generate_index_name';
 
 function mapDesitnationToPainless(destination: string, source: string) {
   const fieldParts = destination.split('.');
@@ -20,7 +14,7 @@ function mapDesitnationToPainless(destination: string, source: string) {
     if (currentIndex + 1 === parts.length) {
       return `${acc}\n  ctx${parts
         .map((s) => `["${s}"]`)
-        .join('')} = ctx.entity.metadata.${source}.keySet();`;
+        .join('')} = ctx.entity.metadata.${source}.data.keySet();`;
     }
     return `${acc}\n  ctx${parts
       .slice(0, currentIndex + 1)
@@ -39,11 +33,11 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
     return `${script}if (ctx.entity?.metadata?.${source.replaceAll(
       '.',
       '?.'
-    )} != null) {${mapDesitnationToPainless(destination, source)}\n}\n`;
+    )}.data != null) {${mapDesitnationToPainless(destination, source)}\n}\n`;
   }, '');
 }
 
-export function generateProcessors(definition: EntityDefinition) {
+export function generateSummaryProcessors(definition: EntityDefinition) {
   return [
     {
       set: {
@@ -55,23 +49,6 @@ export function generateProcessors(definition: EntityDefinition) {
       set: {
         field: 'entity.definitionId',
         value: definition.id,
-      },
-    },
-    {
-      set: {
-        field: 'entity.indexPatterns',
-        value: JSON.stringify(definition.indexPatterns),
-      },
-    },
-    {
-      json: {
-        field: 'entity.indexPatterns',
-      },
-    },
-    {
-      set: {
-        field: 'entity.id',
-        value: createIdTemplate(definition),
       },
     },
     ...(definition.staticFields != null
@@ -91,7 +68,7 @@ export function generateProcessors(definition: EntityDefinition) {
     {
       set: {
         field: '_index',
-        value: generateIndexName(definition),
+        value: generateSummaryIndexName(definition),
       },
     },
   ];

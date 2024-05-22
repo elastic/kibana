@@ -7,24 +7,45 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateTransform } from './transform/generate_transform';
 import { retryTransientEsErrors } from './helpers/retry';
 import { EntitySecurityException } from './errors/entity_security_exception';
+import { generateSummaryTransform } from './transform/generate_summary_transform';
+import { generateHistoryTransform } from './transform/generate_history_transform';
 
-export async function createAndInstallTransform(
+export async function createAndInstallHistoryTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ) {
-  const transform = generateTransform(definition);
   try {
-    await retryTransientEsErrors(() => esClient.transform.putTransform(transform), { logger });
+    const historyTransform = generateHistoryTransform(definition);
+    await retryTransientEsErrors(() => esClient.transform.putTransform(historyTransform), {
+      logger,
+    });
   } catch (e) {
-    logger.error(`Cannot create entity transform for [${definition.id}] entity definition`);
+    logger.error(`Cannot create entity history transform for [${definition.id}] entity definition`);
     if (e.meta?.body?.error?.type === 'security_exception') {
       throw new EntitySecurityException(e.meta.body.error.reason, definition);
     }
     throw e;
   }
-  return transform.transform_id;
+}
+
+export async function createAndInstallSummaryTransform(
+  esClient: ElasticsearchClient,
+  definition: EntityDefinition,
+  logger: Logger
+) {
+  try {
+    const summaryTransform = generateSummaryTransform(definition);
+    await retryTransientEsErrors(() => esClient.transform.putTransform(summaryTransform), {
+      logger,
+    });
+  } catch (e) {
+    logger.error(`Cannot create entity summary transform for [${definition.id}] entity definition`);
+    if (e.meta?.body?.error?.type === 'security_exception') {
+      throw new EntitySecurityException(e.meta.body.error.reason, definition);
+    }
+    throw e;
+  }
 }

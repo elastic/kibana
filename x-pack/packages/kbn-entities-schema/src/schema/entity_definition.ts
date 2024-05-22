@@ -24,19 +24,31 @@ export const entityDefinitionSchema = z.object({
   filter: filterSchema,
   indexPatterns: arrayOfStringsSchema,
   identityFields: z.array(identityFieldsSchema),
-  identityTemplate: z.string(),
+  displayNameTemplate: z.string(),
   metadata: z.optional(z.array(metadataSchema)),
   metrics: z.optional(z.array(keyMetricSchema)),
   staticFields: z.optional(z.record(z.string(), z.string())),
-  lookback: durationSchema,
-  timestampField: z.string(),
-  settings: z.optional(
-    z.object({
-      syncField: z.optional(z.string()),
-      syncDelay: z.optional(z.string()),
-      frequency: z.optional(z.string()),
-    })
-  ),
+  history: z.object({
+    timestampField: z.string(),
+    interval: durationSchema,
+    initialLookback: z.optional(durationSchema),
+    settings: z.optional(
+      z.object({
+        syncField: z.optional(z.string()),
+        syncDelay: z.optional(z.string()),
+        frequency: z.optional(z.string()),
+      })
+    ),
+  }),
+  summary: z.object({
+    settings: z.optional(
+      z.object({
+        syncField: z.optional(z.string()),
+        syncDelay: z.optional(z.string()),
+        frequency: z.optional(z.string()),
+      })
+    ),
+  }),
 });
 
 export type EntityDefinition = z.infer<typeof entityDefinitionSchema>;

@@ -7,7 +7,7 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 
-export function generateMetadataAggregations(definition: EntityDefinition) {
+export function generateHistoryMetadataAggregations(definition: EntityDefinition) {
   if (!definition.metadata) {
     return {};
   }
@@ -18,6 +18,36 @@ export function generateMetadataAggregations(definition: EntityDefinition) {
         terms: {
           field: metadata.source,
           size: metadata.limit ?? 1000,
+        },
+      },
+    }),
+    {}
+  );
+}
+
+export function generateSummaryMetadataAggregations(definition: EntityDefinition) {
+  if (!definition.metadata) {
+    return {};
+  }
+
+  return definition.metadata.reduce(
+    (aggs, metadata) => ({
+      ...aggs,
+      [`entity.metadata.${metadata.destination}`]: {
+        filter: {
+          range: {
+            'event.ingested': {
+              gte: `now-${definition.history.interval.toJSON()}`,
+            },
+          },
+        },
+        aggs: {
+          data: {
+            terms: {
+              field: metadata.destination ?? metadata.source,
+              size: metadata.limit ?? 1000,
+            },
+          },
         },
       },
     }),

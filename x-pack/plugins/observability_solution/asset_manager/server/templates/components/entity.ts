@@ -21,7 +21,7 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
               ignore_above: 1024,
               type: 'keyword',
             },
-            indexPatterns: {
+            displayName: {
               ignore_above: 1024,
               type: 'keyword',
             },
@@ -30,6 +30,9 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
               type: 'keyword',
             },
             latestTimestamp: {
+              type: 'date',
+            },
+            firstSeenTimestamp: {
               type: 'date',
             },
           },

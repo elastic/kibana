@@ -6,15 +6,8 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import {
-  ENTITY_HISTORY_BASE_PREFIX,
-  ENTITY_SUMMARY_BASE_PREFIX,
-} from '../../../../common/constants_entities';
+import { ENTITY_SUMMARY_BASE_PREFIX } from '../../../../common/constants_entities';
 
-export function generateSummaryIndexName(definition: EntityDefinition) {
+export function generateSummaryIngestPipelineId(definition: EntityDefinition) {
   return `${ENTITY_SUMMARY_BASE_PREFIX}.${definition.id}`;
-}
-
-export function generateHistoryIndexName(definition: EntityDefinition) {
-  return `${ENTITY_HISTORY_BASE_PREFIX}.${definition.id}`;
 }

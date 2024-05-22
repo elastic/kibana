@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { generateProcessors } from './generate_processors';
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
+import { generateSummaryProcessors } from './generate_summary_processors';
 
-describe('generateProcessors(definition)', () => {
+describe('generateSummaryProcessors(definition)', () => {
   it('should genearte a valid pipeline', () => {
-    const processors = generateProcessors(entityDefinition);
+    const processors = generateSummaryProcessors(entityDefinition);
     expect(processors).toMatchSnapshot();
   });
 });
