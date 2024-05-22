@@ -21,8 +21,14 @@ export const EndpointExceptionsDetailsUpsellingLazy = withSuspenseUpsell(
   lazy(() => import('./pages/endpoint_management/endpoint_exceptions_details'))
 );
 
-export const EntityAnalyticsUpsellingLazy = withSuspenseUpsell(
-  lazy(() => import('@kbn/security-solution-upselling/pages/entity_analytics'))
+export const EntityAnalyticsUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('@kbn/security-solution-upselling/pages/entity_analytics').then(
+      ({ EntityAnalyticsUpsellingPage }) => ({
+        default: EntityAnalyticsUpsellingPage,
+      })
+    )
+  )
 );
 
 export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(

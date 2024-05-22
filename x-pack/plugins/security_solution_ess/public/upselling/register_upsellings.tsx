@@ -24,8 +24,10 @@ import type {
 import type React from 'react';
 import type { Services } from '../common/services';
 import { withServicesProvider } from '../common/services';
-import { EntityAnalyticsUpsellingPage } from './pages/entity_analytics_upselling';
-import { EntityAnalyticsUpsellingSection } from './sections/entity_analytics_upselling';
+import {
+  EntityAnalyticsUpsellingPageLazy,
+  EntityAnalyticsUpsellingSectionLazy,
+} from './lazy_upselling';
 
 interface UpsellingsConfig {
   minimumLicenseRequired: LicenseType;
@@ -88,7 +90,7 @@ export const upsellingPages: UpsellingPages = [
   {
     pageName: SecurityPageName.entityAnalytics,
     minimumLicenseRequired: 'platinum',
-    component: EntityAnalyticsUpsellingPage,
+    component: EntityAnalyticsUpsellingPageLazy,
   },
 ];
 
@@ -98,7 +100,7 @@ export const upsellingSections: UpsellingSections = [
   {
     id: 'entity_analytics_panel',
     minimumLicenseRequired: 'platinum',
-    component: EntityAnalyticsUpsellingSection,
+    component: EntityAnalyticsUpsellingSectionLazy,
   },
 ];
 

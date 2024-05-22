@@ -27,7 +27,7 @@ import { withServicesProvider } from '../common/services';
 import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
   EndpointExceptionsDetailsUpsellingLazy,
-  EntityAnalyticsUpsellingLazy,
+  EntityAnalyticsUpsellingPageLazy,
   EntityAnalyticsUpsellingSectionLazy,
   OsqueryResponseActionsUpsellingSectionLazy,
   ThreatIntelligencePaywallLazy,
@@ -104,7 +104,7 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.entityAnalytics,
     pli: ProductFeatureKey.advancedInsights,
     component: () => (
-      <EntityAnalyticsUpsellingLazy
+      <EntityAnalyticsUpsellingPageLazy
         upgradeToLabel={entityAnalyticsProductType}
         upgradeMessage={i18n.UPGRADE_PRODUCT_MESSAGE(entityAnalyticsProductType)}
       />

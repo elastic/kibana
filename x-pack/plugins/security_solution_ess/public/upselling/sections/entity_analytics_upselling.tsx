@@ -5,26 +5,16 @@
  * 2.0.
  */
 
-import { withSuspenseUpsell } from '@kbn/security-solution-upselling/helpers';
-import React, { lazy } from 'react';
+import React from 'react';
+import { EntityAnalyticsUpsellingSection } from '@kbn/security-solution-upselling/sections/entity_analytics';
 import { useKibana } from '../../common/services';
 import * as i18n from '../translations';
 
-const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
-  lazy(() =>
-    import('@kbn/security-solution-upselling/sections/entity_analytics').then(
-      ({ EntityAnalyticsUpsellingSection }) => ({
-        default: EntityAnalyticsUpsellingSection,
-      })
-    )
-  )
-);
-
-export const EntityAnalyticsUpsellingSection = () => {
+export const EntityAnalyticsUpsellingSectionESS = () => {
   const { services } = useKibana();
   const requiredLicense = 'Platinum';
   return (
-    <EntityAnalyticsUpsellingSectionLazy
+    <EntityAnalyticsUpsellingSection
       upgradeMessage={i18n.UPGRADE_LICENSE_MESSAGE(requiredLicense ?? '')}
       upgradeHref={services.application.getUrlForApp('management', {
         path: 'stack/license_management',
