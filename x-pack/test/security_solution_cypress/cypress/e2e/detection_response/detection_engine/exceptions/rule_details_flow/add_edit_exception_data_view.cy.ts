@@ -45,7 +45,7 @@ import {
 } from '../../../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
-const DATAVIEW = 'exceptions-*';
+const DATAVIEW = 'auditbeat-exceptions-*';
 
 describe(
   'Add exception using data views from rule details',
