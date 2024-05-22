@@ -395,7 +395,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         onReset={onReset}
         shouldRerunAnalysis={shouldRerunAnalysis}
       >
-        cn
         <EuiFlexItem grow={false}>
           <EuiFormRow display="columnCompressedSwitch">
             <EuiFlexGroup gutterSize="s" alignItems="center">
