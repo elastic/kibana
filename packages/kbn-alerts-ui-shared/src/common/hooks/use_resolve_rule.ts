@@ -13,20 +13,26 @@ import { RuleFormData } from '../../rule_form';
 
 export interface UseResolveProps {
   http: HttpStart;
-  id: string;
+  id?: string;
 }
 
 export const useResolveRule = (props: UseResolveProps) => {
   const { id, http } = props;
 
   const queryFn = () => {
-    return resolveRule({ http, id });
+    if (id) {
+      return resolveRule({ http, id });
+    }
   };
 
   const { data, isSuccess, isFetching, isLoading, isError, error } = useQuery({
-    queryKey: ['useResolveRule'],
+    queryKey: ['useResolveRule', id],
     queryFn,
-    select: (rule): RuleFormData => {
+    enabled: typeof id !== 'undefined',
+    select: (rule): RuleFormData | null => {
+      if (!rule) {
+        return null;
+      }
       return {
         ...rule,
         ...(rule.alertDelay ? { alertDelay: rule.alertDelay } : {}),

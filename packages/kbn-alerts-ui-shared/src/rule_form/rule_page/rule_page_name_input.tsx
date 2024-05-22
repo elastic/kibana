@@ -92,7 +92,7 @@ export const RulePageNameInput = () => {
   if (isEditing) {
     return (
       <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem>
+        <EuiFlexItem grow={10}>
           <EuiFormRow fullWidth isInvalid={errors.name?.length > 0} error={errors?.name ?? ''}>
             <EuiTitle size="l">
               <h1>

@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import type { RuleFormData, RuleFormPlugins } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
-import {
-  useLoadUiConfig,
-  useHealthCheck,
-  useUpdateRule,
-  useResolveRule,
-  useLoadRuleTypesQuery,
-} from '../common/hooks';
+import { useUpdateRule } from '../common/hooks';
 
 import { RulePage } from './rule_page';
 import { RuleFormHealthCheckError } from './rule_form_health_check_error';
@@ -24,6 +18,7 @@ import {
   RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE,
   RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT,
 } from './translations';
+import { useLoadDependencies } from './hooks/use_load_dependencies';
 
 export interface EditRuleFormProps {
   id: string;
@@ -32,20 +27,17 @@ export interface EditRuleFormProps {
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
   const { id, plugins } = props;
-  const { http, toasts, docLinks, ruleTypeRegistry } = plugins;
-
-  const { data, isLoading: isLoadingUiConfig } = useLoadUiConfig({ http });
-  const { error, isLoading: isLoadingHealthCheck } = useHealthCheck({ http });
-  const {
-    ruleTypesState: { data: ruleTypeIndex, isLoading: isLoadingRuleTypes },
-  } = useLoadRuleTypesQuery({
-    http,
-    toasts,
-  });
+  const { http, notification, docLinks, ruleTypeRegistry } = plugins;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({ http });
 
-  const { data: fetchedFormData, isLoading: isLoadingRule } = useResolveRule({ http, id });
+  const { isLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError, fetchedFormData } =
+    useLoadDependencies({
+      http,
+      toasts: notification.toasts,
+      ruleTypeRegistry,
+      id,
+    });
 
   const onSave = useCallback(
     (newFormData: RuleFormData) => {
@@ -57,20 +49,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     [id, mutate]
   );
 
-  const ruleTypes = [...ruleTypeIndex.values()];
-  const ruleType = ruleTypes.find((rt) => rt.id === fetchedFormData?.ruleTypeId);
-
-  const ruleTypeModel = useMemo(() => {
-    let model;
-    try {
-      model = ruleTypeRegistry.get(fetchedFormData?.ruleTypeId || '');
-    } catch (e) {
-      return null;
-    }
-    return model;
-  }, [ruleTypeRegistry, fetchedFormData]);
-
-  if (isLoadingUiConfig || isLoadingHealthCheck || isLoadingRule || isLoadingRuleTypes) {
+  if (isLoading) {
     return <EuiLoadingSpinner />;
   }
 
@@ -89,8 +68,8 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     );
   }
 
-  if (error) {
-    return <RuleFormHealthCheckError error={error} docLinks={docLinks} />;
+  if (healthCheckError) {
+    return <RuleFormHealthCheckError error={healthCheckError} docLinks={docLinks} />;
   }
 
   return (
@@ -100,7 +79,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           formData: fetchedFormData,
           id,
           plugins,
-          minimumScheduleInterval: data?.minimumScheduleInterval,
+          minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
           selectedRuleTypeModel: ruleTypeModel,
         }}
       >
@@ -109,7 +88,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           selectedRuleTypeModel={ruleTypeModel}
           selectedRuleType={ruleType}
           isSaving={isSaving}
-          onCancel={() => {}}
           onSave={onSave}
         />
       </RuleFormStateProvider>

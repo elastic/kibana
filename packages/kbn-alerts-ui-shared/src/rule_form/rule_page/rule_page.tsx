@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiPageTemplate,
   EuiHorizontalRule,
   EuiSpacer,
   EuiSteps,
   EuiStepsProps,
-  EuiBreadcrumbsProps,
   useEuiBackgroundColorCSS,
-  EuiIcon,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { getRouterLinkProps } from '@kbn/router-utils';
 import {
   RuleDefinition,
   RuleActions,
@@ -29,6 +29,7 @@ import {
   RuleFormData,
 } from '..';
 import { RuleTypeWithDescription } from '../../common/types';
+import { useRuleFormState } from '../hooks';
 
 export interface RulePageProps {
   canShowConsumerSelection?: boolean;
@@ -36,10 +37,8 @@ export interface RulePageProps {
   selectedRuleTypeModel: RuleTypeModel;
   selectedRuleType: RuleTypeWithDescription;
   validConsumers?: RuleCreationValidConsumer[];
-  referrerHref?: string;
   isEdit?: boolean;
   isSaving?: boolean;
-  onCancel: () => void;
   onSave: (formData: RuleFormData) => void;
 }
 
@@ -50,32 +49,22 @@ export const RulePage = (props: RulePageProps) => {
     selectedRuleTypeModel,
     selectedRuleType,
     validConsumers,
-    referrerHref,
     isEdit = false,
     isSaving = false,
-    onCancel,
     onSave,
   } = props;
 
+  const {
+    plugins: { application },
+  } = useRuleFormState();
+
   const styles = useEuiBackgroundColorCSS().transparent;
 
-  const breadcrumbs: EuiBreadcrumbsProps['breadcrumbs'] = useMemo(() => {
-    if (referrerHref) {
-      return [
-        {
-          text: (
-            <>
-              <EuiIcon size="s" type="arrowLeft" /> Return
-            </>
-          ),
-          color: 'primary',
-          'aria-current': false,
-          ...getRouterLinkProps({ href: referrerHref, onClick: onCancel }),
-        },
-      ];
-    }
-    return [];
-  }, [onCancel, referrerHref]);
+  const onCancel = useCallback(() => {
+    application.navigateToUrl(window.location.pathname.split('rule')[0], {
+      forceRedirect: true,
+    });
+  }, [application]);
 
   const steps: EuiStepsProps['steps'] = useMemo(() => {
     return [
@@ -122,8 +111,24 @@ export const RulePage = (props: RulePageProps) => {
 
   return (
     <EuiPageTemplate grow bottomBorder offset={0} css={styles}>
-      <EuiPageTemplate.Header breadcrumbs={breadcrumbs}>
-        <RulePageNameInput />
+      <EuiPageTemplate.Header>
+        <EuiFlexGroup direction="column" gutterSize="none" alignItems="flexStart">
+          <EuiFlexItem>
+            <EuiButtonEmpty
+              href={window.location.pathname.split('rule')[0]}
+              style={{ padding: 0 }}
+              iconType="arrowLeft"
+              iconSide="left"
+              aria-label="Return link"
+            >
+              Return
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiSpacer />
+          <EuiFlexItem grow={10}>
+            <RulePageNameInput />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section>
         <EuiSteps steps={steps} />

@@ -10,7 +10,8 @@ import type { ComponentType } from 'react';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -116,7 +117,8 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
 
 export interface RuleFormPlugins {
   http: HttpStart;
-  toasts: ToastsStart;
+  application: ApplicationStart;
+  notification: NotificationsStart;
   charts: ChartsPluginSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

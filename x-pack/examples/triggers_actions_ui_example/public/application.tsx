@@ -43,7 +43,8 @@ import { RuleDetailsSandbox } from './components/rule_form/rule_details_sandbox'
 
 export interface TriggersActionsUiExampleComponentParams {
   http: CoreStart['http'];
-  toasts: CoreStart['notifications']['toasts'];
+  notification: CoreStart['notifications'];
+  application: CoreStart['application'];
   docLinks: CoreStart['docLinks'];
   basename: string;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -58,7 +59,8 @@ const TriggersActionsUiExampleApp = ({
   basename,
   triggersActionsUi,
   http,
-  toasts,
+  application,
+  notification,
   docLinks,
   data,
   charts,
@@ -173,7 +175,8 @@ const TriggersActionsUiExampleApp = ({
               <RuleForm
                 plugins={{
                   http,
-                  toasts,
+                  application,
+                  notification,
                   docLinks,
                   charts,
                   data,
@@ -192,7 +195,8 @@ const TriggersActionsUiExampleApp = ({
               <RuleForm
                 plugins={{
                   http,
-                  toasts,
+                  application,
+                  notification,
                   docLinks,
                   charts,
                   data,
@@ -232,7 +236,7 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks } = core;
+  const { http, notifications, docLinks, application } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
   ReactDOM.render(
@@ -249,7 +253,8 @@ export const renderApp = (
           <TriggersActionsUiExampleApp
             basename={appBasePath}
             http={http}
-            toasts={notifications.toasts}
+            notification={notifications}
+            application={application}
             docLinks={docLinks}
             triggersActionsUi={deps.triggersActionsUi}
             data={deps.data}
