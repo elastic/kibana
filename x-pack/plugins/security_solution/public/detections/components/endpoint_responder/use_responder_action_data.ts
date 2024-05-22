@@ -112,6 +112,10 @@ export const useResponderActionData = ({
       }
     }
 
+    if (!endpointId) {
+      return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
+    }
+
     // Still loading host info
     if (isFetching) {
       return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
@@ -141,6 +145,7 @@ export const useResponderActionData = ({
     return [false, undefined];
   }, [
     isEndpointHost,
+    endpointId,
     isFetching,
     error,
     hostInfo?.host_status,
