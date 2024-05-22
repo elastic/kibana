@@ -20,7 +20,6 @@ import {
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Comparator } from '@kbn/infra-plugin/common/alerting/logs/log_threshold';
 import {
   ABOVE_OR_EQ_TEXT,
   ABOVE_TEXT,
@@ -45,19 +44,15 @@ export interface FlyoutThresholdData {
   pctAboveThreshold: string;
 }
 
-const getI18nComparator = (comparator?: COMPARATORS | Comparator) => {
+const getI18nComparator = (comparator?: COMPARATORS) => {
   switch (comparator) {
     case COMPARATORS.GREATER_THAN:
-    case Comparator.GT:
       return ABOVE_TEXT;
     case COMPARATORS.GREATER_THAN_OR_EQUALS:
-    case Comparator.GT_OR_EQ:
       return ABOVE_OR_EQ_TEXT;
     case COMPARATORS.LESS_THAN:
-    case Comparator.LT:
       return BELOW_TEXT;
     case COMPARATORS.LESS_THAN_OR_EQUALS:
-    case Comparator.LT_OR_EQ:
       return BELOW_OR_EQ_TEXT;
     default:
       return comparator;
@@ -66,7 +61,7 @@ const getI18nComparator = (comparator?: COMPARATORS | Comparator) => {
 const getPctAboveThreshold = (
   observedValue?: number,
   threshold?: number[],
-  comparator?: COMPARATORS | Comparator
+  comparator?: COMPARATORS
 ): string => {
   if (!observedValue || !threshold || threshold.length > 1 || threshold[0] <= 0) return '';
 
@@ -205,7 +200,7 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       });
 
     case LOG_THRESHOLD_ALERT_TYPE_ID:
-      const { comparator } = ruleParams?.count as { comparator: Comparator };
+      const { comparator } = ruleParams?.count as { comparator: COMPARATORS };
       const flyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
