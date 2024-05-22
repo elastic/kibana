@@ -100,7 +100,8 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/alerting-comparators",
     "@kbn/react-kibana-context-render",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/infra-plugin"
   ],
   "exclude": [
     "target/**/*"
