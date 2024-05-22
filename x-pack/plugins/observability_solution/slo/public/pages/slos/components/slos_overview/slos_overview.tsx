@@ -24,13 +24,14 @@ import { OverViewItem } from './overview_item';
 
 export function SLOsOverview() {
   const { state } = useUrlSearchState();
-  const { kqlQuery, filters, tagsFilter, statusFilter } = state;
+  const { kqlQuery, filters, tagsFilter, statusFilter, lastRefresh } = state;
 
   const { data, isLoading } = useFetchSLOsOverview({
     kqlQuery,
     filters,
     tagsFilter,
     statusFilter,
+    lastRefresh,
   });
 
   const theme = useEuiTheme().euiTheme;
