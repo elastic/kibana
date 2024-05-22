@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject, distinctUntilChanged, skip } from 'rxjs';
+
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject, distinctUntilChanged, skip } from 'rxjs';
+
 import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiRegistration, ControlStateManager } from '../types';
@@ -88,7 +90,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
     defaultPanelTitle,
     dataViews,
     onEdit,
-    isEditingEnabled: () => true, // TODO
+    isEditingEnabled: () => true,
     getTypeDisplayName: () => 'Test', // TODO
   };
 

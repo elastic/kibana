@@ -24,9 +24,9 @@ import {
   PublishesDataLoading,
   PublishesFilters,
   PublishesUnifiedSearch,
-  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import { PublishesControlDisplaySettings } from '../types';
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState> &
@@ -37,7 +37,7 @@ export type ControlGroupApi = PresentationContainer &
   HasEditCapabilities & // editing for control group settings - this will be a custom action
   PublishesDataLoading & // loading = true if any children loading
   // PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
-  PublishesDefaultControlDisplaySettings &
+  PublishesControlDisplaySettings & // publishes the default
   Partial<HasParentApi<PublishesUnifiedSearch & PublishesLastSavedState>>;
 
 export interface ControlGroupRuntimeState {
@@ -57,8 +57,3 @@ export type ControlGroupSerializedState = Omit<
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
 };
-
-export interface PublishesDefaultControlDisplaySettings {
-  grow: PublishingSubject<boolean>;
-  width: PublishingSubject<ControlWidth>;
-}

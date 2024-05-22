@@ -7,6 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
+import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
 import {
@@ -28,6 +29,8 @@ import {
   apiPublishesFilters,
   PublishesDataViews,
   PublishesFilters,
+  PublishingSubject,
+  StateComparators,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
@@ -50,8 +53,8 @@ export const getControlGroupEmbeddableFactory = (services: {
     deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const grow = new BehaviorSubject<boolean>(DEFAULT_CONTROL_GROW);
-      const width = new BehaviorSubject<ControlWidth>(DEFAULT_CONTROL_WIDTH);
+      const grow = new BehaviorSubject<boolean | undefined>(DEFAULT_CONTROL_GROW);
+      const width = new BehaviorSubject<ControlWidth | undefined>(DEFAULT_CONTROL_WIDTH);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -67,10 +70,32 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialState.ignoreParentSettings
       );
 
+      const controlGroupComparators: StateComparators<ControlGroupRuntimeState> = {
+        chainingSystem: [chainingSystem$, (value) => chainingSystem$.next(value)],
+        defaultControlGrow: [
+          grow,
+          (value) => grow.next(value),
+          (oldGrow, newGrow) =>
+            (oldGrow ?? DEFAULT_CONTROL_GROW) === (newGrow ?? DEFAULT_CONTROL_GROW),
+        ],
+        defaultControlWidth: [
+          width,
+          (value) => width.next(value),
+          (oldWidth, newWidth) =>
+            (oldWidth ?? DEFAULT_CONTROL_WIDTH) === (newWidth ?? DEFAULT_CONTROL_WIDTH),
+        ],
+        controlStyle: [controlStyle$, (value) => controlStyle$.next(value)],
+        panels: [panels$, (value) => panels$.next(value), deepEqual],
+        showApplySelections: [showApplySelections, (value) => showApplySelections.next(value)],
+        ignoreParentSettings: [ignoreParentSettings, (value) => ignoreParentSettings.next(value)],
+      };
+
       const api = buildApi(
         {
           dataLoading: dataLoading$,
-          children$,
+          children$: children$ as PublishingSubject<{
+            [key: string]: unknown;
+          }>,
           onEdit: async () => {
             // TODO: Edit control group settings
           },
@@ -91,7 +116,6 @@ export const getControlGroupEmbeddableFactory = (services: {
           },
           removePanel: (panelId) => {
             // TODO: Remove a child control
-            console.log('Remove', panelId);
           },
           replacePanel: async (panelId, newPanel) => {
             // TODO: Replace a child control
@@ -102,7 +126,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           filters$,
           dataViews,
         },
-        {}
+        controlGroupComparators
       );
 
       /** Subscribe to all children's output filters, combine them, and output them */
@@ -142,10 +166,10 @@ export const getControlGroupEmbeddableFactory = (services: {
                   type={panels[id].type}
                   state={panels[id]}
                   parentApi={api}
-                  onApiAvailable={(api) => {
+                  onApiAvailable={(controlApi) => {
                     children$.next({
                       ...children$.getValue(),
-                      [api.uuid]: api as DefaultControlApi,
+                      [controlApi.uuid]: controlApi,
                     });
                   }}
                 />
