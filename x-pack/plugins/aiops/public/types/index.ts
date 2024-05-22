@@ -18,7 +18,10 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesPublicSetup } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import type { ChangePointDetectionSharedComponent } from './shared_components';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ChangePointDetectionSharedComponent } from '../shared_components';
+
+import type { LogCategorizationEmbeddableWrapperProps } from '../components/log_categorization/log_categorization_for_embeddable/log_categorization_wrapper';
 
 export interface AiopsPluginSetupDeps {
   embeddable: EmbeddableSetup;
@@ -45,5 +48,7 @@ export interface AiopsPluginStartDeps {
 
 export type AiopsPluginSetup = void;
 export interface AiopsPluginStart {
+  getPatternAnalysisAvailable: () => Promise<(dataView: DataView) => Promise<boolean>>;
+  PatternAnalysisComponent: React.ComponentType<LogCategorizationEmbeddableWrapperProps>;
   ChangePointDetectionComponent: ChangePointDetectionSharedComponent;
 }
