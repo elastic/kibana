@@ -12,8 +12,20 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { formatRequest } from '@kbn/server-route-repository';
 import supertest from 'supertest';
-import { format } from 'url';
 import { Subtract } from 'utility-types';
+import { format, UrlObject } from 'url';
+import { kbnTestConfig } from '@kbn/test';
+import { User } from './users/users';
+
+export async function getScopedApiClient(kibanaServer: UrlObject, username: User['username']) {
+  const { password } = kbnTestConfig.getUrlParts();
+  const baseUrlWithAuth = format({
+    ...kibanaServer,
+    auth: `${username}:${password}`,
+  });
+
+  return createObservabilityAIAssistantApiClient(supertest(baseUrlWithAuth));
+}
 
 export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
   return <TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(

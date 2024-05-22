@@ -24,6 +24,7 @@ import {
   useSetupAutocompletePolling,
   useSetupAutosave,
   useResizeCheckerUtils,
+  useKeyboardCommandsUtils,
 } from './hooks';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import { getSuggestionProvider } from './monaco_editor_suggestion_provider';
@@ -43,26 +44,13 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
+  const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
 
   const dispatch = useRequestActionContext();
   const actionsProvider = useRef<MonacoEditorActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
 
   const setInputEditor = useSetInputEditor();
-  const editorDidMountCallback = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor) => {
-      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
-      actionsProvider.current = provider;
-      setupResizeChecker(divRef.current!, editor);
-      setInputEditor(provider);
-    },
-    [setInputEditor, setupResizeChecker]
-  );
-
-  const editorWillUnmountCallback = useCallback(() => {
-    destroyResizeChecker();
-  }, [destroyResizeChecker]);
-
   const getCurlCallback = useCallback(async (): Promise<string> => {
     const curl = await actionsProvider.current?.getCurl(esHostService.getHost());
     return curl ?? '';
@@ -79,6 +67,29 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
   const sendRequestsCallback = useCallback(async () => {
     await actionsProvider.current?.sendRequests(dispatch, context);
   }, [dispatch, context]);
+
+  const editorDidMountCallback = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      setupResizeChecker(divRef.current!, editor);
+      registerKeyboardCommands({
+        editor,
+        sendRequest: sendRequestsCallback,
+        autoIndent: async () => await actionsProvider.current?.autoIndent(),
+        getDocumentationLink: getDocumenationLink,
+        moveToPreviousRequestEdge: async () =>
+          await actionsProvider.current?.moveToPreviousRequestEdge(),
+        moveToNextRequestEdge: async () => await actionsProvider.current?.moveToNextRequestEdge(),
+      });
+      setInputEditor(provider);
+    },
+    [getDocumenationLink, registerKeyboardCommands, sendRequestsCallback, setupResizeChecker]
+  );
+
+  const editorWillUnmountCallback = useCallback(() => {
+    destroyResizeChecker();
+    unregisterKeyboardCommands();
+  }, [destroyResizeChecker, unregisterKeyboardCommands]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider);

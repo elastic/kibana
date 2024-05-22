@@ -503,4 +503,66 @@ export class MonacoEditorActionsProvider {
       },
     ]);
   }
+
+  /**
+   * This function moves the cursor to the previous request edge (start/end line).
+   * If the cursor is inside a request, it is moved to the start line of this request.
+   * If there are no requests before the cursor, it is moved at the first line in the editor.
+   */
+  public async moveToPreviousRequestEdge() {
+    const currentPosition = this.editor.getPosition();
+    const model = this.editor.getModel();
+    if (!currentPosition || !model) {
+      return;
+    }
+    const { lineNumber: currentLineNumber } = currentPosition;
+    // Get all requests before the current line
+    const requestsBefore = await this.getRequestsBetweenLines(model, 1, currentLineNumber - 1);
+    if (requestsBefore.length === 0) {
+      // If no requests before current line, set position to first line
+      this.editor.setPosition({ lineNumber: 1, column: 1 });
+      return;
+    }
+    const lastRequestBefore = requestsBefore[requestsBefore.length - 1];
+    if (lastRequestBefore.endLineNumber < currentLineNumber) {
+      this.editor.setPosition({ lineNumber: lastRequestBefore.endLineNumber, column: 1 });
+    } else {
+      // If the end line of the request is after the current line, then the cursor is inside the request
+      // The previous request edge is the start line of the request
+      this.editor.setPosition({ lineNumber: lastRequestBefore.startLineNumber, column: 1 });
+    }
+  }
+
+  /**
+   * This function moves the cursor to the next request edge.
+   * If the cursor is inside a request, it is moved to the end line of this request.
+   * If there are no requests after the cursor, it is moved at the last line in the editor.
+   */
+  public async moveToNextRequestEdge() {
+    const currentPosition = this.editor.getPosition();
+    const model = this.editor.getModel();
+    if (!currentPosition || !model) {
+      return;
+    }
+    const { lineNumber: currentLineNumber } = currentPosition;
+    // Get all requests before the current line
+    const requestsAfter = await this.getRequestsBetweenLines(
+      model,
+      currentLineNumber + 1,
+      model.getLineCount()
+    );
+    if (requestsAfter.length === 0) {
+      // If no requests after current line, set position to last line
+      this.editor.setPosition({ lineNumber: model.getLineCount(), column: 1 });
+      return;
+    }
+    const firstRequestAfter = requestsAfter[0];
+    if (firstRequestAfter.startLineNumber > currentLineNumber) {
+      this.editor.setPosition({ lineNumber: firstRequestAfter.startLineNumber, column: 1 });
+    } else {
+      // If the start line of the request is before the current line, then the cursor is inside the request
+      // The next request edge is the end line of the request
+      this.editor.setPosition({ lineNumber: firstRequestAfter.endLineNumber, column: 1 });
+    }
+  }
 }
