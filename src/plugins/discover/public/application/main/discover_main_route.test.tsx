@@ -40,6 +40,16 @@ jest.mock('./discover_main_app', () => {
   };
 });
 
+jest.mock('../../context_awareness', () => {
+  const originalModule = jest.requireActual('../../context_awareness');
+  return {
+    ...originalModule,
+    useRootProfile: () => ({
+      rootProfileLoading: false,
+    }),
+  };
+});
+
 describe('DiscoverMainRoute', () => {
   beforeEach(() => {
     mockCustomizationService = createCustomizationService();
