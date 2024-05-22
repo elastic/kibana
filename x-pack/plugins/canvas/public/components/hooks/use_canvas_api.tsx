@@ -9,7 +9,8 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
 
-import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
 import { CanvasContainerApi } from '../../../types';
@@ -35,9 +36,9 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
     [selectedPageId, dispatch]
   );
 
-  const getCanvasApi = useCallback(() => {
+  const getCanvasApi = useCallback((): CanvasContainerApi => {
     return {
-      viewMode: new BehaviorSubject<ViewMode>(ViewMode.EDIT), // always in edit mode
+      viewMode: new BehaviorSubject<ViewMode>('edit'), // always in edit mode
       addNewPanel: async ({
         panelType,
         initialState,
@@ -47,7 +48,12 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
       }) => {
         createNewEmbeddable(panelType, initialState);
       },
-    } as CanvasContainerApi;
+      disableTriggers: true,
+      /**
+       * getSerializedStateForChild is left out here because we cannot access the state here. That method
+       * is injected in `x-pack/plugins/canvas/canvas_plugin_src/renderers/embeddable/embeddable.tsx`
+       */
+    } as unknown as CanvasContainerApi;
   }, [createNewEmbeddable]);
 
   return useMemo(() => getCanvasApi(), [getCanvasApi]);
