@@ -179,11 +179,13 @@ exports[`<CodeEditor /> is rendered 1`] = `
         isVisible={false}
         onBlur={[Function]}
         onFocus={[Function]}
+        onKeyDown={[Function]}
         onMouseOut={[Function]}
         onMouseOver={[Function]}
       >
         <span
           css="unknown styles"
+          onKeyDown={[Function]}
           onMouseOut={[Function]}
           onMouseOver={[Function]}
         >
@@ -259,6 +261,7 @@ exports[`<CodeEditor /> is rendered 1`] = `
           />
           <span
             className="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+            onKeyDown={[Function]}
             onMouseOut={[Function]}
             onMouseOver={[Function]}
           >

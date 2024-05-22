@@ -45,7 +45,7 @@ export const defaultState = {
   searchSessionId: 'sessionId-1',
   filters: [],
   query: { language: 'lucene', query: '' },
-  resolvedDateRange: { fromDate: '2021-01-10T04:00:00.000Z', toDate: '2021-01-10T08:00:00.000Z' },
+  resolvedDateRange: { fromDate: 'now-7d', toDate: 'now' },
   isFullscreenDatasource: false,
   isSaveable: false,
   isLoading: false,
