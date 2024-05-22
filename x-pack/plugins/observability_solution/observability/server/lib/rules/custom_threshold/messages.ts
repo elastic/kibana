@@ -7,18 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import {
+  ABOVE_TEXT,
+  ABOVE_OR_EQ_TEXT,
+  BELOW_TEXT,
+  BELOW_OR_EQ_TEXT,
+  BETWEEN_TEXT,
+  NOT_BETWEEN_TEXT,
+} from '../../../../common/i18n';
 import { formatDurationFromTimeUnitChar } from '../../../../common';
 import { Evaluation } from './lib/evaluate_rule';
 import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
-import {
-  BELOW_TEXT,
-  ABOVE_TEXT,
-  BETWEEN_TEXT,
-  NOT_BETWEEN_TEXT,
-  CUSTOM_EQUATION_I18N,
-  ABOVE_OR_EQ_TEXT,
-  BELOW_OR_EQ_TEXT,
-} from './translations';
+import { CUSTOM_EQUATION_I18N } from './translations';
 import { UNGROUPED_FACTORY_KEY } from './constants';
 
 const toNumber = (value: number | string) =>

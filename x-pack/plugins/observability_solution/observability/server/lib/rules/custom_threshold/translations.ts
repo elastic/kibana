@@ -85,50 +85,6 @@ export const CUSTOM_EQUATION_I18N = i18n.translate(
   }
 );
 
-// Comparators
-
-export const BELOW_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.below',
-  {
-    defaultMessage: 'below',
-  }
-);
-
-export const BELOW_OR_EQ_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.belowOrEqual',
-  {
-    defaultMessage: 'below or equal',
-  }
-);
-
-export const ABOVE_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.above',
-  {
-    defaultMessage: 'above',
-  }
-);
-
-export const ABOVE_OR_EQ_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.aboveOrEqual',
-  {
-    defaultMessage: 'above or equal',
-  }
-);
-
-export const BETWEEN_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.between',
-  {
-    defaultMessage: 'between',
-  }
-);
-
-export const NOT_BETWEEN_TEXT = i18n.translate(
-  'xpack.observability.customThreshold.rule.threshold.notBetween',
-  {
-    defaultMessage: 'not between',
-  }
-);
-
 // Action variable descriptions
 
 export const groupByKeysActionVariableDescription = i18n.translate(
