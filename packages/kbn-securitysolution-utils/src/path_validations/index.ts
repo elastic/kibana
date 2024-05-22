@@ -103,14 +103,14 @@ export const validateFilePathInput = ({
 
 export const validateWildcardInput = (value: string | string[]): string | undefined => {
   if (Array.isArray(value)) {
-    const test = value.some((v) => /[*?]/.test(v))
+    const test = value.some((v) => /[*?]/.test(v));
     if (test) {
       return WILDCARD_WARNING;
     }
   } else {
-      if (/[*?]/.test(value)) {
-        return WILDCARD_WARNING;
-      }
+    if (/[*?]/.test(value)) {
+      return WILDCARD_WARNING;
+    }
   }
 };
 
