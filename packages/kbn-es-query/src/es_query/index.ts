@@ -24,6 +24,7 @@ export type {
   IFieldSubType,
   BoolQuery,
   DataViewBase,
+  DataViewBaseNoFields,
   DataViewFieldBase,
   IFieldSubTypeMulti,
   IFieldSubTypeNested,
