@@ -33,7 +33,10 @@ export const APMLocatorPayloadValidator = t.union([
       }),
     }),
     t.type({
-      query: environmentRt,
+      query: t.intersection([
+        environmentRt,
+        t.partial({ kuery: t.string, rangeFrom: t.string, rangeTo: t.string }),
+      ]),
     }),
   ]),
 ]);
