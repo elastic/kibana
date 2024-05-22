@@ -181,6 +181,15 @@ export const DocViewerTable = ({
     [currentDataViewId, pinnedFields, storage]
   );
 
+  const onSearch = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const newSearchText = event.currentTarget.value;
+      updateSearchText(newSearchText, storage);
+      setSearchText(newSearchText);
+    },
+    [storage]
+  );
+
   const fieldToItem = useCallback(
     (field: string): TableRow => {
       const fieldMapping = mapping(field);
@@ -240,15 +249,6 @@ export const DocViewerTable = ({
     ]
   );
 
-  const handleOnChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const newSearchText = event.currentTarget.value;
-      updateSearchText(newSearchText, storage);
-      setSearchText(newSearchText);
-    },
-    [storage]
-  );
-
   const { pinnedItems, restItems } = Object.keys(flattened)
     .sort((fieldA, fieldB) => {
       const mappingA = mapping(fieldA);
@@ -287,9 +287,11 @@ export const DocViewerTable = ({
       }
     );
 
+  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
+
   const { curPageIndex, pageSize, totalPages, changePageIndex, changePageSize } = usePager({
     initialPageSize: getPageSize(storage),
-    totalItems: restItems.length,
+    totalItems: rows.length,
   });
   const showPagination = totalPages !== 0;
 
@@ -312,8 +314,6 @@ export const DocViewerTable = ({
         }
       : undefined;
   }, [showPagination, curPageIndex, pageSize, onChangePageSize, changePageIndex]);
-
-  const rows = useMemo(() => [...pinnedItems, ...restItems], [pinnedItems, restItems]);
 
   const fieldCellActions = useMemo(
     () => getFieldCellActions({ rows, filter, onToggleColumn }),
@@ -436,7 +436,7 @@ export const DocViewerTable = ({
         <EuiFieldSearch
           aria-label={searchPlaceholder}
           fullWidth
-          onChange={handleOnChange}
+          onChange={onSearch}
           placeholder={searchPlaceholder}
           value={searchText}
           data-test-subj="unifiedDocViewerFieldsSearchInput"
