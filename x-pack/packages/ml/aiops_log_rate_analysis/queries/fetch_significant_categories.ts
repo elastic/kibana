@@ -36,10 +36,10 @@ export const fetchSignificantCategories = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
   fieldNames: string[],
-  logger: Logger,
+  logger?: Logger,
   // The default value of 1 means no sampling will be used
   sampleProbability: number = 1,
-  emitError: (m: string) => void,
+  emitError?: (m: string) => void,
   abortSignal?: AbortSignal
 ) => {
   const categoriesOverall = await fetchCategories(
