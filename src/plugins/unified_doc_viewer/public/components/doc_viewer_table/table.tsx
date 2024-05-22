@@ -364,7 +364,7 @@ export const DocViewerTable = ({
 
       const {
         action: { flattenedField },
-        field: { field, fieldMapping, fieldType, scripted },
+        field: { field, fieldMapping, fieldType, scripted, pinned },
         value: { formattedValue, ignored },
       } = row;
 
@@ -380,8 +380,8 @@ export const DocViewerTable = ({
                 fieldMapping?.displayName ?? field,
                 searchText
               )}
+              isPinned={pinned}
             />
-            {/* TODO: how to highlight pinned fields? */}
 
             {isDetails && fieldMapping?.customDescription ? (
               <div>

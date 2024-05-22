@@ -8,7 +8,14 @@
 
 import React from 'react';
 import './field_name.scss';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiHighlight } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  EuiHighlight,
+  EuiIconTip,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon, FieldIconProps } from '@kbn/react-field';
@@ -23,6 +30,7 @@ interface Props {
   fieldIconProps?: Omit<FieldIconProps, 'type'>;
   scripted?: boolean;
   highlight?: string;
+  isPinned?: boolean;
 }
 
 export function FieldName({
@@ -32,6 +40,7 @@ export function FieldName({
   fieldIconProps,
   scripted = false,
   highlight = '',
+  isPinned = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
   const displayName =
@@ -47,6 +56,19 @@ export function FieldName({
       </EuiFlexItem>
 
       <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
+        {isPinned && (
+          <EuiFlexItem grow={false} className="kbnDocViewer__fieldPinned">
+            <EuiIconTip
+              type="pinFilled"
+              content={
+                <FormattedMessage
+                  id="unifiedDocViewer.fieldChooser.discoverField.pinnedFieldTooltipContent"
+                  defaultMessage="Pinned field"
+                />
+              }
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem
           className="kbnDocViewer__fieldName eui-textBreakAll"
           grow={false}
