@@ -39,11 +39,11 @@ const buildGetRuleRoute = ({
     {
       path,
       options: excludeFromPublicApi
-        ? {
+        ? undefined
+        : {
             access: 'public',
             description: `Get rule details`,
-          }
-        : undefined,
+          },
       validate: {
         params: getRuleRequestParamsSchemaV1,
       },
