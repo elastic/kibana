@@ -23,7 +23,7 @@ export const createOpenInDiscoverAction = (
   createAction<EmbeddableApiContext>({
     type: ACTION_OPEN_IN_DISCOVER,
     id: ACTION_OPEN_IN_DISCOVER,
-    order: 19, // right after Inspect which is 20
+    order: 20, // right before Maximize/Minimize panel which is 19
     getIconType: () => 'popout',
     getDisplayName: () =>
       i18n.translate('xpack.lens.action.exploreInDiscover', {

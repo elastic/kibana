@@ -76,7 +76,6 @@ const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, 
   panel.items = visibleItems;
   const subPanel: PanelDescriptor = {
     id: morePanelId,
-    title: panel.title || defaultTitle,
     items: itemsInSubmenu,
   };
   panels[morePanelId] = subPanel;
@@ -117,7 +116,6 @@ export async function buildContextMenuForActions({
   const panels: Record<string, PanelDescriptor> = {
     mainMenu: {
       id: 'mainMenu',
-      title,
       items: [],
     },
   };
