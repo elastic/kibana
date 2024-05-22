@@ -66,8 +66,10 @@ describe('Editor actions provider', () => {
       onDidChangeCursorSelection: jest.fn(),
       onDidContentSizeChange: jest.fn(),
       getSelection: jest.fn(),
+      getPosition: jest.fn(),
       getTopForLineNumber: jest.fn(),
       getScrollTop: jest.fn(),
+      setPosition: jest.fn(),
     } as unknown as jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
 
     editor.getModel.mockReturnValue({
@@ -208,6 +210,195 @@ describe('Editor actions provider', () => {
       expect(completionItems?.suggestions.length).toBe(2);
       const endpoints = completionItems?.suggestions.map((suggestion) => suggestion.label);
       expect((endpoints as string[]).sort()).toEqual(['_cat', '_search']);
+    });
+  });
+
+  describe('move to next/previous request edge', () => {
+    beforeEach(() => {
+      /* The editor has the following text:
+      1:
+      2: POST _search
+      3: {
+      4:   "test": "test"
+      5: }
+      6: GET _analyze
+      7:
+      */
+      mockGetParsedRequests.mockReturnValue([
+        {
+          method: 'POST',
+          url: '_search',
+          startOffset: 1,
+          endOffset: 36,
+          data: [
+            {
+              test: 'test',
+            },
+          ],
+        },
+        {
+          method: 'GET',
+          url: '_analyze',
+          startOffset: 37,
+          endOffset: 49,
+        },
+      ]);
+
+      editor.getModel.mockReturnValue({
+        getPositionAt: (offset: number) => {
+          // mock for start offsets of the mocked requests
+          if (offset === 1) {
+            return { lineNumber: 2, column: 1 };
+          }
+          if (offset === 37) {
+            return { lineNumber: 6, column: 1 };
+          }
+          // mock for end offsets of the mocked requests
+          if (offset === 36) {
+            return { lineNumber: 5, column: 2 };
+          }
+          if (offset === 49) {
+            return { lineNumber: 6, column: 13 };
+          }
+        },
+        getLineContent: (lineNumber: number) => {
+          if (lineNumber === 1) {
+            return '';
+          }
+          if (lineNumber === 2) {
+            return 'POST _search';
+          }
+          if (lineNumber === 3) {
+            return '{';
+          }
+          if (lineNumber === 4) {
+            return '  "test": "test"';
+          }
+          if (lineNumber === 5) {
+            return '}';
+          }
+          if (lineNumber === 6) {
+            return 'GET _analyze';
+          }
+          if (lineNumber === 7) {
+            return '';
+          }
+        },
+        getLineCount: () => 7,
+      } as unknown as monaco.editor.ITextModel);
+    });
+    describe('moveToPreviousRequestEdge', () => {
+      it('correctly sets position when cursor is at first line of a request', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 6,
+          column: 4,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToPreviousRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 5, column: 1 });
+      });
+
+      it('correctly sets position when cursor is at last line of a request', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 5,
+          column: 1,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToPreviousRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 2, column: 1 });
+      });
+
+      it('correctly sets position when cursor is inside a request', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 4,
+          column: 1,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToPreviousRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 2, column: 1 });
+      });
+
+      it('correctly sets position when cursor is after a request', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 7,
+          column: 1,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToPreviousRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 6, column: 1 });
+      });
+
+      it('correctly sets position to first line of editor when there are no requests before cursor', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 2,
+          column: 3,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToPreviousRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 1, column: 1 });
+      });
+    });
+
+    describe('moveToNextRequestEdge', () => {
+      it('correctly sets position when cursor is at first line of a request', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 2,
+          column: 8,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToNextRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 5, column: 1 });
+      });
+
+      it('correctly sets position when cursor is at last line of a request', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 5,
+          column: 1,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToNextRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 6, column: 1 });
+      });
+
+      it('correctly sets position when cursor is inside a request', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 3,
+          column: 1,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToNextRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 5, column: 1 });
+      });
+
+      it('correctly sets position when cursor is before a request', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 1,
+          column: 1,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToNextRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 2, column: 1 });
+      });
+
+      it('correctly sets position to last line of editor when there are no requests after cursor', async () => {
+        editor.getPosition.mockReturnValue({
+          lineNumber: 6,
+          column: 3,
+        } as monaco.Position);
+
+        await editorActionsProvider.moveToNextRequestEdge();
+        expect(editor.setPosition).toHaveBeenCalledTimes(1);
+        expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 7, column: 1 });
+      });
     });
   });
 });
