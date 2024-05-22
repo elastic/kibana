@@ -29,6 +29,44 @@ const baseResponse = {
   timed_out: false,
   _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
 };
+
+const getMockSearchResponse = (
+  status: CROWDSTRIKE_NETWORK_STATUS,
+  agentName: string,
+  wrongAgentName?: boolean
+) => ({
+  ...baseResponse,
+  hits: {
+    hits: [
+      {
+        _id: '1',
+        _index: 'index',
+        fields: { 'crowdstrike.host.id': [agentName] },
+        inner_hits: {
+          most_recent: {
+            hits: {
+              hits: [
+                {
+                  _id: '1',
+                  _index: 'index',
+                  _source: {
+                    crowdstrike: {
+                      host: {
+                        id: !wrongAgentName ? agentName : 'wrongAgentName',
+                        last_seen: '2023-01-01',
+                        status,
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    ],
+  },
+});
 describe('CrowdstrikeAgentStatusClient', () => {
   let client: CrowdstrikeAgentStatusClient;
   const constructorOptions = responseActionsClientMock.createConstructorOptions();
@@ -86,41 +124,46 @@ describe('CrowdstrikeAgentStatusClient', () => {
     afterEach(() => {
       jest.clearAllMocks();
     });
-    it('should get agent statuses', async () => {
+    it('should return found false when there is no agent.host.id', async () => {
       const agentIds = ['agent1'];
-      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = {
-        ...baseResponse,
-        hits: {
-          hits: [
-            {
-              fields: { 'crowdstrike.host.id': ['agent1'] },
-              _id: '1',
-              _index: 'index',
-              inner_hits: {
-                most_recent: {
-                  hits: {
-                    hits: [
-                      {
-                        _id: '1',
-                        _index: 'index',
-                        _source: {
-                          crowdstrike: {
-                            host: {
-                              id: 'agent1',
-                              last_seen: '2023-01-01',
-                              status: CROWDSTRIKE_NETWORK_STATUS.NORMAL,
-                            },
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          ],
-        },
+      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
+        CROWDSTRIKE_NETWORK_STATUS.NORMAL,
+        'agent1',
+        true
+      );
+
+      constructorOptions.esClient.search.mockResolvedValueOnce(searchResponse);
+
+      const agentStatusResponse = {
+        agent1: { id: 'agent1', state: CROWDSTRIKE_STATUS_RESPONSE.ONLINE },
       };
+      // @ts-expect-error private method
+      (client.getAgentStatusFromConnectorAction as Jest.Mock).mockResolvedValue(
+        agentStatusResponse
+      );
+
+      const result = await client.getAgentStatuses(agentIds);
+
+      expect(constructorOptions.esClient.search).toHaveBeenCalled();
+      expect(result).toEqual({
+        agent1: {
+          agentId: 'agent1',
+          agentType: 'crowdstrike',
+          found: false,
+          isolated: false,
+          lastSeen: '2023-01-01',
+          status: HostStatus.HEALTHY,
+          pendingActions: {},
+        },
+      });
+    });
+    it('should accept NORMAL status', async () => {
+      const agentIds = ['agent1'];
+      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
+        CROWDSTRIKE_NETWORK_STATUS.NORMAL,
+        'agent1'
+      );
+
       constructorOptions.esClient.search.mockResolvedValueOnce(searchResponse);
 
       const agentStatusResponse = {
@@ -147,41 +190,12 @@ describe('CrowdstrikeAgentStatusClient', () => {
       });
     });
 
-    it('should handle unhealthy agent', async () => {
+    it('should accept CONTAINED STATUS ', async () => {
       const agentIds = ['agent2'];
-      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = {
-        ...baseResponse,
-        hits: {
-          hits: [
-            {
-              _id: '1',
-              _index: 'index',
-              fields: { 'crowdstrike.host.id': ['agent2'] },
-              inner_hits: {
-                most_recent: {
-                  hits: {
-                    hits: [
-                      {
-                        _id: '1',
-                        _index: 'index',
-                        _source: {
-                          crowdstrike: {
-                            host: {
-                              id: 'agent2',
-                              last_seen: '2023-01-01',
-                              status: CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
-                            },
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          ],
-        },
-      };
+      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
+        CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
+        'agent2'
+      );
       constructorOptions.esClient.search.mockResolvedValueOnce(searchResponse);
 
       const agentStatusResponse = {
@@ -208,41 +222,44 @@ describe('CrowdstrikeAgentStatusClient', () => {
         },
       });
     });
+    it('should set isolated to false if host is pending isolate', async () => {
+      const agentIds = ['agent2'];
+      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
+        CROWDSTRIKE_NETWORK_STATUS.CONTAINMENT_PENDING,
+        'agent2'
+      );
+      constructorOptions.esClient.search.mockResolvedValueOnce(searchResponse);
+
+      const agentStatusResponse = {
+        agent2: { id: 'agent2', state: CROWDSTRIKE_STATUS_RESPONSE.OFFLINE },
+      };
+
+      // @ts-expect-error private method
+      (client.getAgentStatusFromConnectorAction as Jest.Mock).mockResolvedValue(
+        agentStatusResponse
+      );
+
+      const result = await client.getAgentStatuses(agentIds);
+
+      expect(constructorOptions.esClient.search).toHaveBeenCalled();
+      expect(result).toEqual({
+        agent2: {
+          agentId: 'agent2',
+          agentType: 'crowdstrike',
+          found: true,
+          isolated: false,
+          lastSeen: '2023-01-01',
+          status: HostStatus.OFFLINE,
+          pendingActions: {},
+        },
+      });
+    });
     it('should set isolated to true if host is pending release', async () => {
       const agentIds = ['agent2'];
-      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = {
-        ...baseResponse,
-        hits: {
-          hits: [
-            {
-              _id: '1',
-              _index: 'index',
-              fields: { 'crowdstrike.host.id': ['agent2'] },
-              inner_hits: {
-                most_recent: {
-                  hits: {
-                    hits: [
-                      {
-                        _id: '1',
-                        _index: 'index',
-                        _source: {
-                          crowdstrike: {
-                            host: {
-                              id: 'agent2',
-                              last_seen: '2023-01-01',
-                              status: CROWDSTRIKE_NETWORK_STATUS.LIFT_CONTAINMENT_PENDING,
-                            },
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-              },
-            },
-          ],
-        },
-      };
+      const searchResponse: estypes.SearchResponse<RawCrowdstrikeInfo> = getMockSearchResponse(
+        CROWDSTRIKE_NETWORK_STATUS.LIFT_CONTAINMENT_PENDING,
+        'agent2'
+      );
       constructorOptions.esClient.search.mockResolvedValueOnce(searchResponse);
 
       const agentStatusResponse = {
@@ -264,8 +281,8 @@ describe('CrowdstrikeAgentStatusClient', () => {
           found: true,
           isolated: true,
           lastSeen: '2023-01-01',
-          status: HostStatus.OFFLINE,
           pendingActions: {},
+          status: HostStatus.OFFLINE,
         },
       });
     });
