@@ -99,7 +99,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // a given policy will finish executing. Until that happens the policy cannot
       // be deleted. 2s seems to be plenty enough to guarantee that, at least for this
       // test.
-      await PageObjects.common.sleep(2000);
+      await pageObjects.common.sleep(2000);
 
       await pageObjects.indexManagement.clickDeleteEnrichPolicyAt(0);
       await pageObjects.indexManagement.clickConfirmModalButton();
