@@ -7446,6 +7446,9 @@
               },
               "title": {
                 "type": "string"
+              },
+              "requires_root": {
+                "type": "boolean"
               }
             },
             "required": [
