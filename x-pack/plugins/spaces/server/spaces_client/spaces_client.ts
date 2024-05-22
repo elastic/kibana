@@ -140,6 +140,10 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest('Unable to create Space, solution property is forbidden in serverless');
     }
 
+    if (space.hasOwnProperty('solution') && !space.solution) {
+      throw Boom.badRequest('Unable to create Space, solution property cannot be empty');
+    }
+
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
     const id = space.id;
