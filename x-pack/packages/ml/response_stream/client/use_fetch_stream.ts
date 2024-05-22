@@ -19,8 +19,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { fetchStream } from './fetch_stream';
 import { stringReducer, type StringReducer } from './string_reducer';
-
-const DATA_THROTTLE_MS = 100;
+import { DATA_THROTTLE_MS } from './constants';
 
 // This pattern with a dual ternary allows us to default to StringReducer
 // and if a custom reducer is supplied fall back to that one instead.
@@ -80,7 +79,8 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
   // a lot of unnecessary re-renders even in combination with `useThrottle`.
   // We're now using `dataRef` to allow updates outside of the render cycle.
   // When the stream is running, we'll update `data` with the `dataRef` value
-  // periodically.
+  // periodically. This will get simpler with React 18 where we
+  // can make use of `useDeferredValue`.
   const [data, setData] = useState(reducerWithFallback.initialState);
   const dataRef = useRef(reducerWithFallback.initialState);
 
