@@ -31,6 +31,7 @@ The API returns the following:
   "color": "#aabbcc",
   "initials": "MK",
   "disabledFeatures": [],
-  "imageUrl": ""
+  "imageUrl": "",
+  "solution": "search"
 }
 --------------------------------------------------
