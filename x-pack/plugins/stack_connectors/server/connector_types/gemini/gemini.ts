@@ -7,7 +7,7 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError, Method } from 'axios';
-import {GoogleAuth} from 'google-auth-library';
+import { GoogleAuth } from 'google-auth-library';
 import { PassThrough } from 'stream';
 import { IncomingMessage } from 'http';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -28,11 +28,12 @@ import {
   InvokeAIActionParams,
   InvokeAIActionResponse,
 } from '../../../common/gemini/types';
-import { SUB_ACTION, DEFAULT_TIMEOUT_MS, DEFAULT_TOKEN_LIMIT } from '../../../common/gemini/constants';
 import {
-  DashboardActionParams,
-  DashboardActionResponse,
-} from '../../../common/gemini/types';
+  SUB_ACTION,
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_TOKEN_LIMIT,
+} from '../../../common/gemini/constants';
+import { DashboardActionParams, DashboardActionResponse } from '../../../common/gemini/types';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
 /** Interfaces to define Gemini model response type */
@@ -49,19 +50,18 @@ interface MessageContent {
 interface Payload {
   contents: MessageContent[];
   generation_config: {
-      temperature: number;
-      maxOutputTokens: number;
+    temperature: number;
+    maxOutputTokens: number;
   };
 }
 
-
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
+  private static token: string | null;
+  private static tokenExpiryTimeout: NodeJS.Timeout;
   private url;
   private model;
   private gcpRegion;
   private gcpProjectID;
-  private static token: string | null;
-  private static tokenExpiryTimeout: NodeJS.Timeout;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -195,31 +195,30 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     model: reqModel,
     signal,
     timeout,
-   }: RunActionParams): Promise<RunActionResponse> {
-   // set model on per request basis
-   const currentModel = reqModel ?? this.model;
-   const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
-   const token = GeminiConnector.token ? GeminiConnector.token: await this.getAccessToken();
-   const requestArgs = {
-     url: `${this.url}${path}`,
-     method: 'post' as Method,
-     data: body,
-     headers: {
-       'Authorization': `Bearer ${token}`,
-       'Content-Type': 'application/json'
-     },
-     signal,
-     timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-     responseSchema: RunApiResponseSchema,
+  }: RunActionParams): Promise<RunActionResponse> {
+    // set model on per request basis
+    const currentModel = reqModel ?? this.model;
+    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
+    const token = GeminiConnector.token ? GeminiConnector.token : await this.getAccessToken();
+    const requestArgs = {
+      url: `${this.url}${path}`,
+      method: 'post' as Method,
+      data: body,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      signal,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+      responseSchema: RunApiResponseSchema,
     } as SubActionRequestParams<RunApiResponse>;
 
     const response = await this.request(requestArgs);
     const candidate = response.data.candidates[0];
     const usageMetadata = response.data.usageMetadata;
     const completionText = candidate.content.parts[0].text;
-    return { completion: completionText, usageMetadata, };
-
- }
+    return { completion: completionText, usageMetadata };
+  }
 
   private async streamAPI({
     body,
@@ -229,7 +228,7 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
   }: RunActionParams): Promise<StreamingResponse> {
     const currentModel = reqModel ?? this.model;
     const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:streamGenerateContent?alt=sse`;
-    const token = GeminiConnector.token ? GeminiConnector.token: await this.getAccessToken();
+    const token = GeminiConnector.token ? GeminiConnector.token : await this.getAccessToken();
 
     const response = await this.request({
       url: `${this.url}${path}`,
@@ -238,8 +237,8 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       data: body,
       responseType: 'stream',
       headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
       },
       signal,
       timeout: timeout ?? DEFAULT_TIMEOUT_MS,
@@ -255,9 +254,9 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     timeout,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({
-        body: JSON.stringify(formatGeminiPayload( messages, temperature)),
-        model,
-        timeout,
+      body: JSON.stringify(formatGeminiPayload(messages, temperature)),
+      model,
+      timeout,
     });
 
     return { message: res.completion, usageMetadata: res.usageMetadata };
@@ -288,27 +287,29 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     })) as unknown as IncomingMessage;
     return res;
   }
-
 }
 /** Format the json body to meet Gemini payload requirements */
-const formatGeminiPayload = (data: Array<{ role: string; content: string }>, temperature: number): Payload => {
-  let payload: Payload = {
-      contents: [],
-      generation_config: {
-          temperature,
-          maxOutputTokens: DEFAULT_TOKEN_LIMIT
-      }
+const formatGeminiPayload = (
+  data: Array<{ role: string; content: string }>,
+  temperature: number
+): Payload => {
+  const payload: Payload = {
+    contents: [],
+    generation_config: {
+      temperature,
+      maxOutputTokens: DEFAULT_TOKEN_LIMIT,
+    },
   };
   for (const row of data) {
-    let correct_role = (row.role == 'assistant') ? 'model' : 'user';
+    const correctRole = row.role === 'assistant' ? 'model' : 'user';
     payload.contents.push({
-          role: correct_role,
-          parts: [
-              {
-                  text: row.content
-              }
-          ]
-      });
+      role: correctRole,
+      parts: [
+        {
+          text: row.content,
+        },
+      ],
+    });
   }
 
   return payload;

@@ -12,40 +12,36 @@ import { OPENAI_TITLE, OPENAI_CONNECTOR_ID } from '../../../../common/openai/con
 import { BEDROCK_TITLE, BEDROCK_CONNECTOR_ID } from '../../../../common/bedrock/constants';
 import { GEMINI_TITLE, GEMINI_CONNECTOR_ID } from '../../../../common/gemini/constants';
 
-
 const getDashboardTitle = (title: string) => `${title} Token Usage`;
 
 export const getDashboard = (
   genAIProvider: 'OpenAI' | 'Bedrock' | 'Gemini',
   dashboardId: string
 ): SavedObject<DashboardAttributes> => {
-  
   let attributes = {
     provider: OPENAI_TITLE,
     dashboardTitle: getDashboardTitle(OPENAI_TITLE),
     actionTypeId: OPENAI_CONNECTOR_ID,
-  }
+  };
 
-  if(genAIProvider === 'OpenAI') {
+  if (genAIProvider === 'OpenAI') {
     attributes = {
-              provider: OPENAI_TITLE,
-              dashboardTitle: getDashboardTitle(OPENAI_TITLE),
-              actionTypeId: OPENAI_CONNECTOR_ID,
-            }
+      provider: OPENAI_TITLE,
+      dashboardTitle: getDashboardTitle(OPENAI_TITLE),
+      actionTypeId: OPENAI_CONNECTOR_ID,
+    };
   } else if (genAIProvider === 'Bedrock') {
     attributes = {
       provider: BEDROCK_TITLE,
       dashboardTitle: getDashboardTitle(BEDROCK_TITLE),
       actionTypeId: BEDROCK_CONNECTOR_ID,
-    }
-    
+    };
   } else if (genAIProvider === 'Gemini') {
     attributes = {
       provider: GEMINI_TITLE,
       dashboardTitle: getDashboardTitle(GEMINI_TITLE),
       actionTypeId: GEMINI_CONNECTOR_ID,
-    }
-
+    };
   }
 
   const ids: Record<string, string> = {

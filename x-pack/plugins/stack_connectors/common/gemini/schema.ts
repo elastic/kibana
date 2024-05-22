@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_GEMINI_MODEL } from './constants';
 
@@ -40,29 +39,23 @@ export const InvokeAIActionParamsSchema = schema.object({
 
 export const InvokeAIActionResponseSchema = schema.object({
   message: schema.string(),
-  usageMetadata: schema.object(
-    {
-      promptTokenCount: schema.number(),
-      candidatesTokenCount: schema.number(),
-      totalTokenCount: schema.number(),
-    }
-  ),
+  usageMetadata: schema.object({
+    promptTokenCount: schema.number(),
+    candidatesTokenCount: schema.number(),
+    totalTokenCount: schema.number(),
+  }),
 });
 
 export const StreamingResponseSchema = schema.any();
 
-export const RunApiResponseSchema = schema.object(
-  {
-    candidates: schema.any(),
-    usageMetadata: schema.object(
-      {
-        promptTokenCount: schema.number(),
-        candidatesTokenCount: schema.number(),
-        totalTokenCount: schema.number(),
-      }
-    ),
-  }
-);
+export const RunApiResponseSchema = schema.object({
+  candidates: schema.any(),
+  usageMetadata: schema.object({
+    promptTokenCount: schema.number(),
+    candidatesTokenCount: schema.number(),
+    totalTokenCount: schema.number(),
+  }),
+});
 
 export const RunActionResponseSchema = schema.object(
   {
