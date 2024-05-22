@@ -63,7 +63,7 @@ export const DocumentViewModeToggle = ({
 
   useEffect(
     function checkForPatternAnalysis() {
-      if (aiopsService === undefined) {
+      if (!aiopsService) {
         setShowPatternAnalysisTab(false);
         return;
       }

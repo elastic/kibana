@@ -40,7 +40,7 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
 
   useEffect(() => {
     // Track should only be called once when component is loaded
-    if (aiopsService !== undefined) {
+    if (aiopsService) {
       trackUiMetric?.(METRIC_TYPE.LOADED, PATTERN_ANALYSIS_LOADED);
     }
   }, [aiopsService, trackUiMetric]);
@@ -57,7 +57,7 @@ export const PatternAnalysisTable = (props: PatternAnalysisTableProps) => {
     [lastReloadRequestTime, props]
   );
 
-  if (aiopsService === undefined) {
+  if (!aiopsService) {
     return null;
   }
 
