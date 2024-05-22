@@ -121,6 +121,7 @@ export const typeSpecificSnakeToCamel = (
         type: params.type,
         language: params.language,
         query: params.query,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'threat_match': {
@@ -237,6 +238,8 @@ const patchEsqlParams = (
     type: existingRule.type,
     language: params.language ?? existingRule.language,
     query: params.query ?? existingRule.query,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -630,6 +633,7 @@ export const typeSpecificCamelToSnake = (
         type: params.type,
         language: params.language,
         query: params.query,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'threat_match': {
