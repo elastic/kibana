@@ -221,7 +221,7 @@ export const WatchVisualization = () => {
               baseTheme={chartBaseTheme}
               xDomain={domain}
               showLegend={!!watch.termField}
-              showLegendExtra
+              legendValues={[LegendValue.CurrentAndLastValue]}
               legendPosition={Position.Bottom}
               locale={i18n.getLocale()}
             />

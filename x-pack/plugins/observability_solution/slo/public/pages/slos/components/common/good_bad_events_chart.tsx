@@ -99,7 +99,6 @@ export function GoodBadEventsChart({
           <Settings
             baseTheme={baseTheme}
             showLegend={true}
-            showLegendExtra={false}
             legendPosition={Position.Left}
             noResults={
               <EuiIcon

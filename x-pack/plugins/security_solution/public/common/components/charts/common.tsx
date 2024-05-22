@@ -125,7 +125,7 @@ export const chartDefaultSettings: SettingsProps = {
   rotation: chartDefaultRotation,
   rendering: chartDefaultRendering,
   showLegend: false,
-  showLegendExtra: false,
+  legendValues: [],
   debug: false,
   legendPosition: Position.Bottom,
 };

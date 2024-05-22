@@ -27,6 +27,7 @@ import { useActiveCursor } from '@kbn/charts-plugin/public';
 
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common';
 import { AreaSeriesComponent, BarSeriesComponent } from './series';
 
 import {
@@ -207,7 +208,7 @@ export const TimelionVisComponent = ({
           debugState={window._echDebugStateFlag ?? false}
           onBrushEnd={brushEndListener}
           showLegend={legend.showLegend}
-          showLegendExtra={true}
+          legendValues={[XYLegendValue.CurrentAndLastValue]}
           legendPosition={legend.legendPosition}
           onRenderChange={onRenderChange}
           onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
