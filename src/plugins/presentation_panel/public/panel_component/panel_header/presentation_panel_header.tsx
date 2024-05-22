@@ -12,9 +12,8 @@ import classNames from 'classnames';
 import React from 'react';
 import { getAriaLabelForTitle } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-// import { PresentationPanelContextMenu } from './presentation_panel_context_menu';
 import { PresentationPanelTitle } from './presentation_panel_title';
-// import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
+import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
 export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPanelApi> = {
   api: ApiType;
@@ -43,18 +42,17 @@ export const PresentationPanelHeader = <
   showBadges = true,
   showNotifications = true,
 }: PresentationPanelHeaderProps<ApiType>) => {
-  // const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
-  //   showNotifications,
-  //   showBadges,
-  //   api,
-  //   getActions
-  // );
+  const { notificationElements, badgeElements } = usePresentationPanelHeaderActions<ApiType>(
+    showNotifications,
+    showBadges,
+    api,
+    getActions
+  );
 
-  // console.log({ panelTitle });
-  const showPanelBar = !hideTitle && (panelTitle || panelDescription);
-  // ||
-  // badgeElements.length > 0 ||
-  // notificationElements.length > 0;
+  const showPanelBar =
+    (!hideTitle && (panelTitle || panelDescription)) ||
+    badgeElements.length > 0 ||
+    notificationElements.length > 0;
 
   const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
   const ariaLabelElement = (
@@ -91,9 +89,9 @@ export const PresentationPanelHeader = <
           panelTitle={panelTitle}
           panelDescription={panelDescription}
         />
-        {/* {showBadges && badgeElements} */}
+        {showBadges && badgeElements}
       </h2>
-      {/* {showNotifications && notificationElements} */}
+      {showNotifications && notificationElements}
     </figcaption>
   );
 };
