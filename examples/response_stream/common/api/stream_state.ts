@@ -6,6 +6,14 @@
  * Side Public License, v 1.
  */
 
-export { defineReducerStreamRoute } from './reducer_stream';
-export { defineReduxStreamRoute } from './redux_stream';
-export { defineSimpleStringStreamRoute } from './single_string_stream';
+export interface StreamState {
+  errors: string[];
+  progress: number;
+  entities: Record<string, number>;
+}
+
+export const getInitialState = (): StreamState => ({
+  errors: [],
+  progress: 0,
+  entities: {},
+});

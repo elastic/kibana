@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import React, { useEffect, useRef, FC } from 'react';
 
 import {
   EuiBadge,
@@ -19,49 +19,52 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import { useFetchStream } from '@kbn/ml-response-stream/client';
+import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 
-import { getInitialState } from '../../../../../common/api/stream_state';
-import {
-  resetStream,
-  reducerStreamReducer,
-} from '../../../../../common/api/reducer_stream/reducer';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../../../../common/api';
+import {
+  setSimulateErrors,
+  setCompressResponse,
+  setFlushFix,
+} from '../../../../../common/api/redux_stream/options_slice';
+import { reset } from '../../../../../common/api/redux_stream/data_slice';
 
 import { Page } from '../../../../components/page';
-
 import { useDeps } from '../../../../hooks/use_deps';
 
 import { BarChartRace } from '../../components/bar_chart_race';
 import { getStatusMessage } from '../../components/get_status_message';
 
-const initialState = getInitialState();
+import { useAppDispatch, useAppSelector } from './hooks';
 
-export const PageReducerStream: FC = () => {
+export const PageReduxStream: FC = () => {
   const {
     core: { http, notifications },
   } = useDeps();
 
-  const [simulateErrors, setSimulateErrors] = useState(false);
-  const [compressResponse, setCompressResponse] = useState(true);
-  const [flushFix, setFlushFix] = useState(false);
+  const dispatch = useAppDispatch();
+  const { isRunning, isCancelled, errors: streamErrors } = useAppSelector((s) => s.stream);
+  const { progress, entities, errors } = useAppSelector((s) => s.data);
+  const { simulateErrors, compressResponse, flushFix } = useAppSelector((s) => s.options);
 
-  const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream(
-    http,
-    RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
-    '1',
-    { compressResponse, flushFix, simulateErrors },
-    { reducer: reducerStreamReducer, initialState }
-  );
-
-  const { progress, entities } = data;
+  const abortCtrl = useRef(new AbortController());
 
   const onClickHandler = async () => {
     if (isRunning) {
-      cancel();
+      abortCtrl.current.abort();
+      dispatch(cancelStream());
     } else {
-      dispatch(resetStream());
-      start();
+      abortCtrl.current = new AbortController();
+      dispatch(reset());
+      dispatch(
+        startStream({
+          http,
+          endpoint: RESPONSE_STREAM_API_ENDPOINT.REDUX_STREAM,
+          apiVersion: '1',
+          abortCtrl,
+          body: { compressResponse, flushFix, simulateErrors },
+        })
+      );
     }
   };
 
@@ -72,31 +75,32 @@ export const PageReducerStream: FC = () => {
   // return errors. This is why we need separate error handling for application
   // level errors.
   useEffect(() => {
+    if (streamErrors.length > 0) {
+      notifications.toasts.addDanger(streamErrors[streamErrors.length - 1]);
+    }
+  }, [streamErrors, notifications.toasts]);
+
+  // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
+  // This is for errors on the application level
+  useEffect(() => {
     if (errors.length > 0) {
       notifications.toasts.addDanger(errors[errors.length - 1]);
     }
   }, [errors, notifications.toasts]);
 
-  // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
-  // This is for errors on the application level
-  useEffect(() => {
-    if (data.errors.length > 0) {
-      notifications.toasts.addDanger(data.errors[data.errors.length - 1]);
-    }
-  }, [data.errors, notifications.toasts]);
-
   const buttonLabel = isRunning ? 'Stop development' : 'Start development';
 
   return (
-    <Page title={'NDJSON useReducer stream'}>
+    <Page title={'NDJSON Redux Toolkit stream'}>
       <EuiText>
         <p>
-          This demonstrates a single endpoint with streaming support that sends old school Redux
-          inspired actions from server to client. The server and client share types of the data to
-          be received. The client uses a custom hook that receives stream chunks and passes them on
-          to `useReducer()` that acts on the actions it receives. The custom hook includes code to
-          buffer actions and is able to apply them in bulk so the DOM does not get hammered with
-          updates. Hit &quot;Start development&quot; to trigger the bar chart race!
+          This demonstrates integration of a single endpoint with streaming support with Redux
+          Toolkit. The server and client share actions created via `createSlice`. The server sends a
+          stream of NDJSON data to the client where each line is a redux action. The client then
+          applies these actions to its state. The package `@kbn/ml-response-stream` exposes a slice
+          of the state that can be used to start and cancel the stream. The `startStream` action is
+          implemented as an async thunk that starts the stream and then dispatches received actions
+          to the store. Hit &quot;Start development&quot; to trigger the bar chart race!
         </p>
       </EuiText>
       <br />
@@ -131,21 +135,21 @@ export const PageReducerStream: FC = () => {
           id="responseStreamSimulateErrorsCheckbox"
           label="Simulate errors (gets applied to new streams only, not currently running ones)."
           checked={simulateErrors}
-          onChange={(e) => setSimulateErrors(!simulateErrors)}
+          onChange={(e) => dispatch(setSimulateErrors(!simulateErrors))}
           compressed
         />
         <EuiCheckbox
           id="responseStreamCompressionCheckbox"
           label="Toggle compression setting for response stream."
           checked={compressResponse}
-          onChange={(e) => setCompressResponse(!compressResponse)}
+          onChange={(e) => dispatch(setCompressResponse(!compressResponse))}
           compressed
         />
         <EuiCheckbox
           id="responseStreamFlushFixCheckbox"
           label="Toggle flushFix setting for response stream."
           checked={flushFix}
-          onChange={(e) => setFlushFix(!flushFix)}
+          onChange={(e) => dispatch(setFlushFix(!flushFix))}
           compressed
         />
       </EuiText>

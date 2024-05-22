@@ -10,21 +10,21 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import {
-  errorAction,
-  updateProgressAction,
-  addToEntityAction,
-  deleteEntityAction,
-  ReducerStreamApiAction,
-} from '../../common/api/reducer_stream/reducer_actions';
+  updateProgress,
+  addToEntity,
+  deleteEntity,
+  error,
+  type ReduxStreamApiAction,
+} from '../../common/api/redux_stream/data_slice';
 import { reducerStreamRequestBodySchema } from '../../common/api/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
 
 import { entities, getActions } from './shared';
 
-export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
+export const defineReduxStreamRoute = (router: IRouter, logger: Logger) => {
   router.versioned
     .post({
-      path: RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
+      path: RESPONSE_STREAM_API_ENDPOINT.REDUX_STREAM,
       access: 'internal',
     })
     .addVersion(
@@ -59,7 +59,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
           shouldStop = true;
         });
 
-        const { end, push, responseWithHeaders } = streamFactory<ReducerStreamApiAction>(
+        const { end, push, responseWithHeaders } = streamFactory<ReduxStreamApiAction>(
           request.headers,
           logger,
           request.body.compressResponse,
@@ -82,7 +82,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
               return;
             }
 
-            push(updateProgressAction(progress));
+            push(updateProgress(progress));
 
             const randomEntity = entities[Math.floor(Math.random() * entities.length)];
             const randomAction = actions[Math.floor(Math.random() * actions.length)];
@@ -90,11 +90,11 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
             switch (randomAction) {
               case 'add':
                 const randomCommits = Math.floor(Math.random() * 100);
-                push(addToEntityAction(randomEntity, randomCommits));
+                push(addToEntity({ entity: randomEntity, value: randomCommits }));
                 break;
 
               case 'delete':
-                push(deleteEntityAction(randomEntity));
+                push(deleteEntity(randomEntity));
                 break;
 
               case 'throw-error':
@@ -107,7 +107,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
 
               case 'emit-error':
                 // Emit an error as a stream action.
-                push(errorAction('(Simulated) error pushed to the stream'));
+                push(error('(Simulated) error pushed to the stream'));
                 return;
             }
 

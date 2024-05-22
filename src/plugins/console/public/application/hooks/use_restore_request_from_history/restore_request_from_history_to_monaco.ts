@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
+import { formatRequestBodyDoc } from '../../../lib/utils';
 import { MonacoEditorActionsProvider } from '../../containers/editor/monaco/monaco_editor_actions_provider';
-import { SenseEditor } from '../../models/sense_editor';
+import { ESRequest } from '../../../types';
 
-export class EditorRegistry {
-  private inputEditor: SenseEditor | MonacoEditorActionsProvider | undefined;
-
-  setInputEditor(inputEditor: SenseEditor | MonacoEditorActionsProvider) {
-    this.inputEditor = inputEditor;
+export async function restoreRequestFromHistoryToMonaco(
+  provider: MonacoEditorActionsProvider,
+  req: ESRequest
+) {
+  let s = req.method + ' ' + req.endpoint;
+  if (req.data) {
+    const indent = true;
+    const formattedData = formatRequestBodyDoc([req.data], indent);
+    s += '\n' + formattedData.data;
   }
-
-  getInputEditor() {
-    return this.inputEditor!;
-  }
+  await provider.restoreRequestFromHistory(s);
 }
-
-// Create a single instance of this and use as private state.
-export const instance = new EditorRegistry();

@@ -14,13 +14,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
 
-  describe('useReducer stream example', () => {
+  describe('redux stream example', () => {
     it('navigates to the example', async () => {
-      await testSubjects.click('ndjson-usereducer-stream');
+      await testSubjects.click('ndjson-redux-toolkit-stream');
 
       await retry.try(async () => {
         expect(await testSubjects.getVisibleText('responseStreamPageTitle')).to.be(
-          'NDJSON useReducer stream'
+          'NDJSON Redux Toolkit stream'
         );
         expect(await testSubjects.getVisibleText('responseStreamProgressBadge')).to.be('0%');
         expect(await testSubjects.getVisibleText('responseStreamStatusMessage')).to.be(
