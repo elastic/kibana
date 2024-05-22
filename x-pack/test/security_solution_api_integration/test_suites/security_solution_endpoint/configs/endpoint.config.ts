@@ -20,7 +20,7 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
   return generateConfig({
     ftrConfigProviderContext,
     baseConfig: xpackFunctionalConfig,
-    testFiles: [resolve(__dirname, './apps/endpoint')],
+    testFiles: [resolve(__dirname, '.../apps/endpoint')],
     junitReportName: 'X-Pack Endpoint Functional Tests on ESS',
     target: 'ess',
     services,

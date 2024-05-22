@@ -20,7 +20,7 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
   return generateConfig({
     ftrConfigProviderContext,
     baseConfig: svlBaseConfig,
-    testFiles: [resolve(__dirname, './apps/endpoint')],
+    testFiles: [resolve(__dirname, '../apps/endpoint')],
     junitReportName: 'X-Pack Endpoint Functional Tests on Serverless',
     kbnServerArgs: ['--serverless=security'],
     target: 'serverless',
