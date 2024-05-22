@@ -113,7 +113,8 @@ export abstract class Type<V> {
         schema = schema.description(options.meta.description);
       }
       if (options.meta.id) {
-        schema = schema.meta({ [META_FIELD_X_OAS_REF_ID]: options.meta.id });
+        const id = options.meta.id;
+        schema = schema.id(id).meta({ [META_FIELD_X_OAS_REF_ID]: id });
       }
       if (options.meta.deprecated) {
         schema = schema.meta({ [META_FIELD_X_OAS_DEPRECATED]: true });

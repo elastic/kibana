@@ -49,6 +49,7 @@ import {
   URIType,
   StreamType,
   UnionTypeOptions,
+  Lazy,
 } from './src/types';
 
 export type { AnyType, ConditionalType, TypeOf, Props, SchemaStructureEntry, NullableProps };
@@ -214,6 +215,10 @@ function conditional<A extends ConditionalTypeValue, B, C>(
   options?: TypeOptions<B | C>
 ) {
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
+}
+
+export function lazy<T>(id: string) {
+  return new Lazy<T>(id);
 }
 
 export const schema = {
