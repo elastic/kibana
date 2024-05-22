@@ -16,8 +16,6 @@ export const GEMINI_TITLE = i18n.translate(
 export const GEMINI_CONNECTOR_ID = '.gemini';
 export enum SUB_ACTION {
   RUN = 'run',
-  INVOKE_AI = 'invokeAI',
-  INVOKE_STREAM = 'invokeStream',
   DASHBOARD = 'getDashboard',
   TEST = 'test',
 }
