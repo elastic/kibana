@@ -151,6 +151,7 @@ export const deleteRiskScoreIndices = async ({
 export const areRiskScoreIndicesEmpty = async ({
   es,
   namespace = 'default',
+  log,
 }: {
   es: Client;
   namespace?: string;
@@ -166,8 +167,8 @@ export const areRiskScoreIndicesEmpty = async ({
       es.count({ index: riskScoreIndex }),
       es.count({ index: riskScoreLatestIndex }),
     ]);
-    riskScoreCount = riskScoreCountRes.body.count;
-    riskScoreLatestCount = riskScoreLatestCountRes.body.count;
+    riskScoreCount = riskScoreCountRes.count;
+    riskScoreLatestCount = riskScoreLatestCountRes.count;
   } catch (e) {
     if (e.meta.statusCode === 404) {
       return true;
@@ -175,21 +176,19 @@ export const areRiskScoreIndicesEmpty = async ({
     throw e;
   }
 
-  const isEmpty = riskScoreCount.body.count === 0 && riskScoreLatestCount.body.count === 0;
+  const isEmpty = riskScoreCount === 0 && riskScoreLatestCount === 0;
 
   if (!isEmpty) {
     log.warning(
-      `Risk score indices are not empty. Risk score index count: ${riskScoreCount.body.count}, Risk score latest index count: ${riskScoreLatestCount.body.count}`
+      `Risk score indices are not empty. Risk score index count: ${riskScoreCount}, Risk score latest index count: ${riskScoreLatestCount}`
     );
     const [riskScoreDocs, riskScoreLatestDocs] = await Promise.all([
       es.search({ index: riskScoreIndex, size: 25 }),
       es.search({ index: riskScoreLatestIndex, size: 25 }),
     ]);
 
-    log.info(`Risk score index documents: ${JSON.stringify(riskScoreDocs.body.hits.hits)}`);
-    log.info(
-      `Risk score latest index documents: ${JSON.stringify(riskScoreLatestDocs.body.hits.hits)}`
-    );
+    log.info(`Risk score index documents: ${JSON.stringify(riskScoreDocs.hits.hits)}`);
+    log.info(`Risk score latest index documents: ${JSON.stringify(riskScoreLatestDocs.hits.hits)}`);
   }
 
   return isEmpty;
