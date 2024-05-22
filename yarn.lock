@@ -1735,10 +1735,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@94.3.0":
-  version "94.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.3.0.tgz#77c07701128b6443e2ea55e2462ef0ccadd64582"
-  integrity sha512-qJTLrQYe11MPTX+8AqifJVYLDyO8VqdFWqPVJRYel11l/FvJOqyQi50x+xQK8I7h73TF50xywtUHCfhfkqpbYg==
+"@elastic/eui@94.5.1":
+  version "94.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.5.1.tgz#cdaab02483a419bfc910be9d75a310b60141a611"
+  integrity sha512-VopgWoljYAkhrK602vP9QJSbGcGVTT57YkWjAGHVV57YRdKJWXvHt3sbBUdangquxYj4ZC2GXM81p7mMxiCOXA==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -6288,10 +6288,6 @@
   uid ""
 
 "@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
-  version "0.0.0"
-  uid ""
-
-"@kbn/solution-nav-es@link:packages/solution-nav/es":
   version "0.0.0"
   uid ""
 
@@ -11437,6 +11433,11 @@ acorn-import-assertions@^1.9.0:
   resolved "https://registry.yarnpkg.com/acorn-import-assertions/-/acorn-import-assertions-1.9.0.tgz#507276249d684797c84e0734ef84860334cfb1ac"
   integrity sha512-cmMwop9x+8KFhxvKrKfPYmN6/pKTYYHBqLa0DfvVZcKMJWNyWLnaqND7dx/qn66R7ewM1UX5XMaDVP5wlVTaVA==
 
+acorn-import-attributes@^1.9.5:
+  version "1.9.5"
+  resolved "https://registry.yarnpkg.com/acorn-import-attributes/-/acorn-import-attributes-1.9.5.tgz#7eb1557b1ba05ef18b5ed0ec67591bfab04688ef"
+  integrity sha512-n02Vykv5uA3eHGM/Z2dQrcD56kL8TyDb2p1+0P83PClMnC/nc+anbQRhIOWnSq4Ke/KvDPrY3C9hDtC/A3eHnQ==
+
 acorn-jsx@^5.3.1, acorn-jsx@^5.3.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/acorn-jsx/-/acorn-jsx-5.3.2.tgz#7ed5bb55908b3b2f1bc55c6af1653bada7f07937"
@@ -15940,10 +15941,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.5.3:
-  version "4.5.3"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.5.3.tgz#8015f1525f6cd45daef6a48a88d93dbaf5899212"
-  integrity sha512-FE+srHVTtvDp/SfY76yxSIupCU8Z30WuOx1Yf3plUXeyLuKqq9YRk6uX0Jleb1jfwG58lvabpeU0u9YmS1YdrA==
+elastic-apm-node@^4.5.4:
+  version "4.5.4"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.5.4.tgz#add7c5a53f8a4ec29989e3365c9f2053ec64a20d"
+  integrity sha512-PqX8a5PdWo+mtH1Vn+xjmhJpa2RE9zbKDKFkKoENKG118KVgukxhFlVIpb3qrht9aeRkPxHqQsPNtNV3ljPjew==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
@@ -15963,7 +15964,7 @@ elastic-apm-node@^4.5.3:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.7.3"
+    import-in-the-middle "1.7.4"
     json-bigint "^1.0.0"
     lru-cache "^10.0.1"
     measured-reporting "^1.51.1"
@@ -19269,13 +19270,13 @@ import-fresh@^3.1.0, import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.7.3:
-  version "1.7.3"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.7.3.tgz#ffa784cdd57a47d2b68d2e7dd33070ff06baee43"
-  integrity sha512-R2I11NRi0lI3jD2+qjqyVlVEahsejw7LDnYEbGb47QEFjczE3bZYsmWheCTQA+LFs2DzOQxR7Pms7naHW1V4bQ==
+import-in-the-middle@1.7.4:
+  version "1.7.4"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.7.4.tgz#508da6e91cfa84f210dcdb6c0a91ab0c9e8b3ebc"
+  integrity sha512-Lk+qzWmiQuRPPulGQeK5qq0v32k2bHnWrRPFgqyvhw7Kkov5L6MOLOIU3pcWeujc9W4q54Cp3Q2WV16eQkc7Bg==
   dependencies:
     acorn "^8.8.2"
-    acorn-import-assertions "^1.9.0"
+    acorn-import-attributes "^1.9.5"
     cjs-module-lexer "^1.2.2"
     module-details-from-path "^1.0.3"
 

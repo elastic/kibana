@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isRootPrivilegesRequired } from './package_helpers';
+import { getRootIntegrations, isRootPrivilegesRequired } from './package_helpers';
 
 describe('isRootPrivilegesRequired', () => {
   it('should return true if root privileges is required at root level', () => {
@@ -36,5 +36,46 @@ describe('isRootPrivilegesRequired', () => {
       data_streams: [],
     } as any);
     expect(res).toBe(false);
+  });
+});
+
+describe('getRootIntegrations', () => {
+  it('should return packages that require root', () => {
+    const res = getRootIntegrations([
+      {
+        package: {
+          requires_root: true,
+          name: 'auditd_manager',
+          title: 'Auditd Manager',
+        },
+      } as any,
+      {
+        package: {
+          requires_root: false,
+          name: 'system',
+          title: 'System',
+        },
+      } as any,
+      {
+        package: {
+          name: 'test',
+          title: 'Test',
+        },
+      } as any,
+      {
+        package: {
+          requires_root: true,
+          name: 'auditd_manager',
+          title: 'Auditd Manager',
+        },
+      } as any,
+      {} as any,
+    ]);
+    expect(res).toEqual([{ name: 'auditd_manager', title: 'Auditd Manager' }]);
+  });
+
+  it('should return empty array if no packages require root', () => {
+    const res = getRootIntegrations([]);
+    expect(res).toEqual([]);
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { Subscription } from 'rxjs';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -31,35 +31,6 @@ export function PassiveMap(props: Props) {
   const mapApiRef = useRef<MapApi | undefined>(undefined);
   const beforeApiReadyPassiveLayerRef = useRef<LayerDescriptor | undefined>(undefined);
   const onRenderCompleteSubscriptionRef = useRef<Subscription | undefined>(undefined);
-  const initialState = useMemo(() => {
-    const basemapLayerDescriptor = createBasemapLayerDescriptor();
-    const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
-    return {
-      rawState: {
-        attributes: {
-          title: '',
-          layerListJSON: JSON.stringify([...intialLayers, props.passiveLayer]),
-        },
-        filters: [],
-        hidePanelTitles: true,
-        viewMode: ViewMode.VIEW,
-        isLayerTOCOpen: false,
-        hideFilterActions: true,
-        mapSettings: {
-          disableInteractive: false,
-          hideToolbarOverlay: false,
-          hideLayerControl: false,
-          hideViewControl: false,
-          initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
-          autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
-        },
-        isSharable: false,
-      },
-      references: [],
-    };
-    // only run onMount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (mapApiRef.current) {
@@ -81,7 +52,35 @@ export function PassiveMap(props: Props) {
     <div className="mapEmbeddableContainer">
       <ReactEmbeddableRenderer<MapSerializedState, MapApi>
         type={MAP_SAVED_OBJECT_TYPE}
-        state={initialState}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => {
+            const basemapLayerDescriptor = createBasemapLayerDescriptor();
+            const intialLayers = basemapLayerDescriptor ? [basemapLayerDescriptor] : [];
+            return {
+              rawState: {
+                attributes: {
+                  title: '',
+                  layerListJSON: JSON.stringify([...intialLayers, props.passiveLayer]),
+                },
+                filters: [],
+                hidePanelTitles: true,
+                viewMode: ViewMode.VIEW,
+                isLayerTOCOpen: false,
+                hideFilterActions: true,
+                mapSettings: {
+                  disableInteractive: false,
+                  hideToolbarOverlay: false,
+                  hideLayerControl: false,
+                  hideViewControl: false,
+                  initialLocation: INITIAL_LOCATION.AUTO_FIT_TO_BOUNDS, // this will startup based on data-extent
+                  autoFitToDataBounds: true, // this will auto-fit when there are changes to the filter and/or query
+                },
+                isSharable: false,
+              },
+              references: [],
+            };
+          },
+        })}
         onApiAvailable={(api) => {
           mapApiRef.current = api;
           if (beforeApiReadyPassiveLayerRef.current) {

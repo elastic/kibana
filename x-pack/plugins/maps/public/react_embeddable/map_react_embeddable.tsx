@@ -12,7 +12,7 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
-  apiIsOfType,
+  areTriggersDisabled,
   getUnchangingComparator,
   initializeTimeRange,
   initializeTitles,
@@ -208,7 +208,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<MapSerializedState, Ma
             <MapContainer
               onSingleValueTrigger={actionHandlers.onSingleValueTrigger}
               addFilters={
-                state.hideFilterActions || apiIsOfType(parentApi, 'canvas')
+                state.hideFilterActions || areTriggersDisabled(api)
                   ? null
                   : actionHandlers.addFilters
               }
