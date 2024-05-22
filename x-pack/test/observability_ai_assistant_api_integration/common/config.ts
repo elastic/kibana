@@ -6,24 +6,20 @@
  */
 
 import { Config, FtrConfigProviderContext } from '@kbn/test';
-import supertest from 'supertest';
-import { format, UrlObject } from 'url';
+import { UrlObject } from 'url';
 import { ObservabilityAIAssistantFtrConfigName } from '../configs';
 import { getApmSynthtraceEsClient } from './create_synthtrace_client';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import {
-  createObservabilityAIAssistantApiClient,
+  getScopedApiClient,
   ObservabilityAIAssistantAPIClient,
 } from './observability_ai_assistant_api_client';
+import { editorUser, viewerUser } from './users/users';
 
 export interface ObservabilityAIAssistantFtrConfig {
   name: ObservabilityAIAssistantFtrConfigName;
   license: 'basic' | 'trial';
   kibanaConfig?: Record<string, any>;
-}
-
-async function getObservabilityAIAssistantAPIClient(kibanaServerUrl: string) {
-  return createObservabilityAIAssistantApiClient(supertest(kibanaServerUrl));
 }
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
@@ -33,8 +29,9 @@ export interface CreateTest {
   servers: any;
   services: InheritedServices & {
     observabilityAIAssistantAPIClient: () => Promise<{
-      readUser: ObservabilityAIAssistantAPIClient;
-      writeUser: ObservabilityAIAssistantAPIClient;
+      adminUser: ObservabilityAIAssistantAPIClient;
+      viewerUser: ObservabilityAIAssistantAPIClient;
+      editorUser: ObservabilityAIAssistantAPIClient;
     }>;
   };
   junit: { reportName: string };
@@ -56,7 +53,6 @@ export function createObservabilityAIAssistantAPIConfig({
   const services = config.get('services') as InheritedServices;
   const servers = config.get('servers');
   const kibanaServer = servers.kibana as UrlObject;
-  const kibanaServerUrl = format(kibanaServer);
   const apmSynthtraceKibanaClient = services.apmSynthtraceKibanaClient();
 
   const createTest: Omit<CreateTest, 'testFiles'> = {
@@ -68,8 +64,9 @@ export function createObservabilityAIAssistantAPIConfig({
         getApmSynthtraceEsClient(context, apmSynthtraceKibanaClient),
       observabilityAIAssistantAPIClient: async () => {
         return {
-          readUser: await getObservabilityAIAssistantAPIClient(kibanaServerUrl),
-          writeUser: await getObservabilityAIAssistantAPIClient(kibanaServerUrl),
+          adminUser: await getScopedApiClient(kibanaServer, 'elastic'),
+          viewerUser: await getScopedApiClient(kibanaServer, viewerUser.username),
+          editorUser: await getScopedApiClient(kibanaServer, editorUser.username),
         };
       },
     },
