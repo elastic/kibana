@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import EntityAnalyticsUpsellingComponent from './entity_analytics';
+import { EntityAnalyticsUpsellingPage } from './entity_analytics';
 
 jest.mock('@kbn/security-solution-navigation', () => {
   const original = jest.requireActual('@kbn/security-solution-navigation');
@@ -21,7 +21,7 @@ jest.mock('@kbn/security-solution-navigation', () => {
 describe('EntityAnalyticsUpselling', () => {
   it('should render', () => {
     const { getByTestId } = render(
-      <EntityAnalyticsUpsellingComponent
+      <EntityAnalyticsUpsellingPage
         upgradeMessage="test upgrade message"
         upgradeToLabel="TEST LICENSE"
       />
@@ -31,7 +31,7 @@ describe('EntityAnalyticsUpselling', () => {
 
   it('should show upgrade label badge', () => {
     const { getByText } = render(
-      <EntityAnalyticsUpsellingComponent
+      <EntityAnalyticsUpsellingPage
         upgradeToLabel="TEST PRODUCT"
         upgradeMessage="test upgrade message"
       />
@@ -42,7 +42,7 @@ describe('EntityAnalyticsUpselling', () => {
 
   it('should show license message', () => {
     const { getByTestId } = render(
-      <EntityAnalyticsUpsellingComponent
+      <EntityAnalyticsUpsellingPage
         upgradeToLabel="TEST PRODUCT"
         upgradeMessage="test upgrade message"
       />
