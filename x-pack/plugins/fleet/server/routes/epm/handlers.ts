@@ -8,12 +8,14 @@
 import type { TypeOf } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 import type { HttpResponseOptions } from '@kbn/core/server';
+import moment from 'moment';
 
 import { pick } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
 import { handleTransformReauthorizeAndStart } from '../../services/epm/elasticsearch/transform/reauthorize';
+import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../common';
 
 import type {
   GetInfoResponse,
@@ -32,6 +34,7 @@ import type {
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
   AssetSOObject,
+  Installation,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -84,6 +87,8 @@ import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integ
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
 };
+
+const UPLOAD_RETRY_AFTER_MS = 30000; // 30s
 
 export const getCategoriesHandler: FleetRequestHandler<
   undefined,
@@ -451,8 +456,45 @@ export const installPackageByUploadHandler: FleetRequestHandler<
   const archiveBuffer = Buffer.from(request.body);
   const spaceId = fleetContext.spaceId;
   const user = (await appContextService.getSecurity()?.authc.getCurrentUser(request)) || undefined;
+  const logger = appContextService.getLogger();
 
   const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, user?.username);
+  const timeToWaitString = moment
+    .utc(moment.duration(UPLOAD_RETRY_AFTER_MS).asMilliseconds())
+    .format('mm[m]ss[s]');
+
+  // Find the latest packages installed by upload
+  const latestUploadedPackage = await savedObjectsClient.find<Installation>({
+    type: PACKAGES_SAVED_OBJECT_TYPE,
+    perPage: 10,
+    searchFields: ['install_source'],
+    search: 'upload',
+    sortField: 'updated_at',
+    sortOrder: 'desc',
+  });
+  const latestUploadedPackageAt =
+    latestUploadedPackage.saved_objects.length && latestUploadedPackage.saved_objects[0]?.updated_at
+      ? latestUploadedPackage.saved_objects[0].updated_at
+      : undefined;
+
+  if (
+    latestUploadedPackageAt &&
+    Date.now() - Date.parse(latestUploadedPackageAt) < UPLOAD_RETRY_AFTER_MS
+  ) {
+    logger.debug(
+      `Install by Upload - Too many requests. Latest upload attempted at ${latestUploadedPackageAt}.`
+    );
+    return response.customError({
+      statusCode: 429,
+      body: {
+        message: `Too many requests. Please wait ${timeToWaitString} before uploading again.`,
+      },
+      headers: {
+        // retry-after expects seconds
+        'retry-after': Math.ceil(UPLOAD_RETRY_AFTER_MS / 1000).toString(),
+      },
+    });
+  }
 
   const res = await installPackage({
     installSource: 'upload',
