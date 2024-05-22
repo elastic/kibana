@@ -114,9 +114,10 @@ export default function ({ getService }: FtrProviderContext) {
                 // replication section is not allowed if earch contains query or field_security
                 replication: {
                   names: ['logs*'],
-                }
+                },
               },
-            }).expect(400);
+            })
+            .expect(400);
 
           await supertest
             .post('/internal/security/api_key')
@@ -135,10 +136,11 @@ export default function ({ getService }: FtrProviderContext) {
                 // replication section is not allowed if earch contains query or field_security
                 replication: {
                   names: ['logs*'],
-                }
+                },
               },
-            }).expect(400);
-          });
+            })
+            .expect(400);
+        });
       }
     });
 
@@ -317,9 +319,10 @@ export default function ({ getService }: FtrProviderContext) {
                 // replication section is not allowed if earch contains query or field_security
                 replication: {
                   names: ['logs*'],
-                }
+                },
               },
-            }).expect(400);
+            })
+            .expect(400);
 
           await supertest
             .put('/internal/security/api_key')
@@ -340,10 +343,11 @@ export default function ({ getService }: FtrProviderContext) {
                 // replication section is not allowed if earch contains query or field_security
                 replication: {
                   names: ['logs*'],
-                }
+                },
               },
-            }).expect(400);
-          });
+            })
+            .expect(400);
+        });
       }
     });
 
