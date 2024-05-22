@@ -15,11 +15,6 @@ import { importRules } from './import_rules_utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 
 describe('importRules', () => {
-  const mlAuthz = {
-    validateRuleType: jest
-      .fn()
-      .mockResolvedValue({ valid: true, message: 'mocked validation message' }),
-  };
   const { clients, context } = requestContextMock.createTools();
   const importedRule = getRuleMock(getQueryRuleParams());
 
@@ -36,7 +31,6 @@ describe('importRules', () => {
     const result = await importRules({
       ruleChunks: [],
       rulesResponseAcc: [],
-      mlAuthz,
       overwriteRules: false,
       rulesManagementClient: context.securitySolution.getRulesManagementClient(),
       existingLists: {},
@@ -49,7 +43,6 @@ describe('importRules', () => {
     const result = await importRules({
       ruleChunks: [[new Error('error importing')]],
       rulesResponseAcc: [],
-      mlAuthz,
       overwriteRules: false,
       rulesManagementClient: context.securitySolution.getRulesManagementClient(),
       existingLists: {},
@@ -78,7 +71,6 @@ describe('importRules', () => {
     const result = await importRules({
       ruleChunks: [ruleChunk],
       rulesResponseAcc: [],
-      mlAuthz,
       overwriteRules: false,
       rulesManagementClient: context.securitySolution.getRulesManagementClient(),
       existingLists: {},
@@ -99,7 +91,6 @@ describe('importRules', () => {
     const result = await importRules({
       ruleChunks: [ruleChunk],
       rulesResponseAcc: [],
-      mlAuthz,
       overwriteRules: false,
       rulesManagementClient: context.securitySolution.getRulesManagementClient(),
       existingLists: {},

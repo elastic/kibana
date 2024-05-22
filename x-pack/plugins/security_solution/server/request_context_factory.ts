@@ -17,7 +17,6 @@ import { buildFrameworkRequest } from './lib/timeline/utils/common';
 import type {
   SecuritySolutionPluginCoreSetupDependencies,
   SecuritySolutionPluginSetupDependencies,
-  SetupPlugins,
 } from './plugin_contract';
 import type {
   SecuritySolutionApiRequestHandlerContext,
@@ -114,7 +113,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
       getAuditLogger,
 
-      getRulesManagementClient: (ml?: SetupPlugins['ml']) =>
+      getRulesManagementClient: () =>
         createRulesManagementClient(
           startPlugins.alerting.getRulesClientWithRequest(request),
           request,

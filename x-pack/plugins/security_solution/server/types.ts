@@ -34,7 +34,6 @@ import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/ri
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
 import type { IRulesManagementClient } from './lib/detection_engine/rule_management/logic/crud/rules_management_client';
-import type { SetupPlugins } from './plugin';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -46,7 +45,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getAppClient: () => AppClient;
   getSpaceId: () => string;
   getRuleDataService: () => IRuleDataService;
-  getRulesManagementClient: (ml?: SetupPlugins['ml']) => IRulesManagementClient;
+  getRulesManagementClient: () => IRulesManagementClient;
   getDetectionEngineHealthClient: () => IDetectionEngineHealthClient;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getRacClient: (req: KibanaRequest) => Promise<AlertsClient>;
