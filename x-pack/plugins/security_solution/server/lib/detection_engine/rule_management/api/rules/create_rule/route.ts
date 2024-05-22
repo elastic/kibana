@@ -13,7 +13,6 @@ import {
   validateCreateRuleProps,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -22,10 +21,7 @@ import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptio
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
-export const createRuleRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml']
-): void => {
+export const createRuleRoute = (router: SecuritySolutionPluginRouter): void => {
   router.versioned
     .post({
       access: 'public',
@@ -61,7 +57,7 @@ export const createRuleRoute = (
           ]);
 
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient(ml);
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
           const exceptionsClient = ctx.lists?.getExceptionListClient();
 
           if (request.body.rule_id != null) {

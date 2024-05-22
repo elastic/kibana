@@ -13,7 +13,6 @@ import {
   validateUpdateRuleProps,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -23,7 +22,7 @@ import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/vali
 import { getIdError } from '../../../utils/utils';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
-export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .put({
       access: 'public',
@@ -50,7 +49,7 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient(ml);
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 

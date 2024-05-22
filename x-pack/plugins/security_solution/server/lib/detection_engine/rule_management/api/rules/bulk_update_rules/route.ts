@@ -17,7 +17,6 @@ import {
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import {
@@ -34,11 +33,7 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const bulkUpdateRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  logger: Logger
-) => {
+export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .put({
       access: 'public',
@@ -67,7 +62,7 @@ export const bulkUpdateRulesRoute = (
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
           const rulesClient = ctx.alerting.getRulesClient();
-          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient(ml);
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           const rules = await Promise.all(
             request.body.map(async (payloadRule) => {

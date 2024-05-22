@@ -15,8 +15,6 @@ import type {
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
-import type { MlAuthz } from '../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 import type { IRulesManagementClient } from '../crud/rules_management_client';
 
@@ -44,7 +42,6 @@ export interface RuleExceptionsPromiseFromStreams {
 export const importRules = async ({
   ruleChunks,
   rulesResponseAcc,
-  mlAuthz,
   overwriteRules,
   rulesManagementClient,
   existingLists,
@@ -52,7 +49,6 @@ export const importRules = async ({
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
-  mlAuthz: MlAuthz;
   overwriteRules: boolean;
   rulesManagementClient: IRulesManagementClient;
   existingLists: Record<string, ExceptionListSchema>;
@@ -91,8 +87,6 @@ export const importRules = async ({
               });
 
               importRuleResponse = [...importRuleResponse, ...exceptionErrors];
-
-              throwAuthzError(await mlAuthz.validateRuleType(parsedRule.type));
 
               const importedRule = await rulesManagementClient.importRule({
                 ruleToImport: {

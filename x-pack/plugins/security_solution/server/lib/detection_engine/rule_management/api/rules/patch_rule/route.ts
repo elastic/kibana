@@ -13,7 +13,6 @@ import {
   validatePatchRuleRequestBody,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -23,7 +22,7 @@ import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/vali
 import { getIdError } from '../../../utils/utils';
 import { transformValidate } from '../../../utils/validate';
 
-export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const patchRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .patch({
       access: 'public',
@@ -53,10 +52,7 @@ export const patchRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPl
         try {
           const params = request.body;
           const rulesClient = (await context.alerting).getRulesClient();
-          const savedObjectsClient = (await context.core).savedObjects.client;
-          const rulesManagementClient = (await context.securitySolution).getRulesManagementClient(
-            ml
-          );
+          const rulesManagementClient = (await context.securitySolution).getRulesManagementClient();
 
           const existingRule = await readRules({
             rulesClient,

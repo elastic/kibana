@@ -8,9 +8,6 @@
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import { getPatchRulesSchemaMock } from '../../../../../../../common/api/detection_engine/rule_management/mocks';
 
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import {
   getEmptyFindResult,
@@ -24,25 +21,22 @@ import {
 import { getMlRuleParams, getQueryRuleParams } from '../../../../rule_schema/mocks';
 
 import { patchRuleRoute } from './route';
-
-jest.mock('../../../../../machine_learning/authz');
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
 describe('Patch rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // existing rule
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
     clients.rulesManagementClient.patchRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
 
-    patchRuleRoute(server.router, ml);
+    patchRuleRoute(server.router);
   });
 
   describe('status codes', () => {
@@ -131,11 +125,10 @@ describe('Patch rule route', () => {
     });
 
     it('rejects patching a rule to ML if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.rulesManagementClient.patchRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
+
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_URL,
@@ -151,11 +144,10 @@ describe('Patch rule route', () => {
     });
 
     it('rejects patching an ML rule if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.rulesManagementClient.patchRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
+
       const { type, ...payloadWithoutType } = typicalMlRulePayload();
       const request = requestMock.create({
         method: 'patch',

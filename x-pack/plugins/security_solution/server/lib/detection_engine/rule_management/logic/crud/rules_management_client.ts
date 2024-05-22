@@ -313,6 +313,8 @@ export const importRule = async (
 ): Promise<RuleAlertType> => {
   const { ruleToImport, overwriteRules, options } = importRulePayload;
 
+  await _validateMlAuth(mlAuthz, ruleToImport.type);
+
   const existingRule = await readRules({
     rulesClient,
     ruleId: ruleToImport.rule_id,
@@ -325,7 +327,6 @@ export const importRule = async (
       allowMissingConnectorSecrets: options?.allowMissingConnectorSecrets,
     });
   } else if (existingRule && overwriteRules) {
-    await _validateMlAuth(mlAuthz, existingRule.params.type);
     return _updateRule(rulesClient, {
       existingRule,
       ruleUpdate: ruleToImport,

@@ -120,7 +120,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           request,
           coreContext.savedObjects.client,
           licensing,
-          ml
+          plugins.ml
         ),
 
       getDetectionEngineHealthClient: memoize(() =>
