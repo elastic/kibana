@@ -19,10 +19,16 @@ import { readRules } from './read_rules';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getEqlRuleParams, getQueryRuleParams } from '../../../rule_schema/mocks';
 
+import { buildMlAuthz } from '../../../../machine_learning/authz';
+import { throwAuthzError } from '../../../../machine_learning/validation';
+
+jest.mock('../../../../machine_learning/authz');
+jest.mock('../../../../machine_learning/validation');
 jest.mock('./read_rules');
 
 describe('RuleManagementClient.upgradePrebuiltRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  const mlAuthz = (buildMlAuthz as jest.Mock)();
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
@@ -36,9 +42,29 @@ describe('RuleManagementClient.upgradePrebuiltRule', () => {
     };
 
     (readRules as jest.Mock).mockResolvedValue(null);
-    await expect(upgradePrebuiltRule(rulesClient, { ruleAsset })).rejects.toThrow(
+    await expect(upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz)).rejects.toThrow(
       `Failed to find rule ${ruleAsset.rule_id}`
     );
+  });
+
+  it('throws if mlAuth fails', async () => {
+    (throwAuthzError as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('mocked MLAuth error');
+    });
+
+    const ruleAsset: PrebuiltRuleAsset = {
+      ...getCreateRulesSchemaMock(),
+      version: 1,
+      rule_id: 'rule-id',
+    };
+
+    await expect(upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz)).rejects.toThrow(
+      'mocked MLAuth error'
+    );
+
+    expect(rulesClient.create).not.toHaveBeenCalled();
+    expect(rulesClient.delete).not.toHaveBeenCalled();
+    expect(rulesClient.update).not.toHaveBeenCalled();
   });
 
   describe('if the new version has a different type than the existing version', () => {
@@ -74,12 +100,12 @@ describe('RuleManagementClient.upgradePrebuiltRule', () => {
     });
 
     it('deletes the old rule ', async () => {
-      await upgradePrebuiltRule(rulesClient, { ruleAsset });
+      await upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz);
       expect(rulesClient.delete).toHaveBeenCalled();
     });
 
     it('creates a new rule with the new type and expected params of the original rules', async () => {
-      await upgradePrebuiltRule(rulesClient, { ruleAsset });
+      await upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz);
       expect(rulesClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
@@ -125,7 +151,7 @@ describe('RuleManagementClient.upgradePrebuiltRule', () => {
     });
 
     it('patches the existing rule with the new params from the rule asset', async () => {
-      await upgradePrebuiltRule(rulesClient, { ruleAsset });
+      await upgradePrebuiltRule(rulesClient, { ruleAsset }, mlAuthz);
       expect(rulesClient.update).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({

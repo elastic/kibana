@@ -9,7 +9,6 @@ import {
   DETECTION_ENGINE_RULES_BULK_UPDATE,
   DETECTION_ENGINE_RULES_URL,
 } from '../../../../../../../common/constants';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getFindResultWithSingleHit,

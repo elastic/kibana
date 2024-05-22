@@ -20,7 +20,6 @@ import type {
   RuleToImport,
   PatchRuleRequestBody,
   RuleUpdateProps,
-  RuleSignatureId,
 } from '../../../../../../common/api/detection_engine';
 
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
@@ -74,14 +73,10 @@ interface CreatePrebuiltRuleProps {
 }
 
 interface UpdateRuleProps {
-  ruleId?: RuleSignatureId;
-  id?: RuleObjectId;
   ruleUpdate: RuleUpdateProps;
 }
 
 interface PatchRuleProps {
-  ruleId?: RuleSignatureId;
-  id?: RuleObjectId;
   nextParams: PatchRuleRequestBody;
 }
 
@@ -204,7 +199,8 @@ export const updateRule = async (
   updateRulePayload: UpdateRuleProps,
   mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
-  const { ruleUpdate, ruleId, id } = updateRulePayload;
+  const { ruleUpdate } = updateRulePayload;
+  const { rule_id: ruleId, id } = ruleUpdate;
 
   await _validateMlAuth(mlAuthz, ruleUpdate.type);
 
@@ -232,7 +228,8 @@ export const patchRule = async (
   patchRulePayload: PatchRuleProps,
   mlAuthz: MlAuthz
 ): Promise<RuleAlertType> => {
-  const { nextParams, ruleId, id } = patchRulePayload;
+  const { nextParams } = patchRulePayload;
+  const { rule_id: ruleId, id } = nextParams;
 
   const existingRule = await readRules({
     rulesClient,

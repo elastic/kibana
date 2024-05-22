@@ -15,9 +15,15 @@ import {
   getCreateThreatMatchRulesSchemaMock,
 } from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
+import { buildMlAuthz } from '../../../../machine_learning/authz';
+import { throwAuthzError } from '../../../../machine_learning/validation';
+
+jest.mock('../../../../machine_learning/authz');
+jest.mock('../../../../machine_learning/validation');
 
 describe('RuleManagementClient.createCustomRule', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
+  const mlAuthz = (buildMlAuthz as jest.Mock)();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -27,7 +33,7 @@ describe('RuleManagementClient.createCustomRule', () => {
   it('should create a rule with the correct parameters and options', async () => {
     const params = getCreateRulesSchemaMock();
 
-    await createCustomRule(rulesClient, { params });
+    await createCustomRule(rulesClient, { params }, mlAuthz);
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -44,8 +50,24 @@ describe('RuleManagementClient.createCustomRule', () => {
     );
   });
 
+  it('throws if mlAuth fails', async () => {
+    (throwAuthzError as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('mocked MLAuth error');
+    });
+
+    await expect(
+      createCustomRule(rulesClient, { params: getCreateMachineLearningRulesSchemaMock() }, mlAuthz)
+    ).rejects.toThrow('mocked MLAuth error');
+
+    expect(rulesClient.create).not.toHaveBeenCalled();
+  });
+
   it('calls the rulesClient with legacy ML params', async () => {
-    await createCustomRule(rulesClient, { params: getCreateMachineLearningRulesSchemaMock() });
+    await createCustomRule(
+      rulesClient,
+      { params: getCreateMachineLearningRulesSchemaMock() },
+      mlAuthz
+    );
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -63,12 +85,16 @@ describe('RuleManagementClient.createCustomRule', () => {
   });
 
   it('calls the rulesClient with ML params', async () => {
-    await createCustomRule(rulesClient, {
-      params: {
-        ...getCreateMachineLearningRulesSchemaMock(),
-        machine_learning_job_id: ['new_job_1', 'new_job_2'],
+    await createCustomRule(
+      rulesClient,
+      {
+        params: {
+          ...getCreateMachineLearningRulesSchemaMock(),
+          machine_learning_job_id: ['new_job_1', 'new_job_2'],
+        },
       },
-    });
+      mlAuthz
+    );
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -89,9 +115,13 @@ describe('RuleManagementClient.createCustomRule', () => {
     const params = getCreateThreatMatchRulesSchemaMock();
     delete params.threat_indicator_path;
 
-    await createCustomRule(rulesClient, {
-      params,
-    });
+    await createCustomRule(
+      rulesClient,
+      {
+        params,
+      },
+      mlAuthz
+    );
 
     expect(rulesClient.create).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -108,7 +138,7 @@ describe('RuleManagementClient.createCustomRule', () => {
   });
 
   it('does not populate a threatIndicatorPath value for other rules if empty', async () => {
-    await createCustomRule(rulesClient, { params: getCreateRulesSchemaMock() });
+    await createCustomRule(rulesClient, { params: getCreateRulesSchemaMock() }, mlAuthz);
     expect(rulesClient.create).not.toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
