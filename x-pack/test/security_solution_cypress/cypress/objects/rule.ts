@@ -216,7 +216,7 @@ export const getUnmappedRule = (
 ): QueryRuleCreateProps => ({
   type: 'query',
   query: '*:*',
-  index: ['unmapped*'],
+  index: ['auditbeat-unmapped*'],
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'high',
