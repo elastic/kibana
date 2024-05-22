@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Type, schema, lazy } from '../..';
+import { Type, schema } from '../..';
 
 interface RecursiveType {
   name: string;
@@ -20,7 +20,7 @@ interface RecursiveType {
   const testObject: Type<RecursiveType> = schema.object(
     {
       name: schema.string(),
-      notSelf: lazy<RecursiveType>(id), // this declaration should fail
+      notSelf: schema.lazy<RecursiveType>(id), // this declaration should fail
     },
     { meta: { id } }
   );
