@@ -254,7 +254,6 @@ const nodeToEuiCollapsibleNavProps = (
 
     if (href !== undefined) {
       e.preventDefault();
-      e.stopPropagation();
       navigateToUrl(href);
       closePanel();
       return;
@@ -287,17 +286,13 @@ const nodeToEuiCollapsibleNavProps = (
         href,
         external: isExternal,
         onClick: (e) => {
-          // TODO: here we might want to toggle the accordion (if we "renderAs: 'accordion'")
-          // Will be done in following PR
-          e.stopPropagation();
-
           if (customOnClick) {
             customOnClick(e);
             return;
           }
 
-          e.preventDefault();
           if (href) {
+            e.preventDefault();
             navigateToUrl(href);
           }
         },
