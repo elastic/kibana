@@ -239,9 +239,6 @@ const getSearchStartDate = (lastSuccessfulReport: Date): Date => {
   const initialDate = new Date();
   const thresholdDate = new Date(initialDate.getTime() - THRESHOLD_MINUTES * 60 * 1000);
 
-  console.log({ thresholdDate });
-  console.log({ lastSuccessfulReport });
-
   if (lastSuccessfulReport) {
     const lastSuccessfulReportDate = new Date(lastSuccessfulReport);
 
