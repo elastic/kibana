@@ -28,6 +28,7 @@ export function createLogsServiceEntitiesAggregator() {
           'entity.latestTimestamp': lastSeen,
           'entity.indexPatterns': ['logs-*'],
           'entity.data_stream.type': ['logs'],
+          'entity.firstSeen': firstSeen,
         };
       },
     },

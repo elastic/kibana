@@ -9,10 +9,11 @@
 import { Entity, EntityDocument } from './entities';
 
 export interface ServiceEntityDocument extends EntityDocument {
-  'service.language.name'?: string;
-  'service.name': string;
-  'service.node.name'?: string;
-  'service.environment'?: string;
+  'entity.metric.latency'?: number;
+  'entity.metric.throughput'?: number;
+  'entity.metric.failedTransactionRate'?: number;
+  'entity.metric.logRate'?: number;
+  'entity.metric.errorRate'?: number;
 }
 
 export class ServiceEntity extends Entity<ServiceEntityDocument> {

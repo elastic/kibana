@@ -65,7 +65,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(1000)
+            .duration(500)
             .success()
             .children(
               instance
@@ -90,7 +90,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(1000)
+            .duration(600)
             .failure()
             .errors(
               instance

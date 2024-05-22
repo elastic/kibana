@@ -107,7 +107,7 @@ function getRoutingTransform() {
     objectMode: true,
     transform(document: ESDocumentWithOperation<EntityDocument>, encoding, callback) {
       if ('entity.id' in document) {
-        document._index = `entities`;
+        document._index = `entities-synthrace.summary`;
       } else {
         throw new Error(`Cannot determine index for event ${JSON.stringify(document)}`);
       }
