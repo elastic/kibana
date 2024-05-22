@@ -27,7 +27,7 @@ export interface UseFieldsMetadataReturnType {
 }
 
 export type UseFieldsMetadataHook = (
-  params: UseFieldsMetadataParams
+  params?: UseFieldsMetadataParams
 ) => UseFieldsMetadataReturnType;
 
 export const createUseFieldsMetadataHook = ({
