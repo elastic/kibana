@@ -312,13 +312,12 @@ export function getDataStateContainer({
 
   const fetchQuery = async (resetQuery?: boolean) => {
     const query = getAppState().query;
-    let dataView = getSavedSearch().searchSource.getField('index');
+    const currentDataView = getSavedSearch().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {
-      const nextDataView = await getEsqlDataView(query, dataView, services);
-      if (nextDataView !== dataView) {
+      const nextDataView = await getEsqlDataView(query, currentDataView, services);
+      if (nextDataView !== currentDataView) {
         setDataView(nextDataView);
-        dataView = nextDataView;
       }
     }
 
