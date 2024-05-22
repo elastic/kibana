@@ -13,6 +13,8 @@ import { css } from '@emotion/react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRightPanelContext } from '../context';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
@@ -23,14 +25,15 @@ import {
 } from './test_ids';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
 import { type PreviewPanelProps, RulePreviewPanel } from '../../preview';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Displays the rule description of a signal document.
  */
 export const AlertDescription: FC = () => {
   const { telemetry } = useKibana().services;
-  const { dataFormattedForFieldBrowser, scopeId, eventId, indexName, isPreview } =
-    useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId, indexName, isPreview } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );

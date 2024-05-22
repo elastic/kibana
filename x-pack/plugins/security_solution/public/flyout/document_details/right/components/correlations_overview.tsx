@@ -12,6 +12,8 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -30,6 +32,7 @@ import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -37,8 +40,9 @@ import { isActiveTimeline } from '../../../../helpers';
  * and the SummaryPanel component for data rendering.
  */
 export const CorrelationsOverview: React.FC = () => {
-  const { dataAsNestedObject, eventId, indexName, getFieldsData, scopeId, isPreview } =
+  const { dataAsNestedObject, indexName, getFieldsData, scopeId, isPreview } =
     useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));

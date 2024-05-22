@@ -9,6 +9,8 @@ import React, { memo } from 'react';
 import { EuiText } from '@elastic/eui';
 import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import type { EventFieldsData } from '../../../../common/components/event_details/types';
 import { FieldValueCell } from '../../../../common/components/event_details/table/field_value_cell';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
@@ -19,6 +21,7 @@ import { useRightPanelContext } from '../context';
 import type { ColumnsProvider } from '../../../../common/components/event_details/event_fields_browser';
 import { EventFieldsBrowser } from '../../../../common/components/event_details/event_fields_browser';
 import { TimelineTabs } from '../../../../../common/types';
+import { selectEventId } from '../../../shared/store/selectors';
 
 export const getFieldFromBrowserField = memoizeOne(
   (keys: string[], browserFields: BrowserFields): BrowserField | undefined =>
@@ -82,7 +85,8 @@ export const getColumns: ColumnsProvider = ({
  * Table view displayed in the document details expandable flyout right section
  */
 export const TableTab = memo(() => {
-  const { browserFields, dataFormattedForFieldBrowser, eventId, scopeId } = useRightPanelContext();
+  const { browserFields, dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
 
   return (
     <EventFieldsBrowser

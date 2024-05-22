@@ -10,6 +10,10 @@ import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
+import { selectEventId } from '../../../shared/store/selectors';
+import { useFetchEventDetails } from '../../shared/hooks/use_fetch_event_details';
 import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 
@@ -21,7 +25,9 @@ const FLYOUT_FOOTER_HEIGHT = 72;
  * Json view displayed in the document details expandable flyout right section
  */
 export const JsonTab = memo(() => {
-  const { searchHit, isPreview } = useRightPanelContext();
+  const { isPreview } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
+  const { data: searchHit } = useFetchEventDetails({ eventId });
   const jsonValue = JSON.stringify(searchHit, null, 2);
 
   const flexGroupElement = useRef<HTMLDivElement>(null);

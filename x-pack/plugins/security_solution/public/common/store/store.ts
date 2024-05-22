@@ -20,6 +20,7 @@ import type { EnhancerOptions } from 'redux-devtools-extension';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
+import type { FlyoutState } from '../../flyout/shared/store/types';
 import { TimelineType } from '../../../common/api/timeline';
 import { TimelineId } from '../../../common/types';
 import { initialGroupingState } from './grouping/reducer';
@@ -120,6 +121,12 @@ export const createStoreFactory = async (
     },
   };
 
+  const flyoutInitialState: FlyoutState = {
+    flyout: {
+      eventId: null,
+    },
+  };
+
   const dataTableInitialState = {
     dataTable: {
       tableById: {
@@ -164,7 +171,8 @@ export const createStoreFactory = async (
     },
     dataTableInitialState,
     groupsInitialState,
-    analyzerInitialState
+    analyzerInitialState,
+    flyoutInitialState
   );
 
   const rootReducer = {

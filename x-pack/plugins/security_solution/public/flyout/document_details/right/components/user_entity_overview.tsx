@@ -19,6 +19,8 @@ import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
@@ -54,6 +56,7 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
+import { selectEventId } from '../../../shared/store/selectors';
 
 const USER_ICON = 'user';
 
@@ -68,7 +71,8 @@ export interface UserEntityOverviewProps {
  * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
-  const { eventId, indexName, scopeId } = useRightPanelContext();
+  const { indexName, scopeId } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({

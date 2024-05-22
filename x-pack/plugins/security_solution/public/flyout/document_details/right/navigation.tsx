@@ -8,11 +8,14 @@
 import type { FC } from 'react';
 import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { HeaderActions } from './components/header_actions';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { DocumentDetailsLeftPanelKey } from '../shared/constants/panel_keys';
 import { useRightPanelContext } from './context';
+import { selectEventId } from '../../shared/store/selectors';
 
 interface PanelNavigationProps {
   /**
@@ -24,7 +27,8 @@ interface PanelNavigationProps {
 export const PanelNavigation: FC<PanelNavigationProps> = memo(({ flyoutIsExpandable }) => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId } = useRightPanelContext();
+  const { indexName, scopeId } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
 
   const expandDetails = useCallback(() => {
     openLeftPanel({

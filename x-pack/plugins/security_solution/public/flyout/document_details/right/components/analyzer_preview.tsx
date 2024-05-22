@@ -9,6 +9,8 @@ import { find } from 'lodash/fp';
 import { EuiTreeView, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
 import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
@@ -18,6 +20,7 @@ import type { StatsNode } from '../../../../common/containers/alerts/use_alert_p
 import { isActiveTimeline } from '../../../../helpers';
 import { getField } from '../../shared/utils';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
+import { selectEventId } from '../../../shared/store/selectors';
 
 const CHILD_COUNT_LIMIT = 3;
 const ANCESTOR_LEVEL = 3;
@@ -39,9 +42,9 @@ export const AnalyzerPreview: React.FC = () => {
     dataFormattedForFieldBrowser: data,
     getFieldsData,
     scopeId,
-    eventId,
     isPreview,
   } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
   const documentId = isPreview ? ancestorId : eventId; // use ancestor as fallback for alert preview
 

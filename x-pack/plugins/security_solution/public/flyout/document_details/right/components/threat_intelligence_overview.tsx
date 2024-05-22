@@ -10,6 +10,8 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
 import { InsightsSummaryRow } from './insights_summary_row';
@@ -18,6 +20,7 @@ import { INSIGHTS_THREAT_INTELLIGENCE_TEST_ID } from './test_ids';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelligence_details';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Threat intelligence section under Insights section, overview tab.
@@ -25,7 +28,8 @@ import { THREAT_INTELLIGENCE_TAB_ID } from '../../left/components/threat_intelli
  * and the SummaryPanel component for data rendering.
  */
 export const ThreatIntelligenceOverview: FC = () => {
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToThreatIntelligenceTab = useCallback(() => {

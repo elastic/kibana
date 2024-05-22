@@ -10,6 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiPanel, useEuiTheme, EuiLink } 
 import { css } from '@emotion/css';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
 import { useRuleDetailsLink } from '../../shared/hooks/use_rule_details_link';
 import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';
@@ -21,19 +23,15 @@ import { PreferenceFormattedDate } from '../../../../common/components/formatted
 import { FLYOUT_ALERT_HEADER_TITLE_TEST_ID, ALERT_SUMMARY_PANEL_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
+import { selectEventId } from '../../../shared/store/selectors';
 
 /**
  * Alert details flyout right section header
  */
 export const AlertHeaderTitle = memo(() => {
-  const {
-    dataFormattedForFieldBrowser,
-    eventId,
-    scopeId,
-    isPreview,
-    refetchFlyoutData,
-    getFieldsData,
-  } = useRightPanelContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview, refetchFlyoutData, getFieldsData } =
+    useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
   const { isAlert, ruleName, timestamp, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );

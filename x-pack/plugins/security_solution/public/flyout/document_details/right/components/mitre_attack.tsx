@@ -8,12 +8,16 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../../common/store';
+import { useFetchEventDetails } from '../../shared/hooks/use_fetch_event_details';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 import { getMitreComponentParts } from '../../../../detections/mitre/get_mitre_threat_component';
-import { useRightPanelContext } from '../context';
+import { selectEventId } from '../../../shared/store/selectors';
 
 export const MitreAttack: FC = () => {
-  const { searchHit } = useRightPanelContext();
+  const eventId = useSelector((state: State) => selectEventId(state));
+  const { data: searchHit } = useFetchEventDetails({ eventId });
   const threatDetails = useMemo(() => getMitreComponentParts(searchHit), [searchHit]);
 
   if (!threatDetails || !threatDetails[0]) {

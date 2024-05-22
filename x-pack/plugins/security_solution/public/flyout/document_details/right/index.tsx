@@ -9,6 +9,9 @@ import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useSelector } from 'react-redux';
+import type { State } from '../../../common/store';
+import { selectEventId } from '../../shared/store/selectors';
 import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useTabs } from './hooks/use_tabs';
 import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
@@ -40,8 +43,10 @@ export interface RightPanelProps extends FlyoutPanelProps {
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { storage, telemetry } = useKibana().services;
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =
+  const { indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =
     useRightPanelContext();
+
+  const eventId = useSelector((state: State) => selectEventId(state));
 
   // if the flyout is expandable we render all 3 tabs (overview, table and json)
   // if the flyout is not, we render only table and json
