@@ -64,12 +64,14 @@ export type DataViewFieldBase = {
  * A base interface for an index pattern
  * @public
  */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type DataViewBase = {
+export interface DataViewBase extends DataViewBaseNoFields {
   fields: DataViewFieldBase[];
+}
+
+export interface DataViewBaseNoFields {
   id?: string;
   title: string;
-};
+}
 
 export interface BoolQuery {
   must: estypes.QueryDslQueryContainer[];
