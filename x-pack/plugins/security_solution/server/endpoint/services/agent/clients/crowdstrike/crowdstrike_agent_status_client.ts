@@ -38,6 +38,7 @@ export enum CROWDSTRIKE_STATUS_RESPONSE {
 
 export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
   protected readonly agentType: ResponseActionAgentType = 'crowdstrike';
+
   private async getAgentStatusFromConnectorAction(agentIds: string[]) {
     const connectorActions = new NormalizedExternalConnectorClient(
       this.options.connectorActionsClient as ActionsClient,
@@ -56,6 +57,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
 
     return keyBy(agentStatusResponse.data?.resources, 'id');
   }
+
   async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
     const metadataService = this.options.endpointService.getEndpointMetadataService();
@@ -144,7 +146,7 @@ export class CrowdstrikeAgentStatusClient extends AgentStatusClient {
           agentType: this.agentType,
           // TODO: check if we should use crowdstrike.cid instead
           found: agentInfo?.host.id === agentId,
-          isolated: agentInfo?.status === CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
+          isolated: agentInfo?.host.status === CROWDSTRIKE_NETWORK_STATUS.CONTAINED,
           lastSeen: agentInfo?.host.last_seen || '',
           status:
             agentStatus?.state === CROWDSTRIKE_STATUS_RESPONSE.ONLINE

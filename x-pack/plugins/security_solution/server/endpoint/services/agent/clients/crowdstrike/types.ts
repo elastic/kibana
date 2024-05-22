@@ -11,6 +11,7 @@ export interface RawCrowdstrikeInfo {
       id: string;
       last_seen: string;
       hostname: string;
+      status: string;
     };
     reduced_functionality_mode: 'no'; // or else?
     status: string;
