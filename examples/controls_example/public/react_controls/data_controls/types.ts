@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Data } from '@dnd-kit/core/dist/store';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { HasEditCapabilities, PublishesPanelTitle } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing';
@@ -21,8 +22,10 @@ export type DataControlApi = DefaultControlApi &
   HasEditCapabilities &
   PublishesDataViews;
 
-export interface DataControlFactory<State extends DefaultDataControlState = DefaultDataControlState>
-  extends ControlFactory<State, DataControlApi> {
+export interface DataControlFactory<
+  State extends DefaultDataControlState = DefaultDataControlState,
+  Api extends DataControlApi = DataControlApi
+> extends ControlFactory<State, Api> {
   isFieldCompatible: (field: DataViewField) => boolean;
   CustomOptionsComponent?: React.FC<{
     stateManager: ControlStateManager<State>;

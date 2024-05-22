@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import deepEqual from 'fast-deep-equal';
-
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
@@ -33,11 +31,7 @@ import {
   persistableControlGroupInputIsEqual,
   persistableControlGroupInputKeys,
 } from '../../../common';
-import {
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
-} from '../../../common/control_group/control_group_constants';
-import { ControlWidth, TimeSlice } from '../../../common/types';
+import { TimeSlice } from '../../../common/types';
 import { pluginServices } from '../../services';
 import { ControlsStorageService } from '../../services/storage/types';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
@@ -128,7 +122,7 @@ export class ControlGroupContainer extends Container<
   public onControlRemoved$: Subject<string>;
 
   /** This currently reports the **entire** persistable control group input on unsaved changes */
-  public unsavedChanges = new BehaviorSubject<PersistableControlGroupInput | undefined>(undefined);
+  public unsavedChanges: BehaviorSubject<PersistableControlGroupInput | undefined>;
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
 
   constructor(

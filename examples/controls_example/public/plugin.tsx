@@ -14,13 +14,10 @@ import { PANEL_HOVER_TRIGGER, registerReactEmbeddableFactory } from '@kbn/embedd
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PLUGIN_ID } from './constants';
+import img from './control_group_image.png';
 import { EditControlAction } from './react_controls/actions/edit_control_action';
 import { registerControlFactory } from './react_controls/control_factory_registry';
-import {
-  SearchControlState,
-  SEARCH_CONTROL_TYPE,
-} from './react_controls/data_controls/search_control/types';
-import img from './control_group_image.png';
+import { SEARCH_CONTROL_TYPE } from './react_controls/data_controls/search_control/types';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -41,9 +38,9 @@ export class ControlsExamplePlugin
       title: 'Controls examples',
       visibleIn: [],
       async mount(params: AppMountParameters) {
-        const [, depsStart] = await core.getStartServices();
+        const [coreStart, depsStart] = await core.getStartServices();
         const { renderApp } = await import('./app/app');
-        return renderApp(core, depsStart, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
 

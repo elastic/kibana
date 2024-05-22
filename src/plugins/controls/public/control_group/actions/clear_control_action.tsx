@@ -9,30 +9,55 @@
 import React, { SyntheticEvent } from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { apiIsPresentationContainer, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  apiCanAccessViewMode,
+  apiHasParentApi,
+  apiHasType,
+  apiHasUniqueId,
+  apiIsOfType,
+  EmbeddableApiContext,
+  HasParentApi,
+  HasType,
+  HasUniqueId,
+} from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_CLEAR_CONTROL } from '.';
+import { CanClearSelections, isClearableControl } from '../../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlEmbeddable, DataControlInput, isClearableControl } from '../../types';
-import { isControlGroup } from '../embeddable/control_group_helpers';
+import { CONTROL_GROUP_TYPE } from '../types';
 
-export interface ClearControlActionContext {
-  embeddable: ControlEmbeddable<DataControlInput>;
-}
+export type ClearControlActionApi = HasType &
+  HasUniqueId &
+  CanClearSelections &
+  HasParentApi<PresentationContainer & HasType>;
 
-export class ClearControlAction implements Action<ClearControlActionContext> {
+const isApiCompatible = (api: unknown | null): api is ClearControlActionApi =>
+  Boolean(
+    apiHasType(api) &&
+      apiHasUniqueId(api) &&
+      isClearableControl(api) &&
+      apiHasParentApi(api) &&
+      apiCanAccessViewMode(api.parentApi) &&
+      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+      apiIsPresentationContainer(api.parentApi)
+  );
+
+export class ClearControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_CLEAR_CONTROL;
   public readonly id = ACTION_CLEAR_CONTROL;
   public order = 1;
 
   constructor() {}
 
-  public readonly MenuItem = ({ context }: { context: ClearControlActionContext }) => {
+  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
+    if (!isApiCompatible(context.embeddable)) throw new IncompatibleActionError();
+
     return (
       <EuiToolTip content={this.getDisplayName(context)}>
         <EuiButtonIcon
-          data-test-subj={`control-action-${context.embeddable.id}-erase`}
+          data-test-subj={`control-action-${context.embeddable.uuid}-erase`}
           aria-label={this.getDisplayName(context)}
           iconType={this.getIconType(context)}
           onClick={(event: SyntheticEvent<HTMLButtonElement>) => {
@@ -45,34 +70,22 @@ export class ClearControlAction implements Action<ClearControlActionContext> {
     );
   };
 
-  public getDisplayName({ embeddable }: ClearControlActionContext) {
-    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return ControlGroupStrings.floatingActions.getClearButtonTitle();
   }
 
-  public getIconType({ embeddable }: ClearControlActionContext) {
-    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     return 'eraser';
   }
 
-  public async isCompatible({ embeddable }: ClearControlActionContext) {
-    if (isErrorEmbeddable(embeddable)) return false;
-    const controlGroup = embeddable.parent;
-    return Boolean(controlGroup && isControlGroup(controlGroup)) && isClearableControl(embeddable);
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    return isApiCompatible(embeddable);
   }
 
-  public async execute({ embeddable }: ClearControlActionContext) {
-    if (
-      !embeddable.parent ||
-      !isControlGroup(embeddable.parent) ||
-      !isClearableControl(embeddable)
-    ) {
-      throw new IncompatibleActionError();
-    }
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
     embeddable.clearSelections();
   }
 }

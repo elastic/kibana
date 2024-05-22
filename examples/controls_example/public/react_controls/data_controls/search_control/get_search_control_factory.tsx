@@ -18,7 +18,12 @@ import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
 import { initializeDataControl } from '../initialize_data_control';
 import { DataControlFactory } from '../types';
-import { SearchControlState, SearchControlTechniques, SEARCH_CONTROL_TYPE } from './types';
+import {
+  SearchControlApi,
+  SearchControlState,
+  SearchControlTechniques,
+  SEARCH_CONTROL_TYPE,
+} from './types';
 
 const allSearchOptions = [
   {
@@ -41,7 +46,7 @@ export const getSearchEmbeddableFactory = ({
 }: {
   core: CoreStart;
   dataViewsService: DataViewsPublicPluginStart;
-}): DataControlFactory<SearchControlState> => {
+}): DataControlFactory<SearchControlState, SearchControlApi> => {
   return {
     type: SEARCH_CONTROL_TYPE,
     getIconType: () => 'search',
@@ -90,18 +95,27 @@ export const getSearchEmbeddableFactory = ({
           }
         );
 
-      const api = buildApi(dataControlApi, {
-        ...dataControlComparators,
-        searchTechnique: [
-          searchTechnique,
-          (newTechnique: SearchControlTechniques | undefined) => searchTechnique.next(newTechnique),
-        ],
-        searchString: [
-          searchString,
-          (newString: string | undefined) =>
-            searchString.next(newString?.length === 0 ? undefined : newString),
-        ],
-      });
+      const api = buildApi(
+        {
+          ...dataControlApi,
+          clearSelections: () => {
+            searchString.next(undefined);
+          },
+        },
+        {
+          ...dataControlComparators,
+          searchTechnique: [
+            searchTechnique,
+            (newTechnique: SearchControlTechniques | undefined) =>
+              searchTechnique.next(newTechnique),
+          ],
+          searchString: [
+            searchString,
+            (newString: string | undefined) =>
+              searchString.next(newString?.length === 0 ? undefined : newString),
+          ],
+        }
+      );
 
       /**
        * If either the search string or the search technique changes, recalulate the output filter
@@ -153,7 +167,7 @@ export const getSearchEmbeddableFactory = ({
       return {
         api,
         Component: () => {
-          const [currentSearch, setCurrentSearch] = useState(searchString.getValue());
+          const currentSearch = useStateFromPublishingSubject(searchString);
 
           useEffect(() => {
             return () => {
@@ -166,12 +180,10 @@ export const getSearchEmbeddableFactory = ({
           return (
             <EuiFieldSearch
               incremental={true}
+              isClearable={false} // this will be handled by the clear floating action instead
               value={currentSearch ?? ''}
               onChange={(event) => {
-                setCurrentSearch(event.target.value);
-              }}
-              onSearch={(searchTerm) => {
-                searchString.next(searchTerm);
+                searchString.next(event.target.value);
               }}
               placeholder={i18n.translate('controls.searchControl.placeholder', {
                 defaultMessage: 'Search...',

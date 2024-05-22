@@ -15,6 +15,7 @@ export type {
   ControlEditorProps,
   CommonControlOutput,
   IEditableControlFactory,
+  CanClearSelections,
 } from './types';
 
 export type {

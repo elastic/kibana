@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { DefaultDataControlState } from '../types';
+import { CanClearSelections } from '@kbn/controls-plugin/public';
+import { DataControlApi, DefaultDataControlState } from '../types';
 
 export const SEARCH_CONTROL_TYPE = 'searchControl';
 
@@ -16,3 +17,5 @@ export interface SearchControlState extends DefaultDataControlState {
   searchString?: string;
   searchTechnique?: SearchControlTechniques;
 }
+
+export type SearchControlApi = DataControlApi & CanClearSelections;

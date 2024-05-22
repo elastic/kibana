@@ -48,14 +48,12 @@ export interface ControlEmbeddable<
   ) => Promise<ControlGroupFilterOutput>;
 }
 
-export interface IClearableControl<
-  TClearableControlEmbeddableInput extends ControlInput = ControlInput
-> extends ControlEmbeddable {
+export interface CanClearSelections {
   clearSelections: () => void;
 }
 
-export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {
-  return Boolean((control as IClearableControl).clearSelections);
+export const isClearableControl = (control: unknown): control is CanClearSelections => {
+  return typeof (control as CanClearSelections).clearSelections === 'function';
 };
 
 /**
