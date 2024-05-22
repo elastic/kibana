@@ -117,7 +117,6 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             groupFilters$,
             remoteName$
           );
-          const { observabilityRuleTypeRegistry } = deps.observability;
 
           useEffect(() => {
             return () => {
