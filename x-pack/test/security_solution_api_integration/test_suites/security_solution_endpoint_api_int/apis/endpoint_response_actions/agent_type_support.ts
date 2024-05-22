@@ -7,14 +7,11 @@
 
 import { ISOLATE_HOST_ROUTE_V2 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { targetTags } from '../../../security_solution_endpoint/target_tags';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('Response Actions support for sentinelOne agentType', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
+  describe('@ess @serverless Response Actions support for sentinelOne agentType', function () {
     describe('and the "responseActionsSentinelOneV1Enabled" feature flag is enabled', () => {
       it('should not return feature disabled error, but a connector not found error', async () => {
         await supertest

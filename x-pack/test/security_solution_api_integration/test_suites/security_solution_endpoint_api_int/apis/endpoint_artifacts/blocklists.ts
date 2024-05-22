@@ -13,10 +13,9 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
-import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint/services/endpoint_artifacts';
+import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
 import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -25,9 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin): Blocklists', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
+  describe('@ess @serverless Endpoint artifacts (via lists plugin): Blocklists', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
@@ -302,21 +299,20 @@ export default function ({ getService }: FtrProviderContext) {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
               .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
-              .send(blocklistApiCall.getBody())
+              .send(blocklistApiCall.getBody() as object)
               .expect(200);
           });
         }
       });
 
-      describe('and user has authorization to read blocklist', function () {
-        targetTags(this, ['@skipInServerless']); // no such role in serverless
-
+      // no such role in serverless
+      describe('@skipInServerless and user has authorization to read blocklist', function () {
         for (const blocklistApiCall of [...blocklistApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${blocklistApiCall.method}] - [${blocklistApiCall.info}]`, async () => {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
               .auth(ROLE.artifact_read_privileges, 'changeme')
               .set('kbn-xsrf', 'true')
-              .send(blocklistApiCall.getBody())
+              .send(blocklistApiCall.getBody() as object)
               .expect(403);
           });
         }
@@ -326,7 +322,7 @@ export default function ({ getService }: FtrProviderContext) {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
               .auth(ROLE.artifact_read_privileges, 'changeme')
               .set('kbn-xsrf', 'true')
-              .send(blocklistApiCall.getBody())
+              .send(blocklistApiCall.getBody() as object)
               .expect(200);
           });
         }
@@ -342,7 +338,7 @@ export default function ({ getService }: FtrProviderContext) {
             await supertestWithoutAuth[blocklistApiCall.method](blocklistApiCall.path)
               .auth(ROLE.t1_analyst, 'changeme')
               .set('kbn-xsrf', 'true')
-              .send(blocklistApiCall.getBody())
+              .send(blocklistApiCall.getBody() as object)
               .expect(403);
           });
         }

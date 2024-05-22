@@ -29,7 +29,6 @@ import {
   EndpointSortableField,
   MetadataListResponse,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { targetTags } from '../../security_solution_endpoint/target_tags';
 import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 import {
   bulkIndex,
@@ -47,9 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const log = getService('log');
 
-  describe('test metadata apis', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
+  describe('@ess @serverless test metadata apis', function () {
     describe('list endpoints GET route', () => {
       const numberOfHostsInFixture = 2;
       let agent1Timestamp: number;

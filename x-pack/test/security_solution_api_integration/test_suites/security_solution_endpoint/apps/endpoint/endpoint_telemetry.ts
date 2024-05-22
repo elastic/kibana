@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { targetTags } from '../../target_tags';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -16,9 +15,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   // The source of the data for these tests have changed and need to be updated
   // There are currently tests in the security_solution application being maintained
-  describe.skip('security solution endpoint telemetry', function () {
-    targetTags(this, ['@ess']);
-
+  describe.skip('@ess security solution endpoint telemetry', function () {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });

@@ -13,10 +13,9 @@ import {
   GLOBAL_ARTIFACT_TAG,
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
-import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint/services/endpoint_artifacts';
+import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
 import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -25,9 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint artifacts (via lists plugin): Trusted Applications', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
+  describe('@ess @serverless Endpoint artifacts (via lists plugin): Trusted Applications', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
 
     before(async () => {
@@ -269,21 +266,20 @@ export default function ({ getService }: FtrProviderContext) {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
               .auth(ROLE.endpoint_policy_manager, 'changeme')
               .set('kbn-xsrf', 'true')
-              .send(trustedAppApiCall.getBody())
+              .send(trustedAppApiCall.getBody() as object)
               .expect(200);
           });
         }
       });
 
-      describe('and user has authorization to read trusted apps', function () {
-        targetTags(this, ['@skipInServerless']); // no such role in serverless
-
+      // no such role in serverless
+      describe('@skipInServerless and user has authorization to read trusted apps', function () {
         for (const trustedAppApiCall of [...trustedAppApiCalls, ...needsWritePrivilege]) {
           it(`should error on [${trustedAppApiCall.method}] - [${trustedAppApiCall.info}]`, async () => {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
               .auth(ROLE.hunter, 'changeme')
               .set('kbn-xsrf', 'true')
-              .send(trustedAppApiCall.getBody())
+              .send(trustedAppApiCall.getBody() as object)
               .expect(403);
           });
         }
@@ -293,7 +289,7 @@ export default function ({ getService }: FtrProviderContext) {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
               .auth(ROLE.hunter, 'changeme')
               .set('kbn-xsrf', 'true')
-              .send(trustedAppApiCall.getBody())
+              .send(trustedAppApiCall.getBody() as object)
               .expect(200);
           });
         }
@@ -309,7 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
             await supertestWithoutAuth[trustedAppApiCall.method](trustedAppApiCall.path)
               .auth(ROLE.t1_analyst, 'changeme')
               .set('kbn-xsrf', 'true')
-              .send(trustedAppApiCall.getBody())
+              .send(trustedAppApiCall.getBody() as object)
               .expect(403);
           });
         }

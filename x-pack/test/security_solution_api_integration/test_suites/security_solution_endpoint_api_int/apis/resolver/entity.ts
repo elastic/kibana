@@ -8,22 +8,19 @@
 import expect from '@kbn/expect';
 import { eventsIndexPattern } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { ResolverEntityIndex } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('Resolver tests for the entity route', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
+  describe('@ess @serverless Resolver tests for the entity route', function () {
     describe('winlogbeat tests', () => {
-      before(async () => {
+      beforeAll(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');
       });
 
-      after(async () => {
+      afterAll(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');
       });
 
@@ -63,15 +60,13 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('signals index mapping tests', function () {
-      // illegal_argument_exception: unknown setting [index.lifecycle.name] in before
-      targetTags(this, ['@brokenInServerless']);
-
-      before(async () => {
+    // illegal_argument_exception: unknown setting [index.lifecycle.name] in before
+    describe('@brokenInServerless signals index mapping tests', function () {
+      beforeAll(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       });
 
-      after(async () => {
+      afterAll(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       });
 

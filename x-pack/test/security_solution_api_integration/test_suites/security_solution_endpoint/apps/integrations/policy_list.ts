@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
-import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -25,10 +24,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const policyTestResources = getService('policyTestResources');
   const endpointTestResources = getService('endpointTestResources');
 
-  describe('When on the Endpoint Policy List Page', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
-    before(async () => {
+  describe('@ess @serverless When on the Endpoint Policy List Page', function () {
+    beforeAll(async () => {
       await browser.refresh();
     });
 
@@ -55,12 +52,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe.skip('with policies', () => {
       let indexedData: IndexedHostsAndAlertsResponse;
       let policyInfo: PolicyTestResourceInfo;
-      before(async () => {
+      beforeAll(async () => {
         indexedData = await endpointTestResources.loadEndpointData();
         policyInfo = await policyTestResources.createPolicy();
         await browser.refresh();
       });
-      after(async () => {
+      afterAll(async () => {
         if (indexedData) {
           await endpointTestResources.unloadEndpointData(indexedData);
         }

@@ -17,10 +17,9 @@ import {
   toNdJsonString,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
-import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { PolicyTestResourceInfo } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../security_solution_api_integration/test_suites/security_solution_endpoint/services/endpoint_artifacts';
+import { PolicyTestResourceInfo } from '../../../security_solution_endpoint/services/endpoint_policy';
+import { ArtifactTestData } from '../../../security_solution_endpoint/services/endpoint_artifacts';
 import { ROLE } from '../../services/roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -29,9 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointPolicyTestResources = getService('endpointPolicyTestResources');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
 
-  describe('Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
+  describe('@ess @serverless Endpoint Host Isolation Exceptions artifacts (via lists plugin)', function () {
     let fleetEndpointPolicy: PolicyTestResourceInfo;
     let hostIsolationExceptionData: ArtifactTestData;
 
@@ -278,15 +275,14 @@ export default function ({ getService }: FtrProviderContext) {
           )
             .auth(ROLE.endpoint_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
-            .send(hostIsolationExceptionApiCall.getBody())
+            .send(hostIsolationExceptionApiCall.getBody() as object)
             .expect(200);
         });
       }
     });
 
-    describe('and user has authorization to read host isolation exceptions', function () {
-      targetTags(this, ['@skipInServerless']); // no such role in serverless
-
+    // no such role in serverless
+    describe('@skipInServerless and user has authorization to read host isolation exceptions', function () {
       for (const hostIsolationExceptionApiCall of [
         ...hostIsolationExceptionCalls,
         ...needsWritePrivilege,
@@ -297,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
             .auth(ROLE.hunter, 'changeme')
             .set('kbn-xsrf', 'true')
-            .send(hostIsolationExceptionApiCall.getBody())
+            .send(hostIsolationExceptionApiCall.getBody() as object)
             .expect(403);
         });
       }
@@ -309,7 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
             .auth(ROLE.hunter, 'changeme')
             .set('kbn-xsrf', 'true')
-            .send(hostIsolationExceptionApiCall.getBody())
+            .send(hostIsolationExceptionApiCall.getBody() as object)
             .expect(200);
         });
       }
@@ -327,7 +323,7 @@ export default function ({ getService }: FtrProviderContext) {
           )
             .auth(ROLE.t1_analyst, 'changeme')
             .set('kbn-xsrf', 'true')
-            .send(hostIsolationExceptionApiCall.getBody())
+            .send(hostIsolationExceptionApiCall.getBody() as object)
             .expect(403);
         });
       }

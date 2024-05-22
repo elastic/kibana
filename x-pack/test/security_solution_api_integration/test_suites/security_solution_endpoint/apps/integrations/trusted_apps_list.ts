@@ -8,7 +8,6 @@
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
-import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'trustedApps']);
@@ -17,16 +16,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
   const toasts = getService('toasts');
 
-  describe('When on the Trusted Apps list', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
+  describe('@ess @serverless When on the Trusted Apps list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
-    before(async () => {
+    beforeAll(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
     });
-    after(async () => {
+    afterAll(async () => {
       await endpointTestResources.unloadEndpointData(indexedData);
     });
 

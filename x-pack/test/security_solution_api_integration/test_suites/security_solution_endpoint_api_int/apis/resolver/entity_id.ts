@@ -19,7 +19,6 @@ import {
   EndpointDocGenerator,
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
-import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../../services/resolver';
 import { createAncestryArray, schemaWithAncestry } from './common';
@@ -36,13 +35,11 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
 
-  describe('Resolver handling of entity ids', function () {
-    targetTags(this, ['@ess', '@serverless']);
-
+  describe('@ess @serverless Resolver handling of entity ids', function () {
     describe('entity api', () => {
       let origin: Event;
       let genData: InsertedEvents;
-      before(async () => {
+      beforeAll(async () => {
         origin = generator.generateEvent({
           parentEntityID: 'a',
           eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
@@ -51,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         genData = await resolver.insertEvents([origin], processEventsIndex);
       });
 
-      after(async () => {
+      afterAll(async () => {
         await resolver.deleteData(genData);
       });
 
