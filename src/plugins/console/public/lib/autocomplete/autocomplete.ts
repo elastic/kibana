@@ -423,12 +423,7 @@ export default function ({
     });
   }
 
-  function applyTerm(term: {
-    value?: string;
-    context?: AutoCompleteContext;
-    template?: { __raw?: boolean; value?: string; [key: string]: unknown };
-    insertValue?: string;
-  }) {
+  function applyTerm(term: ResultTerm) {
     const context = term.context!;
 
     if (context?.endpoint && term.value) {
