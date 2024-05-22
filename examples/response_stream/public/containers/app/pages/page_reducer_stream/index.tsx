@@ -65,8 +65,12 @@ export const PageReducerStream: FC = () => {
     }
   };
 
-  // TODO This approach needs to be adapted as it might miss when error messages arrive bulk.
-  // This is for low level errors on the stream/HTTP level.
+  // TODO This needs to be adapted as it might miss when error messages arrive
+  // in bulk, but it should be good enough for this demo. This is for low level
+  // errors on the HTTP level.Note this will only surface errors that happen for
+  // the original request. Once the stream returns data, it will not be able to
+  // return errors. This is why we need separate error handling for application
+  // level errors.
   useEffect(() => {
     if (errors.length > 0) {
       notifications.toasts.addDanger(errors[errors.length - 1]);
