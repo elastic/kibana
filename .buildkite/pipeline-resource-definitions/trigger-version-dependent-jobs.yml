@@ -48,7 +48,16 @@ spec:
       schedules:
         Trigger ES forward compatibility tests:
           cronline: 0 5 * * *
-          message: Daily 6 am UTC
-          branch: main
+          message: Trigger ES forward compatibility tests
           env:
             TRIGGER_PIPELINE_SET: es-forward
+        Trigger artifact staging builds:
+          cronline: 0 7 * * * America/New_York
+          message: Trigger artifact staging builds
+          env:
+            TRIGGER_PIPELINE_SET: artifacts-staging
+        Trigger artifact snapshot builds:
+          cronline: 0 7 * * * America/New_York
+          message: Trigger artifact snapshot builds
+          env:
+              TRIGGER_PIPELINE_SET: artifacts-snapshot
