@@ -13,7 +13,7 @@ export const containerDiskIOOps: TSVBMetricModelCreator = (
   interval
 ): TSVBMetricModel => ({
   id: 'containerDiskIOOps',
-  requires: ['docker.disk'],
+  requires: ['docker.diskio'],
   index_pattern: indexPattern,
   interval,
   time_field: timeField,
