@@ -1565,13 +1565,73 @@
       },
       {
         "parentPluginId": "@kbn/reporting-server",
-        "id": "def-server.REPORTING_SYSTEM_INDEX",
+        "id": "def-server.REPORTING_DATA_STREAM_ALIAS",
         "type": "string",
         "tags": [],
-        "label": "REPORTING_SYSTEM_INDEX",
+        "label": "REPORTING_DATA_STREAM_ALIAS",
         "description": [],
         "signature": [
-          "\".reporting\""
+          "\".kibana-reporting\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_COMPONENT_TEMPLATE",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_COMPONENT_TEMPLATE",
+        "description": [],
+        "signature": [
+          "\"kibana-reporting@custom\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_WILDCARD",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_WILDCARD",
+        "description": [],
+        "signature": [
+          "\".kibana-reporting*\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY",
+        "description": [],
+        "signature": [
+          "\".reporting-*,.kibana-reporting*\""
+        ],
+        "path": "packages/kbn-reporting/server/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/reporting-server",
+        "id": "def-server.REPORTING_LEGACY_INDICES",
+        "type": "string",
+        "tags": [],
+        "label": "REPORTING_LEGACY_INDICES",
+        "description": [],
+        "signature": [
+          "\".reporting-*\""
         ],
         "path": "packages/kbn-reporting/server/constants.ts",
         "deprecated": false,
