@@ -58,6 +58,7 @@ import { getReferencesForPanelId } from '../../../common/dashboard_container/per
 import {
   DASHBOARD_APP_ID,
   DASHBOARD_LOADED_EVENT,
+  DASHBOARD_LOAD_TYPES,
   DASHBOARD_UI_METRIC_ID,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
@@ -117,6 +118,8 @@ type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
   DashboardReduxState,
   typeof dashboardContainerReducers
 >;
+
+let isFirstDashboardLoadOfSession = true;
 
 export const DashboardContainerContext = createContext<DashboardContainer | null>(null);
 export const useDashboardContainer = (): DashboardContainer => {
@@ -181,6 +184,7 @@ export class DashboardContainer
   private theme;
   private chrome;
   private customBranding;
+  private firstLoadOnThisDashboard: boolean = true;
 
   public trackContentfulRender() {
     if (!this.hadContentfulRender && this.analyticsService) {
@@ -327,6 +331,13 @@ export class DashboardContainer
 
   public reportPerformanceMetrics(stats: DashboardRenderPerformanceStats) {
     if (this.analyticsService && this.dashboardCreationStartTime) {
+      let loadType = DASHBOARD_LOAD_TYPES.subsequentDashboardLoad;
+      if (isFirstDashboardLoadOfSession) {
+        loadType = DASHBOARD_LOAD_TYPES.initialKibanaLoad;
+      } else if (this.firstLoadOnThisDashboard) {
+        loadType = DASHBOARD_LOAD_TYPES.initialDashboardLoad;
+      }
+
       const panelCount = Object.keys(this.getState().explicitInput.panels).length;
       const totalDuration = stats.panelsRenderDoneTime - this.dashboardCreationStartTime;
       reportPerformanceMetricEvent(this.analyticsService, {
@@ -338,7 +349,11 @@ export class DashboardContainer
         value2: panelCount,
         key3: 'total_load_time',
         value3: totalDuration,
+        key4: 'load_type',
+        value4: loadType,
       });
+      isFirstDashboardLoadOfSession = false;
+      this.firstLoadOnThisDashboard = false;
     }
   }
 
@@ -697,6 +712,7 @@ export class DashboardContainer
       this.dispatch.setLastSavedId(newSavedObjectId);
       this.setExpandedPanelId(undefined);
     });
+    this.firstLoadOnThisDashboard = true;
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
   };
