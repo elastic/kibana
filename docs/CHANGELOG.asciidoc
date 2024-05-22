@@ -364,7 +364,7 @@ Observability::
 * Fixes filtering for a histogram legend value ({kibana-pull}178551[#178551]).
 * Fixes an OpenAI Connector default model assignment bug ({kibana-pull}178369[#178369]).
 Platform::
-* Update static asset headers to include public` and `immutable` link:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control[cache control directives] to a large number of assets served by Kibana, which should reduce the number of requests for static assets in browsers that respect these directives. ({kibana-pull}180378[#180378]).
+* Update static asset headers to include `public` and `immutable` link:https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control[cache control directives] to a large number of assets served by Kibana, which should reduce the number of requests for static assets in browsers that respect these directives. ({kibana-pull}180378[#180378]).
 * Omits apiKey from RUM agent ({kibana-pull}178902[#178902]).
 Presentation::
 * Fixes clicking "Explore in maps" button not taking users to maps ({kibana-pull}181903[#181903]).
