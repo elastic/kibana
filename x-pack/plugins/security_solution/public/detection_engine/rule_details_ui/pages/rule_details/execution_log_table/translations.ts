@@ -93,7 +93,7 @@ export const COLUMN_SOURCE_EVENT_TIME_RANGE = i18n.translate(
 export const COLUMN_SOURCE_EVENT_TIME_RANGE_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.sourceEventTimeRangeTooltip',
   {
-    defaultMessage: 'Only for manual rule runs',
+    defaultMessage: "Only for manual rule runs. Don't inlcude additional lookback time.",
   }
 );
 
