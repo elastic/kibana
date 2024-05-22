@@ -63,7 +63,6 @@ describe(
           cy.log('Waiting for assignees to appear in popover');
           refreshRuleExecutionTable();
           return getExecutionLogTableRow().then((rows) => {
-
             return rows.length === 2;
           });
         },
