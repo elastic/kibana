@@ -35,7 +35,12 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { TrackContentfulRender } from '@kbn/presentation-containers';
+import {
+  HasRuntimeChildState,
+  HasSaveNotification,
+  HasSerializedChildState,
+  TrackContentfulRender,
+} from '@kbn/presentation-containers';
 import { apiHasSerializableState, PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -73,6 +78,7 @@ import {
   DashboardPublicState,
   DashboardReduxState,
   DashboardRenderPerformanceStats,
+  UnsavedPanelState,
 } from '../types';
 import {
   addFromLibrary,
@@ -124,7 +130,12 @@ export const useDashboardContainer = (): DashboardContainer => {
 
 export class DashboardContainer
   extends Container<InheritedChildInput, DashboardContainerInput>
-  implements DashboardExternallyAccessibleApi, TrackContentfulRender
+  implements
+    DashboardExternallyAccessibleApi,
+    TrackContentfulRender,
+    HasSaveNotification,
+    HasRuntimeChildState,
+    HasSerializedChildState
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
@@ -577,9 +588,9 @@ export class DashboardContainer
       const factory = await getReactEmbeddableFactory(panel.type);
       const child = this.children$.value[panelId];
       if (!child) throw new PanelNotFoundError();
-      if (!apiHasSerializableState(child)) throw new PanelIncompatibleError();
-      const serialized = child.serializeState();
-      const deserialized = factory.deserializeState(serialized);
+      const serialized = apiHasSerializableState(child)
+        ? await child.serializeState()
+        : { rawState: {} };
       return {
         type: panel.type,
         explicitInput: { ...panel.explicitInput, ...deserialized },
@@ -810,17 +821,19 @@ export class DashboardContainer
     });
   };
 
-  public lastSavedState: Subject<void> = new Subject();
-  public getLastSavedStateForChild = (childId: string) => {
-    const {
-      componentState: {
-        lastSavedInput: { panels },
-      },
-    } = this.getState();
-    const panel: DashboardPanelState | undefined = panels[childId];
+  public saveNotification$: Subject<void> = new Subject<void>();
 
+  public getSerializedStateForChild = (childId: string) => {
     const references = getReferencesForPanelId(childId, this.savedObjectReferences);
-    return { rawState: panel?.explicitInput, version: panel?.version, references };
+    return {
+      rawState: this.getInput().panels[childId].explicitInput,
+      references,
+    };
+  };
+
+  public restoredRuntimeState: UnsavedPanelState | undefined = undefined;
+  public getRuntimeStateForChild = (childId: string) => {
+    return this.restoredRuntimeState?.[childId];
   };
 
   public removePanel(id: string) {
@@ -861,6 +874,7 @@ export class DashboardContainer
   };
 
   public resetAllReactEmbeddables = () => {
+    this.restoredRuntimeState = undefined;
     let resetChangedPanelCount = false;
     const currentChildren = this.children$.value;
     for (const panelId of Object.keys(currentChildren)) {

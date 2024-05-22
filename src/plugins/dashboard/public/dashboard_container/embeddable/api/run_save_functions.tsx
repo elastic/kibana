@@ -10,7 +10,7 @@ import { Reference } from '@kbn/content-management-utils';
 import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
-import { apiHasSerializableState } from '@kbn/presentation-containers';
+import { apiHasSerializableState, SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import React from 'react';
 import { batch } from 'react-redux';
@@ -38,6 +38,9 @@ const serializeAllPanelState = async (
   const references: Reference[] = [];
   const newPanelsMap: DashboardPanelMap = {};
 
+  const serializePromises: Array<
+    Promise<{ uuid: string; serialized: SerializedPanelState<object> }>
+  > = [];
   for (const [uuid, panel] of Object.entries(dashboard.getInput().panels)) {
     const newUuid = saveAsCopy ? v4() : uuid;
     if (!reactEmbeddableRegistryHasKey(panel.type)) {
@@ -49,16 +52,23 @@ const serializeAllPanelState = async (
       continue;
     }
     const api = dashboard.children$.value[uuid];
+
     if (api && apiHasSerializableState(api)) {
-      const serializedState = api.serializeState();
-      newPanelsMap[newUuid] = {
-        ...panel,
-        gridData: { ...panel.gridData, i: newUuid },
-        explicitInput: { ...serializedState.rawState, id: newUuid },
-      };
-      references.push(...prefixReferencesFromPanel(newUuid, serializedState.references ?? []));
+      serializePromises.push(
+        (async () => {
+          const serialized = await api.serializeState();
+          return { uuid: newUuid, serialized };
+        })()
+      );
     }
   }
+
+  const serializeResults = await Promise.all(serializePromises);
+  for (const result of serializeResults) {
+    newPanelsMap[result.uuid].explicitInput = { ...result.serialized.rawState, id: result.uuid };
+    references.push(...prefixReferencesFromPanel(result.uuid, result.serialized.references ?? []));
+  }
+
   return { panels: newPanelsMap, references };
 };
 
@@ -159,7 +169,7 @@ export function runSaveAs(this: DashboardContainer) {
         });
       }
       this.savedObjectReferences = saveResult.references ?? [];
-      this.lastSavedState.next();
+      this.saveNotification$.next();
       resolve(saveResult);
       return saveResult;
     };
@@ -213,7 +223,7 @@ export async function runQuickSave(this: DashboardContainer) {
 
   this.savedObjectReferences = saveResult.references ?? [];
   this.dispatch.setLastSavedInput(dashboardStateToSave);
-  this.lastSavedState.next();
+  this.saveNotification$.next();
   if (this.controlGroup && persistableControlGroupInput) {
     this.controlGroup.setSavedState(persistableControlGroupInput);
   }
