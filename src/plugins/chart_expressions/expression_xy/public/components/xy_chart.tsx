@@ -651,7 +651,12 @@ export function XYChart({
         : undefined;
     const xAxisColumnIndex = table.columns.findIndex((el) => el.id === xAccessor);
 
-    const context: BrushEvent['data'] = { range: [min, max], table, column: xAxisColumnIndex };
+    const context: BrushEvent['data'] = {
+      range: [min, max],
+      table,
+      column: xAxisColumnIndex,
+      ...(table.meta?.type === 'es_ql' ? { timeFieldName: xAccessor } : {}),
+    };
     onSelectRange(context);
   };
 
