@@ -12,6 +12,7 @@ import {
 } from '@kbn/core/server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
+import { syntheticsSettings } from './synthetics_settings';
 import {
   SYNTHETICS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
@@ -19,18 +20,12 @@ import {
 import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 import { DynamicSettingsAttributes } from '../runtime_types/settings';
-import { UptimeConfig } from '../../common/config';
 import { settingsObjectId, settingsObjectType } from './uptime_settings';
 import {
   getSyntheticsMonitorSavedObjectType,
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
 } from './synthetics_monitor';
 import { syntheticsServiceApiKey } from './service_api_key';
-
-export type UMSavedObjectsQueryFn<T = any, P = undefined> = (
-  client: SavedObjectsClientContract,
-  params?: P
-) => Promise<T> | T;
 
 export const registerUptimeSavedObjects = (
   savedObjectsService: SavedObjectsServiceSetup,
@@ -41,6 +36,7 @@ export const registerUptimeSavedObjects = (
   savedObjectsService.registerType(getSyntheticsMonitorSavedObjectType(encryptedSavedObjects));
   savedObjectsService.registerType(syntheticsServiceApiKey);
   savedObjectsService.registerType(syntheticsParamSavedObjectType);
+  savedObjectsService.registerType(syntheticsSettings);
 
   encryptedSavedObjects.registerType({
     type: syntheticsServiceApiKey.name,
@@ -52,15 +48,10 @@ export const registerUptimeSavedObjects = (
   encryptedSavedObjects.registerType(SYNTHETICS_SECRET_ENCRYPTED_TYPE);
 };
 
-export interface UMSavedObjectsAdapter {
-  config: UptimeConfig | null;
-  getUptimeDynamicSettings: UMSavedObjectsQueryFn<DynamicSettingsAttributes>;
-  setUptimeDynamicSettings: UMSavedObjectsQueryFn<void, DynamicSettingsAttributes>;
-}
-
 export const savedObjectsAdapter: UMSavedObjectsAdapter = {
-  config: null,
-  getUptimeDynamicSettings: async (client) => {
+  getUptimeDynamicSettings: async (
+    client: SavedObjectsClientContract
+  ): Promise<DynamicSettingsAttributes> => {
     try {
       const obj = await client.get<DynamicSettingsAttributes>(settingsObjectType, settingsObjectId);
       return obj?.attributes ?? DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
@@ -68,17 +59,26 @@ export const savedObjectsAdapter: UMSavedObjectsAdapter = {
       const config = savedObjectsAdapter.config;
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         if (config?.index) {
-          return { ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES, heartbeatIndices: config.index };
+          return { ...DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES };
         }
         return DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES;
       }
       throw getErr;
     }
   },
-  setUptimeDynamicSettings: async (client, settings: DynamicSettingsAttributes | undefined) => {
-    await client.create(settingsObjectType, settings, {
-      id: settingsObjectId,
-      overwrite: true,
-    });
+  setUptimeDynamicSettings: async (
+    client: SavedObjectsClientContract,
+    settings: DynamicSettingsAttributes
+  ) => {
+    const settingsObject = await client.create<DynamicSettingsAttributes>(
+      settingsObjectType,
+      settings,
+      {
+        id: settingsObjectId,
+        overwrite: true,
+      }
+    );
+
+    return settingsObject.attributes;
   },
 };
