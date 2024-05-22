@@ -103,7 +103,7 @@ export const indexHostsAndAlerts = usageTracker.track(
 
     // If `fleet` integration is true, then ensure a (fake) fleet-server is connected
     if (fleet) {
-      await enableFleetServerIfNecessary(client);
+      await enableFleetServerIfNecessary(client, kbnClient, logger);
     }
 
     // Keep a map of host applied policy ids (fake) to real ingest package configs (policy record)

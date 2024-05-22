@@ -91,7 +91,7 @@ export const loadEndpoints = async ({
 
   if (!WAS_FLEET_SETUP_DONE) {
     await setupFleetForEndpoint(kbnClient);
-    await enableFleetServerIfNecessary(esClient);
+    await enableFleetServerIfNecessary(esClient, kbnClient, log);
     // eslint-disable-next-line require-atomic-updates
     WAS_FLEET_SETUP_DONE = true;
   }
