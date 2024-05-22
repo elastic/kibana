@@ -7,6 +7,7 @@
 
 import React from 'react';
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -93,10 +94,35 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
     <EuiPanel hasBorder>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate(
-            'xpack.observability_onboarding.otelLogsPanel.otelLogsModalHeaderTitleLabel',
-            { defaultMessage: 'OTel Logs and host metrics' }
-          )}
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexItem grow>
+              {i18n.translate(
+                'xpack.observability_onboarding.otelLogsPanel.otelLogsModalHeaderTitleLabel',
+                { defaultMessage: 'OTel logs and host metrics' }
+              )}
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label={i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.label',
+                  {
+                    defaultMessage: 'Technical preview',
+                  }
+                )}
+                size="m"
+                color="hollow"
+                tooltipContent={i18n.translate(
+                  'xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.tooltip',
+                  {
+                    defaultMessage:
+                      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                  }
+                )}
+                tooltipPosition={'right'}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
