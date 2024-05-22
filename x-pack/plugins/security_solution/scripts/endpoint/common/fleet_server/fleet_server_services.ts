@@ -17,6 +17,7 @@ import {
   API_VERSIONS,
   FLEET_SERVER_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  AGENTS_INDEX,
 } from '@kbn/fleet-plugin/common';
 import type {
   FleetServerHost,
@@ -734,7 +735,7 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
           method: 'POST',
           path: '/api/console/proxy',
           query: {
-            path: `.fleet-servers/_search`,
+            path: `${AGENTS_INDEX}/_search`,
             method: 'GET',
           },
           body: {
@@ -743,7 +744,7 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
                 filter: [
                   {
                     term: {
-                      'host.name': fleetServerHostname,
+                      'local_metadata.host.name': fleetServerHostname,
                     },
                   },
                 ],
