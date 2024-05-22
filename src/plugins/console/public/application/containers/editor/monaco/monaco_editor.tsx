@@ -70,7 +70,9 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      actionsProvider.current = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
+      setInputEditor(provider);
+      actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       registerKeyboardCommands({
         editor,
@@ -81,9 +83,14 @@ export const MonacoEditor = ({ initialTextValue }: EditorProps) => {
           await actionsProvider.current?.moveToPreviousRequestEdge(),
         moveToNextRequestEdge: async () => await actionsProvider.current?.moveToNextRequestEdge(),
       });
-      setInputEditor(provider);
     },
-    [getDocumenationLink, registerKeyboardCommands, sendRequestsCallback, setupResizeChecker]
+    [
+      getDocumenationLink,
+      registerKeyboardCommands,
+      sendRequestsCallback,
+      setupResizeChecker,
+      setInputEditor,
+    ]
   );
 
   const editorWillUnmountCallback = useCallback(() => {

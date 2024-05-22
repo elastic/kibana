@@ -213,7 +213,7 @@ describe('Editor actions provider', () => {
       expect((endpoints as string[]).sort()).toEqual(['_cat', '_search']);
     });
   });
-  
+
   describe('move to next/previous request edge', () => {
     beforeEach(() => {
       /* The editor has the following text:
@@ -402,7 +402,7 @@ describe('Editor actions provider', () => {
       });
     });
   });
-  
+
     describe('restoreRequestFromHistory', () => {
     const testHistoryRequest = 'GET _alias';
     beforeEach(() => {
@@ -558,5 +558,4 @@ describe('Editor actions provider', () => {
       expect(editor.executeEdits).toHaveBeenCalledWith('restoreFromHistory', [expectedEdit]);
     });
   });
-});
 });
