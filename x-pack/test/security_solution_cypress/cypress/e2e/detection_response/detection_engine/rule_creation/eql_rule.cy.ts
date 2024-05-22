@@ -42,7 +42,7 @@ import {
   INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
 
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { getDetails } from '../../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
@@ -138,7 +138,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
           .should('have.text', `${humanizedDuration}`);
       });
 
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfAlerts);
@@ -175,7 +174,6 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       createAndEnableRule();
       openRuleManagementPageViaBreadcrumbs();
       goToRuleDetailsOf(rule.name);
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('have.text', expectedNumberOfSequenceAlerts);
