@@ -11,7 +11,6 @@ import type { MessageDescriptor } from '@formatjs/intl';
 import { handleIntlError } from './error_handler';
 
 import { Translation, TranslationInput } from '../translation';
-import { polyfillLocale } from './polyfills';
 import { defaultEnFormats } from './formats';
 import { FormatXMLElementFn, PrimitiveType } from './types';
 
@@ -192,7 +191,6 @@ export async function load(translationsUrl: string) {
     return;
   }
 
-  await polyfillLocale(normalizeLocale(newTranslation.locale));
   init(newTranslation);
   isInitialized = true;
 }
