@@ -56,12 +56,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 
-    beforeAll(async () => {
+    before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
-    }, timeout);
-    afterAll(async () => {
+    });
+    after(async () => {
       await endpointTestResources.unloadEndpointData(indexedData);
-    }, timeout);
+    });
 
     const checkFleetArtifacts = async (
       identifier: string,

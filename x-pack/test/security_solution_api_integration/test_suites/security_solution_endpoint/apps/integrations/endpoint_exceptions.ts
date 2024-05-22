@@ -123,7 +123,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     let indexedData: IndexedHostsAndAlertsResponse;
-    beforeAll(async () => {
+    before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
 
       const waitForAlertsToAppear = async () => {
@@ -136,11 +136,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       await waitForAlertsToAppear();
-    }, timeout);
+    });
 
-    afterAll(async () => {
+    after(async () => {
       await endpointTestResources.unloadEndpointData(indexedData);
-    }, timeout);
+    });
 
     beforeEach(async () => {
       const deleteEndpointExceptions = async () => {

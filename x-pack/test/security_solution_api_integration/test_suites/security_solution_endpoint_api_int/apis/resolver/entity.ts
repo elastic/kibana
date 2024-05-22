@@ -16,11 +16,11 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('@ess @serverless Resolver tests for the entity route', function () {
     describe('winlogbeat tests', () => {
-      beforeAll(async () => {
+      before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');
       });
 
-      afterAll(async () => {
+      after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/winlogbeat');
       });
 
@@ -62,11 +62,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     // illegal_argument_exception: unknown setting [index.lifecycle.name] in before
     describe('@brokenInServerless signals index mapping tests', function () {
-      beforeAll(async () => {
+      before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       });
 
-      afterAll(async () => {
+      after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
       });
 

@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
     const registryUrl = getRegistryUrlFromTestEnv() ?? getRegistryUrlFromIngest();
     log.info(`Package registry URL for tests: ${registryUrl}`);
 
-    beforeAll(async () => {
+    before(async () => {
       log.info('calling Fleet setup');
       await ingestManager.setup();
 

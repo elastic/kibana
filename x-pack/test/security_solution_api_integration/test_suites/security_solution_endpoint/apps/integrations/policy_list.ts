@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
 
   describe('@ess @serverless When on the Endpoint Policy List Page', function () {
-    beforeAll(async () => {
+    before(async () => {
       await browser.refresh();
     });
 
@@ -52,12 +52,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe.skip('with policies', () => {
       let indexedData: IndexedHostsAndAlertsResponse;
       let policyInfo: PolicyTestResourceInfo;
-      beforeAll(async () => {
+      before(async () => {
         indexedData = await endpointTestResources.loadEndpointData();
         policyInfo = await policyTestResources.createPolicy();
         await browser.refresh();
       });
-      afterAll(async () => {
+      after(async () => {
         if (indexedData) {
           await endpointTestResources.unloadEndpointData(indexedData);
         }

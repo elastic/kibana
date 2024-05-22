@@ -20,7 +20,7 @@ export default async function (ftrConfigProviderContext: FtrConfigProviderContex
   return generateConfig({
     ftrConfigProviderContext,
     baseConfig: svlBaseConfig,
-    testFiles: [resolve(__dirname, './apps/integrations_feature_flag')],
+    testFiles: [resolve(__dirname, '../apps/integrations_feature_flag')],
     junitReportName:
       'X-Pack Endpoint Integrations With Feature Flags turned on Functional Tests on ESS',
     target: 'serverless',

@@ -18,12 +18,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('@ess @serverless When on the Trusted Apps list', function () {
     let indexedData: IndexedHostsAndAlertsResponse;
-    beforeAll(async () => {
+    before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
       await pageObjects.trustedApps.navigateToTrustedAppsList();
     });
-    afterAll(async () => {
+    after(async () => {
       await endpointTestResources.unloadEndpointData(indexedData);
     });
 

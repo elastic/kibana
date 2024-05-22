@@ -39,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('entity api', () => {
       let origin: Event;
       let genData: InsertedEvents;
-      beforeAll(async () => {
+      before(async () => {
         origin = generator.generateEvent({
           parentEntityID: 'a',
           eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
@@ -48,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
         genData = await resolver.insertEvents([origin], processEventsIndex);
       });
 
-      afterAll(async () => {
+      after(async () => {
         await resolver.deleteData(genData);
       });
 

@@ -31,12 +31,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let indexedData: IndexedHostsAndAlertsResponse;
     const formTestSubjects = getPolicySettingsFormTestSubjects();
 
-    beforeAll(async () => {
+    before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
       await browser.refresh();
     });
 
-    afterAll(async () => {
+    after(async () => {
       await endpointTestResources.unloadEndpointData(indexedData);
     });
 

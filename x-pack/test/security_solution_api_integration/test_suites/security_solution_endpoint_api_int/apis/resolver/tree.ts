@@ -47,12 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('@ess @serverless Resolver tree', function () {
-    beforeAll(async () => {
+    before(async () => {
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
       tree = resolverTrees.trees[0];
     });
-    afterAll(async () => {
+    after(async () => {
       await resolver.deleteData(resolverTrees);
     });
 

@@ -38,7 +38,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
   const policyTestResources = getService('policyTestResources');
   const unzipPromisify = promisify(unzip);
-  const timeout = 60000 * 5;
 
   const removeAllArtifacts = async () => {
     for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
@@ -57,12 +56,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let indexedData: IndexedHostsAndAlertsResponse;
     let policyInfo: PolicyTestResourceInfo;
 
-    beforeAll(async () => {
+    before(async () => {
       indexedData = await endpointTestResources.loadEndpointData();
-    }, timeout);
-    afterAll(async () => {
+    });
+    after(async () => {
       await endpointTestResources.unloadEndpointData(indexedData);
-    }, timeout);
+    });
 
     const checkFleetArtifacts = async (
       identifier: string,
