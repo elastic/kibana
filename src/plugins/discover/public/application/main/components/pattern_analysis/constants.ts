@@ -6,10 +6,6 @@
  * Side Public License, v 1.
  */
 
-export {
-  type FieldCategorizeButtonProps,
-  FieldCategorizeButton,
-  getFieldCategorizeButton,
-} from './field_categorize_button';
-
-export { triggerCategorizeActions, canCategorize } from './categorize_trigger_utils';
+/** Telemetry related to field statistics table **/
+export const PATTERN_ANALYSIS_LOADED = 'pattern_analysis_loaded';
+export const PATTERN_ANALYSIS_VIEW_CLICK = 'pattern_analysis_view_click';
