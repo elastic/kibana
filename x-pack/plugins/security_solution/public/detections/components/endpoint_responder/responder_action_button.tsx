@@ -17,6 +17,7 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 export const ResponderActionButton = memo<ResponderContextMenuItemProps>(
   ({ endpointId, onClick }) => {
     const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
+      agentType: 'endpoint',
       endpointId,
       onClick,
     });
