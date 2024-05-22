@@ -15,6 +15,7 @@ import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -125,7 +126,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
       .getTypeRegistry()
       .getAllTypes()
       .reduce((versionMap, type) => {
-        const { name, migrations, convertToMultiNamespaceTypeVersion } = type;
+        const { name, migrations, convertToMultiNamespaceTypeVersion, modelVersions } = type;
         if (migrations || convertToMultiNamespaceTypeVersion) {
           const migrationsMap = typeof migrations === 'function' ? migrations() : migrations;
           const migrationsKeys = migrationsMap ? Object.keys(migrationsMap) : [];
@@ -133,6 +134,16 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
             // Setting this option registers a conversion migration that is reflected in the object's `typeMigrationVersions` field
             migrationsKeys.push(convertToMultiNamespaceTypeVersion);
           }
+
+          const modelVersionCreateSchemas =
+            typeof modelVersions === 'function' ? modelVersions() : modelVersions ?? {};
+
+          Object.entries(modelVersionCreateSchemas).forEach(([key, modelVersion]) => {
+            if (modelVersion.schemas?.create) {
+              migrationsKeys.push(modelVersionToVirtualVersion(key));
+            }
+          });
+
           const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
           return {
             ...versionMap,
