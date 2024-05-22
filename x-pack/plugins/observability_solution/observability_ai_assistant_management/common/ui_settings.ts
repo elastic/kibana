@@ -12,6 +12,7 @@ import {
   aiAssistantLogsIndexPattern,
   aiAssistantResponseLanguage,
   aiAssistantSimulatedFunctionCalling,
+  aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   DEFAULT_LANGUAGE_OPTION,
@@ -83,6 +84,24 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     ),
     schema: schema.boolean(),
     type: 'boolean',
+    requiresPageReload: true,
+  },
+  [aiAssistantSearchConnectorIndexPattern]: {
+    category: ['observability'],
+    name: i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsTab.h3.searchConnectorIndexPatternLabel',
+      { defaultMessage: 'Search connector index pattern' }
+    ),
+    value: '',
+    description: i18n.translate(
+      'xpack.observabilityAiAssistantManagement.settingsPage.searchConnectorIndexPatternDescription',
+      {
+        defaultMessage:
+          'Index pattern used by the AI Assistant when querying search connectors indices (part of the knowledge base). By default the index for every search connector will be queried',
+      }
+    ),
+    schema: schema.string(),
+    type: 'string',
     requiresPageReload: true,
   },
 };
