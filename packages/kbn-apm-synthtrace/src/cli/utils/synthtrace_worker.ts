@@ -31,7 +31,7 @@ const { bucketFrom, bucketTo, runOptions, esUrl, version } = workerData as Worke
 
 async function start() {
   const logger = loggerProxy;
-  const assetsEsClient = getEntitiesEsClient({
+  const entitiesEsClient = getEntitiesEsClient({
     concurrency: runOptions.concurrency,
     target: esUrl,
     logger,
@@ -69,7 +69,7 @@ async function start() {
       apmEsClient,
       logsEsClient,
       infraEsClient,
-      assetsEsClient,
+      entitiesEsClient: entitiesEsClient,
     });
   }
 
@@ -78,7 +78,7 @@ async function start() {
   const generatorsAndClients = logger.perf('generate_scenario', () =>
     generate({
       range: timerange(bucketFrom, bucketTo),
-      clients: { logsEsClient, apmEsClient, infraEsClient, assetsEsClient },
+      clients: { logsEsClient, apmEsClient, infraEsClient, entitiesEsClient: entitiesEsClient },
     })
   );
 

@@ -29,7 +29,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
   return {
     generate: ({
       range,
-      clients: { apmEsClient, assetsEsClient, logsEsClient, infraEsClient },
+      clients: { apmEsClient, entitiesEsClient, logsEsClient, infraEsClient },
     }) => {
       const transactionName = '240rpm/75% 1000ms';
 
@@ -217,7 +217,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
 
       return [
         withClient(
-          assetsEsClient,
+          entitiesEsClient,
           logger.perf('generating_assets_events', () =>
             Readable.from(Array.from(logsGenAssets).concat(Array.from(tracesGenAssets)))
           )

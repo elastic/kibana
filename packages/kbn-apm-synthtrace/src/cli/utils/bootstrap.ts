@@ -73,7 +73,7 @@ export async function bootstrap(runOptions: RunOptions) {
     apmEsClient,
     logsEsClient,
     infraEsClient,
-    assetsEsClient: entitiesEsClient,
+    entitiesEsClient,
     version,
     kibanaUrl,
     esUrl,

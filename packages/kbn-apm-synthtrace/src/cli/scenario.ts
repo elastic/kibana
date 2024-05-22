@@ -19,7 +19,7 @@ type Generate<TFields> = (options: {
     apmEsClient: ApmSynthtraceEsClient;
     logsEsClient: LogsSynthtraceEsClient;
     infraEsClient: InfraSynthtraceEsClient;
-    assetsEsClient: EntitiesSynthtraceEsClient;
+    entitiesEsClient: EntitiesSynthtraceEsClient;
   };
 }) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
@@ -28,7 +28,7 @@ export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Pr
     apmEsClient: ApmSynthtraceEsClient;
     logsEsClient: LogsSynthtraceEsClient;
     infraEsClient: InfraSynthtraceEsClient;
-    assetsEsClient: EntitiesSynthtraceEsClient;
+    entitiesEsClient: EntitiesSynthtraceEsClient;
   }) => Promise<void>;
   generate: Generate<TFields>;
 }>;
