@@ -92,7 +92,8 @@ export default function ({ getService }) {
         });
       });
 
-      describe('create', () => {
+      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/183928
+      describe.skip('create', () => {
         let indexName;
 
         beforeEach(async () => {

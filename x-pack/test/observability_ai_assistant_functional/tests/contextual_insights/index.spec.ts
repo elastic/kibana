@@ -113,7 +113,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       ]);
     });
 
-    describe('when there are no connectors', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/184029
+    describe.skip('when there are no connectors', () => {
       it('should not show the contextual insight component', async () => {
         await navigateToError();
         await testSubjects.missingOrFail(ui.pages.contextualInsights.button);
