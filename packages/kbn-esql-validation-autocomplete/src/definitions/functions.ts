@@ -248,6 +248,87 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
+          type: 'number',
+          optional: false,
+        },
+      ],
+      returnType: 'number',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'number',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'boolean',
+          optional: true,
+        },
+      ],
+      returnType: 'number',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'date',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'boolean',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'string',
+          optional: false,
+        },
+      ],
+      returnType: 'string',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'string',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'boolean',
+          optional: true,
+        },
+      ],
+      returnType: 'string',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
           type: 'boolean',
           optional: false,
         },
@@ -275,54 +356,162 @@ const coalesceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'first',
-          type: 'number',
+          type: 'ip',
           optional: false,
         },
       ],
-      returnType: 'number',
+      returnType: 'ip',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'number',
+          type: 'ip',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'number',
+          type: 'boolean',
           optional: true,
         },
       ],
-      returnType: 'number',
+      returnType: 'ip',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'string',
+          type: 'cartesian_point',
           optional: false,
         },
       ],
-      returnType: 'string',
+      returnType: 'cartesian_point',
       minParams: 1,
     },
     {
       params: [
         {
           name: 'first',
-          type: 'string',
+          type: 'cartesian_point',
           optional: false,
         },
         {
           name: 'rest',
-          type: 'string',
+          type: 'boolean',
           optional: true,
         },
       ],
-      returnType: 'string',
+      returnType: 'cartesian_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'cartesian_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'boolean',
+          optional: true,
+        },
+      ],
+      returnType: 'cartesian_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'geo_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_point',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'boolean',
+          optional: true,
+        },
+      ],
+      returnType: 'geo_point',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'geo_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'geo_shape',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'boolean',
+          optional: true,
+        },
+      ],
+      returnType: 'geo_shape',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'version',
+          optional: false,
+        },
+      ],
+      returnType: 'version',
+      minParams: 1,
+    },
+    {
+      params: [
+        {
+          name: 'first',
+          type: 'version',
+          optional: false,
+        },
+        {
+          name: 'rest',
+          type: 'boolean',
+          optional: true,
+        },
+      ],
+      returnType: 'version',
       minParams: 1,
     },
   ],

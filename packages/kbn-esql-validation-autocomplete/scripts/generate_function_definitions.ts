@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-const { readdirSync, readFileSync } = require('fs');
-const { writeFile } = require('fs/promises');
-const join = require('path').join;
-const _ = require('lodash');
+import { readdirSync, readFileSync } from 'fs';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
+import _ from 'lodash';
+import type { RecursivePartial } from '@kbn/utility-types';
+import { FunctionDefinition, supportedFieldTypes } from '../src/definitions/types';
 
-const aliasTable = {
+const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
   to_unsigned_long: ['to_ul', 'to_ulong'],
   to_boolean: ['to_bool'],
@@ -29,7 +31,7 @@ const evalSupportedCommandsAndOptions = {
 
 const excludedFunctions = new Set(['bucket', 'case']);
 
-const extraFunctions = [
+const extraFunctions: FunctionDefinition[] = [
   {
     type: 'eval',
     name: 'case',
@@ -52,7 +54,7 @@ const extraFunctions = [
   },
 ];
 
-const elasticsearchToKibanaType = (elasticsearchType) => {
+const elasticsearchToKibanaType = (elasticsearchType: string) => {
   if (
     [
       'double',
@@ -176,7 +178,7 @@ const dateDiffOptions = [
  * This is the place to put information that is not provided by Elasticsearch
  * and, hence, won't be present in the JSON file.
  */
-const functionEnrichments = {
+const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> = {
   log10: {
     validate: validateLogFunctions,
   },
@@ -211,6 +213,39 @@ const functionEnrichments = {
       params: [{}, { literalOptions: ['asc', 'desc'] }],
     }),
   },
+  coalesce: {
+    signatures: supportedFieldTypes
+      .map<FunctionDefinition['signatures']>((type) => [
+        {
+          params: [
+            {
+              name: 'first',
+              type,
+              optional: false,
+            },
+          ],
+          returnType: type,
+          minParams: 1,
+        },
+        {
+          params: [
+            {
+              name: 'first',
+              type,
+              optional: false,
+            },
+            {
+              name: 'rest',
+              type: 'boolean',
+              optional: true,
+            },
+          ],
+          returnType: type,
+          minParams: 1,
+        },
+      ])
+      .flat(),
+  },
 };
 
 /**
@@ -219,7 +254,7 @@ const functionEnrichments = {
  * @param {*} columnIndices — the indices of the columns in the "meta functions" table
  * @returns
  */
-function getFunctionDefinition(ESFunctionDefinition) {
+function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): FunctionDefinition {
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
@@ -229,9 +264,9 @@ function getFunctionDefinition(ESFunctionDefinition) {
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
     signatures: _.uniqBy(
-      ESFunctionDefinition.signatures.map((signature) => ({
+      ESFunctionDefinition.signatures.map((signature: any) => ({
         ...signature,
-        params: signature.params.map((param) => ({
+        params: signature.params.map((param: any) => ({
           ...param,
           type: elasticsearchToKibanaType(param.type),
           description: undefined,
@@ -239,7 +274,7 @@ function getFunctionDefinition(ESFunctionDefinition) {
         returnType: elasticsearchToKibanaType(signature.returnType),
         variadic: undefined, // we don't support variadic property
         minParams: signature.variadic
-          ? signature.params.filter((param) => !param.optional).length
+          ? signature.params.filter((param: any) => !param.optional).length
           : undefined,
       })),
       (el) => JSON.stringify(el)
@@ -251,18 +286,18 @@ function getFunctionDefinition(ESFunctionDefinition) {
     _.merge(ret, functionEnrichments[ret.name]);
   }
 
-  return ret;
+  return ret as FunctionDefinition;
 }
 
-function printGeneratedFunctionsFile(functionDefinitions) {
-  const removeInlineAsciiDocLinks = (asciidocString) => {
+function printGeneratedFunctionsFile(functionDefinitions: FunctionDefinition[]) {
+  const removeInlineAsciiDocLinks = (asciidocString: string) => {
     const inlineLinkRegex = /\{.+?\}\/.+?\[(.+?)\]/g;
     return asciidocString.replace(inlineLinkRegex, '$1');
   };
 
-  const getDefinitionName = (name) => _.camelCase(`${name}Definition`);
+  const getDefinitionName = (name: string) => _.camelCase(`${name}Definition`);
 
-  const printFunctionDefinition = (functionDefinition) => {
+  const printFunctionDefinition = (functionDefinition: FunctionDefinition) => {
     const { type, name, description, alias, signatures } = functionDefinition;
 
     return `const ${getDefinitionName(name)}: FunctionDefinition = {
@@ -315,7 +350,7 @@ import type { FunctionDefinition } from './types';
     JSON.parse(readFileSync(`${ESFunctionDefinitionsDirectory}/${file}`, 'utf-8'))
   );
 
-  const evalFunctionDefinitions = [];
+  const evalFunctionDefinitions: FunctionDefinition[] = [];
   // const aggFunctionDefinitions = [];
   for (const ESDefinition of ESFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
