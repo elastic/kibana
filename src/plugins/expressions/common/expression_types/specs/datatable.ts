@@ -200,8 +200,6 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
       }),
     }),
     arrow: (value: { type: 'arrow'; table: Table }): Datatable => {
-      const columns = value.table.schema.fields.map((field) => field.name);
-
       const jsArray = [];
 
       for (let i = 0; i < value.table.numRows; i++) {
@@ -210,14 +208,24 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
 
       return {
         type: 'datatable',
-        columns: value.table.schema.fields.map((field) => ({
-          id: field.name,
-          name: field.name,
-          type: field.type,
-          meta: {
+        columns: value.table.schema.fields.map((field) => {
+          const meta: Record<string, unknown> = {};
+          for (const key in field.metadata.keys()) {
+            if (field.metadata.has(key)) {
+              meta[key] = field.metadata.get(key);
+            }
+          }
+
+          return {
+            id: field.name,
+            name: field.name,
             type: field.type,
-          },
-        })),
+            meta: {
+              type: field.type,
+              ...meta,
+            },
+          };
+        }),
         rows: jsArray,
       };
     },
@@ -251,7 +259,14 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
       };
     },
     arrow: (value: Datatable): { type: 'arrow'; table: Table } => {
-      return { type: 'arrow', table: tableFromJSON(value.rows) };
+      const table = tableFromJSON(value.rows);
+      table.schema.fields.forEach((field, i) => {
+        Object.keys(value.columns[i].meta).forEach((key) => {
+          // @ts-ignore
+          field.metadata.set(key, value.columns[i].meta[key]);
+        });
+      });
+      return { type: 'arrow', table };
     },
   },
 };
