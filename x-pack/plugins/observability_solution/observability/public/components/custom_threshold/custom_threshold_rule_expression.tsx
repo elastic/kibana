@@ -453,7 +453,13 @@ export default function Expressions(props: Props) {
         onFiltersUpdated={(filter) => {
           setRuleParams(
             'searchConfiguration',
-            getSearchConfiguration(ruleParams.searchConfiguration, setParamsWarning)
+            getSearchConfiguration(
+              {
+                ...ruleParams.searchConfiguration,
+                filter,
+              },
+              setParamsWarning
+            )
           );
         }}
       />
