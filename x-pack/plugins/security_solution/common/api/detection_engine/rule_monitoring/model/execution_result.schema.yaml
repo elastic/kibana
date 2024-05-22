@@ -55,13 +55,10 @@ components:
         backfill:
           type: object
           properties:
-            start:
-              type: string
-              format: date-time
             from:
               type: string
               format: date-time
-            interval:
+            to:
               type: string              
       required:
         - execution_uuid

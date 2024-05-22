@@ -43,9 +43,8 @@ export const RuleExecutionResult = z.object({
   security_message: z.string(),
   backfill: z
     .object({
-      start: z.string().datetime().optional(),
       from: z.string().datetime().optional(),
-      interval: z.string().optional(),
+      to: z.string().optional(),
     })
     .optional(),
 });

@@ -289,6 +289,11 @@ const getBackfill = (bucket: ExecutionUuidAggBucket) => {
     backfill.from = moment(backfill.start)
       .subtract(parseDuration(backfill.interval), 'ms')
       .toISOString();
+
+    return {
+      from: moment(backfill.start).subtract(parseDuration(backfill.interval), 'ms').toISOString(),
+      to: backfill.start,
+    };
   }
 
   return backfill;
