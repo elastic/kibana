@@ -3069,6 +3069,10 @@
     "dynamic": false,
     "properties": {}
   },
+  "synthetics-dynamic-settings": {
+    "dynamic": false,
+    "properties": {}
+  },
   "synthetics-monitor": {
     "dynamic": false,
     "properties": {

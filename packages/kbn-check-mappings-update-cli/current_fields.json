@@ -934,6 +934,7 @@
     "name"
   ],
   "spaces-usage-stats": [],
+  "synthetics-dynamic-settings": [],
   "synthetics-monitor": [
     "alert",
     "alert.status",
