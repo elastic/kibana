@@ -278,14 +278,14 @@ export const uiSettings: Record<string, UiSettings> = {
     name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
       defaultMessage: 'Custom dashboards for asset details in Infrastructure',
     }),
-    value: true,
+    value: false,
     description: i18n.translate(
       'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
       {
         defaultMessage:
-          '{betaLabel} Enable option to link custom dashboards in the asset details view.',
+          '{technicalPreviewLabel} Enable option to link custom dashboards in the asset details view.',
         values: {
-          betaLabel: `<em>[${betaLabel}]</em>`,
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
         },
       }
     ),

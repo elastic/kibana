@@ -115,7 +115,9 @@ export const JobsListPage: FC<Props> = ({
   if (accessDenied) {
     return (
       <I18nProvider>
-        <AccessDeniedPage />
+        <KibanaRenderContextProvider {...coreStart}>
+          <AccessDeniedPage />
+        </KibanaRenderContextProvider>
       </I18nProvider>
     );
   }
@@ -123,7 +125,9 @@ export const JobsListPage: FC<Props> = ({
   if (isPlatinumOrTrialLicense === false) {
     return (
       <I18nProvider>
-        <InsufficientLicensePage basePath={coreStart.http.basePath} />
+        <KibanaRenderContextProvider {...coreStart}>
+          <InsufficientLicensePage basePath={coreStart.http.basePath} />
+        </KibanaRenderContextProvider>
       </I18nProvider>
     );
   }
