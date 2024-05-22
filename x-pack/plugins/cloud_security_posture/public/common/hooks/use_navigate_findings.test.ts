@@ -33,8 +33,8 @@ jest.mock('./use_kibana', () => ({
     },
   }),
 }));
-jest.mock('../api/use_latest_findings_data_view', () => ({
-  useLatestFindingsDataView: jest.fn().mockReturnValue({
+jest.mock('../api/use_data_view', () => ({
+  useDataView: jest.fn().mockReturnValue({
     status: 'success',
     data: {
       id: 'data-view-id',
