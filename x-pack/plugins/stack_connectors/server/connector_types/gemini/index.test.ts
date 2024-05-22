@@ -37,12 +37,13 @@ describe('Gemini Connector', () => {
     expect(connectorType.id).toEqual('.gemini');
     expect(connectorType.name).toEqual('Google Gemini');
   });
-  
+
   describe('config validation', () => {
     test('config validation passes when only required fields are provided', () => {
       const config: Config = {
-        apiUrl: 'https://us-central1-aiplatform.googleapis.com/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent',
-        defaultModel: DEFAULT_GEMINI_MODEL,       
+        apiUrl:
+          'https://us-central1-aiplatform.googleapis.com/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent',
+        defaultModel: DEFAULT_GEMINI_MODEL,
         gcpRegion: 'us-central-1',
         gcpProjectID: 'test-gcpProject',
       };

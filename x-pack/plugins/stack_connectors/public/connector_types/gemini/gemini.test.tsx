@@ -1,4 +1,3 @@
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -12,7 +11,6 @@ import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/typ
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { SUB_ACTION } from '../../../common/gemini/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-
 
 const ACTION_TYPE_ID = '.gemini';
 let actionTypeModel: ActionTypeModel;
@@ -36,7 +34,6 @@ describe('actionTypeRegistry.get() works', () => {
 });
 
 describe('gemini action params validation', () => {
-
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
       subAction: SUB_ACTION.RUN,
@@ -86,4 +83,3 @@ describe('gemini action params validation', () => {
     });
   });
 });
-

@@ -14,19 +14,13 @@ export const API_URL_LABEL = i18n.translate(
   }
 );
 
-export const GCP_REGION = i18n.translate(
-  'xpack.stackConnectors.components.gemini.gcpRegion',
-  {
-    defaultMessage: 'GCP Region',
-  }
-);
+export const GCP_REGION = i18n.translate('xpack.stackConnectors.components.gemini.gcpRegion', {
+  defaultMessage: 'GCP Region',
+});
 
-export const GCP_PROJECT_ID = i18n.translate(
-  'xpack.stackConnectors.components.gemini.gcpRegion',
-  {
-    defaultMessage: 'GCP Project ID',
-  }
-);
+export const GCP_PROJECT_ID = i18n.translate('xpack.stackConnectors.components.gemini.gcpRegion', {
+  defaultMessage: 'GCP Project ID',
+});
 
 export const ACCESS_KEY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.gemini.accessKeySecret',

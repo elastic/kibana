@@ -25,5 +25,3 @@ export const DEFAULT_TIMEOUT_MS = 60000;
 export const DEFAULT_GCP_REGION = 'us-central1';
 export const DEFAULT_GEMINI_MODEL = 'gemini-1.5-pro-preview-0409';
 export const DEFAULT_GEMINI_URL = `https://us-central1-aiplatform.googleapis.com` as const;
-
-

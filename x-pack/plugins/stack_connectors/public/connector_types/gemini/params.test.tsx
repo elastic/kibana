@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import GeminiParamsFields from './params';
-import { DEFAULT_GEMINI_URL, SUB_ACTION } from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import { DEFAULT_GEMINI_URL, SUB_ACTION } from '../../../common/gemini/constants';
 import { I18nProvider } from '@kbn/i18n-react';
 
 const messageVariables = [
@@ -61,7 +61,7 @@ describe('Gemini Params Fields renders', () => {
       config: {
         apiUrl: DEFAULT_GEMINI_URL,
         gcpRegion: 'us-central-1',
-        gcpProjectID: 'test-project'
+        gcpProjectID: 'test-project',
       },
     };
     render(

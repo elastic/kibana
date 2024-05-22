@@ -1,56 +1,52 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { GeminiConnector } from './gemini';
 import { ServiceParams } from '@kbn/actions-plugin/server';
-import {
-  Config,
-  Secrets,
-  RunActionParams,
-  RunActionResponse
-} from '../../../common/gemini/types';
+import { Config, Secrets, RunActionParams } from '../../../common/gemini/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { Logger } from '@kbn/logging';
-  import type {
-    Services
-  } from 'x-pack/plugins/actions/server/types';
-  import {
-    KibanaRequest,
-    SavedObjectsClientContract,
-    ElasticsearchClient,
-    KibanaRequestEvents,
-    IKibanaSocket,
-  } from '@kbn/core/server';
-  import { ConnectorTokenClient } from 'x-pack/plugins/actions/server/lib/connector_token_client';
-  import type { Headers } from 'packages/core/http/core-http-server/src/router/headers';
-  import {
-    AxiosResponse,
-    AxiosHeaders
-  } from 'axios';
-import { RunApiResponse } from '@kbn/stack-connectors-plugin/common/gemini/types';
-import { RunApiResponseSchema } from '@kbn/stack-connectors-plugin/common/gemini/schema';
-
+import type { Services } from '@kbn/actions-plugin/server/types';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+  KibanaRequestEvents,
+  IKibanaSocket,
+} from '@kbn/core/server';
+import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
+import type { Headers } from 'packages/core/http/core-http-server/src/router/headers';
+import { AxiosResponse, AxiosHeaders } from 'axios';
+import { RunApiResponse } from '../../../common/gemini/types';
+import { RunApiResponseSchema } from '../../../common/gemini/schema';
 
 jest.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', () => ({
   assertURL: jest.fn(),
 }));
 
 jest.mock('@kbn/actions-plugin/server', () => {
-    const originalModule = jest.requireActual('@kbn/actions-plugin/server');
-  
-    return {
-      ...originalModule,
-      SubActionConnector: jest.fn().mockImplementation(
-        (
-          ...args // Capture constructor arguments
-        ) => {
-          const connectorInstance = new originalModule.SubActionConnector(...args);
-          // Now you can mock the request method on the instance
-          (connectorInstance.request as jest.MockedFunction<any>) = jest.fn(); 
-          return connectorInstance;
-        }
-      ),
-    };
-  });
-  
-  
+  const originalModule = jest.requireActual('@kbn/actions-plugin/server');
+
+  return {
+    ...originalModule,
+    SubActionConnector: jest.fn().mockImplementation(
+      (
+        ...args: ConstructorParameters<typeof originalModule.SubActionConnector> // Capture constructor arguments
+      ) => {
+        const connectorInstance = new originalModule.SubActionConnector(...args);
+        // Now you can mock the request method on the instance
+        (connectorInstance.request as jest.MockedFunction<
+          typeof originalModule.SubActionConnector.prototype.request
+        >) = jest.fn();
+        return connectorInstance;
+      }
+    ),
+  };
+});
 
 describe('GeminiConnector', () => {
   let connector: GeminiConnector;
@@ -58,22 +54,22 @@ describe('GeminiConnector', () => {
 
   const mockConfigurationUtilities: ActionsConfigurationUtilities = {
     isHostnameAllowed: jest.fn().mockReturnValue(true), // Always allow hostname
-    isUriAllowed: jest.fn().mockReturnValue(true),       // Always allow URI
+    isUriAllowed: jest.fn().mockReturnValue(true), // Always allow URI
     isActionTypeEnabled: jest.fn().mockReturnValue(true), // Always enable action type
-    ensureHostnameAllowed: jest.fn(),              // Empty implementation for now
-    ensureUriAllowed: jest.fn(),                  // Empty implementation for now
-    ensureActionTypeEnabled: jest.fn(),             // Empty implementation for now
-    getSSLSettings: jest.fn(),                    // Empty implementation for now
-    getProxySettings: jest.fn(),                   // Empty implementation for now
-    getResponseSettings: jest.fn(),                 // Empty implementation for now
-    getCustomHostSettings: jest.fn(),               // Empty implementation for now
-    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue('https://graph.microsoft.com/v1.0'), 
-    getMicrosoftGraphApiScope: jest.fn().mockReturnValue('https://graph.microsoft.com/.default'), 
-    getMicrosoftExchangeUrl: jest.fn().mockReturnValue('https://outlook.office.com/api/v2.0'), 
-    getMaxAttempts: jest.fn().mockReturnValue(3),      
-    validateEmailAddresses: jest.fn(),             
-    enableFooterInEmail: jest.fn().mockReturnValue(true),  
-    getMaxQueued: jest.fn().mockReturnValue(100),      
+    ensureHostnameAllowed: jest.fn(), // Empty implementation for now
+    ensureUriAllowed: jest.fn(), // Empty implementation for now
+    ensureActionTypeEnabled: jest.fn(), // Empty implementation for now
+    getSSLSettings: jest.fn(), // Empty implementation for now
+    getProxySettings: jest.fn(), // Empty implementation for now
+    getResponseSettings: jest.fn(), // Empty implementation for now
+    getCustomHostSettings: jest.fn(), // Empty implementation for now
+    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue('https://graph.microsoft.com/v1.0'),
+    getMicrosoftGraphApiScope: jest.fn().mockReturnValue('https://graph.microsoft.com/.default'),
+    getMicrosoftExchangeUrl: jest.fn().mockReturnValue('https://outlook.office.com/api/v2.0'),
+    getMaxAttempts: jest.fn().mockReturnValue(3),
+    validateEmailAddresses: jest.fn(),
+    enableFooterInEmail: jest.fn().mockReturnValue(true),
+    getMaxQueued: jest.fn().mockReturnValue(100),
   };
 
   const mockLogger: Logger = {
@@ -90,37 +86,40 @@ describe('GeminiConnector', () => {
 
   const mockServices: Services = {
     savedObjectsClient: {} as SavedObjectsClientContract, // Empty mock object
-    scopedClusterClient: {} as ElasticsearchClient,        // Empty mock object
-    connectorTokenClient: {} as ConnectorTokenClient,      // Empty mock object
+    scopedClusterClient: {} as ElasticsearchClient, // Empty mock object
+    connectorTokenClient: {} as ConnectorTokenClient, // Empty mock object
   };
 
   const mockHeaders: Headers = {
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer some-token',
+    Authorization: 'Bearer some-token',
     'X-Custom-Header': ['value1', 'value2'], // Multiple values
   };
 
   const mockAxiosHeaders = new AxiosHeaders({
     'Content-Type': 'application/json',
-    'Authorization': 'Bearer some-token',
+    Authorization: 'Bearer some-token',
     'X-Custom-Header': ['value1', 'value2'],
-});
+  });
 
   const mockKibanaRequest: KibanaRequest = {
     id: 'mock-request-id',
     uuid: 'mock-request-uuid',
     url: new URL('https://example.com/api/endpoint'),
-    route: { path: '/api/endpoint', method: 'get', options: {
-        authRequired:  "optional",
+    route: {
+      path: '/api/endpoint',
+      method: 'get',
+      options: {
+        authRequired: 'optional',
         xsrfRequired: false,
-        access: "public",
+        access: 'public',
         tags: ['readonly'],
         timeout: {
-            payload: undefined,
-            idleSocket: undefined
+          payload: undefined,
+          idleSocket: undefined,
         },
-    description: 'string'
-        } 
+        description: 'string',
+      },
     },
     headers: mockHeaders,
     isSystemRequest: false,
@@ -129,14 +128,12 @@ describe('GeminiConnector', () => {
     socket: {} as IKibanaSocket, // You might need to mock this depending on your code's interaction with it
     events: {} as KibanaRequestEvents, // You might need to mock this too
     auth: {
-      isAuthenticated: false
+      isAuthenticated: false,
     },
     params: {},
     query: {},
     body: {},
   };
-  
-  
 
   beforeEach(() => {
     mockServiceParams = {
@@ -149,11 +146,11 @@ describe('GeminiConnector', () => {
         gcpProjectID: 'my-project-12345',
       },
       secrets: {
-        credentialsJson: 'some-random-string' 
+        credentialsJson: 'some-random-string',
       },
       logger: mockLogger,
       services: mockServices,
-      request: mockKibanaRequest
+      request: mockKibanaRequest,
     };
 
     connector = new GeminiConnector(mockServiceParams);
@@ -162,9 +159,9 @@ describe('GeminiConnector', () => {
   describe('getDashboard', () => {
     it('should return available: true when user has privileges', async () => {
       const dashboardId = 'some-dashboard-id';
-      
+
       // Mock initDashboard to simulate a successful dashboard fetch
-      jest.spyOn(connector, 'initDashboard' as any).mockResolvedValueOnce({ success: true });
+      jest.spyOn(connector, 'initDashboard').mockResolvedValueOnce({ success: true });
 
       const response = await connector.getDashboard({ dashboardId });
       expect(response).toEqual({ available: true });
@@ -172,67 +169,72 @@ describe('GeminiConnector', () => {
 
     // Add a test for the case when the user doesn't have privileges
   });
-  
+
   describe('runApi', () => {
     it('should send a formatted request to the API and return the response', async () => {
-        const runActionParams: RunActionParams = {
-            body: JSON.stringify({
-                "messages": [{
-                    "author": "user",
-                    "content": "What is the capital of France?"
-                }]
-            }),
-            model: 'test-model'
-        };
-
-        const mockApiResponse: AxiosResponse<RunApiResponse> = {
-            data: {
-                candidates: [{
-                    content: {
-                        parts: [{ text: 'Paris' }]
-                    }
-                }],
-                usageMetadata : {
-                    promptTokenCount: 4096,
-                    candidatesTokenCount: 512,
-                    totalTokenCount: 8192
-                }
+      const runActionParams: RunActionParams = {
+        body: JSON.stringify({
+          messages: [
+            {
+              author: 'user',
+              content: 'What is the capital of France?',
             },
-            status: 200,
-            statusText: 'OK',
-            headers: {},
-            config: {
-                headers: mockAxiosHeaders,
+          ],
+        }),
+        model: 'test-model',
+      };
+
+      const mockApiResponse: AxiosResponse<RunApiResponse> = {
+        data: {
+          candidates: [
+            {
+              content: {
+                parts: [{ text: 'Paris' }],
+              },
             },
-        };
+          ],
+          usageMetadata: {
+            promptTokenCount: 4096,
+            candidatesTokenCount: 512,
+            totalTokenCount: 8192,
+          },
+        },
+        status: 200,
+        statusText: 'OK',
+        headers: {},
+        config: {
+          headers: mockAxiosHeaders,
+        },
+      };
 
-        // Mock the request function to simulate a successful API call
-        //jest.spyOn(connector, 'request' as any).mockResolvedValueOnce(mockApiResponse);
-        (connector as jest.MockedFunction<any>).mockResolvedValueOnce(mockApiResponse);
+      // Mock the request function to simulate a successful API call
+      jest.spyOn(connector as GeminiConnector, 'request').mockResolvedValueOnce(mockApiResponse);
 
-        const response = await connector.runApi(runActionParams);
+      const response = await connector.runApi(runActionParams);
 
-        // Assert that the request was made with the correct parameters
-        expect(connector).toHaveBeenCalledWith({
-            url: 'https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/test-model:generateContent',
-            method: 'post',
-            data: JSON.stringify([{ contents: [{
-                    role: 'user',
-                    parts: [{text:"What is the capital of France?" }]
-            }]  }]),
-            headers: {
-                'Authorization': 'Bearer fake-access-token',
-                'Content-Type': 'application/json'
-            },
-            responseSchema: RunApiResponseSchema
-        });
-        
-        // Assert the response
-        expect(response).toEqual({ completion: 'Paris' });
+      // Assert that the request was made with the correct parameters
+      expect(connector.runApi).toHaveBeenCalledWith({
+        url: 'https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/test-model:generateContent',
+        method: 'post',
+        data: JSON.stringify([
+          {
+            contents: [
+              {
+                role: 'user',
+                parts: [{ text: 'What is the capital of France?' }],
+              },
+            ],
+          },
+        ]),
+        headers: {
+          Authorization: 'Bearer fake-access-token',
+          'Content-Type': 'application/json',
+        },
+        responseSchema: RunApiResponseSchema,
+      });
 
+      // Assert the response
+      expect(response).toEqual({ completion: 'Paris' });
     });
-
-    // Add error handling tests here as well
   });
-  
 });

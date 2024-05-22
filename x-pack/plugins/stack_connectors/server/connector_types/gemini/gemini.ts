@@ -7,13 +7,10 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError, Method } from 'axios';
-import {GoogleAuth} from 'google-auth-library';
+import { GoogleAuth } from 'google-auth-library';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import {
-  RunActionParamsSchema,
-  RunApiResponseSchema,
-} from '../../../common/gemini/schema';
+import { RunActionParamsSchema, RunApiResponseSchema } from '../../../common/gemini/schema';
 import {
   Config,
   Secrets,
@@ -22,21 +19,16 @@ import {
   RunApiResponse,
 } from '../../../common/gemini/types';
 import { SUB_ACTION, DEFAULT_TIMEOUT_MS } from '../../../common/gemini/constants';
-import {
-  DashboardActionParams,
-  DashboardActionResponse,
-} from '../../../common/gemini/types';
+import { DashboardActionParams, DashboardActionResponse } from '../../../common/gemini/types';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
-
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
+  private static token: string | null;
+  private static tokenExpiryTimeout: NodeJS.Timeout;
   private url;
   private model;
   private gcpRegion;
   private gcpProjectID;
-  private static token: string | null;
-  private static tokenExpiryTimeout: NodeJS.Timeout;
-
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -67,7 +59,6 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       method: 'runApi',
       schema: RunActionParamsSchema,
     });
-    
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ message?: string }>): string {
@@ -159,26 +150,26 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     model: reqModel,
     signal,
     timeout,
-   }: RunActionParams): Promise<RunActionResponse> {
-   // set model on per request basis
-   const currentModel = reqModel ?? this.model;
-   const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
-   const token = await this.getAccessToken();
+  }: RunActionParams): Promise<RunActionResponse> {
+    // set model on per request basis
+    const currentModel = reqModel ?? this.model;
+    const path = `/v1/projects/${this.gcpProjectID}/locations/${this.gcpRegion}/publishers/google/models/${currentModel}:generateContent`;
+    const token = await this.getAccessToken();
 
-   const requestArgs = {
-    url: `${this.url}${path}`,
-    method: 'post' as Method,
-    data: body,
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    },
-    signal,
-    timeout: timeout ?? DEFAULT_TIMEOUT_MS,
-    responseSchema: RunApiResponseSchema,
-   } as SubActionRequestParams<RunApiResponse>;
+    const requestArgs = {
+      url: `${this.url}${path}`,
+      method: 'post' as Method,
+      data: body,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      signal,
+      timeout: timeout ?? DEFAULT_TIMEOUT_MS,
+      responseSchema: RunApiResponseSchema,
+    } as SubActionRequestParams<RunApiResponse>;
 
-   try {
+    try {
       if (!GeminiConnector.token) {
         GeminiConnector.token = (await this.getAccessToken()) as string;
       }
@@ -188,21 +179,13 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       const usageMetadata = response.data.usageMetadata;
       const completionText = candidate.content.parts[0].text;
       return { completion: completionText, usageMetadata };
-
     } catch (error) {
       if (error.code === 401) {
         GeminiConnector.token = null;
-        return this.runApi({body, model: reqModel,
-          signal,
-          timeout
-        });
+        return this.runApi({ body, model: reqModel, signal, timeout });
       }
 
       return { completion: '' };
     }
+  }
 }
-
- }
-
-
-
