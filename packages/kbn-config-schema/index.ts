@@ -217,6 +217,9 @@ function conditional<A extends ConditionalTypeValue, B, C>(
   return new ConditionalType(leftOperand, rightOperand, equalType, notEqualType, options);
 }
 
+/**
+ * Useful for creating recursive schemas.
+ */
 export function lazy<T>(id: string) {
   return new Lazy<T>(id);
 }
