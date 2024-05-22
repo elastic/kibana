@@ -15,12 +15,12 @@ import { SloEmbeddableDeps } from '../overview/types';
 
 const queryClient = new QueryClient();
 
-export interface OverviewEmbeddableContextProps {
+export interface SloEmbeddableContextProps {
   deps: SloEmbeddableDeps;
   children: React.ReactNode;
 }
 
-export function SloOverviewEmbeddableContext({ deps, children }: OverviewEmbeddableContextProps) {
+export function SloEmbeddableContext({ deps, children }: SloEmbeddableContextProps) {
   const { observabilityRuleTypeRegistry } = deps.observability;
 
   return (

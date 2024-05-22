@@ -29,7 +29,7 @@ import {
   GroupSloCustomInput,
 } from './types';
 import { EDIT_SLO_OVERVIEW_ACTION } from '../../../ui_actions/edit_slo_overview_panel';
-import { SloOverviewEmbeddableContext } from '../common/overview_embeddable_context';
+import { SloEmbeddableContext } from '../common/slo_embeddable_context';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
@@ -182,9 +182,9 @@ export const getOverviewEmbeddableFactory = (deps: SloEmbeddableDeps) => {
             }
           };
           return (
-            <SloOverviewEmbeddableContext deps={deps}>
+            <SloEmbeddableContext deps={deps}>
               {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
-            </SloOverviewEmbeddableContext>
+            </SloEmbeddableContext>
           );
         },
       };
