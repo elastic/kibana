@@ -301,8 +301,6 @@ Discover::
 * Fixes displaying "Unsaved changes" badge on time filter changes in case time range is stored along with saved search ({kibana-pull}178659[#178659]).
 Elastic Security::
 For the Elastic Security 8.14.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-Elastic Search::
-* Adds Playground telemetry ({kibana-pull}181587[#181587]).
 ES|QL::
 * Fixes validation on string implicit casting for dates and other minor issues ({kibana-pull}181571[#181571]).
 * Fixes validation for some specific {esql} types ({kibana-pull}181381[#181381]).
