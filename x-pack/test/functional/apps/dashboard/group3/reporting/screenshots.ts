@@ -155,7 +155,6 @@ export default function ({
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/183566
     describe.skip('Preserve Layout', () => {
       before(async () => {
         await loadEcommerce();
@@ -175,9 +174,7 @@ export default function ({
 
         const url = await PageObjects.reporting.getReportURL(60000);
         const res = await PageObjects.reporting.getResponse(url ?? '');
-        if (await PageObjects.share.isShareMenuOpen()) {
-          await PageObjects.share.closeShareModal();
-        }
+        await PageObjects.share.closeShareModal();
 
         expect(res.status).to.equal(200);
         expect(res.get('content-type')).to.equal('application/pdf');
