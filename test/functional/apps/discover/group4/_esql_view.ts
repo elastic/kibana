@@ -23,7 +23,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const find = getService('find');
   const esql = getService('esql');
-  const elasticChart = getService('elasticChart');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects([
     'common',
@@ -262,19 +261,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
       it('shows Discover and Lens requests in Inspector', async () => {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await elasticChart.waitForRenderComplete();
+        let retries = 0;
         await retry.try(async () => {
+          if (retries > 0) {
+            await inspector.close();
+            await testSubjects.click('querySubmitButton');
+            await PageObjects.header.waitUntilLoadingHasFinished();
+            await PageObjects.discover.waitUntilSearchingHasFinished();
+          }
           await inspector.open();
+          retries = retries + 1;
           const requestNames = await inspector.getRequestNames();
           expect(requestNames).to.contain('Table');
           expect(requestNames).to.contain('Visualization');
-          await inspector.close();
         });
       });
     });
