@@ -80,7 +80,7 @@ export const EnterpriseSearchAnalyticsPageTemplate: React.FC<
     return () => {
       updateSideNavDefinition({ collections: undefined });
     };
-  }, [navItems, updateSideNavDefinition]);
+  }, [updateSideNavDefinition]);
 
   return (
     <EnterpriseSearchPageTemplateWrapper
