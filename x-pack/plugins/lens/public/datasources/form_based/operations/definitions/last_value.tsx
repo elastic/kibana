@@ -36,6 +36,10 @@ import { isRuntimeField, isScriptedField } from './terms/helpers';
 import { FormRow } from './shared_components/form_row';
 import { getColumnReducedTimeRangeError } from '../../reduced_time_range_utils';
 import { getGroupByKey } from './get_group_by_key';
+import {
+  LAST_VALUE_OP_SORT_FIELD_INVALID_TYPE,
+  LAST_VALUE_OP_SORT_FIELD_NOT_FOUND,
+} from '../../../../user_messages_ids';
 
 function ofName(name: string, timeShift: string | undefined, reducedTimeRange: string | undefined) {
   return adjustTimeScaleLabelSuffix(
@@ -69,35 +73,44 @@ function getInvalidSortFieldMessage(
   sortField: string,
   columnId: string,
   indexPattern?: IndexPattern
-): FieldBasedOperationErrorMessage | undefined {
+): FieldBasedOperationErrorMessage[] {
   if (!indexPattern) {
-    return;
+    return [];
   }
   const field = indexPattern.getFieldByName(sortField);
   if (!field) {
-    return {
-      message: (
-        <FormattedMessage
-          id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
-          defaultMessage="Sort field {sortField} was not found."
-          values={{
-            sortField: <strong>{sortField}</strong>,
-          }}
-        />
-      ),
-      displayLocations: [
-        { id: 'toolbar' },
-        { id: 'dimensionButton', dimensionId: columnId },
-        { id: 'embeddableBadge' },
-      ],
-    };
+    return [
+      {
+        uniqueId: LAST_VALUE_OP_SORT_FIELD_NOT_FOUND,
+        message: (
+          <FormattedMessage
+            id="xpack.lens.indexPattern.lastValue.sortFieldNotFound"
+            defaultMessage="Sort field {sortField} was not found."
+            values={{
+              sortField: <strong>{sortField}</strong>,
+            }}
+          />
+        ),
+        displayLocations: [
+          { id: 'toolbar' },
+          { id: 'dimensionButton', dimensionId: columnId },
+          { id: 'embeddableBadge' },
+        ],
+      },
+    ];
   }
   if (field.type !== 'date') {
-    return i18n.translate('xpack.lens.indexPattern.lastValue.invalidTypeSortField', {
-      defaultMessage: 'Field {invalidField} is not a date field and cannot be used for sorting',
-      values: { invalidField: sortField },
-    });
+    return [
+      {
+        uniqueId: LAST_VALUE_OP_SORT_FIELD_INVALID_TYPE,
+        message: i18n.translate('xpack.lens.indexPattern.lastValue.invalidTypeSortField', {
+          defaultMessage: 'Field {invalidField} is not a date field and cannot be used for sorting',
+          values: { invalidField: sortField },
+        }),
+      },
+    ];
   }
+  return [];
 }
 
 function isTimeFieldNameDateField(indexPattern: IndexPattern) {
@@ -211,24 +224,11 @@ export const lastValueOperation: OperationDefinition<
   },
   getErrorMessage(layer, columnId, indexPattern) {
     const column = layer.columns[columnId] as LastValueIndexPatternColumn;
-    const errorMessages: FieldBasedOperationErrorMessage[] = [];
-
-    const invalidSourceFieldMessage = getInvalidFieldMessage(layer, columnId, indexPattern);
-    if (invalidSourceFieldMessage) {
-      errorMessages.push(...invalidSourceFieldMessage);
-    }
-
-    const invalidSortFieldMessage = getInvalidSortFieldMessage(
-      column.params.sortField,
-      columnId,
-      indexPattern
-    );
-    if (invalidSortFieldMessage) {
-      errorMessages.push(invalidSortFieldMessage);
-    }
-
-    errorMessages.push(...(getColumnReducedTimeRangeError(layer, columnId, indexPattern) || []));
-    return errorMessages.length ? errorMessages : undefined;
+    return [
+      ...getInvalidFieldMessage(layer, columnId, indexPattern),
+      ...getInvalidSortFieldMessage(column.params.sortField, columnId, indexPattern),
+      ...getColumnReducedTimeRangeError(layer, columnId, indexPattern),
+    ];
   },
   buildColumn({ field, previousColumn, indexPattern }, columnParams) {
     const lastValueParams = columnParams as LastValueIndexPatternColumn['params'];

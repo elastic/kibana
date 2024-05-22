@@ -93,16 +93,16 @@ function getCountOperationColumn(
 
 describe('getMultiTermsScriptedFieldErrorMessage()', () => {
   it('should return no error message for a single field', () => {
-    expect(
-      getMultiTermsScriptedFieldErrorMessage(getLayer(), 'col1', indexPattern)
-    ).toBeUndefined();
+    expect(getMultiTermsScriptedFieldErrorMessage(getLayer(), 'col1', indexPattern)).toHaveLength(
+      0
+    );
   });
 
   it('should return no error message for a scripted field when single', () => {
     const col = getStringBasedOperationColumn('scripted');
     expect(
       getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern)
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return an error message for a scripted field when there are multiple fields', () => {
@@ -116,7 +116,7 @@ describe('getMultiTermsScriptedFieldErrorMessage()', () => {
     const col = getStringBasedOperationColumn('source', { secondaryFields: ['dest'] });
     expect(
       getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern)
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should list all scripted fields in the error message', () => {

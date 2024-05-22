@@ -110,13 +110,17 @@ interface ValidationErrors {
       alternativeFn: string;
     };
   };
+  invalidQuery: {
+    message: string;
+    type: { text: string };
+  };
 }
 
 type ErrorTypes = keyof ValidationErrors;
 type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
 
 export interface ErrorWrapper {
-  type?: ErrorTypes; // TODO - make this required?
+  type: ErrorTypes;
   message: string;
   locations: TinymathLocation[];
   severity?: 'error' | 'warning';
@@ -172,7 +176,10 @@ export function hasInvalidOperations(
   };
 }
 
-export const getRawQueryValidationError = (text: string, operations: Record<string, unknown>) => {
+export const getRawQueryValidationError = (
+  text: string,
+  operations: Record<string, unknown>
+): string[] => {
   // try to extract the query context here
   const singleLine = text.split('\n').join('');
   const languagesRegexp = /(kql|lucene)/;
@@ -183,7 +190,7 @@ export const getRawQueryValidationError = (text: string, operations: Record<stri
   );
   // no args or no valid operation, no more work to do here
   if (allArgs.length === 0 || !containsOneValidOperation) {
-    return;
+    return [];
   }
   // at this point each entry in allArgs may contain one or more
   // in the worst case it would be a math chain of count operation
@@ -206,7 +213,7 @@ export const getRawQueryValidationError = (text: string, operations: Record<stri
       errors.push(result);
     }
   }
-  return errors.length ? errors : undefined;
+  return errors;
 };
 
 const validateQueryQuotes = (rawQuery: string, language: 'kql' | 'lucene') => {
@@ -233,8 +240,11 @@ export const getQueryValidationError = (
   { value: query, name: language, text }: TinymathNamedArgument,
   indexPattern: IndexPattern
 ): string | undefined => {
+  if (language !== 'kql' || language !== 'kql') {
+    return;
+  }
   // check if the raw argument has the minimal requirements
-  const result = validateQueryQuotes(text, language as 'kql' | 'lucene');
+  const result = validateQueryQuotes(text, language);
   // forward the error here is ok?
   if (result) {
     return result;
@@ -260,144 +270,210 @@ function getMessageFromId<K extends ErrorTypes>({
   values: ErrorValues<K>;
   locations: TinymathLocation[];
 }): ErrorWrapper {
-  let message: string;
   // Use a less strict type instead of doing a typecast on each message type
-  const out = values as unknown as Record<string, string>;
+  // const out = values as unknown as Record<string, string>;
+
+  if (messageId === 'wrongFirstArgument') {
+    console.log(values);
+  }
+
   switch (messageId) {
     case 'wrongFirstArgument':
-      message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
-        defaultMessage:
-          'The first argument for {operation} should be a {type} name. Found {argument}',
-        values: { operation: out.operation, type: out.type, argument: out.argument },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
+          defaultMessage:
+            'The first argument for {operation} should be a {type} name. Found {argument}',
+          values: { operation: values.operation, type: out.type, argument: out.argument },
+        }),
+      };
     case 'shouldNotHaveField':
-      message = i18n.translate('xpack.lens.indexPattern.formulaFieldNotRequired', {
-        defaultMessage: 'The operation {operation} does not accept any field as argument',
-        values: { operation: out.operation },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaFieldNotRequired', {
+          defaultMessage: 'The operation {operation} does not accept any field as argument',
+          values: { operation: out.operation },
+        }),
+      };
     case 'cannotAcceptParameter':
-      message = i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
-        defaultMessage: 'The operation {operation} does not accept any parameter',
-        values: { operation: out.operation },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
+          defaultMessage: 'The operation {operation} does not accept any parameter',
+          values: { operation: out.operation },
+        }),
+      };
     case 'missingParameter':
-      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
-        defaultMessage:
-          'The operation {operation} in the Formula is missing the following parameters: {params}',
-        values: { operation: out.operation, params: out.params },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
+          defaultMessage:
+            'The operation {operation} in the Formula is missing the following parameters: {params}',
+          values: { operation: out.operation, params: out.params },
+        }),
+      };
     case 'wrongTypeParameter':
-      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongType', {
-        defaultMessage:
-          'The parameters for the operation {operation} in the Formula are of the wrong type: {params}',
-        values: { operation: out.operation, params: out.params },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongType', {
+          defaultMessage:
+            'The parameters for the operation {operation} in the Formula are of the wrong type: {params}',
+          values: { operation: out.operation, params: out.params },
+        }),
+      };
     case 'wrongTypeArgument':
-      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongTypeArgument', {
-        defaultMessage:
-          'The {name} argument for the operation {operation} in the Formula is of the wrong type: {type} instead of {expectedType}',
-        values: {
-          operation: out.operation,
-          name: out.name,
-          type: out.type,
-          expectedType: out.expectedType,
-        },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongTypeArgument', {
+          defaultMessage:
+            'The {name} argument for the operation {operation} in the Formula is of the wrong type: {type} instead of {expectedType}',
+          values: {
+            operation: out.operation,
+            name: out.name,
+            type: out.type,
+            expectedType: out.expectedType,
+          },
+        }),
+      };
     case 'duplicateArgument':
-      message = i18n.translate('xpack.lens.indexPattern.formulaOperationDuplicateParams', {
-        defaultMessage:
-          'The parameters for the operation {operation} have been declared multiple times: {params}',
-        values: { operation: out.operation, params: out.params },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaOperationDuplicateParams', {
+          defaultMessage:
+            'The parameters for the operation {operation} have been declared multiple times: {params}',
+          values: { operation: out.operation, params: out.params },
+        }),
+      };
     case 'missingField':
-      message = i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
-        defaultMessage:
-          '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
-        values: { variablesLength: out.variablesLength, variablesList: out.variablesList },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
+          defaultMessage:
+            '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
+          values: { variablesLength: out.variablesLength, variablesList: out.variablesList },
+        }),
+      };
     case 'missingOperation':
-      message = i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
-        defaultMessage:
-          '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
-        values: { operationLength: out.operationLength, operationsList: out.operationsList },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
+          defaultMessage:
+            '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
+          values: { operationLength: out.operationLength, operationsList: out.operationsList },
+        }),
+      };
     case 'fieldWithNoOperation':
-      message = i18n.translate('xpack.lens.indexPattern.fieldNoOperation', {
-        defaultMessage: 'The field {field} cannot be used without operation',
-        values: { field: out.field },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.fieldNoOperation', {
+          defaultMessage: 'The field {field} cannot be used without operation',
+          values: { field: out.field },
+        }),
+      };
     case 'failedParsing':
-      message = i18n.translate('xpack.lens.indexPattern.formulaExpressionParseError', {
-        defaultMessage: 'The Formula {expression} cannot be parsed',
-        values: { expression: out.expression },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaExpressionParseError', {
+          defaultMessage: 'The Formula {expression} cannot be parsed',
+          values: { expression: out.expression },
+        }),
+      };
     case 'tooManyArguments':
-      message = i18n.translate('xpack.lens.indexPattern.formulaWithTooManyArguments', {
-        defaultMessage: 'The operation {operation} has too many arguments',
-        values: { operation: out.operation },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaWithTooManyArguments', {
+          defaultMessage: 'The operation {operation} has too many arguments',
+          values: { operation: out.operation },
+        }),
+      };
     case 'missingMathArgument':
-      message = i18n.translate('xpack.lens.indexPattern.formulaMathMissingArgument', {
-        defaultMessage:
-          'The operation {operation} in the Formula is missing {count} arguments: {params}',
-        values: { operation: out.operation, count: out.count, params: out.params },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaMathMissingArgument', {
+          defaultMessage:
+            'The operation {operation} in the Formula is missing {count} arguments: {params}',
+          values: { operation: out.operation, count: out.count, params: out.params },
+        }),
+      };
     case 'tooManyQueries':
-      message = i18n.translate('xpack.lens.indexPattern.formulaOperationDoubleQueryError', {
-        defaultMessage: 'Use only one of kql= or lucene=, not both',
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaOperationDoubleQueryError', {
+          defaultMessage: 'Use only one of kql= or lucene=, not both',
+        }),
+      };
     case 'tooManyFirstArguments':
-      message = i18n.translate('xpack.lens.indexPattern.formulaOperationTooManyFirstArguments', {
-        defaultMessage:
-          'The operation {operation} in the Formula requires a {supported, plural, one {single} other {supported}} {type}, found: {text}',
-        values: {
-          operation: out.operation,
-          text: out.text,
-          type: out.type,
-          supported: out.supported || 1,
-        },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaOperationTooManyFirstArguments', {
+          defaultMessage:
+            'The operation {operation} in the Formula requires a {supported, plural, one {single} other {supported}} {type}, found: {text}',
+          values: {
+            operation: out.operation,
+            text: out.text,
+            type: out.type,
+            supported: out.supported || 1,
+          },
+        }),
+      };
     case 'wrongArgument':
-      message = i18n.translate('xpack.lens.indexPattern.formulaOperationwrongArgument', {
-        defaultMessage:
-          'The operation {operation} in the Formula does not support {type} parameters, found: {text}',
-        values: { operation: out.operation, text: out.text, type: out.type },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaOperationwrongArgument', {
+          defaultMessage:
+            'The operation {operation} in the Formula does not support {type} parameters, found: {text}',
+          values: { operation: out.operation, text: out.text, type: out.type },
+        }),
+      };
     case 'wrongReturnedType':
-      message = i18n.translate('xpack.lens.indexPattern.formulaOperationWrongReturnedType', {
-        defaultMessage: 'The return value type of the operation {text} is not supported in Formula',
-        values: { text: out.text },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaOperationWrongReturnedType', {
+          defaultMessage:
+            'The return value type of the operation {text} is not supported in Formula',
+          values: { text: out.text },
+        }),
+      };
     case 'filtersTypeConflict':
-      message = i18n.translate('xpack.lens.indexPattern.formulaOperationFiltersTypeConflicts', {
-        defaultMessage:
-          'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation',
-        values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaOperationFiltersTypeConflicts', {
+          defaultMessage:
+            'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation',
+          values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
+        }),
+      };
     case 'useAlternativeFunction':
-      message = i18n.translate('xpack.lens.indexPattern.formulaUseAlternative', {
-        defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead`,
-        values: { operation: out.operation, params: out.params, alternativeFn: out.alternativeFn },
-      });
-      break;
+      return {
+        type: messageId,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.formulaUseAlternative', {
+          defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead`,
+          values: {
+            operation: out.operation,
+            params: out.params,
+            alternativeFn: out.alternativeFn,
+          },
+        }),
+      };
     // case 'mathRequiresFunction':
     //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
     //     defaultMessage; 'The function {name} requires an Elasticsearch function',
@@ -405,11 +481,8 @@ function getMessageFromId<K extends ErrorTypes>({
     //   });
     //   break;
     default:
-      message = 'no Error found';
-      break;
+      return undefined;
   }
-
-  return { type: messageId, message, locations };
 }
 
 export function tryToParse(
@@ -425,9 +498,12 @@ export function tryToParse(
     // * if the formula contains no existing ES operation, assume it's a plain parse failure
     // * if the formula contains at least one existing operation, check for query problems
     const maybeQueryProblems = getRawQueryValidationError(formula, operations);
-    if (maybeQueryProblems) {
+    if (maybeQueryProblems.length) {
       // need to emulate an error shape here
-      return { root: null, error: { message: maybeQueryProblems[0], locations: [] } };
+      return {
+        root: null,
+        error: { message: maybeQueryProblems[0], type: 'invalidQuery', locations: [] },
+      };
     }
     return {
       root: null,
@@ -550,12 +626,10 @@ function getQueryValidationErrors(
   const errors: ErrorWrapper[] = [];
   (namedArguments ?? []).forEach((arg) => {
     if (arg.name === 'kql' || arg.name === 'lucene') {
-      const message = getQueryValidationError(
-        arg as TinymathNamedArgument & { name: 'kql' | 'lucene' },
-        indexPattern
-      );
+      const message = getQueryValidationError(arg, indexPattern);
       if (message) {
         errors.push({
+          type: 'invalidQuery',
           message,
           locations: [arg.location],
         });
@@ -578,6 +652,7 @@ function getQueryValidationErrors(
           );
           if (error) {
             errors.push({
+              type: error,
               message: getAbsoluteTimeShiftErrorMessage(error),
               locations: [arg.location],
             });

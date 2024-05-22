@@ -199,6 +199,7 @@ export function getStateTimeShiftWarningMessages(
     const timeShifts = new Set<number>();
     const timeShiftMap: Record<number, string[]> = {};
     Object.entries(layer.columns).forEach(([columnId, column]) => {
+      // TODO: I believe this can be replaced with a similar code like getColumnTimeShiftWarnings
       if (column.isBucketed) return;
       let duration: number = 0;
       // skip absolute time shifts as underneath it will be converted to be round
@@ -276,12 +277,12 @@ export function getStateTimeShiftWarningMessages(
 export function getColumnTimeShiftWarnings(
   dateHistogramInterval: ReturnType<typeof getDateHistogramInterval>,
   timeShift: string | undefined
-) {
+): string[] {
   const { isValueTooSmall, isValueNotMultiple } = getLayerTimeShiftChecks(dateHistogramInterval);
 
   const warnings: string[] = [];
   if (isAbsoluteTimeShift(timeShift)) {
-    return warnings;
+    return [];
   }
 
   const parsedLocalValue = timeShift && parseTimeShift(timeShift);

@@ -71,7 +71,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap, targetBars) {
       const column = layer.columns[columnId] as FormulaIndexPatternColumn;
       if (!column.params.formula || !operationDefinitionMap) {
-        return;
+        return [];
       }
 
       const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);

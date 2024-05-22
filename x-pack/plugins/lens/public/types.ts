@@ -307,8 +307,6 @@ export interface UserMessage {
   displayLocations: UserMessageDisplayLocation[];
 }
 
-export type RemovableUserMessage = UserMessage & { uniqueId: string };
-
 export interface UserMessageFilters {
   severity?: UserMessage['severity'];
   dimensionId?: string;
@@ -319,11 +317,7 @@ export type UserMessagesGetter = (
   filters?: UserMessageFilters
 ) => UserMessage[];
 
-export type AddUserMessages = (messages: RemovableUserMessage[]) => () => void;
-
-export function isMessageRemovable(message: UserMessage): message is RemovableUserMessage {
-  return Boolean(message.uniqueId);
-}
+export type AddUserMessages = (messages: UserMessage[]) => () => void;
 
 /**
  * Interface for the datasource registry

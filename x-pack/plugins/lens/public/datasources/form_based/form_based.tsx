@@ -100,6 +100,7 @@ import { isColumnOfType } from './operations/definitions/helpers';
 import { LayerSettingsPanel } from './layer_settings';
 import { FormBasedLayer, LastValueIndexPatternColumn } from '../..';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
+import { EDITOR_INVALID_DIMENSION } from '../../user_messages_ids';
 export type { OperationType, GenericIndexPatternColumn } from './operations';
 export { deleteColumn } from './operations';
 
@@ -802,7 +803,7 @@ export function getFormBasedDatasource({
     },
 
     getSearchWarningMessages: (state, warning, request, response) => {
-      return [...getSearchWarningMessages(state, warning, request, response, core.theme)];
+      return getSearchWarningMessages(state, warning, request, response, core.theme);
     },
 
     checkIntegrity: (state, indexPatterns) => {
@@ -928,6 +929,7 @@ function getLayerErrorMessages(
         []
       ).map((error) => {
         const message: UserMessage = {
+          uniqueId: typeof error === 'string' ? error : error.uniqueId,
           severity: 'error',
           fixableInEditor: true,
           displayLocations:
@@ -1025,6 +1027,7 @@ function getInvalidDimensionErrorMessages(
 
         if (!isValidColumn(layerId, columnId)) {
           messages.push({
+            uniqueId: EDITOR_INVALID_DIMENSION,
             severity: 'error',
             displayLocations: [{ id: 'dimensionButton', dimensionId: columnId }],
             fixableInEditor: true,

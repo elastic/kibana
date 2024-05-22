@@ -65,12 +65,14 @@ import { getOriginalId } from '../../../common/expressions/datatable/transpose_h
 import { ReducedSamplingSectionEntries } from './info_badges';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import {
+  INCOMPLETE_ES_RESULTS,
   LAYER_SETTINGS_IGNORE_GLOBAL_FILTERS,
   LAYER_SETTINGS_RANDOM_SAMPLING_INFO,
   PRECISION_ERROR_ACCURACY_MODE_DISABLED,
   PRECISION_ERROR_ACCURACY_MODE_ENABLED,
   PRECISION_ERROR_ASC_COUNT_PRECISION,
   TSDB_UNSUPPORTED_COUNTER_OP,
+  UNSUPPORTED_DOWNSAMPLED_INDEX_AGG_PREFIX,
 } from '../../user_messages_ids';
 
 function isMinOrMaxColumn(
@@ -181,7 +183,7 @@ export function fieldIsInvalid(
   if (!column || !hasField(column)) {
     return false;
   }
-  return !!getInvalidFieldMessage(layer, columnId, indexPattern)?.length;
+  return Boolean(getInvalidFieldMessage(layer, columnId, indexPattern));
 }
 
 const accuracyModeDisabledWarning = (
@@ -294,28 +296,24 @@ export function getSearchWarningMessages(
                   ].includes(col.operationType)
                 )
                 .map((col) => col.label)
-            ).map(
-              (label) =>
-                ({
-                  type: 'xx',
-                  uniqueId: `unsupported_aggregation_on_downsampled_index--${label}`,
-                  severity: 'warning',
-                  fixableInEditor: true,
-                  displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
-                  shortMessage: '',
-                  longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
-                    defaultMessage:
-                      '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
-                    values: {
-                      label,
-                    },
-                  }),
-                } as UserMessage)
-            )
+            ).map((label) => ({
+              uniqueId: `${UNSUPPORTED_DOWNSAMPLED_INDEX_AGG_PREFIX}--${label}`,
+              severity: 'warning',
+              fixableInEditor: true,
+              displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
+              shortMessage: '',
+              longMessage: i18n.translate('xpack.lens.indexPattern.tsdbRollupWarning', {
+                defaultMessage:
+                  '{label} uses a function that is unsupported by rolled up data. Select a different function or change the time range.',
+                values: {
+                  label,
+                },
+              }),
+            }))
           )
         : [
             {
-              uniqueId: `incomplete`,
+              uniqueId: INCOMPLETE_ES_RESULTS,
               severity: 'warning',
               fixableInEditor: true,
               displayLocations: [{ id: 'toolbar' }, { id: 'embeddableBadge' }],
@@ -326,7 +324,7 @@ export function getSearchWarningMessages(
                   warnings={[warning]}
                 />
               ),
-            } as UserMessage,
+            },
           ];
     }
   }

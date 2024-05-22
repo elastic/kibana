@@ -324,7 +324,7 @@ interface BaseOperationDefinitionProps<
     dateRange?: DateRange,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>,
     targetBars?: number
-  ) => FieldBasedOperationErrorMessage[] | undefined;
+  ) => FieldBasedOperationErrorMessage[];
 
   /*
    * Flag whether this operation can be scaled by time unit if a date histogram is available.
@@ -463,21 +463,20 @@ interface FilterParams {
   lucene?: string;
 }
 
-export type FieldBasedOperationErrorMessage =
-  | {
-      message: string | React.ReactNode;
-      displayLocations?: UserMessage['displayLocations'];
-      fixAction?: {
-        label: string;
-        newState: (
-          data: DataPublicPluginStart,
-          core: CoreStart,
-          frame: FramePublicAPI,
-          layerId: string
-        ) => Promise<FormBasedLayer>;
-      };
-    }
-  | string;
+export interface FieldBasedOperationErrorMessage {
+  uniqueId: string;
+  message: string | React.ReactNode;
+  displayLocations?: UserMessage['displayLocations'];
+  fixAction?: {
+    label: string;
+    newState: (
+      data: DataPublicPluginStart,
+      core: CoreStart,
+      frame: FramePublicAPI,
+      layerId: string
+    ) => Promise<FormBasedLayer>;
+  };
+}
 interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}> {
   input: 'none';
 
@@ -581,7 +580,7 @@ interface FieldBasedOperationDefinition<C extends BaseIndexPatternColumn, P = {}
     columnId: string,
     indexPattern: IndexPattern,
     operationDefinitionMap?: Record<string, GenericOperationDefinition>
-  ) => FieldBasedOperationErrorMessage[] | undefined;
+  ) => FieldBasedOperationErrorMessage[];
 }
 
 export interface RequiredReference {
