@@ -17,7 +17,7 @@ export function registerCasesAttachments(
   cases: CasesPublicSetup,
   coreStart: CoreStart,
   pluginStart: MlStartDependencies,
-  SingleMetricViewerServices: SingleMetricViewerServices
+  singleMetricViewerServices: SingleMetricViewerServices
 ) {
   registerAnomalySwimLaneCasesAttachment(cases, pluginStart);
   registerAnomalyChartsCasesAttachment(cases, coreStart, pluginStart);
