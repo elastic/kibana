@@ -76,6 +76,10 @@ export const getRuleRoute = (
     licenseState,
     path: `${BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
+    options: {
+      access: 'public',
+      description: `Get rule details`,
+    },
   });
 
 export const getInternalRuleRoute = (
@@ -87,8 +91,4 @@ export const getInternalRuleRoute = (
     licenseState,
     path: `${INTERNAL_BASE_ALERTING_API_PATH}/rule/{id}`,
     router,
-    options: {
-      access: 'public',
-      description: `Get rule details`,
-    },
   });
