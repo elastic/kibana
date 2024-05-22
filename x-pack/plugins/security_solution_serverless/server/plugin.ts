@@ -104,9 +104,6 @@ export class SecuritySolutionServerlessPlugin
       meteringCallback: endpointMeteringService.getUsageRecords,
       taskManager: pluginsSetup.taskManager,
       cloudSetup: pluginsSetup.cloud,
-      options: {
-        lookBackLimitMinutes: ENDPOINT_METERING_TASK.LOOK_BACK_LIMIT_MINUTES,
-      },
     });
 
     this.nlpCleanupTask = new NLPCleanupTask({

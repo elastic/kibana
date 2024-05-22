@@ -99,7 +99,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 
 
 |{kib-repo}blob/{branch}/src/plugins/embeddable/README.md[embeddable]
-|The Embeddables Plugin provides an opportunity to expose reusable interactive widgets that can be embedded outside the original plugin.
+|Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 
 |{kib-repo}blob/{branch}/src/plugins/es_ui_shared/README.md[esUiShared]
@@ -649,6 +649,10 @@ the infrastructure monitoring use-case within Kibana.
 |{kib-repo}blob/{branch}/x-pack/plugins/lists/README.md[lists]
 |README.md for developers working on the backend lists on how to get started
 using the CURL scripts in the scripts folder.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_data_access/README.md[logsDataAccess]
+|Exposes services to access logs data.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_explorer/README.md[logsExplorer]

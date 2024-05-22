@@ -68,8 +68,6 @@ export default function ({ getService }: FtrProviderContext) {
    * Tests
    */
   describe('Generate CSV from SearchSource', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/179456
-    this.tags(['failsOnMKI']);
     beforeEach(async () => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
@@ -84,6 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        await reportingAPI.deleteAllReports();
         await esArchiver.unload(archives.ecommerce.data);
         await kibanaServer.importExport.unload(archives.ecommerce.savedObjects);
       });
@@ -731,7 +730,9 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, undefined, undefined, {
+          timeout: 80 * 1000,
+        });
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expect((csvFile as string).length).to.be(4826973);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();

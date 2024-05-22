@@ -8,24 +8,22 @@
 
 import { CSSProperties, Dispatch } from 'react';
 import { debounce } from 'lodash';
-import {
-  ConsoleParsedRequestsProvider,
-  getParsedRequestsProvider,
-  monaco,
-  ParsedRequest,
-} from '@kbn/monaco';
+import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
-import { sendRequest } from '../../../hooks/use_send_current_request/send_request';
+import { sendRequest } from '../../../hooks';
 import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
+
 import {
+  AutocompleteType,
   containsUrlParams,
+  getBodyCompletionItems,
   getCurlRequest,
-  getDocumentationLink,
+  getDocumentationLinkFromAutocomplete,
   getLineTokens,
   getMethodCompletionItems,
   getRequestEndLineNumber,
@@ -33,28 +31,15 @@ import {
   getUrlParamsCompletionItems,
   getUrlPathCompletionItems,
   replaceRequestVariables,
+  SELECTED_REQUESTS_CLASSNAME,
   stringifyRequest,
   trackSentRequests,
+  getAutoIndentedRequests,
 } from './utils';
 
-const selectedRequestsClass = 'console__monaco_editor__selectedRequests';
+import type { AdjustedParsedRequest } from './types';
 
-export interface EditorRequest {
-  method: string;
-  url: string;
-  data: string[];
-}
-
-interface AdjustedParsedRequest extends ParsedRequest {
-  startLineNumber: number;
-  endLineNumber: number;
-}
-enum AutocompleteType {
-  PATH = 'path',
-  URL_PARAMS = 'url_params',
-  METHOD = 'method',
-  BODY = 'body',
-}
+const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 
 export class MonacoEditorActionsProvider {
   private parsedRequestsProvider: ConsoleParsedRequestsProvider;
@@ -125,7 +110,7 @@ export class MonacoEditorActionsProvider {
           range: selectedRange,
           options: {
             isWholeLine: true,
-            className: selectedRequestsClass,
+            className: SELECTED_REQUESTS_CLASSNAME,
           },
         },
       ]);
@@ -255,7 +240,7 @@ export class MonacoEditorActionsProvider {
     }
     const request = requests[0];
 
-    return getDocumentationLink(request, docLinkVersion);
+    return getDocumentationLinkFromAutocomplete(request, docLinkVersion);
   }
 
   private async getAutocompleteType(
@@ -302,7 +287,11 @@ export class MonacoEditorActionsProvider {
     return AutocompleteType.BODY;
   }
 
-  private async getSuggestions(model: monaco.editor.ITextModel, position: monaco.Position) {
+  private async getSuggestions(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    context: monaco.languages.CompletionContext
+  ) {
     // determine autocomplete type
     const autocompleteType = await this.getAutocompleteType(model, position);
     if (!autocompleteType) {
@@ -328,6 +317,23 @@ export class MonacoEditorActionsProvider {
       };
     }
 
+    if (autocompleteType === AutocompleteType.BODY) {
+      // suggestions only when triggered by " or keyboard
+      if (context.triggerCharacter && context.triggerCharacter !== '"') {
+        return { suggestions: [] };
+      }
+      const requests = await this.getRequestsBetweenLines(
+        model,
+        position.lineNumber,
+        position.lineNumber
+      );
+      const requestStartLineNumber = requests[0].startLineNumber;
+      const suggestions = getBodyCompletionItems(model, position, requestStartLineNumber);
+      return {
+        suggestions,
+      };
+    }
+
     return {
       suggestions: [],
     };
@@ -338,6 +344,121 @@ export class MonacoEditorActionsProvider {
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken
   ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
-    return this.getSuggestions(model, position);
+    return this.getSuggestions(model, position, context);
+  }
+
+  /*
+  This function returns the text in the provided range.
+  If no range is provided, it returns all text in the editor.
+  */
+  private getTextInRange(selectionRange?: monaco.IRange): string {
+    const model = this.editor.getModel();
+    if (!model) {
+      return '';
+    }
+    if (selectionRange) {
+      const { startLineNumber, startColumn, endLineNumber, endColumn } = selectionRange;
+      return model.getValueInRange({
+        startLineNumber,
+        startColumn,
+        endLineNumber,
+        endColumn,
+      });
+    }
+    // If no range is provided, return all text in the editor
+    return model.getValue();
+  }
+
+  /**
+   * This function applies indentations to the request in the selected text.
+   */
+  public async autoIndent() {
+    const parsedRequests = await this.getSelectedParsedRequests();
+    const selectionStartLineNumber = parsedRequests[0].startLineNumber;
+    const selectionEndLineNumber = parsedRequests[parsedRequests.length - 1].endLineNumber;
+    const selectedRange = new monaco.Range(
+      selectionStartLineNumber,
+      1,
+      selectionEndLineNumber,
+      this.editor.getModel()?.getLineMaxColumn(selectionEndLineNumber) ?? 1
+    );
+
+    if (parsedRequests.length < 1) {
+      return;
+    }
+
+    const selectedText = this.getTextInRange(selectedRange);
+    const allText = this.getTextInRange();
+
+    const autoIndentedText = getAutoIndentedRequests(parsedRequests, selectedText, allText);
+
+    this.editor.executeEdits(AUTO_INDENTATION_ACTION_LABEL, [
+      {
+        range: selectedRange,
+        text: autoIndentedText,
+      },
+    ]);
+  }
+
+  /**
+   * This function moves the cursor to the previous request edge (start/end line).
+   * If the cursor is inside a request, it is moved to the start line of this request.
+   * If there are no requests before the cursor, it is moved at the first line in the editor.
+   */
+  public async moveToPreviousRequestEdge() {
+    const currentPosition = this.editor.getPosition();
+    const model = this.editor.getModel();
+    if (!currentPosition || !model) {
+      return;
+    }
+    const { lineNumber: currentLineNumber } = currentPosition;
+    // Get all requests before the current line
+    const requestsBefore = await this.getRequestsBetweenLines(model, 1, currentLineNumber - 1);
+    if (requestsBefore.length === 0) {
+      // If no requests before current line, set position to first line
+      this.editor.setPosition({ lineNumber: 1, column: 1 });
+      return;
+    }
+    const lastRequestBefore = requestsBefore[requestsBefore.length - 1];
+    if (lastRequestBefore.endLineNumber < currentLineNumber) {
+      this.editor.setPosition({ lineNumber: lastRequestBefore.endLineNumber, column: 1 });
+    } else {
+      // If the end line of the request is after the current line, then the cursor is inside the request
+      // The previous request edge is the start line of the request
+      this.editor.setPosition({ lineNumber: lastRequestBefore.startLineNumber, column: 1 });
+    }
+  }
+
+  /**
+   * This function moves the cursor to the next request edge.
+   * If the cursor is inside a request, it is moved to the end line of this request.
+   * If there are no requests after the cursor, it is moved at the last line in the editor.
+   */
+  public async moveToNextRequestEdge() {
+    const currentPosition = this.editor.getPosition();
+    const model = this.editor.getModel();
+    if (!currentPosition || !model) {
+      return;
+    }
+    const { lineNumber: currentLineNumber } = currentPosition;
+    // Get all requests before the current line
+    const requestsAfter = await this.getRequestsBetweenLines(
+      model,
+      currentLineNumber + 1,
+      model.getLineCount()
+    );
+    if (requestsAfter.length === 0) {
+      // If no requests after current line, set position to last line
+      this.editor.setPosition({ lineNumber: model.getLineCount(), column: 1 });
+      return;
+    }
+    const firstRequestAfter = requestsAfter[0];
+    if (firstRequestAfter.startLineNumber > currentLineNumber) {
+      this.editor.setPosition({ lineNumber: firstRequestAfter.startLineNumber, column: 1 });
+    } else {
+      // If the start line of the request is before the current line, then the cursor is inside the request
+      // The next request edge is the end line of the request
+      this.editor.setPosition({ lineNumber: firstRequestAfter.endLineNumber, column: 1 });
+    }
   }
 }
