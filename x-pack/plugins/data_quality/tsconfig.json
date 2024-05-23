@@ -19,6 +19,9 @@
     "@kbn/management-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-router",
+    "@kbn/core-notifications-browser",
+    "@kbn/i18n-react",
+    "@kbn/core-chrome-browser",
   ],
   "exclude": ["target/**/*"]
 }

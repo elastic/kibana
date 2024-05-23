@@ -56,6 +56,10 @@ export function getAlertsForNotification(
         }
       }
     } else if (trackedEvent.event[ALERT_STATUS] === ALERT_STATUS_RECOVERED) {
+      // if alert has not reached the alertDelay threshold don't recover the alert
+      if (trackedEvent.activeCount < alertDelay) {
+        continue;
+      }
       trackedEvent.activeCount = 0;
       if (flappingSettings.enabled) {
         if (trackedEvent.flapping) {
