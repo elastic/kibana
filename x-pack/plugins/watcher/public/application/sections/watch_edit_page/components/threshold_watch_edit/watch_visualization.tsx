@@ -10,6 +10,7 @@ import {
   AnnotationDomainType,
   Axis,
   Chart,
+  LegendValue,
   LineAnnotation,
   LineSeries,
   PartialTheme,
