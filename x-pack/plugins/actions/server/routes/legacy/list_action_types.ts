@@ -24,6 +24,10 @@ export const listActionTypesRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/list_action_types`,
+      options: {
+        access: 'public',
+        description: `Get connector types`,
+      },
       validate: {},
     },
     router.handleLegacyErrors(async function (context, req, res) {

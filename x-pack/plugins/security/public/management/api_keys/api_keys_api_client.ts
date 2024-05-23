@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import type { QueryContainer } from '@elastic/eui/src/components/search_bar/query/ast_to_es_query_dsl';
+
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 
-import type { ApiKeyToInvalidate } from '../../../common/model';
-import type {
-  GetAPIKeysResult,
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-} from '../../../server/routes/api_keys';
+import type { QueryFilters } from './api_keys_grid/api_keys_table';
+import type { ApiKeyToInvalidate, QueryApiKeyResult } from '../../../common/model';
+import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../../server/routes/api_keys';
 
 export type { CreateAPIKeyParams, CreateAPIKeyResult, UpdateAPIKeyParams, UpdateAPIKeyResult };
 
@@ -22,13 +21,41 @@ export interface InvalidateApiKeysResponse {
   errors: any[];
 }
 
+export interface QueryApiKeySortOptions {
+  field:
+    | 'id'
+    | 'type'
+    | 'name'
+    | 'username'
+    | 'realm'
+    | 'creation'
+    | 'metadata'
+    | 'role_descriptors'
+    | 'expiration'
+    | 'invalidated'
+    | 'limited_by'
+    | '_sort'
+    | 'expired';
+  direction: 'asc' | 'desc';
+}
+
+export interface QueryApiKeyParams {
+  query: QueryContainer;
+  from: number;
+  size: number;
+  sort: QueryApiKeySortOptions;
+  filters: QueryFilters;
+}
+
 const apiKeysUrl = '/internal/security/api_key';
 
 export class APIKeysAPIClient {
   constructor(private readonly http: HttpStart) {}
 
-  public async getApiKeys() {
-    return await this.http.get<GetAPIKeysResult>(apiKeysUrl);
+  public async queryApiKeys(params?: QueryApiKeyParams) {
+    return await this.http.post<QueryApiKeyResult>(`${apiKeysUrl}/_query`, {
+      body: JSON.stringify(params || {}),
+    });
   }
 
   public async invalidateApiKeys(apiKeys: ApiKeyToInvalidate[], isAdmin = false) {

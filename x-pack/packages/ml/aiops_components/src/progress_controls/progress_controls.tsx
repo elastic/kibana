@@ -63,6 +63,8 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
     runAnalysisDisabled = false,
   } = props;
 
+  const progressOutput = Math.round(progress * 100);
+
   const { euiTheme } = useEuiTheme();
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
   const analysisCompleteStyle = { display: 'none' };
@@ -147,7 +149,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
                 data-test-subj="aiopsProgressTitleMessage"
                 id="xpack.aiops.progressTitle"
                 defaultMessage="Progress: {progress}% — {progressMessage}"
-                values={{ progress: Math.round(progress * 100), progressMessage }}
+                values={{ progress: progressOutput, progressMessage }}
               />
             </EuiText>
           </EuiFlexItem>
@@ -156,7 +158,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
               aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
                 defaultMessage: 'Progress',
               })}
-              value={Math.round(progress * 100)}
+              value={progressOutput}
               max={100}
               size="m"
             />
