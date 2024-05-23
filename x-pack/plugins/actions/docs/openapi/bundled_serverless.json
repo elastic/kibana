@@ -1330,7 +1330,9 @@
         "description": "Defines properties for connectors when type is `.gemini`.",
         "type": "object",
         "required": [
-          "apiUrl"
+          "apiUrl",
+          "gcpRegion",
+          "gcpProjectID"
         ],
         "properties": {
           "apiUrl": {
@@ -1341,6 +1343,14 @@
             "type": "string",
             "description": "The generative artificial intelligence model for Google Gemini to use.\n",
             "default": "gemini-1.5-pro-preview-0409"
+          },
+          "gcpRegion": {
+            "type": "string",
+            "description": "The GCP region that has Vertex AI endpoint enabled."
+          },
+          "gcpProjectID": {
+            "type": "string",
+            "description": "The Google ProjectID that has Vertex AI endpoint enabled."
           }
         }
       },
@@ -1349,12 +1359,12 @@
         "description": "Defines secrets for connectors when type is `.gemini`.",
         "type": "object",
         "required": [
-          "accessToken"
+          "credentialsJSON"
         ],
         "properties": {
-          "accessToken": {
+          "credentialsJSON": {
             "type": "string",
-            "description": "Access token to authenticate to Google Gemini."
+            "description": "The service account credentials JSON file. The service account should have Vertex AI user IAM role assigned to it."
           }
         }
       },
