@@ -216,7 +216,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   dataViewId: undefined,
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
-  requiredFields: [],
+  requiredFields: [{ name: 'host.name', type: 'keyword' }],
   relatedIntegrations: [
     {
       package: 'aws',

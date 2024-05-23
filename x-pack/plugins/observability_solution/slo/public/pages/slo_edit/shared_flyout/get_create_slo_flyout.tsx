@@ -9,7 +9,7 @@ import React from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { QueryClient } from '@tanstack/react-query';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { CoreStart } from '@kbn/core/public';
 import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RecursivePartial } from '@kbn/utility-types';

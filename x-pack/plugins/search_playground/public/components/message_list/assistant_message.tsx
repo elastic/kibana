@@ -13,6 +13,7 @@ import {
   EuiButtonEmpty,
   EuiComment,
   EuiFlexGroup,
+  EuiLink,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -21,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { docLinks } from '../../../common/doc_links';
 import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
 import type { AIMessage as AIMessageType } from '../../types';
 
@@ -52,6 +54,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
         <EuiComment
           username={username}
           timelineAvatar="dot"
+          data-test-subj="retrieval-docs-comment"
           event={
             <>
               <EuiText size="s">
@@ -68,6 +71,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
                 css={{ blockSize: 'auto' }}
                 size="s"
                 flush="left"
+                data-test-subj="retrieval-docs-button"
                 onClick={() => setIsDocsFlyoutOpen(true)}
               >
                 <FormattedMessage
@@ -87,11 +91,50 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
           }
         />
       )}
+      {retrievalDocs?.length === 0 && (
+        <EuiComment
+          username={username}
+          timelineAvatar="dot"
+          data-test-subj="retrieval-docs-comment-no-docs"
+          event={
+            <>
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.chat.message.assistant.noRetrievalDocs"
+                    defaultMessage="Unable to retrieve documents based on the provided question and query."
+                  />
+                  {` `}
+                </p>
+              </EuiText>
+
+              <EuiLink
+                href={docLinks.retrievalOptimize}
+                target="_blank"
+                data-test-subj="retrieval-optimization-documentation-link"
+              >
+                <FormattedMessage
+                  id="xpack.searchPlayground.chat.message.assistant.noRetrievalDocs.learnMore"
+                  defaultMessage=" Learn more."
+                />
+              </EuiLink>
+
+              {isDocsFlyoutOpen && (
+                <RetrievalDocsFlyout
+                  onClose={() => setIsDocsFlyoutOpen(false)}
+                  retrievalDocs={retrievalDocs}
+                />
+              )}
+            </>
+          }
+        />
+      )}
       <EuiComment
         username={username}
         event={i18n.translate('xpack.searchPlayground.chat.message.assistant.event.responded', {
           defaultMessage: 'responded',
         })}
+        data-test-subj="assistant-message"
         timestamp={
           createdAt &&
           i18n.translate('xpack.searchPlayground.chat.message.assistant.createdAt', {
@@ -137,7 +180,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ message }) =
         {!!citations?.length && (
           <>
             <EuiSpacer size="l" />
-            <EuiTitle size="xs">
+            <EuiTitle size="xs" data-test-subj="assistant-message-citations">
               <p>
                 <FormattedMessage
                   id="xpack.searchPlayground.chat.message.assistant.citations.title"

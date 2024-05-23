@@ -1164,6 +1164,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_MULTI_SIGNAL",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_MULTI_SIGNAL",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableMultiSignal\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
         "type": "string",
         "tags": [],
@@ -1321,6 +1336,21 @@
         "description": [],
         "signature": [
           "\"observability:enableComparisonByDefault\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_CONTAINER_ASSET_VIEW_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_CONTAINER_ASSET_VIEW_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableContainerAssetView\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

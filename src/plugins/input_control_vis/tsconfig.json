@@ -26,6 +26,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/presentation-publishing",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

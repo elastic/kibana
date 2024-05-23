@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 
-import { App, HttpContext } from './app';
+import { App, AppContext } from './app';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
@@ -26,12 +26,13 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
       title: APPLICATION_NAME,
       visibleIn: [],
       mount: async ({ element }: AppMountParameters) => {
-        const [{ http }] = await getStartServices();
+        const [{ http, analytics, i18n, theme }] = await getStartServices();
+        const startServices = { analytics, http, i18n, theme };
 
         ReactDOM.render(
-          <HttpContext.Provider value={http}>
+          <AppContext.Provider value={startServices}>
             <App />
-          </HttpContext.Provider>,
+          </AppContext.Provider>,
           element
         );
         return () => ReactDOM.unmountComponentAtNode(element);

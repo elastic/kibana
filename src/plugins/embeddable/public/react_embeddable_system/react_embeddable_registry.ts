@@ -14,17 +14,17 @@ const registry: { [key: string]: () => Promise<ReactEmbeddableFactory<any, any>>
 /**
  * Registers a new React embeddable factory. This should be called at plugin start time.
  *
- * @param type The key to register the factory under. This should be the same as the `type` key in the factory definition.
+ * @param type The key to register the factory under.
  * @param getFactory an async function that gets the factory definition for this key. This should always async import the
  * actual factory definition file to avoid polluting page load.
  */
 export const registerReactEmbeddableFactory = <
   SerializedState extends object = object,
-  ApiType extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
   RuntimeState extends object = SerializedState
 >(
   type: string,
-  getFactory: () => Promise<ReactEmbeddableFactory<SerializedState, ApiType, RuntimeState>>
+  getFactory: () => Promise<ReactEmbeddableFactory<SerializedState, Api, RuntimeState>>
 ) => {
   if (registry[type] !== undefined)
     throw new Error(
@@ -40,11 +40,11 @@ export const reactEmbeddableRegistryHasKey = (key: string) => registry[key] !== 
 
 export const getReactEmbeddableFactory = async <
   SerializedState extends object = object,
-  ApiType extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>,
   RuntimeState extends object = SerializedState
 >(
   key: string
-): Promise<ReactEmbeddableFactory<SerializedState, ApiType, RuntimeState>> => {
+): Promise<ReactEmbeddableFactory<SerializedState, Api, RuntimeState>> => {
   if (registry[key] === undefined)
     throw new Error(
       i18n.translate('embeddableApi.reactEmbeddable.factoryNotFoundError', {
