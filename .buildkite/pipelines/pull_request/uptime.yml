@@ -3,7 +3,7 @@ steps:
     label: 'Uptime @elastic/synthetics Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme

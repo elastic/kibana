@@ -4,7 +4,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
 
@@ -14,7 +14,7 @@ steps:
     label: Build Kibana Distribution and Plugins
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
     key: build
@@ -26,7 +26,7 @@ steps:
     parallelism: 27
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -43,7 +43,7 @@ steps:
     label: 'Docker CI Group'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -61,7 +61,7 @@ steps:
     parallelism: 11
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -77,7 +77,7 @@ steps:
     label: 'OSS Accessibility Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -92,7 +92,7 @@ steps:
     label: 'Default Accessibility Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -108,7 +108,7 @@ steps:
     label: 'OSS Firefox Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -123,7 +123,7 @@ steps:
     label: 'Default Firefox Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -139,7 +139,7 @@ steps:
     label: 'OSS Misc Functional Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -155,7 +155,7 @@ steps:
     label: 'Saved Object Field Metrics'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -172,7 +172,7 @@ steps:
     parallelism: 8
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -185,7 +185,7 @@ steps:
     parallelism: 3
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -197,7 +197,7 @@ steps:
     label: 'API Integration Tests'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -209,7 +209,7 @@ steps:
     label: 'Linting'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -221,7 +221,7 @@ steps:
     label: 'Linting (with types)'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: c2-standard-16
     key: linting_with_types
@@ -231,7 +231,7 @@ steps:
     label: 'Checks'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -246,7 +246,7 @@ steps:
     label: 'Check Types'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -257,7 +257,7 @@ steps:
     label: 'Build Storybooks'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
@@ -269,7 +269,7 @@ steps:
     label: 'Build API Docs'
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
