@@ -23,7 +23,7 @@ import { useFetchApmIndex } from '../../../hooks/use_fetch_apm_indices';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { BehaviorSubject } from 'rxjs';
-
+import { useFetchSloGlobalDiagnosis } from '../../../hooks/use_fetch_global_diagnosis';
 import { cleanup } from '@testing-library/react';
 
 jest.mock('@kbn/observability-shared-plugin/public');
@@ -35,14 +35,15 @@ jest.mock('../../../hooks/use_update_slo');
 jest.mock('../../../hooks/use_fetch_apm_suggestions');
 jest.mock('../../../hooks/use_capabilities');
 jest.mock('../../../hooks/use_fetch_apm_indices');
+jest.mock('../../../hooks/use_fetch_global_diagnosis');
 
-const mockUseKibanaReturnValue = kibanaStartMock.startContract();
+// const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
-jest.mock('../../../utils/kibana_react', () => ({
-  useKibana: jest.fn(() => mockUseKibanaReturnValue),
-}));
+// jest.mock('../../../utils/kibana_react', () => ({
+//   useKibana: jest.fn(() => mockUseKibanaReturnValue),
+// }));
 
-const useKibanaMock = useKibana as jest.Mock;
+// const useKibanaMock = useKibana as jest.Mock;
 
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
@@ -53,6 +54,7 @@ const useCreateRuleMock = useCreateRule as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 const useFetchApmIndexMock = useFetchApmIndex as jest.Mock;
+const useFetchSloGlobalDiagnosisMock = useFetchSloGlobalDiagnosis as jest.Mock;
 
 describe('render the flyout', () => {
   const mockCreateRule = jest.fn();
@@ -62,64 +64,64 @@ describe('render the flyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    useKibanaMock.mockReturnValue({
-      services: {
-        theme: {},
-        application: {
-          navigateToUrl: jest.fn(),
-        },
-        charts: {
-          theme: {
-            useChartsBaseTheme: () => {},
-          },
-        },
-        data: {
-          dataViews: {
-            find: jest.fn().mockReturnValue([]),
-            get: jest.fn().mockReturnValue([]),
-            getDefault: jest.fn(),
-          },
-        },
-        dataViews: {
-          create: jest.fn().mockResolvedValue({
-            getIndexPattern: jest.fn().mockReturnValue('some-index'),
-          }),
-        },
-        docLinks: {
-          links: {
-            query: {},
-          },
-        },
-        http: {
-          basePath: {
-            prepend: jest.fn(),
-          },
-        },
-        storage: {
-          get: () => {},
-        },
-        triggersActionsUi: {
-          getAddRuleFlyout: jest
-            .fn()
-            .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
-        },
-        uiSettings: {
-          get: () => {},
-        },
-        unifiedSearch: {
-          ui: {
-            QueryStringInput: () => <div>Query String Input</div>,
-            SearchBar: () => <div>Search Bar</div>,
-          },
-          autocomplete: {
-            hasQuerySuggestions: () => {},
-          },
-        },
-        licensing: {
-          license$: new BehaviorSubject(null),
-        },
-      },
-    });
+    // useKibanaMock.mockReturnValue({
+    //   services: {
+    //     theme: {},
+    //     application: {
+    //       navigateToUrl: jest.fn(),
+    //     },
+    //     charts: {
+    //       theme: {
+    //         useChartsBaseTheme: () => {},
+    //       },
+    //     },
+    //     data: {
+    //       dataViews: {
+    //         find: jest.fn().mockReturnValue([]),
+    //         get: jest.fn().mockReturnValue([]),
+    //         getDefault: jest.fn(),
+    //       },
+    //     },
+    //     dataViews: {
+    //       create: jest.fn().mockResolvedValue({
+    //         getIndexPattern: jest.fn().mockReturnValue('some-index'),
+    //       }),
+    //     },
+    //     docLinks: {
+    //       links: {
+    //         query: {},
+    //       },
+    //     },
+    //     http: {
+    //       basePath: {
+    //         prepend: jest.fn(),
+    //       },
+    //     },
+    //     storage: {
+    //       get: () => {},
+    //     },
+    //     triggersActionsUi: {
+    //       getAddRuleFlyout: jest
+    //         .fn()
+    //         .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
+    //     },
+    //     uiSettings: {
+    //       get: () => {},
+    //     },
+    //     unifiedSearch: {
+    //       ui: {
+    //         QueryStringInput: () => <div>Query String Input</div>,
+    //         SearchBar: () => <div>Search Bar</div>,
+    //       },
+    //       autocomplete: {
+    //         hasQuerySuggestions: () => {},
+    //       },
+    //     },
+    //     licensing: {
+    //       license$: new BehaviorSubject(null),
+    //     },
+    //   },
+    // });
 
     useFetchDataViewsMock.mockReturnValue({
       isLoading: false,
@@ -164,6 +166,10 @@ describe('render the flyout', () => {
     useFetchApmIndexMock.mockReturnValue({
       isLoading: false,
       data: '',
+    });
+
+    useFetchSloGlobalDiagnosisMock.mockReturnValue({
+      isError: false,
     });
   });
 

@@ -26,6 +26,8 @@ import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { indexPatternFieldEditorPluginMock as dataViewFieldEditorPluginMock } from '@kbn/data-view-field-editor-plugin/public/mocks';
 import { ToastsStart } from '@kbn/core/public';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
   createStart() {
@@ -63,11 +65,11 @@ export const sloPublicPluginsStartMock = {
       cases: mockCasesContract(),
       charts: chartPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
-      dataViewEditor: dataViewEditor.createStart(),
+      dataViewEditor: dataViewEditorPluginMock.createStartContract(),
       dataViews: dataViewPluginMocks.createStartContract(),
       lens: lensPluginMock.createStartContract(),
       share: sharePluginMock.createStartContract(),
-      triggersActionsUi: triggersActionsUiStartMock.createStart(),
+      triggersActionsUi: triggersActionsUiMock.createStart(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       dashboard: dashboardPluginMock.createStartContract(),
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
