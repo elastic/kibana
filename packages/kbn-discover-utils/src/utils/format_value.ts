@@ -32,7 +32,7 @@ import type {
 export function formatFieldValue(
   value: unknown,
   hit: SearchHit,
-  fieldFormats: FieldFormatsStart,
+  fieldFormats?: FieldFormatsStart,
   dataView?: DataView,
   field?: DataViewField,
   contentType?: FieldFormatsContentType,
@@ -46,6 +46,7 @@ export function formatFieldValue(
   };
 
   if (!dataView || !field) {
+    if (!fieldFormats) return String(value);
     // If either no field is available or no data view, we'll use the default
     // string formatter to format that field.
     return fieldFormats

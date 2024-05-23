@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/esql-datatable",
+  "owner": "@elastic/kibana-esql",
+  "plugin": {
+    "id": "esqlDatatable",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "data",
+      "uiActions",
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "dataViews"
+    ]
+  }
+}

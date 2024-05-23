@@ -4655,6 +4655,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-datatable@link:src/plugins/esql_datatable":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:packages/kbn-esql-utils":
   version "0.0.0"
   uid ""

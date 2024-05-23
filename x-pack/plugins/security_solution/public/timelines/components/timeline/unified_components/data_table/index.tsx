@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import UnifiedDataTable, { DataLoadingState } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EuiDataGridCustomBodyProps, EuiDataGridProps } from '@elastic/eui';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';

@@ -20,7 +20,7 @@ import {
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { DataLoadingState, UnifiedDataTable, UnifiedDataTableProps } from '@kbn/unified-data-table';
+import UnifiedDataTable, { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-table';
 import React, { useEffect } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { StartDeps } from '../../plugin';

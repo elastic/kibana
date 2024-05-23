@@ -12,7 +12,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { ActionBar } from './components/action_bar/action_bar';
 import { GetStateReturn } from './services/context_state';
 import { SortDirection } from '@kbn/data-plugin/public';
-import { UnifiedDataTable } from '@kbn/unified-data-table';
+import UnifiedDataTable from '@kbn/unified-data-table';
 import { ContextAppContent, ContextAppContentProps } from './context_app_content';
 import { LoadingStatus } from './services/context_query_state';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';

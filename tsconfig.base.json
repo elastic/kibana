@@ -810,6 +810,8 @@
       "@kbn/esql-ast/*": ["packages/kbn-esql-ast/*"],
       "@kbn/esql-ast-inspector-plugin": ["examples/esql_ast_inspector"],
       "@kbn/esql-ast-inspector-plugin/*": ["examples/esql_ast_inspector/*"],
+      "@kbn/esql-datatable": ["src/plugins/esql_datatable"],
+      "@kbn/esql-datatable/*": ["src/plugins/esql_datatable/*"],
       "@kbn/esql-utils": ["packages/kbn-esql-utils"],
       "@kbn/esql-utils/*": ["packages/kbn-esql-utils/*"],
       "@kbn/esql-validation-autocomplete": ["packages/kbn-esql-validation-autocomplete"],

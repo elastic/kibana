@@ -449,6 +449,7 @@
     "@kbn/eso-plugin": "link:x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin",
     "@kbn/esql-ast": "link:packages/kbn-esql-ast",
     "@kbn/esql-ast-inspector-plugin": "link:examples/esql_ast_inspector",
+    "@kbn/esql-datatable": "link:src/plugins/esql_datatable",
     "@kbn/esql-utils": "link:packages/kbn-esql-utils",
     "@kbn/esql-validation-autocomplete": "link:packages/kbn-esql-validation-autocomplete",
     "@kbn/esql-validation-example-plugin": "link:examples/esql_validation_example",

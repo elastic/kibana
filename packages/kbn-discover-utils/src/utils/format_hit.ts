@@ -33,7 +33,7 @@ export function formatHit(
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   maxEntries: number,
-  fieldFormats: FieldFormatsStart
+  fieldFormats?: FieldFormatsStart
 ): FormattedHit {
   const cached = formattedHitCache.get(hit.raw);
   if (cached && cached.maxEntries === maxEntries) {

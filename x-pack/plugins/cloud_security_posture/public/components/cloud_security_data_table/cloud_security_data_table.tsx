@@ -6,7 +6,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import { UnifiedDataTableSettings, useColumns } from '@kbn/unified-data-table';
-import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
+import UnifiedDataTable, { DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { SHOW_MULTIFIELDS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
 import { DataTableRecord } from '@kbn/discover-utils/types';
