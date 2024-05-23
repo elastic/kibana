@@ -26,6 +26,7 @@ import { rulesToMap } from '../../logic/utils';
 
 import { buildFrameworkRequest } from '../../../../timeline/utils/common';
 import { checkTimelinesStatus } from '../../../../timeline/utils/check_timelines_status';
+import { KQL_FILTER_CUSTOM_RULES } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 
 export const getPrebuiltRulesAndTimelinesStatusRoute = (
   router: SecuritySolutionPluginRouter,
@@ -60,7 +61,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
             page: 1,
             sortField: 'enabled',
             sortOrder: 'desc',
-            filter: 'alert.attributes.params.immutable: false',
+            filter: KQL_FILTER_CUSTOM_RULES,
             fields: undefined,
           });
 

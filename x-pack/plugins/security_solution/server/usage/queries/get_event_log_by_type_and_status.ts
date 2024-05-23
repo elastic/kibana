@@ -100,7 +100,11 @@ const _getEventLogByTypeAndStatus = async ({
   });
 
   const elasticRuleIds = ruleResults
-    .filter((ruleResult) => ruleResult.attributes.params.immutable)
+    .filter((ruleResult) =>
+      ruleResult.attributes.params.immutable !== null
+        ? ruleResult.attributes.params.immutable
+        : ruleResult.attributes.params.ruleSource?.type === 'external'
+    )
     .map((ruleResult) => ruleResult.id);
 
   const queryForTotal = getSearchForAllRules({ eventLogIndex, aggs });

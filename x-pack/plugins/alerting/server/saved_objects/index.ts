@@ -11,7 +11,10 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
 } from '@kbn/core/server';
-import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectTypeRegistration,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { alertMappings } from '../../common/saved_objects/rules/mappings';
@@ -31,6 +34,7 @@ import {
 } from '../../common';
 import { ruleModelVersions } from './rule_model_versions';
 import { adHocRunParamsModelVersions } from './ad_hoc_run_params_model_versions';
+import { isDetectionEngineAADRuleType } from './migrations/utils';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 export const AD_HOC_RUN_SAVED_OBJECT_TYPE = 'ad_hoc_run_params';
@@ -92,6 +96,12 @@ export const AdHocRunAttributesToEncrypt = ['apiKeyToUse'];
 export const AdHocRunAttributesIncludedInAAD = ['rule', 'spaceId'];
 export type AdHocRunAttributesNotPartiallyUpdatable = 'rule' | 'spaceId' | 'apiKeyToUse';
 
+const EncryptedRuleTypeRegistration: EncryptedSavedObjectTypeRegistration = {
+  type: RULE_SAVED_OBJECT_TYPE,
+  attributesToEncrypt: new Set(RuleAttributesToEncrypt),
+  attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
+};
+
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
@@ -129,7 +139,28 @@ export function setupSavedObjects(
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },
-    modelVersions: ruleModelVersions,
+    modelVersions: {
+      ...ruleModelVersions,
+      '2': encryptedSavedObjects.createModelVersion({
+        modelVersion: {
+          changes: [
+            {
+              type: 'unsafe_transform',
+              transformFn: (document) => {
+                if (isDetectionEngineAADRuleType(document)) {
+                  document.attributes.params.rule_source = {
+                    type: document.attributes.params.immutable ? 'external' : 'internal',
+                  };
+                }
+                return { document };
+              },
+            },
+          ],
+        },
+        inputType: EncryptedRuleTypeRegistration,
+        outputType: EncryptedRuleTypeRegistration,
+      }),
+    },
   });
 
   savedObjects.registerType({
@@ -208,11 +239,7 @@ export function setupSavedObjects(
   });
 
   // Encrypted attributes
-  encryptedSavedObjects.registerType({
-    type: RULE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(RuleAttributesToEncrypt),
-    attributesToIncludeInAAD: new Set(RuleAttributesIncludedInAAD),
-  });
+  encryptedSavedObjects.registerType(EncryptedRuleTypeRegistration);
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({

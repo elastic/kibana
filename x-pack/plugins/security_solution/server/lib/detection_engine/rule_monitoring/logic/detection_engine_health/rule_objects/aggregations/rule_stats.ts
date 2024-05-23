@@ -26,6 +26,7 @@ export const getRuleStatsAggregation = (): Record<
     rulesByEnabled,
     rulesByOrigin: {
       terms: {
+        // TODO
         field: 'alert.attributes.params.immutable',
       },
       aggs: {

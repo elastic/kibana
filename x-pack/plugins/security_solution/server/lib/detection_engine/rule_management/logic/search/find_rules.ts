@@ -6,6 +6,7 @@
  */
 
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
+import { buildKueryNodeFilter } from '@kbn/alerting-plugin/server/rules_client/common';
 import type { FindRulesSortField } from '../../../../../../common/api/detection_engine/rule_management';
 
 import type { Page, PerPage, SortOrder } from '../../../../../../common/api/detection_engine';
@@ -40,6 +41,8 @@ export const findRules = ({
   sortOrder,
   hasReference,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
+  console.log(JSON.stringify(buildKueryNodeFilter(filter), null, 2));
+
   return rulesClient.find({
     options: {
       fields,

@@ -8,8 +8,8 @@
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 
 import {
-  KQL_FILTER_IMMUTABLE_RULES,
-  KQL_FILTER_MUTABLE_RULES,
+  KQL_FILTER_PREBUILT_RULES,
+  KQL_FILTER_CUSTOM_RULES,
 } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from './find_rules';
@@ -22,7 +22,7 @@ export const getNonPackagedRulesCount = async ({
 }: {
   rulesClient: RulesClient;
 }): Promise<number> => {
-  return getRulesCount({ rulesClient, filter: KQL_FILTER_MUTABLE_RULES });
+  return getRulesCount({ rulesClient, filter: KQL_FILTER_CUSTOM_RULES });
 };
 
 export const getRulesCount = async ({
@@ -74,7 +74,7 @@ export const getNonPackagedRules = async ({
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
-    filter: KQL_FILTER_MUTABLE_RULES,
+    filter: KQL_FILTER_CUSTOM_RULES,
   });
 };
 
@@ -85,6 +85,6 @@ export const getExistingPrepackagedRules = async ({
 }): Promise<RuleAlertType[]> => {
   return getRules({
     rulesClient,
-    filter: KQL_FILTER_IMMUTABLE_RULES,
+    filter: KQL_FILTER_PREBUILT_RULES,
   });
 };

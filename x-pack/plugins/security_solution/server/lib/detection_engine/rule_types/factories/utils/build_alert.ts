@@ -230,6 +230,7 @@ export const buildAlert = (
     [ALERT_RULE_EXCEPTIONS_LIST]: params.exceptionsList,
     [ALERT_RULE_FALSE_POSITIVES]: params.falsePositives,
     [ALERT_RULE_FROM]: params.from,
+    // TODO
     [ALERT_RULE_IMMUTABLE]: params.immutable,
     [ALERT_RULE_INTERVAL]: schedule.interval,
     [ALERT_RULE_INDICES]: indicesToQuery,

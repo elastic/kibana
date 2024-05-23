@@ -6,6 +6,7 @@
  */
 
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { buildKueryNodeFilter } from '@kbn/alerting-plugin/server/rules_client/common';
 
 const alertTypeFilter = Object.values(ruleTypeMappings)
   .map((type) => `alert.attributes.alertTypeId: ${type}`)
@@ -25,6 +26,8 @@ export const enrichFilterWithRuleTypeMapping = (filter: string | null | undefine
   if (filter == null || filter.length === 0) {
     return alertTypeFilter;
   }
+
+  const filterAst = buildKueryNodeFilter(filter);
 
   // Just in case of statements OR'ed in the filter wrap it in parentheses
   return `(${alertTypeFilter}) AND (${filter})`;

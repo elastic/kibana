@@ -699,6 +699,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                 bool: {
                   filter: {
                     terms: {
+                      // TODO check what is this
                       'alert.params.immutable': [true],
                     },
                   },
@@ -828,6 +829,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                 should: [
                   {
                     match_phrase: {
+                      // TODO check what is this
                       'kibana.alert.rule.parameters.immutable': 'true',
                     },
                   },
@@ -956,6 +958,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                   should: [
                     {
                       match_phrase: {
+                        // TODO check what is this
                         'kibana.alert.rule.parameters.immutable': 'true',
                       },
                     },
