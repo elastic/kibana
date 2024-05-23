@@ -481,7 +481,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     latestUploadedPackageAt &&
     Date.now() - Date.parse(latestUploadedPackageAt) < UPLOAD_RETRY_AFTER_MS
   ) {
-    logger.debug(
+    logger.error(
       `Install by Upload - Too many requests. Latest upload attempted at ${latestUploadedPackageAt}.`
     );
     return response.customError({
