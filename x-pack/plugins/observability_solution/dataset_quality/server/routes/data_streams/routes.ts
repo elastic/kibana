@@ -142,13 +142,10 @@ const degradedFieldsRoute = createDatasetQualityServerRoute({
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
-    const { type, dataset, namespace } = indexNameToDataStreamParts(dataStream);
 
     return await getDegradedFields({
       esClient,
-      type,
-      dataset,
-      namespace,
+      dataStream,
       ...params.query,
     });
   },

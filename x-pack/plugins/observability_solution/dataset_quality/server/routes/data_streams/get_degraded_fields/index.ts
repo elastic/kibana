@@ -6,42 +6,26 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { rangeQuery, termQuery, existsQuery } from '@kbn/observability-plugin/server';
-import { DataStreamType } from '../../../../common/types';
+import { rangeQuery, existsQuery } from '@kbn/observability-plugin/server';
 import { DegradedField } from '../../../../common/api_types';
-import { DEFAULT_DATASET_TYPE, MAX_DEGRADED_FIELDS } from '../../../../common/constants';
+import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
-import {
-  _IGNORED,
-  DATA_STREAM_DATASET,
-  DATA_STREAM_NAMESPACE,
-  DATA_STREAM_TYPE,
-  TIMESTAMP,
-} from '../../../../common/es_fields';
+import { _IGNORED, TIMESTAMP } from '../../../../common/es_fields';
 
 export async function getDegradedFields({
   esClient,
   start,
   end,
-  type = DEFAULT_DATASET_TYPE,
-  namespace,
-  dataset,
+  dataStream,
 }: {
   esClient: ElasticsearchClient;
   start: number;
   end: number;
-  type?: DataStreamType;
-  namespace: string;
-  dataset: string;
+  dataStream: string;
 }): Promise<DegradedField[]> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const filterQuery = [
-    ...rangeQuery(start, end),
-    ...termQuery(DATA_STREAM_TYPE, type),
-    ...termQuery(DATA_STREAM_NAMESPACE, namespace),
-    ...termQuery(DATA_STREAM_DATASET, dataset),
-  ];
+  const filterQuery = [...rangeQuery(start, end)];
 
   const mustQuery = [...existsQuery(_IGNORED)];
 
@@ -62,6 +46,7 @@ export async function getDegradedFields({
   };
 
   const response = await datasetQualityESClient.search({
+    index: dataStream,
     size: 0,
     query: {
       bool: {
