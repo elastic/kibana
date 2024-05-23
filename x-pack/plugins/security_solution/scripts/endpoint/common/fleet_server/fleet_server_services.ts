@@ -323,7 +323,7 @@ const startFleetServerWithDocker = async ({
         await updateFleetElasticsearchOutputHostNames(kbnClient, log);
 
         if (isServerless) {
-          log.info(`Waiting for Fleet Server [${hostname}] to be running`);
+          log.info(`Waiting for Fleet Server [${hostname}] to start running`);
           await isFleetServerRunning(kbnClient, log);
         } else {
           log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
@@ -697,7 +697,7 @@ export const isFleetServerRunning = async (
         })
         .catch(catchAxiosErrorFormatAndThrow)
         .catch((e) => {
-          log.debug(`Fleet server not up at [${fleetServerUrl}]`);
+          log.debug(`Fleet server not (yet) up at [${fleetServerUrl}]. Retrying...`);
           log.verbose(`Call to [${url.toString()}] failed with:`, e);
           return false;
         });
