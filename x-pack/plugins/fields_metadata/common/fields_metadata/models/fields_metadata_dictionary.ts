@@ -15,11 +15,11 @@ export class FieldsMetadataDictionary {
   private constructor(private readonly fields: PartialFieldsMetadataMap) {}
 
   pick(attributes: FieldAttribute[]): Record<string, PartialFieldMetadataPlain> {
-    return mapValues(this.fields, (field) => field?.pick(attributes));
+    return mapValues(this.fields, (field) => field.pick(attributes));
   }
 
   toPlain(): Record<string, FieldMetadataPlain> {
-    return mapValues(this.fields, (field) => field?.toPlain());
+    return mapValues(this.fields, (field) => field.toPlain());
   }
 
   public static create(fields: PartialFieldsMetadataMap = {}) {

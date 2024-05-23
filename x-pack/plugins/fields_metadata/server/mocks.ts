@@ -17,7 +17,7 @@ const createFieldsMetadataSetupMock = (): jest.Mocked<FieldsMetadataServerSetup>
 });
 
 const createFieldsMetadataStartMock = (): jest.Mocked<FieldsMetadataServerStart> => ({
-  client: createFieldsMetadataServiceStartMock().getClient(),
+  getClient: createFieldsMetadataServiceStartMock().getClient,
 });
 
 export const fieldsMetadataPluginMock = {

@@ -17,7 +17,7 @@ export class FieldMetadata {
     Object.assign(this, fieldMetadata);
   }
 
-  public pick(props: FieldAttribute[]) {
+  public pick(props: FieldAttribute[]): PartialFieldMetadataPlain {
     return pick(this, props);
   }
 

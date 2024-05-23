@@ -9,7 +9,7 @@ import type { CoreSetup } from '@kbn/core/server';
 
 import {
   FieldsMetadataServiceSetup,
-  IFieldsMetadataClient,
+  FieldsMetadataServiceStart,
 } from './services/fields_metadata/types';
 
 export type FieldsMetadataPluginCoreSetup = CoreSetup<
@@ -24,7 +24,7 @@ export interface FieldsMetadataServerSetup {
 }
 
 export interface FieldsMetadataServerStart {
-  client: IFieldsMetadataClient;
+  getClient: FieldsMetadataServiceStart['getClient'];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
