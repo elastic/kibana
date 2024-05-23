@@ -165,8 +165,8 @@ export function runSaveAs(this: DashboardContainer) {
             this.controlGroup.setSavedState(persistableControlGroupInput);
           }
         });
+        this.updateInput(dashboardStateToSave);
       }
-      this.updateInput(dashboardStateToSave);
       this.savedObjectReferences = saveResult.references ?? [];
       this.saveNotification$.next();
       resolve(saveResult);
