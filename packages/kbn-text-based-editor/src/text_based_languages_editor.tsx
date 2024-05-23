@@ -183,6 +183,23 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
+
+  const editorShouldNotValidate = useMemo(() => {
+    return (
+      isLoading ||
+      isDisabled ||
+      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')) ||
+      Boolean(!isCodeEditorExpandedFocused && queryString === '')
+    );
+  }, [
+    codeOneLiner,
+    isCodeEditorExpandedFocused,
+    isCompactFocused,
+    isDisabled,
+    isLoading,
+    queryString,
+  ]);
+
   const [abortController, setAbortController] = useState(new AbortController());
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -451,9 +468,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
 
+  useEffect(() => {
+    if (code === '') {
+      setEditorMessages({ errors: [], warnings: [] });
+    }
+  }, [code]);
+
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
-      if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed()) return;
+      if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed() || !code)
+        return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
       const markers = [];
@@ -467,12 +491,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return;
       }
     },
-    [language, parseMessages]
+    [code, language, parseMessages]
   );
 
   useDebounceWithOptions(
     async () => {
-      if (!editorModel.current) return;
+      if (!editorModel.current || editorShouldNotValidate) return;
       const subscription = { active: true };
       if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
         const parsedErrors = parseErrors(serverErrors || [], code);
@@ -642,10 +666,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     lightbulb: {
       enabled: false,
     },
-    readOnly:
-      isLoading ||
-      isDisabled ||
-      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+    readOnly: editorShouldNotValidate,
   };
 
   if (isCompactFocused) {
