@@ -75,6 +75,10 @@ export interface DocumentCountStats {
   /** The timestamp of the last document in the time range. */
   lastDocTimeStampMs?: number;
 }
+
+/**
+ * Represents the overall document stats.
+ */
 export interface DocumentStats {
   /** The probability of sampling. */
   sampleProbability: number;

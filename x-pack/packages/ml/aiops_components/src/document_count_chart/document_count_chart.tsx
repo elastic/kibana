@@ -80,6 +80,14 @@ export interface BrushSettings {
 type SetAutoRunAnalysisFn = (isAutoRun: boolean) => void;
 
 /**
+ * Brush selection update handler
+ */
+type BrushSelectionUpdateHandler = (
+  /** Payload for the brush selection update */
+  d: BrushSelectionUpdatePayload
+) => void;
+
+/**
  * Props for document count chart
  */
 export interface DocumentCountChartProps {
@@ -91,7 +99,7 @@ export interface DocumentCountChartProps {
     uiSettings: IUiSettingsClient;
   };
   /** Optional callback for handling brush selection updates */
-  brushSelectionUpdateHandler?: (d: BrushSelectionUpdatePayload) => void;
+  brushSelectionUpdateHandler?: BrushSelectionUpdateHandler;
   /** Optional width */
   width?: number;
   /** Optional chart height */

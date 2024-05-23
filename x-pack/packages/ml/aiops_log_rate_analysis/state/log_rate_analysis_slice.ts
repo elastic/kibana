@@ -16,9 +16,16 @@ import { LOG_RATE_ANALYSIS_TYPE } from '../log_rate_analysis_type';
 import type { DocumentStats } from '../types';
 
 export type InitialAnalysisStart = number | WindowParameters | undefined;
+
+/**
+ * Payload for brushSelectionUpdate action
+ */
 export interface BrushSelectionUpdatePayload {
+  /** The window parameters to update the analysis with */
   windowParameters: WindowParameters;
+  /** Flag to force the update */
   force: boolean;
+
   analysisType: LogRateAnalysisType;
 }
 
