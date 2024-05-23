@@ -14,7 +14,6 @@ export interface IntegrationFieldsSearchParams {
 
 export type ExtractedIntegrationFields = Record<string, Record<string, FieldMetadataPlain>>;
 
-export type IntegrationFieldsExtractor = ({
-  integration,
-  dataset,
-}: IntegrationFieldsSearchParams) => Promise<ExtractedIntegrationFields>;
+export type IntegrationFieldsExtractor = (
+  params: IntegrationFieldsSearchParams
+) => Promise<ExtractedIntegrationFields>;
