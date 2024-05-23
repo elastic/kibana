@@ -14,7 +14,6 @@ import {
   createMlRuleRequest,
   getBasicEmptySearchResponse,
 } from '../../../../routes/__mocks__/request_responses';
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
 import { requestContextMock, serverMock, requestMock } from '../../../../routes/__mocks__';
 import { createRuleRoute } from './route';
 import { getCreateRulesSchemaMock } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
@@ -25,12 +24,10 @@ import { HttpAuthzError } from '../../../../../machine_learning/validation';
 describe('Create rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.find.mockResolvedValue(getEmptyFindResult()); // no current rules
     clients.rulesClient.create.mockResolvedValue(getRuleMock(getQueryRuleParams())); // creation succeeds
