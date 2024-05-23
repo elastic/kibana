@@ -6,9 +6,9 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { useSelector } from 'react-redux';
 
 import type { RootState } from './store';
+import { useAppSelector } from './hooks';
 
 const selectSelectedSignificantItem = (s: RootState) =>
   s.logRateAnalysisTableRow.selectedSignificantItem;
@@ -27,4 +27,4 @@ const selectCurrentSelectedSignificantItem = createSelector(
 );
 
 export const useCurrentSelectedSignificantItem = () =>
-  useSelector(selectCurrentSelectedSignificantItem);
+  useAppSelector(selectCurrentSelectedSignificantItem);

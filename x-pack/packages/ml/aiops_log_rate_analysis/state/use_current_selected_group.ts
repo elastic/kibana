@@ -6,12 +6,12 @@
  */
 
 import { createSelector } from '@reduxjs/toolkit';
-import { useSelector } from 'react-redux';
 
 import type { RootState } from './store';
+import { useAppSelector } from './hooks';
 
-const selectSelectedGroup = (s: RootState) => s.logRateAnalysis.selectedGroup;
-const selectPinnedGroup = (s: RootState) => s.logRateAnalysis.pinnedGroup;
+const selectSelectedGroup = (s: RootState) => s.logRateAnalysisTableRow.selectedGroup;
+const selectPinnedGroup = (s: RootState) => s.logRateAnalysisTableRow.pinnedGroup;
 const selectCurrentSelectedGroup = createSelector(
   selectSelectedGroup,
   selectPinnedGroup,
@@ -24,4 +24,4 @@ const selectCurrentSelectedGroup = createSelector(
   }
 );
 
-export const useCurrentSelectedGroup = () => useSelector(selectCurrentSelectedGroup);
+export const useCurrentSelectedGroup = () => useAppSelector(selectCurrentSelectedGroup);
