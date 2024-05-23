@@ -30,9 +30,12 @@ export const validateTree = {
         to: schema.string(),
       })
     ),
+    agentId: schema.string({ minLength: 1 }),
     schema: schema.object({
       // the ancestry field is optional
       ancestry: schema.maybe(schema.string({ minLength: 1 })),
+      // the agentId field is introduced because agent.id will stop being included in entity_id
+      agentId: schema.string({ minLength: 1 }),
       id: schema.string({ minLength: 1 }),
       name: schema.maybe(schema.string({ minLength: 1 })),
       parent: schema.string({ minLength: 1 }),

@@ -64,6 +64,7 @@ export const getSupportedSchemas = (
         parent: 'process.parent.entity_id',
         ancestry: 'process.Ext.ancestry',
         name: 'process.name',
+        agentId: 'agent.id',
       },
     },
     {
@@ -82,6 +83,7 @@ export const getSupportedSchemas = (
         id: 'process.entity_id',
         parent: 'process.parent.entity_id',
         name: 'process.name',
+        agentId: 'agent.id',
       },
     },
     {
@@ -100,6 +102,7 @@ export const getSupportedSchemas = (
         id: 'process.entity_id',
         parent: 'process.parent.entity_id',
         name: 'process.name',
+        agentId: 'agent.id',
       },
     },
     {
@@ -118,6 +121,7 @@ export const getSupportedSchemas = (
         id: 'process.entity_id',
         parent: 'process.parent.entity_id',
         name: 'process.name',
+        agentId: 'agent.id',
       },
     },
   ];
@@ -125,6 +129,7 @@ export const getSupportedSchemas = (
 
 export function getFieldAsString(doc: unknown, field: string): string | undefined {
   const value = _.get(doc, field);
+  // console.log({ doc, field });
   if (value === undefined) {
     return undefined;
   }

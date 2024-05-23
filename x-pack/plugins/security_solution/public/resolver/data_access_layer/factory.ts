@@ -241,6 +241,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
       indices,
       ancestors,
       descendants,
+      agentId,
     }: {
       dataId: string;
       schema: ResolverSchema;
@@ -248,6 +249,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
       indices: string[];
       ancestors: number;
       descendants: number;
+      agentId: string;
     }): Promise<ResolverNode[]> {
       return context.http.post('/api/endpoint/resolver/tree', {
         body: JSON.stringify({
@@ -257,6 +259,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
           schema,
           nodes: [dataId],
           indexPatterns: indices,
+          agentId,
         }),
       });
     },

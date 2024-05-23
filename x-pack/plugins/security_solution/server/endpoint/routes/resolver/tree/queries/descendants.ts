@@ -26,8 +26,16 @@ export class DescendantsQuery extends BaseResolverQuery {
     timeRange,
     isInternalRequest,
     shouldExcludeColdAndFrozenTiers,
+    agentId,
   }: ResolverQueryParams) {
-    super({ schema, indexPatterns, timeRange, isInternalRequest, shouldExcludeColdAndFrozenTiers });
+    super({
+      schema,
+      indexPatterns,
+      timeRange,
+      isInternalRequest,
+      shouldExcludeColdAndFrozenTiers,
+      agentId,
+    });
   }
 
   private query(nodes: NodeID[], size: number): JsonObject {
@@ -46,6 +54,9 @@ export class DescendantsQuery extends BaseResolverQuery {
             ...this.getColdAndFrozenTierFilter(),
             {
               terms: { [this.schema.parent]: nodes },
+            },
+            {
+              term: { 'agent.id': this.agentId },
             },
             {
               exists: {
@@ -127,6 +138,9 @@ export class DescendantsQuery extends BaseResolverQuery {
               terms: {
                 [ancestryField]: nodes,
               },
+            },
+            {
+              term: { 'agent.id': this.agentId },
             },
             {
               exists: {

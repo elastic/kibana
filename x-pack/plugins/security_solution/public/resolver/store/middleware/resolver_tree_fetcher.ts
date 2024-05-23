@@ -24,6 +24,7 @@ import {
   serverReturnedResolverData,
 } from '../data/action';
 import type { State } from '../../../common/store/types';
+
 /**
  * A function that handles syncing ResolverTree data w/ the current entity ID.
  * This will make a request anytime the entityID changes (to something other than undefined.)
@@ -51,6 +52,7 @@ export function ResolverTreeFetcher(
       let entityIDToFetch: string | undefined;
       let dataSource: string | undefined;
       let dataSourceSchema: ResolverSchema | undefined;
+      let dataSourceAgentId: string | undefined;
       let result: ResolverNode[] | undefined;
       const timeRangeFilters = selectors.timeRangeFilters(state.analyzer[id]);
 
@@ -63,6 +65,7 @@ export function ResolverTreeFetcher(
           indices: databaseParameters.indices,
           signal: lastRequestAbortController.signal,
         });
+
         if (matchingEntities.length < 1) {
           // If no entity_id could be found for the _id, bail out with a failure.
           api.dispatch(
@@ -73,7 +76,12 @@ export function ResolverTreeFetcher(
           );
           return;
         }
-        ({ id: entityIDToFetch, schema: dataSourceSchema, name: dataSource } = matchingEntities[0]);
+        ({
+          id: entityIDToFetch,
+          schema: dataSourceSchema,
+          name: dataSource,
+          agentId: dataSourceAgentId,
+        } = matchingEntities[0]);
 
         result = await dataAccessLayer.resolverTree({
           dataId: entityIDToFetch,
@@ -82,6 +90,7 @@ export function ResolverTreeFetcher(
           indices: databaseParameters.indices,
           ancestors: ancestorsRequestAmount(dataSourceSchema),
           descendants: descendantsRequestAmount(),
+          agentId: dataSourceAgentId,
         });
 
         const resolverTree: NewResolverTree = {
@@ -96,6 +105,7 @@ export function ResolverTreeFetcher(
             indices: databaseParameters.indices,
             ancestors: ancestorsRequestAmount(dataSourceSchema),
             descendants: descendantsRequestAmount(),
+            agentId: dataSourceAgentId,
           });
           if (unboundedTree.length > 0) {
             const timestamps = unboundedTree
