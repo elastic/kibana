@@ -176,7 +176,7 @@ const Logo = ({
           <EuiImage
             src={logo}
             css={logoCss}
-            data-test-subj="globalLoadingIndicator-hidden"
+            data-test-subj="globalLoadingIndicator-hidden customLogo"
             size={24}
             alt="logo"
             aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
