@@ -7,6 +7,7 @@
 
 import type { ExperimentalFeatures } from '../../../../common/experimental_features';
 import type { Note } from '../../lib/note';
+import type { Note as TimelineNote } from '../../../../common/api/timeline';
 
 export type ErrorState = ErrorModel;
 
@@ -25,11 +26,28 @@ export interface Error {
 export type ErrorModel = Error[];
 
 export interface AppModel {
+  // old
   notesById: NotesById;
   errors: ErrorState;
   enableExperimental: ExperimentalFeatures;
   eventIdsToFetch: string[];
   nonTimelineEventNotesLoading: boolean;
   nonTimelineEventNotesError: string | null;
-  nonAssociatedNotes: Note[];
+  // new
+  byId: { [id: string]: TimelineNote };
+  allIds: string[];
+  idsByDocumentId: { [documentId: string]: string[] };
+  idsBySavedObjectId: { [objectId: string]: string[] };
+  loadingFetchByDocument: boolean;
+  errorFetchByDocument: boolean;
+  loadingFetchBySavedObject: boolean;
+  errorFetchBySavedObject: boolean;
+  loadingCreateForDocument: boolean;
+  errorCreateForDocument: boolean;
+  loadingCreateForSavedObject: boolean;
+  errorCreateForSavedObject: boolean;
+  loadingCreateForDocumentAndForSavedObject: boolean;
+  errorCreateForDocumentAndForSavedObject: boolean;
+  loadingDeleteNoteIds: string[];
+  errorDelete: boolean;
 }

@@ -18,18 +18,19 @@ import {
 } from '@elastic/eui';
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
+import type { Note } from '../../../../../common/lib/note';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import { timelineActions } from '../../../../store';
+import { timelineActions, timelineSelectors } from '../../../../store';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { TimelineTabs } from '../../../../../../common/types/timeline';
+import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { TimelineStatus } from '../../../../../../common/api/timeline';
 import { appSelectors } from '../../../../../common/store/app';
 import { AddNote } from '../../../notes/add_note';
@@ -158,10 +159,22 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
     return [...noteIds, ...eventNoteIds];
   }, [noteIds, eventIdToNoteIds]);
 
-  const notes = useMemo(
-    () => appNotes.filter((appNote) => allTimelineNoteIds.includes(appNote?.noteId ?? '-1')),
-    [appNotes, allTimelineNoteIds]
+  const notesById: { [id: string]: Note } = useSelector((state) => appSelectors.selectById(state));
+  const noteIdsBySavedObjectId: { [savedObjectId: string]: string[] } = useSelector((state) =>
+    appSelectors.selectIdsBySavedObjectId(state)
   );
+  const activeTimeline = useSelector((state) =>
+    timelineSelectors.selectTimelineById(state, TimelineId.active)
+  );
+
+  const notes = useMemo(() => {
+    const filteredAppNotes = appNotes.filter((appNote) =>
+      allTimelineNoteIds.includes(appNote?.noteId ?? '-1')
+    );
+    const nonAssociatedNotes: Note[] =
+      noteIdsBySavedObjectId[activeTimeline.id]?.map((noteId) => notesById[noteId]) ?? [];
+    return [...filteredAppNotes, ...nonAssociatedNotes];
+  }, [appNotes, noteIdsBySavedObjectId, activeTimeline.id, allTimelineNoteIds, notesById]);
 
   // filter for savedObjectId to make sure we don't display `elastic` user while saving the note
   const participants = useMemo(() => uniqBy('updatedBy', filter('savedObjectId', notes)), [notes]);

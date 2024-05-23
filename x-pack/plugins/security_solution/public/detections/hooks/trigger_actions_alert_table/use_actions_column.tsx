@@ -10,6 +10,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import type { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { StatefulEventContext } from '../../../common/components/events_viewer/stateful_event_context';
 import { eventsViewerSelector } from '../../../common/components/events_viewer/selectors';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
@@ -24,7 +25,12 @@ export const getUseActionColumnHook =
   () => {
     const license = useLicense();
     const isEnterprisePlus = license.isEnterprise();
-    const ACTION_BUTTON_COUNT = tableId === TableId.alertsOnCasePage ? 4 : isEnterprisePlus ? 6 : 5;
+    let ACTION_BUTTON_COUNT = tableId === TableId.alertsOnCasePage ? 4 : isEnterprisePlus ? 6 : 5;
+
+    const expandableFlyoutDisabled = useIsExperimentalFeatureEnabled('expandableFlyoutDisabled');
+    if (expandableFlyoutDisabled) {
+      ACTION_BUTTON_COUNT--;
+    }
 
     const eventContext = useContext(StatefulEventContext);
 

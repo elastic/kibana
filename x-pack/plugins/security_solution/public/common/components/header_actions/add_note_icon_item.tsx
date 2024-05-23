@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
+import { EuiNotificationBadge } from '@elastic/eui';
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
 import { TimelineType } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
@@ -34,18 +36,46 @@ const AddEventNoteActionComponent: React.FC<AddEventNoteActionProps> = ({
     timelineType === TimelineType.template ? i18n.NOTES_DISABLE_TOOLTIP : i18n.NOTES_TOOLTIP;
 
   return (
-    <ActionIconItem>
-      <NotesButton
-        ariaLabel={ariaLabel}
-        data-test-subj="add-note"
-        isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
-        showNotes={showNotes}
-        timelineType={timelineType}
-        toggleShowNotes={toggleShowNotes}
-        toolTip={eventCount ?? toolTip}
-        eventId={eventId}
-      />
-    </ActionIconItem>
+    <>
+      {eventCount ? (
+        <>
+          <ActionIconItem>
+            <NotesButton
+              ariaLabel={ariaLabel}
+              data-test-subj="add-note"
+              isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+              showNotes={showNotes}
+              timelineType={timelineType}
+              toggleShowNotes={toggleShowNotes}
+              toolTip={eventCount ? `${eventCount} note(s)` : toolTip}
+              eventId={eventId}
+            />
+          </ActionIconItem>
+          <EuiNotificationBadge
+            color="subdued"
+            css={css`
+              margin-bottom: 12px;
+              margin-left: -8px;
+            `}
+          >
+            {eventCount}
+          </EuiNotificationBadge>
+        </>
+      ) : (
+        <ActionIconItem>
+          <NotesButton
+            ariaLabel={ariaLabel}
+            data-test-subj="add-note"
+            isDisabled={kibanaSecuritySolutionsPrivileges.crud === false}
+            showNotes={showNotes}
+            timelineType={timelineType}
+            toggleShowNotes={toggleShowNotes}
+            toolTip={toolTip}
+            eventId={eventId}
+          />
+        </ActionIconItem>
+      )}
+    </>
   );
 };
 

@@ -27,7 +27,9 @@ export const persistNote = async ({
   } catch (err) {
     return Promise.reject(new Error(`Failed to stringify query: ${JSON.stringify(err)}`));
   }
-  const response = await KibanaServices.get().http.patch<Note[]>(NOTE_URL, {
+  const response = await KibanaServices.get().http.patch<{
+    data: { persistNote: { code: number; message: string; note: Note } };
+  }>(NOTE_URL, {
     method: 'PATCH',
     body: requestBody,
     version: '2023-10-31',
@@ -35,10 +37,60 @@ export const persistNote = async ({
   return response;
 };
 
-export const getNotesByIds = async (documentIds: string[]) => {
-  const response = await KibanaServices.get().http.get<Note[]>(NOTE_URL, {
-    query: { alertIds: documentIds },
+export const deleteNote = async (noteId: string) => {
+  const response = await KibanaServices.get().http.delete<{ data: unknown }>(NOTE_URL, {
+    body: JSON.stringify({ noteId }),
     version: '2023-10-31',
   });
+  return response;
+};
+
+export const fetchNotesByDocumentId = async (documentId: string) => {
+  const response = await KibanaServices.get().http.get<{ totalCount: number; notes: Note[] }>(
+    NOTE_URL,
+    {
+      query: {
+        alertIds: [documentId],
+        page: '1',
+        perPage: '10',
+        search: '',
+        sortField: '',
+        sortOrder: 'asc',
+        filter: '',
+      },
+      version: '2023-10-31',
+    }
+  );
+  return response;
+};
+
+export const fetchNotesByDocumentIds = async (documentIds: string[]) => {
+  const response = await KibanaServices.get().http.get<{ totalCount: number; notes: Note[] }>(
+    NOTE_URL,
+    {
+      query: {
+        alertIds: documentIds,
+        page: '1',
+        perPage: '10',
+        search: '',
+        sortField: '',
+        sortOrder: 'asc',
+        filter: '',
+      },
+      version: '2023-10-31',
+    }
+  );
+  return response;
+};
+
+// TODO server side needs implementation
+export const fetchNotesBySavedObjectIdId = async (savedObjectId: string) => {
+  const response = await KibanaServices.get().http.get<{ totalCount: number; notes: Note[] }>(
+    NOTE_URL,
+    {
+      query: { savedObjectId },
+      version: '2023-10-31',
+    }
+  );
   return response;
 };
