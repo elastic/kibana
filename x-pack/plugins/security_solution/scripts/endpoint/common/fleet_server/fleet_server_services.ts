@@ -324,7 +324,9 @@ const startFleetServerWithDocker = async ({
 
         if (isServerless) {
           log.info(`Waiting for Fleet Server [${hostname}] to start running`);
-          await isFleetServerRunning(kbnClient, log);
+          if (!(await isFleetServerRunning(kbnClient, log))) {
+            throw Error(`Unable to start Fleet Server [${hostname}]`);
+          }
         } else {
           log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
           await waitForHostToEnroll(kbnClient, log, hostname, 120000);
@@ -678,7 +680,7 @@ export const isFleetServerRunning = async (
   const url = new URL(fleetServerUrl);
   url.pathname = '/api/status';
 
-  return pRetry<boolean>(
+  return pRetry(
     async () => {
       return axios
         .request({
@@ -693,15 +695,20 @@ export const isFleetServerRunning = async (
             `Fleet server is up and running at [${fleetServerUrl}]. Status: `,
             response.data
           );
-          return true;
         })
-        .catch(catchAxiosErrorFormatAndThrow)
-        .catch((e) => {
-          log.debug(`Fleet server not (yet) up at [${fleetServerUrl}]. Retrying...`);
-          log.verbose(`Call to [${url.toString()}] failed with:`, e);
-          return false;
-        });
+        .catch(catchAxiosErrorFormatAndThrow);
     },
-    { maxTimeout: 10000 }
-  );
+    {
+      maxTimeout: 10000,
+      retries: 5,
+      onFailedAttempt: (e) => {
+        log.warning(
+          `Fleet server not (yet) up at [${fleetServerUrl}]. Retrying... (attempt #${e.attemptNumber}, ${e.retriesLeft} retries left)`
+        );
+        log.verbose(`Call to [${url.toString()}] failed with:`, e);
+      },
+    }
+  )
+    .then(() => true)
+    .catch(() => false);
 };
