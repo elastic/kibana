@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/data-quality-plugin",
-  "owner": "@elastic/obs-ux-logs",
+  "owner": "@elastic/obs-ux-logs-team",
   "plugin": {
     "id": "dataQuality",
     "server": false,
