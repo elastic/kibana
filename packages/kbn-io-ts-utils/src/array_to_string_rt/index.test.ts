@@ -9,19 +9,12 @@
 import * as rt from 'io-ts';
 import { arrayToStringRt } from '.';
 import { isRight, Either, isLeft, fold } from 'fp-ts/lib/Either';
-import { Right } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 
-function getValueOrThrow<TEither extends Either<any, any>>(either: TEither): Right<TEither> {
-  const value = pipe(
-    either,
-    fold(() => {
-      throw new Error('cannot get right value of left');
-    }, identity)
-  );
-
-  return value as Right<TEither>;
+function getValueOrThrow(either: Either<unknown, any>) {
+  return fold(() => {
+    throw new Error('Cannot get right value of left');
+  }, identity)(either);
 }
 
 describe('arrayToStringRt', () => {
