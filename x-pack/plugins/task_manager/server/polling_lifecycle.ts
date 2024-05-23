@@ -14,7 +14,7 @@ import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk } from './lib/result_type';
 import { ManagedConfiguration } from './lib/create_managed_configuration';
-import { TaskManagerConfig } from './config';
+import { TaskManagerConfig, CLAIM_STRATEGY_DEFAULT } from './config';
 
 import {
   TaskMarkRunning,
@@ -154,15 +154,18 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     // pipe taskClaiming events into the lifecycle event stream
     this.taskClaiming.events.subscribe(emitEvent);
 
-    const { poll_interval: pollInterval } = config;
+    const { poll_interval: pollInterval, claim_strategy: claimStrategy } = config;
 
-    const pollIntervalDelay$ = delayOnClaimConflicts(
-      maxWorkersConfiguration$,
-      pollIntervalConfiguration$,
-      this.events$,
-      config.version_conflict_threshold,
-      config.monitored_stats_running_average_window
-    ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
+    let pollIntervalDelay$: Observable<number> | undefined;
+    if (claimStrategy === CLAIM_STRATEGY_DEFAULT) {
+      pollIntervalDelay$ = delayOnClaimConflicts(
+        maxWorkersConfiguration$,
+        pollIntervalConfiguration$,
+        this.events$,
+        config.version_conflict_threshold,
+        config.monitored_stats_running_average_window
+      ).pipe(tap((delay) => emitEvent(asTaskManagerStatEvent('pollingDelay', asOk(delay)))));
+    }
 
     const poller = createTaskPoller<string, TimedFillPoolResult>({
       logger,

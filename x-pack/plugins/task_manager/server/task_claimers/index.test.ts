@@ -28,7 +28,7 @@ describe('task_claimers/index', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    test('throws error for unsupported parameter', () => {
+    test('logs a warning for unsupported parameter', () => {
       const taskClaimer = getTaskClaimer(logger, 'not-supported');
       expect(taskClaimer).toBe(claimAvailableTasksDefault);
       expect(logger.warn).toHaveBeenCalledWith(

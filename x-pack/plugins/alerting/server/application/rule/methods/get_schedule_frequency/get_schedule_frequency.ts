@@ -66,9 +66,7 @@ export const getScheduleFrequency = async (
   const result = {
     totalScheduledPerMinute,
     remainingSchedulesPerMinute: Math.max(
-      // TODO: hack to override serverless default; remove before merging
-      // context.maxScheduledPerMinute - totalScheduledPerMinute,
-      10000 - totalScheduledPerMinute,
+      context.maxScheduledPerMinute - totalScheduledPerMinute,
       0
     ),
   };

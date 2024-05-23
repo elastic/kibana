@@ -242,11 +242,7 @@ describe('config validation', () => {
     }).not.toThrowError();
   });
 
-  test('the default claim strategy is valid', () => {
-    configSchema.validate({ claim_strategy: 'default' });
-  });
-
-  test('the mget claim strategy is valid', () => {
-    configSchema.validate({ claim_strategy: 'mget' });
+  test('any claim strategy is valid', () => {
+    configSchema.validate({ claim_strategy: 'anything!' });
   });
 });

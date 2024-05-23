@@ -40,8 +40,6 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { TaskValidator } from './task_validator';
 
-const SO_TYPE = 'task';
-
 export interface StoreOpts {
   esClient: ElasticsearchClient;
   index: string;
@@ -154,7 +152,7 @@ export class TaskStore {
   public convertToSavedObjectIds(
     taskIds: Array<ConcreteTaskInstance['id']>
   ): Array<ConcreteTaskInstance['id']> {
-    return taskIds.map((id) => this.serializer.generateRawId(undefined, SO_TYPE, id));
+    return taskIds.map((id) => this.serializer.generateRawId(undefined, 'task', id));
   }
 
   /**
@@ -170,7 +168,7 @@ export class TaskStore {
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       savedObject = await this.savedObjectsRepository.create<SerializedConcreteTaskInstance>(
-        SO_TYPE,
+        'task',
         taskInstanceToAttributes(validatedTaskInstance),
         { id: taskInstance.id, refresh: false }
       );
@@ -197,7 +195,7 @@ export class TaskStore {
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
       return {
-        type: SO_TYPE,
+        type: 'task',
         attributes: taskInstanceToAttributes(validatedTaskInstance),
         id: taskInstance.id,
       };
@@ -259,7 +257,7 @@ export class TaskStore {
     let updatedSavedObject;
     try {
       updatedSavedObject = await this.savedObjectsRepository.update<SerializedConcreteTaskInstance>(
-        SO_TYPE,
+        'task',
         doc.id,
         attributes,
         {
@@ -308,7 +306,7 @@ export class TaskStore {
       ({ saved_objects: updatedSavedObjects } =
         await this.savedObjectsRepository.bulkUpdate<SerializedConcreteTaskInstance>(
           docs.map((doc) => ({
-            type: SO_TYPE,
+            type: 'task',
             id: doc.id,
             version: doc.version,
             attributes: attributesByDocId.get(doc.id)!,
@@ -325,7 +323,7 @@ export class TaskStore {
     return updatedSavedObjects.map((updatedSavedObject) => {
       if (updatedSavedObject.error !== undefined) {
         return asErr({
-          type: SO_TYPE,
+          type: 'task',
           id: updatedSavedObject.id,
           error: updatedSavedObject.error,
         });
@@ -353,7 +351,7 @@ export class TaskStore {
    */
   public async remove(id: string): Promise<void> {
     try {
-      await this.savedObjectsRepository.delete(SO_TYPE, id, { refresh: false });
+      await this.savedObjectsRepository.delete('task', id, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -368,7 +366,7 @@ export class TaskStore {
    */
   public async bulkRemove(taskIds: string[]): Promise<SavedObjectsBulkDeleteResponse> {
     try {
-      const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: SO_TYPE }));
+      const savedObjectsToDelete = taskIds.map((taskId) => ({ id: taskId, type: 'task' }));
       return await this.savedObjectsRepository.bulkDelete(savedObjectsToDelete, { refresh: false });
     } catch (e) {
       this.errors$.next(e);
@@ -385,7 +383,7 @@ export class TaskStore {
   public async get(id: string): Promise<ConcreteTaskInstance> {
     let result;
     try {
-      result = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>(SO_TYPE, id);
+      result = await this.savedObjectsRepository.get<SerializedConcreteTaskInstance>('task', id);
     } catch (e) {
       this.errors$.next(e);
       throw e;
@@ -404,7 +402,7 @@ export class TaskStore {
     let result;
     try {
       result = await this.savedObjectsRepository.bulkGet<SerializedConcreteTaskInstance>(
-        ids.map((id) => ({ type: SO_TYPE, id }))
+        ids.map((id) => ({ type: 'task', id }))
       );
     } catch (e) {
       this.errors$.next(e);
@@ -436,17 +434,23 @@ export class TaskStore {
 
     const result = taskVersions.docs.map((taskVersion) => {
       if (isMGetSuccess(taskVersion)) {
-        return {
-          esId: taskVersion._id,
-          seqNo: taskVersion._seq_no,
-          primaryTerm: taskVersion._primary_term,
-        };
+        if (!taskVersion.found) {
+          return {
+            esId: taskVersion._id,
+            error: `task "${taskVersion._id}" not found`,
+          };
+        } else {
+          return {
+            esId: taskVersion._id,
+            seqNo: taskVersion._seq_no,
+            primaryTerm: taskVersion._primary_term,
+          };
+        }
       }
 
-      const errorTaskVersion = taskVersion as estypes.MgetMultiGetError;
-      const error = errorTaskVersion.error
-        ? `${taskVersion.error.type}: ${taskVersion.error.reason}`
-        : `unknown error performing bulk for ${taskVersion._id}`;
+      const type = taskVersion.error?.type || 'unknown type of error';
+      const reason = taskVersion.error?.reason || 'unknown reason';
+      const error = `error getting version for ${taskVersion._id}: ${type}: ${reason}`;
       return {
         esId: taskVersion._id,
         error,
@@ -652,7 +656,7 @@ function parseJSONField(json: string, fieldName: string, id: string) {
 
 function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
   const originalQuery = opts.query;
-  const queryOnlyTasks = { term: { type: SO_TYPE } };
+  const queryOnlyTasks = { term: { type: 'task' } };
   const query = originalQuery
     ? { bool: { must: [queryOnlyTasks, originalQuery] } }
     : queryOnlyTasks;
@@ -667,7 +671,7 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
   const originalQuery = opts.query;
   const filterToOnlyTasks = {
     bool: {
-      filter: [{ term: { type: SO_TYPE } }, { term: { 'task.enabled': true } }],
+      filter: [{ term: { type: 'task' } }, { term: { 'task.enabled': true } }],
     },
   };
   const query = originalQuery

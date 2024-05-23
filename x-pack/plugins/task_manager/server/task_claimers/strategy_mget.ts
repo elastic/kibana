@@ -35,7 +35,7 @@ import {
   TASK_MANAGER_MARK_AS_CLAIMED,
   TaskClaimingBatches,
 } from '../queries/task_claiming';
-import { TaskClaim } from '../task_events';
+import { TaskClaim, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 
 import {
@@ -73,7 +73,7 @@ export function claimAvailableTasksMget(opts: TaskClaimerOpts): Observable<Claim
       taskClaimOwnership$.next(result);
     })
     .catch((err) => {
-      taskClaimOwnership$.next(err);
+      taskClaimOwnership$.error(err);
     })
     .finally(() => {
       taskClaimOwnership$.complete();
@@ -105,6 +105,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const loggerTag = claimAvailableTasksMget.name;
   const logMeta = { tags: [loggerTag] };
   const initialCapacity = getCapacity();
+  const stopTaskTimer = startTaskTimer();
 
   const removedTypes = new Set(unusedTypes); // REMOVED_TYPES
   const excludedTypes = new Set(excludedTaskTypes); // excluded via config
@@ -231,7 +232,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     }
   }
 
-  const message = `task claimer claimed: ${finalResults.length}; stale: ${staleTasks.size}; conflicts: ${conflicts}; missing: ${missingTasks.size}; updateErrors: ${bulkErrors}; removed: ${removedCount}`;
+  const message = `task claimer claimed: ${finalResults.length}; stale: ${staleTasks.size}; conflicts: ${conflicts}; missing: ${missingTasks.size}; updateErrors: ${bulkErrors}; removed: ${removedCount};`;
   logger.debug(message, logMeta);
 
   return {
@@ -241,6 +242,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       tasksClaimed: finalResults.length,
     },
     docs: finalResults,
+    timing: stopTaskTimer(),
   };
 }
 
