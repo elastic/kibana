@@ -166,6 +166,7 @@ export function runSaveAs(this: DashboardContainer) {
           }
         });
       }
+      this.updateInput(dashboardStateToSave);
       this.savedObjectReferences = saveResult.references ?? [];
       this.saveNotification$.next();
       resolve(saveResult);
