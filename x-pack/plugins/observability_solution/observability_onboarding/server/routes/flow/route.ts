@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { NamingCollisionError, type PackageClient } from '@kbn/fleet-plugin/server';
+import {
+  NamingCollisionError,
+  FleetUnauthorizedError,
+  type PackageClient,
+} from '@kbn/fleet-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { dump } from 'js-yaml';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
@@ -247,30 +251,34 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       } as ObservabilityOnboardingFlow,
     });
 
-    const agentInputs = await ensureInstalledIntegrations(integrationsToInstall, packageClient);
-    if (agentInputs.length) {
-      const authApiKey = getAuthenticationAPIKey(request);
-      const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
-        ? [plugins.cloud?.setup?.elasticsearchUrl]
-        : await getFallbackESUrl(services.esLegacyConfigService);
-
-      return response.ok({
-        headers: {
-          'content-type': 'application/yaml',
-        },
-        body: generateAgentConfig({
-          apiKey: authApiKey ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}` : '$API_KEY',
-          esHost: elasticsearchUrl,
-          inputs: agentInputs,
-        }),
-      });
+    let agentInputs: unknown[];
+    try {
+      agentInputs = await ensureInstalledIntegrations(integrationsToInstall, packageClient);
+    } catch (error) {
+      if (error instanceof FleetUnauthorizedError) {
+        return response.forbidden({
+          body: {
+            message: error.message,
+          },
+        });
+      }
+      throw error;
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: {
-        message: 'Failed to install integrations',
+    const authApiKey = getAuthenticationAPIKey(request);
+    const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
+      ? [plugins.cloud?.setup?.elasticsearchUrl]
+      : await getFallbackESUrl(services.esLegacyConfigService);
+
+    return response.ok({
+      headers: {
+        'content-type': 'application/yaml',
       },
+      body: generateAgentConfig({
+        apiKey: authApiKey ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}` : '$API_KEY',
+        esHost: elasticsearchUrl,
+        inputs: agentInputs,
+      }),
     });
   },
 });
@@ -291,16 +299,11 @@ async function ensureInstalledIntegrations(
   packageClient: PackageClient
 ) {
   const agentInputs: unknown[] = [];
-  const errors = [];
   for (const integration of integrationsToInstall) {
     const { pkgName, installSource } = integration;
     if (installSource === 'registry') {
-      try {
-        await packageClient.ensureInstalledPackage({ pkgName });
-        agentInputs.push(...getSystemLogsDataStreams(uuidv4()));
-      } catch (error) {
-        errors.push(error);
-      }
+      await packageClient.ensureInstalledPackage({ pkgName });
+      agentInputs.push(...getSystemLogsDataStreams(uuidv4()));
     } else if (installSource === 'custom') {
       const input = {
         id: `custom-logs-${uuidv4()}`,
@@ -329,7 +332,7 @@ async function ensureInstalledIntegrations(
         if (error instanceof NamingCollisionError) {
           agentInputs.push(input);
         } else {
-          errors.push(error);
+          throw error;
         }
       }
     }
