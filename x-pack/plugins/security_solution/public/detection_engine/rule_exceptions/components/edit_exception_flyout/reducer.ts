@@ -65,7 +65,7 @@ export type Action =
     }
   | {
       type: 'setWildcardWithWrongOperator';
-      wildcardWarningExists: boolean;
+      warningExists: boolean;
     };
 
 export const createExceptionItemsReducer =
