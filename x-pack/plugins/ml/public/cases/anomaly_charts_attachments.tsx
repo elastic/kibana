@@ -19,7 +19,7 @@ import { EuiDescriptionList, htmlIdGenerator } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { LazyEmbeddableAnomalyChartsContainer } from '../embeddables/anomaly_charts/lazy_anomaly_charts_container';
+import { LazyAnomalyChartsContainer } from '../embeddables/anomaly_charts/lazy_anomaly_charts_container';
 import { initializeAnomalyChartsControls } from '../embeddables/anomaly_charts/initialize_anomaly_charts_controls';
 import type {
   AnomalyChartsApi,
@@ -72,7 +72,7 @@ const AnomalyChartsCaseAttachment = ({
     <div css={css({ display: 'flex', width: '100%' })}>
       <KibanaRenderContextProvider {...coreStartServices}>
         <KibanaContextProvider services={contextServices}>
-          <LazyEmbeddableAnomalyChartsContainer
+          <LazyAnomalyChartsContainer
             id={`case-anomaly-charts-${id}`}
             severityThreshold={initialState.severityThreshold}
             api={api}

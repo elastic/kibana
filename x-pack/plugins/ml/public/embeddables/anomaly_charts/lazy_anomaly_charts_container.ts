@@ -6,6 +6,4 @@
  */
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export const LazyEmbeddableAnomalyChartsContainer = dynamic(
-  () => import('./anomaly_charts_react_container')
-);
+export const LazyAnomalyChartsContainer = dynamic(() => import('./anomaly_charts_react_container'));

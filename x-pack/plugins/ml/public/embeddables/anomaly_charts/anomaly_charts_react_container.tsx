@@ -35,8 +35,7 @@ import { useAnomalyChartsData } from './use_anomaly_charts_data';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
-export interface EmbeddableAnomalyChartsContainerProps
-  extends Partial<AnomalyChartsEmbeddableCustomInput> {
+export interface AnomalyChartsContainerProps extends Partial<AnomalyChartsEmbeddableCustomInput> {
   lastReloadRequestTime?: number;
   api: AnomalyChartsApi;
   id: string;
@@ -47,7 +46,7 @@ export interface EmbeddableAnomalyChartsContainerProps
   onError: (error: Error) => void;
 }
 
-const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
+const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   id,
   timeRange$,
   severityThreshold,
@@ -222,4 +221,4 @@ const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default EmbeddableAnomalyChartsContainer;
+export default AnomalyChartsContainer;

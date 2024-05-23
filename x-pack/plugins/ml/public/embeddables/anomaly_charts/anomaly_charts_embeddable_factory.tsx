@@ -30,7 +30,7 @@ import type { AnomalyChartsEmbeddableApi, AnomalyChartsEmbeddableState } from '.
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
 import { useReactEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { initializeAnomalyChartsControls } from './initialize_anomaly_charts_controls';
-import { LazyEmbeddableAnomalyChartsContainer } from './lazy_anomaly_charts_container';
+import { LazyAnomalyChartsContainer } from './lazy_anomaly_charts_container';
 import { getAnomalyChartsServiceDependencies } from './get_anomaly_charts_services_dependencies';
 import { buildDataViewPublishingApi } from '../common/anomaly_detection_embeddable';
 
@@ -175,7 +175,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                     `}
                     data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
                   >
-                    <LazyEmbeddableAnomalyChartsContainer
+                    <LazyAnomalyChartsContainer
                       id={uuid}
                       severityThreshold={state.severityThreshold}
                       api={api}
