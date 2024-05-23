@@ -13,7 +13,8 @@ const incompleteText = i18n.translate(
   { defaultMessage: 'Incomplete' }
 );
 
-export function connectorStatusToText(connector: Connector, hasIndexName: boolean): string {
+export function connectorStatusToText(connector: Connector): string {
+  const hasIndexName = !!connector.index_name;
   const connectorStatus = connector.status;
   if (
     connectorStatus === ConnectorStatus.CREATED ||
@@ -59,10 +60,8 @@ export function connectorStatusToText(connector: Connector, hasIndexName: boolea
   return incompleteText;
 }
 
-export function connectorStatusToColor(
-  connector: Connector,
-  hasIndexName: boolean
-): 'warning' | 'danger' | 'success' {
+export function connectorStatusToColor(connector: Connector): 'warning' | 'danger' | 'success' {
+  const hasIndexName = !!connector.index_name;
   const connectorStatus = connector.status;
   if (!hasIndexName) {
     return 'warning';
