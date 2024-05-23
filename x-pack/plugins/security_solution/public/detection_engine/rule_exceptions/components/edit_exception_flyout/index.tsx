@@ -145,6 +145,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     entryErrorExists: false,
     expireTime: itemToEdit.expire_time !== undefined ? moment(itemToEdit.expire_time) : undefined,
     expireErrorExists: false,
+    wildcardWarningExists: false,
   });
 
   const allowLargeValueLists = useMemo((): boolean => {
