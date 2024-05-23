@@ -213,7 +213,7 @@ describe('getNetworkEvents', () => {
               "size": 1000,
               "track_total_hits": true,
             },
-            "index": "heartbeat-*",
+            "index": "synthetics-*",
           },
           Object {
             "meta": true,
