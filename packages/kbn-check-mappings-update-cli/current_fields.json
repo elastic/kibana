@@ -615,6 +615,10 @@
   ],
   "ingest_manager_settings": [
     "fleet_server_hosts",
+    "fleet_setup",
+    "fleet_setup.started_at",
+    "fleet_setup.status",
+    "fleet_setup.uuid",
     "fleet_setup_status",
     "has_seen_add_data_notice",
     "output_secret_storage_requirements_met",

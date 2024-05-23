@@ -2057,6 +2057,19 @@
       "fleet_server_hosts": {
         "type": "keyword"
       },
+      "fleet_setup": {
+        "properties": {
+          "started_at": {
+            "type": "date"
+          },
+          "status": {
+            "type": "keyword"
+          },
+          "uuid": {
+            "type": "text"
+          }
+        }
+      },
       "fleet_setup_status": {
         "type": "keyword"
       },
