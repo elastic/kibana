@@ -20,7 +20,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 
 import { useAnimatedProgressBarBackground } from './use_animated_progress_bar_background';
 
@@ -36,6 +35,7 @@ interface ProgressControlProps {
   onRefresh: () => void;
   onCancel: () => void;
   onReset: () => void;
+  isBrushCleared: boolean;
   isRunning: boolean;
   shouldRerunAnalysis: boolean;
   runAnalysisDisabled?: boolean;
@@ -43,7 +43,7 @@ interface ProgressControlProps {
 
 /**
  * ProgressControls React Component
- * Component with ability to Run & cancel analysis
+ * Component with ability to run & cancel analysis
  * by default uses `Baseline` and `Deviation` for the badge name
  *
  * @param props ProgressControls component props
@@ -57,6 +57,7 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
     onRefresh,
     onCancel,
     onReset,
+    isBrushCleared,
     isRunning,
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
@@ -65,8 +66,6 @@ export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (pr
   const progressOutput = Math.round(progress * 100);
 
   const { euiTheme } = useEuiTheme();
-
-  const isBrushCleared = useAppSelector((s) => s.logRateAnalysis.isBrushCleared);
 
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
   const analysisCompleteStyle = { display: 'none' };

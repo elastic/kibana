@@ -167,6 +167,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     windowParameters,
     documentStats: { sampleProbability },
     stickyHistogram,
+    isBrushCleared,
   } = useAppSelector((s) => s.logRateAnalysis);
   const { isRunning, errors: streamErrors } = useAppSelector((s) => s.logRateAnalysisStream);
   const data = useAppSelector((s) => s.logRateAnalysisResults);
@@ -399,6 +400,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   return (
     <div data-test-subj="aiopsLogRateAnalysisResults">
       <ProgressControls
+        isBrushCleared={isBrushCleared}
         progress={data.loaded}
         progressMessage={data.loadingState ?? ''}
         isRunning={isRunning}
