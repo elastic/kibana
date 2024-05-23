@@ -136,6 +136,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickDocViewerTab('doc_view_table');
       await dataGrid.expandFieldNameCellInFlyout('Cancelled');
       await a11y.testAppSnapshot();
+      await browser.pressKeys(browser.keys.ESCAPE);
     });
 
     it('a11y test for data-grid table with columns', async () => {
