@@ -26,8 +26,7 @@ import {
 import type { Filter, Query } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -310,8 +309,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         successToastId.current = addSuccess(
           {
             title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
-            text: mountReactNode(
-              <KibanaRenderContextProvider {...startServices}>
+            text: toMountPoint(
+              <>
                 <p>{i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION}</p>
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                   <EuiFlexItem grow={false}>
@@ -320,7 +319,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </KibanaRenderContextProvider>
+              </>,
+              startServices
             ),
           },
           // Essentially keep toast around till user dismisses via 'x'
