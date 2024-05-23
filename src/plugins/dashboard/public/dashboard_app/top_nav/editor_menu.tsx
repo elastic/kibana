@@ -68,29 +68,18 @@ export const mergeGroupedItemsProvider =
   (
     factoryGroupMap: Record<string, FactoryGroup>,
     groupedAddPanelAction: Record<string, GroupedAddPanelActions>
-  ): [EuiContextMenuPanelItemDescriptor[], EuiContextMenuPanelDescriptor[]] => {
-    const initialPanelGroups: EuiContextMenuPanelItemDescriptor[] = [];
-    const additionalPanels: EuiContextMenuPanelDescriptor[] = [];
+  ): EuiContextMenuPanelDescriptor[] => {
+    const panelGroups: EuiContextMenuPanelDescriptor[] = [];
 
     new Set(Object.keys(factoryGroupMap).concat(Object.keys(groupedAddPanelAction))).forEach(
       (groupId) => {
-        const dataTestSubj = `dashboardEditorMenu-${groupId}Group`;
+        // const dataTestSubj = `dashboardEditorMenu-${groupId}Group`;
 
         const factoryGroup = factoryGroupMap[groupId];
         const addPanelGroup = groupedAddPanelAction[groupId];
 
         if (factoryGroup && addPanelGroup) {
-          const panelId = factoryGroup.panelId;
-
-          // TODO: remove this
-          initialPanelGroups.push({
-            'data-test-subj': dataTestSubj,
-            name: factoryGroup.appName,
-            icon: factoryGroup.icon,
-            panel: panelId,
-          });
-
-          additionalPanels.push({
+          panelGroups.push({
             id: factoryGroup.id,
             title: factoryGroup.appName,
             items: [
@@ -99,33 +88,14 @@ export const mergeGroupedItemsProvider =
             ],
           });
         } else if (factoryGroup) {
-          const panelId = factoryGroup.panelId;
-
-          initialPanelGroups.push({
-            'data-test-subj': dataTestSubj,
-            name: factoryGroup.appName,
-            icon: factoryGroup.icon,
-            panel: panelId,
-          });
-
-          additionalPanels.push({
+          panelGroups.push({
             id: factoryGroup.id,
             title: factoryGroup.appName,
             items: factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
           });
         } else if (addPanelGroup) {
-          const panelId = addPanelGroup.id;
-
-          // TODO: remove this
-          initialPanelGroups.push({
-            'data-test-subj': dataTestSubj,
-            name: addPanelGroup.title,
-            icon: addPanelGroup.icon,
-            panel: panelId,
-          });
-
-          additionalPanels.push({
-            id: panelId,
+          panelGroups.push({
+            id: addPanelGroup.id,
             title: addPanelGroup.title,
             items: addPanelGroup.items,
           });
@@ -133,7 +103,7 @@ export const mergeGroupedItemsProvider =
       }
     );
 
-    return [initialPanelGroups, additionalPanels];
+    return panelGroups;
   };
 
 export const EditorMenu = ({
@@ -308,12 +278,13 @@ export const EditorMenu = ({
       closePopover
     );
 
-    const [, additionalPanels] = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
+    const initialPanelGroups = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
       factoryGroupMap,
       groupedAddPanelAction
     );
 
-    const enhancedPanelGroup = additionalPanels.map((panelGroup) => {
+    // enhance panel groups
+    return initialPanelGroups.map((panelGroup) => {
       switch (panelGroup.id) {
         case 'visualizations': {
           return {
@@ -342,8 +313,6 @@ export const EditorMenu = ({
         }
       }
     });
-
-    return enhancedPanelGroup;
   };
 
   return (
