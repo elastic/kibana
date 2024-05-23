@@ -6,18 +6,22 @@
  */
 
 import { HashedCache } from '../../../../common/hashed_cache';
-import { FieldMetadata, FieldMetadataPlain, IntegrationFieldName } from '../../../../common';
-import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './types';
+import { FieldMetadata, IntegrationFieldName } from '../../../../common';
+import {
+  ExtractedIntegrationFields,
+  IntegrationFieldsExtractor,
+  IntegrationFieldsSearchParams,
+} from './types';
 import { PackageNotFoundError } from '../errors';
 interface IntegrationFieldsRepositoryDeps {
   integrationFieldsExtractor: IntegrationFieldsExtractor;
 }
 
+type DatasetFieldsMetadata = Record<string, FieldMetadata>;
+type IntegrationFieldsMetadataTree = Record<IntegrationFieldName, DatasetFieldsMetadata>;
+
 export class IntegrationFieldsRepository {
-  private cache: HashedCache<
-    IntegrationFieldsSearchParams,
-    Record<string, Record<string, FieldMetadata>>
-  >;
+  private cache: HashedCache<IntegrationFieldsSearchParams, IntegrationFieldsMetadataTree>;
 
   private constructor(private readonly fieldsExtractor: IntegrationFieldsExtractor) {
     this.cache = new HashedCache();
@@ -95,7 +99,7 @@ export class IntegrationFieldsRepository {
 
   private storeFieldsInCache = (
     cacheKey: IntegrationFieldsSearchParams,
-    extractedFieldsMetadata: Record<string, Record<string, FieldMetadata>>
+    extractedFieldsMetadata: IntegrationFieldsMetadataTree
   ): void => {
     const cachedIntegration = this.cache.get(cacheKey);
 
@@ -108,25 +112,21 @@ export class IntegrationFieldsRepository {
 
   private getCacheKey = (params: IntegrationFieldsSearchParams) => params;
 
-  private mapExtractedFieldsToFieldMetadataTree = (
-    extractedFields: Record<string, Record<string, FieldMetadataPlain>>
-  ) => {
-    return Object.entries(extractedFields).reduce(
-      (integrationGroup, [datasetName, datasetGroup]) => {
-        integrationGroup[datasetName] = Object.entries(datasetGroup).reduce(
-          (datasetGroupResult, [fieldName, field]) => {
-            datasetGroupResult[fieldName] = FieldMetadata.create({
-              ...field,
-              source: 'integration',
-            });
-            return datasetGroupResult;
-          },
-          {} as Record<string, FieldMetadata>
-        );
+  private mapExtractedFieldsToFieldMetadataTree = (extractedFields: ExtractedIntegrationFields) => {
+    const datasetGroups = Object.entries(extractedFields);
 
-        return integrationGroup;
-      },
-      {} as Record<string, Record<string, FieldMetadata>>
-    );
+    return datasetGroups.reduce((integrationGroup, [datasetName, datasetGroup]) => {
+      const datasetFieldsEntries = Object.entries(datasetGroup);
+
+      integrationGroup[datasetName] = datasetFieldsEntries.reduce(
+        (datasetFields, [fieldName, field]) => {
+          datasetFields[fieldName] = FieldMetadata.create({ ...field, source: 'integration' });
+          return datasetFields;
+        },
+        {} as DatasetFieldsMetadata
+      );
+
+      return integrationGroup;
+    }, {} as IntegrationFieldsMetadataTree);
   };
 }
