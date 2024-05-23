@@ -40,6 +40,4 @@ export class FieldsMetadataPlugin implements FieldsMetadataClientPluginClass {
       useFieldsMetadata,
     };
   }
-
-  public stop() {}
 }

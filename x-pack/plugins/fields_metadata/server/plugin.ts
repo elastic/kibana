@@ -61,6 +61,4 @@ export class FieldsMetadataPlugin
 
     return { client };
   }
-
-  public stop() {}
 }
