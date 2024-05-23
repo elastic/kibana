@@ -29,41 +29,42 @@ describe('Http2 - Smoke tests', () => {
   let config: HttpConfig;
   let logger: Logger;
   let coreContext: ReturnType<typeof mockCoreContext.create>;
+  let innerServerListener: Server;
+
   const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
   beforeAll(() => {
-    // required for self-signed certificates
+    // required for the self-signed certificates used in testing
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   });
 
   beforeEach(() => {
     coreContext = mockCoreContext.create();
     logger = coreContext.logger.get();
+
+    const rawConfig = httpConfig.schema.validate({
+      name: 'kibana',
+      protocol: 'http2',
+      host: '127.0.0.1',
+      port: 10002,
+      ssl: {
+        enabled: true,
+        certificate: KBN_CERT_PATH,
+        key: KBN_KEY_PATH,
+        cipherSuites: ['TLS_AES_256_GCM_SHA384'],
+        redirectHttpFromPort: 10003,
+      },
+      shutdownTimeout: '5s',
+    });
+    config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
   });
 
-  describe('When HTTP2 is enabled', () => {
-    let innerServerListener: Server;
+  afterEach(async () => {
+    await server?.stop();
+  });
 
-    beforeEach(() => {
-      const rawConfig = httpConfig.schema.validate({
-        name: 'kibana',
-        protocol: 'http2',
-        host: '127.0.0.1',
-        port: 10002,
-        ssl: {
-          enabled: true,
-          certificate: KBN_CERT_PATH,
-          key: KBN_KEY_PATH,
-          cipherSuites: ['TLS_AES_256_GCM_SHA384'],
-          redirectHttpFromPort: 10003,
-        },
-        shutdownTimeout: '5s',
-      });
-      config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
-
-      server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
-    });
-
+  describe('Basic test against all supported methods', () => {
     beforeEach(async () => {
       const { registerRouter, server: innerServer } = await server.setup({ config$: of(config) });
       innerServerListener = innerServer.listener;
@@ -74,36 +75,95 @@ describe('Http2 - Smoke tests', () => {
           defaultHandlerResolutionStrategy: 'oldest',
         },
       });
-      router.post(
-        {
-          path: '/',
-          validate: false,
-        },
-        async (context, req, res) => {
-          return res.ok({ body: { ok: true } });
-        }
-      );
+
+      router.post({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({
+          body: { protocol: req.protocol, httpVersion: req.httpVersion },
+        });
+      });
+      router.get({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({
+          body: { protocol: req.protocol, httpVersion: req.httpVersion },
+        });
+      });
+      router.put({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({
+          body: { protocol: req.protocol, httpVersion: req.httpVersion },
+        });
+      });
+      router.delete({ path: '/', validate: false }, async (context, req, res) => {
+        return res.ok({
+          body: { protocol: req.protocol, httpVersion: req.httpVersion },
+        });
+      });
+
       registerRouter(router);
 
       await server.start();
     });
 
-    afterEach(async () => {
-      await server.stop();
+    describe('POST', () => {
+      it('should respond to POST endpoint for an HTTP/2 request', async () => {
+        const response = await supertest(innerServerListener).post('/').http2();
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http2', httpVersion: '2.0' });
+      });
+
+      it('should respond to POST endpoint for an HTTP/1.x request', async () => {
+        const response = await supertest(innerServerListener).post('/');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http1', httpVersion: '1.1' });
+      });
     });
 
-    test('Should respond to POST endpoint for an HTTP/2 request', async () => {
-      const response = await supertest(innerServerListener).post('/').http2();
+    describe('GET', () => {
+      it('should respond to GET endpoint for an HTTP/2 request', async () => {
+        const response = await supertest(innerServerListener).get('/').http2();
 
-      expect(response.status).toBe(200);
-      expect(response.body).toStrictEqual({ ok: true });
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http2', httpVersion: '2.0' });
+      });
+
+      it('should respond to GET endpoint for an HTTP/1.x request', async () => {
+        const response = await supertest(innerServerListener).get('/');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http1', httpVersion: '1.1' });
+      });
     });
 
-    test('Should respond to POST endpoint for an HTTP/1.x request', async () => {
-      const response = await supertest(innerServerListener).post('/');
+    describe('DELETE', () => {
+      it('should respond to DELETE endpoint for an HTTP/2 request', async () => {
+        const response = await supertest(innerServerListener).delete('/').http2();
 
-      expect(response.status).toBe(200);
-      expect(response.body).toStrictEqual({ ok: true });
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http2', httpVersion: '2.0' });
+      });
+
+      it('should respond to DELETE endpoint for an HTTP/1.x request', async () => {
+        const response = await supertest(innerServerListener).delete('/');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http1', httpVersion: '1.1' });
+      });
+    });
+
+    describe('PUT', () => {
+      it('should respond to PUT endpoint for an HTTP/2 request', async () => {
+        const response = await supertest(innerServerListener).put('/').http2();
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http2', httpVersion: '2.0' });
+      });
+
+      it('should respond to PUT endpoint for an HTTP/1.x request', async () => {
+        const response = await supertest(innerServerListener).put('/');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http1', httpVersion: '1.1' });
+      });
     });
   });
 });

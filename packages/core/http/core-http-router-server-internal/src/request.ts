@@ -173,8 +173,7 @@ export class CoreKibanaRequest<
     });
 
     this.httpVersion = isRealReq ? request.raw.req.httpVersion : '1.0';
-    // hardcoded for now as only supporting http1
-    this.protocol = 'http1';
+    this.protocol = getProtocolFromHttpVersion(this.httpVersion);
 
     this.route = deepFreeze(this.getRouteInfo(request));
     this.socket = isRealReq
@@ -373,4 +372,8 @@ function sanitizeRequest(req: Request): { query: unknown; params: unknown; body:
     params: req.params,
     body: req.payload,
   };
+}
+
+function getProtocolFromHttpVersion(httpVersion: string): HttpProtocol {
+  return httpVersion.split('.')[0] === '2' ? 'http2' : 'http1';
 }
