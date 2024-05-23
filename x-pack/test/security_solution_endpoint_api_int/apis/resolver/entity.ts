@@ -43,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
               id: 'process.entity_id',
               parent: 'process.parent.entity_id',
               name: 'process.name',
+              agentId: 'agent.id',
             },
             // this value is from the es archive
             id: '{98da333e-2060-5fc9-2e01-000000003f00}',
@@ -89,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
               parent: 'process.parent.entity_id',
               ancestry: 'process.Ext.ancestry',
               name: 'process.name',
+              agentId: 'agent.id',
             },
             // this value is from the es archive
             id: 'MTIwNWY1NWQtODRkYS00MzkxLWIyNWQtYTNkNGJmNDBmY2E1LTc1NTItMTMyNDM1NDY1MTQuNjI0MjgxMDA=',
