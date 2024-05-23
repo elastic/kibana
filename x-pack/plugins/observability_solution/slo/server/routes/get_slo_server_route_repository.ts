@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EndpointOf } from '@kbn/server-route-repository';
 import { getSloRouteRepository } from './slo/route';
 
 export function getSloServerRouteRepository({ isServerless }: { isServerless?: boolean } = {}) {
@@ -14,3 +15,4 @@ export function getSloServerRouteRepository({ isServerless }: { isServerless?: b
 }
 
 export type SloServerRouteRepository = ReturnType<typeof getSloServerRouteRepository>;
+export type SloApiEndpoint = EndpointOf<SloServerRouteRepository>;

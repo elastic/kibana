@@ -42,8 +42,8 @@ export interface Sort {
 
 export interface SummarySearchClient {
   search(
-    kqlQuery: string,
-    filters: string,
+    kqlQuery: string | undefined,
+    filters: string | undefined,
     sort: Sort,
     pagination: Pagination,
     hideStale?: boolean
@@ -59,13 +59,13 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
   ) {}
 
   async search(
-    kqlQuery: string,
-    filters: string,
+    kqlQuery: string | undefined,
+    filters: string | undefined,
     sort: Sort,
     pagination: Pagination,
     hideStale?: boolean
   ): Promise<Paginated<SummaryResult>> {
-    const parsedFilters = parseStringFilters(filters, this.logger);
+    const parsedFilters = parseStringFilters(filters || '', this.logger);
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getListOfSummaryIndices(this.esClient, settings);
     const esParams = createEsParams({
@@ -75,7 +75,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         bool: {
           filter: [
             { term: { spaceId: this.spaceId } },
-            ...excludeStaleSummaryFilter(settings, kqlQuery, hideStale),
+            ...(kqlQuery ? excludeStaleSummaryFilter(settings, kqlQuery, hideStale) : []),
             getElasticsearchQueryOrThrow(kqlQuery),
             ...(parsedFilters.filter ?? []),
           ],

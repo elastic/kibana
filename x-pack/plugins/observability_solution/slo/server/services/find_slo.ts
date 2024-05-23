@@ -24,8 +24,8 @@ export class FindSLO {
 
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const summaryResults = await this.summarySearchClient.search(
-      params.kqlQuery ?? '',
-      params.filters ?? '',
+      params.kqlQuery,
+      params.filters,
       toSort(params),
       toPagination(params),
       params.hideStale

@@ -30,6 +30,7 @@ import { SloOverviewEmbeddableState } from './embeddable/slo/overview/types';
 import { SLO_ERROR_BUDGET_ID } from './embeddable/slo/error_budget/constants';
 import { SLO_ALERTS_EMBEDDABLE_ID } from './embeddable/slo/alerts/constants';
 
+import { callSloApi, createSloApiClient } from './rest';
 export class SloPlugin
   implements Plugin<SloPublicSetup, SloPublicStart, SloPublicPluginsSetup, SloPublicPluginsStart>
 {
@@ -160,7 +161,10 @@ export class SloPlugin
     const kibanaVersion = this.initContext.env.packageInfo.version;
     const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
+    createSloApiClient(coreStart);
+
     return {
+      apiClient: callSloApi,
       getCreateSLOFlyout: getCreateSLOFlyoutLazy({
         core: coreStart,
         isDev: this.initContext.env.mode.dev,
