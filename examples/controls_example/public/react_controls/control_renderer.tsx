@@ -11,14 +11,13 @@ import { v4 as generateId } from 'uuid';
 // import { ControlPanel } from './control_panel';
 // import { getReactEmbeddableFactory } from './react_embeddable_registry';
 // import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import { ControlWidth } from '@kbn/controls-plugin/common';
 import { OverlayStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { startTrackingEmbeddableUnsavedChanges } from '@kbn/embeddable-plugin/public';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
 import { getControlFactory } from './control_factory_registry';
+import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './control_panel';
 import {
   ControlApiRegistration,
@@ -26,7 +25,6 @@ import {
   DefaultControlApi,
   DefaultControlState,
 } from './types';
-import { ControlGroupApi } from './control_group/types';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -65,30 +63,21 @@ export const ControlRenderer = <
           apiRegistration: ControlApiRegistration<ApiType>,
           comparators: StateComparators<ControlStateRegistration<StateType>>
         ) => {
-          // const grow = new BehaviorSubject<boolean | undefined>(state.grow);
-          // const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
           const { unsavedChanges, resetUnsavedChanges, cleanup } =
             startTrackingEmbeddableUnsavedChanges<StateType>(
               uuid,
               parentApi,
               comparators,
-              // {
-              //   ...comparators,
-              // grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],
-              // width: [width, (newWidth: ControlWidth | undefined) => width.next(newWidth)],
-              // },
               (serializedState: SerializedPanelState<StateType>) => serializedState.rawState
             );
-          // const panelTitle = new BehaviorSubject<string | undefined>(state.title);
-          // const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.fieldName); // only applicable for data controls - make this generic
 
-          // const snapshotRuntimeState = () => {
-          //   const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
-          //   return comparatorKeys.reduce((acc, key) => {
-          //     acc[key] = comparators[key][0].value as RuntimeState[typeof key];
-          //     return acc;
-          //   }, {} as RuntimeState);
-          // };
+          const snapshotRuntimeState = () => {
+            const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
+            return comparatorKeys.reduce((acc, key) => {
+              acc[key] = comparators[key][0].value as RuntimeState[typeof key];
+              return acc;
+            }, {} as RuntimeState);
+          };
 
           const fullApi: ApiType = {
             ...apiRegistration,

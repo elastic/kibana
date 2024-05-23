@@ -121,7 +121,7 @@ export const getSearchEmbeddableFactory = ({
        * If either the search string or the search technique changes, recalulate the output filter
        */
       const onSearchStringChanged = combineLatest([searchString, searchTechnique])
-        .pipe(debounceTime(100), distinctUntilChanged(deepEqual))
+        .pipe(debounceTime(200), distinctUntilChanged(deepEqual))
         .subscribe(([newSearchString, currentSearchTechnnique]) => {
           const currentDataView = dataControlApi.dataViews.getValue()?.[0];
           const currentField = dataControlStateManager.fieldName.getValue();

@@ -9,6 +9,7 @@
 import {
   EuiButton,
   EuiButtonGroup,
+  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -100,9 +101,19 @@ export const ReactControlExample = ({
     };
   }, [controlGroupApi]);
 
-  if (loading || !dataViews || !dataViews[0].id) return <EuiLoadingSpinner />;
+  if (error)
+    return (
+      <EuiEmptyPrompt
+        iconType="error"
+        color="danger"
+        title={<h2>There was an error!</h2>}
+        body={<p>{error.message}</p>}
+      />
+    );
 
-  return (
+  return loading || !dataViews || !dataViews[0].id ? (
+    <EuiLoadingSpinner />
+  ) : (
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
@@ -156,20 +167,22 @@ export const ReactControlExample = ({
         }}
       />
       <EuiSpacer size="l" />
-      <ReactEmbeddableRenderer
-        type={'data_table'}
-        state={{
-          rawState: {
-            timeRange: { from: 'now-60d/d', to: 'now+60d/d' },
-          },
-          references: [],
-        }}
-        parentApi={mockedParentApi}
-        hidePanelChrome={false}
-        onApiAvailable={(api) => {
-          children$.next({ ...children$.getValue(), [api.uuid]: api });
-        }}
-      />
+      <div style={{ height: '400px' }}>
+        <ReactEmbeddableRenderer
+          type={'data_table'}
+          state={{
+            rawState: {
+              timeRange: { from: 'now-60d/d', to: 'now+60d/d' },
+            },
+            references: [],
+          }}
+          parentApi={mockedParentApi}
+          hidePanelChrome={false}
+          onApiAvailable={(api) => {
+            children$.next({ ...children$.getValue(), [api.uuid]: api });
+          }}
+        />
+      </div>
     </>
   );
 };

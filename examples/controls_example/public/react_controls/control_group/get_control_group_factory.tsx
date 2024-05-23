@@ -15,8 +15,7 @@ import {
   ControlsPanels,
   ControlWidth,
   CONTROL_GROUP_TYPE,
-  DEFAULT_CONTROL_GROW,
-  DEFAULT_CONTROL_WIDTH,
+  DEFAULT_CONTROL_STYLE,
 } from '@kbn/controls-plugin/common';
 import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { OverlayStart } from '@kbn/core/public';
@@ -24,6 +23,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import {
   apiPublishesDataViews,
   apiPublishesFilters,
@@ -53,13 +53,15 @@ export const getControlGroupEmbeddableFactory = (services: {
     deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const grow = new BehaviorSubject<boolean | undefined>(DEFAULT_CONTROL_GROW);
-      const width = new BehaviorSubject<ControlWidth | undefined>(DEFAULT_CONTROL_WIDTH);
+      const grow = new BehaviorSubject<boolean>(initialState.defaultControlGrow);
+      const width = new BehaviorSubject<ControlWidth>(initialState.defaultControlWidth);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
       const panels$ = new BehaviorSubject<ControlsPanels>(initialState.panels);
-      const controlStyle$ = new BehaviorSubject<ControlStyle>(initialState.controlStyle);
+      const controlStyle$ = new BehaviorSubject<ControlStyle>(
+        initialState.controlStyle ?? DEFAULT_CONTROL_STYLE
+      );
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
         initialState.chainingSystem
       );
@@ -72,18 +74,8 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       const controlGroupComparators: StateComparators<ControlGroupRuntimeState> = {
         chainingSystem: [chainingSystem$, (value) => chainingSystem$.next(value)],
-        defaultControlGrow: [
-          grow,
-          (value) => grow.next(value),
-          (oldGrow, newGrow) =>
-            (oldGrow ?? DEFAULT_CONTROL_GROW) === (newGrow ?? DEFAULT_CONTROL_GROW),
-        ],
-        defaultControlWidth: [
-          width,
-          (value) => width.next(value),
-          (oldWidth, newWidth) =>
-            (oldWidth ?? DEFAULT_CONTROL_WIDTH) === (newWidth ?? DEFAULT_CONTROL_WIDTH),
-        ],
+        defaultControlGrow: [grow, (value) => grow.next(value)],
+        defaultControlWidth: [width, (value) => width.next(value)],
         controlStyle: [controlStyle$, (value) => controlStyle$.next(value)],
         panels: [panels$, (value) => panels$.next(value), deepEqual],
         showApplySelections: [showApplySelections, (value) => showApplySelections.next(value)],
@@ -100,7 +92,10 @@ export const getControlGroupEmbeddableFactory = (services: {
             // TODO: Edit control group settings
           },
           isEditingEnabled: () => true,
-          getTypeDisplayName: () => 'Control group', // TODO: i18n
+          getTypeDisplayName: () =>
+            i18n.translate('controls.controlGroup.displayName', {
+              defaultMessage: 'Controls',
+            }),
           serializeState: () => {
             return serializeControlGroup({
               panels: panels$.getValue(),
@@ -108,6 +103,8 @@ export const getControlGroupEmbeddableFactory = (services: {
               chainingSystem: chainingSystem$.getValue(),
               showApplySelections: showApplySelections.getValue(),
               ignoreParentSettings: ignoreParentSettings.getValue(),
+              defaultControlGrow: grow.getValue(),
+              defaultControlWidth: width.getValue(),
             });
           },
           addNewPanel: (panel) => {
@@ -125,6 +122,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           width,
           filters$,
           dataViews,
+          controlStyle: controlStyle$,
         },
         controlGroupComparators
       );

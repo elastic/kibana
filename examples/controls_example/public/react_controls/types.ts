@@ -26,8 +26,8 @@ import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from './control_group/types';
 
 export interface PublishesControlDisplaySettings {
-  grow: PublishingSubject<boolean | undefined>;
-  width: PublishingSubject<ControlWidth | undefined>;
+  grow: PublishingSubject<boolean>;
+  width: PublishingSubject<ControlWidth>;
 }
 
 export interface HasCustomPrepend {
@@ -38,10 +38,15 @@ export interface HasCustomPrepend {
 export type DefaultControlApi = PublishesDataLoading &
   PublishesBlockingError &
   PublishesUnsavedChanges &
-  Partial<PublishesDisabledActionIds> &
-  PublishesControlDisplaySettings &
-  Partial<PublishesPanelTitle & HasCustomPrepend> &
-  Partial<PublishesFilters & PublishesTimeslice & PublishesPanelTitle & HasCustomPrepend> & // can publish either filters or timeslice
+  Partial<
+    PublishesPanelTitle &
+      PublishesDisabledActionIds &
+      PublishesControlDisplaySettings &
+      HasCustomPrepend &
+      // can publish either filters or timeslice
+      PublishesFilters &
+      PublishesTimeslice
+  > &
   HasType &
   HasUniqueId &
   HasParentApi<ControlGroupApi> & {

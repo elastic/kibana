@@ -32,7 +32,7 @@ export const initializeDefaultControlApi = (
   const blockingError = new BehaviorSubject<Error | undefined>(undefined);
   const grow = new BehaviorSubject<boolean | undefined>(state.grow);
   const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
-  const filters = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const filters = new BehaviorSubject<Filter[] | undefined>(undefined); // TODO: Move this to data control
 
   const defaultControlApi: ControlApi = {
     grow,

@@ -7,6 +7,7 @@
  */
 
 import { Reference } from '@kbn/content-management-utils';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
@@ -42,6 +43,8 @@ export const deserializeControlGroup = (
     ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
     panels: flattenedPanels,
     ignoreParentSettings,
+    defaultControlGrow: DEFAULT_CONTROL_GROW,
+    defaultControlWidth: DEFAULT_CONTROL_WIDTH,
   };
 };
 
@@ -69,7 +72,12 @@ export const serializeControlGroup = (
 
   return {
     rawState: {
-      ...omit(state, ['panels', 'ignoreParentSettings']),
+      ...omit(state, [
+        'panels',
+        'ignoreParentSettings',
+        'defaultControlGrow',
+        'defaultControlWidth',
+      ]),
       ignoreParentSettingsJSON: JSON.stringify(state.ignoreParentSettings),
       panelsJSON: JSON.stringify(explicitInputPanels),
     },

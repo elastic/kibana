@@ -41,7 +41,11 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 
 // import { getDataControlFieldRegistry } from '@kbn/controls-plugin/public/control_group/editor/data_control_editor_tools';
-import { ControlWidth } from '@kbn/controls-plugin/common';
+import {
+  ControlWidth,
+  DEFAULT_CONTROL_GROW,
+  DEFAULT_CONTROL_WIDTH,
+} from '@kbn/controls-plugin/common';
 import { CONTROL_WIDTH_OPTIONS } from '@kbn/controls-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -365,7 +369,7 @@ export const DataControlEditor = ({
                     }
                   )}
                   options={CONTROL_WIDTH_OPTIONS}
-                  idSelected={selectedWidth ?? defaultWidth}
+                  idSelected={selectedWidth ?? defaultWidth ?? DEFAULT_CONTROL_WIDTH}
                   onChange={(newWidth: string) => stateManager.width.next(newWidth as ControlWidth)}
                 />
                 <EuiSpacer size="s" />
@@ -377,7 +381,10 @@ export const DataControlEditor = ({
                     }
                   )}
                   color="primary"
-                  checked={selectedGrow === undefined ? defaultGrow : selectedGrow}
+                  checked={
+                    (selectedGrow === undefined ? defaultGrow : selectedGrow) ??
+                    DEFAULT_CONTROL_GROW
+                  }
                   onChange={() => stateManager.grow.next(!selectedGrow)}
                   data-test-subj="control-editor-grow-switch"
                 />

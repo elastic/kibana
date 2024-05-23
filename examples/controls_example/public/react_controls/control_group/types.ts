@@ -24,9 +24,15 @@ import {
   PublishesDataLoading,
   PublishesFilters,
   PublishesUnifiedSearch,
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 import { PublishesControlDisplaySettings } from '../types';
+
+/** The control display settings published by the control group are the "default" */
+type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
+  controlStyle: PublishingSubject<ControlStyle>;
+};
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState> &
@@ -37,13 +43,13 @@ export type ControlGroupApi = PresentationContainer &
   HasEditCapabilities & // editing for control group settings - this will be a custom action
   PublishesDataLoading & // loading = true if any children loading
   // PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
-  PublishesControlDisplaySettings & // publishes the default
+  PublishesControlGroupDisplaySettings &
   Partial<HasParentApi<PublishesUnifiedSearch & PublishesLastSavedState>>;
 
 export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;
-  defaultControlWidth?: ControlWidth;
-  defaultControlGrow?: boolean;
+  defaultControlGrow: boolean;
+  defaultControlWidth: ControlWidth;
   controlStyle: ControlStyle;
   panels: ControlsPanels;
   showApplySelections?: boolean;
@@ -52,7 +58,7 @@ export interface ControlGroupRuntimeState {
 
 export type ControlGroupSerializedState = Omit<
   ControlGroupRuntimeState,
-  'panels' | 'ignoreParentSettings'
+  'panels' | 'ignoreParentSettings' | 'defaultControlGrow' | 'defaultControlWidth'
 > & {
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
