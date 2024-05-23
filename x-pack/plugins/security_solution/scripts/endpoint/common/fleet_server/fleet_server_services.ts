@@ -17,7 +17,6 @@ import {
   API_VERSIONS,
   FLEET_SERVER_PACKAGE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AGENTS_INDEX,
 } from '@kbn/fleet-plugin/common';
 import type {
   FleetServerHost,
@@ -42,13 +41,8 @@ import {
 } from '@kbn/dev-utils';
 import { maybeCreateDockerNetwork, SERVERLESS_NODES, verifyDockerInstalled } from '@kbn/es';
 import { resolve } from 'path';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { captureCallingStack, dump, prefixedOutputLogger } from '../utils';
-import {
-  createToolingLogger,
-  RETRYABLE_TRANSIENT_ERRORS,
-  retryOnError,
-} from '../../../../common/endpoint/data_loaders/utils';
+import { createToolingLogger } from '../../../../common/endpoint/data_loaders/utils';
 import { isServerlessKibanaFlavor } from '../stack_services';
 import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
 import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
@@ -329,9 +323,10 @@ const startFleetServerWithDocker = async ({
         await updateFleetElasticsearchOutputHostNames(kbnClient, log);
 
         if (isServerless) {
-          log.info(`Waiting for server [${hostname}] to register with Elasticsearch`);
-          await waitForFleetServerToRegisterWithElasticsearch(kbnClient, log, hostname, 180000);
+          log.info(`Waiting for Fleet Server [${hostname}] to be running`);
+          await isFleetServerRunning(kbnClient, log);
         } else {
+          log.info(`Waiting for Fleet Server [${hostname}] to enroll with Fleet`);
           await waitForHostToEnroll(kbnClient, log, hostname, 120000);
         }
 
@@ -709,88 +704,4 @@ export const isFleetServerRunning = async (
     },
     { maxTimeout: 10000 }
   );
-};
-
-/**
- * Checks and waits until the given fleet server hostname has been registered into elasticsearch.
- * This check can be used when enrolling a standalone fleet-server, since those would not show up
- * in Kibana's Fleet UI.
- */
-const waitForFleetServerToRegisterWithElasticsearch = async (
-  kbnClient: KbnClient,
-  logger: ToolingLog = createToolingLogger(),
-  fleetServerHostname: string,
-  timeoutMs: number = 30000
-): Promise<void> => {
-  const started = new Date();
-  const hasTimedOut = (): boolean => {
-    const elapsedTime = Date.now() - started.getTime();
-    return elapsedTime > timeoutMs;
-  };
-  let found = false;
-
-  while (!found && !hasTimedOut()) {
-    found = await retryOnError(
-      async () => {
-        const fleetServerRecord = await kbnClient
-          .request<estypes.SearchResponse>({
-            method: 'POST',
-            path: '/api/console/proxy',
-            query: {
-              path: `${AGENTS_INDEX}/_search`,
-              method: 'GET',
-            },
-            body: {
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      term: {
-                        'local_metadata.host.hostname.keyword': fleetServerHostname,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-          })
-          .then((response) => {
-            const esResponse = response.data;
-
-            // Because we are calling Elasticsearch APIs through the Kibana console proxy, we need
-            // to check if the response from ES is an error here and then throw if thats the case
-            if (isEsErrorResponse(esResponse)) {
-              throw new Error(
-                `Search against index [${AGENTS_INDEX}] failed with: ${
-                  esResponse.error.reason || esResponse.error.type || ''
-                }\n${dump(esResponse)}`
-              );
-            }
-
-            return esResponse;
-          })
-          .catch(catchAxiosErrorFormatAndThrow);
-
-        return ((fleetServerRecord?.hits?.total as estypes.SearchTotalHits)?.value ?? 0) === 1;
-      },
-      [...RETRYABLE_TRANSIENT_ERRORS, /index_not_found_exception/],
-      logger
-    );
-
-    if (!found) {
-      // sleep and check again
-      await new Promise((r) => setTimeout(r, 2000));
-    }
-  }
-
-  if (!found) {
-    throw new Error(
-      `Timed out waiting for fleet server [${fleetServerHostname}] to register with Elasticsearch`
-    );
-  }
-};
-
-/** Type guard */
-const isEsErrorResponse = (data: object): data is estypes.ErrorResponseBase => {
-  return 'error' in data && 'status' in data;
 };
