@@ -6,12 +6,15 @@
  */
 
 import React, { memo, useCallback } from 'react';
+import { capitalize } from 'lodash';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiHealth, EuiText, EuiTreeView, EuiNotificationBadge } from '@elastic/eui';
+import { PolicyResponseArtifactItem } from './policy_response_artifact_item';
 import { useKibana } from '../../../common/lib/kibana';
 import type {
   HostPolicyResponseAppliedAction,
+  HostPolicyResponseArtifacts,
   HostPolicyResponseConfiguration,
   Immutable,
   ImmutableArray,
@@ -60,6 +63,7 @@ interface PolicyResponseProps {
   hostOs: string;
   policyResponseConfig: Immutable<HostPolicyResponseConfiguration>;
   policyResponseActions: Immutable<HostPolicyResponseAppliedAction[]>;
+  policyResponseArtifacts: Immutable<HostPolicyResponseArtifacts>;
   policyResponseAttentionCount: Map<string, number>;
 }
 
@@ -71,6 +75,7 @@ export const PolicyResponse = memo(
     hostOs,
     policyResponseConfig,
     policyResponseActions,
+    policyResponseArtifacts,
     policyResponseAttentionCount,
   }: PolicyResponseProps) => {
     const { docLinks } = useKibana().services;
@@ -155,37 +160,95 @@ export const PolicyResponse = memo(
       ]
     );
 
-    const getResponseConfigs = useCallback(
-      () =>
-        Object.entries(policyResponseConfig).map(([key, val]) => {
-          const attentionCount = policyResponseAttentionCount.get(key);
+    const getArtifacts = useCallback(
+      (
+        artifactIdentifiers: PolicyResponseProps['policyResponseArtifacts'][
+          | 'global'
+          | 'user']['identifiers']
+      ) => {
+        return artifactIdentifiers.map((artifact) => {
+          return {
+            label: <PolicyResponseArtifactItem artifact={artifact} />,
+            id: artifact.name,
+          };
+        });
+      },
+      []
+    );
+
+    const getResponseConfigs = useCallback(() => {
+      const config = Object.entries(policyResponseConfig).map(([key, val]) => {
+        const attentionCount = policyResponseAttentionCount.get(key);
+        return {
+          label: (
+            <EuiText
+              color={attentionCount ? 'danger' : 'default'}
+              size="s"
+              data-test-subj="endpointPolicyResponseConfig"
+            >
+              {formatResponse(key)}
+            </EuiText>
+          ),
+          id: key,
+          icon: attentionCount ? (
+            <EuiNotificationBadge data-test-subj="endpointPolicyResponseStatusAttentionHealth">
+              {attentionCount}
+            </EuiNotificationBadge>
+          ) : (
+            <EuiHealth
+              color="success"
+              data-test-subj="endpointPolicyResponseStatusSuccessHealth"
+              className="policyResponseStatusHealth"
+            />
+          ),
+          children: getConcernedActions(val.concerned_actions),
+        };
+      });
+
+      const artifacts = {
+        label: (
+          <EuiText color={'default'} size="s" data-test-subj="endpointPolicyResponseArtifactsTitle">
+            <FormattedMessage
+              id="xpack.securitySolution.endpoint.policyResponse.artifacts.title"
+              defaultMessage="Artifacts"
+            />
+          </EuiText>
+        ),
+        id: 'policyResponseArtifacts',
+        icon: (
+          <EuiHealth
+            color="success"
+            data-test-subj="endpointPolicyResponseStatusSuccessHealth"
+            className="policyResponseStatusHealth"
+          />
+        ),
+        children: Object.entries(policyResponseArtifacts).map(([key, val]) => {
           return {
             label: (
-              <EuiText
-                color={attentionCount ? 'danger' : 'default'}
-                size="s"
-                data-test-subj="endpointPolicyResponseConfig"
-              >
-                {formatResponse(key)}
+              <EuiText color="default" size="s" data-test-subj="endpointPolicyResponseArtifact">
+                {`${capitalize(key)} (v${val.version})`}
               </EuiText>
             ),
             id: key,
-            icon: attentionCount ? (
-              <EuiNotificationBadge data-test-subj="endpointPolicyResponseStatusAttentionHealth">
-                {attentionCount}
-              </EuiNotificationBadge>
-            ) : (
+            icon: (
               <EuiHealth
                 color="success"
                 data-test-subj="endpointPolicyResponseStatusSuccessHealth"
                 className="policyResponseStatusHealth"
               />
             ),
-            children: getConcernedActions(val.concerned_actions),
+            children: getArtifacts(val.identifiers),
           };
         }),
-      [getConcernedActions, policyResponseAttentionCount, policyResponseConfig]
-    );
+      };
+      return [...config, artifacts];
+    }, [
+      getArtifacts,
+      getConcernedActions,
+      policyResponseArtifacts,
+      policyResponseAttentionCount,
+      policyResponseConfig,
+    ]);
 
     const generateTreeView = useCallback(() => {
       let policyTotalErrors = 0;
