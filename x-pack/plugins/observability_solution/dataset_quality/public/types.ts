@@ -16,6 +16,7 @@ import type { ObservabilitySharedPluginSetup } from '@kbn/observability-shared-p
 
 import type { CreateDatasetQualityController } from './controller';
 import type { DatasetQualityProps } from './components/dataset_quality';
+import type { DatasetQualityClient } from '../common/rest';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginSetup {}
@@ -23,6 +24,7 @@ export interface DatasetQualityPluginSetup {}
 export interface DatasetQualityPluginStart {
   DatasetQuality: ComponentType<DatasetQualityProps>;
   createDatasetQualityController: CreateDatasetQualityController;
+  datasetQualityAPIClient: DatasetQualityClient;
 }
 
 export interface DatasetQualityStartDeps {

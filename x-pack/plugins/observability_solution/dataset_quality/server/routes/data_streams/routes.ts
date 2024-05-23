@@ -27,7 +27,7 @@ import { getDegradedFields } from './get_degraded_fields';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
-  params: t.type({
+  params: t.partial({
     query: t.intersection([
       typeRt,
       t.partial({
@@ -48,13 +48,15 @@ const statsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
+    const { query } = params || {};
+
     const [dataStreams, dataStreamsStats] = await Promise.all([
       getDataStreams({
         esClient,
-        ...params.query,
+        ...query,
         uncategorisedOnly: false,
       }),
-      getDataStreamsStats({ esClient, sizeStatsAvailable, ...params.query }),
+      getDataStreamsStats({ esClient, sizeStatsAvailable, ...query }),
     ]);
 
     return {

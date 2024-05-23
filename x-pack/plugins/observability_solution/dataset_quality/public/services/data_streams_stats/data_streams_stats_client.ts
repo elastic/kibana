@@ -103,7 +103,9 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }
 
   public async getIntegrations(
-    params: GetIntegrationsParams['query'] = { type: DEFAULT_DATASET_TYPE }
+    params: Required<Exclude<GetIntegrationsParams, undefined>>['query'] = {
+      type: DEFAULT_DATASET_TYPE,
+    }
   ): Promise<IntegrationsResponse> {
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/integrations', {
