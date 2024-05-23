@@ -9,6 +9,7 @@
 import Joi from 'joi';
 import joiToJsonParse from 'joi-to-json';
 import type { OpenAPIV3 } from 'openapi-types';
+import { omit } from 'lodash';
 import { createCtx, postProcessMutations } from './post_process_mutations';
 import type { IContext } from './post_process_mutations';
 
@@ -17,13 +18,34 @@ interface ParseArgs {
   ctx?: IContext;
 }
 
+export interface JoiToJsonReferenceObject extends OpenAPIV3.BaseSchemaObject {
+  schemas: { [id: string]: OpenAPIV3.SchemaObject };
+}
+
+type ParseResult = OpenAPIV3.SchemaObject | JoiToJsonReferenceObject;
+
+export const isJoiToJsonSpecialSchemas = (
+  parseResult: ParseResult
+): parseResult is JoiToJsonReferenceObject => {
+  return 'schemas' in parseResult;
+};
+
 export const joi2JsonInternal = (schema: Joi.Schema) => {
   return joiToJsonParse(schema, 'open-api');
 };
 
 export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
-  const parsed: OpenAPIV3.SchemaObject = joi2JsonInternal(schema);
-  postProcessMutations({ schema: parsed, ctx });
-  const result = ctx.processRef(parsed);
-  return { shared: ctx.sharedSchemas, result };
+  const parsed: ParseResult = joi2JsonInternal(schema);
+  let result: OpenAPIV3.SchemaObject;
+  if (isJoiToJsonSpecialSchemas(parsed)) {
+    Object.entries(parsed.schemas).forEach(([id, s]) => {
+      postProcessMutations({ schema: s, ctx });
+      ctx.addSharedSchema(id, s);
+    });
+    result = omit(parsed, 'schemas');
+  } else {
+    result = parsed;
+  }
+  postProcessMutations({ schema: result, ctx });
+  return { shared: ctx.getSharedSchemas(), result };
 };
