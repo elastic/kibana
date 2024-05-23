@@ -107,29 +107,28 @@ interface ConsoleWrapperProps
     'setDispatch' | 'alternateView' | 'setConsoleHeight' | 'getConsoleHeight'
   > {
   onKeyDown: (this: Window, ev: WindowEventMap['keydown']) => any;
+  isOpen: boolean;
 }
 
 export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
-  const { core, usageCollection, onKeyDown, isMonacoEnabled } = props;
+  const { core, usageCollection, onKeyDown, isMonacoEnabled, isOpen } = props;
   const { analytics, i18n, theme } = core;
   const startServices = { analytics, i18n, theme };
 
   useEffect(() => {
-    if (dependencies === null) {
+    if (dependencies === null && isOpen) {
       loadDependencies(core, usageCollection).then(setDependencies);
     }
-  }, [dependencies, setDependencies, core, usageCollection]);
+  }, [dependencies, setDependencies, core, usageCollection, isOpen]);
 
-  useEffect(() => {
-    return () => {
-      if (dependencies) {
-        dependencies.autocompleteInfo.clearSubscriptions();
-      }
-    };
-  }, [dependencies]);
+  if (!dependencies && !isOpen) {
+    // Console has not been opened
+    return null;
+  }
 
   if (!dependencies) {
+    // Console open for the first time, wait for dependencies to load.
     return <EditorContentSpinner />;
   }
 
@@ -171,10 +170,14 @@ export const ConsoleWrapper = (props: ConsoleWrapperProps) => {
       >
         <RequestContextProvider>
           <EditorContextProvider settings={settings.toJSON()}>
-            <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
-              <EuiWindowEvent event="keydown" handler={onKeyDown} />
-              <Main hideWelcome />
-            </div>
+            {isOpen ? (
+              <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
+                <EuiWindowEvent event="keydown" handler={onKeyDown} />
+                <Main hideWelcome />
+              </div>
+            ) : (
+              <span />
+            )}
           </EditorContextProvider>
         </RequestContextProvider>
       </ServicesContextProvider>

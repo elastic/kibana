@@ -175,5 +175,6 @@
     "@kbn/esql-utils",
     "@kbn/search-types",
     "@kbn/analytics-ftr-helpers-plugin",
+    "@kbn/reporting-server",
   ]
 }

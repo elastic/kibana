@@ -13,6 +13,7 @@ import { CasesWebhookMethods, CasesWebhookPublicConfigurationType, ExternalServi
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 jest.mock('@kbn/actions-plugin/server/lib/axios_utils', () => {
@@ -123,6 +124,43 @@ describe('Cases webhook service', () => {
           configurationUtilities
         )
       ).not.toThrow();
+    });
+
+    test('uses the basic auth header for authentication', () => {
+      createExternalService(
+        actionId,
+        {
+          config,
+          secrets: { user: 'username', password: 'password' },
+        },
+        logger,
+        configurationUtilities
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          ...getBasicAuthHeader({ username: 'username', password: 'password' }),
+          'content-type': 'application/json',
+        },
+      });
+    });
+
+    test('does not add the basic auth header for authentication if hasAuth=false', () => {
+      createExternalService(
+        actionId,
+        {
+          config: { ...config, hasAuth: false },
+          secrets: { user: 'username', password: 'password' },
+        },
+        logger,
+        configurationUtilities
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: {
+          'content-type': 'application/json',
+        },
+      });
     });
   });
 
