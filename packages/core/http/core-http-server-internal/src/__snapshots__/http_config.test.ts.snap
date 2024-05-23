@@ -68,6 +68,9 @@ Object {
     },
   },
   "host": "localhost",
+  "http2": Object {
+    "allowUnsecure": false,
+  },
   "keepaliveTimeout": 120000,
   "maxPayload": ByteSizeValue {
     "valueInBytes": 1048576,
