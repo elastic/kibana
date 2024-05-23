@@ -17,7 +17,7 @@ import {
 import type { CloudSecurityIntegrationAwsAccountType } from '@kbn/fleet-plugin/public/components/agent_enrollment_flyout/types';
 
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import { TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR } from '../../../../common/constants';
+import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT, TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR } from "../../../../common/constants";
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormAgentlessOptions,
@@ -36,9 +36,9 @@ const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
 
 export const CloudFormationCloudCredentialsGuide = ({
-  awsAccountType,
+  isOrganization,
 }: {
-  awsAccountType?: CloudSecurityIntegrationAwsAccountType;
+  isOrganization?: boolean;
 }) => {
   return (
     <EuiText>
@@ -65,7 +65,7 @@ export const CloudFormationCloudCredentialsGuide = ({
       </p>
       <EuiText size="s" color="subdued">
         <ol>
-          {awsAccountType === 'organization-account' ? (
+          {isOrganization ? (
             <li>
               <FormattedMessage
                 id="xpack.csp.agentlessForm.cloudFormation.guide.steps.organizationLogin"
@@ -143,7 +143,8 @@ export const AwsCredentialsFormAgentless = ({
   const group = options[awsCredentialsType];
   const fields = getInputVarsFields(input, group.fields);
   const integrationLink = cspIntegrationDocsNavigation.cspm.getStartedPath;
-  const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? 'single-account';
+  const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
 
   const automationCredentialTemplate = getTemplateUrlFromPackageInfo(
     packageInfo,
@@ -189,7 +190,7 @@ export const AwsCredentialsFormAgentless = ({
       <EuiSpacer size="m" />
       {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE && (
         <>
-          <CloudFormationCloudCredentialsGuide awsAccountType={accountType} />
+          <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
           <EuiSpacer size="m" />
           automationCredentialTemplate && (
           <EuiButton

@@ -6,14 +6,17 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from "@elastic/eui";
+import { EuiButton, EuiCodeBlock, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 
 import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR } from '../../../../common/constants';
+import {
+  ORGANIZATION_ACCOUNT,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+} from '../../../../common/constants';
 import {
   GcpFormProps,
   GcpInputVarFields,
@@ -97,7 +100,7 @@ export const GcpCredentialsFormAgentless = ({
   disabled,
 }: GcpFormProps) => {
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
-  const isOrganization = accountType === 'organization-account';
+  const isOrganization = accountType === ORGANIZATION_ACCOUNT;
   const organizationFields = ['gcp.organization_id', 'gcp.credentials.json'];
   const singleAccountFields = ['gcp.project_id', 'gcp.credentials.json'];
 
@@ -138,7 +141,10 @@ export const GcpCredentialsFormAgentless = ({
         iconType="launch"
         href={cloudShellUrl}
       >
-        <FormattedMessage id="xpack.csp.agentlessForm..googleCloudShell.cloudCredentials.button" defaultMessage="Launch Google Cloud Shell" />
+        <FormattedMessage
+          id="xpack.csp.agentlessForm..googleCloudShell.cloudCredentials.button"
+          defaultMessage="Launch Google Cloud Shell"
+        />
       </EuiButton>
       <EuiSpacer size="l" />
       <GcpInputVarFields
