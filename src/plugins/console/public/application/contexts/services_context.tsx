@@ -30,7 +30,7 @@ export interface ContextValue {
   services: ContextServices;
   docLinkVersion: string;
   docLinks: DocLinksStart['links'];
-  config?: {
+  config: {
     isMonacoEnabled: boolean;
   };
   startServices: ConsoleStartServices;
