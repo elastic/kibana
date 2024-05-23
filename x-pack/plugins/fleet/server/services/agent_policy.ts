@@ -182,10 +182,10 @@ class AgentPolicyService {
             : { is_protected: agentPolicy.is_protected }),
           updated_at: new Date().toISOString(),
           updated_by: user ? user.username : 'system',
-        },
-        {
-          version: existingAgentPolicy.version,
         }
+        // {
+        //   version: existingAgentPolicy.version,
+        // }
       );
     } catch (err) {
       logger.error(err);
