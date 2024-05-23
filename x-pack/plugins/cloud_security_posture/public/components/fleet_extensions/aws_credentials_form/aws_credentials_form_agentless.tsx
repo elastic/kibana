@@ -44,7 +44,7 @@ export const CloudFormationCloudCredentialsGuide = ({
     <EuiText>
       <p>
         <FormattedMessage
-          id="xpack.fleet.cloudFormation.guide.description"
+          id="xpack.csp.agentlessForm.cloudFormation.guide.description"
           defaultMessage="CloudFormation will create all the necessary resources to evaluate the security posture of your AWS environment. {learnMore}."
           values={{
             learnMore: (
@@ -55,7 +55,7 @@ export const CloudFormationCloudCredentialsGuide = ({
                 data-test-subj="externalLink"
               >
                 <FormattedMessage
-                  id="xpack.fleet.cloudFormation.guide.learnMoreLinkText"
+                  id="xpack.csp.agentlessForm.cloudFormation.guide.learnMoreLinkText"
                   defaultMessage="Learn more about CloudFormation"
                 />
               </EuiLink>
@@ -68,39 +68,39 @@ export const CloudFormationCloudCredentialsGuide = ({
           {awsAccountType === 'organization-account' ? (
             <li>
               <FormattedMessage
-                id="xpack.fleet.cloudFormation.guide.steps.organizationLogin"
+                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.organizationLogin"
                 defaultMessage="Log in as an admin in the management account of the AWS Organization you want to onboard"
               />
             </li>
           ) : (
             <li>
               <FormattedMessage
-                id="xpack.fleet.cloudFormation.guide.steps.login"
+                id="xpack.csp.agentlessForm.cloudFormation.guide.steps.login"
                 defaultMessage="Log in as an admin in the AWS account you want to onboard"
               />
             </li>
           )}
           <li>
             <FormattedMessage
-              id="xpack.fleet.cloudFormation.guide.steps.launch"
+              id="xpack.csp.agentlessForm.cloudFormation.guide.steps.launch"
               defaultMessage="Click the Launch CloudFormation button below."
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.fleet.cloudFormation.guide.steps.region"
+              id="xpack.csp.agentlessForm.cloudFormation.steps.region"
               defaultMessage="(Optional) Change the Amazon region in the upper right corner to the region you want to deploy your stack to"
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.fleet.cloudFormation.guide.steps.accept"
+              id="xpack.csp.agentlessForm.cloudFormation.gsteps.accept"
               defaultMessage="Tick the checkbox under capabilities in the opened CloudFormation stack review form: {acknowledge}"
               values={{
                 acknowledge: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.fleet.cloudFormation.guide.steps.accept.acknowledge"
+                      id="xpack.csp.agentlessForm.cloudFormation.steps.accept.acknowledge"
                       defaultMessage="I acknowledge that AWS CloudFormation might create IAM resources."
                     />
                   </strong>
@@ -110,19 +110,19 @@ export const CloudFormationCloudCredentialsGuide = ({
           </li>
           <li>
             <FormattedMessage
-              id="xpack.fleet.cloudFormation.guide.steps.create"
+              id="xpack.csp.agentlessForm.cloudFormation.steps.create"
               defaultMessage="Click Create stack."
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.fleet.cloudFormation.guide.steps.stackStatus"
+              id="xpack.csp.agentlessForm.cloudFormation.steps.stackStatus"
               defaultMessage="Once  stack status is CREATE_COMPLETE then click the Ouputs tab"
             />
           </li>
           <li>
             <FormattedMessage
-              id="xpack.fleet.cloudFormation.guide.steps.credentials"
+              id="xpack.csp.agentlessForm.cloudFormation.steps.credentials"
               defaultMessage="Copy Access Key Id and Secret Access Key then paste the credentials below"
             />
           </li>
@@ -200,7 +200,7 @@ export const AwsCredentialsFormAgentless = ({
             href={automationCredentialTemplate}
           >
             <FormattedMessage
-              id="xpack.fleet.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+              id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
               defaultMessage="Launch CloudFormation"
             />
           </EuiButton>
