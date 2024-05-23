@@ -189,7 +189,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.discover.waitUntilSearchingHasFinished();
           // error in fetching documents because of the invalid query
-          await PageObjects.discover.showsErrorCallout();
+          await retry.try(async () => {
+            await PageObjects.discover.showsErrorCallout();
+          });
           const message = await testSubjects.getVisibleText('discoverErrorCalloutMessage');
           expect(message).to.contain(
             "[esql] > Couldn't parse Elasticsearch ES|QL query. Check your query and try again."
