@@ -403,6 +403,7 @@ export function XYChart({
   const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
+  const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === 'es_ql');
   const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
@@ -655,9 +656,7 @@ export function XYChart({
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      ...(table.meta?.type === 'es_ql'
-        ? { timeFieldName: table.columns[xAxisColumnIndex].name }
-        : {}),
+      ...(isEsqlMode ? { timeFieldName: table.columns[xAxisColumnIndex].name } : {}),
     };
     onSelectRange(context);
   };
@@ -786,7 +785,7 @@ export function XYChart({
               formattedDatatables,
               xAxisFormatter,
               formatFactory,
-              interactive && !args.detailedTooltip
+              interactive && !args.detailedTooltip && !isEsqlMode
             )}
             customTooltip={
               args.detailedTooltip
@@ -862,8 +861,9 @@ export function XYChart({
             allowBrushingLastHistogramBin={isTimeViz}
             rotation={shouldRotate ? 90 : 0}
             xDomain={xDomain}
+            // enable brushing only for time charts, for both ES|QL and DSL queries
             onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
-            onElementClick={interactive ? clickHandler : undefined}
+            onElementClick={interactive && !isEsqlMode ? clickHandler : undefined}
             legendAction={
               interactive
                 ? getLegendAction(
