@@ -8,6 +8,7 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { Table } from 'apache-arrow/Arrow.node';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import {
@@ -19,7 +20,7 @@ import {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common/expression_renderers';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import {
   ChartSizeEvent,
@@ -34,13 +35,15 @@ const MetricVisComponent = lazy(() => import('../components/metric_component'));
 
 async function metricFilterable(
   dimensions: VisParams['dimensions'],
-  table: Datatable,
+  table: Table,
   handlers: IInterpreterRenderHandlers
 ) {
+  const columns = table.schema.fields as unknown as DatatableColumn[];
+
   return Promise.all(
     dimensions.metrics.map(async (metric: string | ExpressionValueVisDimension) => {
-      const column = getColumnByAccessor(metric, table.columns);
-      const colIndex = table.columns.indexOf(column!);
+      const column = getColumnByAccessor(metric, columns);
+      const colIndex = columns.indexOf(column!);
       return Boolean(
         await handlers.hasCompatibleActions?.({
           name: 'filter',
@@ -113,7 +116,7 @@ export const getMetricVisRenderer: (
         <VisualizationContainer
           data-test-subj="legacyMtrVis"
           className="legacyMtrVis"
-          showNoResult={!visData.rows?.length}
+          showNoResult={!visData.numRows}
           renderComplete={renderComplete}
           handlers={handlers}
         >
