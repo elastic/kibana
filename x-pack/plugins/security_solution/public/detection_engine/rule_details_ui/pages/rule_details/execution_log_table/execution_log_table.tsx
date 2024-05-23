@@ -71,6 +71,7 @@ import {
   expanderColumn,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
+import { RuleBackfillsInfo } from '../../../../rule_gaps/components/rule_backfills_info';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -445,6 +446,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         <EuiFlexItem grow={true}>
           <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
         </EuiFlexItem>
+
+        
         <EuiFlexItem grow={false}>
           <ExecutionLogSearchBar
             onlyShowFilters={true}
@@ -469,6 +472,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         </DatePickerEuiFlexItem>
       </EuiFlexGroup>
 
+      <EuiSpacer size="s" />
+      <RuleBackfillsInfo ruleId={ruleId} />
       <EuiSpacer size="s" />
 
       {/* Utility bar */}
