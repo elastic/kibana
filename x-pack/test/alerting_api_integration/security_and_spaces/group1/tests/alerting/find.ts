@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest, Test } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
@@ -16,11 +16,13 @@ import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 const findTestUtils = (
   describeType: 'internal' | 'public',
   objectRemover: ObjectRemover,
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   supertestWithoutAuth: any
 ) => {
-  describe.skip(describeType, () => {
-    afterEach(() => objectRemover.removeAll());
+  describe(describeType, () => {
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
@@ -651,12 +653,12 @@ export default function createFindTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  // Failing: See https://github.com/elastic/kibana/issues/182263
-  // Failing: See https://github.com/elastic/kibana/issues/182284
-  describe.skip('find', () => {
+  describe('find', () => {
     const objectRemover = new ObjectRemover(supertest);
 
-    afterEach(() => objectRemover.removeAll());
+    afterEach(async () => {
+      await objectRemover.removeAll();
+    });
 
     findTestUtils('public', objectRemover, supertest, supertestWithoutAuth);
     findTestUtils('internal', objectRemover, supertest, supertestWithoutAuth);

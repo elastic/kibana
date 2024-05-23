@@ -30,6 +30,7 @@ interface SetInitialValueParams {
 /**
  * Util function for reading the load_from parameter from the current url.
  */
+
 export const readLoadFromParam = () => {
   const [, queryString] = (window.location.hash || window.location.search || '').split('?');
 

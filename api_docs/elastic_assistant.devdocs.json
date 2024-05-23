@@ -1471,6 +1471,20 @@
           },
           {
             "parentPluginId": "elasticAssistant",
+            "id": "def-server.AssistantToolParams.langChainTimeout",
+            "type": "number",
+            "tags": [],
+            "label": "langChainTimeout",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "elasticAssistant",
             "id": "def-server.AssistantToolParams.llm",
             "type": "CompoundType",
             "tags": [],
@@ -1480,6 +1494,8 @@
               "ActionsClientLlm",
               " | ",
               "ActionsClientChatOpenAI",
+              " | ",
+              "ActionsClientSimpleChatModel",
               " | undefined"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",

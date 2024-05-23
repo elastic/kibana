@@ -9,19 +9,30 @@ import type { Client } from '@elastic/elasticsearch';
 import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain } from './conversational_chain';
 import { FakeListChatModel } from '@langchain/core/utils/testing';
+import { FakeListLLM } from 'langchain/llms/fake';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { Message } from 'ai';
 
 describe('conversational chain', () => {
-  const createTestChain = async (
-    responses: string[],
-    chat: Message[],
-    expectedFinalAnswer: string,
-    expectedDocs: any,
-    expectedTokens: any,
-    expectedSearchRequest: any,
-    contentField: Record<string, string> = { index: 'field', website: 'body_content' }
-  ) => {
+  const createTestChain = async ({
+    responses,
+    chat,
+    expectedFinalAnswer,
+    expectedDocs,
+    expectedTokens,
+    expectedSearchRequest,
+    contentField = { index: 'field', website: 'body_content' },
+    isChatModel = true,
+  }: {
+    responses: string[];
+    chat: Message[];
+    expectedFinalAnswer: string;
+    expectedDocs: any;
+    expectedTokens: any;
+    expectedSearchRequest: any;
+    contentField?: Record<string, string>;
+    isChatModel?: boolean;
+  }) => {
     const searchMock = jest.fn().mockImplementation(() => {
       return {
         hits: {
@@ -54,9 +65,11 @@ describe('conversational chain', () => {
       },
     };
 
-    const llm = new FakeListChatModel({
-      responses,
-    });
+    const llm = isChatModel
+      ? new FakeListChatModel({
+          responses,
+        })
+      : new FakeListLLM({ responses });
 
     const aiClient = Assist({
       es_client: mockElasticsearchClient as unknown as Client,
@@ -118,17 +131,17 @@ describe('conversational chain', () => {
   };
 
   it('should be able to create a conversational chain', async () => {
-    await createTestChain(
-      ['the final answer'],
-      [
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
         {
           id: '1',
           role: 'user',
           content: 'what is the work from home policy?',
         },
       ],
-      'the final answer',
-      [
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
         {
           documents: [
             { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
@@ -137,32 +150,32 @@ describe('conversational chain', () => {
           type: 'retrieved_docs',
         },
       ],
-      [
+      expectedTokens: [
         { type: 'context_token_count', count: 15 },
         { type: 'prompt_token_count', count: 5 },
       ],
-      [
+      expectedSearchRequest: [
         {
           method: 'POST',
           path: '/index,website/_search',
           body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
         },
-      ]
-    );
+      ],
+    });
   });
 
   it('should be able to create a conversational chain with nested field', async () => {
-    await createTestChain(
-      ['the final answer'],
-      [
+    await createTestChain({
+      responses: ['the final answer'],
+      chat: [
         {
           id: '1',
           role: 'user',
           content: 'what is the work from home policy?',
         },
       ],
-      'the final answer',
-      [
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
         {
           documents: [
             { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
@@ -171,25 +184,25 @@ describe('conversational chain', () => {
           type: 'retrieved_docs',
         },
       ],
-      [
+      expectedTokens: [
         { type: 'context_token_count', count: 15 },
         { type: 'prompt_token_count', count: 5 },
       ],
-      [
+      expectedSearchRequest: [
         {
           method: 'POST',
           path: '/index,website/_search',
           body: { query: { match: { field: 'what is the work from home policy?' } }, size: 3 },
         },
       ],
-      { index: 'field', website: 'metadata.source' }
-    );
+      contentField: { index: 'field', website: 'metadata.source' },
+    });
   });
 
   it('asking with chat history should re-write the question', async () => {
-    await createTestChain(
-      ['rewrite the question', 'the final answer'],
-      [
+    await createTestChain({
+      responses: ['rewrite the question', 'the final answer'],
+      chat: [
         {
           id: '1',
           role: 'user',
@@ -206,8 +219,8 @@ describe('conversational chain', () => {
           content: 'what is the work from home policy?',
         },
       ],
-      'the final answer',
-      [
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
         {
           documents: [
             { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
@@ -216,24 +229,24 @@ describe('conversational chain', () => {
           type: 'retrieved_docs',
         },
       ],
-      [
+      expectedTokens: [
         { type: 'context_token_count', count: 15 },
         { type: 'prompt_token_count', count: 5 },
       ],
-      [
+      expectedSearchRequest: [
         {
           method: 'POST',
           path: '/index,website/_search',
           body: { query: { match: { field: 'rewrite the question' } }, size: 3 },
         },
-      ]
-    );
+      ],
+    });
   });
 
   it('should cope with quotes in the query', async () => {
-    await createTestChain(
-      ['rewrite "the" question', 'the final answer'],
-      [
+    await createTestChain({
+      responses: ['rewrite "the" question', 'the final answer'],
+      chat: [
         {
           id: '1',
           role: 'user',
@@ -250,8 +263,8 @@ describe('conversational chain', () => {
           content: 'what is the work from home policy?',
         },
       ],
-      'the final answer',
-      [
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
         {
           documents: [
             { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
@@ -260,17 +273,62 @@ describe('conversational chain', () => {
           type: 'retrieved_docs',
         },
       ],
-      [
+      expectedTokens: [
         { type: 'context_token_count', count: 15 },
         { type: 'prompt_token_count', count: 5 },
       ],
-      [
+      expectedSearchRequest: [
         {
           method: 'POST',
           path: '/index,website/_search',
           body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
         },
-      ]
-    );
+      ],
+    });
+  });
+
+  it('should work with an LLM based model', async () => {
+    await createTestChain({
+      responses: ['rewrite "the" question', 'the final answer'],
+      chat: [
+        {
+          id: '1',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+        {
+          id: '2',
+          role: 'assistant',
+          content: 'the final answer',
+        },
+        {
+          id: '3',
+          role: 'user',
+          content: 'what is the work from home policy?',
+        },
+      ],
+      expectedFinalAnswer: 'the final answer',
+      expectedDocs: [
+        {
+          documents: [
+            { metadata: { _id: '1', _index: 'index' }, pageContent: 'value' },
+            { metadata: { _id: '1', _index: 'website' }, pageContent: 'value2' },
+          ],
+          type: 'retrieved_docs',
+        },
+      ],
+      expectedTokens: [
+        { type: 'context_token_count', count: 15 },
+        { type: 'prompt_token_count', count: 7 },
+      ],
+      expectedSearchRequest: [
+        {
+          method: 'POST',
+          path: '/index,website/_search',
+          body: { query: { match: { field: 'rewrite "the" question' } }, size: 3 },
+        },
+      ],
+      isChatModel: false,
+    });
   });
 });

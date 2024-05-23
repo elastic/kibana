@@ -200,6 +200,9 @@
     "@kbn/security-plugin-types-server",
     "@kbn/deeplinks-security",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/field-utils",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/langchain"
   ]
 }
