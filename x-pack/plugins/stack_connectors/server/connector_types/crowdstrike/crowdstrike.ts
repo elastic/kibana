@@ -6,6 +6,7 @@
  */
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import type {
@@ -13,16 +14,17 @@ import type {
   CrowdstrikeSecrets,
   CrowdstrikeGetAgentsResponse,
   CrowdstrikeGetAgentsParams,
-  CrowdstrikeBaseApiResponse,
   CrowdstrikeHostActionsParams,
   CrowdstrikeGetTokenResponse,
+  CrowdstrikeGetAgentOnlineStatusResponse,
+  RelaxedCrowdstrikeBaseApiResponse,
 } from '../../../common/crowdstrike/types';
 import {
-  CrowdstrikeGetAgentsResponseSchema,
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
   CrowdstrikeGetTokenResponseSchema,
   CrowdstrikeHostActionsResponseSchema,
+  RelaxedCrowdstrikeBaseApiResponseSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';
@@ -52,6 +54,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     getToken: string;
     agents: string;
     hostAction: string;
+    agentStatus: string;
   };
 
   constructor(params: ServiceParams<CrowdstrikeConfig, CrowdstrikeSecrets>) {
@@ -60,6 +63,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
       getToken: `${this.config.url}/oauth2/token`,
       hostAction: `${this.config.url}/devices/entities/devices-actions/v2`,
       agents: `${this.config.url}/devices/entities/devices/v2`,
+      agentStatus: `${this.config.url}/devices/entities/online-state/v1`,
     };
 
     if (!CrowdstrikeConnector.base64encodedToken) {
@@ -82,6 +86,12 @@ export class CrowdstrikeConnector extends SubActionConnector<
       name: SUB_ACTION.HOST_ACTIONS,
       method: 'executeHostActions',
       schema: CrowdstrikeHostActionsParamsSchema,
+    });
+
+    this.registerSubAction({
+      name: SUB_ACTION.GET_AGENT_ONLINE_STATUS,
+      method: 'getAgentOnlineStatus',
+      schema: CrowdstrikeGetAgentsParamsSchema,
     });
   }
 
@@ -118,8 +128,22 @@ export class CrowdstrikeConnector extends SubActionConnector<
         ids: payload.ids,
       },
       paramsSerializer,
-      responseSchema: CrowdstrikeGetAgentsResponseSchema,
-    });
+      responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+    }) as Promise<CrowdstrikeGetAgentsResponse>;
+  }
+
+  public async getAgentOnlineStatus(
+    payload: CrowdstrikeGetAgentsParams
+  ): Promise<CrowdstrikeGetAgentOnlineStatusResponse> {
+    return this.crowdstrikeApiRequest({
+      url: this.urls.agentStatus,
+      method: 'GET',
+      params: {
+        ids: payload.ids,
+      },
+      paramsSerializer,
+      responseSchema: RelaxedCrowdstrikeBaseApiResponseSchema,
+    }) as Promise<CrowdstrikeGetAgentOnlineStatusResponse>;
   }
 
   private async getTokenRequest() {
@@ -146,7 +170,7 @@ export class CrowdstrikeConnector extends SubActionConnector<
     return token;
   }
 
-  private async crowdstrikeApiRequest<R extends CrowdstrikeBaseApiResponse>(
+  private async crowdstrikeApiRequest<R extends RelaxedCrowdstrikeBaseApiResponse>(
     req: SubActionRequestParams<R>,
     retried?: boolean
   ): Promise<R> {

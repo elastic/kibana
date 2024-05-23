@@ -55,6 +55,10 @@ export const ruleTypesRoute = (
   router.get(
     {
       path: `${BASE_ALERTING_API_PATH}/rule_types`,
+      options: {
+        access: 'public',
+        description: `Get rule types`,
+      },
       validate: {},
     },
     router.handleLegacyErrors(
