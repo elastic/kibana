@@ -12,7 +12,10 @@ export interface IntegrationFieldsSearchParams {
   dataset?: string;
 }
 
-export type ExtractedIntegrationFields = Record<string, Record<string, FieldMetadataPlain>>;
+export type IntegrationName = string;
+export type DatasetName = string;
+export type ExtractedIntegrationFields = Record<IntegrationName, ExtractedDatasetFields>;
+export type ExtractedDatasetFields = Record<DatasetName, FieldMetadataPlain>;
 
 export type IntegrationFieldsExtractor = (
   params: IntegrationFieldsSearchParams

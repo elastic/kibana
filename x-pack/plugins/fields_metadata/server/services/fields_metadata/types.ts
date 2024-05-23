@@ -8,6 +8,8 @@
 import { FieldName, FieldMetadata, FieldsMetadataDictionary } from '../../../common';
 import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './repositories/types';
 
+export * from './repositories/types';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataServiceStartDeps {}
 

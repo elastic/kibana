@@ -8,6 +8,12 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 
 export type { FieldsMetadataServerSetup, FieldsMetadataServerStart } from './types';
+export type {
+  IntegrationName,
+  DatasetName,
+  ExtractedIntegrationFields,
+  ExtractedDatasetFields,
+} from './services/fields_metadata/types';
 
 export async function plugin(context: PluginInitializerContext) {
   const { FieldsMetadataPlugin } = await import('./plugin');

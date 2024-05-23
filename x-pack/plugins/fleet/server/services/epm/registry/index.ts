@@ -13,7 +13,7 @@ import semverGte from 'semver/functions/gte';
 import type { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 
-import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { ExtractedIntegrationFields } from '@kbn/fields-metadata-plugin/server';
 
 import { splitPkgKey as split } from '../../../../common/services';
 
@@ -357,7 +357,7 @@ export async function getPackage(
 export async function getPackageFieldsMetadata(
   params: { packageName: string; datasetName?: string },
   options: { excludedFieldsAssets?: string[] } = {}
-): Promise<Record<string, Record<string, FieldMetadataPlain>>> {
+): Promise<ExtractedIntegrationFields> {
   const { packageName, datasetName } = params;
   const { excludedFieldsAssets = ['ecs.yml'] } = options;
 
@@ -367,10 +367,6 @@ export async function getPackageFieldsMetadata(
 
   // Attempt retrieving latest package
   const resolvedPackage = await getPackage(name, version);
-
-  if (!resolvedPackage) {
-    throw new Error('The package you are looking for cannot be retrieved.');
-  }
 
   // We need to collect all the available data streams for the package.
   // In case a dataset is specified from the parameter, it will load the fields only for that specific dataset.

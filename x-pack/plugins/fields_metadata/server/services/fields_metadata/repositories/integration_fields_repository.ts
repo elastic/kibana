@@ -11,6 +11,7 @@ import {
   ExtractedIntegrationFields,
   IntegrationFieldsExtractor,
   IntegrationFieldsSearchParams,
+  IntegrationName,
 } from './types';
 import { PackageNotFoundError } from '../errors';
 interface IntegrationFieldsRepositoryDeps {
@@ -18,7 +19,7 @@ interface IntegrationFieldsRepositoryDeps {
 }
 
 type DatasetFieldsMetadata = Record<string, FieldMetadata>;
-type IntegrationFieldsMetadataTree = Record<IntegrationFieldName, DatasetFieldsMetadata>;
+type IntegrationFieldsMetadataTree = Record<IntegrationName, DatasetFieldsMetadata>;
 
 export class IntegrationFieldsRepository {
   private cache: HashedCache<IntegrationFieldsSearchParams, IntegrationFieldsMetadataTree>;

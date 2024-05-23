@@ -7,6 +7,7 @@
 
 import { withSpan } from '@kbn/apm-utils';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { ExtractedDatasetFields } from '@kbn/fields-metadata-plugin/server';
 
 import { load } from 'js-yaml';
 
@@ -24,7 +25,7 @@ type InputField =
 export const withPackageSpan = <T>(stepName: string, func: () => Promise<T>) =>
   withSpan({ name: stepName, type: 'package' }, func);
 
-const normalizeFields = (fields: InputField[], prefix = ''): Record<string, FieldMetadataPlain> => {
+const normalizeFields = (fields: InputField[], prefix = ''): ExtractedDatasetFields => {
   return fields.reduce((normalizedFields, field) => {
     const flatName = prefix ? `${prefix}.${field.name}` : field.name;
     // Recursively resolve field groups
@@ -35,7 +36,7 @@ const normalizeFields = (fields: InputField[], prefix = ''): Record<string, Fiel
     normalizedFields[flatName] = createIntegrationField(field, flatName);
 
     return normalizedFields;
-  }, {} as Record<string, FieldMetadataPlain>);
+  }, {} as ExtractedDatasetFields);
 };
 
 const createIntegrationField = (
@@ -87,7 +88,7 @@ export const resolveDataStreamFields = ({
     }
 
     return dataStreamFields;
-  }, {} as Record<string, FieldMetadataPlain>);
+  }, {} as ExtractedDatasetFields);
 
   return {
     [dataset]: fields,
