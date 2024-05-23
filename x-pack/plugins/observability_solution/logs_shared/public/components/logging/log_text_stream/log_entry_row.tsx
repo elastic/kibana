@@ -175,9 +175,6 @@ export const LogEntryRow = memo(
         onMouseLeave={setItemIsNotHovered}
         isHighlighted={isHighlighted}
         scale={scale}
-        alt={i18n.translate('xpack.logsShared.streamEntry.altText', {
-          defaultMessage: 'stream entry within log stream',
-        })}
       >
         {columnConfigurations.map((columnConfiguration) => {
           if (isTimestampColumnRenderConfiguration(columnConfiguration)) {

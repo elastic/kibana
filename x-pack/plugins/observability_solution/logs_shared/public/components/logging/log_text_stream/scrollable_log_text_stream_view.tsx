@@ -157,7 +157,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     const hasContextAction = !!setContextEntry;
 
     return (
-      <ScrollableLogTextStreamViewWrapper>
+      <ScrollableLogTextStreamViewWrapper role="table">
         {isReloading && (!isStreaming || !hasItems) ? (
           <LogsSharedLoadingPanel
             width="100%"
@@ -222,7 +222,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                                 onExtendRange={(newDateExpression) =>
                                   updateDateRange({ startDateExpression: newDateExpression })
                                 }
-                                aria-owns="streamEntry logTextStreamEntry"
                               />
                               {items.map((item, idx) => {
                                 const currentTime = item.logEntry.cursor.time;
