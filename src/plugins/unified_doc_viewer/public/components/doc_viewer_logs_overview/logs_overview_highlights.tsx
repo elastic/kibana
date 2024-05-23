@@ -26,7 +26,7 @@ export function LogsOverviewHighlights({
     fieldsMetadata: { useFieldsMetadata },
   } = getUnifiedDocViewerServices();
 
-  const { fieldsMetadata } = useFieldsMetadata({
+  const { fieldsMetadata = {} } = useFieldsMetadata({
     attributes: ['flat_name', 'short', 'type'],
     fieldNames: [
       fieldConstants.SERVICE_NAME_FIELD,
@@ -63,7 +63,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewService"
             label={serviceLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.SERVICE_NAME_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.SERVICE_NAME_FIELD]}
             {...getHighlightProps(fieldConstants.SERVICE_NAME_FIELD)}
           />
         )}
@@ -71,7 +71,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewHostName"
             label={hostNameLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.HOST_NAME_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.HOST_NAME_FIELD]}
             {...getHighlightProps(fieldConstants.HOST_NAME_FIELD)}
           />
         )}
@@ -79,7 +79,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewTrace"
             label={traceLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.TRACE_ID_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.TRACE_ID_FIELD]}
             {...getHighlightProps(fieldConstants.TRACE_ID_FIELD)}
           />
         )}
@@ -87,7 +87,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewClusterName"
             label={orchestratorClusterNameLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]}
             {...getHighlightProps(fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD)}
           />
         )}
@@ -95,7 +95,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewResourceId"
             label={orchestratorResourceIdLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]}
             {...getHighlightProps(fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD)}
           />
         )}
@@ -109,7 +109,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudProvider"
             label={cloudProviderLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.CLOUD_PROVIDER_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_PROVIDER_FIELD]}
             icon={
               <CloudProviderIcon
                 cloudProvider={first(
@@ -124,7 +124,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudRegion"
             label={cloudRegionLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.CLOUD_REGION_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_REGION_FIELD]}
             {...getHighlightProps(fieldConstants.CLOUD_REGION_FIELD)}
           />
         )}
@@ -132,7 +132,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudAz"
             label={cloudAvailabilityZoneLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD]}
             {...getHighlightProps(fieldConstants.CLOUD_AVAILABILITY_ZONE_FIELD)}
           />
         )}
@@ -140,7 +140,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudProjectId"
             label={cloudProjectIdLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.CLOUD_PROJECT_ID_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_PROJECT_ID_FIELD]}
             {...getHighlightProps(fieldConstants.CLOUD_PROJECT_ID_FIELD)}
           />
         )}
@@ -148,7 +148,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewCloudInstanceId"
             label={cloudInstanceIdLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.CLOUD_INSTANCE_ID_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.CLOUD_INSTANCE_ID_FIELD]}
             {...getHighlightProps(fieldConstants.CLOUD_INSTANCE_ID_FIELD)}
           />
         )}
@@ -162,7 +162,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewLogPathFile"
             label={logPathFileLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.LOG_FILE_PATH_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.LOG_FILE_PATH_FIELD]}
             {...getHighlightProps(fieldConstants.LOG_FILE_PATH_FIELD)}
           />
         )}
@@ -170,7 +170,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewDataset"
             label={datasetLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.DATASTREAM_DATASET_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.DATASTREAM_DATASET_FIELD]}
             {...getHighlightProps(fieldConstants.DATASTREAM_DATASET_FIELD)}
           />
         )}
@@ -178,7 +178,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewNamespace"
             label={namespaceLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.DATASTREAM_NAMESPACE_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.DATASTREAM_NAMESPACE_FIELD]}
             useBadge
             {...getHighlightProps(fieldConstants.DATASTREAM_NAMESPACE_FIELD)}
           />
@@ -187,7 +187,7 @@ export function LogsOverviewHighlights({
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewLogShipper"
             label={shipperLabel}
-            fieldMetadata={fieldsMetadata?.[fieldConstants.AGENT_NAME_FIELD]}
+            fieldMetadata={fieldsMetadata[fieldConstants.AGENT_NAME_FIELD]}
             {...getHighlightProps(fieldConstants.AGENT_NAME_FIELD)}
           />
         )}
