@@ -58,8 +58,6 @@ import {
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
 import {
-  DefaultEmbeddableApi,
-  ReactEmbeddableFactory,
   reactEmbeddableRegistryHasKey,
   registerReactEmbeddableFactory,
 } from './react_embeddable_system';
@@ -108,13 +106,7 @@ export interface EmbeddableSetup {
   /**
    * Registers an async {@link ReactEmbeddableFactory} getter.
    */
-  registerReactEmbeddableFactory: <
-    StateType extends object = object,
-    APIType extends DefaultEmbeddableApi<StateType> = DefaultEmbeddableApi<StateType>
-  >(
-    type: string,
-    getFactory: () => Promise<ReactEmbeddableFactory<StateType, APIType>>
-  ) => void;
+  registerReactEmbeddableFactory: typeof registerReactEmbeddableFactory;
 
   /**
    * @deprecated use {@link registerReactEmbeddableFactory} instead.
