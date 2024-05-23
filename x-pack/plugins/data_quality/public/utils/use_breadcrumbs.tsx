@@ -8,6 +8,7 @@
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { useEffect } from 'react';
 
 export const useBreadcrumbs = (
   breadcrumb: string,
@@ -17,5 +18,8 @@ export const useBreadcrumbs = (
   const { docTitle } = chromeService;
 
   docTitle.change(breadcrumb);
-  params.setBreadcrumbs([{ text: breadcrumb }]);
+
+  useEffect(() => {
+    params.setBreadcrumbs([{ text: breadcrumb }]);
+  }, [breadcrumb, params]);
 };

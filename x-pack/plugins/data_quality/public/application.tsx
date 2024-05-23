@@ -53,7 +53,7 @@ const App = ({ core, plugins, pluginStart, params }: AppProps) => {
         <KbnUrlStateStorageFromRouterProvider>
           <Router history={params.history}>
             <Routes>
-              <Route path="/" exact={true} render={() => <DatasetQualityRoute params={params} />} />
+              <Route path="/" exact={true} render={() => <DatasetQualityRoute />} />
             </Routes>
           </Router>
         </KbnUrlStateStorageFromRouterProvider>
