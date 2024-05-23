@@ -517,6 +517,7 @@ src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-langchain @elastic/security-generative-ai
 packages/kbn-language-documentation-popover @elastic/kibana-esql
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
@@ -818,7 +819,6 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/kibana-management
-packages/solution-nav/es @elastic/appex-sharedux @elastic/enterprise-search-frontend
 packages/solution-nav/oblt @elastic/appex-sharedux @elastic/obs-ux-management-team
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations

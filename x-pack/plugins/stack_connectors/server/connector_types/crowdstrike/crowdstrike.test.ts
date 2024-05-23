@@ -13,6 +13,7 @@ import { CROWDSTRIKE_CONNECTOR_ID } from '../../../public/common';
 
 const tokenPath = 'https://api.crowdstrike.com/oauth2/token';
 const hostPath = 'https://api.crowdstrike.com/devices/entities/devices/v2';
+const onlineStatusPath = 'https://api.crowdstrike.com/devices/entities/online-state/v1';
 const actionsPath = 'https://api.crowdstrike.com/devices/entities/devices-actions/v2';
 describe('CrowdstrikeConnector', () => {
   const connector = new CrowdstrikeConnector({
@@ -113,6 +114,45 @@ describe('CrowdstrikeConnector', () => {
     });
   });
 
+  describe('getAgentOnlineStatus', () => {
+    it('should make a GET request to the correct URL with correct params', async () => {
+      const mockResponse = { data: { resources: [{}] } };
+
+      mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
+      mockedRequest.mockResolvedValueOnce(mockResponse);
+
+      const result = await connector.getAgentOnlineStatus({ ids: ['id1', 'id2'] });
+
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          headers: {
+            accept: 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            authorization: expect.any(String),
+          },
+          method: 'post',
+          responseSchema: expect.any(Object),
+          url: tokenPath,
+        })
+      );
+      expect(mockedRequest).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            Authorization: 'Bearer testToken',
+          }),
+          method: 'GET',
+          params: { ids: ['id1', 'id2'] },
+          paramsSerializer: expect.any(Function),
+          responseSchema: expect.any(Object),
+          url: onlineStatusPath,
+        })
+      );
+      expect(result).toEqual({ resources: [{}] });
+    });
+  });
+
   describe('getTokenRequest', () => {
     it('should make a POST request to the correct URL with correct headers', async () => {
       const mockResponse = { data: { access_token: 'testToken' } };
@@ -191,7 +231,6 @@ describe('CrowdstrikeConnector', () => {
       mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
       mockedRequest.mockRejectedValueOnce(mockResponse);
 
-      //   expect(mockedRequest).toThrowError('access denied, invalid bearer token');
       await expect(() => connector.getAgentDetails({ ids: ['id1', 'id2'] })).rejects.toThrowError(
         'something goes wrong'
       );
@@ -203,7 +242,6 @@ describe('CrowdstrikeConnector', () => {
       mockedRequest.mockResolvedValueOnce({ data: { access_token: 'testToken' } });
       mockedRequest.mockRejectedValueOnce(mockResponse);
 
-      //   expect(mockedRequest).toThrowError('access denied, invalid bearer token');
       await expect(() => connector.getAgentDetails({ ids: ['id1', 'id2'] })).rejects.toThrowError();
       expect(mockedRequest).toHaveBeenCalledTimes(3);
     });

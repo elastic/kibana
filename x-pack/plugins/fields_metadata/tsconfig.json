@@ -17,5 +17,6 @@
     "@kbn/logging",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/core-http-server",
+    "@kbn/logging-mocks",
   ]
 }
