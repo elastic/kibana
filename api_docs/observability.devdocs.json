@@ -3572,7 +3572,13 @@
             "label": "aiops",
             "description": [],
             "signature": [
-              "AiopsPluginStart"
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.AiopsPluginStart",
+                "text": "AiopsPluginStart"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
@@ -10332,7 +10338,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "true"
+                  "false"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,

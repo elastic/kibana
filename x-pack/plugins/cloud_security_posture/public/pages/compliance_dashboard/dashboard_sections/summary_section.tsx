@@ -160,7 +160,7 @@ export const SummarySection = ({
       gutterSize="l"
       css={css`
         // height for compliance by cis section with max rows
-        height: 310px;
+        height: 350px;
       `}
       data-test-subj={DASHBOARD_SUMMARY_CONTAINER}
     >

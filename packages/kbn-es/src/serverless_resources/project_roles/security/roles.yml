@@ -468,6 +468,7 @@ soc_manager:
         - feature_siem.actions_log_management_all
         - feature_siem.file_operations_all
         - feature_siem.execute_operations_all
+        - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
@@ -644,9 +645,10 @@ endpoint_operations_analyst:
         - feature_siem.blocklist_all
         - feature_siem.host_isolation_all
         - feature_siem.process_operations_all
-        - feature_siem.actions_log_management_all # Response History
+        - feature_siem.actions_log_management_all
         - feature_siem.file_operations_all
-        - feature_siem.execute_operations_all # Execute
+        - feature_siem.execute_operations_all
+        - feature_siem.scan_operations_all
         - feature_securitySolutionCases.all
         - feature_securitySolutionAssistant.all
         - feature_actions.all
