@@ -78,6 +78,13 @@ export const resolveDataStreamFields = ({
     excludedFieldsAssets
   );
 
+  /**
+   * We want to create a single dictionary with fields taken from all the dataset /fields assets.
+   * This step
+   * - reads the files buffer
+   * - normalizes the fields data structure for each file
+   * - finally merge the fields from each file into a single dictionary
+   */
   const fields = dataStreamFieldsAssetPaths.reduce((dataStreamFields, fieldsAssetPath) => {
     const fieldsAssetBuffer = assetsMap.get(fieldsAssetPath);
 
