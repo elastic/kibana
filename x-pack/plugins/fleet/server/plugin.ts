@@ -635,6 +635,7 @@ export class FleetPlugin
     const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
 
     const fleetSetup = async () => {
+      appContextService.getLogger().info(new Error().stack ?? 'fleetSetup');
       try {
         // Fleet remains `available` during setup as to excessively delay Kibana's boot process.
         // This should be reevaluated as Fleet's setup process is optimized and stabilized.
@@ -659,9 +660,6 @@ export class FleetPlugin
         // Retry Fleet setup w/ backoff
         await backOff(
           async () => {
-            appContextService
-              .getLogger()
-              .info('Call Fleet setup from plugin start: ' + new Error().stack);
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
               core.elasticsearch.client.asInternalUser
