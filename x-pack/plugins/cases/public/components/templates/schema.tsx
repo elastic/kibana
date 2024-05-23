@@ -12,17 +12,17 @@ import {
   MAX_DESCRIPTION_LENGTH,
   MAX_LENGTH_PER_TAG,
   MAX_TAGS_PER_CASE,
+  MAX_TAGS_PER_TEMPLATE,
+  MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
 } from '../../../common/constants';
 import { OptionalFieldLabel } from '../create/optional_field_label';
 import { SEVERITY_TITLE } from '../severity/translations';
 import * as i18n from './translations';
 import type { TemplateFormProps } from './types';
+import { validateEmptyTags, validateMaxLength, validateMaxTagsLength } from './utils';
 
 const { emptyField, maxLengthField } = fieldValidators;
-const isInvalidTag = (value: string) => value.trim() === '';
-
-const isTagCharactersInLimit = (value: string) => value.trim().length > MAX_LENGTH_PER_TAG;
 
 export const schema: FormSchema<TemplateFormProps> = {
   key: {
@@ -45,6 +45,37 @@ export const schema: FormSchema<TemplateFormProps> = {
     validations: [
       {
         validator: emptyField(i18n.REQUIRED_FIELD(i18n.DESCRIPTION)),
+      },
+    ],
+  },
+  tags: {
+    label: i18n.TAGS,
+    helpText: i18n.TEMPLATE_TAGS_HELP,
+    labelAppend: OptionalFieldLabel,
+    validations: [
+      {
+        validator: ({ value }: { value: string | string[] }) =>
+          validateEmptyTags({ value, message: i18n.TAGS_EMPTY_ERROR }),
+        type: VALIDATION_TYPES.ARRAY_ITEM,
+        isBlocking: false,
+      },
+      {
+        validator: ({ value }: { value: string | string[] }) =>
+          validateMaxLength({
+            value,
+            message: i18n.MAX_LENGTH_ERROR('tag', MAX_TEMPLATE_TAG_LENGTH),
+            limit: MAX_TEMPLATE_TAG_LENGTH,
+          }),
+        type: VALIDATION_TYPES.ARRAY_ITEM,
+        isBlocking: false,
+      },
+      {
+        validator: ({ value }: { value: string[] }) =>
+          validateMaxTagsLength({
+            value,
+            message: i18n.MAX_TAGS_ERROR(MAX_TAGS_PER_TEMPLATE),
+            limit: MAX_TAGS_PER_TEMPLATE,
+          }),
       },
     ],
   },
@@ -79,41 +110,28 @@ export const schema: FormSchema<TemplateFormProps> = {
       labelAppend: OptionalFieldLabel,
       validations: [
         {
-          validator: ({ value }: { value: string | string[] }) => {
-            if (
-              (!Array.isArray(value) && isInvalidTag(value)) ||
-              (Array.isArray(value) && value.length > 0 && value.find(isInvalidTag))
-            ) {
-              return {
-                message: i18n.TAGS_EMPTY_ERROR,
-              };
-            }
-          },
+          validator: ({ value }: { value: string | string[] }) =>
+            validateEmptyTags({ value, message: i18n.TAGS_EMPTY_ERROR }),
           type: VALIDATION_TYPES.ARRAY_ITEM,
           isBlocking: false,
         },
         {
-          validator: ({ value }: { value: string | string[] }) => {
-            if (
-              (!Array.isArray(value) && isTagCharactersInLimit(value)) ||
-              (Array.isArray(value) && value.length > 0 && value.some(isTagCharactersInLimit))
-            ) {
-              return {
-                message: i18n.MAX_LENGTH_ERROR('tag', MAX_LENGTH_PER_TAG),
-              };
-            }
-          },
+          validator: ({ value }: { value: string | string[] }) =>
+            validateMaxLength({
+              value,
+              message: i18n.MAX_LENGTH_ERROR('tag', MAX_LENGTH_PER_TAG),
+              limit: MAX_LENGTH_PER_TAG,
+            }),
           type: VALIDATION_TYPES.ARRAY_ITEM,
           isBlocking: false,
         },
         {
-          validator: ({ value }: { value: string[] }) => {
-            if (Array.isArray(value) && value.length > MAX_TAGS_PER_CASE) {
-              return {
-                message: i18n.MAX_TAGS_ERROR(MAX_TAGS_PER_CASE),
-              };
-            }
-          },
+          validator: ({ value }: { value: string[] }) =>
+            validateMaxTagsLength({
+              value,
+              message: i18n.MAX_TAGS_ERROR(MAX_TAGS_PER_CASE),
+              limit: MAX_TAGS_PER_CASE,
+            }),
         },
       ],
     },
@@ -138,6 +156,7 @@ export const schema: FormSchema<TemplateFormProps> = {
     syncAlerts: {
       helpText: i18n.SYNC_ALERTS_HELP,
       labelAppend: OptionalFieldLabel,
+      defaultValue: true,
     },
   },
 };

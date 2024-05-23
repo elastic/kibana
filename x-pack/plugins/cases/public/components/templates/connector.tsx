@@ -17,21 +17,20 @@ import { getConnectorById, getConnectorsFormValidators } from '../utils';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import * as i18n from '../../common/translations';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import type { CasesConfigurationUI } from '../../containers/types';
 import { schema } from './schema';
 
 interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
   path?: string;
-  configurationConnector: CasesConfigurationUI['connector'] | null;
+  configurationConnectorId: string;
 }
 
 const ConnectorComponent: React.FC<Props> = ({
   connectors,
   isLoading,
   path,
-  configurationConnector,
+  configurationConnectorId,
 }) => {
   const [{ caseFields }] = useFormData({ watch: ['caseFields.connectorId'] });
   const connector = getConnectorById(caseFields?.connectorId, connectors) ?? null;
@@ -39,9 +38,10 @@ const ConnectorComponent: React.FC<Props> = ({
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
   const hasReadPermissions = permissions.connectors && actions.read;
+  const connectorId = schema.caseFields?.connectorId ?? '';
 
   const connectorIdConfig = getConnectorsFormValidators({
-    config: schema.caseFields?.connectorId as FieldConfig,
+    config: connectorId as FieldConfig,
     connectors,
   });
 
@@ -60,7 +60,7 @@ const ConnectorComponent: React.FC<Props> = ({
           path={path ?? 'connectorId'}
           config={connectorIdConfig}
           component={ConnectorSelector}
-          defaultValue={configurationConnector !== null ? configurationConnector.id : ''}
+          defaultValue={configurationConnectorId}
           componentProps={{
             connectors,
             dataTestSubj: 'caseConnectors',

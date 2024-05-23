@@ -43,6 +43,11 @@ export const TEMPLATE_NAME = i18n.translate('xpack.cases.templates.templateName'
   defaultMessage: 'Template name',
 });
 
+export const TEMPLATE_TAGS_HELP = i18n.translate('xpack.cases.templates.templateTagsHelp', {
+  defaultMessage:
+    'Type one or more custom identifying tags for this template. Please enter after each tag to begin a new one',
+});
+
 export const TEMPLATE_FIELDS = i18n.translate('xpack.cases.templates.templateFields', {
   defaultMessage: 'Template fields',
 });

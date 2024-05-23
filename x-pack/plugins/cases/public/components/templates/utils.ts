@@ -54,3 +54,59 @@ export const templateSerializer = <T extends TemplateFormProps | null>(data: T):
 
   return data;
 };
+
+const isInvalidTag = (value: string) => value.trim() === '';
+
+const isTagCharactersInLimit = (value: string, limit: number) => value.trim().length > limit;
+
+export const validateEmptyTags = ({
+  value,
+  message,
+}: {
+  value: string | string[];
+  message: string;
+}) => {
+  if (
+    (!Array.isArray(value) && isInvalidTag(value)) ||
+    (Array.isArray(value) && value.length > 0 && value.find(isInvalidTag))
+  ) {
+    return {
+      message,
+    };
+  }
+};
+
+export const validateMaxLength = ({
+  value,
+  message,
+  limit,
+}: {
+  value: string | string[];
+  message: string;
+  limit: number;
+}) => {
+  if (
+    (!Array.isArray(value) && value.trim().length > limit) ||
+    (Array.isArray(value) && value.length > 0 && value.some(isTagCharactersInLimit))
+  ) {
+    return {
+      message,
+    };
+  }
+};
+
+export const validateMaxTagsLength = ({
+  value,
+  message,
+  limit,
+}: {
+  value: string | string[];
+  message: string;
+  limit: number;
+}) => {
+  if (Array.isArray(value) && value.length > limit) {
+    return {
+      message,
+    };
+  }
+};

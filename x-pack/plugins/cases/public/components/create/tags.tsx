@@ -14,9 +14,10 @@ import * as i18n from './translations';
 interface Props {
   isLoading: boolean;
   path?: string;
+  dataTestSubject?: string;
 }
 
-const TagsComponent: React.FC<Props> = ({ isLoading, path }) => {
+const TagsComponent: React.FC<Props> = ({ isLoading, path, dataTestSubject }) => {
   const { data: tagOptions = [], isLoading: isLoadingTags } = useGetTags();
   const options = useMemo(
     () =>
@@ -32,8 +33,8 @@ const TagsComponent: React.FC<Props> = ({ isLoading, path }) => {
       component={ComboBoxField}
       defaultValue={[]}
       componentProps={{
-        idAria: 'caseTags',
-        'data-test-subj': 'caseTags',
+        idAria: dataTestSubject ?? 'caseTags',
+        'data-test-subj': dataTestSubject ?? 'caseTags',
         euiFieldProps: {
           fullWidth: true,
           placeholder: '',

@@ -16,18 +16,19 @@ import type { ActionConnector } from '../../containers/configure/types';
 import type { CasesConfigurationUI } from '../../containers/types';
 import { getMarkdownEditorStorageKey } from '../markdown_editor/utils';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { Tags } from '../create/tags';
 
 interface FormFieldsProps {
   isSubmitting?: boolean;
   connectors: ActionConnector[];
-  configurationConnector: CasesConfigurationUI['connector'] | null;
+  configurationConnectorId: string;
   configurationCustomFields: CasesConfigurationUI['customFields'];
 }
 
 const FormFieldsComponent: React.FC<FormFieldsProps> = ({
   isSubmitting = false,
   connectors,
-  configurationConnector,
+  configurationConnectorId,
   configurationCustomFields,
 }) => {
   const { owner } = useCasesContext();
@@ -54,6 +55,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
               },
             }}
           />
+          <Tags isLoading={isSubmitting} path="tags" dataTestSubject="template-tags" />
           <UseField
             path="description"
             component={TextField}
@@ -93,13 +95,13 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
           <Connector
             connectors={connectors}
             isLoading={isSubmitting}
-            configurationConnector={configurationConnector}
+            configurationConnectorId={configurationConnectorId}
             path="caseFields.connectorId"
           />
         </div>
       ),
     }),
-    [connectors, configurationConnector, isSubmitting]
+    [connectors, configurationConnectorId, isSubmitting]
   );
 
   const allSteps = useMemo(
