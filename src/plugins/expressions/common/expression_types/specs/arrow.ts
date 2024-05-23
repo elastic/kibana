@@ -18,16 +18,7 @@ export const arrow: ExpressionTypeDefinition<
   { type: 'arrow'; table: Table }
 > = {
   name,
-  validate: (table: Record<string, unknown>) => {
-    // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
-    if (!table.columns) {
-      throw new Error('datatable must have a columns array, even if it is empty');
-    }
-
-    if (!table.rows) {
-      throw new Error('datatable must have a rows array, even if it is empty');
-    }
-  },
+  validate: (table: Record<string, unknown>) => {},
   serialize: (table) => {
     return table;
   },
