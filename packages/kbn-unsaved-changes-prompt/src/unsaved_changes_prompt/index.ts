@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { UnsavedChangesPrompt } from './unsaved_changes_prompt';
+export { useUnsavedChangesPrompt } from './unsaved_changes_prompt';

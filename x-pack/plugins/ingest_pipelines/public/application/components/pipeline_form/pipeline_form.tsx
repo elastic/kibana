@@ -10,10 +10,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { isEqual } from 'lodash';
 
-import { UnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { Pipeline, Processor } from '../../../../common/types';
 import { useForm, Form, FormConfig, useFormIsModified } from '../../../shared_imports';
 
+import { useKibana } from '../../../shared_imports';
 import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
 
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
@@ -50,6 +51,13 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
   onCancel,
   canEditName,
 }) => {
+  const {
+    overlays,
+    history,
+    application: { navigateToUrl },
+    http,
+  } = useKibana().services;
+
   const [isRequestVisible, setIsRequestVisible] = useState<boolean>(false);
   const [areProcessorsDirty, setAreProcessorsDirty] = useState<boolean>(false);
   const [hasSubmittedForm, setHasSubmittedForm] = useState<boolean>(false);
@@ -126,26 +134,36 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
       // Calculate if the current processor state has changed compared to the
       // initial processors state.
       setAreProcessorsDirty(
-        !isEqual(processorsState, {
-          processors: currentProcessorsState?.processors || [],
-          onFailure: currentProcessorsState?.on_failure || [],
-        })
+        !isEqual(
+          {
+            processors: processorsState?.processors || [],
+            onFailure: processorsState?.onFailure || [],
+          },
+          {
+            processors: currentProcessorsState?.processors || [],
+            onFailure: currentProcessorsState?.on_failure || [],
+          }
+        )
       );
     },
     [processorsState]
   );
 
+  /*
+    We need to check if the form is dirty and also if the form has been submitted.
+    Because on form submission we also redirect the user to the pipelines list,
+    and this could otherwise trigger an unwanted unsaved changes prompt.
+  */
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: (isFormDirty || areProcessorsDirty) && !hasSubmittedForm,
+    openConfirm: overlays.openConfirm,
+    history,
+    http,
+    navigateToUrl,
+  });
+
   return (
     <>
-      {/*
-        We need to check if the form is dirty and also if the form has been submitted.
-        Because on form submission we also redirect the user to the pipelines list,
-        and this could otherwise trigger an unwanted unsaved changes prompt.
-      */}
-      <UnsavedChangesPrompt
-        hasUnsavedChanges={(isFormDirty || areProcessorsDirty) && !hasSubmittedForm}
-      />
-
       <Form
         form={form}
         data-test-subj="pipelineForm"

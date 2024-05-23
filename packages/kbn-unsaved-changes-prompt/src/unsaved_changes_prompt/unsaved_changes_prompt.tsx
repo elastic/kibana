@@ -6,37 +6,91 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect } from 'react';
-import { Prompt } from 'react-router-dom';
+import { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
-const DEFAULT_MESSAGE_TEXT = i18n.translate('unsavedChangesPrompt.defaultModalText', {
-  defaultMessage: 'Your changes have not been saved. Are you sure you want to leave?',
+import { ApplicationStart, ScopedHistory, OverlayStart, HttpStart } from '@kbn/core/public';
+
+const DEFAULT_BODY_TEXT = i18n.translate('unsavedChangesPrompt.defaultModalText', {
+  defaultMessage: `You can't recover unsaved changes.`,
+});
+
+const DEFAULT_TITLE_TEXT = i18n.translate('unsavedChangesPrompt.defaultModalTitle', {
+  defaultMessage: 'Discard unsaved changes?',
+});
+
+const DEFAULT_CANCEL_BUTTON = i18n.translate('unsavedChangesPrompt.defaultModalCancel', {
+  defaultMessage: 'Cancel',
+});
+
+const DEFAULT_CONFIRM_BUTTON = i18n.translate('unsavedChangesPrompt.defaultModalConfirm', {
+  defaultMessage: 'Discard changes',
 });
 
 interface Props {
   hasUnsavedChanges: boolean;
+  http: HttpStart;
+  openConfirm: OverlayStart['openConfirm'];
+  history: ScopedHistory;
+  navigateToUrl: ApplicationStart['navigateToUrl'];
+  titleText?: string;
   messageText?: string;
+  cancelButtonText?: string;
+  confirmButtonText?: string;
 }
 
-export const UnsavedChangesPrompt: React.FC<Props> = ({
+export const useUnsavedChangesPrompt = ({
   hasUnsavedChanges,
-  messageText = DEFAULT_MESSAGE_TEXT,
-}) => {
+  openConfirm,
+  history,
+  http,
+  navigateToUrl,
+  // Provide overrides for confirm dialog
+  messageText = DEFAULT_BODY_TEXT,
+  titleText = DEFAULT_TITLE_TEXT,
+  confirmButtonText = DEFAULT_CONFIRM_BUTTON,
+  cancelButtonText = DEFAULT_CANCEL_BUTTON,
+}: Props) => {
   useEffect(() => {
-    const handler = (event: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        // Prevent event from bubbling
-        event.preventDefault();
-        // For legacy support, e.g. Chrome/Edge < 119
-        event.returnValue = '';
+    if (!hasUnsavedChanges) {
+      return;
+    }
+
+    const unblock = history.block((state) => {
+      async function confirmAsync() {
+        const confirmRes = await openConfirm(messageText, {
+          title: titleText,
+          cancelButtonText,
+          confirmButtonText,
+          buttonColor: 'danger',
+        });
+
+        if (confirmRes) {
+          // Compute the URL we want to redirect to
+          const url = http.basePath.prepend(state.pathname) + state.hash + state.search;
+          // Unload history block
+          unblock();
+          // Navigate away
+          navigateToUrl(url, {
+            state: state.state,
+          });
+        }
       }
-    };
 
-    window.addEventListener('beforeunload', handler);
+      confirmAsync();
+      return false;
+    });
 
-    return () => window.removeEventListener('beforeunload', handler);
-  }, [hasUnsavedChanges]);
-
-  return <Prompt when={hasUnsavedChanges} message={messageText} />;
+    return unblock;
+  }, [
+    history,
+    hasUnsavedChanges,
+    openConfirm,
+    navigateToUrl,
+    http.basePath,
+    titleText,
+    cancelButtonText,
+    confirmButtonText,
+    messageText,
+  ]);
 };

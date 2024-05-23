@@ -1,24 +1,27 @@
 # @kbn/unsaved-changes-prompt
 
-This package provides a component that alerts users when they attempt to leave a
-page with unsaved changes. It displays a customizable warning message, prompting
-users to confirm whether they want to proceed without saving their changes in order
-to prevent accidental loss of data.
+The useUnsavedChangesPrompt function is a custom React hook that prompts users with
+a confirmation dialog when they try to leave a page with unsaved changes. It blocks
+navigation and shows a dialog using the provided openConfirm function. If the user
+confirms, it navigates away; otherwise, it cancels the navigation, ensuring unsaved
+changes are not lost.
+
 
 ```typescript
-import { UnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
-export const SampleForm = () => {
+export const SampleForm = ({ servicesForUnsavedChangesPrompt }) => {
   const { form } = useForm();
   const isFormDirty = useFormIsModified({ form });
 
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: isFormDirty,
+    ...servicesForUnsavedChangesPrompt,
+  });
+
   return (
     <>
-      <UnsavedChangesPrompt
-        hasUnsavedChanges={isFormDirty}
-        messageText="You have unsaved changes, are you sure you wanna leave?"
-      />
-      <Form>
+      <Form form={form}>
          ....
       </Form>
     </>
