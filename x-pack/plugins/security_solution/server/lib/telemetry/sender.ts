@@ -457,7 +457,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
     try {
       this.logger.debug('Sending telemetry events', {
-        eventss: events.length,
+        events: events.length,
         channel,
       } as LogMeta);
       const resp = await axiosInstance.post(telemetryUrl, ndjson, {
