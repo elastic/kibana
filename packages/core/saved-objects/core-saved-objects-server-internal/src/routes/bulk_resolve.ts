@@ -31,6 +31,10 @@ export const registerBulkResolveRoute = (
   router.post(
     {
       path: '/_bulk_resolve',
+      options: {
+        access: 'public',
+        description: `Resolve saved objects`,
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

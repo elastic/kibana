@@ -143,6 +143,10 @@ export const registerExportRoute = (
   router.post(
     {
       path: '/_export',
+      options: {
+        access: 'public',
+        description: `Export saved objects`,
+      },
       validate: {
         body: schema.object({
           type: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),

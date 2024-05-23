@@ -27,6 +27,10 @@ export const registerResolveRoute = (
   router.get(
     {
       path: '/resolve/{type}/{id}',
+      options: {
+        access: 'public',
+        description: `Resolve a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

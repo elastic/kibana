@@ -31,6 +31,10 @@ export const registerBulkCreateRoute = (
   router.post(
     {
       path: '/_bulk_create',
+      options: {
+        access: 'public',
+        description: `Create saved objects`,
+      },
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),

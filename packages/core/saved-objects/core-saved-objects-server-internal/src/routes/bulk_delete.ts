@@ -31,6 +31,10 @@ export const registerBulkDeleteRoute = (
   router.post(
     {
       path: '/_bulk_delete',
+      options: {
+        access: 'public',
+        description: `Remove saved objects`,
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

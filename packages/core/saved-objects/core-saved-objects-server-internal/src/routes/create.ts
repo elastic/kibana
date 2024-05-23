@@ -31,6 +31,10 @@ export const registerCreateRoute = (
   router.post(
     {
       path: '/{type}/{id?}',
+      options: {
+        access: 'public',
+        description: `Create a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

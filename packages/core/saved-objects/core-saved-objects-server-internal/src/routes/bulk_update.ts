@@ -31,6 +31,10 @@ export const registerBulkUpdateRoute = (
   router.put(
     {
       path: '/_bulk_update',
+      options: {
+        access: 'public',
+        description: `Update saved objects`,
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

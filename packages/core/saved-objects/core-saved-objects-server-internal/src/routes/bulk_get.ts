@@ -31,6 +31,10 @@ export const registerBulkGetRoute = (
   router.post(
     {
       path: '/_bulk_get',
+      options: {
+        access: 'public',
+        description: `Get saved objects`,
+      },
       validate: {
         body: schema.arrayOf(
           schema.object({

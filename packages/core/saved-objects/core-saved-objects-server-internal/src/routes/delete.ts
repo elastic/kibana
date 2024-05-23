@@ -31,6 +31,10 @@ export const registerDeleteRoute = (
   router.delete(
     {
       path: '/{type}/{id}',
+      options: {
+        access: 'public',
+        description: `Delete a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

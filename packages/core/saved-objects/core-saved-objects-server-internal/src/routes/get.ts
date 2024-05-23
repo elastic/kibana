@@ -31,6 +31,10 @@ export const registerGetRoute = (
   router.get(
     {
       path: '/{type}/{id}',
+      options: {
+        access: 'public',
+        description: `Get a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

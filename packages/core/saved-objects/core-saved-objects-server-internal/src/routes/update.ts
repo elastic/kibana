@@ -32,6 +32,10 @@ export const registerUpdateRoute = (
   router.put(
     {
       path: '/{type}/{id}',
+      options: {
+        access: 'public',
+        description: `Update a saved object`,
+      },
       validate: {
         params: schema.object({
           type: schema.string(),

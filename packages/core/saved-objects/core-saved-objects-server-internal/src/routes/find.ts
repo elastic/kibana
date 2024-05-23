@@ -34,6 +34,10 @@ export const registerFindRoute = (
   router.get(
     {
       path: '/_find',
+      options: {
+        access: 'public',
+        description: `Get saved objects`,
+      },
       validate: {
         query: schema.object({
           per_page: schema.number({ min: 0, defaultValue: 20 }),
