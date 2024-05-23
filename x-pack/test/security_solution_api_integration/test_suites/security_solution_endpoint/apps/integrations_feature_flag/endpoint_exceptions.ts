@@ -155,87 +155,95 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       await deleteEndpointExceptions();
-    });
+    }, timeout);
 
-    it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
-      await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+    it(
+      'should add `event.module=endpoint` to entry if only wildcard operator is present',
+      async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
 
-      await openNewEndpointExceptionFlyout();
-      await clearPrefilledEntries();
+        await openNewEndpointExceptionFlyout();
+        await clearPrefilledEntries();
 
-      await testSubjects.setValue('exceptionFlyoutNameInput', 'test exception');
-      await setLastEntry({ field: 'file.path', operator: 'matches', value: '*/cheese/*' });
-      await testSubjects.click('exceptionsAndButton');
-      await setLastEntry({ field: 'process.executable', operator: 'matches', value: 'ex*' });
+        await testSubjects.setValue('exceptionFlyoutNameInput', 'test exception');
+        await setLastEntry({ field: 'file.path', operator: 'matches', value: '*/cheese/*' });
+        await testSubjects.click('exceptionsAndButton');
+        await setLastEntry({ field: 'process.executable', operator: 'matches', value: 'ex*' });
 
-      await testSubjects.click('addExceptionConfirmButton');
-      await toasts.dismiss();
+        await testSubjects.click('addExceptionConfirmButton');
+        await toasts.dismiss();
 
-      await checkArtifact({
-        entries: [
-          {
-            type: 'simple',
-            entries: [
-              {
-                field: 'file.path',
-                operator: 'included',
-                type: 'wildcard_cased',
-                value: '*/cheese/*',
-              },
-              {
-                field: 'process.executable',
-                operator: 'included',
-                type: 'wildcard_cased',
-                value: 'ex*',
-              },
-              {
-                // this additional entry should be added
-                field: 'event.module',
-                operator: 'included',
-                type: 'exact_cased',
-                value: 'endpoint',
-              },
-            ],
-          },
-        ],
-      });
-    });
+        await checkArtifact({
+          entries: [
+            {
+              type: 'simple',
+              entries: [
+                {
+                  field: 'file.path',
+                  operator: 'included',
+                  type: 'wildcard_cased',
+                  value: '*/cheese/*',
+                },
+                {
+                  field: 'process.executable',
+                  operator: 'included',
+                  type: 'wildcard_cased',
+                  value: 'ex*',
+                },
+                {
+                  // this additional entry should be added
+                  field: 'event.module',
+                  operator: 'included',
+                  type: 'exact_cased',
+                  value: 'endpoint',
+                },
+              ],
+            },
+          ],
+        });
+      },
+      timeout
+    );
 
-    it('should NOT add `event.module=endpoint` to entry if there is another operator', async () => {
-      await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+    it(
+      'should NOT add `event.module=endpoint` to entry if there is another operator',
+      async () => {
+        await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
 
-      await openNewEndpointExceptionFlyout();
-      await clearPrefilledEntries();
+        await openNewEndpointExceptionFlyout();
+        await clearPrefilledEntries();
 
-      await testSubjects.setValue('exceptionFlyoutNameInput', 'test exception');
-      await setLastEntry({ field: 'file.path', operator: 'matches', value: '*/cheese/*' });
-      await testSubjects.click('exceptionsAndButton');
-      await setLastEntry({ field: 'process.executable', operator: 'is', value: 'something' });
+        await testSubjects.setValue('exceptionFlyoutNameInput', 'test exception');
+        await setLastEntry({ field: 'file.path', operator: 'matches', value: '*/cheese/*' });
+        await testSubjects.click('exceptionsAndButton');
+        await setLastEntry({ field: 'process.executable', operator: 'is', value: 'something' });
 
-      await testSubjects.click('addExceptionConfirmButton');
-      await toasts.dismiss();
+        await testSubjects.click('addExceptionConfirmButton');
+        await toasts.dismiss();
 
-      await checkArtifact({
-        entries: [
-          {
-            type: 'simple',
-            entries: [
-              {
-                field: 'file.path',
-                operator: 'included',
-                type: 'wildcard_cased',
-                value: '*/cheese/*',
-              },
-              {
-                field: 'process.executable',
-                operator: 'included',
-                type: 'exact_cased',
-                value: 'something',
-              },
-            ],
-          },
-        ],
-      });
-    });
+        await checkArtifact({
+          entries: [
+            {
+              type: 'simple',
+              entries: [
+                {
+                  field: 'file.path',
+                  operator: 'included',
+                  type: 'wildcard_cased',
+                  value: '*/cheese/*',
+                },
+                {
+                  field: 'process.executable',
+                  operator: 'included',
+                  type: 'exact_cased',
+                  value: 'something',
+                },
+              ],
+            },
+          ],
+        });
+      },
+      timeout
+    );
   });
 };
