@@ -3532,6 +3532,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-public.aiAssistantSearchConnectorIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSearchConnectorIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSearchConnectorIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-public.aiAssistantSimulatedFunctionCalling",
         "type": "string",
         "tags": [],
@@ -5670,6 +5685,21 @@
       },
       {
         "parentPluginId": "observabilityAIAssistant",
+        "id": "def-server.aiAssistantSearchConnectorIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSearchConnectorIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSearchConnectorIndexPattern\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
         "id": "def-server.aiAssistantSimulatedFunctionCalling",
         "type": "string",
         "tags": [],
@@ -7364,6 +7394,21 @@
         "description": [],
         "signature": [
           "\"observability:aiAssistantResponseLanguage\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityAIAssistant",
+        "id": "def-common.aiAssistantSearchConnectorIndexPattern",
+        "type": "string",
+        "tags": [],
+        "label": "aiAssistantSearchConnectorIndexPattern",
+        "description": [],
+        "signature": [
+          "\"observability:aiAssistantSearchConnectorIndexPattern\""
         ],
         "path": "x-pack/plugins/observability_solution/observability_ai_assistant/common/ui_settings/settings_keys.ts",
         "deprecated": false,
