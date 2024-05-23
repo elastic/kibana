@@ -22,7 +22,7 @@ export const DisabledCallout = ({ total }: { total?: number }) => {
   }
 
   const disabledCallout =
-    !canEnable && !loading ? (
+    !canEnable && showDisableCallout && !loading ? (
       <>
         <EuiCallOut title={labels.CALLOUT_MANAGEMENT_DISABLED} color="warning">
           <p>{labels.CALLOUT_MANAGEMENT_DESCRIPTION}</p>
