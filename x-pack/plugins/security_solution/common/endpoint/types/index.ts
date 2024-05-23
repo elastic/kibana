@@ -149,6 +149,7 @@ export interface ResolverNode {
   parent?: string | number;
   name?: string;
   stats: EventStats;
+  agentId?: string;
 }
 
 /**

@@ -118,6 +118,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: timestampAsDateSafeVersion(childWithEntityID)?.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: origin.agent.id,
           })
           .expect(200);
         expect(body.length).to.be(1);

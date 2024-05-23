@@ -174,6 +174,7 @@ export function noAncestorsTwoChildren(): { dataAccessLayer: DataAccessLayer; me
               agentId: 'agent.id',
             },
             id: metadata.entityIDs.origin,
+            agentId: 'mockedAgentId',
           },
         ]);
       },

@@ -187,6 +187,7 @@ export function noAncestorsTwoChildrenWithRelatedEventsOnOrigin(): {
               agentId: 'agent.id',
             },
             id: metadata.entityIDs.origin,
+            agentId: 'mockedAgentId',
           },
         ];
       },

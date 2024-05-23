@@ -81,6 +81,8 @@ describe('fetcher test', () => {
         return [];
       });
       const options: TreeOptions = {
+        agentId: '',
+
         descendantLevels: 1,
         descendants: 5,
         ancestors: 0,
@@ -91,6 +93,7 @@ describe('fetcher test', () => {
         schema: {
           id: '',
           parent: '',
+          agentId: '',
         },
         indexPatterns: [''],
         nodes: ['a'],
@@ -101,6 +104,8 @@ describe('fetcher test', () => {
 
     it('exists the loop when the options specify no descendants', async () => {
       const options: TreeOptions = {
+        agentId: '',
+
         descendantLevels: 0,
         descendants: 0,
         ancestors: 0,
@@ -111,6 +116,7 @@ describe('fetcher test', () => {
         schema: {
           id: '',
           parent: '',
+          agentId: '',
         },
         indexPatterns: [''],
         nodes: ['a'],
@@ -164,6 +170,7 @@ describe('fetcher test', () => {
           return level2;
         });
       const options: TreeOptions = {
+        agentId: '',
         descendantLevels: 2,
         descendants: 5,
         ancestors: 0,
@@ -189,6 +196,7 @@ describe('fetcher test', () => {
         return [];
       });
       const options: TreeOptions = {
+        agentId: '',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 5,
@@ -199,6 +207,7 @@ describe('fetcher test', () => {
         schema: {
           id: '',
           parent: '',
+          agentId: '',
         },
         indexPatterns: [''],
         nodes: ['a'],
@@ -212,6 +221,7 @@ describe('fetcher test', () => {
         throw new Error('should not have called this');
       });
       const options: TreeOptions = {
+        agentId: '',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 0,
@@ -222,6 +232,7 @@ describe('fetcher test', () => {
         schema: {
           id: '',
           parent: '',
+          agentId: '',
         },
         indexPatterns: [''],
         nodes: ['a'],
@@ -250,6 +261,7 @@ describe('fetcher test', () => {
           ];
         });
       const options: TreeOptions = {
+        agentId: '',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 2,
@@ -293,6 +305,7 @@ describe('fetcher test', () => {
           ];
         });
       const options: TreeOptions = {
+        agentId: '',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 2,
@@ -343,6 +356,7 @@ describe('fetcher test', () => {
           return [node1, node2];
         });
       const options: TreeOptions = {
+        agentId: '',
         descendantLevels: 0,
         descendants: 0,
         ancestors: 3,
@@ -384,7 +398,11 @@ describe('fetcher test', () => {
           parent: '0',
         },
       ];
-      const leaves = getLeafNodes(results, ['0'], { id: 'id', parent: 'parent' });
+      const leaves = getLeafNodes(results, ['0'], {
+        id: 'id',
+        parent: 'parent',
+        agentId: 'agent.id',
+      });
       expect(leaves).toStrictEqual(['1', '2', '3']);
     });
 
@@ -409,7 +427,11 @@ describe('fetcher test', () => {
           parentNotReal: '0',
         },
       ];
-      const leaves = getLeafNodes(results, ['0'], { id: 'id', parent: 'parent' });
+      const leaves = getLeafNodes(results, ['0'], {
+        id: 'id',
+        parent: 'parent',
+        agentId: 'agent.id',
+      });
       expect(leaves).toStrictEqual(['1', '2']);
     });
 
@@ -428,7 +450,11 @@ describe('fetcher test', () => {
           parent: '0',
         },
       ];
-      const leaves = getLeafNodes(results, ['0'], { id: 'id', parent: 'parent' });
+      const leaves = getLeafNodes(results, ['0'], {
+        id: 'id',
+        parent: 'parent',
+        agentId: 'agent.id',
+      });
       expect(leaves).toStrictEqual([]);
     });
 
@@ -461,6 +487,7 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         expect(leaves).toStrictEqual(['2']);
       });
@@ -491,6 +518,7 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         expect(leaves).toStrictEqual(['1', '3']);
       });
@@ -536,6 +564,7 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         expect(leaves).toStrictEqual(['2', '4', '5']);
       });
@@ -600,6 +629,7 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         expect(leaves).toStrictEqual(['2', '4', '5', 'c', 'd']);
       });
@@ -652,6 +682,7 @@ describe('fetcher test', () => {
           id: 'id',
           parent: 'parent',
           ancestry: 'ancestry',
+          agentId: 'agent.id',
         });
         // the reason b is not identified here is because the ancestry array
         // size is 2, which means that if b had a descendant, then it would have been found
@@ -664,32 +695,41 @@ describe('fetcher test', () => {
 
   describe('getIDField', () => {
     it('returns undefined if the field does not exist', () => {
-      expect(getIDField({}, { id: 'a', parent: 'b' })).toBeUndefined();
+      expect(getIDField({}, { id: 'a', parent: 'b', agentId: 'c' })).toBeUndefined();
     });
 
     it('returns the first value if the field is an array', () => {
-      expect(getIDField({ 'a.b': ['1', '2'] }, { id: 'a.b', parent: 'b' })).toStrictEqual('1');
+      expect(
+        getIDField({ 'a.b': ['1', '2'] }, { id: 'a.b', parent: 'b', agentId: 'c' })
+      ).toStrictEqual('1');
     });
   });
 
   describe('getParentField', () => {
     it('returns undefined if the field does not exist', () => {
-      expect(getParentField({}, { id: 'a', parent: 'b' })).toBeUndefined();
+      expect(getParentField({}, { id: 'a', parent: 'b', agentId: 'c' })).toBeUndefined();
     });
 
     it('returns the first value if the field is an array', () => {
-      expect(getParentField({ 'a.b': ['1', '2'] }, { id: 'z', parent: 'a.b' })).toStrictEqual('1');
+      expect(
+        getParentField({ 'a.b': ['1', '2'] }, { id: 'z', parent: 'a.b', agentId: 'c' })
+      ).toStrictEqual('1');
     });
   });
 
   describe('getAncestryAsArray', () => {
     it('returns an empty array if the field does not exist', () => {
-      expect(getAncestryAsArray({}, { id: 'a', parent: 'b', ancestry: 'z' })).toStrictEqual([]);
+      expect(
+        getAncestryAsArray({}, { id: 'a', parent: 'b', ancestry: 'z', agentId: 'c' })
+      ).toStrictEqual([]);
     });
 
     it('returns the full array if the field exists', () => {
       expect(
-        getAncestryAsArray({ 'a.b': ['1', '2'] }, { id: 'z', parent: 'f', ancestry: 'a.b' })
+        getAncestryAsArray(
+          { 'a.b': ['1', '2'] },
+          { id: 'z', parent: 'f', ancestry: 'a.b', agentId: 'c' }
+        )
       ).toStrictEqual(['1', '2']);
     });
 
@@ -697,7 +737,7 @@ describe('fetcher test', () => {
       expect(
         getAncestryAsArray(
           { 'aParent.bParent': ['1', '2'], ancestry: [] },
-          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry' }
+          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry', agentId: 'agent.id' }
         )
       ).toStrictEqual(['1']);
     });
@@ -706,7 +746,7 @@ describe('fetcher test', () => {
       expect(
         getAncestryAsArray(
           { 'aParent.bParent': '1' },
-          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry' }
+          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry', agentId: 'agent.id' }
         )
       ).toStrictEqual(['1']);
     });

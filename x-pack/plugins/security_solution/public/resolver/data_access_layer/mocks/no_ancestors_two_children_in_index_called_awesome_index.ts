@@ -197,6 +197,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
                 agentId: 'agent.id',
               },
               id: metadata.entityIDs.origin,
+              agentId: 'mockedAgentId',
             },
           ]);
         }

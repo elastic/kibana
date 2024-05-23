@@ -35,6 +35,7 @@ export const schemaWithAncestry: ResolverSchema = {
   ancestry: 'process.Ext.ancestry',
   id: 'process.entity_id',
   parent: 'process.parent.entity_id',
+  agentId: 'agent.id',
 };
 
 /**
@@ -43,6 +44,7 @@ export const schemaWithAncestry: ResolverSchema = {
 export const schemaWithoutAncestry: ResolverSchema = {
   id: 'process.entity_id',
   parent: 'process.parent.entity_id',
+  agentId: 'agent.id',
 };
 
 /**
@@ -52,6 +54,7 @@ export const schemaWithName: ResolverSchema = {
   id: 'process.entity_id',
   parent: 'process.parent.entity_id',
   name: 'process.name',
+  agentId: 'agent.id',
 };
 
 const createLevels = ({

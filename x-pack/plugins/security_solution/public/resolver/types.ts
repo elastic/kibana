@@ -703,10 +703,12 @@ export interface DataAccessLayer {
     entityID,
     timeRange,
     indexPatterns,
+    agentId,
   }: {
     entityID: string;
     timeRange?: TimeRange;
     indexPatterns: string[];
+    agentId: string;
   }) => Promise<ResolverRelatedEvents>;
 
   /**

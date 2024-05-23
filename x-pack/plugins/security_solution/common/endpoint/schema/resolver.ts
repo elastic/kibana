@@ -71,7 +71,7 @@ export const validateEvents = {
     filter: schema.maybe(schema.string()),
     entityType: schema.maybe(schema.string()),
     eventID: schema.maybe(schema.string()),
-    agentId: schema.maybe(schema.string()),
+    agentId: schema.string(),
   }),
 };
 

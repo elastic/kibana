@@ -381,6 +381,7 @@ export class EndpointDocGenerator extends BaseDataGenerator {
   protected get commonInfo() {
     return clone(this._commonInfo);
   }
+
   protected set commonInfo(newInfo) {
     this._commonInfo = newInfo;
   }

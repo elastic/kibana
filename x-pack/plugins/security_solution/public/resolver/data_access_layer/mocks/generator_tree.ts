@@ -188,6 +188,7 @@ export function generateTreeWithDAL(
             agentId: 'agent.id',
           },
           id: generatedTree.origin.id,
+          agentId: 'mockedAgentId',
         },
       ];
     },

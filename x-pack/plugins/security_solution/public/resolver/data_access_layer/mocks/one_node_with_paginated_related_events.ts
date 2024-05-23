@@ -180,6 +180,7 @@ export function oneNodeWithPaginatedEvents(): {
               agentId: 'agent.id',
             },
             id: metadata.entityIDs.origin,
+            agentId: 'mockedAgentId',
           },
         ];
       },
