@@ -105,7 +105,6 @@
     "@kbn/react-field",
     "@kbn/field-types",
     "@kbn/securitysolution-rules",
-    "@kbn/core-mount-utils-browser-internal",
     "@kbn/cases-components",
     "@kbn/event-log-plugin",
     "@kbn/task-manager-plugin",
