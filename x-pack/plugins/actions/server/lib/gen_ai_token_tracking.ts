@@ -176,7 +176,11 @@ export const getGenAiTokenTracking = async ({
   // Process non-streamed Gemini response from `usageMetadata` object
   if (actionTypeId === '.gemini') {
     const data = result.data as unknown as {
-      usageMetadata: { promptTokenCount?: number; candidatesTokenCount?: number; totalTokenCount?: number };
+      usageMetadata: {
+        promptTokenCount?: number;
+        candidatesTokenCount?: number;
+        totalTokenCount?: number;
+      };
     };
     if (data.usageMetadata == null) {
       logger.error('Response did not contain usage metadata object');

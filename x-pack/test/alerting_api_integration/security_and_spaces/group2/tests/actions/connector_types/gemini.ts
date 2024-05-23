@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import {
-    GeminiSimulator,
-    geminiSuccessResponse,
+  GeminiSimulator,
+  geminiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/gemini_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
@@ -16,9 +16,9 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 const connectorTypeId = '.gemini';
 const name = 'A Gemini action';
 const defaultConfig = {
-    gcpRegion: 'us-central-1',
-    gcpProjectID: 'test-project'
-  };
+  gcpRegion: 'us-central-1',
+  gcpProjectID: 'test-project',
+};
 const secrets = {
   credentialsJSON: JSON.stringify({
     type: 'service_account',
@@ -161,7 +161,6 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           });
       });
 
-
       it('should return 400 Bad Request when creating the connector with a url that is not allowed', async () => {
         await supertest
           .post('/api/actions/connector')
@@ -293,30 +292,44 @@ export default function geminiTest({ getService }: FtrProviderContext) {
                     contents: [
                       {
                         role: 'user',
-                        parts: [{
+                        parts: [
+                          {
                             text: 'Hello',
-                        }],
+                          },
+                        ],
                       },
                       {
                         role: 'model',
-                        parts: [{
+                        parts: [
+                          {
                             text: 'Hi there, how can I help you today?',
-                        }] 
+                          },
+                        ],
                       },
                       {
                         role: 'user',
-                        parts: [{
+                        parts: [
+                          {
                             text: 'Write the first line of a story about a magic backpack.',
-                        }] 
-                      }
+                          },
+                        ],
+                      },
                     ],
-                    "generation_config":{"temperature":0,"maxOutputTokens":8192}
+                    generation_config: { temperature: 0, maxOutputTokens: 8192 },
                   },
                 },
               })
               .expect(200);
 
-            expect(simulator.requestData).to.eql({"contents":[{"role":"user","parts":[{"text":"Write the first line of a story about a magic backpack."}]}],"generation_config":{"temperature":0,"maxOutputTokens":8192}});
+            expect(simulator.requestData).to.eql({
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'Write the first line of a story about a magic backpack.' }],
+                },
+              ],
+              generation_config: { temperature: 0, maxOutputTokens: 8192 },
+            });
             expect(body).to.eql({
               status: 'ok',
               connector_id: geminiActionId,
@@ -363,7 +376,6 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             });
           });
         });
-        
       });
     });
   });
