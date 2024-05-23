@@ -68,7 +68,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EVENTS_TAB_CONTENT).should('exist');
     });
 
-    it(`renders users risk tab`, { tags: ['@skipInserverless'] }, () => {
+    it(`renders users risk tab`, { tags: ['@skipInServerless'] }, () => {
       waitForTabToBeLoaded(RISK_SCORE_TAB);
 
       cy.get(RISK_SCORE_TAB_CONTENT).should('exist');
