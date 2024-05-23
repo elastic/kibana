@@ -7,7 +7,10 @@
  */
 import './setup_jest_mocks';
 import { of } from 'rxjs';
-import type { NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
+import type {
+  NavigationTreeDefinitionUI,
+  ChromeProjectNavigationNode,
+} from '@kbn/core-chrome-browser';
 
 import { renderNavigation } from './utils';
 
@@ -77,6 +80,93 @@ describe('builds navigation tree', () => {
     (await findByTestId(/nav-item-group1.group1A.group1A_1\s/)).click();
 
     expect(await findByTestId(/nav-item-group1.group1A.group1A_1.item1/)).toBeVisible();
+  });
+
+  test('should handle links on accordion toggle button', async () => {
+    const navigateToUrl = jest.fn();
+
+    const accordionNode: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      renderAs: 'accordion',
+      href: '/app/foo', // Accordion has an href
+      children: [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+        },
+      ],
+    };
+
+    {
+      const { findByTestId, unmount } = renderNavigation({
+        navTreeDef: of({
+          body: [accordionNode],
+        }),
+        services: { navigateToUrl },
+      });
+
+      const accordionToggleButton = await findByTestId(/nav-item-group1\s/);
+      accordionToggleButton.click();
+      expect(navigateToUrl).not.toHaveBeenCalled();
+      unmount();
+    }
+
+    {
+      const { findByTestId } = renderNavigation({
+        navTreeDef: of({
+          body: [
+            {
+              ...accordionNode,
+              isCollapsible: false, // Non-collapsible accordion
+            },
+          ],
+        }),
+        services: { navigateToUrl },
+      });
+
+      const accordionToggleButton = await findByTestId(/nav-item-group1\s/);
+      accordionToggleButton.click();
+
+      expect(navigateToUrl).toHaveBeenCalledWith('/app/foo'); // Should navigate to the href
+    }
+  });
+
+  test('should allow custom onClick handler for links', async () => {
+    const navigateToUrl = jest.fn();
+    const onClick = jest.fn();
+
+    const node: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      defaultIsCollapsed: false,
+      children: [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+          onClick,
+        },
+      ],
+    };
+
+    const { findByTestId } = renderNavigation({
+      navTreeDef: of({
+        body: [node],
+      }),
+      services: { navigateToUrl },
+    });
+
+    const navItem = await findByTestId(/nav-item-group1.item1\s/);
+    navItem.click();
+
+    expect(navigateToUrl).not.toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }));
   });
 
   test('should not render the group if it does not have children', async () => {

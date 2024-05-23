@@ -15,7 +15,10 @@ import { Redirect } from 'react-router-dom';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import {
+  LatencyAggregationType,
+  latencyAggregationTypeRt,
+} from '../../../../common/latency_aggregation_types';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { AlertsOverview, ALERT_STATUS_ALL } from '../../app/alerts_overview';
@@ -103,7 +106,7 @@ export const serviceDetailRoute = {
             comparisonEnabled: toBooleanRt,
           }),
           t.partial({
-            latencyAggregationType: t.string,
+            latencyAggregationType: latencyAggregationTypeRt,
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
             refreshInterval: t.string,

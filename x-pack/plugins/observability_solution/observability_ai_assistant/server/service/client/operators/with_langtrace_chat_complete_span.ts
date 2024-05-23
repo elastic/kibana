@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Event, LLMSpanAttributes } from '@langtrase/trace-attributes';
 import { Span } from '@opentelemetry/api';
 import { FunctionDefinition } from 'openai/resources';
 import { ignoreElements, last, merge, OperatorFunction, share, tap } from 'rxjs';
@@ -39,6 +38,7 @@ export function withLangtraceChatCompleteSpan<T extends ChatEvent>({
     'langtrace.service.name': serviceProvider,
     'llm.api': '/chat/completions',
     'http.max.retries': 0,
+    // dummy URL
     'url.full': 'http://localhost:3000/chat/completions',
     'http.timeout': 120 * 1000,
     'llm.prompts': JSON.stringify(

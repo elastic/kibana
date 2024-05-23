@@ -126,18 +126,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlExistOrFail();
-      });
-
-      it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close menu
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('allows saving via the saved query management component popover with no saved query loaded', async () => {
         await queryBar.setQuery('response:200');
         await queryBar.clickQuerySubmitButton();
@@ -268,18 +256,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
 
-      it(`Embed Code doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlMissingOrFail();
-      });
-
-      it(`Permalinks doesn't show create short-url button`, async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlMissingOrFail();
-        // close the menu
-        await PageObjects.share.clickShareTopNavButton();
-      });
-
       it('allows loading a saved query via the saved query management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
@@ -374,18 +350,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         await testSubjects.existOrFail('shareTopNavButton', { timeout: 10000 });
         await testSubjects.missingOrFail('visualizeSaveButton', { timeout: 10000 });
-      });
-
-      it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embedcode');
-        await PageObjects.share.createShortUrlExistOrFail();
-      });
-
-      it('Permalinks shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Permalinks');
-        await PageObjects.share.createShortUrlExistOrFail();
-        // close menu
-        await PageObjects.share.clickShareTopNavButton();
       });
 
       it('allows loading a saved query via the saved query management component', async () => {

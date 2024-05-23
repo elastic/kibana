@@ -7,7 +7,7 @@
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound } from '@hapi/boom';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SpanKind, context } from '@opentelemetry/api';
@@ -86,6 +86,7 @@ export class ObservabilityAIAssistantClient {
   constructor(
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;
+      uiSettingsClient: IUiSettingsClient;
       namespace: string;
       esClient: {
         asInternalUser: ElasticsearchClient;
@@ -560,8 +561,11 @@ export class ObservabilityAIAssistantClient {
                     span,
                     messages,
                     functions,
-                    model: 'gpt-4',
-                    serviceProvider: LangtraceServiceProvider.Azure,
+                    model: connector.name,
+                    serviceProvider:
+                      connector.actionTypeId === ObservabilityAIAssistantConnectorType.OpenAI
+                        ? LangtraceServiceProvider.OpenAI
+                        : LangtraceServiceProvider.Anthropic,
                   })
                 );
               }
@@ -698,6 +702,7 @@ export class ObservabilityAIAssistantClient {
       queries,
       categories,
       asCurrentUser: this.dependencies.esClient.asCurrentUser,
+      uiSettingsClient: this.dependencies.uiSettingsClient,
     });
   };
 

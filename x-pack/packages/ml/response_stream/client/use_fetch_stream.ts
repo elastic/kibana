@@ -7,20 +7,19 @@
 
 import {
   useEffect,
-  useReducer,
   useRef,
   useState,
   type Reducer,
-  type ReducerAction,
   type ReducerState,
+  type ReducerAction,
 } from 'react';
-import useThrottle from 'react-use/lib/useThrottle';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { fetchStream } from './fetch_stream';
 import { stringReducer, type StringReducer } from './string_reducer';
+import { DATA_THROTTLE_MS } from './constants';
 
 // This pattern with a dual ternary allows us to default to StringReducer
 // and if a custom reducer is supplied fall back to that one instead.
@@ -57,6 +56,7 @@ function isReducerOptions<T>(arg: unknown): arg is CustomReducer<T> {
  * @param apiVersion Optional API version.
  * @param body Optional API request body.
  * @param customReducer Optional custom reducer and initial state.
+ * @param headers Optional headers.
  * @returns An object with streaming data and methods to act on the stream.
  */
 export function useFetchStream<B extends object, R extends Reducer<any, any>>(
@@ -75,11 +75,42 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
     ? customReducer
     : ({ reducer: stringReducer, initialState: '' } as FetchStreamCustomReducer<R>);
 
-  const [data, dispatch] = useReducer(
-    reducerWithFallback.reducer,
-    reducerWithFallback.initialState
-  );
-  const dataThrottled = useThrottle(data, 100);
+  // We used `useReducer` in previous iterations of this hook, but it caused
+  // a lot of unnecessary re-renders even in combination with `useThrottle`.
+  // We're now using `dataRef` to allow updates outside of the render cycle.
+  // When the stream is running, we'll update `data` with the `dataRef` value
+  // periodically. This will get simpler with React 18 where we
+  // can make use of `useDeferredValue`.
+  const [data, setData] = useState(reducerWithFallback.initialState);
+  const dataRef = useRef(reducerWithFallback.initialState);
+
+  // This effect is used to throttle the data updates while the stream is running.
+  // It will update the `data` state with the current `dataRef` value every 100ms.
+  useEffect(() => {
+    // We cannot check against `isRunning` in the `setTimeout` callback, because
+    // we would check against a stale value. Instead, we use a mutable
+    // object to keep track of the current state of the effect.
+    const effectState = { isActive: true };
+
+    if (isRunning) {
+      setData(dataRef.current);
+
+      function updateData() {
+        setTimeout(() => {
+          setData(dataRef.current);
+          if (effectState.isActive) {
+            updateData();
+          }
+        }, DATA_THROTTLE_MS);
+      }
+
+      updateData();
+    }
+
+    return () => {
+      effectState.isActive = false;
+    };
+  }, [isRunning]);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -99,7 +130,7 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
 
     abortCtrl.current = new AbortController();
 
-    for await (const [fetchStreamError, actions] of fetchStream<B, CustomReducer<R>>(
+    for await (const [fetchStreamError, action] of fetchStream<B, CustomReducer<R>>(
       http,
       endpoint,
       apiVersion,
@@ -110,12 +141,24 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
     )) {
       if (fetchStreamError !== null) {
         addError(fetchStreamError);
-      } else if (Array.isArray(actions) && actions.length > 0) {
-        dispatch(actions as ReducerAction<CustomReducer<R>>);
+      } else if (action) {
+        dataRef.current = reducerWithFallback.reducer(dataRef.current, action) as ReducerState<
+          CustomReducer<R>
+        >;
       }
     }
 
     setIsRunning(false);
+  };
+
+  // This custom dispatch function allows us to update the `dataRef` value and will
+  // then trigger an update of `data` right away as we don't want to have the
+  // throttling in place for these types of updates.
+  const dispatch = (action: ReducerAction<FetchStreamCustomReducer<R>['reducer']>) => {
+    dataRef.current = reducerWithFallback.reducer(dataRef.current, action) as ReducerState<
+      CustomReducer<R>
+    >;
+    setData(dataRef.current);
   };
 
   const cancel = () => {
@@ -131,10 +174,10 @@ export function useFetchStream<B extends object, R extends Reducer<any, any>>(
 
   return {
     cancel,
-    // To avoid a race condition where the stream already ended but `useThrottle` would
-    // yet have to trigger another update within the throttling interval, we'll return
+    // To avoid a race condition where the stream already ended but the throttling would
+    // yet have to trigger another update within the interval, we'll return
     // the unthrottled data once the stream is complete.
-    data: isRunning ? dataThrottled : data,
+    data: isRunning ? data : dataRef.current,
     dispatch,
     errors,
     isCancelled,

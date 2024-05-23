@@ -1581,7 +1581,7 @@ paths:
       operationId: agent-action-cancel
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agents/files@{fileId}@{fileName}:
+  /agents/files/{fileId}/{fileName}:
     parameters:
       - schema:
           type: string
@@ -1616,6 +1616,35 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-agent-upload-file
+  /agents/files/{fileId}:
+    parameters:
+      - schema:
+          type: string
+        name: fileId
+        in: path
+        required: true
+    delete:
+      summary: Delete file uploaded by agent
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      deleted:
+                        type: boolean
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: delete-agent-upload-file
   /agents/{agentId}/reassign:
     parameters:
       - schema:
@@ -4674,6 +4703,7 @@ components:
               properties:
                 log_level:
                   type: string
+                  nullable: true
                   enum:
                     - debug
                     - info
@@ -4746,6 +4776,8 @@ components:
               type: string
             title:
               type: string
+            requires_root:
+              type: boolean
           required:
             - name
             - version
@@ -4863,6 +4895,8 @@ components:
         revision:
           type: number
         agents:
+          type: number
+        unprivileged_agents:
           type: number
         agent_features:
           type: array
