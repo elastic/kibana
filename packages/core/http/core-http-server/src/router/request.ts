@@ -10,6 +10,7 @@ import type { URL } from 'url';
 import type { RequestApplicationState, RouteOptionsApp } from '@hapi/hapi';
 import type { Observable } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
 import type { RouteMethod, RouteConfigOptions } from './route';
 import type { Headers } from './headers';
@@ -140,6 +141,16 @@ export interface KibanaRequest<
    * @note See the {@link KibanaRequestRouteOptions#access} route option.
    */
   readonly isInternalApiRequest: boolean;
+
+  /**
+   * The HTTP version sent by the client.
+   */
+  readonly httpVersion: string;
+
+  /**
+   * The protocol used by the client, inferred from the httpVersion.
+   */
+  readonly protocol: HttpProtocol;
 
   /**
    * The socket associated with this request.
