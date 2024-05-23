@@ -1139,8 +1139,7 @@ export default function (providerContext: FtrProviderContext) {
           (item: any) => item.status === 'installed'
         );
 
-        expect(installedPackages.length).to.be(0); // TODO: this is failing, there is one package that is installed
-
+        expect(installedPackages.length).to.be(0);
         agentPolicyId = originalPolicy.id;
         const {
           body: { item: updatedPolicy },
