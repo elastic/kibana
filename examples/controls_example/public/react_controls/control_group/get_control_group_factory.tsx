@@ -7,12 +7,10 @@
  */
 
 import React, { useEffect } from 'react';
-import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 
 import {
   ControlGroupChainingSystem,
-  ControlsPanels,
   ControlWidth,
   CONTROL_GROUP_TYPE,
   DEFAULT_CONTROL_STYLE,
@@ -38,7 +36,12 @@ import { combineCompatibleApis } from '@kbn/presentation-containers';
 import { ControlRenderer } from '../control_renderer';
 import { DefaultControlApi } from '../types';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
-import { ControlGroupApi, ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+  ControlsPanels,
+} from './types';
 
 export const getControlGroupEmbeddableFactory = (services: {
   overlays: OverlayStart;
@@ -52,6 +55,7 @@ export const getControlGroupEmbeddableFactory = (services: {
     type: CONTROL_GROUP_TYPE,
     deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
+      console.log(initialState.panels);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const grow = new BehaviorSubject<boolean>(initialState.defaultControlGrow);
       const width = new BehaviorSubject<ControlWidth>(initialState.defaultControlWidth);
@@ -72,14 +76,31 @@ export const getControlGroupEmbeddableFactory = (services: {
         initialState.ignoreParentSettings
       );
 
+      const anyChildHasUnsavedChanges = new BehaviorSubject<boolean>(
+        initialState.anyChildHasUnsavedChanges
+      );
+
+      // each child has an unsaved changed behaviour subject it pushes to
+      // control group listens to all of them
+      // any time they change, it pops it into an object
+
       const controlGroupComparators: StateComparators<ControlGroupRuntimeState> = {
         chainingSystem: [chainingSystem$, (value) => chainingSystem$.next(value)],
         defaultControlGrow: [grow, (value) => grow.next(value)],
         defaultControlWidth: [width, (value) => width.next(value)],
         controlStyle: [controlStyle$, (value) => controlStyle$.next(value)],
-        panels: [panels$, (value) => panels$.next(value), deepEqual],
         showApplySelections: [showApplySelections, (value) => showApplySelections.next(value)],
         ignoreParentSettings: [ignoreParentSettings, (value) => ignoreParentSettings.next(value)],
+        panels: [
+          panels$,
+          (value) => panels$.next(value),
+          () => true, // each control will be responsible for handling its own unsaved changes
+        ],
+        anyChildHasUnsavedChanges: [
+          anyChildHasUnsavedChanges,
+          (value) => anyChildHasUnsavedChanges.next(value),
+          () => anyChildHasUnsavedChanges.getValue(),
+        ],
       };
 
       const api = buildApi(
@@ -96,6 +117,10 @@ export const getControlGroupEmbeddableFactory = (services: {
             i18n.translate('controls.controlGroup.displayName', {
               defaultMessage: 'Controls',
             }),
+          getChildState: (childId) => {
+            console.log(childId, panels$.getValue());
+            return panels$.getValue()[childId];
+          },
           serializeState: () => {
             return serializeControlGroup({
               panels: panels$.getValue(),
@@ -103,8 +128,6 @@ export const getControlGroupEmbeddableFactory = (services: {
               chainingSystem: chainingSystem$.getValue(),
               showApplySelections: showApplySelections.getValue(),
               ignoreParentSettings: ignoreParentSettings.getValue(),
-              defaultControlGrow: grow.getValue(),
-              defaultControlWidth: width.getValue(),
             });
           },
           addNewPanel: (panel) => {
@@ -160,10 +183,12 @@ export const getControlGroupEmbeddableFactory = (services: {
               {Object.keys(panels).map((id) => (
                 <ControlRenderer
                   key={uuid}
+                  maybeId={id}
                   services={services}
                   type={panels[id].type}
-                  state={panels[id]}
-                  parentApi={api}
+                  // state={panels[id]}
+                  // parentApi={api}
+                  getParentApi={() => api}
                   onApiAvailable={(controlApi) => {
                     children$.next({
                       ...children$.getValue(),

@@ -13,18 +13,12 @@ import { v4 as generateId } from 'uuid';
 // import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
 import { OverlayStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { startTrackingEmbeddableUnsavedChanges } from '@kbn/embeddable-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
+import { BehaviorSubject } from 'rxjs';
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './control_panel';
-import {
-  ControlApiRegistration,
-  ControlStateRegistration,
-  DefaultControlApi,
-  DefaultControlState,
-} from './types';
+import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -35,73 +29,77 @@ export const ControlRenderer = <
   StateType extends DefaultControlState = DefaultControlState,
   ApiType extends DefaultControlApi = DefaultControlApi
 >({
-  maybeId,
   type,
-  state,
-  parentApi,
-  services,
+  maybeId,
+  getParentApi,
   onApiAvailable,
+  services,
 }: {
   maybeId?: string;
   type: string;
-  state: StateType; // TODO: Delete this
-  parentApi: ControlGroupApi;
+  // parentApi: ControlGroupApi;
+  getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
 
   /** TODO: Remove this */
   services: { overlays: OverlayStart; dataViews: DataViewsPublicPluginStart };
 }) => {
-  const cleanupFunction = useRef<(() => void) | null>(null);
+  // const cleanupFunction = useRef<(() => void) | null>(null);
 
-  const componentPromise = useMemo(
+  const component = useMemo(
     () =>
-      (async () => {
+      (() => {
+        const parentApi = getParentApi();
         const uuid = maybeId ?? generateId();
         const factory = getControlFactory<StateType, ApiType>(type);
 
-        const registerApi = (
+        const buildApi = (
           apiRegistration: ControlApiRegistration<ApiType>,
-          comparators: StateComparators<ControlStateRegistration<StateType>>
-        ) => {
-          const { unsavedChanges, resetUnsavedChanges, cleanup } =
-            startTrackingEmbeddableUnsavedChanges<StateType>(
-              uuid,
-              parentApi,
-              comparators,
-              (serializedState: SerializedPanelState<StateType>) => serializedState.rawState
-            );
+          comparators: StateComparators<StateType>
+        ): ApiType => {
+          // const { unsavedChanges, resetUnsavedChanges, cleanup } =
+          //   startTrackingEmbeddableUnsavedChanges<StateType>(
+          //     uuid,
+          //     parentApi,
+          //     comparators,
+          //     (serializedState: SerializedPanelState<StateType>) => serializedState.rawState
+          //   );
 
-          const snapshotRuntimeState = () => {
-            const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
-            return comparatorKeys.reduce((acc, key) => {
-              acc[key] = comparators[key][0].value as RuntimeState[typeof key];
-              return acc;
-            }, {} as RuntimeState);
-          };
+          // const snapshotRuntimeState = () => {
+          //   const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
+          //   return comparatorKeys.reduce((acc, key) => {
+          //     acc[key] = comparators[key][0].value as RuntimeState[typeof key];
+          //     return acc;
+          //   }, {} as RuntimeState);
+          // };
 
-          const fullApi: ApiType = {
+          const fullApi = {
             ...apiRegistration,
             uuid,
             parentApi,
-            unsavedChanges,
-            resetUnsavedChanges,
+            unsavedChanges: new BehaviorSubject<Partial<StateType> | undefined>(undefined),
+            resetUnsavedChanges: () => {},
             type: factory.type,
             // defaultPanelTitle,
             // grow,
             // width,
-          };
+          } as unknown as ApiType;
 
-          cleanupFunction.current = () => cleanup();
+          // cleanupFunction.current = () => cleanup();
           onApiAvailable?.(fullApi);
           return fullApi;
         };
 
-        const { api, Component } = factory.buildControl(state, registerApi, uuid, parentApi);
+        const initialState = parentApi.getChildState<StateType>(uuid);
+
+        const { api, Component } = factory.buildControl(initialState, buildApi, uuid, parentApi);
+
+        console.log('api', api, 'Component', Component);
 
         return React.forwardRef<typeof api>((_, ref) => {
           // expose the api into the imperative handle
           useImperativeHandle(ref, () => api, []);
-
+          console.log('HERE!!!', api);
           return <Component />;
         });
       })(),
@@ -113,11 +111,11 @@ export const ControlRenderer = <
     [type]
   );
 
-  useEffect(() => {
-    return () => {
-      cleanupFunction.current?.();
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     cleanupFunction.current?.();
+  //   };
+  // }, []);
 
-  return <ControlPanel<StateType> Component={componentPromise} />;
+  return <ControlPanel<StateType, ApiType> Component={component} />;
 };

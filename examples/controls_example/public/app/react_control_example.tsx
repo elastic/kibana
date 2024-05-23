@@ -101,17 +101,17 @@ export const ReactControlExample = ({
     };
   }, [controlGroupApi]);
 
-  if (error)
+  if (error || (!dataViews?.[0]?.id && !loading))
     return (
       <EuiEmptyPrompt
         iconType="error"
         color="danger"
         title={<h2>There was an error!</h2>}
-        body={<p>{error.message}</p>}
+        body={<p>{error ? error.message : 'Please add at least one data view.'}</p>}
       />
     );
 
-  return loading || !dataViews || !dataViews[0].id ? (
+  return loading ? (
     <EuiLoadingSpinner />
   ) : (
     <>
@@ -145,38 +145,42 @@ export const ReactControlExample = ({
         }}
         hidePanelChrome={true}
         type={CONTROL_GROUP_TYPE}
-        parentApi={mockedParentApi} // should be the dashboard
+        getParentApi={() => ({
+          ...mockedParentApi,
+          getSerializedStateForChild: () => ({
+            rawState: {
+              controlStyle: 'oneLine',
+              chainingSystem: 'HIERARCHICAL',
+              showApplySelections: false,
+              panelsJSON:
+                '{"a957862f-beae-4f0c-8a3a-a6ea4c235651":{"type":"searchControl","order":0,"grow":true,"width":"medium","explicitInput":{"id":"a957862f-beae-4f0c-8a3a-a6ea4c235651","fieldName":"message","title":"Message","grow":true,"width":"medium","searchString": "this","enhancements":{}}}}',
+              ignoreParentSettingsJSON:
+                '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
+            } as object,
+            references: [
+              {
+                name: 'controlGroup_a957862f-beae-4f0c-8a3a-a6ea4c235651:searchControlDataView',
+                type: 'index-pattern',
+                id: dataViews[0].id ?? 'The error check above prevents this :)',
+              },
+            ],
+          }),
+        })} // should be the dashboard
         key={`control_group`}
-        state={{
-          rawState: {
-            controlStyle: 'oneLine',
-            chainingSystem: 'HIERARCHICAL',
-            showApplySelections: false,
-            panelsJSON:
-              '{"a957862f-beae-4f0c-8a3a-a6ea4c235651":{"type":"searchControl","order":0,"grow":true,"width":"medium","explicitInput":{"id":"a957862f-beae-4f0c-8a3a-a6ea4c235651","fieldName":"message","title":"Message","grow":true,"width":"medium","searchString": "this","enhancements":{}}}}',
-            ignoreParentSettingsJSON:
-              '{"ignoreFilters":false,"ignoreQuery":false,"ignoreTimerange":false,"ignoreValidations":false}',
-          } as object,
-          references: [
-            {
-              name: 'controlGroup_a957862f-beae-4f0c-8a3a-a6ea4c235651:searchControlDataView',
-              type: 'index-pattern',
-              id: dataViews[0].id,
-            },
-          ],
-        }}
       />
       <EuiSpacer size="l" />
       <div style={{ height: '400px' }}>
         <ReactEmbeddableRenderer
           type={'data_table'}
-          state={{
-            rawState: {
-              timeRange: { from: 'now-60d/d', to: 'now+60d/d' },
-            },
-            references: [],
-          }}
-          parentApi={mockedParentApi}
+          getParentApi={() => ({
+            ...mockedParentApi,
+            getSerializedStateForChild: () => ({
+              rawState: {
+                timeRange: { from: 'now-60d/d', to: 'now+60d/d' },
+              },
+              references: [],
+            }),
+          })}
           hidePanelChrome={false}
           onApiAvailable={(api) => {
             children$.next({ ...children$.getValue(), [api.uuid]: api });

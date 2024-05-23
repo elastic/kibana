@@ -8,6 +8,7 @@
 
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
 import { Filter } from '@kbn/es-query';
+import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasParentApi,
   HasType,
@@ -56,25 +57,23 @@ export type DefaultControlApi = PublishesDataLoading &
   };
 
 export interface DefaultControlState {
+  type: string;
   grow?: boolean;
   width?: ControlWidth;
+  order?: number;
 }
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
   'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' // | 'grow' | 'width'
-> & {
-  setDataLoading: (loading: boolean) => void;
-  setBlockingError: (error: Error | undefined) => void;
-  setOutputFilter: (filter: Filter | undefined) => void;
-};
+>;
 
 // export type ControlStateRegistration<
 //   ControlState extends DefaultControlState = DefaultControlState
 // > = Omit<ControlState, 'grow' | 'width'>;
 
 export interface ControlFactory<
-  State extends object = object,
+  State extends DefaultControlState = DefaultControlState,
   ControlApi extends DefaultControlApi = DefaultControlApi
 > {
   type: string;
@@ -96,3 +95,10 @@ export interface ControlFactory<
 export type ControlStateManager<State extends object = object> = {
   [key in keyof Required<State>]: BehaviorSubject<State[key]>;
 };
+
+export interface ControlPanelProps<
+  ApiType extends DefaultControlApi = DefaultControlApi,
+  PropsType extends {} = {}
+> {
+  Component: PanelCompatibleComponent<ApiType, PropsType>;
+}

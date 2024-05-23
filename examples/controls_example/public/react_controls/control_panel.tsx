@@ -22,35 +22,19 @@ import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { ControlError } from './control_error_component';
-import { DefaultControlApi } from './types';
+import { ControlPanelProps, DefaultControlApi } from './types';
 
 export const ControlPanel = <
   State extends object,
   ApiType extends DefaultControlApi = DefaultControlApi
 >({
-  index,
-
-  getActions,
-  actionPredicate,
-
   Component,
-  // componentProps,
-
-  onPanelStatusChange,
-}: PresentationPanelProps<ApiType, {}>) => {
+}: ControlPanelProps<ApiType, {}>) => {
+  console.log('HERE!!!');
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
-  const { loading, value, error } = useAsync(async () => {
-    const componentPromise = isPromise(Component) ? Component : Promise.resolve(Component);
-    const [unwrappedComponent] = await Promise.all([componentPromise]);
-    console.log('COMPONENT', unwrappedComponent);
-    return { component: unwrappedComponent };
-
-    // Ancestry chain is expected to use 'key' attribute to reset DOM and state
-    // when unwrappedComponent needs to be re-loaded
-  }, []);
-
+  console.log('Component', Component);
   const viewModeSubject = (() => {
     if (
       apiHasParentApi(api) && // api.parentApi => controGroupApi
@@ -80,8 +64,7 @@ export const ControlPanel = <
     api?.parentApi?.controlStyle,
     viewModeSubject
   );
-
-  const ControlComponent = value?.component;
+  console.log('controlStyle', controlStyle);
   const usingTwoLineLayout = controlStyle === 'twoLine';
   const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
 
@@ -89,35 +72,35 @@ export const ControlPanel = <
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
     setInitialLoadComplete(true);
   }
-  console.log(api, ControlComponent);
 
-  return !api || !ControlComponent ? (
-    <>here</>
-  ) : (
+  return (
     <FloatingActions
-      className={classNames('controlFrame__control', {
-        'controlFrame--twoLine': usingTwoLineLayout,
-        'controlFrame--oneLine': !usingTwoLineLayout,
-        'controlFrameWrapper--grow': grow,
-        // 'controlFrameWrapper-isDragging': isDragging,
-        // 'controlFrameWrapper-isEditable': isEditable,
-        'controlFrameWrapper--small': width === 'small',
-        'controlFrameWrapper--medium': width === 'medium',
-        'controlFrameWrapper--large': width === 'large',
-        // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-        // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+      className={classNames({
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
+      // className={classNames({
+      //   'controlFrame--twoLine': usingTwoLineLayout,
+      //   'controlFrame--oneLine': !usingTwoLineLayout,
+      //   // 'controlFrameWrapper--grow': grow,
+      //   // // 'controlFrameWrapper-isDragging': isDragging,
+      //   // // 'controlFrameWrapper-isEditable': isEditable,
+      //   // 'controlFrameWrapper--small': width === 'small',
+      //   // 'controlFrameWrapper--medium': width === 'medium',
+      //   // 'controlFrameWrapper--large': width === 'large',
+      //   // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
+      //   // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+      // })}
       viewMode={viewMode}
       embeddable={api}
       disabledActions={[]}
       isEnabled={true}
     >
-      {blockingError || error ? (
+      {blockingError ? (
         <EuiFormControlLayout>
           <ControlError
             error={
               blockingError ??
-              error ??
               i18n.translate('controls.blockingError', {
                 defaultMessage: 'There was an error loading this control.',
               })
@@ -127,7 +110,7 @@ export const ControlPanel = <
       ) : (
         <EuiFormControlLayout
           fullWidth
-          isLoading={loading || Boolean(dataLoading)}
+          isLoading={Boolean(dataLoading)}
           prepend={
             api?.getCustomPrepend ? (
               <>{api.getCustomPrepend()}</>
@@ -136,9 +119,8 @@ export const ControlPanel = <
             )
           }
         >
-          <ControlComponent
+          <Component
             ref={(newApi) => {
-              console.log('new api', newApi);
               if (newApi && !api) setApi(newApi);
             }}
           />

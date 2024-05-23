@@ -80,7 +80,6 @@ export const getSearchEmbeddableFactory = ({
       const searchTechnique = new BehaviorSubject<SearchControlTechniques | undefined>(
         initialState.searchTechnique ?? DEFAULT_SEARCH_TECHNIQUE
       );
-
       const editorStateManager = { searchTechnique };
 
       const { dataControlApi, dataControlComparators, dataControlStateManager } =

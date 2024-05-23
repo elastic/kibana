@@ -10,7 +10,7 @@ import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { PANEL_HOVER_TRIGGER, registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PLUGIN_ID } from './constants';
@@ -21,6 +21,7 @@ import { SEARCH_CONTROL_TYPE } from './react_controls/data_controls/search_contr
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface ControlsExampleStartDeps {
@@ -32,7 +33,21 @@ export interface ControlsExampleStartDeps {
 export class ControlsExamplePlugin
   implements Plugin<void, void, SetupDeps, ControlsExampleStartDeps>
 {
-  public setup(core: CoreSetup<ControlsExampleStartDeps>, { developerExamples }: SetupDeps) {
+  public setup(
+    core: CoreSetup<ControlsExampleStartDeps>,
+    { developerExamples, embeddable }: SetupDeps
+  ) {
+    embeddable.registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
+      const [{ getControlGroupEmbeddableFactory }, [coreStart, depsStart]] = await Promise.all([
+        import('./react_controls/control_group/get_control_group_factory'),
+        core.getStartServices(),
+      ]);
+      return getControlGroupEmbeddableFactory({
+        overlays: coreStart.overlays,
+        dataViews: depsStart.data.dataViews,
+      });
+    });
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Controls examples',
@@ -56,16 +71,6 @@ export class ControlsExamplePlugin
     const editControlAction = new EditControlAction();
     deps.uiActions.registerAction(editControlAction);
     deps.uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
-
-    registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
-      const { getControlGroupEmbeddableFactory } = await import(
-        './react_controls/control_group/get_control_group_factory'
-      );
-      return getControlGroupEmbeddableFactory({
-        overlays: core.overlays,
-        dataViews: deps.data.dataViews,
-      });
-    });
 
     registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
       const { getSearchEmbeddableFactory } = await import(

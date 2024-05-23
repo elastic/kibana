@@ -6,18 +6,11 @@
  * Side Public License, v 1.
  */
 
-import {
-  ControlGroupChainingSystem,
-  ControlsPanels,
-} from '@kbn/controls-plugin/common/control_group/types';
+import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
 import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import {
-  HasSerializableState,
-  PresentationContainer,
-  PublishesLastSavedState,
-} from '@kbn/presentation-containers';
+import { HasSerializableState, PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -27,16 +20,20 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
-import { PublishesControlDisplaySettings } from '../types';
+import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
 
 /** The control display settings published by the control group are the "default" */
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
   controlStyle: PublishingSubject<ControlStyle>;
 };
+export interface ControlsPanels<State extends DefaultControlState = DefaultControlState> {
+  [panelId: string]: State;
+}
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlGroupSerializedState> &
   HasSerializableState &
+  // HasSerializedChildState<DefaultControlState> &
   PublishesFilters &
   // PublishesSettings & // published so children can use it... Might be unnecessary?
   PublishesDataViews &
@@ -44,7 +41,11 @@ export type ControlGroupApi = PresentationContainer &
   PublishesDataLoading & // loading = true if any children loading
   // PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
   PublishesControlGroupDisplaySettings &
-  Partial<HasParentApi<PublishesUnifiedSearch & PublishesLastSavedState>>;
+  Partial<HasParentApi<PublishesUnifiedSearch>> & {
+    getChildState: <ChildStateType extends DefaultControlState = DefaultControlState>(
+      uuid: string
+    ) => ChildStateType;
+  };
 
 export interface ControlGroupRuntimeState {
   chainingSystem: ControlGroupChainingSystem;
@@ -54,11 +55,17 @@ export interface ControlGroupRuntimeState {
   panels: ControlsPanels;
   showApplySelections?: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
+
+  anyChildHasUnsavedChanges: boolean;
 }
 
 export type ControlGroupSerializedState = Omit<
   ControlGroupRuntimeState,
-  'panels' | 'ignoreParentSettings' | 'defaultControlGrow' | 'defaultControlWidth'
+  | 'panels'
+  | 'ignoreParentSettings'
+  | 'defaultControlGrow'
+  | 'defaultControlWidth'
+  | 'anyChildHasUnsavedChanges'
 > & {
   panelsJSON: string;
   ignoreParentSettingsJSON: string;
