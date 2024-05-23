@@ -330,7 +330,7 @@ const startFleetServerWithDocker = async ({
 
         if (isServerless) {
           log.info(`Waiting for server [${hostname}] to register with Elasticsearch`);
-          await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 180000);
+          await waitForFleetServerToRegisterWithElasticsearch(kbnClient, log, hostname, 180000);
         } else {
           await waitForHostToEnroll(kbnClient, log, hostname, 120000);
         }
@@ -718,6 +718,7 @@ export const isFleetServerRunning = async (
  */
 const waitForFleetServerToRegisterWithElasticsearch = async (
   kbnClient: KbnClient,
+  logger?: ToolingLog = createToolingLogger(),
   fleetServerHostname: string,
   timeoutMs: number = 30000
 ): Promise<void> => {
@@ -729,34 +730,52 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
   let found = false;
 
   while (!found && !hasTimedOut()) {
-    found = await retryOnError(async () => {
-      const fleetServerRecord = await kbnClient
-        .request<estypes.SearchResponse>({
-          method: 'POST',
-          path: '/api/console/proxy',
-          query: {
-            path: `${AGENTS_INDEX}/_search`,
-            method: 'GET',
-          },
-          body: {
+    found = await retryOnError(
+      async () => {
+        const fleetServerRecord = await kbnClient
+          .request<estypes.SearchResponse>({
+            method: 'POST',
+            path: '/api/console/proxy',
             query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      'local_metadata.host.hostname.keyword': fleetServerHostname,
+              path: `${AGENTS_INDEX}/_search`,
+              method: 'GET',
+            },
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      term: {
+                        'local_metadata.host.hostname.keyword': fleetServerHostname,
+                      },
                     },
-                  },
-                ],
+                  ],
+                },
               },
             },
-          },
-        })
-        .then((response) => response.data)
-        .catch(catchAxiosErrorFormatAndThrow);
+          })
+          .then((response) => {
+            const esResponse = response.data;
 
-      return ((fleetServerRecord?.hits?.total as estypes.SearchTotalHits)?.value ?? 0) === 1;
-    }, RETRYABLE_TRANSIENT_ERRORS);
+            // Because we are calling Elasticsearch APIs through the Kibana console proxy, we need
+            // to check if the response from ES is an error here and then throw if thats the case
+            if (isEsErrorResponse(esResponse)) {
+              throw new Error(
+                `Search against index [${AGENTS_INDEX}] failed with: ${
+                  esResponse.error.reason || esResponse.error.type || ''
+                }\n${dump(esResponse)}`
+              );
+            }
+
+            return esResponse;
+          })
+          .catch(catchAxiosErrorFormatAndThrow);
+
+        return ((fleetServerRecord?.hits?.total as estypes.SearchTotalHits)?.value ?? 0) === 1;
+      },
+      [...RETRYABLE_TRANSIENT_ERRORS, /index_not_found_exception/],
+      logger
+    );
 
     if (!found) {
       // sleep and check again
@@ -769,4 +788,9 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
       `Timed out waiting for fleet server [${fleetServerHostname}] to register with Elasticsearch`
     );
   }
+};
+
+/** Type guard */
+const isEsErrorResponse = (data: object): data is estypes.ErrorResponseBase => {
+  return 'error' in data && 'status' in data;
 };

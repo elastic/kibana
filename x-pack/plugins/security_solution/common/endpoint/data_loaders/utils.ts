@@ -89,7 +89,8 @@ export const retryOnError = async <T>(
 
       return result;
     } catch (err) {
-      log.warning(msg(`attempt ${thisAttempt} failed with: ${err.message}`), err);
+      log.warning(msg(`attempt ${thisAttempt} failed with: ${err.message.split('\n').at(0)}`));
+      log.verbose(err);
 
       // If not an error that is retryable, then end loop here and return that error;
       if (!isRetryableError(err)) {
