@@ -8,7 +8,7 @@
 
 import './editor_menu.scss';
 
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import {
   EuiBadge,
   EuiContextMenuItemIcon,
@@ -24,7 +24,6 @@ import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
-import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { ADD_PANEL_TRIGGER } from '../../triggers';
 import {
   getAddPanelActionMenuItemsGroup,
@@ -150,11 +149,7 @@ export const EditorMenu = ({
   const isMounted = useRef(false);
   const {
     embeddable,
-    visualizations: {
-      getAliases: getVisTypeAliases,
-      getByGroup: getVisTypesByGroup,
-      showNewVisModal,
-    },
+    visualizations: { getAliases: getVisTypeAliases, getByGroup: getVisTypesByGroup },
     uiActions,
   } = pluginServices.getServices();
 
@@ -181,17 +176,6 @@ export const EditorMenu = ({
       setUnwrappedEmbeddableFactories(factories);
     });
   }, [embeddableFactories]);
-
-  // TODO: leverage this to open agg modal
-  const createNewAggsBasedVis = useCallback(
-    (visType?: BaseVisType) => () =>
-      showNewVisModal({
-        originatingApp: DASHBOARD_APP_ID,
-        outsideVisualizeApp: true,
-        showAggsSelection: true,
-      }),
-    [showNewVisModal]
-  );
 
   const getSortedVisTypesByGroup = (group: VisGroups) =>
     getVisTypesByGroup(group)
@@ -278,15 +262,7 @@ export const EditorMenu = ({
   });
 
   const getVisTypeMenuItem = (visType: BaseVisType): EuiContextMenuPanelItemDescriptor => {
-    const {
-      name,
-      title,
-      titleInWizard,
-      description,
-      icon = 'empty',
-      group,
-      isDeprecated,
-    } = visType;
+    const { name, title, titleInWizard, description, icon = 'empty', isDeprecated } = visType;
     return {
       name: !isDeprecated ? (
         titleInWizard || title
@@ -303,11 +279,7 @@ export const EditorMenu = ({
         </EuiFlexGroup>
       ),
       icon: icon as string,
-      onClick:
-        // not all the agg-based visualizations need to be created via the wizard
-        group === VisGroups.AGGBASED && visType.options.showIndexSelection
-          ? createNewAggsBasedVis(visType)
-          : createNewVisType(visType),
+      onClick: createNewVisType(visType),
       'data-test-subj': `visType-${name}`,
       toolTipContent: description,
     };
