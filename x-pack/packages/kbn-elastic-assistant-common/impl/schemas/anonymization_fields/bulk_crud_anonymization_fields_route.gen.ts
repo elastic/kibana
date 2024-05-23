@@ -13,10 +13,10 @@ import { z } from 'zod';
  *
  * info:
  *   title: Bulk Actions API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
-import { UUID, NonEmptyString } from '../conversations/common_attributes.gen';
+import { NonEmptyString } from '../common_attributes.gen';
 
 export type BulkActionSkipReason = z.infer<typeof BulkActionSkipReason>;
 export const BulkActionSkipReason = z.literal('ANONYMIZATION_FIELD_NOT_MODIFIED');
@@ -44,7 +44,7 @@ export const NormalizedAnonymizationFieldError = z.object({
 
 export type AnonymizationFieldResponse = z.infer<typeof AnonymizationFieldResponse>;
 export const AnonymizationFieldResponse = z.object({
-  id: UUID,
+  id: NonEmptyString,
   timestamp: NonEmptyString.optional(),
   field: z.string(),
   allowed: z.boolean().optional(),
