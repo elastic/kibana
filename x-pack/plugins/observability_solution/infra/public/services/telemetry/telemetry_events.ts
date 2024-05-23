@@ -187,6 +187,35 @@ const assetDetailsPageViewed: InfraTelemetryEvent = {
   },
 };
 
+const assetDashboardLoaded: InfraTelemetryEvent = {
+  eventType: InfraTelemetryEventTypes.ASSET_DASHBOARD_LOADED,
+  schema: {
+    assetType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Asset type for the selected asset.',
+        optional: false,
+      },
+    },
+    state: {
+      type: 'boolean',
+      _meta: {
+        description: 'If the dashboard is filtered or now',
+        optional: false,
+      },
+    },
+    filtered_by: {
+      type: 'array',
+      items: {
+        type: 'text',
+        _meta: {
+          description: 'Filters enabled for the dashboard added for an asset',
+        },
+      },
+    },
+  },
+};
+
 export const infraTelemetryEvents = [
   assetDetailsFlyoutViewed,
   assetDetailsPageViewed,
@@ -195,4 +224,5 @@ export const infraTelemetryEvents = [
   hostFlyoutRemoveFilter,
   hostFlyoutAddFilter,
   hostViewTotalHostCountRetrieved,
+  assetDashboardLoaded,
 ];
