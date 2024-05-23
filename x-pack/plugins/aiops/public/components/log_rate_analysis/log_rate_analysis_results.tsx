@@ -158,16 +158,16 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http } = useAiopsAppContext();
   const { dataView } = useDataSource();
+
   const {
     analysisType,
     earliest,
     latest,
     windowParameters,
     documentStats: { sampleProbability },
+    stickyHistogram,
   } = useAppSelector((s) => s.logRateAnalysis);
-  const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
-  const stickyHistogram = useAppSelector((s) => s.logRateAnalysis.stickyHistogram);
-  const streamErrors = useAppSelector((s) => s.logRateAnalysisStream.errors);
+  const { isRunning, errors: streamErrors } = useAppSelector((s) => s.logRateAnalysisStream);
 
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
