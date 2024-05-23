@@ -16,6 +16,7 @@
       "licensing",
       "logsShared",
       "esUiShared",
+      "navigation",
     ],
     "optionalPlugins": [
       "customIntegrations",
