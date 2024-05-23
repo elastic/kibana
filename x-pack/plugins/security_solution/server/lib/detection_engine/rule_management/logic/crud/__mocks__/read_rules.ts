@@ -15,7 +15,7 @@ export const readRules = jest
   .mockImplementation(async (): Promise<SanitizedRule<RuleParams> | null> => {
     const mockRule: SanitizedRule<RuleParams> = getRuleMock({
       ...getQueryRuleParams(),
-      ruleId: 'rule-idpepep',
+      ruleId: 'rule-id',
     });
     return mockRule;
   });
