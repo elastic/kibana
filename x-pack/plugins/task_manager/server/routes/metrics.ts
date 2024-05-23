@@ -40,10 +40,12 @@ export function metricsRoute(params: MetricsRouteParams) {
   const { router, logger, metrics$, resetMetrics$, taskManagerId } = params;
 
   const debugLogger = logger.get(`metrics-debugger`);
+  const additionalDebugLogger = logger.get(`metrics-subscribe-debugger`);
   let lastMetrics: NodeMetrics | null = null;
 
   metrics$.subscribe((metrics) => {
     lastMetrics = { process_uuid: taskManagerId, timestamp: new Date().toISOString(), ...metrics };
+    additionalDebugLogger.debug(`subscribed metrics ${JSON.stringify(metrics)}`);
   });
 
   router.get(
