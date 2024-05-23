@@ -201,7 +201,7 @@ describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
       visit(CREATE_RULE_URL);
       selectEqlRuleType();
       getIndexPatternClearButton().click();
-      getRuleIndexInput().type(`no_at_timestamp_field{enter}`);
+      getRuleIndexInput().type(`auditbeat-no_at_timestamp_field{enter}`);
 
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('exist');
       cy.get(RULES_CREATION_FORM).find(EQL_QUERY_INPUT).should('be.visible');
