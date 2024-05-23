@@ -69,7 +69,8 @@ For details on what types of rules are available and how to configure them, refe
 You can add one or more actions to your rule to generate notifications when its conditions are met and when they are no longer met.
 
 Each action uses a connector, which provides connection information for a {kib} service or third party integration, depending on where you want to send the notifications.
-If no connectors exist, click **Add connector** to create one.
+
+preview:[] Some connectors that perform actions within {kib}, such as the <<cases-action-type,Cases connector>>, require less configuration. For example, you do not need to set the action frequency or variables.
 
 After you select a connector, set the action frequency.
 You can choose to create a summary of alerts on each check interval or on a custom interval.
