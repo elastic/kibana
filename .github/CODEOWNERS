@@ -27,6 +27,7 @@ x-pack/plugins/alerting @elastic/response-ops
 x-pack/packages/kbn-alerting-state-types @elastic/response-ops
 packages/kbn-alerting-types @elastic/response-ops
 packages/kbn-alerts-as-data-utils @elastic/response-ops
+packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
 packages/kbn-ambient-common-types @elastic/kibana-operations
@@ -734,7 +735,6 @@ x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-in
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
-packages/kbn-alerts-grouping @elastic/response-ops
 packages/kbn-securitysolution-hook-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-detection-engine
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
