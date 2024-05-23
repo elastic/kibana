@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,
@@ -51,7 +52,7 @@ export const registerCreateImageAction = () => {
       }),
   });
 
-  uiActionsService.attachAction('ADD_PANEL_TRIGGER', ADD_IMAGE_EMBEDDABLE_ACTION_ID);
+  uiActionsService.attachAction(ADD_PANEL_TRIGGER, ADD_IMAGE_EMBEDDABLE_ACTION_ID);
   if (uiActionsService.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
     // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
     // the create action if the Canvas-specific trigger does indeed exist.

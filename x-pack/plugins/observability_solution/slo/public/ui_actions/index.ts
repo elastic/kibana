@@ -7,6 +7,7 @@
 
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import { createEditSloAlertsPanelAction } from './edit_slo_alerts_panel';
 import { createEditSloOverviewPanelAction } from './edit_slo_overview_panel';
@@ -29,7 +30,7 @@ export function registerSloUiActions(
   // Assign triggers
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloAlertsPanelAction);
   uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editSloOverviewPanelAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addOverviewPanelAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addErrorBudgetPanelAction);
-  uiActions.addTriggerAction('ADD_PANEL_TRIGGER', addAlertsPanelAction);
+  uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addOverviewPanelAction);
+  uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addErrorBudgetPanelAction);
+  uiActions.addTriggerAction(ADD_PANEL_TRIGGER, addAlertsPanelAction);
 }

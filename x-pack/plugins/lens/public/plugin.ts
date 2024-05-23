@@ -14,6 +14,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
@@ -648,7 +649,7 @@ export class LensPlugin {
 
     // Displays the add ESQL panel in the dashboard add Panel menu
     const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core);
-    startDependencies.uiActions.addTriggerAction('ADD_PANEL_TRIGGER', createESQLPanelAction);
+    startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {

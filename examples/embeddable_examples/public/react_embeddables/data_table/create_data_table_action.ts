@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './constants';
@@ -39,5 +40,5 @@ export const registerCreateDataTableAction = (uiActions: UiActionsStart) => {
         defaultMessage: 'Data table',
       }),
   });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_DATA_TABLE_ACTION_ID);
+  uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_DATA_TABLE_ACTION_ID);
 };

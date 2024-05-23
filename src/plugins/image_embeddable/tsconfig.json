@@ -24,7 +24,8 @@
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-mount",
     "@kbn/security-plugin-types-public",
-    "@kbn/embeddable-enhanced-plugin"
+    "@kbn/embeddable-enhanced-plugin",
+    "@kbn/dashboard-plugin"
   ],
   "exclude": ["target/**/*"]
 }
