@@ -41,6 +41,10 @@ const buildFindRulesRoute = ({
   router.get(
     {
       path,
+      options: {
+        access: 'public',
+        description: `Get rules`,
+      },
       validate: {
         query: findRulesRequestQuerySchemaV1,
       },

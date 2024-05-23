@@ -25,7 +25,7 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
               ignore_above: 1024,
               type: 'keyword',
             },
-            defintionId: {
+            definitionId: {
               ignore_above: 1024,
               type: 'keyword',
             },

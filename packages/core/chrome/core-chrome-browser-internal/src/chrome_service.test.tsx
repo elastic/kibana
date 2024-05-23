@@ -21,7 +21,10 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { getAppInfo } from '@kbn/core-application-browser-internal';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { ChromeService } from './chrome_service';
 
@@ -48,6 +51,9 @@ Object.defineProperty(window, 'localStorage', {
 
 function defaultStartDeps(availableApps?: App[], currentAppId?: string) {
   const deps = {
+    analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+    i18n: i18nServiceMock.createStartContract(),
+    theme: themeServiceMock.createStartContract(),
     application: applicationServiceMock.createInternalStartContract(currentAppId),
     docLinks: docLinksServiceMock.createStartContract(),
     http: httpServiceMock.createStartContract(),
@@ -94,7 +100,7 @@ async function start({
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
   }
 
-  await service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
+  service.setup({ analytics: analyticsServiceMock.createAnalyticsServiceSetup() });
   const chromeStart = await service.start(startDeps);
 
   return {
@@ -118,7 +124,7 @@ describe('setup', () => {
   it('calls registerAnalyticsContextProvider with the correct parameters', async () => {
     const service = new ChromeService(defaultStartTestOptions({}));
     const analytics = analyticsServiceMock.createAnalyticsServiceSetup();
-    await service.setup({ analytics });
+    service.setup({ analytics });
 
     expect(registerAnalyticsContextProviderMock).toHaveBeenCalledTimes(1);
     expect(registerAnalyticsContextProviderMock).toHaveBeenCalledWith(
@@ -206,7 +212,7 @@ describe('start', () => {
     });
 
     it('renders the custom project side navigation', async () => {
-      const { chrome } = await start({
+      const { chrome, startDeps } = await start({
         startDeps: defaultStartDeps([{ id: 'foo', title: 'Foo' } as App], 'foo'),
       });
 
@@ -216,7 +222,11 @@ describe('start', () => {
       chrome.setChromeStyle('project');
       chrome.project.setSideNavComponent(MyNav);
 
-      const component = mount(chrome.getHeaderComponent());
+      const component = mount(
+        <KibanaRenderContextProvider {...startDeps}>
+          {chrome.getHeaderComponent()}
+        </KibanaRenderContextProvider>
+      );
 
       const projectHeader = findTestSubject(component, 'kibanaProjectHeader');
       expect(projectHeader.length).toBe(1);
@@ -229,11 +239,15 @@ describe('start', () => {
     });
 
     it('renders chromeless header', async () => {
-      const { chrome } = await start({ startDeps: defaultStartDeps() });
+      const { chrome, startDeps } = await start({ startDeps: defaultStartDeps() });
 
       chrome.setIsVisible(false);
 
-      const component = mount(chrome.getHeaderComponent());
+      const component = mount(
+        <KibanaRenderContextProvider {...startDeps}>
+          {chrome.getHeaderComponent()}
+        </KibanaRenderContextProvider>
+      );
 
       const chromeless = findTestSubject(component, 'kibanaHeaderChromeless');
       expect(chromeless.length).toBe(1);
@@ -418,7 +432,7 @@ describe('start', () => {
       const promise = chrome.getBreadcrumbsAppendExtension$().pipe(toArray()).toPromise();
 
       chrome.setBreadcrumbsAppendExtension({
-        content: (element) => () => {},
+        content: () => () => {},
       });
       service.stop();
 
