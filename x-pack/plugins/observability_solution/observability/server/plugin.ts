@@ -82,6 +82,11 @@ const o11yRuleTypes = [
   ...Object.values(ApmRuleType),
 ];
 
+const alertingFeatures = o11yRuleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [observabilityFeatureId],
+}));
+
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
 
@@ -234,7 +239,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         category: DEFAULT_APP_CATEGORIES.observability,
         app: [observabilityFeatureId],
         catalogue: [observabilityFeatureId],
-        alerting: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
+        alerting: alertingFeatures,
         privileges: {
           all: {
             app: [observabilityFeatureId],
@@ -246,10 +251,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
             alerting: {
               rule: {
-                all: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
+                all: alertingFeatures,
               },
               alert: {
-                all: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
+                all: alertingFeatures,
               },
             },
             ui: ['read', 'write'],
@@ -264,10 +269,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             },
             alerting: {
               rule: {
-                read: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
+                read: alertingFeatures,
               },
               alert: {
-                read: { ruleTypeIds: o11yRuleTypes, consumers: [observabilityFeatureId] },
+                read: alertingFeatures,
               },
             },
             ui: ['read'],

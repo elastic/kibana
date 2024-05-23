@@ -115,14 +115,17 @@ export class AlertingAuthorization {
             // ignore features which are disabled in the user's space
             !disabledFeatures.has(id) &&
             // ignore features which don't grant privileges to alerting
-            ((alerting?.ruleTypeIds?.length ?? 0 > 0) || (alerting?.consumers?.length ?? 0 > 0))
+            (alerting?.length ?? 0 > 0)
         )
       );
 
     this.allPossibleConsumers = alertingFeaturesPromise.then((alertingFeatures) => {
-      const consumers = alertingFeatures
-        .flatMap((alertingFeature) => alertingFeature.alerting?.consumers)
-        .filter(Boolean) as string[];
+      const consumers = alertingFeatures.flatMap(
+        (alertingFeature) =>
+          alertingFeature.alerting
+            ?.flatMap((feature) => feature.consumers ?? [])
+            .filter(Boolean) as string[]
+      );
 
       return consumers.length
         ? asAuthorizedConsumers([ALERTING_FEATURE_ID, ...consumers], {

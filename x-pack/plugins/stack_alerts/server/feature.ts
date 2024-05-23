@@ -16,6 +16,13 @@ import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containme
 
 const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;
 
+const alertingFeatures = [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth].map(
+  (ruleTypeId) => ({
+    ruleTypeId,
+    consumers: [STACK_ALERTS_FEATURE_ID],
+  })
+);
+
 export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   id: STACK_ALERTS_FEATURE_ID,
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
@@ -26,10 +33,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: {
-    ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
-    consumers: [STACK_ALERTS_FEATURE_ID],
-  },
+  alerting: alertingFeatures,
   privileges: {
     all: {
       app: [],
@@ -39,16 +43,10 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         rule: {
-          all: {
-            ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
-            consumers: [STACK_ALERTS_FEATURE_ID],
-          },
+          all: alertingFeatures,
         },
         alert: {
-          all: {
-            ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
-            consumers: [STACK_ALERTS_FEATURE_ID],
-          },
+          all: alertingFeatures,
         },
       },
       savedObject: {
@@ -66,16 +64,10 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
       },
       alerting: {
         rule: {
-          read: {
-            ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
-            consumers: [STACK_ALERTS_FEATURE_ID],
-          },
+          read: alertingFeatures,
         },
         alert: {
-          read: {
-            ruleTypeIds: [IndexThreshold, GeoContainment, ElasticsearchQuery, TransformHealth],
-            consumers: [STACK_ALERTS_FEATURE_ID],
-          },
+          read: alertingFeatures,
         },
       },
       savedObject: {

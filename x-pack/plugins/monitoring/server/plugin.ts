@@ -266,6 +266,11 @@ export class MonitoringPlugin
   }
 
   registerPluginInUI(plugins: PluginsSetup) {
+    const alertingFeatures = RULES.map((ruleTypeId) => ({
+      ruleTypeId,
+      consumers: ['monitoring'],
+    }));
+
     plugins.features.registerKibanaFeature({
       id: 'monitoring',
       name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
@@ -275,7 +280,7 @@ export class MonitoringPlugin
       app: ['monitoring', 'kibana'],
       catalogue: ['monitoring'],
       privileges: null,
-      alerting: { ruleTypeIds: RULES, consumers: ['monitoring'] },
+      alerting: alertingFeatures,
       reserved: {
         description: i18n.translate('xpack.monitoring.feature.reserved.description', {
           defaultMessage: 'To grant users access, you should also assign the monitoring_user role.',
@@ -292,10 +297,10 @@ export class MonitoringPlugin
               },
               alerting: {
                 rule: {
-                  all: { ruleTypeIds: RULES, consumers: ['monitoring'] },
+                  all: alertingFeatures,
                 },
                 alert: {
-                  all: { ruleTypeIds: RULES, consumers: ['monitoring'] },
+                  all: alertingFeatures,
                 },
               },
               ui: [],

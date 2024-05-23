@@ -20,12 +20,12 @@ describe(`feature_privilege_builder`, () => {
       const privilege: FeatureKibanaPrivileges = {
         alerting: {
           rule: {
-            all: {},
-            read: {},
+            all: [],
+            read: [],
           },
           alert: {
-            all: {},
-            read: {},
+            all: [],
+            read: [],
           },
         },
         savedObject: {
@@ -57,8 +57,8 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: {},
-              read: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              all: [],
+              read: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
             },
           },
           savedObject: {
@@ -101,8 +101,8 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             alert: {
-              all: {},
-              read: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              all: [],
+              read: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
             },
           },
           savedObject: {
@@ -140,12 +140,12 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: {},
-              read: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              all: [],
+              read: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
             },
             alert: {
-              all: {},
-              read: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
+              all: [],
+              read: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
             },
           },
           savedObject: {
@@ -192,8 +192,8 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
-              read: {},
+              all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              read: [],
             },
           },
 
@@ -256,8 +256,8 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             alert: {
-              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
-              read: {},
+              all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              read: [],
             },
           },
           savedObject: {
@@ -296,12 +296,12 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
-              read: {},
+              all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              read: [],
             },
             alert: {
-              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
-              read: {},
+              all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              read: [],
             },
           },
           savedObject: {
@@ -368,8 +368,8 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
-              read: { ruleTypeIds: ['readonly-alert-type'], consumers: ['my-consumer'] },
+              all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              read: [{ ruleTypeId: 'readonly-alert-type', consumers: ['my-consumer'] }],
             },
           },
           savedObject: {
@@ -440,8 +440,8 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             alert: {
-              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
-              read: { ruleTypeIds: ['readonly-alert-type'], consumers: ['my-consumer'] },
+              all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              read: [{ ruleTypeId: 'readonly-alert-type', consumers: ['my-consumer'] }],
             },
           },
 
@@ -485,12 +485,12 @@ describe(`feature_privilege_builder`, () => {
         const privilege: FeatureKibanaPrivileges = {
           alerting: {
             rule: {
-              all: { ruleTypeIds: ['alert-type'], consumers: ['my-consumer'] },
-              read: { ruleTypeIds: ['readonly-alert-type'], consumers: ['my-consumer'] },
+              all: [{ ruleTypeId: 'alert-type', consumers: ['my-consumer'] }],
+              read: [{ ruleTypeId: 'readonly-alert-type', consumers: ['my-consumer'] }],
             },
             alert: {
-              all: { ruleTypeIds: ['another-alert-type'], consumers: ['my-consumer'] },
-              read: { ruleTypeIds: ['readonly-alert-type'], consumers: ['my-consumer'] },
+              all: [{ ruleTypeId: 'another-alert-type', consumers: ['my-consumer'] }],
+              read: [{ ruleTypeId: 'readonly-alert-type', consumers: ['my-consumer'] }],
             },
           },
 

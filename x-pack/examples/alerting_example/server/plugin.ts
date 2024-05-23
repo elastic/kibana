@@ -75,24 +75,27 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         insightsAndAlerting: ['triggersActions'],
       },
       category: DEFAULT_APP_CATEGORIES.management,
-      alerting: {
-        ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
-        consumers: [ALERTING_EXAMPLE_APP_ID],
-      },
+      alerting: [
+        { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+        { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+        { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+      ],
       privileges: {
         all: {
           alerting: {
             rule: {
-              all: {
-                ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
-                consumers: [ALERTING_EXAMPLE_APP_ID],
-              },
+              all: [
+                { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+              ],
             },
             alert: {
-              all: {
-                ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
-                consumers: [ALERTING_EXAMPLE_APP_ID],
-              },
+              all: [
+                { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+              ],
             },
           },
           savedObject: {
@@ -107,16 +110,18 @@ export class AlertingExamplePlugin implements Plugin<void, void, AlertingExample
         read: {
           alerting: {
             rule: {
-              read: {
-                ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
-                consumers: [ALERTING_EXAMPLE_APP_ID],
-              },
+              read: [
+                { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+              ],
             },
             alert: {
-              read: {
-                ruleTypeIds: [alwaysFiringRule.id, peopleInSpaceRule.id, INDEX_THRESHOLD_ID],
-                consumers: [ALERTING_EXAMPLE_APP_ID],
-              },
+              read: [
+                { ruleTypeId: alwaysFiringRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                { ruleTypeId: peopleInSpaceRule.id, consumers: [ALERTING_EXAMPLE_APP_ID] },
+                { ruleTypeId: INDEX_THRESHOLD_ID, consumers: [ALERTING_EXAMPLE_APP_ID] },
+              ],
             },
           },
           savedObject: {

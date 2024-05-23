@@ -108,6 +108,11 @@ export function getDefaultCapabilities(): MlCapabilities {
   };
 }
 
+const alertingFeatures = Object.values(ML_ALERT_TYPES).map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [PLUGIN_ID],
+}));
+
 export function getPluginPrivileges() {
   const apmUserMlCapabilitiesKeys = Object.keys(apmUserMlCapabilities);
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
@@ -149,10 +154,10 @@ export function getPluginPrivileges() {
       },
       alerting: {
         rule: {
-          all: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
+          all: alertingFeatures,
         },
         alert: {
-          all: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
+          all: alertingFeatures,
         },
       },
     },
@@ -171,10 +176,10 @@ export function getPluginPrivileges() {
       },
       alerting: {
         rule: {
-          read: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
+          read: alertingFeatures,
         },
         alert: {
-          read: { ruleTypeIds: Object.values(ML_ALERT_TYPES), consumers: [PLUGIN_ID] },
+          read: alertingFeatures,
         },
       },
     },

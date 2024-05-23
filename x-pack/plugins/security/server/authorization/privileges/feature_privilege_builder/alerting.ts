@@ -67,11 +67,10 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
   ): string[] {
     const getAlertingPrivilege = (
       operations: string[],
-      ruleTypeIds: readonly string[],
-      alertingEntity: string,
-      consumers: string[]
+      privileges: Array<{ ruleTypeId: string; consumers: string[] }>,
+      alertingEntity: string
     ) =>
-      ruleTypeIds.flatMap((ruleTypeId) =>
+      privileges.flatMap(({ ruleTypeId, consumers }) =>
         consumers.flatMap((consumer) =>
           operations.map((operation) =>
             this.actions.alerting.get(ruleTypeId, consumer, alertingEntity, operation)
@@ -80,14 +79,12 @@ export class FeaturePrivilegeAlertingBuilder extends BaseFeaturePrivilegeBuilder
       );
 
     const getPrivilegesForEntity = (entity: AlertingEntity) => {
-      const allRuleTypeIds = get(privilegeDefinition.alerting, `${entity}.all.ruleTypeIds`) ?? [];
-      const allConsumers = get(privilegeDefinition.alerting, `${entity}.all.consumers`) ?? [];
-      const readRuleTypeId = get(privilegeDefinition.alerting, `${entity}.read.ruleTypeIds`) ?? [];
-      const readConsumers = get(privilegeDefinition.alerting, `${entity}.read.consumers`) ?? [];
+      const all = get(privilegeDefinition.alerting, `${entity}.all`) ?? [];
+      const read = get(privilegeDefinition.alerting, `${entity}.read`) ?? [];
 
       return uniq([
-        ...getAlertingPrivilege(allOperations[entity], allRuleTypeIds, entity, allConsumers),
-        ...getAlertingPrivilege(readOperations[entity], readRuleTypeId, entity, readConsumers),
+        ...getAlertingPrivilege(allOperations[entity], all, entity),
+        ...getAlertingPrivilege(readOperations[entity], read, entity),
       ]);
     };
 

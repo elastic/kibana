@@ -103,7 +103,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      all?: { ruleTypeIds?: readonly string[]; consumers?: readonly string[] };
+      all?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
       /**
        * List of rule types which users should have read-only access to when granted this privilege.
        * @example
@@ -113,7 +113,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      read?: { ruleTypeIds?: readonly string[]; consumers?: readonly string[] };
+      read?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
     };
     alert?: {
       /**
@@ -125,7 +125,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      all?: { ruleTypeIds?: readonly string[]; consumers?: readonly string[] };
+      all?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
       /**
        * List of rule types for which users should have read-only access to their alert data when granted this privilege.
        * @example
@@ -135,7 +135,7 @@ export interface FeatureKibanaPrivileges {
        *  }
        * ```
        */
-      read?: { ruleTypeIds?: readonly string[]; consumers?: readonly string[] };
+      read?: ReadonlyArray<{ ruleTypeId: string; consumers: readonly string[] }>;
     };
   };
 

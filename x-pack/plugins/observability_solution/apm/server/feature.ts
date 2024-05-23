@@ -17,7 +17,10 @@ import { APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE } from '@kbn/apm-data-access-plugi
 import { ApmRuleType } from '@kbn/rule-data-utils';
 import { APM_SERVER_FEATURE_ID } from '../common/rules/apm_rule_types';
 
-const ruleTypes = Object.values(ApmRuleType);
+const alertingFeatures = Object.values(ApmRuleType).map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [APM_SERVER_FEATURE_ID],
+}));
 
 export const APM_FEATURE = {
   id: APM_SERVER_FEATURE_ID,
@@ -31,7 +34,7 @@ export const APM_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
+  alerting: alertingFeatures,
   // see x-pack/plugins/features/common/feature_kibana_privileges.ts
   privileges: {
     all: {
@@ -44,10 +47,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          all: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
+          all: alertingFeatures,
         },
         rule: {
-          all: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
+          all: alertingFeatures,
         },
       },
       management: {
@@ -65,10 +68,10 @@ export const APM_FEATURE = {
       },
       alerting: {
         alert: {
-          read: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
+          read: alertingFeatures,
         },
         rule: {
-          read: { ruleTypeIds: ruleTypes, consumers: [APM_SERVER_FEATURE_ID] },
+          read: alertingFeatures,
         },
       },
       management: {

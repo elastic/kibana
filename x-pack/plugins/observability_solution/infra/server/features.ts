@@ -30,6 +30,11 @@ const metricRuleTypes = [
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
 
+const metricAlertingFeatures = metricRuleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [METRICS_FEATURE_ID],
+}));
+
 export const METRICS_FEATURE = {
   id: METRICS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
@@ -42,7 +47,7 @@ export const METRICS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
+  alerting: metricAlertingFeatures,
   privileges: {
     all: {
       app: ['infra', 'metrics', 'kibana'],
@@ -54,10 +59,10 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
+          all: metricAlertingFeatures,
         },
         alert: {
-          all: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
+          all: metricAlertingFeatures,
         },
       },
       management: {
@@ -75,10 +80,10 @@ export const METRICS_FEATURE = {
       },
       alerting: {
         rule: {
-          read: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
+          read: metricAlertingFeatures,
         },
         alert: {
-          read: { ruleTypeIds: metricRuleTypes, consumers: [METRICS_FEATURE_ID] },
+          read: metricAlertingFeatures,
         },
       },
       management: {
@@ -96,6 +101,11 @@ const logsRuleTypes = [
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
 
+const logsAlertingFeatures = logsRuleTypes.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [LOGS_FEATURE_ID],
+}));
+
 export const LOGS_FEATURE = {
   id: LOGS_FEATURE_ID,
   name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
@@ -108,7 +118,7 @@ export const LOGS_FEATURE = {
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
-  alerting: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
+  alerting: logsAlertingFeatures,
   privileges: {
     all: {
       app: ['infra', 'logs', 'kibana'],
@@ -120,10 +130,10 @@ export const LOGS_FEATURE = {
       },
       alerting: {
         rule: {
-          all: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
+          all: logsAlertingFeatures,
         },
         alert: {
-          all: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
+          all: logsAlertingFeatures,
         },
       },
       management: {
@@ -137,10 +147,10 @@ export const LOGS_FEATURE = {
       api: ['infra', 'rac'],
       alerting: {
         rule: {
-          read: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
+          read: logsAlertingFeatures,
         },
         alert: {
-          read: { ruleTypeIds: logsRuleTypes, consumers: [LOGS_FEATURE_ID] },
+          read: logsAlertingFeatures,
         },
       },
       management: {
