@@ -28,4 +28,8 @@ export interface AppModel {
   notesById: NotesById;
   errors: ErrorState;
   enableExperimental: ExperimentalFeatures;
+  eventIdsToFetch: string[];
+  nonTimelineEventNotesLoading: boolean;
+  nonTimelineEventNotesError: string | null;
+  nonAssociatedNotes: Note[];
 }

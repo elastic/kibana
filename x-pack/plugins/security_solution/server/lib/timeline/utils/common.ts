@@ -39,6 +39,8 @@ export const buildFrameworkRequest = async (
 
 export const escapeHatch = schema.object({}, { unknowns: 'allow' });
 
+export const getNotesByDocumentIds = schema.object({ alertIds: schema.arrayOf(schema.string()) });
+
 type ErrorFactory = (message: string) => Error;
 
 export const throwErrors = (createError: ErrorFactory) => (errors: rt.Errors) => {

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -19,6 +19,7 @@ import {
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { useIsInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { timelineActions, timelineSelectors } from '../../../timelines/store';
+import { appSelectors } from '../../store';
 import type { ActionProps, OnPinEvent } from '../../../../common/types';
 import { TimelineId } from '../../../../common/types';
 import { AddEventNoteAction } from './add_note_icon_item';
@@ -119,7 +120,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
       !(ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'))
     );
   }, [ecsData, eventType]);
-
+  const nonAssociatedNotes = useSelector((state) =>
+    appSelectors.nonAssociatedNotesByIdSelector(state, eventId)
+  );
+  console.log('nonAssociatedNotes', nonAssociatedNotes);
   const isDisabled = !useIsInvestigateInResolverActionEnabled(ecsData);
   const { setGlobalFullScreen } = useGlobalFullScreen();
   const { setTimelineFullScreen } = useTimelineFullScreen();
@@ -283,6 +287,17 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
           )}
         </>
+        {timelineId === 'alerts-page' && (
+          <AddEventNoteAction
+            ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
+            key="add-event-note"
+            showNotes={false}
+            toggleShowNotes={() => {}}
+            timelineType={timelineType}
+            eventId={eventId}
+            eventCount={nonAssociatedNotes.length}
+          />
+        )}
         {!isEventViewer && toggleShowNotes && (
           <>
             <AddEventNoteAction

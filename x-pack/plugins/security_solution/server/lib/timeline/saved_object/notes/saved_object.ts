@@ -19,7 +19,7 @@ import { getUserDisplayName } from '@kbn/user-profile-components';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
   Note,
-  BareNote,
+  // BareNote,
   BareNoteWithoutExternalRefs,
   ResponseNote,
 } from '../../../../../common/api/timeline';
@@ -83,7 +83,7 @@ export const persistNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string | null;
-  note: BareNote;
+  note: BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }): Promise<ResponseNote> => {
   try {
@@ -124,7 +124,7 @@ const createNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string | null;
-  note: BareNote;
+  note: BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
@@ -136,6 +136,8 @@ const createNote = async ({
     noteFieldsMigrator.extractFieldsToReferences<BareNoteWithoutExternalRefs>({
       data: noteWithCreator,
     });
+
+  console.log('migratedAttributes:', migratedAttributes);
 
   const noteAttributes: SavedObjectNoteWithoutExternalRefs = {
     eventId: migratedAttributes.eventId,
@@ -174,7 +176,7 @@ const updateNote = async ({
 }: {
   request: FrameworkRequest;
   noteId: string;
-  note: BareNote;
+  note: BareNoteWithoutExternalRefs;
   overrideOwner?: boolean;
 }) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
@@ -233,7 +235,10 @@ const getSavedNote = async (request: FrameworkRequest, NoteId: string) => {
   return convertSavedObjectToSavedNote(populatedNote);
 };
 
-const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
+export const getAllSavedNote = async (
+  request: FrameworkRequest,
+  options: SavedObjectsFindOptions
+) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObjects = await savedObjectsClient.find<SavedObjectNoteWithoutExternalRefs>(options);
 
@@ -247,14 +252,15 @@ const getAllSavedNote = async (request: FrameworkRequest, options: SavedObjectsF
   };
 };
 
-export const convertSavedObjectToSavedNote = (savedObject: unknown): Note =>
-  pipe(
+export const convertSavedObjectToSavedNote = (savedObject: unknown): Note => {
+  console.log(savedObject, 'savedObject');
+  return pipe(
     SavedObjectNoteRuntimeType.decode(savedObject),
     map((savedNote) => {
       return {
         noteId: savedNote.id,
         version: savedNote.version,
-        timelineId: savedNote.attributes.timelineId,
+        timelineId: savedNote.attributes.timelineId ?? '',
         eventId: savedNote.attributes.eventId,
         note: savedNote.attributes.note,
         created: savedNote.attributes.created,
@@ -264,13 +270,15 @@ export const convertSavedObjectToSavedNote = (savedObject: unknown): Note =>
       };
     }),
     fold((errors) => {
-      throw new Error(failure(errors).join('\n'));
+      console.log('would throw here');
+      // throw new Error(failure(errors).join('\n'));
     }, identity)
   );
+};
 
 export const pickSavedNote = (
   noteId: string | null,
-  savedNote: BareNote,
+  savedNote: BareNoteWithoutExternalRefs,
   userInfo: AuthenticatedUser | null
 ) => {
   if (noteId == null) {
