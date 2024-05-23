@@ -47,12 +47,19 @@ export const getUsageRecords = (
       assetCountAggregation.min_timestamp.value_as_string
     ).toISOString();
 
-    const creationTimestamp = new Date().toISOString();
+    const creationTimestamp = new Date();
+    const minutes = creationTimestamp.getMinutes();
+    if (minutes >= 30) {
+      creationTimestamp.setMinutes(30, 0, 0);
+    } else {
+      creationTimestamp.setMinutes(0, 0, 0);
+    }
+    const roundedCreationTimestamp = creationTimestamp.toISOString();
 
     const usageRecord: UsageRecord = {
-      id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${creationTimestamp}`,
+      id: `${CLOUD_SECURITY_TASK_TYPE}_${cloudSecuritySolution}_${projectId}_${roundedCreationTimestamp}`,
       usage_timestamp: minTimestamp,
-      creation_timestamp: creationTimestamp,
+      creation_timestamp: creationTimestamp.toISOString(),
       usage: {
         type: CLOUD_SECURITY_TASK_TYPE,
         sub_type: cloudSecuritySolution,
@@ -209,7 +216,8 @@ export const getCloudSecurityUsageRecord = async ({
 
     if (!(await indexHasDataInDateRange(esClient, cloudSecuritySolution, searchFrom))) return;
 
-    const periodSeconds = Math.floor((new Date().getTime() - searchFrom.getTime()) / 1000);
+    // const periodSeconds = Math.floor((new Date().getTime() - searchFrom.getTime()) / 1000);
+    const periodSeconds = 1800; // Workaround to prevent overbilling by charging for a constant time window. The issue should be resolved in https://github.com/elastic/security-team/issues/9424.
 
     const assetCountAggregations = await getAssetAggByCloudSecuritySolution(
       esClient,
