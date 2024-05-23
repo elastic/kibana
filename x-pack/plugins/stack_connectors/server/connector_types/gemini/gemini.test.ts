@@ -178,9 +178,13 @@ describe('GeminiConnector', () => {
         body: JSON.stringify({
           messages: [
             {
-              author: 'user',
-              content: 'What is the capital of France?',
-            },
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+    },
           ],
         }),
         model: 'test-model',
