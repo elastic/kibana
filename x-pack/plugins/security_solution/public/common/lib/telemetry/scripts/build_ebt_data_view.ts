@@ -7,6 +7,9 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
+import { events as genAiEvents } from '@kbn/elastic-assistant-plugin/server/lib/telemetry/event_based_telemetry';
+import { telemetryEvents as serverlessEvents } from '@kbn/security-solution-serverless/server/telemetry/event_based_telemetry';
+import { events as securityEvents } from '../../../../../server/lib/telemetry/event_based/events';
 import { telemetryEvents } from '../events/telemetry_events';
 
 const logger = new ToolingLog({
@@ -38,6 +41,7 @@ async function cli(): Promise<void> {
     kibana_url: kibanaUrl,
     space_id: spaceId,
     data_view_name: dataViewName,
+    telemetry_type: telemetryType,
   } = namedArgs;
   logger.info(`API key: ${apiKey}`);
   logger.info(`Kibana URL: ${kibanaUrl}`);
@@ -61,6 +65,7 @@ async function cli(): Promise<void> {
     const ourDataView = dataViews.find(
       (dataView: { id: string; name: string }) => dataView.name === dataViewName
     );
+
     if (!ourDataView) {
       throw new Error(
         `Data view "${dataViewName}" not found, check your data view is spelled correctly and is defined in the ${spaceId} space`
@@ -86,7 +91,14 @@ async function cli(): Promise<void> {
       integer: 'long',
     };
     const allowedValues = Object.keys(valueMap);
-    telemetryEvents.forEach((event) => {
+
+    const events =
+      telemetryType === 'browser'
+        ? telemetryEvents
+        : // serverside events
+          [...genAiEvents, ...serverlessEvents, ...securityEvents];
+
+    events.forEach((event) => {
       const newProps = flattenSchema(event.schema);
       Object.entries(newProps).forEach(([key, value]) => {
         if (!runtimeFields[key] && allowedValues.includes(value)) {
@@ -96,33 +108,26 @@ async function cli(): Promise<void> {
         }
       });
     });
-    console.log('runtimeFields', JSON.stringify(runtimeFields, null, 2));
-    console.log('manualRuntimeFields', JSON.stringify(manualRuntimeFields, null, 2));
+
+    const runtimeFieldUrl = `${dataViewApiUrl}/data_view/${ourDataView.id}/runtime_field`;
+    await upsertRuntimeFields(runtimeFields, runtimeFieldUrl, requestHeaders);
+
+    logger.info(
+      `Data view "${dataViewName}" has been updated with ${
+        Object.keys(runtimeFields).length
+      } runtime fields`
+    );
+    logger.info(
+      `The following ${
+        Object.keys(manualRuntimeFields).length
+      } runtime fields have non-standard types and will need to be manually updated: ${Object.entries(
+        manualRuntimeFields
+      ).join(', ')}`
+    );
   } catch (e) {
-    logger.error(`Error fetching data view "${dataViewName}" - ${e}`);
+    logger.error(`Error updating data view "${dataViewName}" - ${e}`);
     throw e;
   }
-
-  // const runtimeFieldApiUrl = `${dataViewApiUrl}/data_view/${dataViewName}/runtime_field`;
-  //
-  // try {
-  //   logger.info(`Fetching data view "${data_view_name}"...`);
-  //   await axios.put(
-  //     `${KIBANA_URL}/api/security/role/${role}`,
-  //     {
-  //       elasticsearch: selectedRoleDefinition.elasticsearch,
-  //       kibana: selectedRoleDefinition.kibana,
-  //     },
-  //     {
-  //       headers: requestHeaders,
-  //     }
-  //   );
-  //
-  //   logger.info(`Role "${role}" has been created`);
-  // } catch (e) {
-  //   logger.error(`Unable to create role "${role}"`);
-  //   throw e;
-  // }
 }
 
 function removeTrailingSlash(url: string) {
@@ -163,4 +168,33 @@ function flattenSchema(inputObj: NestedObject): { [key: string]: string } {
     }
   }
   return result;
+}
+
+async function upsertRuntimeFields(
+  fields: { [key: string]: string },
+  requestUrl: string,
+  requestHeaders: { [key: string]: string }
+) {
+  for (const fieldName in fields) {
+    if (typeof fields[fieldName] === 'string') {
+      const fieldType = fields[fieldName];
+      const payload = {
+        name: `properties.${fieldName}`,
+        runtimeField: {
+          type: fieldType,
+        },
+      };
+
+      try {
+        await axios.put(requestUrl, payload, {
+          headers: requestHeaders,
+        });
+      } catch (error) {
+        throw new Error(
+          `Error upserting field ${fieldName}:`,
+          error.response ? error.response.data : error.message
+        );
+      }
+    }
+  }
 }
