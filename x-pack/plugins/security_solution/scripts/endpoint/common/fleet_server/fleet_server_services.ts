@@ -744,7 +744,7 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
                 filter: [
                   {
                     term: {
-                      'local_metadata.host.name': fleetServerHostname,
+                      'local_metadata.host.hostname.keyword': fleetServerHostname,
                     },
                   },
                 ],
