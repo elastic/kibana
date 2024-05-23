@@ -20,6 +20,10 @@ export const deleteCommentRoute = createCasesRoute({
       comment_id: schema.string(),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    description: `Delete an alert or comment from a case`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

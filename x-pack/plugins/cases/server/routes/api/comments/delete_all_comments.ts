@@ -13,6 +13,10 @@ import { createCaseError } from '../../../common/error';
 export const deleteAllCommentsRoute = createCasesRoute({
   method: 'delete',
   path: CASE_COMMENTS_URL,
+  routerOptions: {
+    access: 'public',
+    description: `Delete all alerts and comments from a case`,
+  },
   params: {
     params: schema.object({
       case_id: schema.string(),

@@ -19,6 +19,10 @@ export const getCasesByAlertIdRoute = createCasesRoute({
       alert_id: schema.string({ minLength: 1 }),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    description: `Get cases for an alert`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const alertID = request.params.alert_id;

@@ -14,6 +14,10 @@ import { createCasesRoute } from '../create_cases_route';
 export const deleteCaseRoute = createCasesRoute({
   method: 'delete',
   path: CASES_URL,
+  routerOptions: {
+    access: 'public',
+    description: `Delete a case`,
+  },
   params: {
     query: schema.object({
       ids: schema.arrayOf(schema.string()),

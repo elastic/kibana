@@ -20,6 +20,10 @@ export const getAllAlertsAttachedToCaseRoute = createCasesRoute({
       case_id: schema.string({ minLength: 1 }),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    description: `Get all alerts for a case`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseId = request.params.case_id;

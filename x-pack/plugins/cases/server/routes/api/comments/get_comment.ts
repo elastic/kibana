@@ -21,6 +21,10 @@ export const getCommentRoute = createCasesRoute({
       comment_id: schema.string(),
     }),
   },
+  routerOptions: {
+    access: 'public',
+    description: `Get an alert or comment for a case`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;
