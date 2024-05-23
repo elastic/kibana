@@ -50,9 +50,8 @@ import {
   type MonacoMessage,
   getWrappedInPipesCode,
   parseErrors,
-  getIndicesList,
-  getRemoteIndicesList,
   clearCacheWhenOld,
+  getESQLSources,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -376,14 +375,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
   }, []);
 
+  const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
+    const fn = memoize(
+      (...args: [DataViewsPublicPluginStart]) => ({
+        timestamp: Date.now(),
+        result: getESQLSources(...args),
+      }),
+      ({ esql }) => esql
+    );
+
+    return { cache: fn.cache, memoizedSources: fn };
+  }, []);
+
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        const [remoteIndices, localIndices] = await Promise.all([
-          getRemoteIndicesList(dataViews),
-          getIndicesList(dataViews),
-        ]);
-        return [...localIndices, ...remoteIndices];
+        clearCacheWhenOld(dataSourcesCache, queryString);
+        const sources = await memoizedSources(dataViews).result;
+        return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
@@ -419,12 +428,15 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     };
     return callbacks;
   }, [
+    queryString,
+    memoizedSources,
+    dataSourcesCache,
     dataViews,
-    expressions,
-    indexManagementApiService,
     esqlFieldsCache,
     memoizedFieldsFromESQL,
+    expressions,
     abortController,
+    indexManagementApiService,
   ]);
 
   const parseMessages = useCallback(async () => {
