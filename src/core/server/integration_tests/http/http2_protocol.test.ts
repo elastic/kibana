@@ -166,4 +166,49 @@ describe('Http2 - Smoke tests', () => {
       });
     });
   });
+
+  describe('HTTP2-specific behavior', () => {
+    beforeEach(async () => {
+      const { registerRouter, server: innerServer } = await server.setup({ config$: of(config) });
+      innerServerListener = innerServer.listener;
+
+      const router = new Router('', logger, enhanceWithContext, {
+        isDev: false,
+        versionedRouterOptions: {
+          defaultHandlerResolutionStrategy: 'oldest',
+        },
+      });
+
+      router.get({ path: '/illegal_headers', validate: false }, async (context, req, res) => {
+        return res.ok({
+          headers: {
+            connection: 'close',
+          },
+          body: { protocol: req.protocol },
+        });
+      });
+
+      registerRouter(router);
+
+      await server.start();
+    });
+
+    describe('illegal http2 headers', () => {
+      it('should strip illegal http2 headers without causing errors when serving HTTP/2', async () => {
+        const response = await supertest(innerServerListener).get('/illegal_headers').http2();
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http2' });
+        expect(response.header).toEqual(expect.not.objectContaining({ connection: 'close' }));
+      });
+
+      it('should keep illegal http2 headers when serving HTTP/1.x', async () => {
+        const response = await supertest(innerServerListener).get('/illegal_headers');
+
+        expect(response.status).toBe(200);
+        expect(response.body).toEqual({ protocol: 'http1' });
+        expect(response.header).toEqual(expect.objectContaining({ connection: 'close' }));
+      });
+    });
+  });
 });
