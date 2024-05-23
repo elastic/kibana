@@ -117,6 +117,7 @@ const createThreatMatchRule = ({
   threat_index,
   threat_mapping,
   threat_filters: [],
+  interval: '24h',
   ...override,
   threat_indicator_path,
 });

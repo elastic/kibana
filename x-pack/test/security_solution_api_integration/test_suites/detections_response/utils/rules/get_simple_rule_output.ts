@@ -23,7 +23,7 @@ export const getMockSharedResponseSchema = (
   false_positives: [],
   from: 'now-6m',
   immutable: false,
-  interval: '5m',
+  interval: '24h',
   rule_id: ruleId,
   output_index: '',
   max_signals: 100,

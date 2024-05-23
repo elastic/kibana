@@ -148,7 +148,7 @@ export const getCreateNewTermsRulesSchemaMock = (
   risk_score: 55,
   language: 'kuery',
   rule_id: ruleId,
-  interval: '5m',
+  interval: '24h',
   from: 'now-6m',
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
@@ -167,7 +167,7 @@ export const getCreateEsqlRulesSchemaMock = (
   risk_score: 55,
   language: 'esql',
   rule_id: ruleId,
-  interval: '5m',
+  interval: '24h',
   from: 'now-6m',
 });
 

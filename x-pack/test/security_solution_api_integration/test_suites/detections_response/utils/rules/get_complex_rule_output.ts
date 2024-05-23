@@ -41,7 +41,7 @@ export const getComplexRuleOutput = (
   enabled,
   index: ['auditbeat-*', 'filebeat-*'],
   immutable: false,
-  interval: '5m',
+  interval: '24h',
   output_index: '',
   meta: {
     anything_you_want_ui_related_or_otherwise: {

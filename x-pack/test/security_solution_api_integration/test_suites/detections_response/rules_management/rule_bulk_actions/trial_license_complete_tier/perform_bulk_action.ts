@@ -1559,7 +1559,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
           {
             type: BulkActionEditTypeEnum.set_schedule,
-            value: { interval: '1m', lookback: '1m' },
+            value: { interval: '24h', lookback: '1m' },
           },
         ];
         cases.forEach(({ type, value }) => {

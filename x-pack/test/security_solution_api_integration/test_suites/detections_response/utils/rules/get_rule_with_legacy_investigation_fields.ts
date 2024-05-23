@@ -56,7 +56,7 @@ export const getRuleSavedObjectWithLegacyInvestigationFields = (): InternalRuleC
       dataViewId: undefined,
     },
     schedule: {
-      interval: '5m',
+      interval: '24h',
     },
     enabled: false,
     actions: [],
@@ -114,7 +114,7 @@ export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (): Int
       dataViewId: undefined,
     },
     schedule: {
-      interval: '5m',
+      interval: '24h',
     },
     enabled: false,
     actions: [],

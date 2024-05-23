@@ -34,7 +34,7 @@ export const getComplexRule = (ruleId = 'rule-1'): RuleCreateProps => ({
   ],
   enabled: false,
   index: ['auditbeat-*', 'filebeat-*'],
-  interval: '5m',
+  interval: '24h',
   output_index: '',
   meta: {
     anything_you_want_ui_related_or_otherwise: {
