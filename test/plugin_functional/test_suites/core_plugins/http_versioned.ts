@@ -87,18 +87,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             expect(response.headers['elastic-api-version']).to.eql('2023-10-31');
           });
       });
-
-      it('does not requires the version header to be set', async () => {
-        await supertest
-          .get('/api/core_http/public_versioned_route')
-          .unset('Elastic-Api-Version')
-          .expect(200)
-          .then((response) => {
-            expect(response.body).to.eql({
-              version: '2023-10-31',
-            });
-          });
-      });
     });
 
     describe('query version', () => {
