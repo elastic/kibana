@@ -84,7 +84,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: v8.14.0
    */
-  responseActionsSentinelOneV2Enabled: false,
+  responseActionsSentinelOneV2Enabled: true,
 
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: false,
@@ -101,6 +101,11 @@ export const allowedExperimentalValues = Object.freeze({
    * in ES.
    */
   responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+
+  /**
+   * Enables scan response action on Endpoint
+   */
+  responseActionScanEnabled: false,
 
   /**
    * Enables top charts on Alerts Page

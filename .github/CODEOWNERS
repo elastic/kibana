@@ -81,7 +81,7 @@ packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/cloud @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_chat @elastic/kibana-core
-x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/platform-onboarding
+x-pack/plugins/cloud_integrations/cloud_data_migration @elastic/kibana-management
 x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
 x-pack/plugins/cloud_integrations/cloud_experiments @elastic/kibana-core
 x-pack/plugins/cloud_integrations/cloud_full_story @elastic/kibana-core
@@ -470,9 +470,9 @@ x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/grokdebugger @elastic/kibana-management
-packages/kbn-guided-onboarding @elastic/platform-onboarding
-examples/guided_onboarding_example @elastic/platform-onboarding
-src/plugins/guided_onboarding @elastic/platform-onboarding
+packages/kbn-guided-onboarding @elastic/appex-sharedux
+examples/guided_onboarding_example @elastic/appex-sharedux
+src/plugins/guided_onboarding @elastic/appex-sharedux
 packages/kbn-handlebars @elastic/kibana-security
 packages/kbn-hapi-mocks @elastic/kibana-core
 packages/kbn-health-gateway-server @elastic/kibana-core
@@ -517,6 +517,7 @@ src/plugins/kibana_react @elastic/appex-sharedux
 src/plugins/kibana_usage_collection @elastic/kibana-core
 src/plugins/kibana_utils @elastic/appex-sharedux
 x-pack/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
+x-pack/packages/kbn-langchain @elastic/security-generative-ai
 packages/kbn-language-documentation-popover @elastic/kibana-esql
 x-pack/examples/lens_config_builder_example @elastic/kibana-visualizations
 packages/kbn-lens-embeddable-utils @elastic/obs-ux-infra_services-team @elastic/kibana-visualizations
@@ -817,7 +818,6 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/kibana-management
-packages/solution-nav/es @elastic/appex-sharedux @elastic/enterprise-search-frontend
 packages/solution-nav/oblt @elastic/appex-sharedux @elastic/obs-ux-management-team
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
@@ -1149,8 +1149,8 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /src/plugins/unified_doc_viewer/public/components/doc_viewer_logs_overview @elastic/obs-ux-logs-team
 
 # Observability onboarding tour
-/x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/platform-onboarding
-/x-pack/test/functional/apps/infra/tour.ts @elastic/platform-onboarding
+/x-pack/plugins/observability_solution/observability_shared/public/components/tour @elastic/appex-sharedux
+/x-pack/test/functional/apps/infra/tour.ts @elastic/appex-sharedux
 
 # Observability settings
 /x-pack/plugins/observability_solution/observability/server/ui_settings.ts @elastic/obs-docs
@@ -1345,6 +1345,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test_serverless/functional/test_suites/common/management/landing_page.ts @elastic/kibana-management
 /x-pack/test_serverless/functional/test_suites/common/dev_tools/ @elastic/kibana-management
 /x-pack/test_serverless/**/test_suites/common/grok_debugger/ @elastic/kibana-management
+/x-pack/test/api_integration/apis/management/ @elastic/kibana-management
+/x-pack/test/functional/apps/rollup_job/ @elastic/kibana-management
 
 #CC# /x-pack/plugins/cross_cluster_replication/ @elastic/kibana-management
 
@@ -1662,7 +1664,7 @@ x-pack/plugins/security_solution/server/lib/security_integrations @elastic/secur
 /src/plugins/kibana_react/public/page_template/ @elastic/eui-team @elastic/appex-sharedux
 
 # Landing page for guided onboarding in Home plugin
-/src/plugins/home/public/application/components/guided_onboarding @elastic/platform-onboarding
+/src/plugins/home/public/application/components/guided_onboarding @elastic/appex-sharedux
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations

@@ -1735,10 +1735,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@94.5.0-backport.1":
-  version "94.5.0-backport.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.5.0-backport.1.tgz#b26b06c9d4823b80b6c2a4457edfd6cd0cb8ebad"
-  integrity sha512-K6xVQYZjhdZyHNANw4H45ONw2pbZEJtaKr3Aul+dIQmYSRs0NgZbZyjt5fiLMaHJz2EFIpDEZMFccW6l0Aiukg==
+"@elastic/eui@94.5.1":
+  version "94.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-94.5.1.tgz#cdaab02483a419bfc910be9d75a310b60141a611"
+  integrity sha512-VopgWoljYAkhrK602vP9QJSbGcGVTT57YkWjAGHVV57YRdKJWXvHt3sbBUdangquxYj4ZC2GXM81p7mMxiCOXA==
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -5091,6 +5091,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/langchain@link:x-pack/packages/kbn-langchain":
+  version "0.0.0"
+  uid ""
+
 "@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
   version "0.0.0"
   uid ""
@@ -6288,10 +6292,6 @@
   uid ""
 
 "@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
-  version "0.0.0"
-  uid ""
-
-"@kbn/solution-nav-es@link:packages/solution-nav/es":
   version "0.0.0"
   uid ""
 

@@ -113,11 +113,19 @@ export const JobsListPage: FC<Props> = ({
   }
 
   if (accessDenied) {
-    return <AccessDeniedPage />;
+    return (
+      <KibanaRenderContextProvider {...coreStart}>
+        <AccessDeniedPage />
+      </KibanaRenderContextProvider>
+    );
   }
 
   if (isPlatinumOrTrialLicense === false) {
-    return <InsufficientLicensePage basePath={coreStart.http.basePath} />;
+    return (
+      <KibanaRenderContextProvider {...coreStart}>
+        <InsufficientLicensePage basePath={coreStart.http.basePath} />
+      </KibanaRenderContextProvider>
+    );
   }
 
   return (
