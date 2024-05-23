@@ -3,12 +3,7 @@
 exports[`generateOpenApiDocument @kbn/config-schema generates references in the expected format 1`] = `
 Object {
   "components": Object {
-    "schemas": Object {
-      "my.name": Object {
-        "minLength": 1,
-        "type": "string",
-      },
-    },
+    "schemas": Object {},
     "securitySchemes": Object {
       "apiKeyAuth": Object {
         "in": "header",
@@ -46,7 +41,7 @@ Object {
             },
           },
           Object {
-            "description": undefined,
+            "description": "test",
             "in": "path",
             "name": "id",
             "required": true,
@@ -63,7 +58,8 @@ Object {
                 "additionalProperties": false,
                 "properties": Object {
                   "name": Object {
-                    "$ref": "#/components/schemas/my.name",
+                    "minLength": 1,
+                    "type": "string",
                   },
                   "other": Object {
                     "type": "string",
@@ -351,6 +347,105 @@ Object {
           },
         },
         "summary": "route",
+      },
+    },
+  },
+  "security": Array [
+    Object {
+      "basicAuth": Array [],
+    },
+  ],
+  "servers": Array [
+    Object {
+      "url": "https://test.oas",
+    },
+  ],
+  "tags": undefined,
+}
+`;
+
+exports[`generateOpenApiDocument @kbn/config-schema handles recursive schemas 1`] = `
+Object {
+  "components": Object {
+    "schemas": Object {
+      "recursive": Object {
+        "additionalProperties": false,
+        "properties": Object {
+          "name": Object {
+            "type": "string",
+          },
+          "self": Object {
+            "$ref": "#/components/schemas/recursive",
+          },
+        },
+        "required": Array [
+          "name",
+          "self",
+        ],
+        "type": "object",
+      },
+    },
+    "securitySchemes": Object {
+      "apiKeyAuth": Object {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey",
+      },
+      "basicAuth": Object {
+        "scheme": "basic",
+        "type": "http",
+      },
+    },
+  },
+  "externalDocs": undefined,
+  "info": Object {
+    "description": undefined,
+    "title": "test",
+    "version": "99.99.99",
+  },
+  "openapi": "3.0.0",
+  "paths": Object {
+    "/recursive": Object {
+      "get": Object {
+        "operationId": "/recursive#0",
+        "parameters": Array [
+          Object {
+            "description": "The version of the API to use",
+            "in": "header",
+            "name": "elastic-api-version",
+            "schema": Object {
+              "default": "2023-10-31",
+              "enum": Array [
+                "2023-10-31",
+              ],
+              "type": "string",
+            },
+          },
+        ],
+        "requestBody": Object {
+          "content": Object {
+            "application/json; Elastic-Api-Version=2023-10-31": Object {
+              "schema": Object {
+                "$ref": "#/components/schemas/recursive",
+              },
+            },
+          },
+        },
+        "responses": Object {
+          "200": Object {
+            "content": Object {
+              "application/json; Elastic-Api-Version=2023-10-31": Object {
+                "schema": Object {
+                  "maxLength": 10,
+                  "minLength": 1,
+                  "type": "string",
+                },
+              },
+            },
+            "description": "No description",
+          },
+        },
+        "summary": "",
       },
     },
   },
