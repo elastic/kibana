@@ -213,6 +213,7 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
       params: [{}, { literalOptions: ['asc', 'desc'] }],
     }),
   },
+  // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
   coalesce: {
     signatures: supportedFieldTypes
       .map<FunctionDefinition['signatures']>((type) => [
@@ -246,6 +247,7 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
       ])
       .flat(),
   },
+  // can be removed when https://github.com/elastic/elasticsearch/issues/108982 is complete
   mv_dedupe: {
     signatures: supportedFieldTypes.map<FunctionDefinition['signatures'][number]>((type) => ({
       params: [
