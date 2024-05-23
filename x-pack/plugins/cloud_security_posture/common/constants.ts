@@ -192,3 +192,6 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
   managed_identity: [],
   manual: [],
 };
+
+export const CLOUD_FORMATION_STACK_NAME = 'Elastic-Cloud-Security-Posture-Management';
+export const TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR = 'ACCOUNT_TYPE';
