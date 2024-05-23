@@ -13,7 +13,7 @@ import { AgentStatusFilter } from './agent_status_filter';
 const PARTIAL_TOUR_TEXT = 'Some agents have become inactive and have been hidden';
 const mockStorage: Record<any, any> = {};
 
-jest.mock('../../../../../../hooks', () => {
+jest.mock('../../../../../../hooks/use_core', () => {
   return {
     useStartServices: jest.fn(() => ({
       uiSettings: {
@@ -81,14 +81,13 @@ describe('AgentStatusFilter', () => {
   it('Should not show tour if previously been dismissed', async () => {
     mockStorage['fleet.inactiveAgentsTour'] = { active: false };
 
-    const { getByText } = renderComponent({
+    const { queryByText } = renderComponent({
       selectedStatus: [],
       onSelectedStatusChange: () => {},
       totalInactiveAgents: 999,
     });
-
     await act(async () => {
-      expect(getByText(PARTIAL_TOUR_TEXT, { exact: false })).not.toBeVisible();
+      expect(queryByText(PARTIAL_TOUR_TEXT, { exact: false })).toBeNull();
     });
   });
 

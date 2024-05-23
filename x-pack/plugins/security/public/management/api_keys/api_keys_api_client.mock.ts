@@ -11,9 +11,9 @@ import type { APIKeysAPIClient } from './api_keys_api_client';
 
 export const apiKeysAPIClientMock = {
   create: (): jest.Mocked<PublicMethodsOf<APIKeysAPIClient>> => ({
-    getApiKeys: jest.fn(),
     invalidateApiKeys: jest.fn(),
     createApiKey: jest.fn(),
     updateApiKey: jest.fn(),
+    queryApiKeys: jest.fn(),
   }),
 };

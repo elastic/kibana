@@ -308,7 +308,6 @@ const getInsertText = (
     } else {
       templateLines = JSON.stringify(template, null, 2).split(newLineRegex);
     }
-    // TODO add correct indentation
     insertText += ': ' + templateLines.join('\n');
   } else if (value === '{') {
     insertText += '{}';
