@@ -7,10 +7,7 @@
  */
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { addPanelMenuTrigger } from '../../triggers';
 
 const onAddPanelActionClick =
@@ -34,12 +31,11 @@ export type GroupedAddPanelActions = EuiContextMenuPanelDescriptor & {
   icon?: string;
 };
 
-export const getAddPanelActionMenuItems = (
+export const getAddPanelActionMenuItemsGroup = (
   api: PresentationContainer,
   actions: Array<Action<object>> | undefined,
   closePopover: () => void
-): [EuiContextMenuPanelItemDescriptor[], Record<string, GroupedAddPanelActions>] => {
-  const ungrouped: EuiContextMenuPanelItemDescriptor[] = [];
+): Record<string, GroupedAddPanelActions> => {
   const grouped: Record<string, GroupedAddPanelActions> = {};
 
   const context = {
@@ -77,9 +73,9 @@ export const getAddPanelActionMenuItems = (
         grouped[group.id]!.items!.push(getMenuItem(item));
       });
     } else {
-      ungrouped.push(getMenuItem(item));
+      console.log('ungrouped action:: %o \n', getMenuItem(item));
     }
   });
 
-  return [ungrouped, grouped];
+  return grouped;
 };

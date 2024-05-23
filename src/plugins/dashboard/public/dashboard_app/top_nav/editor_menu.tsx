@@ -16,19 +16,18 @@ import {
   type EuiContextMenuPanelItemDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { type BaseVisType, VisGroups, type VisTypeAlias } from '@kbn/visualizations-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { pluginServices } from '../../services/plugin_services';
 import { DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { ADD_PANEL_TRIGGER } from '../../triggers';
 import {
-  getAddPanelActionMenuItems,
+  getAddPanelActionMenuItemsGroup,
   type GroupedAddPanelActions,
 } from './add_panel_action_menu_items';
 import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
@@ -84,6 +83,7 @@ export const mergeGroupedItemsProvider =
         if (factoryGroup && addPanelGroup) {
           const panelId = factoryGroup.panelId;
 
+          // TODO: remove this
           initialPanelGroups.push({
             'data-test-subj': dataTestSubj,
             name: factoryGroup.appName,
@@ -92,7 +92,7 @@ export const mergeGroupedItemsProvider =
           });
 
           additionalPanels.push({
-            id: panelId,
+            id: factoryGroup.id,
             title: factoryGroup.appName,
             items: [
               ...factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
@@ -110,13 +110,14 @@ export const mergeGroupedItemsProvider =
           });
 
           additionalPanels.push({
-            id: panelId,
+            id: factoryGroup.id,
             title: factoryGroup.appName,
             items: factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
           });
         } else if (addPanelGroup) {
           const panelId = addPanelGroup.id;
 
+          // TODO: remove this
           initialPanelGroups.push({
             'data-test-subj': dataTestSubj,
             name: addPanelGroup.title,
@@ -155,21 +156,19 @@ export const EditorMenu = ({
       showNewVisModal,
     },
     uiActions,
-    overlays,
   } = pluginServices.getServices();
 
-  const { euiTheme } = useEuiTheme();
-
-  const embeddableFactories = useMemo(
-    () => Array.from(embeddable.getEmbeddableFactories()),
-    [embeddable]
-  );
   const [unwrappedEmbeddableFactories, setUnwrappedEmbeddableFactories] = useState<
     UnwrappedEmbeddableFactory[]
   >([]);
 
   const [addPanelActions, setAddPanelActions] = useState<Array<Action<object>> | undefined>(
     undefined
+  );
+
+  const embeddableFactories = useMemo(
+    () => Array.from(embeddable.getEmbeddableFactories()),
+    [embeddable]
   );
 
   useEffect(() => {
@@ -183,13 +182,13 @@ export const EditorMenu = ({
     });
   }, [embeddableFactories]);
 
+  // TODO: leverage this to open agg modal
   const createNewAggsBasedVis = useCallback(
     (visType?: BaseVisType) => () =>
       showNewVisModal({
         originatingApp: DASHBOARD_APP_ID,
         outsideVisualizeApp: true,
         showAggsSelection: true,
-        selectedVisType: visType,
       }),
     [showNewVisModal]
   );
@@ -210,10 +209,8 @@ export const EditorMenu = ({
       .filter(({ disableCreate }: BaseVisType) => !disableCreate);
 
   const promotedVisTypes = getSortedVisTypesByGroup(VisGroups.PROMOTED);
-  const aggsBasedVisTypes = getSortedVisTypesByGroup(VisGroups.AGGBASED);
   const toolVisTypes = getSortedVisTypesByGroup(VisGroups.TOOLS);
-
-  console.log('tool vis types:: %o \n', toolVisTypes);
+  const legacyVisTypes = getSortedVisTypesByGroup(VisGroups.LEGACY);
 
   const visTypeAliases = getVisTypeAliases()
     .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
@@ -246,8 +243,6 @@ export const EditorMenu = ({
       const registeredActions = await uiActions?.getTriggerCompatibleActions?.(ADD_PANEL_TRIGGER, {
         embeddable: api,
       });
-
-      console.log('registered actions:: %o \n', registeredActions);
 
       if (isMounted.current) {
         setAddPanelActions(registeredActions);
@@ -332,55 +327,51 @@ export const EditorMenu = ({
     };
   };
 
-  const aggsPanelTitle = i18n.translate('dashboard.editorMenu.aggBasedGroupTitle', {
-    defaultMessage: 'Aggregation based',
-  });
-
   const getEditorMenuPanels = (closePopover: () => void): EuiContextMenuPanelDescriptor[] => {
     const getEmbeddableFactoryMenuItem = getEmbeddableFactoryMenuItemProvider(api, closePopover);
 
-    const [ungroupedAddPanelActions, groupedAddPanelAction] = getAddPanelActionMenuItems(
+    const groupedAddPanelAction = getAddPanelActionMenuItemsGroup(
       api,
       addPanelActions,
       closePopover
     );
 
-    console.log('ungroup panel actions:: %o \n', ungroupedAddPanelActions);
+    const [, additionalPanels] = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
+      factoryGroupMap,
+      groupedAddPanelAction
+    );
 
-    const [initialPanelGroups, additionalPanels] = mergeGroupedItemsProvider(
-      getEmbeddableFactoryMenuItem
-    )(factoryGroupMap, groupedAddPanelAction);
+    const enhancedPanelGroup = additionalPanels.map((panelGroup) => {
+      switch (panelGroup.id) {
+        case 'visualizations': {
+          return {
+            ...panelGroup,
+            items: (panelGroup.items ?? []).concat(
+              promotedVisTypes.map(getVisTypeMenuItem),
+              // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
+              visTypeAliases.map(getVisTypeAliasMenuItem)
+            ),
+          };
+        }
+        case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
+          return {
+            ...panelGroup,
+            items: (panelGroup.items ?? []).concat(legacyVisTypes.map(getVisTypeMenuItem)),
+          };
+        }
+        case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
+          return {
+            ...panelGroup,
+            items: (panelGroup.items ?? []).concat(toolVisTypes.map(getVisTypeMenuItem)),
+          };
+        }
+        default: {
+          return panelGroup;
+        }
+      }
+    });
 
-    const initialPanelItems = [
-      ...visTypeAliases.map(getVisTypeAliasMenuItem),
-      ...ungroupedAddPanelActions,
-      ...toolVisTypes.map(getVisTypeMenuItem),
-      ...ungroupedFactories.map(getEmbeddableFactoryMenuItem),
-      ...initialPanelGroups,
-      ...promotedVisTypes.map(getVisTypeMenuItem),
-    ];
-
-    if (aggsBasedVisTypes.length > 0) {
-      initialPanelItems.push({
-        name: aggsPanelTitle,
-        icon: 'visualizeApp',
-        panel: aggBasedPanelID,
-        'data-test-subj': `dashboardEditorAggBasedMenuItem`,
-      });
-    }
-
-    return [
-      {
-        id: 0,
-        items: initialPanelItems,
-      },
-      {
-        id: aggBasedPanelID,
-        title: aggsPanelTitle,
-        items: aggsBasedVisTypes.map(getVisTypeMenuItem),
-      },
-      ...additionalPanels,
-    ];
+    return enhancedPanelGroup;
   };
 
   return (
