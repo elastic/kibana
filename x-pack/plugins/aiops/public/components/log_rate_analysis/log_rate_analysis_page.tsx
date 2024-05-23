@@ -104,7 +104,7 @@ export const LogRateAnalysisPage: FC = () => {
 
   // TODO Since `useData` isn't just used within Log Rate Analysis, this is a bit of
   // a workaround to pass the result on to the redux store. At least this ensures
-  // we now use `useData` only once across Log Rate Analysis! Originally`useData`
+  // we now use `useData` only once across Log Rate Analysis! Originally `useData`
   // was quite general, but over time it got quite some specific features used
   // across Log Rate Analysis and Pattern Analysis. We discussed that we should
   // split this up into more specific hooks.

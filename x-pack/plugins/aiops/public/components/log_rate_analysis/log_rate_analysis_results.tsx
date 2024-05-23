@@ -134,14 +134,8 @@ export interface LogRateAnalysisResultsData {
  * LogRateAnalysis props require a data view.
  */
 interface LogRateAnalysisResultsProps {
-  /** Start timestamp filter */
-  earliest: number;
-  /** End timestamp filter */
-  latest: number;
   /** Callback for resetting the analysis */
   onReset: () => void;
-  /** Window parameters for the analysis */
-  windowParameters: WindowParameters;
   /** The search query to be applied to the analysis as a filter */
   searchQuery: estypes.QueryDslQueryContainer;
   /** Sample probability to be applied to random sampler aggregations */
@@ -157,10 +151,7 @@ interface LogRateAnalysisResultsProps {
 }
 
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
-  earliest,
-  latest,
   onReset,
-  windowParameters,
   searchQuery,
   sampleProbability,
   barColorOverride,
@@ -170,7 +161,9 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http } = useAiopsAppContext();
   const { dataView } = useDataSource();
-  const analysisType = useAppSelector((s) => s.logRateAnalysis.analysisType);
+  const { analysisType, earliest, latest, windowParameters } = useAppSelector(
+    (s) => s.logRateAnalysis
+  );
   const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
   const stickyHistogram = useAppSelector((s) => s.logRateAnalysis.stickyHistogram);
   const streamErrors = useAppSelector((s) => s.logRateAnalysisStream.errors);
@@ -303,38 +296,55 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     setShouldStart(true);
   }
 
-  const startParams = {
+  const startParams = useMemo(() => {
+    if (!windowParameters) {
+      return undefined;
+    }
+
+    return {
+      http,
+      endpoint: '/internal/aiops/log_rate_analysis',
+      apiVersion: '2',
+      abortCtrl,
+      body: {
+        start: earliest,
+        end: latest,
+        searchQuery: JSON.stringify(searchQuery),
+        // TODO Handle data view without time fields.
+        timeFieldName: dataView.timeFieldName ?? '',
+        index: dataView.getIndexPattern(),
+        grouping: true,
+        flushFix: true,
+        // If analysis type is `spike`, pass on window parameters as is,
+        // if it's `dip`, swap baseline and deviation.
+        ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
+          ? windowParameters
+          : {
+              baselineMin: windowParameters.deviationMin,
+              baselineMax: windowParameters.deviationMax,
+              deviationMin: windowParameters.baselineMin,
+              deviationMax: windowParameters.baselineMax,
+            }),
+        overrides,
+        sampleProbability,
+      },
+      headers: { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
+    };
+  }, [
+    analysisType,
+    earliest,
+    latest,
     http,
-    endpoint: '/internal/aiops/log_rate_analysis',
-    apiVersion: '2',
-    abortCtrl,
-    body: {
-      start: earliest,
-      end: latest,
-      searchQuery: JSON.stringify(searchQuery),
-      // TODO Handle data view without time fields.
-      timeFieldName: dataView.timeFieldName ?? '',
-      index: dataView.getIndexPattern(),
-      grouping: true,
-      flushFix: true,
-      // If analysis type is `spike`, pass on window parameters as is,
-      // if it's `dip`, swap baseline and deviation.
-      ...(analysisType === LOG_RATE_ANALYSIS_TYPE.SPIKE
-        ? windowParameters
-        : {
-            baselineMin: windowParameters.deviationMin,
-            baselineMax: windowParameters.deviationMax,
-            deviationMin: windowParameters.baselineMin,
-            deviationMax: windowParameters.baselineMax,
-          }),
-      overrides,
-      sampleProbability,
-    },
-    headers: { [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin },
-  };
+    searchQuery,
+    dataView,
+    windowParameters,
+    sampleProbability,
+    overrides,
+    embeddingOrigin,
+  ]);
 
   useEffect(() => {
-    if (shouldStart) {
+    if (shouldStart && startParams) {
       dispatch(startStream(startParams));
       setShouldStart(false);
     }
@@ -342,9 +352,11 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   }, [shouldStart]);
 
   useEffect(() => {
-    setCurrentAnalysisType(analysisType);
-    setCurrentAnalysisWindowParameters(windowParameters);
-    dispatch(startStream(startParams));
+    if (startParams) {
+      setCurrentAnalysisType(analysisType);
+      setCurrentAnalysisWindowParameters(windowParameters);
+      dispatch(startStream(startParams));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -365,7 +377,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     return p + c.groupItemsSortedByUniqueness.length;
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
-  const timeRangeMs = { from: earliest, to: latest };
+  const timeRangeMs = { from: earliest ?? 0, to: latest ?? 0 };
 
   // Disable the grouping switch toggle only if no groups were found,
   // the toggle wasn't enabled already and no fields were selected to be skipped.

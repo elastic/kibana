@@ -229,12 +229,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       <EuiHorizontalRule />
       {showLogRateAnalysisResults && (
         <LogRateAnalysisResults
-          earliest={earliest}
-          latest={latest}
           onReset={clearSelectionHandler}
           sampleProbability={sampleProbability}
           searchQuery={searchQuery}
-          windowParameters={windowParameters}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           onAnalysisCompleted={onAnalysisCompleted}
