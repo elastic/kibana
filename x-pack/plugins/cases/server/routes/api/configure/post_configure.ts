@@ -15,6 +15,10 @@ import type { configureApiV1 } from '../../../../common/types/api';
 export const postCaseConfigureRoute = createCasesRoute({
   method: 'post',
   path: CASE_CONFIGURE_URL,
+  routerOptions: {
+    access: 'public',
+    description: `Add case settings`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const query = decodeWithExcessOrThrow(ConfigurationRequestRt)(request.body);

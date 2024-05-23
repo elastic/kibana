@@ -13,6 +13,10 @@ import type { configureApiV1 } from '../../../../common/types/api';
 export const getCaseConfigureRoute = createCasesRoute({
   method: 'get',
   path: CASE_CONFIGURE_URL,
+  routerOptions: {
+    access: 'public',
+    description: `Get case settings`,
+  },
   handler: async ({ context, request, response }) => {
     try {
       const caseContext = await context.cases;

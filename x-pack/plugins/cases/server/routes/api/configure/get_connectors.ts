@@ -17,6 +17,8 @@ export const getConnectorsRoute = createCasesRoute({
   path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,
   routerOptions: {
     tags: ['access:casesGetConnectorsConfigure'],
+    access: 'public',
+    description: `Get case connectors`,
   },
   handler: async ({ context, response }) => {
     try {
