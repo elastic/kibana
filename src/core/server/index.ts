@@ -232,6 +232,7 @@ export type {
   HttpServiceStart,
   RawRequest,
   FakeRawRequest,
+  HttpProtocol,
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
