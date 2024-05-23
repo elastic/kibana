@@ -470,6 +470,8 @@ Allows recursive runtime types to be defined.
 
 Takes a required generic type argument and a required string that represents the id of the schema that is tracked internally.
 
+Note: use of `meta.id` is required to associate the top-level schema with the ID used in the `schema.lazy()` call.
+
 __Output type:__ `T`
 
 __Usage:__
