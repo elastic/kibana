@@ -30,6 +30,7 @@ import { DocumentViewModeToggle } from '../../../../components/view_mode_toggle'
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
+import { PatternAnalysisTab } from '../pattern_analysis';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { PanelsToggle } from '../../../../components/panels_toggle';
@@ -189,13 +190,22 @@ describe('Discover main content component', () => {
     it('should show DiscoverDocuments when VIEW_MODE is DOCUMENT_LEVEL', async () => {
       const component = await mountComponent();
       expect(component.find(DiscoverDocuments).exists()).toBe(true);
+      expect(component.find(PatternAnalysisTab).exists()).toBe(false);
       expect(component.find(FieldStatisticsTab).exists()).toBe(false);
     });
 
-    it('should show FieldStatisticsTableMemoized when VIEW_MODE is not DOCUMENT_LEVEL', async () => {
+    it('should show FieldStatisticsTab when VIEW_MODE is AGGREGATED_LEVEL', async () => {
       const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
       expect(component.find(DiscoverDocuments).exists()).toBe(false);
+      expect(component.find(PatternAnalysisTab).exists()).toBe(false);
       expect(component.find(FieldStatisticsTab).exists()).toBe(true);
+    });
+
+    it('should show PatternAnalysisTab when VIEW_MODE is PATTERN_LEVEL', async () => {
+      const component = await mountComponent({ viewMode: VIEW_MODE.PATTERN_LEVEL });
+      expect(component.find(DiscoverDocuments).exists()).toBe(false);
+      expect(component.find(PatternAnalysisTab).exists()).toBe(true);
+      expect(component.find(FieldStatisticsTab).exists()).toBe(false);
     });
   });
 });
