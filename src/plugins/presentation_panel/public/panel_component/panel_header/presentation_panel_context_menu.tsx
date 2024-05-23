@@ -36,6 +36,11 @@ import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
+const QUICK_ACTION_IDS = {
+  edit: ['editPanel', 'ACTION_CONFIGURE_IN_LENS', 'ACTION_CUSTOMIZE_PANEL'],
+  view: ['ACTION_OPEN_IN_DISCOVER', 'openInspector'],
+};
+
 export const PresentationPanelContextMenu = ({
   api,
   index,
@@ -55,8 +60,12 @@ export const PresentationPanelContextMenu = ({
 }) => {
   const [menuPanelsLoading, setMenuPanelsLoading] = useState(false);
   const [contextMenuActions, setContextMenuActions] = useState<Array<Action<object>>>([]);
+  const [quickActions, setQuickActions] = useState<Array<Action<object>>>([]);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
+  const [hoverActionPanels, setHoverActionPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
+
+  console.log({ contextMenuPanels });
 
   const [title, parentViewMode] = useBatchedOptionalPublishingSubjects(
     api?.panelTitle,
@@ -70,6 +79,8 @@ export const PresentationPanelContextMenu = ({
     getViewModeSubject(api ?? undefined)
   );
 
+  const quickActionIds = QUICK_ACTION_IDS[parentViewMode === 'edit' ? 'edit' : 'view'];
+
   useEffect(() => {
     if (!api) return;
 
@@ -79,7 +90,7 @@ export const PresentationPanelContextMenu = ({
 
     const handleActionCompatibilityChange = (isCompatible: boolean, action: Action<object>) => {
       if (cancelled) return;
-      setContextMenuActions((currentActions) => {
+      setQuickActions((currentActions) => {
         const newActions = currentActions?.filter((current) => current.id !== action.id);
         if (isCompatible) return [...newActions, action];
         return newActions;
@@ -112,7 +123,10 @@ export const PresentationPanelContextMenu = ({
         ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
       );
 
-      setContextMenuActions(compatibleActions);
+      console.log({ compatibleActions });
+
+      setContextMenuActions(compatibleActions.filter(({ id }) => !quickActionIds.includes(id)));
+      setQuickActions(compatibleActions.filter(({ id }) => quickActionIds.includes(id)));
 
       // subscribe to any frequently changing context menu actions
       const frequentlyChangingActions = uiActions.getFrequentlyChangingActionsForTrigger(
@@ -121,20 +135,23 @@ export const PresentationPanelContextMenu = ({
       );
 
       for (const frequentlyChangingAction of frequentlyChangingActions) {
-        subscriptions.add(
-          frequentlyChangingAction.subscribeToCompatibilityChanges(
-            apiContext,
-            (isCompatible, action) =>
-              handleActionCompatibilityChange(isCompatible, action as Action<object>)
-          )
-        );
+        if (quickActionIds.includes(frequentlyChangingAction.id)) {
+          subscriptions.add(
+            frequentlyChangingAction.subscribeToCompatibilityChanges(
+              apiContext,
+              (isCompatible, action) =>
+                handleActionCompatibilityChange(isCompatible, action as Action<object>)
+            )
+          );
+        }
       }
     })();
+
     return () => {
       cancelled = true;
       subscriptions.unsubscribe();
     };
-  }, [actionPredicate, api, getActions, isContextMenuOpen, parentViewMode]);
+  }, [actionPredicate, api, getActions, isContextMenuOpen, parentViewMode, quickActionIds]);
 
   useEffect(() => {
     if (!api) return;
@@ -150,7 +167,7 @@ export const PresentationPanelContextMenu = ({
       /**
        * Build context menu panel from actions
        */
-      const panels = await buildContextMenuForActions({
+      const menuPanels = await buildContextMenuForActions({
         actions: contextMenuActions.map((action) => ({
           action,
           context: apiContext,
@@ -159,10 +176,20 @@ export const PresentationPanelContextMenu = ({
         closeMenu: () => setIsContextMenuOpen(false),
       });
 
+      const quickActionsPanels = await buildContextMenuForActions({
+        actions: quickActions.map((action) => ({
+          action,
+          context: apiContext,
+          trigger: contextMenuTrigger,
+        })),
+        closeMenu: () => setIsContextMenuOpen(false),
+      });
+
       setMenuPanelsLoading(false);
-      setContextMenuPanels(panels);
+      setContextMenuPanels(menuPanels);
+      setHoverActionPanels(quickActionsPanels);
     })();
-  }, [api, contextMenuActions]);
+  }, [api, contextMenuActions, quickActions]);
 
   const showNotification = useMemo(
     () => contextMenuActions.some((action) => action.showNotification),
@@ -184,8 +211,6 @@ export const PresentationPanelContextMenu = ({
       iconType={'boxesVertical'}
     />
   );
-
-  const [mainMenu, moreMenu] = contextMenuPanels;
 
   return (
     <div className="embPanel__floatingActionsWrapper">
@@ -235,7 +260,7 @@ export const PresentationPanelContextMenu = ({
               </>
             ) : (
               <>
-                {mainMenu?.items?.map(
+                {hoverActionPanels[0]?.items?.map(
                   ({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
                     <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
                       <EuiButtonIcon
@@ -248,7 +273,7 @@ export const PresentationPanelContextMenu = ({
                     </EuiToolTip>
                   )
                 )}
-                {moreMenu?.items?.length && (
+                {contextMenuPanels.length && (
                   <EuiPopover
                     repositionOnScroll
                     panelPaddingSize="none"
@@ -277,8 +302,8 @@ export const PresentationPanelContextMenu = ({
                     ) : (
                       <EuiContextMenu
                         data-test-subj="presentationPanelContextMenuItems"
-                        initialPanelId={moreMenu.id}
-                        panels={[moreMenu]}
+                        initialPanelId={'mainMenu'}
+                        panels={contextMenuPanels}
                       />
                     )}
                   </EuiPopover>

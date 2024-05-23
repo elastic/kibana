@@ -36,6 +36,7 @@ export class LegacyUnlinkFromLibraryAction implements Action<EmbeddableApiContex
   public readonly type = ACTION_LEGACY_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_LEGACY_UNLINK_FROM_LIBRARY;
   public order = 15;
+  public grouping = [{ id: 'general', order: 5 }];
 
   private toastsService;
 

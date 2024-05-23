@@ -56,6 +56,7 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_COPY_TO_DASHBOARD;
   public readonly id = ACTION_COPY_TO_DASHBOARD;
   public order = 1;
+  public grouping = [{ id: 'general', order: 5 }];
 
   private dashboardCapabilities;
   private openModal;

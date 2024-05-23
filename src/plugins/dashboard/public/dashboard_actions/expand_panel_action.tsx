@@ -29,6 +29,7 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPAND_PANEL;
   public readonly id = ACTION_EXPAND_PANEL;
   public order = 19; // right after Explore in Discover which is 20
+  public grouping = [{ id: 'general', order: 5 }];
 
   constructor() {}
 

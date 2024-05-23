@@ -63,23 +63,23 @@ const onClick =
  * This method adds "More" item to panels, which have more than 4 items; and
  * moves all items after the thrird one into that "More" sub-menu.
  */
-const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
-  const panel = panels[id];
-  if (!panel) return;
-  const maxItemsBeforeWrapping = 3;
-  if (!panel.items) return;
-  if (panel.items.length <= maxItemsBeforeWrapping) return;
-  const visibleItems = panel.items.slice(0, maxItemsBeforeWrapping - 1) as ItemDescriptor[];
-  const itemsInSubmenu = panel.items.slice(maxItemsBeforeWrapping - 1) as ItemDescriptor[];
-  const morePanelId = panel.id + '__more';
+// const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
+//   const panel = panels[id];
+//   if (!panel) return;
+//   const maxItemsBeforeWrapping = 10;
+//   if (!panel.items) return;
+//   if (panel.items.length <= maxItemsBeforeWrapping) return;
+//   const visibleItems = panel.items.slice(0, maxItemsBeforeWrapping - 1) as ItemDescriptor[];
+//   const itemsInSubmenu = panel.items.slice(maxItemsBeforeWrapping - 1) as ItemDescriptor[];
+//   const morePanelId = panel.id + '__more';
 
-  panel.items = visibleItems;
-  const subPanel: PanelDescriptor = {
-    id: morePanelId,
-    items: itemsInSubmenu,
-  };
-  panels[morePanelId] = subPanel;
-};
+//   panel.items = visibleItems;
+//   const subPanel: PanelDescriptor = {
+//     id: morePanelId,
+//     items: itemsInSubmenu,
+//   };
+//   panels[morePanelId] = subPanel;
+// };
 
 const removeItemMetaFields = (items: ItemDescriptor[]): EuiContextMenuPanelItemDescriptor[] => {
   const euiItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -177,7 +177,9 @@ export async function buildContextMenuForActions({
     );
   }
 
-  wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
+  // wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
+
+  const sortedPanels = Object.values(panels).sort;
 
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
@@ -187,7 +189,7 @@ export async function buildContextMenuForActions({
           key: panel.id + '__separator',
         });
       }
-      if (panel.items.length > 3) {
+      if (panel.items.length > 5) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
           icon: panel._icon || 'empty',

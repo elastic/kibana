@@ -33,6 +33,7 @@ export class RemovePanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_REMOVE_PANEL;
   public readonly id = ACTION_REMOVE_PANEL;
   public order = 0;
+  public grouping = [{ id: 'remove_panel_group', order: 1 }];
 
   constructor() {}
 

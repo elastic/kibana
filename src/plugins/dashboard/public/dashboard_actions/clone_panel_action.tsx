@@ -40,6 +40,7 @@ export class ClonePanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_CLONE_PANEL;
   public readonly id = ACTION_CLONE_PANEL;
   public order = 45;
+  public grouping = [{ id: 'general', order: 5 }];
 
   constructor() {}
 
