@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-
 import {
     GeminiSimulator,
     geminiSuccessResponse,
@@ -21,7 +20,18 @@ const defaultConfig = {
     gcpProjectID: 'test-project'
   };
 const secrets = {
-  credentialsJSON: 'token12345',
+  credentialsJSON: JSON.stringify({
+    type: 'service_account',
+    project_id: '',
+    private_key_id: '',
+    private_key: '-----BEGIN PRIVATE KEY----------END PRIVATE KEY-----\n',
+    client_email: '',
+    client_id: '',
+    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: 'https://oauth2.googleapis.com/token',
+    auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+    client_x509_cert_url: '',
+  }),
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -282,27 +292,21 @@ export default function geminiTest({ getService }: FtrProviderContext) {
                   subActionParams: {
                     contents: [
                       {
-                        role: 'system',
-                        parts: [{
-                            text: 'Be a good chatbot',
-                        }] 
-                      },
-                      {
                         role: 'user',
                         parts: [{
-                            text: 'Hello world',
+                            text: 'Hello',
                         }],
                       },
                       {
                         role: 'model',
                         parts: [{
-                            text: 'Be a good chatbot',
+                            text: 'Hi there, how can I help you today?',
                         }] 
                       },
                       {
                         role: 'user',
                         parts: [{
-                            text: 'Be a good chatbot',
+                            text: 'Write the first line of a story about a magic backpack.',
                         }] 
                       }
                     ],
