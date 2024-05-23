@@ -41,12 +41,12 @@ export const RuleStatusFilter = (props: RuleStatusFilterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
   const onFilterItemChange: EuiSelectableProps['onChange'] = useCallback(
-    (newOptions: EuiSelectableOption[]) => {
+    async (newOptions: EuiSelectableOption[]) => {
       const selected = newOptions
         .filter(({ checked, key }) => checked && key)
         .map(({ key }) => key as RuleStatus);
 
-      onChange(selected);
+      await onChange(selected);
     },
     [onChange]
   );
