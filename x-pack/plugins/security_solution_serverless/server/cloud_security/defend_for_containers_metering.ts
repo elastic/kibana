@@ -56,13 +56,15 @@ const buildMeteringRecord = (
 };
 export const getHeartbeatRecords = async (
   esClient: ElasticsearchClient,
-  searchFrom: Date
+  searchFrom: Date,
+  searchAfter?: any[]
 ): Promise<SearchResponse<CloudDefendHeartbeat, Record<string, AggregationsAggregate>>> => {
   return await esClient.search<CloudDefendHeartbeat>(
     {
       index: CLOUD_DEFEND_HEARTBEAT_INDEX,
       size: BATCH_SIZE,
-      sort: 'event.ingested',
+      sort: [{ 'event.ingested': 'asc' }, { _id: 'asc' }],
+      search_after: searchAfter,
       query: {
         bool: {
           must: [
@@ -96,32 +98,44 @@ export const getCloudDefendUsageRecord = async ({
   logger,
 }: CloudSecurityMeteringCallbackInput): Promise<UsageRecord[] | undefined> => {
   try {
-    const usageRecords = await getHeartbeatRecords(esClient, lastSuccessfulReport);
+    let allRecords: UsageRecord[] = [];
+    let searchAfter: any[] | undefined = undefined;
+    let fetchMore = true;
 
-    logger.error(`usage records: ${JSON.stringify(usageRecords)}`);
+    while (fetchMore) {
+      const usageRecords = await getHeartbeatRecords(esClient, lastSuccessfulReport, searchAfter);
 
-    if (!usageRecords?.hits?.hits?.length) {
-      return [];
-    }
-
-    const records = usageRecords.hits.hits.reduce((acc, { _source }) => {
-      if (!_source) {
-        return acc;
+      if (!usageRecords?.hits?.hits?.length) {
+        break;
       }
 
-      const { event } = _source;
-      const record = buildMeteringRecord(
-        _source['agent.id'],
-        event.ingested,
-        taskId,
-        tier,
-        projectId
-      );
+      const records = usageRecords.hits.hits.reduce((acc, { _source }) => {
+        if (!_source) {
+          return acc;
+        }
 
-      return [...acc, record];
-    }, [] as UsageRecord[]);
+        const { event } = _source;
+        const record = buildMeteringRecord(
+          _source['agent.id'],
+          event.ingested,
+          taskId,
+          tier,
+          projectId
+        );
 
-    return records;
+        return [...acc, record];
+      }, [] as UsageRecord[]);
+
+      allRecords = [...allRecords, ...records];
+
+      if (usageRecords.hits.hits.length < BATCH_SIZE) {
+        fetchMore = false;
+      } else {
+        searchAfter = usageRecords.hits.hits[usageRecords.hits.hits.length - 1].sort;
+      }
+    }
+
+    return allRecords;
   } catch (err) {
     logger.error(`Failed to fetch ${cloudSecuritySolution} metering data ${err}`);
   }
