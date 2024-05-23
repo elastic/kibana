@@ -64,17 +64,19 @@ export class ExplorerChartDistribution extends React.Component {
   constructor(props) {
     super(props);
     this.chartScales = undefined;
-    this.cursor = undefined;
+    this.cursorStateSubscription = undefined;
   }
   componentDidMount() {
     this.renderChart();
-    this.cursor = this.props.cursor$.pipe(filter((c) => c.isDateHistogram)).subscribe((cursor) => {
-      this.drawCursor(cursor.cursor);
-    });
+    this.cursorStateSubscription = this.props.cursor$
+      .pipe(filter((c) => c.isDateHistogram))
+      .subscribe((cursor) => {
+        this.drawCursor(cursor.cursor);
+      });
   }
 
   componentWillUnmount() {
-    this.cursor?.unsubscribe();
+    this.cursorStateSubscription?.unsubscribe();
   }
 
   componentDidUpdate() {

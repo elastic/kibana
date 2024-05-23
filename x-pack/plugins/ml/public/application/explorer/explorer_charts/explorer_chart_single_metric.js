@@ -68,13 +68,15 @@ export class ExplorerChartSingleMetric extends React.Component {
   componentDidMount() {
     this.renderChart();
 
-    this.cursor = this.props.cursor$.pipe(filter((c) => c.isDateHistogram)).subscribe((cursor) => {
-      this.drawCursor(cursor.cursor);
-    });
+    this.cursorStateSubscription = this.props.cursor$
+      .pipe(filter((c) => c.isDateHistogram))
+      .subscribe((cursor) => {
+        this.drawCursor(cursor.cursor);
+      });
   }
 
   componentWillUnmount() {
-    this.cursor?.unsubscribe();
+    this.cursorStateSubscription?.unsubscribe();
   }
 
   componentDidUpdate() {
