@@ -174,7 +174,7 @@ export const DocViewerTable = ({
   );
 
   const fieldToItem = useCallback(
-    (field: string) => {
+    (field: string, isPinned: boolean) => {
       const fieldMapping = mapping(field);
       const displayName = fieldMapping?.displayName ?? field;
       const columnMeta = columnsMeta?.[field];
@@ -202,7 +202,7 @@ export const DocViewerTable = ({
           fieldMapping,
           fieldType,
           scripted: Boolean(fieldMapping?.scripted),
-          pinned: pinnedFields.includes(displayName),
+          pinned: isPinned,
           onTogglePinned,
         },
         value: {
@@ -226,7 +226,6 @@ export const DocViewerTable = ({
       columns,
       columnsMeta,
       flattened,
-      pinnedFields,
       onTogglePinned,
       fieldFormats,
     ]
@@ -256,7 +255,7 @@ export const DocViewerTable = ({
         }
 
         if (pinnedFields.includes(curFieldName)) {
-          acc.pinnedItems.push(fieldToItem(curFieldName));
+          acc.pinnedItems.push(fieldToItem(curFieldName, true));
         } else {
           const fieldMapping = mapping(curFieldName);
           if (
@@ -267,7 +266,7 @@ export const DocViewerTable = ({
             )
           ) {
             // filter only unpinned fields
-            acc.restItems.push(fieldToItem(curFieldName));
+            acc.restItems.push(fieldToItem(curFieldName, false));
           }
         }
 
