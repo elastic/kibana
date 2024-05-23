@@ -9,7 +9,12 @@
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
 import { VisualizeSerializedState } from '../../../react_embeddable/types';
-import { ByValueVisInstance, IEditorController, VisualizeServices } from '../../types';
+import {
+  ByValueVisInstance,
+  EmbeddableApiHandler,
+  IEditorController,
+  VisualizeServices,
+} from '../../types';
 import { getEditBreadcrumbs, getEditServerlessBreadcrumbs } from '../breadcrumbs';
 import { getVisualizationInstanceFromInput } from '../get_visualization_instance';
 
@@ -17,7 +22,7 @@ export const useVisByValue = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
-  embeddableApiHandler: any,
+  embeddableApiHandler: EmbeddableApiHandler,
   valueInput?: VisualizeSerializedState,
   originatingApp?: string,
   originatingPath?: string

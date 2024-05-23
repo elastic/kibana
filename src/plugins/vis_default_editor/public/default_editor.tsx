@@ -108,14 +108,16 @@ function DefaultEditor({
               >
                 <ReactEmbeddableRenderer<VisualizeSerializedState, VisualizeApi>
                   type={VISUALIZE_EMBEDDABLE_TYPE}
-                  state={{
-                    rawState: {
-                      id: '',
-                      savedVis: vis.serialize(),
-                    },
-                    references: [],
-                  }}
-                  parentApi={parentApi}
+                  getParentApi={() => ({
+                    ...parentApi,
+                    getSerializedStateForChild: () => ({
+                      rawState: {
+                        id: '',
+                        savedVis: vis.serialize(),
+                      },
+                      references: [],
+                    }),
+                  })}
                   onApiAvailable={(api) => {
                     api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
                     const [, setOpenInspector] = embeddableApiHandler.openInspector;

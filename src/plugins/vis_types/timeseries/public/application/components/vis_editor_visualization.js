@@ -195,16 +195,18 @@ class VisEditorVisualizationUI extends Component {
         >
           <ReactEmbeddableRenderer
             type={VISUALIZE_EMBEDDABLE_TYPE}
-            state={{
-              rawState: {
-                id: '',
-                savedVis: this.getSavedVis(),
-                title: title,
-                description: description,
-              },
-              references: [],
-            }}
-            parentApi={this._parentApi}
+            getParentApi={() => ({
+              ...this._parentApi,
+              getSerializedStateForChild: () => ({
+                rawState: {
+                  id: '',
+                  savedVis: this.getSavedVis(),
+                  title,
+                  description,
+                },
+                references: [],
+              }),
+            })}
             onApiAvailable={(api) => {
               this.updateVis = () => api.setVis(this.getSavedVis());
               api.subscribeToInitialRender(() =>

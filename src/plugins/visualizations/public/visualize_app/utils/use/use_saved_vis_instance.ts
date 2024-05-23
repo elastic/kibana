@@ -14,7 +14,12 @@ import { useEffect, useRef, useState } from 'react';
 import { VisualizeSerializedState } from '../../../react_embeddable/types';
 import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
-import { IEditorController, SavedVisInstance, VisualizeServices } from '../../types';
+import {
+  EmbeddableApiHandler,
+  IEditorController,
+  SavedVisInstance,
+  VisualizeServices,
+} from '../../types';
 import {
   getCreateBreadcrumbs,
   getCreateServerlessBreadcrumbs,
@@ -32,6 +37,7 @@ export const useSavedVisInstance = (
   services: VisualizeServices,
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
+  embeddableApiHandler: EmbeddableApiHandler,
   originatingApp: string | undefined,
   visualizationIdFromUrl: string | undefined,
   embeddableInput?: VisualizeSerializedState
@@ -99,6 +105,7 @@ export const useSavedVisInstance = (
           );
         }
 
+        console.log('EMBEDDABLE INPUT', embeddableInput);
         if (embeddableInput && embeddableInput.timeRange) {
           savedVisInstance.panelTimeRange = embeddableInput.timeRange;
         }
@@ -148,7 +155,12 @@ export const useSavedVisInstance = (
             const Editor = visEditorsRegistry.get(vis.type.editorConfig?.editor);
 
             if (Editor) {
-              visEditorController = new Editor(visEditorRef.current, vis, eventEmitter);
+              visEditorController = new Editor(
+                visEditorRef.current,
+                vis,
+                eventEmitter,
+                embeddableApiHandler
+              );
             }
           }
         }
@@ -197,6 +209,7 @@ export const useSavedVisInstance = (
     state.savedVisInstance,
     state.visEditorController,
     embeddableInput,
+    embeddableApiHandler,
   ]);
 
   useEffect(() => {

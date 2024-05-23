@@ -65,6 +65,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     services,
     eventEmitter,
     isChromeVisible,
+    embeddableApiHandler,
     originatingApp,
     visualizationIdFromUrl,
     embeddableInput
