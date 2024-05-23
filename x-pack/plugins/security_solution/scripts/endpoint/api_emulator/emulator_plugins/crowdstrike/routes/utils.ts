@@ -4,6 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export const buildCrowdstrikeRoutePath = (path: string): string => {
+  if (!path.startsWith('/')) {
+    throw new Error(`'path' must start with '/'!`);
+  }
 
-export { ActionsClientChatOpenAI } from './chat_openai';
-export { ActionsClientLlm } from './llm';
+  return path;
+};
