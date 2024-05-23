@@ -12,7 +12,9 @@ import { i18n } from '@kbn/i18n';
 import { DocViewFilterFn, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 
 export interface TableRow {
-  action: Omit<FieldRecordLegacy['action'], 'isActive'>;
+  action: Omit<FieldRecordLegacy['action'], 'isActive'> & {
+    isAddedAsColumn: (field: string) => boolean;
+  };
   field: {
     pinned: boolean;
     onTogglePinned: (field: string) => void;
