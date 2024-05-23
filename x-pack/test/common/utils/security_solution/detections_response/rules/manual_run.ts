@@ -23,7 +23,7 @@ export const manualRuleRun = async ({
   start: string;
   end: string;
   namespace?: string;
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
 }): Promise<ScheduleBackfillResponse> => {
   const route = routeWithNamespace(BACKFILL_RULE_URL_SCHEDULE, namespace);
   const response = await supertest
