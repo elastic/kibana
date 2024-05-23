@@ -119,3 +119,13 @@ export const SCHEMA_SEARCH_MODEL_VERSION_3 = SCHEMA_SEARCH_MODEL_VERSION_2.exten
     ])
   ),
 });
+
+export const SCHEMA_SEARCH_MODEL_VERSION_4 = SCHEMA_SEARCH_MODEL_VERSION_3.extends({
+  viewMode: schema.maybe(
+    schema.oneOf([
+      schema.literal(VIEW_MODE.DOCUMENT_LEVEL),
+      schema.literal(VIEW_MODE.PATTERN_LEVEL),
+      schema.literal(VIEW_MODE.AGGREGATED_LEVEL),
+    ])
+  ),
+});
