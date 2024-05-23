@@ -8,6 +8,7 @@
 // eslint-disable-next-line max-classes-per-file
 import {
   CreateConcreteWriteIndexOpts,
+  SetConcreteWriteIndexOpts,
   ConcreteIndexInfo,
   updateIndexMappings,
 } from './create_concrete_write_index';
@@ -186,9 +187,11 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
     // If there are some concrete indices but none of them are the write index, we'll throw an error
     // because one of the existing indices should have been the write target.
     if (concreteIndicesExist && !concreteWriteIndicesExist) {
-      throw new Error(
+      logger.error(
         `Indices matching pattern ${indexPatterns.pattern} exist but none are set as the write index for alias ${indexPatterns.alias}`
       );
+      await setConcreteWriteIndex({ logger, esClient, indexPatterns });
+      return;
     }
   }
 
@@ -220,13 +223,45 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
           { logger }
         );
         if (!existingIndices[indexPatterns.name]?.aliases?.[indexPatterns.alias]?.is_write_index) {
-          throw Error(
+          logger.error(
             `Attempted to create index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}, but the index already exists and is not the write index for the alias`
           );
+          await setConcreteWriteIndex({ logger, esClient, indexPatterns });
         }
       } else {
         throw error;
       }
     }
+  }
+}
+
+async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
+  const { logger, esClient, indexPatterns } = opts;
+  logger.debug(
+    `Attempting to set index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}.`
+  );
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.updateAliases({
+          body: {
+            actions: [
+              { remove: { index: indexPatterns.name, alias: indexPatterns.alias } },
+              {
+                add: {
+                  index: indexPatterns.name,
+                  alias: indexPatterns.alias,
+                  is_write_index: true,
+                },
+              },
+            ],
+          },
+        }),
+      { logger }
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to set index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}.`
+    );
   }
 }

@@ -165,3 +165,9 @@ export interface CreateConcreteWriteIndexOpts {
 export const createConcreteWriteIndex = async (opts: CreateConcreteWriteIndexOpts) => {
   await opts.dataStreamAdapter.createStream(opts);
 };
+
+export interface SetConcreteWriteIndexOpts {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+  indexPatterns: IIndexPatternString;
+}
