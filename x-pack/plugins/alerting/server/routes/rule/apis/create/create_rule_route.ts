@@ -32,6 +32,10 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id?}`,
+      options: {
+        access: 'public',
+        description: `Create a rule`,
+      },
       validate: {
         body: createBodySchemaV1,
         params: createParamsSchemaV1,
