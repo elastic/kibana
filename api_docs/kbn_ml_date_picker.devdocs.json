@@ -176,6 +176,53 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
+        "id": "def-common.getTimeFieldRange",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeFieldRange",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "(options: GetTimeFieldRangeOptions) => Promise<",
+          {
+            "pluginId": "@kbn/ml-date-picker",
+            "scope": "common",
+            "docId": "kibKbnMlDatePickerPluginApi",
+            "section": "def-common.GetTimeFieldRangeResponse",
+            "text": "GetTimeFieldRangeResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/packages/ml/date_picker/src/services/time_field_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-common.getTimeFieldRange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- GetTimeFieldRangeOptions"
+            ],
+            "signature": [
+              "GetTimeFieldRangeOptions"
+            ],
+            "path": "x-pack/packages/ml/date_picker/src/services/time_field_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "GetTimeFieldRangeResponse"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-picker",
         "id": "def-common.getTimeFilterRange",
         "type": "Function",
         "tags": [],
