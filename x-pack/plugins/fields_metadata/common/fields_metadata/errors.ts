@@ -5,10 +5,20 @@
  * 2.0.
  */
 
-export class PackageNotFoundError extends Error {
+/* eslint-disable max-classes-per-file */
+
+export class FetchFieldsMetadataError extends Error {
   constructor(message: string, public cause?: Error) {
     super(message);
     Object.setPrototypeOf(this, new.target.prototype);
-    this.name = 'PackageNotFoundError';
+    this.name = 'FetchFieldsMetadataError';
+  }
+}
+
+export class DecodeFieldsMetadataError extends Error {
+  constructor(message: string, public cause?: Error) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'DecodeFieldsMetadataError';
   }
 }

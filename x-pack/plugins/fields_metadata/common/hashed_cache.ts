@@ -6,6 +6,7 @@
  */
 import LRUCache from 'lru-cache';
 import hash from 'object-hash';
+
 export interface IHashedCache<KeyType, ValueType> {
   get(key: KeyType): ValueType | undefined;
   set(key: KeyType, value: ValueType): boolean;

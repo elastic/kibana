@@ -13,7 +13,12 @@ import {
   FindFieldsMetadataResponsePayload,
   findFieldsMetadataResponsePayloadRT,
 } from '../../../common/latest';
-import { FIND_FIELDS_METADATA_URL } from '../../../common/fields_metadata';
+import {
+  DecodeFieldsMetadataError,
+  FetchFieldsMetadataError,
+  FieldName,
+  FIND_FIELDS_METADATA_URL,
+} from '../../../common/fields_metadata';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { IFieldsMetadataClient } from './types';
 
@@ -37,13 +42,17 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     const response = await this.http
       .get(FIND_FIELDS_METADATA_URL, { query, version: '1' })
       .catch((error) => {
-        throw new Error(`Failed to fetch ecs fields ${params.fieldNames?.join() ?? ''}: ${error}`);
+        throw new FetchFieldsMetadataError(
+          `Failed to fetch fields ${truncateFieldNamesList(params.fieldNames)}: ${error.message}`
+        );
       });
 
     const data = decodeOrThrow(
       findFieldsMetadataResponsePayloadRT,
       (message: string) =>
-        new Error(`Failed to decode ecs fields ${params.fieldNames?.join() ?? ''}: ${message}"`)
+        new DecodeFieldsMetadataError(
+          `Failed decoding fields ${truncateFieldNamesList(params.fieldNames)}: ${message}`
+        )
     )(response);
 
     // Store cached results for given request parameters
@@ -52,3 +61,14 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     return data;
   }
 }
+
+const truncateFieldNamesList = (fieldNames?: FieldName[]) => {
+  if (!fieldNames || fieldNames.length === 0) return '';
+
+  const visibleFields = fieldNames.slice(0, 3);
+  const additionalFieldsCount = fieldNames.length - visibleFields.length;
+
+  return visibleFields
+    .join()
+    .concat(additionalFieldsCount > 0 ? `+${additionalFieldsCount} fields` : '');
+};
