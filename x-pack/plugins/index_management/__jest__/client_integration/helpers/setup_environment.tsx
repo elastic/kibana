@@ -86,6 +86,7 @@ const appDependencies = {
     enableDataStreamsStorageColumn: true,
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
+    enableSemanticText: false,
   },
 } as any;
 

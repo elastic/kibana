@@ -62,6 +62,7 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
+    enableSemanticText: schema.boolean({ defaultValue: false }),
   },
   { defaultValue: undefined }
 );
@@ -76,6 +77,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableDataStreamsStorageColumn: true,
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
+    enableSemanticText: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],

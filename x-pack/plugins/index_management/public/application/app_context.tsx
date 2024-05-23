@@ -64,6 +64,7 @@ export interface AppDependencies {
     enableDataStreamsStorageColumn: boolean;
     enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
+    enableSemanticText: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: (type: IndexManagementBreadcrumb, additionalBreadcrumb?: EuiBreadcrumb) => void;
