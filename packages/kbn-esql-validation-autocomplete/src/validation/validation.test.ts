@@ -309,18 +309,18 @@ describe('validation logic', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
           testErrorsAndWarnings(command, [
-            `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
+            `SyntaxError: mismatched input '${command}' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
           ])
       );
     });
 
     describe('from', () => {
       testErrorsAndWarnings('f', [
-        `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}`,
+        `SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}`,
       ]);
-      testErrorsAndWarnings(`from `, ["SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"]);
+      testErrorsAndWarnings(`from `, ["SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"]);
       testErrorsAndWarnings(`from index,`, [
-        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'",
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'",
       ]);
       testErrorsAndWarnings(`from assignment = 1`, [
         "SyntaxError: mismatched input '=' expecting <EOF>",
