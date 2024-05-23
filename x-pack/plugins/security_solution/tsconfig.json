@@ -202,6 +202,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
     "@kbn/field-utils",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/langchain",
     "@kbn/core-analytics-browser",
     "@kbn/core-i18n-browser",
     "@kbn/core-theme-browser"

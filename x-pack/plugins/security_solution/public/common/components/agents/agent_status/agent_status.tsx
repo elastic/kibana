@@ -16,7 +16,6 @@ import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../management/pages/endpoin
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
 import { getAgentStatusText } from '../agent_status_text';
 import { AgentResponseActionsStatus } from './agent_response_action_status';
-
 export enum SENTINEL_ONE_NETWORK_STATUS {
   CONNECTING = 'connecting',
   CONNECTED = 'connected',
@@ -46,9 +45,12 @@ export const AgentStatus = React.memo(
     const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
       'sentinelOneManualHostActionsEnabled'
     );
-
+    const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
+      'responseActionsCrowdstrikeManualHostIsolationEnabled'
+    );
     const { data, isLoading, isFetched } = useAgentStatus([agentId], agentType, {
-      enabled: sentinelOneManualHostActionsEnabled,
+      enabled:
+        sentinelOneManualHostActionsEnabled || responseActionsCrowdstrikeManualHostIsolationEnabled,
     });
     const agentStatus = data?.[`${agentId}`];
     const isCurrentlyIsolated = Boolean(agentStatus?.isolated);

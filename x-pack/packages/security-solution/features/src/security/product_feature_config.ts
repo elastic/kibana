@@ -105,6 +105,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       SecuritySubFeatureId.processOperations,
       SecuritySubFeatureId.fileOperations,
       SecuritySubFeatureId.executeAction,
+      SecuritySubFeatureId.scanAction,
     ],
     subFeaturesPrivileges: [
       {
