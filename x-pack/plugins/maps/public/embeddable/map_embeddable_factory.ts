@@ -8,6 +8,7 @@
 import { first } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
+import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON, MAP_EMBEDDABLE_NAME } from '../../common/constants';
 import { extract, inject } from '../../common/embeddable';
 import { MapByReferenceInput, MapEmbeddableInput } from './types';
@@ -22,6 +23,8 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     type: MAP_SAVED_OBJECT_TYPE,
     getIconForSavedObject: () => APP_ICON,
   };
+
+  grouping = COMMON_VISUALIZATION_GROUPING;
 
   async isEditable() {
     return getMapsCapabilities().save as boolean;

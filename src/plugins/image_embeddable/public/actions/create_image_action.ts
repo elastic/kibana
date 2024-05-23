@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { CanAddNewPanel } from '@kbn/presentation-containers';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/dashboard-plugin/public';
 import {
@@ -46,6 +47,7 @@ export const registerCreateImageAction = () => {
         // swallow the rejection, since this just means the user closed without saving
       }
     },
+    grouping: [COMMON_EMBEDDABLE_GROUPING.annotation],
     getDisplayName: () =>
       i18n.translate('imageEmbeddable.imageEmbeddableFactory.displayName', {
         defaultMessage: 'Image',

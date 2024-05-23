@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the promoted vis types for the first step', async function () {
-      const expectedChartTypes = ['Custom visualization', 'Lens', 'Maps', 'TSVB'];
+      const expectedChartTypes = ['Custom visualization', 'Lens', 'Maps'];
 
       // find all the chart types and make sure there all there
       const chartTypes = (await PageObjects.visualize.getPromotedVisTypes()).sort();

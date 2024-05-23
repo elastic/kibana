@@ -9,8 +9,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
-import { COMMON_VISUALIZATION_GROUPING } from '../../embeddable/common/constants';
 
 const ACTION_CREATE_ESQL_CHART = 'ACTION_CREATE_ESQL_CHART';
 

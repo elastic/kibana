@@ -22,6 +22,7 @@ import { map } from 'rxjs';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { COMMON_EMBEDDABLE_GROUPING } from '@kbn/embeddable-plugin/public';
 import type { InfraPublicConfig } from '../common/plugin_config_types';
 import { createInventoryMetricRuleType } from './alerting/inventory';
 import { createLogThresholdRuleType } from './alerting/log_threshold';
@@ -400,6 +401,7 @@ export class Plugin implements InfraClientPluginClass {
 
     plugins.uiActions.registerAction<EmbeddableApiContext>({
       id: ADD_LOG_STREAM_ACTION_ID,
+      grouping: [COMMON_EMBEDDABLE_GROUPING.legacy],
       getDisplayName: () =>
         i18n.translate('xpack.infra.logStreamEmbeddable.displayName', {
           defaultMessage: 'Log stream',
