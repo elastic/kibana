@@ -37,11 +37,11 @@ import {
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
 
 import { CHART_TYPE } from '../explorer_constants';
-import { TRANSPARENT_BACKGROUND } from './constants';
+import { CHART_HEIGHT, TRANSPARENT_BACKGROUND } from './constants';
 import { filter } from 'rxjs';
+import { drawCursor } from './utils/draw_anomaly_explorer_charts_cursor';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
-const CHART_HEIGHT = 170;
 const SCHEDULED_EVENT_MARKER_HEIGHT = 5;
 
 // If a rare/event-distribution chart has a cardinality of 10 or less,
@@ -71,7 +71,14 @@ export class ExplorerChartDistribution extends React.Component {
     this.cursorStateSubscription = this.props.cursor$
       .pipe(filter((c) => c.isDateHistogram))
       .subscribe((cursor) => {
-        this.drawCursor(cursor.cursor);
+        drawCursor(
+          cursor.cursor,
+          this.rootNode,
+          this.props.id,
+          this.props.seriesConfig,
+          this.chartScales,
+          this.props.chartTheme
+        );
       });
   }
 
@@ -81,47 +88,6 @@ export class ExplorerChartDistribution extends React.Component {
 
   componentDidUpdate() {
     this.renderChart();
-  }
-
-  drawCursor(cursor) {
-    if (!this.chartScales) return;
-    const { lineChartXScale, margin: updatedMargin } = this.chartScales;
-    const { id: chartId, seriesConfig: config } = this.props;
-
-    const element = this.rootNode;
-    const chartElement = d3.select(element).select('#ml-explorer-chart-svg' + chartId);
-    if (!chartElement || !lineChartXScale) return;
-    const { chartTheme } = this.props;
-    chartElement.select('.ml-anomaly-chart-cursor-line').remove();
-
-    const cursorData =
-      cursor &&
-      cursor.type === 'Over' &&
-      cursor.x >= config.plotEarliest &&
-      cursor.x <= config.plotLatest
-        ? [cursor.x]
-        : [];
-
-    const cursorMouseLine = chartElement
-      .append('g')
-      .attr('class', 'ml-anomaly-chart-cursor')
-      .selectAll('.ml-anomaly-chart-cursor-line')
-      .data(cursorData);
-
-    cursorMouseLine
-      .enter()
-      .append('path')
-      .attr('class', 'ml-anomaly-chart-cursor-line')
-      .attr('d', (ts) => {
-        const xPosition = lineChartXScale(ts);
-        return `M${xPosition},${CHART_HEIGHT} ${xPosition},0`;
-      })
-      // Use elastic chart's cursor line style if possible
-      .style('stroke', chartTheme.crosshair.line.stroke)
-      .style('stroke-width', `${chartTheme.crosshair.line.strokeWidth}px`)
-      .style('stroke-dasharray', chartTheme.crosshair.line.dash?.join(',') ?? '4,4')
-      .attr('transform', 'translate(' + updatedMargin.left + ',' + updatedMargin.top + ')');
-    cursorMouseLine.exit().remove();
   }
 
   renderChart() {
