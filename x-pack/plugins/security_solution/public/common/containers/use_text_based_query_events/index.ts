@@ -9,8 +9,9 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { Subscription } from 'rxjs';
 import { lastValueFrom, pluck } from 'rxjs';
 import { useQuery } from '@tanstack/react-query';
 
@@ -40,6 +41,19 @@ interface TextBasedErrorResponse {
   type: 'error';
 }
 
+interface TextBasedRequestPayload {
+  query: AggregateQuery;
+  filters?: Filter[];
+  inputQuery?: Query;
+  timeRange: TimeRange;
+}
+
+const defaultTextBasedQueryResponse: SecuritySolutionTextBasedQueryResponse = {
+  data: [],
+  columns: [],
+  warnings: undefined,
+};
+
 export const useTextBasedEvents = ({
   query,
   dataView,
@@ -50,7 +64,13 @@ export const useTextBasedEvents = ({
   timeRange,
 }: UseTextBasedEventsArgs) => {
   const abortController = useRef(new AbortController());
-  const [isLoading, setIsLoading] = useState(false);
+  const queryDataSubscriptionRef = useRef<Subscription | null>(null);
+
+  useEffect(() => {
+    return () => {
+      queryDataSubscriptionRef.current?.unsubscribe();
+    };
+  }, []);
 
   const convertQueryToAst = useCallback(() => {
     return textBasedQueryStateToAstWithValidation({
@@ -62,86 +82,70 @@ export const useTextBasedEvents = ({
       titleForInspector: 'ESQL Inspector',
       descriptionForInspector: 'ESQL Query for Security Solution',
     });
-  }, [query, dataView, filters, inputQuery, timeRange]);
+  }, [dataView, filters, timeRange, inputQuery, query]);
 
-  const fetchEvents: () => Promise<SecuritySolutionTextBasedQueryResponse> =
-    useCallback(async () => {
-      setIsLoading(true);
-      const ast = await convertQueryToAst();
-      if (!ast) {
-        return {
-          data: [],
-          columns: [],
-          warnings: undefined,
-        };
+  const fetchEvents = useCallback(async () => {
+    const ast = await convertQueryToAst();
+    if (!ast) {
+      return defaultTextBasedQueryResponse;
+    }
+
+    const contract = expressions.execute(ast, null, {
+      inspectorAdapters,
+    });
+
+    abortController.current.signal?.addEventListener('abort', () => {
+      contract.cancel();
+    });
+
+    const execution = contract.getData();
+    let finalData: DataTableRecord[] = [];
+    let textBasedQueryColumns: Datatable['columns'] = [];
+    let error: string | undefined;
+    let textBasedHeaderWarning: string | undefined;
+
+    if (queryDataSubscriptionRef.current) {
+      queryDataSubscriptionRef.current.unsubscribe();
+    }
+
+    queryDataSubscriptionRef.current = execution.pipe(pluck('result')).subscribe((resp) => {
+      const response = resp as Datatable | TextBasedErrorResponse;
+      if ('type' in response && response.type === 'error') {
+        error = response.error.message;
+      } else {
+        const table = response as Datatable;
+        const rows = table?.rows ?? [];
+        finalData = rows.map((row: Record<string, string>, idx: number) => {
+          return {
+            id: String(idx),
+            raw: row,
+            flattened: row,
+          } as unknown as DataTableRecord;
+        });
+
+        textBasedQueryColumns = table?.columns ?? [];
+        textBasedHeaderWarning = table.warning ?? undefined;
       }
+    });
 
-      const contract = expressions.execute(ast, null, {
-        inspectorAdapters,
-      });
+    if (error) {
+      throw new Error(error);
+    }
 
-      abortController.current.signal?.addEventListener('abort', () => {
-        contract.cancel();
-      });
+    await lastValueFrom(execution);
 
-      const execution = contract.getData();
-      let finalData: DataTableRecord[] = [];
-      let textBasedQueryColumns: Datatable['columns'] = [];
-      let error: string | undefined;
-      let textBasedHeaderWarning: string | undefined;
+    return {
+      data: finalData,
+      columns: textBasedQueryColumns,
+      warnings: textBasedHeaderWarning,
+    };
+  }, [convertQueryToAst, expressions, inspectorAdapters]);
 
-      execution.pipe(pluck('result')).subscribe((resp) => {
-        const response = resp as Datatable | TextBasedErrorResponse;
-        if ('type' in response && response.type === 'error') {
-          error = response.error.message;
-        } else {
-          const table = response as Datatable;
-          const rows = table?.rows ?? [];
-          finalData = rows.map((row: Record<string, string>, idx: number) => {
-            return {
-              id: String(idx),
-              raw: row,
-              flattened: row,
-            } as unknown as DataTableRecord;
-          });
-
-          textBasedQueryColumns = table?.columns ?? [];
-          textBasedHeaderWarning = table.warning ?? undefined;
-        }
-
-        setIsLoading(false);
-      });
-
-      if (error) {
-        throw new Error(error);
-      }
-
-      await lastValueFrom(execution);
-
-      const returnOutput = {
-        data: finalData,
-        columns: textBasedQueryColumns,
-        warnings: textBasedHeaderWarning,
-      };
-
-      return returnOutput;
-    }, [convertQueryToAst, expressions, inspectorAdapters]);
-
-  const { isLoading: isQueryLoading, ...result } = useQuery(['esql'], fetchEvents, {
-    enabled: false,
+  const queryResult = useQuery(['esql', query, timeRange, filters], fetchEvents, {
+    enabled: true,
     refetchOnWindowFocus: false,
-    initialData: {
-      data: [],
-      columns: [],
-      warnings: undefined,
-    },
+    initialData: defaultTextBasedQueryResponse,
   });
 
-  return useMemo(
-    () => ({
-      ...result,
-      isLoading: isQueryLoading || isLoading,
-    }),
-    [result, isLoading, isQueryLoading]
-  );
+  return queryResult;
 };

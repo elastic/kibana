@@ -13,50 +13,58 @@ interface UseValidateSecuritySolutionESQLQueryArgs {
   query: AggregateQuery;
 }
 
+export function getESQLSourceCommand(ast: ESQLAst) {
+  const commandClause = ast.find((clause) => clause.type === 'command');
+  return commandClause && 'name' in commandClause ? commandClause.name : undefined;
+}
+
+export function getESQLHasKeepClause(ast: ESQLAst) {
+  return ast.some((clause) => clause.name === 'keep');
+}
+
+export function getESQLMetaDataColumns(ast: ESQLAst) {
+  const fromClause = ast.find((clause) => clause.name === 'from');
+  const metadataClause = fromClause?.args.find((arg) => 'name' in arg && arg.name === 'metadata');
+  const metadataColumns =
+    (metadataClause as ESQLCommandOption | undefined)?.args.map((arg) =>
+      'name' in arg ? arg.name : ''
+    ) || [];
+  return metadataColumns;
+}
+
+export function parseESQLQuery(query: AggregateQuery) {
+  const { ast: _ast, errors: _errors } = getAstAndSyntaxErrors(query.esql);
+  return {
+    ast: _ast,
+    errors: _errors,
+  };
+}
+
 export function useValidateSecuritySolutionESQLQuery({
   query,
 }: UseValidateSecuritySolutionESQLQueryArgs) {
   const [errors, setErrors] = useState<EditorError[]>([]);
 
-  const [ast, setAst] = useState<ESQLAst>(getAstAndSyntaxErrors(query.esql).ast);
+  const [ast, setAst] = useState<ESQLAst>(parseESQLQuery(query).ast);
 
   const parseQuery = useCallback(() => {
-    const { ast: _ast, errors: _errors } = getAstAndSyntaxErrors(query.esql);
+    const { ast: _ast, errors: _errors } = parseESQLQuery(query);
     setAst(_ast);
     setErrors(_errors);
-  }, [query.esql]);
+  }, [query]);
 
   useEffect(() => {
     parseQuery();
   }, [parseQuery]);
 
-  const hasKeepClause = useMemo(() => {
-    return ast.some((clause) => clause.name === 'keep');
-  }, [ast]);
+  const validationResult = useMemo(() => {
+    return {
+      errors,
+      hasKeepClause: getESQLHasKeepClause(ast),
+      metaDataColumns: getESQLMetaDataColumns(ast),
+      command: getESQLSourceCommand(ast),
+    };
+  }, [ast, errors]);
 
-  const command = useMemo(() => {
-    const commandClause = ast.find((clause) => clause.type === 'command');
-
-    return commandClause && 'name' in commandClause ? commandClause.name : undefined;
-  }, [ast]);
-
-  const metaDataColumns = useMemo(() => {
-    const fromClause = ast.find((clause) => clause.name === 'from');
-
-    const metadataClause = fromClause?.args.find((arg) => 'name' in arg && arg.name === 'metadata');
-
-    const metadataColumns =
-      (metadataClause as ESQLCommandOption | undefined)?.args.map((arg) =>
-        'name' in arg ? arg.name : ''
-      ) || [];
-
-    return metadataColumns;
-  }, [ast]);
-
-  return {
-    errors,
-    hasKeepClause,
-    metaDataColumns,
-    command,
-  };
+  return validationResult;
 }

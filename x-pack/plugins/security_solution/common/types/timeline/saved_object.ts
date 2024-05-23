@@ -221,6 +221,11 @@ export const SavedObjectTimelineTypeLiteralWithNullRt = unionWithNullType(
   SavedObjectTimelineTypeLiteralRt
 );
 
+export const EsqlOptionsRuntimeType = runtimeTypes.partial({
+  query: unionWithNullType(runtimeTypes.string),
+  sort: unionWithNullType(runtimeTypes.array(SavedSortObject)),
+});
+
 export const SavedObjectTimelineRuntimeType = runtimeTypes.partial({
   columns: unionWithNullType(runtimeTypes.array(SavedColumnHeaderRuntimeType)),
   dataProviders: unionWithNullType(runtimeTypes.array(SavedDataProviderRuntimeType)),
@@ -247,6 +252,7 @@ export const SavedObjectTimelineRuntimeType = runtimeTypes.partial({
   updated: unionWithNullType(runtimeTypes.number),
   updatedBy: unionWithNullType(runtimeTypes.string),
   savedSearchId: unionWithNullType(runtimeTypes.string),
+  esqlOptions: unionWithNullType(EsqlOptionsRuntimeType),
 });
 type SavedObjectTimeline = runtimeTypes.TypeOf<typeof SavedObjectTimelineRuntimeType>;
 

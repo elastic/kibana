@@ -15,6 +15,12 @@ import { useQuery } from '@tanstack/react-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
+import {
+  getESQLHasKeepClause,
+  getESQLSourceCommand,
+  parseESQLQuery,
+} from '../../../../../common/hooks/esql/use_validate_timeline_esql_query';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/use_get_sourcerer_data_view';
 import { useTextBasedEvents } from '../../../../../common/containers/use_text_based_query_events';
@@ -33,6 +39,7 @@ import {
   selectTimelineColumns,
   selectTimelineDateRange,
   selectTimelineESQLOptions,
+  selectTimelinesItemsPerPage,
 } from '../../../../store/selectors';
 
 interface UnifiedEsqlProps {
@@ -45,16 +52,27 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
 
   const inspectorAdapters = useRef({ requests: new RequestAdapter() });
 
+  const augumentedColumnsRef = useRef<{
+    columns: ColumnHeaderOptions[];
+    dataViewFields?: DataViewField[];
+    hasTimestamp: boolean;
+    columnsMeta: DataTableColumnsMeta;
+  } | null>(null);
+
   const {
     query: esqlQuery,
     esqlDataViewId,
-    queryValidation: { hasKeepClause = false, sourceCommand },
     sort,
   } = useSelector((state: State) => selectTimelineESQLOptions(state, timelineId));
 
-  const timelineDateRange = useSelector((state: State) =>
+  const timelineDateRange = useDeepEqualSelector((state: State) =>
     selectTimelineDateRange(state, timelineId)
   );
+
+  const timelineItemsPerPage = useSelector((state: State) =>
+    selectTimelinesItemsPerPage(state, timelineId)
+  );
+
   const timelineColumns = useSelector((state: State) => selectTimelineColumns(state, timelineId));
 
   const updateESQLOptionsHandler = useCallback(
@@ -78,7 +96,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   } = useKibana();
 
   const { data: esqlDataView } = useQuery<DataView | undefined>({
-    queryKey: ['timeline', 'esql', 'dataView', esqlDataViewId],
+    queryKey: ['timeline', 'esql', 'dataView', esqlDataViewId ?? -1],
     queryFn: () => {
       return esqlDataViewId ? dataViews.get(esqlDataViewId) : undefined;
     },
@@ -95,8 +113,8 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   );
 
   const {
-    refetch,
     data,
+    refetch,
     isLoading: isEventFetchInProgress,
   } = useTextBasedEvents({
     query: esqlQuery,
@@ -115,14 +133,22 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     onDataViewCreationSuccess: onAdHocDataViewSuccessCallback,
   });
 
-  const getAugumentedColumns = useCallback(() => {
+  /*
+   *
+   * getAugumentedColumns loops over all the columns and tries to extract all the
+   * information it needs to render the ESQL Data properly.
+   *
+   * */
+  const augumentedColumns = useMemo(() => {
+    if (augumentedColumnsRef.current && (isEventFetchInProgress || isDataViewLoading)) {
+      return augumentedColumnsRef.current;
+    }
+
     const resultCols: ColumnHeaderOptions[] = [];
     const resultDataViewFiels: DataViewField[] = [];
-    let columnsMeta: DataTableColumnsMeta | undefined;
+    let columnsMeta: DataTableColumnsMeta = {};
 
-    let hasTimeStamp = false;
-
-    const isFromCommand = sourceCommand === 'from';
+    let hasTimestamp = false;
 
     for (const currentColumn of data.columns) {
       if (!columnsMeta) {
@@ -135,10 +161,14 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
       };
 
       if (currentColumn.name === '@timestamp') {
-        hasTimeStamp = true;
+        hasTimestamp = true;
       }
 
-      if (hasKeepClause || !isFromCommand) {
+      const queryAst = parseESQLQuery(esqlQuery).ast;
+      const isFromCommand = getESQLSourceCommand(queryAst) === 'from';
+      const hasKeepClause = getESQLHasKeepClause(queryAst);
+
+      if (!isFromCommand || hasKeepClause) {
         /*
          * If the query has a KEEP clause or is not FROM command,
          * it means there are particular columns that user wants to see
@@ -165,53 +195,20 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
       }
     }
 
-    return {
+    const result = {
       columns: resultCols.length > 0 ? resultCols : timelineColumns,
       dataViewFields: resultDataViewFiels.length > 0 ? resultDataViewFiels : undefined,
-      hasTimeStamp,
+      hasTimestamp,
       columnsMeta,
     };
-  }, [hasKeepClause, timelineColumns, data.columns, sourceCommand]);
 
-  const augumentedColumns = useMemo(() => {
-    return getAugumentedColumns();
-  }, [getAugumentedColumns]);
+    augumentedColumnsRef.current = result;
+    return result;
+  }, [timelineColumns, data.columns, esqlQuery, isEventFetchInProgress, isDataViewLoading]);
 
-  const onQuerySubmit: ESQLTabHeaderProps['onQuerySubmit'] = useCallback(
-    async ({ queryValidationResult }) => {
-      await getDataView();
-      await refetch();
-      updateESQLOptionsHandler({
-        queryValidation: {
-          hasKeepClause: queryValidationResult.hasKeepClause,
-          sourceCommand: queryValidationResult.command,
-        },
-      });
-    },
-    [refetch, getDataView, updateESQLOptionsHandler]
-  );
-
-  const onQueryChange: ESQLTabHeaderProps['onQueryChange'] = useCallback(
-    (args) => {
-      const {
-        query: newQuery,
-        dateRange: { from, to },
-      } = args;
-
-      updateESQLOptionsHandler({
-        query: newQuery,
-      });
-
-      dispatch(
-        timelineActions.updateRange({
-          id: timelineId,
-          start: from,
-          end: to,
-        })
-      );
-    },
-    [timelineId, dispatch, updateESQLOptionsHandler]
-  );
+  const onQuerySubmit: ESQLTabHeaderProps['onQuerySubmit'] = useCallback(async () => {
+    await getDataView();
+  }, [getDataView]);
 
   const dataLoadingState = useMemo(
     () =>
@@ -221,9 +218,24 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     [isEventFetchInProgress, isDataViewLoading]
   );
 
+  const rowRenderersMemo = useMemo(() => [], []);
+
   const esqlSort = useMemo(() => {
-    return augumentedColumns.hasTimeStamp ? sort : [];
-  }, [augumentedColumns.hasTimeStamp, sort]);
+    return sort.filter(({ columnId }) => columnId in augumentedColumns.columnsMeta);
+  }, [augumentedColumns, sort]);
+
+  const onSort = useCallback(
+    (newSort: string[][]) => {
+      updateESQLOptionsHandler({
+        sort: newSort.map(([field, direction]) => ({
+          columnId: field,
+          columnType: augumentedColumns.columnsMeta[field]?.type ?? 'unknown',
+          sortDirection: direction as 'asc' | 'desc',
+        })),
+      });
+    },
+    [updateESQLOptionsHandler, augumentedColumns.columnsMeta]
+  );
 
   if (!securityDataView) {
     return (
@@ -239,31 +251,26 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
       <EuiFlexItem grow={false}>
         <ESQLTabHeader
           onQuerySubmit={onQuerySubmit}
-          onQueryChange={onQueryChange}
-          query={esqlQuery}
-          dateRangeFrom={timelineDateRange.start}
-          dateRangeTo={timelineDateRange.end}
           indexPatterns={[securityDataView]}
+          timelineId={timelineId}
         />
       </EuiFlexItem>
-      {!isEmpty(data.data) ? (
+      {'data' in data && !isEmpty(data.data) ? (
         <EuiFlexItem grow={true}>
           <UnifiedTimeline
             columns={augumentedColumns.columns}
-            rowRenderers={[]}
+            rowRenderers={rowRenderersMemo}
             isSortEnabled={true}
             timelineId={timelineId}
-            itemsPerPage={100}
-            itemsPerPageOptions={[10, 20, 50, 100]}
+            itemsPerPage={timelineItemsPerPage}
             sort={esqlSort}
             events={data.data}
             refetch={refetch}
+            onSort={onSort}
             dataLoadingState={dataLoadingState}
             totalCount={data.data.length}
             showExpandedDetails={false}
-            onChangePage={() => {}}
             activeTab={TimelineTabs.esql}
-            updatedAt={Date.now()}
             isTextBasedQuery={true}
             dataView={esqlDataView ?? securityDataView}
             textBasedDataViewFields={augumentedColumns.dataViewFields}

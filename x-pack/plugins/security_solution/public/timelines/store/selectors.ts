@@ -205,3 +205,8 @@ export const selectTimelineActiveTab = createSelector(
 );
 
 export const selectTimelineSort = createSelector(selectTimelineById, (timeline) => timeline?.sort);
+
+export const selectTimelinesItemsPerPage = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.itemsPerPage
+);

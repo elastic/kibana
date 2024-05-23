@@ -123,7 +123,7 @@ type Props = {
    *
    * */
   textBasedDataViewFields?: DataViewField[];
-} & Pick<UnifiedDataTableProps, 'columnsMeta'>;
+} & Pick<UnifiedDataTableProps, 'columnsMeta' | 'onSort'>;
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
   columns,
@@ -151,6 +151,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   eventIdToNoteIds,
   textBasedDataViewFields,
   columnsMeta,
+  onSort: onSortProp,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -230,7 +231,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     );
   }, [sort]);
 
-  const onSort = useCallback(
+  const onSortCallback = useCallback(
     (nextSort: string[][]) => {
       dispatch(
         timelineActions.updateSort({
@@ -252,6 +253,8 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     },
     [dispatch, timelineId, columns]
   );
+
+  const onSort = useMemo(() => onSortProp ?? onSortCallback, [onSortProp, onSortCallback]);
 
   const setAppState = useCallback(
     (newState: { columns: string[]; sort?: string[][] }) => {
