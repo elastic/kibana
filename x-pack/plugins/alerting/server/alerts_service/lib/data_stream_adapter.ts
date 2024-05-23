@@ -191,7 +191,7 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
         `Indices matching pattern ${indexPatterns.pattern} exist but none are set as the write index for alias ${indexPatterns.alias}`
       );
       await setConcreteWriteIndex({ logger, esClient, indexPatterns });
-      return;
+      concreteWriteIndicesExist = true;
     }
   }
 
