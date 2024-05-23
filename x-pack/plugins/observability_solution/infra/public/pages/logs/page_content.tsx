@@ -81,7 +81,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
                 </EuiHeaderLink>
                 <LazyAlertDropdownWrapper />
                 <EuiHeaderLink
-                  href={getUrlForApp('/observabilityOnboarding')}
+                  href={getUrlForApp('/observabilityOnboarding', { path: '/?category=logs' })}
                   color="primary"
                   iconType="indexOpen"
                 >
