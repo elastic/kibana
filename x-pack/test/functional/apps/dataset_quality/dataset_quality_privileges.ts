@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           {
             feature: {
               discover: ['all'],
+              fleet: ['none'],
             },
             spaces: ['*'],
           },
@@ -128,12 +129,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.closeFlyout();
     });
 
-    it('view dashboards is disabled for underprivileged user', async () => {
+    it('"View dashboards" and "See integration" is disabled for underprivileged user', async () => {
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
       await testSubjects.existOrFail(
         `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-View dashboards`
+      );
+      await testSubjects.existOrFail(
+        `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityInsufficientPrivileges}-See integration`
       );
 
       await PageObjects.datasetQuality.closeFlyout();

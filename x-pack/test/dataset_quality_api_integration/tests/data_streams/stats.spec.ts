@@ -58,7 +58,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const resp = await callApiAs('noAccessUser');
 
         expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
+        expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(false);
         expect(resp.body.dataStreamsStats).to.eql([]);
+      });
+
+      it('returns correct user privileges for an elevated user', async () => {
+        const resp = await callApiAs('adminUser');
+
+        expect(resp.body.datasetUserPrivileges).to.eql({
+          canMonitor: true,
+          canViewIntegrations: true,
+        });
       });
 
       it('get empty set of data streams for a readUser', async () => {

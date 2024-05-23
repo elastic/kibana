@@ -46,7 +46,8 @@ export function IntegrationActionsMenu({
   integration: Integration;
   dashboardsLoading: boolean;
 }) {
-  const { dataStreamStat, canUserAccessDashboards } = useDatasetQualityFlyout();
+  const { dataStreamStat, canUserAccessDashboards, canUserViewIntegrations } =
+    useDatasetQualityFlyout();
   const { type, name } = dataStreamStat!;
   const { dashboards = [], version, name: integrationName } = integration;
   const {
@@ -73,11 +74,13 @@ export function IntegrationActionsMenu({
     buttonText,
     routerLinkProps,
     iconType,
+    disabled = false,
   }: {
     dataTestSubject: string;
-    buttonText: string;
+    buttonText: string | React.ReactNode;
     routerLinkProps: RouterLinkProps;
     iconType: string;
+    disabled?: boolean;
   }) => (
     <EuiButtonEmpty
       {...routerLinkProps}
@@ -88,6 +91,7 @@ export function IntegrationActionsMenu({
       color="text"
       iconType={iconType}
       data-test-subj={dataTestSubject}
+      disabled={disabled}
     >
       {buttonText}
     </EuiButtonEmpty>
@@ -98,10 +102,20 @@ export function IntegrationActionsMenu({
       {
         renderItem: () => (
           <MenuActionItem
-            buttonText={seeIntegrationText}
+            buttonText={
+              <PrivilegesWarningIconWrapper
+                hasPrivileges={canUserViewIntegrations}
+                title={seeIntegrationText}
+                mode="tooltip"
+                iconColor="warning"
+              >
+                {seeIntegrationText}
+              </PrivilegesWarningIconWrapper>
+            }
             dataTestSubject="datasetQualityFlyoutIntegrationActionOverview"
             routerLinkProps={getIntegrationOverviewLinkProps(integrationName, version)}
             iconType="package"
+            disabled={!canUserViewIntegrations}
           />
         ),
       },
@@ -185,6 +199,7 @@ export function IntegrationActionsMenu({
     version,
     dashboardsLoading,
     canUserAccessDashboards,
+    canUserViewIntegrations,
   ]);
 
   return (

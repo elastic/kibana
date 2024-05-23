@@ -8,7 +8,7 @@
 import { DoneInvokeEvent } from 'xstate';
 import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { QualityIndicators } from '../../../../common/types';
-import { UserPrivileges } from '../../../../common/api_types';
+import { DatasetUserPrivileges } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
@@ -72,7 +72,7 @@ export interface WithFilters {
 }
 
 export interface WithDataStreamStats {
-  datasetUserPrivileges: UserPrivileges;
+  datasetUserPrivileges: DatasetUserPrivileges;
   dataStreamStats: DataStreamStatType[];
 }
 

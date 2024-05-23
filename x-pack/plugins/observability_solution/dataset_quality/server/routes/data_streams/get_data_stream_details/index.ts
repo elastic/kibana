@@ -18,7 +18,7 @@ import { MAX_HOSTS_METRIC_VALUE } from '../../../../common/constants';
 import { _IGNORED } from '../../../../common/es_fields';
 import { DataStreamDetails, DataStreamSettings } from '../../../../common/api_types';
 import { createDatasetQualityESClient } from '../../../utils';
-import { dataStreamService } from '../../../services';
+import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 import { getDataStreamsStats } from '../get_data_streams_stats';
 
 export async function getDataStreamSettings({
@@ -53,7 +53,7 @@ export async function getDataStreamDetails({
   throwIfInvalidDataStreamParams(dataStream);
 
   const hasAccessToDataStream = (
-    await dataStreamService.getHasIndexPrivileges(esClient, [dataStream], ['monitor'])
+    await datasetQualityPrivileges.getHasIndexPrivileges(esClient, [dataStream], ['monitor'])
   )[dataStream];
 
   const lastActivity = hasAccessToDataStream

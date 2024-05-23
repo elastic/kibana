@@ -6,7 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { dataStreamService } from '../../../services';
+import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 import { getDataStreams } from '.';
 
@@ -20,7 +20,7 @@ describe('getDataStreams', () => {
       .spyOn(dataStreamService, 'getMatchingDataStreams')
       .mockImplementation(mockGetMockMatchingDataStreams);
     jest
-      .spyOn(dataStreamService, 'getHasIndexPrivileges')
+      .spyOn(datasetQualityPrivileges, 'getHasIndexPrivileges')
       .mockImplementation(mockGetMockDataStreamPrivileges);
   });
 

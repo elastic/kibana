@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { streamPartsToIndexPattern } from '../../../../common/utils';
 import { DataStreamType } from '../../../../common/types';
-import { dataStreamService } from '../../../services';
+import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 
 export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
@@ -23,7 +23,7 @@ export async function getDataStreams(options: {
     datasetPattern: datasetQuery ? `*${datasetQuery}*` : '*',
   });
 
-  const datasetUserPrivileges = await dataStreamService.getHasIndexPrivileges(
+  const datasetUserPrivileges = await datasetQualityPrivileges.getHasIndexPrivileges(
     esClient,
     [datasetName],
     ['read', 'view_index_metadata']
@@ -47,7 +47,7 @@ export async function getDataStreams(options: {
     : allDataStreams;
 
   const dataStreamsPrivileges = filteredDataStreams.length
-    ? await dataStreamService.getHasIndexPrivileges(
+    ? await datasetQualityPrivileges.getHasIndexPrivileges(
         esClient,
         filteredDataStreams.map(({ name }) => name),
         ['monitor']

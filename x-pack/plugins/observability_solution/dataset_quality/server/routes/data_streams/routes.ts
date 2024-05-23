@@ -13,10 +13,11 @@ import {
   DataStreamStat,
   DegradedDocs,
   NonAggregatableDatasets,
-  UserPrivileges,
+  DatasetUserPrivileges,
 } from '../../../common/api_types';
 import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
+import { datasetQualityPrivileges } from '../../services';
 import { getDataStreamDetails, getDataStreamSettings } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
@@ -37,7 +38,7 @@ const statsRoute = createDatasetQualityServerRoute({
     tags: [],
   },
   async handler(resources): Promise<{
-    datasetUserPrivileges: UserPrivileges;
+    datasetUserPrivileges: DatasetUserPrivileges;
     dataStreamsStats: DataStreamStat[];
   }> {
     const { context, params, getEsCapabilities } = resources;
@@ -63,7 +64,10 @@ const statsRoute = createDatasetQualityServerRoute({
     });
 
     return {
-      datasetUserPrivileges: dataStreamsInfo.datasetUserPrivileges,
+      datasetUserPrivileges: {
+        ...dataStreamsInfo.datasetUserPrivileges,
+        canViewIntegrations: await datasetQualityPrivileges.getCanViewIntegrations(esClient), // TODO: Make space aware
+      },
       dataStreamsStats: values(
         merge(keyBy(dataStreamsInfo.items, 'name'), keyBy(dataStreamsStats.items, 'name'))
       ),

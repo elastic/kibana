@@ -38,6 +38,11 @@ export const useDatasetQualityFlyout = () => {
     (state) => !state.matches('flyout.initializing.integrationDashboards.unauthorized')
   );
 
+  const canUserViewIntegrations = useSelector(
+    service,
+    (state) => state.context.datasetUserPrivileges?.canViewIntegrations ?? true
+  );
+
   return {
     dataStreamStat,
     dataStreamSettings,
@@ -49,5 +54,6 @@ export const useDatasetQualityFlyout = () => {
     loadingState,
     flyoutLoading: !dataStreamStat,
     canUserAccessDashboards,
+    canUserViewIntegrations,
   };
 };

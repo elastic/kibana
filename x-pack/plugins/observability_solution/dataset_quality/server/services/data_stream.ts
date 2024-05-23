@@ -8,7 +8,6 @@
 import type {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
-  SecurityIndexPrivilege,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
@@ -93,24 +92,6 @@ class DataStreamService {
       }
       throw e;
     }
-  }
-
-  public async getHasIndexPrivileges(
-    esClient: ElasticsearchClient,
-    indexes: string[],
-    privileges: SecurityIndexPrivilege[]
-  ): Promise<Awaited<Record<string, boolean>>> {
-    const indexPrivileges = await esClient.security.hasPrivileges({
-      index: indexes.map((dataStream) => ({ names: dataStream, privileges })),
-    });
-
-    const indexesList = Object.keys(indexPrivileges.index);
-    return indexesList.reduce((acc, index) => {
-      const privilegesList = Object.values(indexPrivileges.index[index]);
-      const hasAllPrivileges = privilegesList.every((hasPrivilege) => hasPrivilege);
-
-      return Object.assign(acc, { [index]: hasAllPrivileges });
-    }, {} as Record<string, boolean>);
   }
 }
 
