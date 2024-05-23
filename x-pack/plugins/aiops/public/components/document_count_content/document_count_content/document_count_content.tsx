@@ -13,28 +13,41 @@ import type {
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import type {
-  DocumentCountStats,
-  LogRateHistogramItem,
-  WindowParameters,
-} from '@kbn/aiops-log-rate-analysis';
+import { i18n } from '@kbn/i18n';
+import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
+import {
+  useAppSelector,
+  useCurrentSelectedGroup,
+  useCurrentSelectedSignificantItem,
+  type GroupTableItem,
+} from '@kbn/aiops-log-rate-analysis/state';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { DocumentCountChartRedux } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
 
 import { TotalCountHeader } from '../total_count_header';
 
+function getDocumentCountStatsSplitLabel(
+  significantItem?: SignificantItem,
+  group?: GroupTableItem
+): string {
+  if (significantItem) {
+    return `${significantItem?.fieldName}:${significantItem?.fieldValue}`;
+  } else if (group) {
+    return i18n.translate('xpack.aiops.logRateAnalysis.page.documentCountStatsSplitGroupLabel', {
+      defaultMessage: 'Selected group',
+    });
+  } else {
+    return '';
+  }
+}
+
 export interface DocumentCountContentProps {
-  documentCountStats?: DocumentCountStats;
-  documentCountStatsSplit?: DocumentCountStats;
-  documentCountStatsSplitLabel?: string;
-  totalCount: number;
-  sampleProbability: number;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  windowParameters?: WindowParameters;
   baselineLabel?: string;
   deviationLabel?: string;
   barStyleAccessor?: BarStyleAccessor;
@@ -43,20 +56,24 @@ export interface DocumentCountContentProps {
 }
 
 export const DocumentCountContent: FC<DocumentCountContentProps> = ({
-  documentCountStats,
-  documentCountStatsSplit,
-  documentCountStatsSplitLabel = '',
-  totalCount,
-  sampleProbability,
   barColorOverride,
   barHighlightColorOverride,
-  windowParameters,
   ...docCountChartProps
 }) => {
   const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
 
+  const currentSelectedGroup = useCurrentSelectedGroup();
+  const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
+  const { documentStats } = useAppSelector((s) => s.logRateAnalysis);
+  const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
+    documentStats;
+  const documentCountStatsSplitLabel = getDocumentCountStatsSplitLabel(
+    currentSelectedSignificantItem,
+    currentSelectedGroup
+  );
+
   const bucketTimestamps = Object.keys(documentCountStats?.buckets ?? {}).map((time) => +time);
-  const splitBucketTimestamps = Object.keys(documentCountStatsSplit?.buckets ?? {}).map(
+  const splitBucketTimestamps = Object.keys(documentCountStatsCompare?.buckets ?? {}).map(
     (time) => +time
   );
   const timeRangeEarliest = Math.min(...[...bucketTimestamps, ...splitBucketTimestamps]);
@@ -81,8 +98,8 @@ export const DocumentCountContent: FC<DocumentCountContentProps> = ({
   );
 
   let chartPointsSplit: LogRateHistogramItem[] | undefined;
-  if (documentCountStatsSplit?.buckets !== undefined) {
-    chartPointsSplit = Object.entries(documentCountStatsSplit?.buckets).map(([time, value]) => ({
+  if (documentCountStatsCompare?.buckets !== undefined) {
+    chartPointsSplit = Object.entries(documentCountStatsCompare?.buckets).map(([time, value]) => ({
       time: +time,
       value,
     }));

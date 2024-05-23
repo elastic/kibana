@@ -13,7 +13,6 @@ import type { Moment } from 'moment';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   getWindowParametersForTrigger,
@@ -30,11 +29,7 @@ import {
   setInitialAnalysisStart,
   useAppDispatch,
   useAppSelector,
-  useCurrentSelectedGroup,
-  useCurrentSelectedSignificantItem,
-  type GroupTableItem,
 } from '@kbn/aiops-log-rate-analysis/state';
-import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
 import {
@@ -54,19 +49,6 @@ const DEFAULT_SEARCH_BAR_QUERY: estypes.QueryDslQueryContainer = {
     must_not: [],
   },
 };
-
-export function getDocumentCountStatsSplitLabel(
-  significantItem?: SignificantItem,
-  group?: GroupTableItem
-) {
-  if (significantItem) {
-    return `${significantItem?.fieldName}:${significantItem?.fieldValue}`;
-  } else if (group) {
-    return i18n.translate('xpack.aiops.logRateAnalysis.page.documentCountStatsSplitGroupLabel', {
-      defaultMessage: 'Selected group',
-    });
-  }
-}
 
 export interface LogRateAnalysisContentProps {
   /** Optional time range override */
@@ -130,11 +112,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   const { autoRunAnalysis, documentStats, earliest, latest, isBrushCleared } = useAppSelector(
     (s) => s.logRateAnalysis
   );
-  const currentSelectedGroup = useCurrentSelectedGroup();
-  const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
 
-  const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
-    documentStats;
+  const { documentCountStats } = documentStats;
 
   function clearSelectionHandler() {
     dispatch(clearSelection());
@@ -213,14 +192,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     <EuiPanel hasBorder={false} hasShadow={false}>
       {showDocumentCountContent && (
         <DocumentCountContent
-          documentCountStats={documentCountStats}
-          documentCountStatsSplit={documentCountStatsCompare}
-          documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
-            currentSelectedSignificantItem,
-            currentSelectedGroup
-          )}
-          totalCount={totalCount}
-          sampleProbability={sampleProbability}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           barStyleAccessor={barStyleAccessor}
