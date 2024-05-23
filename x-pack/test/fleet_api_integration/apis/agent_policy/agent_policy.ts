@@ -905,11 +905,8 @@ export default function (providerContext: FtrProviderContext) {
     describe('PUT /api/fleet/agent_policies/{agentPolicyId}', () => {
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-        await kibanaServer.savedObjects.cleanStandardList();
       });
-      setupFleetAndAgents(providerContext);
       const createdPolicyIds: string[] = [];
-
       after(async () => {
         const deletedPromises = createdPolicyIds.map((agentPolicyId) =>
           supertest
@@ -919,9 +916,9 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200)
         );
         await Promise.all(deletedPromises);
-
+      });
+      after(async () => {
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
-        await kibanaServer.savedObjects.cleanStandardList();
       });
       let agentPolicyId: undefined | string;
       it('should work with valid values', async () => {
