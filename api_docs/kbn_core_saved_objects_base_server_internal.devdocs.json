@@ -2911,10 +2911,10 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
-            "id": "def-common.HASH_TO_VERSION_MAP.ingestpackagepoliciesa1a074bad36e68d54f98d2158d60f879",
+            "id": "def-common.HASH_TO_VERSION_MAP.ingestpackagepoliciesaef7977b81f7930f23cbfd8711ba272e",
             "type": "string",
             "tags": [],
-            "label": "'ingest-package-policies|a1a074bad36e68d54f98d2158d60f879'",
+            "label": "'ingest-package-policies|aef7977b81f7930f23cbfd8711ba272e'",
             "description": [],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/constants.ts",
             "deprecated": false,
