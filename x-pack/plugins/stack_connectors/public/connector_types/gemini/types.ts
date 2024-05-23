@@ -10,13 +10,15 @@ import { SUB_ACTION } from '../../../common/gemini/constants';
 import { RunActionParams } from '../../../common/gemini/types';
 
 export interface GeminiActionParams {
-  subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;
+  subAction: SUB_ACTION.RUN | SUB_ACTION.TEST | SUB_ACTION.DASHBOARD;
   subActionParams: RunActionParams;
 }
 
 export interface Config {
   apiUrl: string;
   defaultModel: string;
+  gcpRegion: string;
+  gcpProjectID: string;
 }
 
 export interface Secrets {

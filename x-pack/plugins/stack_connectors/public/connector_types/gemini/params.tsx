@@ -90,7 +90,7 @@ const GeminiParamsFields: React.FunctionComponent<ActionParamsProps<GeminiAction
         label={i18n.MODEL}
         helpText={
           <FormattedMessage
-            defaultMessage="Optionally overwrite default model per request. Current support is for the Gemini 1.0 models. For more information, refer to the {geminiAPIModelDocs}."
+            defaultMessage="Optionally overwrite default model per request. Current support is for the Gemini 1.5 models. For more information, refer to the {geminiAPIModelDocs}."
             id="xpack.stackConnectors.components.gemini.modelHelpText"
             values={{
               geminiAPIModelDocs: (
