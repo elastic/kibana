@@ -247,7 +247,7 @@ export const CloudSecurityDataTable = ({
     ? [
         {
           id: 'select',
-          width: 30,
+          width: 20,
           headerCellRender: () => null,
           rowCellRender: ({ rowIndex }) =>
             createRuleFn && (

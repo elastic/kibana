@@ -199,7 +199,7 @@ export const TakeAction = ({
     <EuiButtonIcon
       aria-label="show actions"
       iconType="boxesHorizontal"
-      color="text"
+      color="primary"
       isLoading={isLoading}
       onClick={() => setPopoverOpen(!isPopoverOpen)}
     />
