@@ -41,6 +41,7 @@ import {
   IndexPatternArray,
   InvestigationFields,
   InvestigationGuide,
+  IsExternalRuleCustomized,
   IsRuleImmutable,
   ItemsPerSearch,
   KqlQueryLanguage,
@@ -63,7 +64,6 @@ import {
   RuleQuery,
   RuleReferenceArray,
   RuleSignatureId,
-  RuleSource,
   RuleVersion,
   SavedQueryId,
   SetupGuide,
@@ -84,7 +84,6 @@ import {
   TimestampOverrideFallbackDisabled,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SERVER_APP_ID } from '../../../../../common/constants';
-import { convertObjectKeysToCamelCase } from '../../../../utils/object_case_converters';
 
 // 8.10.x is mapped as an array of strings
 export type LegacyInvestigationFields = z.infer<typeof LegacyInvestigationFields>;
@@ -104,8 +103,20 @@ export const InvestigationFieldsCombined = z.union([
   LegacyInvestigationFields,
 ]);
 
+/**
+ * This is the same type as RuleSource, but with the keys in camelCase. Intended
+ * for internal use only (not for API responses).
+ */
 export type RuleSourceCamelCased = z.infer<typeof RuleSourceCamelCased>;
-export const RuleSourceCamelCased = RuleSource.transform(convertObjectKeysToCamelCase);
+export const RuleSourceCamelCased = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('external'),
+    isCustomized: IsExternalRuleCustomized,
+  }),
+  z.object({
+    type: z.literal('internal'),
+  }),
+]);
 
 // Conversion to an interface has to be disabled for the entire file; otherwise,
 // the resulting union would not be assignable to Alerting's RuleParams due to a

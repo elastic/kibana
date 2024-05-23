@@ -15,6 +15,11 @@ There are a few ways to optimize this context for better results.
 Some adjustments can be made directly in the {x} UI.
 Others require refining your indexing strategy, and potentially reindexing your data.
 
+[NOTE]
+=====
+Currently you can only select *one field* to be provided as context to the LLM.
+=====
+
 [float]
 [[playground-context-ui]]
 == Edit context in UI
