@@ -142,8 +142,6 @@ interface LogRateAnalysisResultsProps {
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
   barHighlightColorOverride?: string;
-  /** Optional callback that exposes data of the completed analysis */
-  onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
 }
@@ -153,7 +151,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
-  onAnalysisCompleted,
   embeddingOrigin,
 }) => {
   const { analytics, http } = useAiopsAppContext();
@@ -245,15 +242,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
       } else if (loaded > 0) {
         // Reset all overrides.
         setOverrides(undefined);
-
-        // If provided call the `onAnalysisCompleted` callback with the analysis results.
-        if (onAnalysisCompleted) {
-          onAnalysisCompleted({
-            analysisType,
-            significantItems: data.significantItems,
-            significantItemsGroups: data.significantItemsGroups,
-          });
-        }
 
         // Track performance metric
         if (analysisStartTime.current !== undefined) {

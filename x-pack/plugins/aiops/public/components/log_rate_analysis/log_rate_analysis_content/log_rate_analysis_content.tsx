@@ -78,6 +78,13 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
 }) => {
   const dispatch = useAppDispatch();
 
+  const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
+  const significantItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
+  const significantItemsGroups = useAppSelector(
+    (s) => s.logRateAnalysisResults.significantItemsGroups
+  );
+  const loaded = useAppSelector((s) => s.logRateAnalysisResults.loaded);
+  const analysisType = useAppSelector((s) => s.logRateAnalysis.analysisType);
   const windowParameters = useAppSelector((s) => s.logRateAnalysis.windowParameters);
 
   // Window parameters stored in the url state use this components
@@ -166,6 +173,17 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     }
   }, [documentCountStats, dispatch, triggerAnalysisForManualSelection]);
 
+  useEffect(() => {
+    if (!isRunning && loaded === 1 && onAnalysisCompleted) {
+      onAnalysisCompleted({
+        analysisType,
+        significantItems,
+        significantItemsGroups,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRunning, loaded]);
+
   const showDocumentCountContent = documentCountStats !== undefined;
 
   const showLogRateAnalysisResults =
@@ -204,7 +222,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
-          onAnalysisCompleted={onAnalysisCompleted}
           embeddingOrigin={embeddingOrigin}
         />
       )}
