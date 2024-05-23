@@ -3583,6 +3583,25 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: false,
       },
+      use_document_level_security: {
+        default_value: null,
+        depends_on: [],
+        display: DisplayType.TOGGLE,
+        label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
+        options: [],
+        order: 13,
+        required: true,
+        sensitive: false,
+        tooltip: getEnableDocumentLevelSecurityTooltip(
+          i18n.translate('searchConnectors.nativeConnectors.outlookTooltip.name', {
+            defaultMessage: 'Outlook',
+          })
+        ),
+        type: FieldType.BOOLEAN,
+        ui_restrictions: [],
+        validations: [],
+        value: false,
+      },
     },
     features: {
       [FeatureName.SYNC_RULES]: {
