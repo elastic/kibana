@@ -9,7 +9,7 @@
 import Joi from 'joi';
 import joiToJsonParse from 'joi-to-json';
 import type { OpenAPIV3 } from 'openapi-types';
-import _ from 'lodash';
+import { omit } from 'lodash';
 import { createCtx, postProcessMutations } from './post_process_mutations';
 import type { IContext } from './post_process_mutations';
 
@@ -42,7 +42,7 @@ export const parse = ({ schema, ctx = createCtx() }: ParseArgs) => {
       postProcessMutations({ schema: s, ctx });
       ctx.addSharedSchema(id, s);
     });
-    result = _.omit(parsed, 'schemas');
+    result = omit(parsed, 'schemas');
   } else {
     result = parsed;
   }
