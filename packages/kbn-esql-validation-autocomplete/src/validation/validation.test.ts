@@ -18,6 +18,7 @@ import capitalize from 'lodash/capitalize';
 import { camelCase } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { nonNullable } from '../shared/helpers';
+import { METADATA_FIELDS } from '../shared/constants';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from './function_describe_block_name';
 
 const fields = [
@@ -81,7 +82,6 @@ function getCallbackMocks() {
       }))
     ),
     getPolicies: jest.fn(async () => policies),
-    getMetaFields: jest.fn(async () => ['_id', '_source']),
   };
 }
 
@@ -357,7 +357,9 @@ describe('validation logic', () => {
         testErrorsAndWarnings(
           `from index ${setWrapping('METADATA _id, _source2')}`,
           [
-            'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
+            `Metadata field [_source2] is not available. Available metadata fields are: [${METADATA_FIELDS.join(
+              ', '
+            )}]`,
           ],
           addBracketsWarning()
         );
@@ -1962,7 +1964,6 @@ describe('validation logic', () => {
               getFieldsFor: undefined,
               getSources: undefined,
               getPolicies: undefined,
-              getMetaFields: undefined,
             }
           );
         } catch {
@@ -9863,7 +9864,6 @@ describe('validation logic', () => {
         getSources: /Unknown index/,
         getPolicies: /Unknown policy/,
         getFieldsFor: /Unknown column|Argument of|it is unsupported or not indexed/,
-        getMetaFields: /Metadata field/,
       };
       return excludedCallback.map((callback) => contentByCallback[callback]) || [];
     }
@@ -9904,40 +9904,38 @@ describe('validation logic', () => {
     });
 
     // test excluding one callback at the time
-    it.each(['getSources', 'getFieldsFor', 'getPolicies', 'getMetaFields'] as Array<
-      keyof typeof ignoreErrorsMap
-    >)(`should not error if %s is missing`, async (excludedCallback) => {
-      const filteredTestCases = fixtures.testCases.filter((t) =>
-        t.error.some((message) =>
-          excludeErrorsByContent([excludedCallback]).every((regexp) => regexp?.test(message))
-        )
-      );
-      const allErrors = await Promise.all(
-        filteredTestCases.map(({ query }) =>
-          validateQuery(
-            query,
-            getAstAndSyntaxErrors,
-            { ignoreOnMissingCallbacks: true },
-            getPartialCallbackMocks(excludedCallback)
+    it.each(['getSources', 'getFieldsFor', 'getPolicies'] as Array<keyof typeof ignoreErrorsMap>)(
+      `should not error if %s is missing`,
+      async (excludedCallback) => {
+        const filteredTestCases = fixtures.testCases.filter((t) =>
+          t.error.some((message) =>
+            excludeErrorsByContent([excludedCallback]).every((regexp) => regexp?.test(message))
           )
-        )
-      );
-      for (const { errors } of allErrors) {
-        expect(
-          errors.every(({ code }) =>
-            ignoreErrorsMap[excludedCallback].every((ignoredCode) => ignoredCode !== code)
+        );
+        const allErrors = await Promise.all(
+          filteredTestCases.map(({ query }) =>
+            validateQuery(
+              query,
+              getAstAndSyntaxErrors,
+              { ignoreOnMissingCallbacks: true },
+              getPartialCallbackMocks(excludedCallback)
+            )
           )
-        ).toBe(true);
+        );
+        for (const { errors } of allErrors) {
+          expect(
+            errors.every(({ code }) =>
+              ignoreErrorsMap[excludedCallback].every((ignoredCode) => ignoredCode !== code)
+            )
+          ).toBe(true);
+        }
       }
-    });
+    );
 
     it('should work if no callback passed', async () => {
-      const excludedCallbacks = [
-        'getSources',
-        'getPolicies',
-        'getFieldsFor',
-        'getMetaFields',
-      ] as Array<keyof typeof ignoreErrorsMap>;
+      const excludedCallbacks = ['getSources', 'getPolicies', 'getFieldsFor'] as Array<
+        keyof typeof ignoreErrorsMap
+      >;
       for (const testCase of fixtures.testCases.filter((t) =>
         t.error.some((message) =>
           excludeErrorsByContent(excludedCallbacks).every((regexp) => regexp?.test(message))

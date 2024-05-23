@@ -68,11 +68,11 @@ import {
   retrieveFields,
   retrievePolicies,
   retrievePoliciesFields,
-  retrieveMetadataFields,
   retrieveFieldsFromStringSources,
 } from './resources';
 import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
 import { getParamAtPosition } from '../autocomplete/helper';
+import { METADATA_FIELDS } from '../shared/constants';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -590,7 +590,8 @@ function validateOption(
   }
   // use dedicate validate fn if provided
   if (optionDef.validate) {
-    messages.push(...optionDef.validate(option, command, referenceMaps.metadataFields));
+    const fields = METADATA_FIELDS;
+    messages.push(...optionDef.validate(option, command, new Set(fields)));
   }
   if (!optionDef.skipCommonValidation) {
     option.args.forEach((arg) => {
@@ -870,7 +871,6 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
-  getMetaFields: ['unknownMetadataField'],
 };
 
 /**
@@ -939,15 +939,13 @@ async function validateAst(
 
   const { ast, errors } = await astProvider(queryString);
 
-  const [sources, availableFields, availablePolicies, availableMetadataFields] = await Promise.all([
+  const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
     // retrieve available fields (if a source command has been defined)
     retrieveFields(queryString, ast, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(ast, callbacks),
-    // retrieve available metadata fields
-    retrieveMetadataFields(callbacks),
   ]);
 
   if (availablePolicies.size) {
@@ -981,7 +979,6 @@ async function validateAst(
       fields: availableFields,
       policies: availablePolicies,
       variables,
-      metadataFields: availableMetadataFields,
       query: queryString,
     });
     messages.push(...commandMessages);
