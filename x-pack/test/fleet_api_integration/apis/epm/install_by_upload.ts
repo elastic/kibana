@@ -10,11 +10,14 @@ import path from 'path';
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { HTTPError } from 'superagent';
+import { promisify } from 'util';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 import { testUsers } from '../test_users';
+
+const sleep = promisify(setTimeout);
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -66,7 +69,7 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('installs packages from direct upload', async () => {
+  describe('Installs packages from direct upload', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -94,6 +97,8 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should upgrade when uploading a newer zip archive', async () => {
       await uploadPackage();
+      // wait 10s before uploading again to avoid getting 429
+      await sleep(10000);
 
       const buf = fs.readFileSync(testPkgArchiveZipNewer);
       const res = await supertest
@@ -147,6 +152,21 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(epmPackageRes.hits.total).to.equal(0);
       expect(epmPackageAssetsRes.hits.total).to.equal(0);
+    });
+
+    it('should get 429 when trying to upload packages too soon', async () => {
+      await uploadPackage();
+
+      const buf = fs.readFileSync(testPkgArchiveZipNewer);
+      const res = await supertest
+        .post(`/api/fleet/epm/packages`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/zip')
+        .send(buf)
+        .expect(429);
+      expect((res.error as HTTPError).text).to.equal(
+        '{"statusCode":429,"error":"Too Many Requests","message":"Too many requests. Please wait 00m10s before uploading again."}'
+      );
     });
 
     it('should install a zip archive correctly and package info should return correctly after validation', async function () {

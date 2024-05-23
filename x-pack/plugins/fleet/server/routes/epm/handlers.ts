@@ -88,7 +88,7 @@ const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
 };
 
-const UPLOAD_RETRY_AFTER_MS = 30000; // 30s
+const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 
 export const getCategoriesHandler: FleetRequestHandler<
   undefined,
