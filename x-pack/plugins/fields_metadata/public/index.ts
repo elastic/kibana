@@ -8,10 +8,10 @@
 import { FieldsMetadataPlugin } from './plugin';
 
 export type {
-  FieldsMetadataClientSetup,
-  FieldsMetadataClientStart,
-  FieldsMetadataClientSetupDeps,
-  FieldsMetadataClientStartDeps,
+  FieldsMetadataPublicSetup,
+  FieldsMetadataPublicStart,
+  FieldsMetadataPublicSetupDeps,
+  FieldsMetadataPublicStartDeps,
 } from './types';
 
 // This exports static code and TypeScript types,

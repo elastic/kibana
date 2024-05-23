@@ -11,8 +11,8 @@ import { FieldsMetadataService } from './services/fields_metadata';
 import {
   FieldsMetadataClientCoreSetup,
   FieldsMetadataClientPluginClass,
-  FieldsMetadataClientSetupDeps,
-  FieldsMetadataClientStartDeps,
+  FieldsMetadataPublicSetupDeps,
+  FieldsMetadataPublicStartDeps,
 } from './types';
 
 export class FieldsMetadataPlugin implements FieldsMetadataClientPluginClass {
@@ -22,13 +22,13 @@ export class FieldsMetadataPlugin implements FieldsMetadataClientPluginClass {
     this.fieldsMetadata = new FieldsMetadataService();
   }
 
-  public setup(_: FieldsMetadataClientCoreSetup, pluginsSetup: FieldsMetadataClientSetupDeps) {
+  public setup(_: FieldsMetadataClientCoreSetup, pluginsSetup: FieldsMetadataPublicSetupDeps) {
     this.fieldsMetadata.setup();
 
     return {};
   }
 
-  public start(core: CoreStart, plugins: FieldsMetadataClientStartDeps) {
+  public start(core: CoreStart, plugins: FieldsMetadataPublicStartDeps) {
     const { http } = core;
 
     const { client } = this.fieldsMetadata.start({ http });

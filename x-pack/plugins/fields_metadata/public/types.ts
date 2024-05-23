@@ -10,32 +10,32 @@ import type { UseFieldsMetadataHook } from './hooks/use_fields_metadata/use_fiel
 import type { IFieldsMetadataClient } from './services/fields_metadata';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FieldsMetadataClientSetup {}
+export interface FieldsMetadataPublicSetup {}
 
-export interface FieldsMetadataClientStart {
+export interface FieldsMetadataPublicStart {
   client: IFieldsMetadataClient;
   useFieldsMetadata: UseFieldsMetadataHook;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FieldsMetadataClientSetupDeps {}
+export interface FieldsMetadataPublicSetupDeps {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface FieldsMetadataClientStartDeps {}
+export interface FieldsMetadataPublicStartDeps {}
 
 export type FieldsMetadataClientCoreSetup = CoreSetup<
-  FieldsMetadataClientStartDeps,
-  FieldsMetadataClientStart
+  FieldsMetadataPublicStartDeps,
+  FieldsMetadataPublicStart
 >;
 export type FieldsMetadataClientCoreStart = CoreStart;
 export type FieldsMetadataClientPluginClass = PluginClass<
-  FieldsMetadataClientSetup,
-  FieldsMetadataClientStart,
-  FieldsMetadataClientSetupDeps,
-  FieldsMetadataClientStartDeps
+  FieldsMetadataPublicSetup,
+  FieldsMetadataPublicStart,
+  FieldsMetadataPublicSetupDeps,
+  FieldsMetadataPublicStartDeps
 >;
 
-export type FieldsMetadataClientStartServicesAccessor =
+export type FieldsMetadataPublicStartServicesAccessor =
   FieldsMetadataClientCoreSetup['getStartServices'];
-export type FieldsMetadataClientStartServices =
-  ReturnType<FieldsMetadataClientStartServicesAccessor>;
+export type FieldsMetadataPublicStartServices =
+  ReturnType<FieldsMetadataPublicStartServicesAccessor>;

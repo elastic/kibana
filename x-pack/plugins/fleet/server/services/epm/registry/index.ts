@@ -13,7 +13,7 @@ import semverGte from 'semver/functions/gte';
 import type { Response } from 'node-fetch';
 import type { Logger } from '@kbn/logging';
 
-import type { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 
 import { splitPkgKey as split } from '../../../../common/services';
 
@@ -357,7 +357,7 @@ export async function getPackage(
 export async function getPackageFieldsMetadata(
   params: { packageName: string; datasetName?: string },
   options: { excludedFieldsAssets?: string[] } = {}
-): Promise<Record<string, Record<string, PartialFieldMetadataPlain>>> {
+): Promise<Record<string, Record<string, FieldMetadataPlain>>> {
   const { packageName, datasetName } = params;
   const { excludedFieldsAssets = ['ecs.yml'] } = options;
 

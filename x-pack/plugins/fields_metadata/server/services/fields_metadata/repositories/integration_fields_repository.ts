@@ -6,7 +6,7 @@
  */
 
 import { HashedCache } from '../../../../common/hashed_cache';
-import { FieldMetadata, IntegrationFieldName, PartialFieldMetadataPlain } from '../../../../common';
+import { FieldMetadata, FieldMetadataPlain, IntegrationFieldName } from '../../../../common';
 import { IntegrationFieldsExtractor, IntegrationFieldsSearchParams } from './types';
 import { PackageNotFoundError } from '../errors';
 interface IntegrationFieldsRepositoryDeps {
@@ -109,7 +109,7 @@ export class IntegrationFieldsRepository {
   private getCacheKey = (params: IntegrationFieldsSearchParams) => params;
 
   private mapExtractedFieldsToFieldMetadataTree = (
-    extractedFields: Record<string, Record<string, PartialFieldMetadataPlain>>
+    extractedFields: Record<string, Record<string, FieldMetadataPlain>>
   ) => {
     return Object.entries(extractedFields).reduce(
       (integrationGroup, [datasetName, datasetGroup]) => {

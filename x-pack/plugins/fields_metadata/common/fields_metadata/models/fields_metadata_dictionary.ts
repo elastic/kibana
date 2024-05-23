@@ -9,10 +9,10 @@ import mapValues from 'lodash/mapValues';
 import { FieldAttribute, FieldMetadataPlain, PartialFieldMetadataPlain } from '../types';
 import { FieldMetadata } from './field_metadata';
 
-export type PartialFieldsMetadataMap = Record<string, FieldMetadata>;
+export type FieldsMetadataMap = Record<string, FieldMetadata>;
 
 export class FieldsMetadataDictionary {
-  private constructor(private readonly fields: PartialFieldsMetadataMap) {}
+  private constructor(private readonly fields: FieldsMetadataMap) {}
 
   pick(attributes: FieldAttribute[]): Record<string, PartialFieldMetadataPlain> {
     return mapValues(this.fields, (field) => field.pick(attributes));
@@ -22,7 +22,7 @@ export class FieldsMetadataDictionary {
     return mapValues(this.fields, (field) => field.toPlain());
   }
 
-  public static create(fields: PartialFieldsMetadataMap = {}) {
+  public static create(fields: FieldsMetadataMap) {
     return new FieldsMetadataDictionary(fields);
   }
 }

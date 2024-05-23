@@ -32,10 +32,7 @@ export const multiFieldRT = rt.type({
 });
 
 const requiredBaseMetadataPlainRT = rt.type({
-  flat_name: rt.string,
   name: rt.string,
-  source: fieldSourceRT,
-  type: rt.string,
 });
 
 const optionalBaseMetadataPlainRT = rt.partial(requiredBaseMetadataPlainRT.props);
@@ -48,6 +45,7 @@ const optionalMetadataPlainRT = rt.partial({
   doc_values: rt.boolean,
   example: rt.unknown,
   expected_values: rt.array(rt.string),
+  flat_name: rt.string,
   format: rt.string,
   ignore_above: rt.number,
   index: rt.boolean,
@@ -63,6 +61,8 @@ const optionalMetadataPlainRT = rt.partial({
   required: rt.boolean,
   scaling_factor: rt.number,
   short: rt.string,
+  source: fieldSourceRT,
+  type: rt.string,
 });
 
 export const partialFieldMetadataPlainRT = rt.intersection([

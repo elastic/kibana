@@ -21,13 +21,12 @@ export class FieldMetadata {
     return pick(this, props);
   }
 
-  public toPlain() {
+  public toPlain(): FieldMetadataPlain {
     return Object.assign({}, this);
   }
 
-  public static create(fieldMetadata: PartialFieldMetadataPlain) {
-    const name = fieldMetadata.name ?? '';
-    const flat_name = fieldMetadata.flat_name ?? name;
+  public static create(fieldMetadata: FieldMetadataPlain) {
+    const flat_name = fieldMetadata.flat_name ?? fieldMetadata.name;
     const dashed_name = fieldMetadata.dashed_name ?? FieldMetadata.toDashedName(flat_name);
     const normalize = fieldMetadata.normalize ?? [];
     const short = fieldMetadata.short ?? fieldMetadata.description;
@@ -36,9 +35,8 @@ export class FieldMetadata {
 
     const fieldMetadataProps = {
       ...fieldMetadata,
-      name,
-      flat_name,
       dashed_name,
+      flat_name,
       normalize,
       short,
       source,

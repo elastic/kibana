@@ -6,19 +6,15 @@
  */
 
 import { withSpan } from '@kbn/apm-utils';
-import type { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 
 import { load } from 'js-yaml';
 
 import type { RegistryDataStream } from '../../../../common';
 import type { AssetsMap } from '../../../../common/types';
 
-interface PackageFieldMetadata extends PartialFieldMetadataPlain {
-  name: string;
-}
-
 type InputField =
-  | PackageFieldMetadata
+  | FieldMetadataPlain
   | {
       name: string;
       type: 'group';
@@ -28,10 +24,7 @@ type InputField =
 export const withPackageSpan = <T>(stepName: string, func: () => Promise<T>) =>
   withSpan({ name: stepName, type: 'package' }, func);
 
-const normalizeFields = (
-  fields: InputField[],
-  prefix = ''
-): Record<string, PackageFieldMetadata> => {
+const normalizeFields = (fields: InputField[], prefix = ''): Record<string, FieldMetadataPlain> => {
   return fields.reduce((normalizedFields, field) => {
     const flatName = prefix ? `${prefix}.${field.name}` : field.name;
     // Recursively resolve field groups
@@ -42,11 +35,11 @@ const normalizeFields = (
     normalizedFields[flatName] = createIntegrationField(field, flatName);
 
     return normalizedFields;
-  }, {} as Record<string, PackageFieldMetadata>);
+  }, {} as Record<string, FieldMetadataPlain>);
 };
 
 const createIntegrationField = (
-  field: Omit<PackageFieldMetadata, 'flat_name'>,
+  field: Omit<FieldMetadataPlain, 'flat_name'>,
   flatName: string
 ) => ({
   ...field,
@@ -94,7 +87,7 @@ export const resolveDataStreamFields = ({
     }
 
     return dataStreamFields;
-  }, {} as Record<string, PackageFieldMetadata>);
+  }, {} as Record<string, FieldMetadataPlain>);
 
   return {
     [dataset]: fields,
