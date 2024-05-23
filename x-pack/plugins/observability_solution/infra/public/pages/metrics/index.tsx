@@ -93,7 +93,8 @@ export const InfrastructurePage = () => {
                       )}
                       <EuiHeaderLink
                         href={kibana.services?.application?.getUrlForApp(
-                          '/observabilityOnboarding'
+                          '/observabilityOnboarding',
+                          { path: '/?category=infra' }
                         )}
                         color="primary"
                         iconType="indexOpen"
