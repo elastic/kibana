@@ -14,13 +14,9 @@ import React from 'react';
 export function HighlightFieldDescription({
   fieldMetadata,
 }: {
-  fieldMetadata?: PartialFieldMetadataPlain;
+  fieldMetadata: PartialFieldMetadataPlain;
 }) {
-  if (!fieldMetadata) return null;
-
   const { flat_name: fieldName, short, type } = fieldMetadata;
-
-  if (!short) return null;
 
   const title = (
     <EuiFlexGroup alignItems="center" gutterSize="s">

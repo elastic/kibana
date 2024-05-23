@@ -36,13 +36,15 @@ export function HighlightField({
   value,
   ...props
 }: HighlightFieldProps) {
+  const hasFieldDescription = !!fieldMetadata?.short;
+
   return formattedValue && value ? (
     <div {...props}>
       <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
         <EuiTitle css={fieldNameStyle} size="xxxs">
           <span>{label}</span>
         </EuiTitle>
-        <HighlightFieldDescription fieldMetadata={fieldMetadata} />
+        {hasFieldDescription ? <HighlightFieldDescription fieldMetadata={fieldMetadata} /> : null}
       </EuiFlexGroup>
       <HoverActionPopover title={value} value={value} field={field}>
         <EuiFlexGroup
