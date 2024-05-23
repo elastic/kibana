@@ -110,13 +110,10 @@ export async function runQuickSave(this: DashboardContainer) {
 }
 
 /**
- * @description exclusively for user directed dashboard save actions in both interaction modes; 'view' and 'edit', also
+ * @description exclusively for user directed dashboard save actions, also
  * accounts for scenarios of cloning elastic managed dashboard into user managed dashboards
  */
-export async function runInteractiveSave(
-  this: DashboardContainer,
-  interactionMode: Extract<ViewMode, ViewMode.EDIT | ViewMode.VIEW>
-) {
+export async function runInteractiveSave(this: DashboardContainer, interactionMode: ViewMode) {
   const {
     data: {
       query: {
@@ -154,7 +151,7 @@ export async function runInteractiveSave(
       };
 
       try {
-        while (
+        if (
           !(await checkForDuplicateDashboardTitle({
             title: newTitle,
             onTitleDuplicate,

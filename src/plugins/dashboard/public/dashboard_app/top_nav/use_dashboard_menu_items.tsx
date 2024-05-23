@@ -104,23 +104,11 @@ export const useDashboardMenuItems = ({
   }, [dashboard]);
 
   /**
-   * Show the dashboard's save modal in the edit interaction mode
+   * initiate interactive dashboard copy action
    */
-  const editModeInteractiveSave = useCallback(() => {
-    dashboard.runInteractiveSave(ViewMode.EDIT).then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboard]);
-
-  /**
-   * Show the dashboard's save modal in the view interaction mode
-   */
-  const viewModeInteractiveSave = useCallback(() => {
-    setIsSaveInProgress(true);
-
-    dashboard.runInteractiveSave(ViewMode.VIEW).then((result) => {
-      setIsSaveInProgress(false);
-      maybeRedirect(result);
-    });
-  }, [maybeRedirect, dashboard]);
+  const dashboardInteractiveSave = useCallback(() => {
+    dashboard.runInteractiveSave(viewMode).then((result) => maybeRedirect(result));
+  }, [maybeRedirect, dashboard, viewMode]);
 
   /**
    * Show the dashboard's "Confirm reset changes" modal. If confirmed:
@@ -197,36 +185,23 @@ export const useDashboardMenuItems = ({
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
-      interactiveSave: (
-        interactionMode: Extract<ViewMode, ViewMode.VIEW | ViewMode.EDIT>
-      ): TopNavMenuData => {
-        const baseOptions = {
-          disableButton: disableTopNav,
-          emphasize: !Boolean(lastSavedId),
-          id: 'interactive-save',
-          testId: 'dashboardInteractiveSaveMenuItem',
-        };
-
-        switch (interactionMode) {
-          case ViewMode.EDIT: {
-            return {
-              ...baseOptions,
-              label: Boolean(lastSavedId)
-                ? topNavStrings.editModeInteractiveSave.label
-                : topNavStrings.quickSave.label,
-              description: topNavStrings.editModeInteractiveSave.description,
-              run: editModeInteractiveSave,
-            };
-          }
-          case ViewMode.VIEW: {
-            return {
-              ...baseOptions,
-              ...topNavStrings.viewModeInteractiveSave,
-              run: viewModeInteractiveSave,
-            };
-          }
-        }
-      },
+      interactiveSave: {
+        disableButton: disableTopNav,
+        emphasize: !Boolean(lastSavedId),
+        id: 'interactive-save',
+        testId: 'dashboardInteractiveSaveMenuItem',
+        run: dashboardInteractiveSave,
+        label:
+          viewMode === ViewMode.VIEW
+            ? topNavStrings.viewModeInteractiveSave.label
+            : Boolean(lastSavedId)
+            ? topNavStrings.editModeInteractiveSave.label
+            : topNavStrings.quickSave.label,
+        description:
+          viewMode === ViewMode.VIEW
+            ? topNavStrings.viewModeInteractiveSave.description
+            : topNavStrings.editModeInteractiveSave.description,
+      } as TopNavMenuData,
 
       switchToViewMode: {
         ...topNavStrings.switchToViewMode,
@@ -250,7 +225,7 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardSettingsButton',
         disableButton: disableTopNav,
         run: () => dashboard.showSettings(),
-      } as TopNavMenuData,
+      },
     };
   }, [
     disableTopNav,
@@ -258,6 +233,8 @@ export const useDashboardMenuItems = ({
     hasRunMigrations,
     hasUnsavedChanges,
     lastSavedId,
+    dashboardInteractiveSave,
+    viewMode,
     showShare,
     dashboard,
     setIsLabsShown,
@@ -265,8 +242,6 @@ export const useDashboardMenuItems = ({
     dashboardBackup,
     quickSaveDashboard,
     resetChanges,
-    editModeInteractiveSave,
-    viewModeInteractiveSave,
   ]);
 
   const resetChangesMenuItem = useMemo(() => {
@@ -288,7 +263,7 @@ export const useDashboardMenuItems = ({
   const viewModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
     const shareMenuItem = share ? [menuItems.share] : [];
-    const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave(ViewMode.VIEW)] : [];
+    const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !managed ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
 
@@ -316,7 +291,7 @@ export const useDashboardMenuItems = ({
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {
-      editModeItems.push(menuItems.interactiveSave(ViewMode.EDIT), menuItems.switchToViewMode);
+      editModeItems.push(menuItems.interactiveSave, menuItems.switchToViewMode);
 
       if (showResetChange) {
         editModeItems.push(resetChangesMenuItem);
@@ -324,7 +299,7 @@ export const useDashboardMenuItems = ({
 
       editModeItems.push(menuItems.quickSave);
     } else {
-      editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave(ViewMode.EDIT));
+      editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
     return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
   }, [isLabsEnabled, menuItems, share, lastSavedId, showResetChange, resetChangesMenuItem]);

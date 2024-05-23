@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { Fragment } from 'react';
+import React, { Fragment, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
@@ -77,11 +77,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
     [onSave, persistSelectedTimeInterval, selectedTags]
   );
 
-  const onTimeRestoreChange = React.useCallback((event: any) => {
-    setPersistSelectedTimeInterval(event.target.checked);
-  }, []);
-
-  const renderDashboardSaveOptions = React.useCallback(() => {
+  const renderDashboardSaveOptions = useCallback(() => {
     const {
       savedObjectsTagging: { components },
     } = pluginServices.getServices();
@@ -111,7 +107,9 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
             <EuiSwitch
               data-test-subj="storeTimeWithDashboard"
               checked={persistSelectedTimeInterval}
-              onChange={onTimeRestoreChange}
+              onChange={(event) => {
+                setPersistSelectedTimeInterval(event.target.checked);
+              }}
               label={
                 <FormattedMessage
                   id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
@@ -123,7 +121,7 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
         ) : null}
       </Fragment>
     );
-  }, [onTimeRestoreChange, persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
+  }, [persistSelectedTimeInterval, selectedTags, showStoreTimeOnSave]);
 
   return (
     <SavedObjectSaveModal
