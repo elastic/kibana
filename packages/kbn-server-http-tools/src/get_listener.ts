@@ -35,14 +35,17 @@ export const configureHttp1Listener = (
 
   const listener = useTLS
     ? https.createServer({
-        ...tlsOptions,
-        keepAliveTimeout: config.keepaliveTimeout,
-      })
+      ...tlsOptions,
+      keepAliveTimeout: config.keepaliveTimeout,
+    })
     : http.createServer({
-        keepAliveTimeout: config.keepaliveTimeout,
-      });
+      keepAliveTimeout: config.keepaliveTimeout,
+    });
 
   listener.setTimeout(config.socketTimeout);
+  listener.on('timeout', (socket) => {
+    socket.destroy();
+  });
   listener.on('clientError', (err, socket) => {
     if (socket.writable) {
       socket.end(Buffer.from('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
@@ -63,10 +66,10 @@ export const configureHttp2Listener = (
 
   const listener = useTLS
     ? http2.createSecureServer({
-        ...tlsOptions,
-        // allow ALPN negotiation to HTTP1
-        allowHTTP1: true,
-      })
+      ...tlsOptions,
+      // allow ALPN negotiation to HTTP1
+      allowHTTP1: true,
+    })
     : http2.createServer({});
 
   listener.setTimeout(config.socketTimeout);

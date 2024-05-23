@@ -6,15 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Server, type ServerOptions } from '@hapi/hapi';
-import type { ServerListener } from './types';
+import { Server, ServerOptions } from '@hapi/hapi';
 
-export function createServer(serverOptions: ServerOptions, listener: ServerListener): Server {
-  const server = new Server({
-    ...serverOptions,
-    // HAPI type signatures are outdated and only define http1 listener
-    listener: listener as ServerOptions['listener'],
-  });
-
-  return server;
+export function createServer(serverOptions: ServerOptions) {
+  return new Server(serverOptions);
 }

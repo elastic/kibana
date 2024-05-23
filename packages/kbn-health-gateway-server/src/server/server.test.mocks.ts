@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { sslSchema, getServerOptions, getServerListener } from '@kbn/server-http-tools';
+import { sslSchema, getServerOptions } from '@kbn/server-http-tools';
 
 export const hapiStartMock = jest.fn();
 export const hapiStopMock = jest.fn();
@@ -18,12 +18,10 @@ export const createServerMock = jest.fn().mockImplementation(() => ({
   route: hapiRouteMock,
 }));
 export const getServerOptionsMock = jest.fn().mockImplementation(getServerOptions);
-export const getServerListenerMock = jest.fn().mockImplementation(getServerListener);
 
 jest.doMock('@kbn/server-http-tools', () => ({
   createServer: createServerMock,
   getServerOptions: getServerOptionsMock,
-  getServerListener: getServerListenerMock,
   sslSchema,
   SslConfig: jest.fn(),
 }));

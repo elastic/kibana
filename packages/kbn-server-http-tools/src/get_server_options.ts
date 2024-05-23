@@ -6,19 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
+import type { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
+import type { IHttpConfig } from './types';
 import { defaultValidationErrorHandler } from './default_validation_error_handler';
-import { IHttpConfig } from './types';
+import { getServerListener } from './get_listener';
 
 const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
 
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
  */
-export function getServerOptions(
-  config: IHttpConfig,
-  { configureTLS = true }: { configureTLS?: boolean } = {}
-) {
+export function getServerOptions(config: IHttpConfig, { configureTLS = true } = {}) {
   const cors: RouteOptionsCors | false = config.cors.enabled
     ? {
         credentials: config.cors.allowCredentials,
@@ -30,6 +28,10 @@ export function getServerOptions(
   const options: ServerOptions = {
     host: config.host,
     port: config.port,
+    // manually configuring the listener
+    listener: getServerListener(config, { configureTLS }),
+    // must set to true when manually passing a TLS listener, false otherwise
+    tls: configureTLS && config.ssl.enabled,
     routes: {
       cache: {
         privacy: 'private',
@@ -52,8 +54,6 @@ export function getServerOptions(
       isHttpOnly: true,
       isSameSite: false, // necessary to allow using Kibana inside an iframe
     },
-    // must set to true when manually passing a listener
-    tls: configureTLS && config.ssl.enabled,
   };
 
   return options;

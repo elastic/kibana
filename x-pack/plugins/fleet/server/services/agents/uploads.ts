@@ -20,12 +20,14 @@ import {
   AGENT_ACTIONS_RESULTS_INDEX,
   agentRouteService,
 } from '../../../common';
-
+import type { DeleteAgentUploadResponse } from '../../../common/types';
 import {
   FILE_STORAGE_DATA_AGENT_INDEX,
   FILE_STORAGE_METADATA_AGENT_INDEX,
   SO_SEARCH_LIMIT,
 } from '../../constants';
+import { updateFilesStatus } from '../files';
+import { FleetError } from '../../errors';
 
 export async function getAgentUploads(
   esClient: ElasticsearchClient,
@@ -48,7 +50,7 @@ export async function getAgentUploads(
       if (fileResponse.hits.hits.length === 0) {
         appContextService
           .getLogger()
-          .debug(`No matches for action_id ${actionId} and agent_id ${agentId}`);
+          .trace(`No matches for action_id ${actionId} and agent_id ${agentId}`);
         return;
       }
       return {
@@ -70,6 +72,19 @@ export async function getAgentUploads(
   const results: AgentDiagnostics[] = [];
   for (const action of actions) {
     const file = await getFile(action.actionId);
+
+    // File list is initially built from list of diagnostic actions.
+    // If file was deleted intentially by ILM policy or user based on the meta information,
+    // or if the meta information does not exist AND the action is old (new actions are
+    // ok to show because we want to show in progress files)
+    // skip returning this action/file information.
+    if (
+      file?.Status === 'DELETED' ||
+      (!file && Date.parse(action.timestamp!) < Date.now() - 89 * 24 * 3600 * 1000)
+    ) {
+      continue;
+    }
+
     const fileName =
       file?.name ??
       `elastic-agent-diagnostics-${moment
@@ -78,7 +93,7 @@ export async function getAgentUploads(
     const filePath = file ? agentRouteService.getAgentFileDownloadLink(file.id, file.name) : '';
     const isActionExpired = action.expiration ? Date.parse(action.expiration) < Date.now() : false;
     const status =
-      file?.Status ?? (action.error ? 'FAILED' : isActionExpired ? 'EXPIRED' : 'IN_PROGRESS');
+      file?.Status ?? (isActionExpired ? 'EXPIRED' : action.error ? 'FAILED' : 'IN_PROGRESS');
     const result = {
       actionId: action.actionId,
       id: file?.id ?? action.actionId,
@@ -210,6 +225,61 @@ export async function getAgentUploadFile(
       body: await file.downloadContent(),
       headers: getDownloadHeadersForFile(fileName),
     };
+  } catch (error) {
+    appContextService.getLogger().error(error);
+    throw error;
+  }
+}
+
+export async function deleteAgentUploadFile(
+  esClient: ElasticsearchClient,
+  id: string
+): Promise<DeleteAgentUploadResponse> {
+  try {
+    // We manually delete the documents from the data streams with `_delete_by_query`
+    // because data streams do not support single deletes. See:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams.html#data-streams-append-only
+
+    // Delete the file from the file storage data stream
+    const filesDeleteResponse = await esClient.deleteByQuery({
+      index: FILE_STORAGE_DATA_AGENT_INDEX,
+      refresh: true,
+      body: {
+        query: {
+          match: {
+            bid: id, // Use `bid` instead of `_id` because `_id` has additional suffixes
+          },
+        },
+      },
+    });
+
+    if (
+      !!(
+        (filesDeleteResponse.deleted && filesDeleteResponse.deleted > 0) ||
+        filesDeleteResponse.total === 0
+      )
+    ) {
+      // Update the metadata to mark the file as deleted
+      const updateMetadataStatusResponse = (
+        await updateFilesStatus(
+          esClient,
+          undefined,
+          { [FILE_STORAGE_METADATA_AGENT_INDEX]: new Set([id]) },
+          'DELETED'
+        )
+      )[0];
+
+      if (updateMetadataStatusResponse.total === 0) {
+        throw new FleetError(`Failed to update file ${id} metadata`);
+      }
+
+      return {
+        id,
+        deleted: true,
+      };
+    } else {
+      throw new FleetError(`Failed to delete file ${id} from file storage data stream`);
+    }
   } catch (error) {
     appContextService.getLogger().error(error);
     throw error;

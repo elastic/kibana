@@ -10,14 +10,7 @@ import { Server, Request } from '@hapi/hapi';
 import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  createServer,
-  getServerListener,
-  getServerOptions,
-  setTlsConfig,
-  getRequestId,
-} from '@kbn/server-http-tools';
-
+import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
 import { Observable, Subscription, firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
@@ -235,9 +228,8 @@ export class HttpServer {
     this.config = config;
 
     const serverOptions = getServerOptions(config);
-    const serverListener = getServerListener(config);
 
-    this.server = createServer(serverOptions, serverListener);
+    this.server = createServer(serverOptions);
     await this.server.register([HapiStaticFiles]);
     if (config.compression.brotli.enabled) {
       await this.server.register({

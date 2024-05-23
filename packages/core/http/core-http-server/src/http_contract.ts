@@ -404,6 +404,10 @@ export interface HttpServerInfo {
 }
 
 /**
- * @public
+ * Defines an http protocol.
+ * (Only supporting http1 for now)
+ *
+ * - http1: regroups all http/1.x protocols
+ * - http2: h2/h2c
  */
 export type HttpProtocol = 'http1' | 'http2';
