@@ -14,7 +14,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 describe(
   'Maintenance window callout on Rule Management page',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@skipInServerless'] },
   () => {
     let maintenanceWindowId = '';
 
