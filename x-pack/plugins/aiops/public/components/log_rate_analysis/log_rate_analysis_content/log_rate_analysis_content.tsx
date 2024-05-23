@@ -36,9 +36,6 @@ import {
 } from '@kbn/aiops-log-rate-analysis/state';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
 
-import { useData } from '../../../hooks/use_data';
-import { useDataSource } from '../../../hooks/use_data_source';
-
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
 import {
   LogRateAnalysisResults,
@@ -97,7 +94,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   onWindowParametersChange,
   embeddingOrigin,
 }) => {
-  const { dataView } = useDataSource();
   const dispatch = useAppDispatch();
 
   const windowParameters = useAppSelector((s) => s.logRateAnalysis.windowParameters);
@@ -131,22 +127,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     [esSearchQuery]
   );
 
-  const autoRunAnalysis = useAppSelector((s) => s.logRateAnalysis.autoRunAnalysis);
-  const isBrushCleared = useAppSelector((s) => s.logRateAnalysis.isBrushCleared);
+  const { autoRunAnalysis, documentStats, earliest, latest, isBrushCleared } = useAppSelector(
+    (s) => s.logRateAnalysis
+  );
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
-
-  const { documentStats, earliest, latest } = useData(
-    dataView,
-    'log_rate_analysis',
-    searchQuery,
-    undefined,
-    currentSelectedSignificantItem,
-    currentSelectedGroup,
-    undefined,
-    true,
-    timeRange
-  );
 
   const { sampleProbability, totalCount, documentCountStats, documentCountStatsCompare } =
     documentStats;
@@ -348,7 +333,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           data-test-subj="aiopsChangePointDetectedPrompt"
         />
       )}
-      {showDefaultEmptyPrompt && (
+      {showDocumentCountContent && showDefaultEmptyPrompt && (
         <EuiEmptyPrompt
           color="subdued"
           hasShadow={false}

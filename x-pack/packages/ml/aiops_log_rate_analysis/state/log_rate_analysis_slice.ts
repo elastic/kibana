@@ -13,6 +13,8 @@ import type { WindowParameters } from '../window_parameters';
 import type { LogRateAnalysisType } from '../log_rate_analysis_type';
 import { LOG_RATE_ANALYSIS_TYPE } from '../log_rate_analysis_type';
 
+import type { DocumentStats } from '../types';
+
 export type InitialAnalysisStart = number | WindowParameters | undefined;
 export interface BrushSelectionUpdatePayload {
   windowParameters: WindowParameters;
@@ -20,13 +22,17 @@ export interface BrushSelectionUpdatePayload {
   analysisType: LogRateAnalysisType;
 }
 
-interface LogRateAnalysisState {
+export interface LogRateAnalysisState {
   analysisType: LogRateAnalysisType;
   autoRunAnalysis: boolean;
   initialAnalysisStart: InitialAnalysisStart;
   isBrushCleared: boolean;
   stickyHistogram: boolean;
   windowParameters?: WindowParameters;
+  earliest?: number;
+  latest?: number;
+  intervalMs?: number;
+  documentStats: DocumentStats;
 }
 
 function getDefaultState(): LogRateAnalysisState {
@@ -35,6 +41,10 @@ function getDefaultState(): LogRateAnalysisState {
     autoRunAnalysis: true,
     initialAnalysisStart: undefined,
     isBrushCleared: true,
+    documentStats: {
+      sampleProbability: 1,
+      totalCount: 0,
+    },
     // Default to false for now, until page restructure work to enable smooth sticky histogram is done
     stickyHistogram: false,
   };
@@ -67,6 +77,20 @@ export const logRateAnalysisSlice = createSlice({
     setAutoRunAnalysis: (state: LogRateAnalysisState, action: PayloadAction<boolean>) => {
       state.autoRunAnalysis = action.payload;
     },
+    setDocumentCountChartData: (
+      state: LogRateAnalysisState,
+      action: PayloadAction<{
+        earliest?: number;
+        latest?: number;
+        intervalMs?: number;
+        documentStats: DocumentStats;
+      }>
+    ) => {
+      state.earliest = action.payload.earliest;
+      state.latest = action.payload.latest;
+      state.intervalMs = action.payload.intervalMs;
+      state.documentStats = action.payload.documentStats;
+    },
     setInitialAnalysisStart: (
       state: LogRateAnalysisState,
       action: PayloadAction<InitialAnalysisStart>
@@ -95,6 +119,7 @@ export const {
   clearSelection,
   setAnalysisType,
   setAutoRunAnalysis,
+  setDocumentCountChartData,
   setInitialAnalysisStart,
   setIsBrushCleared,
   setStickyHistogram,

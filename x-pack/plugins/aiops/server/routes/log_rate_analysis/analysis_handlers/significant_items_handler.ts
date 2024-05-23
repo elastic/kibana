@@ -161,6 +161,8 @@ export const significantItemsHandlerFactory =
         }
       }
 
+      stateHandler.loaded(loadingStep, false);
+
       responseStream.push(
         updateLoadingState({
           ccsWarning: false,

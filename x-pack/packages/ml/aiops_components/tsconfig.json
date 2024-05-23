@@ -27,7 +27,6 @@
     "@kbn/field-formats-plugin",
     "@kbn/visualization-utils",
     "@kbn/aiops-log-rate-analysis",
-    "@kbn/ml-agg-utils",
   ],
   "exclude": [
     "target/**/*",

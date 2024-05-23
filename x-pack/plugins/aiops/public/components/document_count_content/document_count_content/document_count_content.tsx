@@ -13,11 +13,14 @@ import type {
   RectAnnotationSpec,
 } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
-import type { LogRateHistogramItem, WindowParameters } from '@kbn/aiops-log-rate-analysis';
+import type {
+  DocumentCountStats,
+  LogRateHistogramItem,
+  WindowParameters,
+} from '@kbn/aiops-log-rate-analysis';
 import { DocumentCountChartRedux } from '@kbn/aiops-components';
 
 import { useAiopsAppContext } from '../../../hooks/use_aiops_app_context';
-import type { DocumentCountStats } from '../../../get_document_stats';
 
 import { TotalCountHeader } from '../total_count_header';
 

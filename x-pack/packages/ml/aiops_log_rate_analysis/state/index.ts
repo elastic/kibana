@@ -10,6 +10,7 @@ export {
   clearSelection,
   setAnalysisType,
   setAutoRunAnalysis,
+  setDocumentCountChartData,
   setInitialAnalysisStart,
   setIsBrushCleared,
   setStickyHistogram,

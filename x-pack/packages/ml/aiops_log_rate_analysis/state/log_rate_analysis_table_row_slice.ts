@@ -15,7 +15,7 @@ import type { GroupTableItem } from './types';
 type SignificantItemOrNull = SignificantItem | null;
 type GroupOrNull = GroupTableItem | null;
 
-interface LogRateAnalysisTableRowState {
+export interface LogRateAnalysisTableRowState {
   pinnedGroup: GroupOrNull;
   pinnedSignificantItem: SignificantItemOrNull;
   selectedGroup: GroupOrNull;
