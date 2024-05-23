@@ -24,7 +24,8 @@ export default function ({ getService }) {
     cleanUp,
   } = registerHelpers(getService);
 
-  describe('jobs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/184073
+  describe.skip('jobs', () => {
     after(() => cleanUp());
 
     describe('indices', () => {

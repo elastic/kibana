@@ -17,6 +17,5 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/config-schema",
     "@kbn/core-http-server",
-    "@kbn/safer-lodash-set",
   ]
 }
