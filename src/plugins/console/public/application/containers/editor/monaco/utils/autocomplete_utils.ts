@@ -216,12 +216,12 @@ export const getUrlParamsCompletionItems = (
 /*
  * This function returns an array of completion items for the request body params
  */
-export const getBodyCompletionItems = (
+export const getBodyCompletionItems = async (
   model: monaco.editor.ITextModel,
   position: monaco.Position,
   requestStartLineNumber: number,
   editor: MonacoEditorActionsProvider
-): monaco.languages.CompletionItem[] => {
+): Promise<monaco.languages.CompletionItem[]> => {
   const { lineNumber, column } = position;
 
   // get the content on the method+url line
@@ -253,27 +253,48 @@ export const getBodyCompletionItems = (
   context.editor = editor;
   context.requestStartRow = requestStartLineNumber;
   populateContext(bodyTokens, context, editor, true, components);
-  console.log(context);
-  if (context.autoCompleteSet && context.autoCompleteSet.length > 0) {
-    const wordUntilPosition = model.getWordUntilPosition(position);
-    // if there is " after the cursor, replace it
-    let endColumn = position.column;
-    const charAfterPosition = model.getValueInRange({
-      startLineNumber: position.lineNumber,
-      startColumn: position.column,
-      endLineNumber: position.lineNumber,
-      endColumn: position.column + 1,
-    });
-    if (charAfterPosition === '"') {
-      endColumn = endColumn + 1;
+  if (!context) {
+    return [];
+  }
+  if (!context.asyncResultsState?.isLoading) {
+    return getSuggestions(model, position, context, bodyContent);
+  } else {
+    // async suggestions
+    if (context.asyncResultsState) {
+      await context.asyncResultsState.results;
+      return getSuggestions(model, position, context, bodyContent);
     }
-    const range = {
-      startLineNumber: position.lineNumber,
-      // replace the whole word with the suggestion
-      startColumn: wordUntilPosition.startColumn,
-      endLineNumber: position.lineNumber,
-      endColumn,
-    };
+  }
+
+  return [];
+};
+
+const getSuggestions = (
+  model: monaco.editor.ITextModel,
+  position: monaco.Position,
+  context: AutoCompleteContext,
+  bodyContent: string
+) => {
+  const wordUntilPosition = model.getWordUntilPosition(position);
+  // if there is " after the cursor, replace it
+  let endColumn = position.column;
+  const charAfterPosition = model.getValueInRange({
+    startLineNumber: position.lineNumber,
+    startColumn: position.column,
+    endLineNumber: position.lineNumber,
+    endColumn: position.column + 1,
+  });
+  if (charAfterPosition === '"') {
+    endColumn = endColumn + 1;
+  }
+  const range = {
+    startLineNumber: position.lineNumber,
+    // replace the whole word with the suggestion
+    startColumn: wordUntilPosition.startColumn,
+    endLineNumber: position.lineNumber,
+    endColumn,
+  };
+  if (context.autoCompleteSet && context.autoCompleteSet.length > 0) {
     return (
       context.autoCompleteSet
         // filter out items that don't have name
@@ -296,7 +317,6 @@ export const getBodyCompletionItems = (
   }
   return [];
 };
-
 const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
   bodyContent: string,
