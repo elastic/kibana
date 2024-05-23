@@ -86,8 +86,6 @@ async function createSetupSideEffects(
 ): Promise<SetupStatus> {
   const logger = appContextService.getLogger();
   logger.info('Beginning fleet setup');
-  // eslint-disable-next-line no-console
-  console.trace();
 
   await cleanUpOldFileIndices(esClient, logger);
 

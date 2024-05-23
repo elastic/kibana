@@ -73,7 +73,6 @@ export const fleetSetupHandler: FleetRequestHandler = async (context, request, r
   try {
     const soClient = (await context.fleet).internalSoClient;
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
-    appContextService.getLogger().info('Call Fleet setup from API handler');
     const setupStatus = await setupFleet(soClient, esClient);
     const body: PostFleetSetupResponse = {
       ...setupStatus,
