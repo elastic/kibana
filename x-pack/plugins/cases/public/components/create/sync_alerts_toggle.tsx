@@ -19,7 +19,9 @@ const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading, path }) => {
   const [formData] = useFormData();
 
   const syncAlerts =
-    path !== '' ? Boolean(formData?.caseFields?.syncAlerts) : Boolean(formData?.syncAlerts);
+    path && path === 'caseFields.syncAlerts'
+      ? Boolean(formData?.caseFields?.syncAlerts)
+      : Boolean(formData?.syncAlerts);
 
   return (
     <UseField

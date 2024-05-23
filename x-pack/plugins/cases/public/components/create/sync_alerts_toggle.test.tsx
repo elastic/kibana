@@ -5,78 +5,78 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
-
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { screen, within, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import type { FormProps } from './schema';
 import { schema } from './schema';
+import { FormTestComponent } from '../../common/test_utils';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 describe('SyncAlertsToggle', () => {
-  let globalForm: FormHook;
-
-  const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
-    const { form } = useForm<FormProps>({
-      defaultValue: { syncAlerts: true },
-      schema: {
-        syncAlerts: schema.syncAlerts,
-      },
-    });
-
-    globalForm = form;
-
-    return <Form form={form}>{children}</Form>;
+  let appMockRender: AppMockRenderer;
+  const onSubmit = jest.fn();
+  const defaultFormProps = {
+    onSubmit,
+    formDefaultValue: { syncAlerts: true },
+    schema: {
+      syncAlerts: schema.syncAlerts,
+    },
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
   });
 
   it('it renders', async () => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
+    appMockRender.render(
+      <FormTestComponent>
         <SyncAlertsToggle isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    expect(wrapper.find(`[data-test-subj="caseSyncAlerts"]`).exists()).toBeTruthy();
+    expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
+    expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'true');
+    expect(await screen.findByText('On')).toBeInTheDocument();
   });
 
   it('it toggles the switch', async () => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
+    appMockRender.render(
+      <FormTestComponent>
         <SyncAlertsToggle isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
+    const synAlerts = await screen.findByTestId('caseSyncAlerts');
 
-    await waitFor(() => {
-      expect(globalForm.getFormData()).toEqual({ syncAlerts: false });
-    });
+    userEvent.click(within(synAlerts).getByRole('switch'));
+
+    expect(await screen.findByRole('switch')).toHaveAttribute('aria-checked', 'false');
+    expect(await screen.findByText('Off')).toBeInTheDocument();
   });
 
-  it('it shows the correct labels', async () => {
-    const wrapper = mount(
-      <MockHookWrapperComponent>
+  it('calls onSubmit with correct data', async () => {
+    appMockRender.render(
+      <FormTestComponent {...defaultFormProps}>
         <SyncAlertsToggle isLoading={false} />
-      </MockHookWrapperComponent>
+      </FormTestComponent>
     );
 
-    expect(wrapper.find(`[data-test-subj="caseSyncAlerts"] .euiSwitch__label`).first().text()).toBe(
-      'On'
-    );
+    const synAlerts = await screen.findByTestId('caseSyncAlerts');
 
-    wrapper.find('[data-test-subj="caseSyncAlerts"] button').first().simulate('click');
+    userEvent.click(within(synAlerts).getByRole('switch'));
+
+    userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(
-        wrapper.find(`[data-test-subj="caseSyncAlerts"] .euiSwitch__label`).first().text()
-      ).toBe('Off');
+      expect(onSubmit).toBeCalledWith(
+        {
+          syncAlerts: false,
+        },
+        true
+      );
     });
   });
 });

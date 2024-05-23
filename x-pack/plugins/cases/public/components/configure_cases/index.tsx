@@ -285,10 +285,24 @@ export const ConfigureCases: React.FC = React.memo(() => {
     (key: string) => {
       const remainingCustomFields = customFields.filter((field) => field.key !== key);
 
+      // delete the same custom field from each template as well
+      const templatesWithRemainingCustomFields = templates.map((template) => {
+        const templateCustomFields =
+          template.caseFields?.customFields?.filter((field) => field.key !== key) ?? [];
+
+        return {
+          ...template,
+          caseFields: {
+            ...template.caseFields,
+            customFields: [...templateCustomFields],
+          },
+        };
+      });
+
       persistCaseConfigure({
         connector,
         customFields: [...remainingCustomFields],
-        templates,
+        templates: [...templatesWithRemainingCustomFields],
         id: configurationId,
         version: configurationVersion,
         closureType,
