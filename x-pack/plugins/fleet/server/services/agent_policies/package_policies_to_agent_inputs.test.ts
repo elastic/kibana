@@ -31,7 +31,7 @@ packageInfoCache.set('limited_package-0.0.0', {
   ],
 });
 
-describe.only('Fleet - storedPackagePoliciesToAgentInputs', () => {
+describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
   const mockPackagePolicy: PackagePolicy = {
     id: 'some-uuid',
     name: 'mock_package-policy',
