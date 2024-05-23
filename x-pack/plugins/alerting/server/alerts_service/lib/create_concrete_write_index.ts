@@ -166,8 +166,39 @@ export const createConcreteWriteIndex = async (opts: CreateConcreteWriteIndexOpt
   await opts.dataStreamAdapter.createStream(opts);
 };
 
-export interface SetConcreteWriteIndexOpts {
+interface SetConcreteWriteIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   indexPatterns: IIndexPatternString;
+}
+
+export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
+  const { logger, esClient, indexPatterns } = opts;
+  logger.debug(
+    `Attempting to set index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}.`
+  );
+  try {
+    await retryTransientEsErrors(
+      () =>
+        esClient.indices.updateAliases({
+          body: {
+            actions: [
+              { remove: { index: indexPatterns.name, alias: indexPatterns.alias } },
+              {
+                add: {
+                  index: indexPatterns.name,
+                  alias: indexPatterns.alias,
+                  is_write_index: true,
+                },
+              },
+            ],
+          },
+        }),
+      { logger }
+    );
+  } catch (error) {
+    throw new Error(
+      `Failed to set index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}.`
+    );
+  }
 }
