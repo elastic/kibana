@@ -257,21 +257,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/183847
-    describe.skip('inspector', () => {
+    describe('inspector', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
       it('shows Discover and Lens requests in Inspector', async () => {
         await PageObjects.discover.selectTextBaseLang();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
-        await inspector.open();
-        const requestNames = await inspector.getRequestNames();
-        expect(requestNames).to.contain('Table');
-        expect(requestNames).to.contain('Visualization');
+        let retries = 0;
+        await retry.try(async () => {
+          if (retries > 0) {
+            await inspector.close();
+            await testSubjects.click('querySubmitButton');
+            await PageObjects.header.waitUntilLoadingHasFinished();
+            await PageObjects.discover.waitUntilSearchingHasFinished();
+          }
+          await inspector.open();
+          retries = retries + 1;
+          const requestNames = await inspector.getRequestNames();
+          expect(requestNames).to.contain('Table');
+          expect(requestNames).to.contain('Visualization');
+        });
       });
     });
 

@@ -195,7 +195,11 @@ class AgentPolicyService {
     created: boolean;
     policy?: AgentPolicy;
   }> {
-    const { id, ...preconfiguredAgentPolicy } = omit(config, 'package_policies');
+    const {
+      id,
+      space_id: kibanaSpaceId,
+      ...preconfiguredAgentPolicy
+    } = omit(config, 'package_policies');
     const newAgentPolicyDefaults: Pick<NewAgentPolicy, 'namespace' | 'monitoring_enabled'> = {
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
@@ -383,7 +387,10 @@ class AgentPolicyService {
       throw new FleetError(agentPolicySO.error.message);
     }
 
-    const agentPolicy = { id: agentPolicySO.id, ...agentPolicySO.attributes };
+    const agentPolicy = {
+      id: agentPolicySO.id,
+      ...agentPolicySO.attributes,
+    };
 
     if (withPackagePolicies) {
       agentPolicy.package_policies =
