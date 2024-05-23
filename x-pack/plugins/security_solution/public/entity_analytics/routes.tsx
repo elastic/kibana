@@ -31,7 +31,7 @@ const EntityAnalyticsManagementTelemetry = () => (
   </PluginTemplateWrapper>
 );
 
-const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
+export const EntityAnalyticsManagement: React.FC = React.memo(() => {
   return (
     <Switch>
       <Route
@@ -43,7 +43,7 @@ const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
     </Switch>
   );
 });
-EntityAnalyticsManagementContainer.displayName = 'EntityAnalyticsManagementContainer';
+EntityAnalyticsManagement.displayName = 'EntityAnalyticsManagement';
 
 const EntityAnalyticsAssetClassificationTelemetry = () => (
   <PluginTemplateWrapper>
@@ -54,7 +54,7 @@ const EntityAnalyticsAssetClassificationTelemetry = () => (
   </PluginTemplateWrapper>
 );
 
-const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
+export const EntityAnalyticsAssetClassification: React.FC = React.memo(() => {
   return (
     <Switch>
       <Route
@@ -67,5 +67,4 @@ const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
   );
 });
 
-EntityAnalyticsAssetClassificationContainer.displayName =
-  'EntityAnalyticsAssetClassificationContainer';
+EntityAnalyticsAssetClassification.displayName = 'EntityAnalyticsAssetClassification';
