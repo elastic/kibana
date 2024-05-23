@@ -88,7 +88,7 @@ export class ServiceAPIClient {
   async checkAccountAccessStatus() {
     if (this.authorization || !this.config?.manifestUrl) {
       // in case username/password is provided, we assume it's always allowed
-      return { allowed: false, signupUrl: null };
+      return { allowed: true, signupUrl: null };
     }
 
     if (this.locations.length > 0) {
