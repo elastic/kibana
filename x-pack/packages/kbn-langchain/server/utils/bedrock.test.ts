@@ -7,7 +7,7 @@
 
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-import { handleBedrockChunk } from '../..';
+import { handleBedrockChunk } from './bedrock';
 
 const getContentBlockDelta = (completion: string) => ({
   type: 'content_block_delta',

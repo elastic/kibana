@@ -19,12 +19,13 @@ export const getInputControlVisRenderer: (
   name: 'input_control_vis',
   reuseDomNode: true,
   render: async (domNode, { visConfig }, handlers) => {
+    const [coreStart] = await deps.core.getStartServices();
     let registeredController = inputControlVisRegistry.get(domNode);
 
     if (!registeredController) {
       const { createInputControlVisController } = await import('./vis_controller');
 
-      registeredController = createInputControlVisController(deps, handlers, domNode);
+      registeredController = createInputControlVisController(coreStart, deps, handlers, domNode);
       inputControlVisRegistry.set(domNode, registeredController);
 
       handlers.onDestroy(() => {

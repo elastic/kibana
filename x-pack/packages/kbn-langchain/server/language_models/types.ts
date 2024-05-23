@@ -6,15 +6,12 @@
  */
 
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import {
-  ChatCompletionContentPart,
-  ChatCompletionCreateParamsNonStreaming,
-} from 'openai/resources/chat/completions';
+import type OpenAI from 'openai';
 
 export interface InvokeAIActionParamsSchema {
   messages: Array<{
     role: string;
-    content: string | ChatCompletionContentPart[];
+    content: string | OpenAI.ChatCompletionContentPart[];
     name?: string;
     function_call?: {
       arguments: string;
@@ -32,11 +29,16 @@ export interface InvokeAIActionParamsSchema {
     }>;
     tool_call_id?: string;
   }>;
-  model?: ChatCompletionCreateParamsNonStreaming['model'];
-  n?: ChatCompletionCreateParamsNonStreaming['n'];
-  stop?: ChatCompletionCreateParamsNonStreaming['stop'];
-  temperature?: ChatCompletionCreateParamsNonStreaming['temperature'];
-  functions?: ChatCompletionCreateParamsNonStreaming['functions'];
+  model?: OpenAI.ChatCompletionCreateParamsNonStreaming['model'];
+  n?: OpenAI.ChatCompletionCreateParamsNonStreaming['n'];
+  stop?: OpenAI.ChatCompletionCreateParamsNonStreaming['stop'];
+  temperature?: OpenAI.ChatCompletionCreateParamsNonStreaming['temperature'];
+  functions?: OpenAI.ChatCompletionCreateParamsNonStreaming['functions'];
+  signal?: AbortSignal;
+  timeout?: number;
+}
+export interface RunActionParamsSchema {
+  body: string;
   signal?: AbortSignal;
   timeout?: number;
 }
