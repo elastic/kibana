@@ -33,9 +33,7 @@ export const HostIsolationPanel = React.memo(
     );
 
     const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(details), [details]);
-    const crowdstrikeAgentId = useMemo(() => {
-      return getCrowdstrikeAgentId(details);
-    }, [details]);
+    const crowdstrikeAgentId = useMemo(() => getCrowdstrikeAgentId(details), [details]);
 
     const hostName = useMemo(
       () => getFieldValue({ category: 'host', field: 'host.name' }, details),
