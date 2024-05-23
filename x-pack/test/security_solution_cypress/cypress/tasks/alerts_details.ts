@@ -8,7 +8,6 @@
 import { CLOSE_ALERT_BTN, MARK_ALERT_ACKNOWLEDGED_BTN, OPEN_ALERT_BTN } from '../screens/alerts';
 import {
   ALERT_FLYOUT,
-  ENRICHMENT_COUNT_NOTIFICATION,
   JSON_VIEW_TAB,
   TABLE_TAB,
   FILTER_INPUT,
@@ -27,10 +26,6 @@ export const openJsonView = () => {
 
 export const openTable = () => {
   cy.get(TABLE_TAB).click();
-};
-
-export const openThreatIndicatorDetails = () => {
-  cy.get(ENRICHMENT_COUNT_NOTIFICATION).click();
 };
 
 export const verifyInsightCount = ({

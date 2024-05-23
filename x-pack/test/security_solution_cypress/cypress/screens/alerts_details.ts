@@ -9,8 +9,6 @@ export const ALERT_FLYOUT = '[data-test-subj="timeline:details-panel:flyout"]';
 
 export const CELL_TEXT = '.euiText';
 
-export const ENRICHMENT_COUNT_NOTIFICATION = '[data-test-subj="enrichment-count-notification"]';
-
 export const ENRICHMENT_QUERY_RANGE_PICKER = '[data-test-subj="enrichment-query-range-picker"]';
 
 export const ENRICHMENT_QUERY_START_INPUT = '.start-picker';
@@ -26,7 +24,7 @@ export const INVESTIGATION_TIME_ENRICHMENT_SECTION =
 
 export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 
-export const JSON_TEXT = '[data-test-subj="jsonView"]';
+export const JSON_TEXT = '[data-test-subj="kibanaCodeEditor"]';
 
 export const OVERVIEW_RULE = '[data-test-subj="eventDetails"] [data-test-subj="ruleName"]';
 
@@ -40,10 +38,6 @@ export const SUMMARY_VIEW = '[data-test-subj="summary-view"]';
 export const TABLE_CELL = '.euiTableRowCell';
 
 export const CELL_EXPAND_VALUE = '[data-test-subj="euiDataGridCellExpandButton"]';
-
-export const CELL_EXPANSION_POPOVER = '[data-test-subj="euiDataGridExpansionPopover"]';
-
-export const USER_DETAILS_LINK = '[data-test-subj="users-link-anchor"]';
 
 export const TABLE_TAB = '[data-test-subj="tableTab"]';
 
