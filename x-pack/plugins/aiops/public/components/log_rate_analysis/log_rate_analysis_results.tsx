@@ -138,8 +138,6 @@ interface LogRateAnalysisResultsProps {
   onReset: () => void;
   /** The search query to be applied to the analysis as a filter */
   searchQuery: estypes.QueryDslQueryContainer;
-  /** Sample probability to be applied to random sampler aggregations */
-  sampleProbability: number;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -153,7 +151,6 @@ interface LogRateAnalysisResultsProps {
 export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   onReset,
   searchQuery,
-  sampleProbability,
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
@@ -161,9 +158,13 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 }) => {
   const { analytics, http } = useAiopsAppContext();
   const { dataView } = useDataSource();
-  const { analysisType, earliest, latest, windowParameters } = useAppSelector(
-    (s) => s.logRateAnalysis
-  );
+  const {
+    analysisType,
+    earliest,
+    latest,
+    windowParameters,
+    documentStats: { sampleProbability },
+  } = useAppSelector((s) => s.logRateAnalysis);
   const isRunning = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
   const stickyHistogram = useAppSelector((s) => s.logRateAnalysis.stickyHistogram);
   const streamErrors = useAppSelector((s) => s.logRateAnalysisStream.errors);

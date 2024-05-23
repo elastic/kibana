@@ -230,7 +230,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       {showLogRateAnalysisResults && (
         <LogRateAnalysisResults
           onReset={clearSelectionHandler}
-          sampleProbability={sampleProbability}
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
