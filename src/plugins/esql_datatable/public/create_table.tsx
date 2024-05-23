@@ -7,13 +7,15 @@
  */
 import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { zipObject } from 'lodash';
+import type { ESQLRow } from '@kbn/es-types';
 import useAsync from 'react-use/lib/useAsync';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type {
   DatatableColumn,
-  DatatableRow,
   DatatableColumnMeta,
+  DatatableRow,
 } from '@kbn/expressions-plugin/common';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { DataLoadingState } from '@kbn/unified-data-table';
@@ -22,7 +24,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { untilPluginStartServicesReady } from './kibana_services';
 
 interface ESQLDatatableProps {
-  rows: DatatableRow[];
+  rows: ESQLRow[];
   dataView: DataView;
   columns: DatatableColumn[];
 }
@@ -55,6 +57,9 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
     return acc;
   }, {} as DataTableColumnsMeta);
 
+  const columnNames = props.columns?.map(({ name }) => name);
+  const rows: DatatableRow[] = props.rows.map((row) => zipObject(columnNames, row));
+
   return (
     <KibanaContextProvider
       services={{
@@ -64,7 +69,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
         <UnifiedDataTable
           columns={[]}
-          rows={props.rows.map((row: Record<string, string>, idx: number) => {
+          rows={rows.map((row: Record<string, string>, idx: number) => {
             return {
               id: String(idx),
               raw: row,
@@ -84,7 +89,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
           isSortEnabled
           loadingState={DataLoadingState.loaded}
           dataView={props.dataView}
-          sampleSizeState={100}
+          sampleSizeState={10}
           onSetColumns={() => {}}
           showTimeCol
           useNewFieldsApi

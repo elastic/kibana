@@ -15,10 +15,11 @@ import {
   EuiText,
   EuiDescriptionList,
 } from '@elastic/eui';
+import type { ESQLRow } from '@kbn/es-types';
 import { ESQLTable } from '@kbn/esql-datatable/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   InlineEditLensEmbeddableContext,
@@ -64,7 +65,7 @@ interface VisualizeQueryResponsev0 {
 interface VisualizeQueryResponsev1 {
   data: {
     columns: DatatableColumn[];
-    rows: DatatableRow[];
+    rows: ESQLRow[];
     userOverrides?: unknown;
   };
   content: {
@@ -84,7 +85,7 @@ interface VisualizeESQLProps {
   uiActions: UiActionsStart;
   /** Datatable columns as returned from the ES|QL _query api, slightly processed to be kibana compliant */
   columns: DatatableColumn[];
-  rows: DatatableRow[];
+  rows: ESQLRow[];
   /** The ES|QL query */
   query: string;
   /** Actions handler */
@@ -363,7 +364,7 @@ export function registerVisualizeQueryRenderFunction({
       const typedResponse = response as VisualizeQueryResponse;
 
       const columns = 'data' in typedResponse ? typedResponse.data.columns : typedResponse.content;
-      const rows = 'data' in typedResponse ? typedResponse.data.rows : typedResponse.content;
+      const rows = 'data' in typedResponse ? typedResponse.data.rows : [];
       const errorMessages =
         'content' in typedResponse && 'errorMessages' in typedResponse.content
           ? typedResponse.content.errorMessages

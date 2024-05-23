@@ -7,9 +7,8 @@
  */
 
 import React from 'react';
-import {
+import UnifiedDataTable, {
   renderCustomToolbar,
-  UnifiedDataTable,
   type UnifiedDataTableProps,
 } from '@kbn/unified-data-table';
 
