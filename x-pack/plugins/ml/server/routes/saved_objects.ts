@@ -78,6 +78,7 @@ export function savedObjectsRoutes(
     .get({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       access: 'public',
+      description: 'Synchronize machine learning saved objects',
       options: {
         tags: [
           'access:ml:canCreateJob',
