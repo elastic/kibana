@@ -718,7 +718,7 @@ export const isFleetServerRunning = async (
  */
 const waitForFleetServerToRegisterWithElasticsearch = async (
   kbnClient: KbnClient,
-  logger?: ToolingLog = createToolingLogger(),
+  logger: ToolingLog = createToolingLogger(),
   fleetServerHostname: string,
   timeoutMs: number = 30000
 ): Promise<void> => {
