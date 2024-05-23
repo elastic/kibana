@@ -54,8 +54,19 @@ describe('react embeddable renderer', () => {
     setupPresentationPanelServices();
   });
 
-  it('deserializes given state', async () => {
-    render(<ReactEmbeddableRenderer type={'test'} state={{ rawState: { bork: 'blorp?' } }} />);
+  it('deserializes unsaved state provided by the parent', async () => {
+    render(
+      <ReactEmbeddableRenderer
+        type={'test'}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: {
+              bork: 'blorp?',
+            },
+          }),
+        })}
+      />
+    );
     await waitFor(() => {
       expect(testEmbeddableFactory.deserializeState).toHaveBeenCalledWith({
         rawState: { bork: 'blorp?' },
@@ -65,13 +76,24 @@ describe('react embeddable renderer', () => {
 
   it('builds the embeddable', async () => {
     const buildEmbeddableSpy = jest.spyOn(testEmbeddableFactory, 'buildEmbeddable');
-    render(<ReactEmbeddableRenderer type={'test'} state={{ rawState: { bork: 'blorp?' } }} />);
+    render(
+      <ReactEmbeddableRenderer
+        type={'test'}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: {
+              bork: 'blorp?',
+            },
+          }),
+        })}
+      />
+    );
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith(
         { bork: 'blorp?' },
         expect.any(Function),
         expect.any(String),
-        undefined
+        expect.any(Object)
       );
     });
   });
@@ -82,7 +104,13 @@ describe('react embeddable renderer', () => {
       <ReactEmbeddableRenderer
         type={'test'}
         maybeId={'12345'}
-        state={{ rawState: { bork: 'blorp?' } }}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: {
+              bork: 'blorp?',
+            },
+          }),
+        })}
       />
     );
     await waitFor(() => {
@@ -90,21 +118,22 @@ describe('react embeddable renderer', () => {
         { bork: 'blorp?' },
         expect.any(Function),
         '12345',
-        undefined
+        expect.any(Object)
       );
     });
   });
 
   it('builds the embeddable, providing a parent', async () => {
     const buildEmbeddableSpy = jest.spyOn(testEmbeddableFactory, 'buildEmbeddable');
-    const parentApi = getMockPresentationContainer();
-    render(
-      <ReactEmbeddableRenderer
-        type={'test'}
-        state={{ rawState: { bork: 'blorp?' } }}
-        parentApi={parentApi}
-      />
-    );
+    const parentApi = {
+      ...getMockPresentationContainer(),
+      getSerializedStateForChild: () => ({
+        rawState: {
+          bork: 'blorp?',
+        },
+      }),
+    };
+    render(<ReactEmbeddableRenderer type={'test'} getParentApi={() => parentApi} />);
     await waitFor(() => {
       expect(buildEmbeddableSpy).toHaveBeenCalledWith(
         { bork: 'blorp?' },
@@ -119,7 +148,11 @@ describe('react embeddable renderer', () => {
     render(
       <ReactEmbeddableRenderer
         type={'test'}
-        state={{ rawState: { name: 'Kuni Garu', bork: 'Dara' } }}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: { name: 'Kuni Garu', bork: 'Dara' },
+          }),
+        })}
       />
     );
     await waitFor(() => {
@@ -136,17 +169,22 @@ describe('react embeddable renderer', () => {
         type={'test'}
         maybeId={'12345'}
         onApiAvailable={onApiAvailable}
-        state={{ rawState: { name: 'Kuni Garu' } }}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: { name: 'Kuni Garu' },
+          }),
+        })}
       />
     );
     await waitFor(() =>
       expect(onApiAvailable).toHaveBeenCalledWith({
         type: 'test',
         uuid: '12345',
-        parentApi: undefined,
+        parentApi: expect.any(Object),
         unsavedChanges: expect.any(Object),
         serializeState: expect.any(Function),
         resetUnsavedChanges: expect.any(Function),
+        snapshotRuntimeState: expect.any(Function),
       })
     );
   });
@@ -157,7 +195,11 @@ describe('react embeddable renderer', () => {
       <ReactEmbeddableRenderer
         type={'test'}
         onApiAvailable={onApiAvailable}
-        state={{ rawState: { name: 'Kuni Garu' } }}
+        getParentApi={() => ({
+          getSerializedStateForChild: () => ({
+            rawState: { name: 'Kuni Garu' },
+          }),
+        })}
       />
     );
     await waitFor(() =>
