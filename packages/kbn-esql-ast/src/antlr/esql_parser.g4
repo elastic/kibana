@@ -7,14 +7,6 @@
 
 // DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.
 
-
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 parser grammar esql_parser;
 
 options {tokenVocab=esql_lexer;}
@@ -113,20 +105,11 @@ field
     ;
 
 fromCommand
-    : FROM fromIdentifier (COMMA fromIdentifier)* metadata? fromOptions?
+    : FROM fromIdentifier (COMMA fromIdentifier)* metadata?
     ;
 
 fromIdentifier
     : FROM_UNQUOTED_IDENTIFIER
-    | QUOTED_IDENTIFIER
-    ;
-
-fromOptions
-    : OPTIONS configOption (COMMA configOption)*
-    ;
-
-configOption
-    : string ASSIGN string
     ;
 
 metadata

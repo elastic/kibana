@@ -44,6 +44,7 @@ describe('useAttackDiscoveryTelemetry', () => {
       model: 'gpt-4',
       durationMs: 8000,
       alertsCount: 20,
+      alertsContextCount: 25,
       configuredAlertsCount: 30,
     });
     expect(reportAttackDiscoveriesGenerated).toHaveBeenCalledWith({
@@ -51,6 +52,7 @@ describe('useAttackDiscoveryTelemetry', () => {
       model: 'gpt-4',
       durationMs: 8000,
       alertsCount: 20,
+      alertsContextCount: 25,
       configuredAlertsCount: 30,
     });
   });

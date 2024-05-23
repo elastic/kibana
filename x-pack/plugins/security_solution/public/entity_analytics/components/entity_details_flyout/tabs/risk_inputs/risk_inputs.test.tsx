@@ -44,9 +44,15 @@ const riskScore = {
       rule_risks: [],
       calculated_score_norm: 100,
       multipliers: [],
-      calculated_level: RiskSeverity.critical,
+      calculated_level: RiskSeverity.Critical,
     },
   },
+};
+
+const riskScoreWithAssetCriticalityContribution = (contribution: number) => {
+  const score = JSON.parse(JSON.stringify(riskScore));
+  score.user.risk.category_2_score = contribution;
+  return score;
 };
 
 describe('RiskInputsTab', () => {
@@ -115,6 +121,62 @@ describe('RiskInputsTab', () => {
     );
 
     expect(queryByTestId('risk-input-contexts-title')).toBeInTheDocument();
+  });
+
+  it('Displays 0.00 for the asset criticality contribution if the contribution value is less than -0.01', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScoreWithAssetCriticalityContribution(-0.0000001)],
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+      </TestProviders>
+    );
+    const contextsTable = getByTestId('risk-input-contexts-table');
+    expect(contextsTable).not.toHaveTextContent('-0.00');
+    expect(contextsTable).toHaveTextContent('0.00');
+  });
+
+  it('Displays 0.00 for the asset criticality contribution if the contribution value is less than 0.01', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScoreWithAssetCriticalityContribution(0.0000001)],
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+      </TestProviders>
+    );
+    const contextsTable = getByTestId('risk-input-contexts-table');
+    expect(contextsTable).not.toHaveTextContent('+0.00');
+    expect(contextsTable).toHaveTextContent('0.00');
+  });
+
+  it('Adds a plus to positive asset criticality contribution scores', () => {
+    mockUseUiSetting.mockReturnValue([true]);
+
+    mockUseRiskScore.mockReturnValue({
+      loading: false,
+      error: false,
+      data: [riskScoreWithAssetCriticalityContribution(2.22)],
+    });
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <RiskInputsTab entityType={RiskScoreEntity.user} entityName="elastic" />
+      </TestProviders>
+    );
+
+    expect(getByTestId('risk-input-contexts-table')).toHaveTextContent('+2.22');
   });
 
   it('shows extra alerts contribution message', () => {

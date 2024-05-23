@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiPopover, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NonEmptyString } from '@kbn/io-ts-utils';
+import { useBoolean } from '@kbn/react-hooks';
 import {
   SavedViewState,
   SavedViewOperations,
@@ -17,7 +18,6 @@ import {
   BasicAttributes,
 } from '../../../common/saved_views';
 import { ManageViewsFlyout } from './manage_views_flyout';
-import { useBoolean } from '../../hooks/use_boolean';
 import { UpsertViewModal } from './upsert_modal';
 
 interface Props<TSingleSavedViewState extends SavedViewItem, TViewState>

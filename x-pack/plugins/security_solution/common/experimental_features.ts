@@ -84,7 +84,7 @@ export const allowedExperimentalValues = Object.freeze({
    *
    * Release: v8.14.0
    */
-  responseActionsSentinelOneV2Enabled: false,
+  responseActionsSentinelOneV2Enabled: true,
 
   /** Enables the `get-file` response action for SentinelOne */
   responseActionsSentinelOneGetFileEnabled: false,
@@ -101,6 +101,11 @@ export const allowedExperimentalValues = Object.freeze({
    * in ES.
    */
   responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+
+  /**
+   * Enables scan response action on Endpoint
+   */
+  responseActionScanEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
@@ -134,14 +139,14 @@ export const allowedExperimentalValues = Object.freeze({
   alertsPageFiltersEnabled: true,
 
   /**
-   * Enables the Attack discovery feature and API endpoint
-   */
-  attackDiscoveryEnabled: false,
-
-  /**
    * Enables the Assistant Model Evaluation advanced setting and API endpoint, introduced in `8.11.0`.
    */
   assistantModelEvaluation: false,
+
+  /**
+   * Enables the Assistant Knowledge Base by default, introduced in `8.15.0`.
+   */
+  assistantKnowledgeBaseByDefault: false,
 
   /**
    * Enables the new user details flyout displayed on the Alerts table.
@@ -186,6 +191,11 @@ export const allowedExperimentalValues = Object.freeze({
   disableTimelineSaveTour: false,
 
   /**
+   * Enables alerts suppression for ES|QL rules
+   */
+  alertSuppressionForEsqlRuleEnabled: false,
+
+  /**
    * Enables the risk engine privileges route
    * and associated callout in the UI
    */
@@ -207,6 +217,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental Crowdstrike integration data to be available in Analyzer
    */
   crowdstrikeDataInAnalyzerEnabled: false,
+
+  /**
+   * Enables experimental JAMF integration data to be available in Analyzer
+   */
+  jamfDataInAnalyzerEnabled: false,
 
   /**
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
@@ -250,17 +265,27 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Makes Elastic Defend integration's Malware On-Write Scan option available to edit.
    */
-  malwareOnWriteScanOptionAvailable: false,
+  malwareOnWriteScanOptionAvailable: true,
+
+  /**
+   * Enables unified manifest that replaces existing user artifacts manifest SO with a new approach of creating a SO per package policy.
+   */
+  unifiedManifestEnabled: false,
 
   /**
    *  Enables Security AI Assistant's Flyout mode
    */
-  aiAssistantFlyoutMode: false,
+  aiAssistantFlyoutMode: true,
 
   /**
    * Enables the new modal for the value list items
    */
   valueListItemsModalEnabled: true,
+
+  /**
+   * Enables the new rule's bulk action to manage custom highlighted fields
+   */
+  bulkCustomHighlightedFieldsEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

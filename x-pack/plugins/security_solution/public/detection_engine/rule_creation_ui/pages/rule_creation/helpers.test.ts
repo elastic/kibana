@@ -140,6 +140,7 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       };
 
       expect(result).toEqual(expected);
@@ -175,6 +176,20 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+      });
+    });
+
+    test('filters out empty required fields', () => {
+      const result = formatDefineStepData({
+        ...mockData,
+        requiredFields: [
+          { name: 'host.name', type: 'keyword' },
+          { name: '', type: '' },
+        ],
+      });
+
+      expect(result).toMatchObject({
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       });
     });
 
@@ -567,6 +582,7 @@ describe('helpers', () => {
             version: '^1.2.3',
           },
         ],
+        required_fields: [{ name: 'host.name', type: 'keyword' }],
       };
 
       expect(result).toEqual(expected);
@@ -691,10 +707,36 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
       expect(result).toEqual(expected);
+    });
+
+    // Users are allowed to input 0 in the form, but value is validated in the API layer
+    test('returns formatted object with max_signals set to 0', () => {
+      const mockDataWithZeroMaxSignals: AboutStepRule = {
+        ...mockData,
+        maxSignals: 0,
+      };
+
+      const result = formatAboutStepData(mockDataWithZeroMaxSignals);
+
+      expect(result.max_signals).toEqual(0);
+    });
+
+    // Strings or empty values are replaced with undefined and overriden with the default value of 1000
+    test('returns formatted object with undefined max_signals for non-integer values inputs', () => {
+      const mockDataWithNonIntegerMaxSignals: AboutStepRule = {
+        ...mockData,
+        // @ts-expect-error
+        maxSignals: '',
+      };
+
+      const result = formatAboutStepData(mockDataWithNonIntegerMaxSignals);
+
+      expect(result.max_signals).toEqual(undefined);
     });
 
     test('returns formatted object with endpoint exceptions_list', () => {
@@ -773,6 +815,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -799,6 +842,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -844,6 +888,7 @@ describe('helpers', () => {
         tags: ['tag1', 'tag2'],
         threat: getThreatMock(),
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -898,6 +943,7 @@ describe('helpers', () => {
           },
         ],
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -928,6 +974,7 @@ describe('helpers', () => {
         timestamp_override: 'event.ingest',
         timestamp_override_fallback_disabled: true,
         investigation_fields: { field_names: ['foo', 'bar'] },
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -959,6 +1006,7 @@ describe('helpers', () => {
         timestamp_override_fallback_disabled: undefined,
         threat: getThreatMock(),
         investigation_fields: undefined,
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -989,6 +1037,7 @@ describe('helpers', () => {
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 
@@ -1019,6 +1068,7 @@ describe('helpers', () => {
         threat_indicator_path: undefined,
         timestamp_override: undefined,
         timestamp_override_fallback_disabled: undefined,
+        max_signals: 100,
         setup: '# this is some setup documentation',
       };
 

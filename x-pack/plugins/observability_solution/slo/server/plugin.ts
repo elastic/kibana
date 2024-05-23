@@ -17,7 +17,10 @@ import {
 } from '@kbn/core/server';
 import { PluginSetupContract, PluginStartContract } from '@kbn/alerting-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import {
+  RuleRegistryPluginSetupContract,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -37,7 +40,7 @@ import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { SloConfig } from '.';
 import { registerRoutes } from './routes/register_routes';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
-import { sloSettings } from './saved_objects/slo_settings';
+import { sloSettings, SO_SLO_SETTINGS_TYPE } from './saved_objects/slo_settings';
 
 export type SloPluginSetup = ReturnType<SloPlugin['setup']>;
 
@@ -56,6 +59,7 @@ export interface PluginStart {
   alerting: PluginStartContract;
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -73,7 +77,7 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
     const config = this.initContext.config.get<SloConfig>();
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
 
-    const savedObjectTypes = [SO_SLO_TYPE];
+    const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
 
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
@@ -152,6 +156,10 @@ export class SloPlugin implements Plugin<SloPluginSetup> {
         getRulesClientWithRequest: async (request) => {
           const [, pluginStart] = await core.getStartServices();
           return pluginStart.alerting.getRulesClientWithRequest(request);
+        },
+        getRacClientWithRequest: async (request) => {
+          const [, pluginStart] = await core.getStartServices();
+          return pluginStart.ruleRegistry.getRacClientWithRequest(request);
         },
       },
       logger: this.logger,

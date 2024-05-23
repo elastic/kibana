@@ -23,11 +23,11 @@ import {
   useAgentStatusHook,
   useGetAgentStatus,
   useGetSentinelOneAgentStatus,
-} from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+} from '../../../../management/hooks/agents/use_get_agent_status';
 import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');
-jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
+jest.mock('../../../../management/hooks/agents/use_get_agent_status');
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -54,9 +54,11 @@ const panelContextValue = {
 
 const renderHighlightedFieldsCell = (values: string[], field: string) =>
   render(
-    <RightPanelContext.Provider value={panelContextValue}>
-      <HighlightedFieldsCell values={values} field={field} />
-    </RightPanelContext.Provider>
+    <TestProviders>
+      <RightPanelContext.Provider value={panelContextValue}>
+        <HighlightedFieldsCell values={values} field={field} />
+      </RightPanelContext.Provider>
+    </TestProviders>
   );
 
 describe('<HighlightedFieldsCell />', () => {
@@ -65,7 +67,11 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render a basic cell', () => {
-    const { getByTestId } = render(<HighlightedFieldsCell values={['value']} field={'field'} />);
+    const { getByTestId } = render(
+      <TestProviders>
+        <HighlightedFieldsCell values={['value']} field={'field'} />
+      </TestProviders>
+    );
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID)).toBeInTheDocument();
   });
@@ -108,9 +114,9 @@ describe('<HighlightedFieldsCell />', () => {
     expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
   });
 
-  // TODO: 8.15 simplify when `agentStatusClientEnabled` FF is enabled/removed
+  // TODO: 8.15 simplify when `agentStatusClientEnabled` FF is enabled and removed
   it.each(Object.keys(hooksToMock))(
-    'should render SentinelOne agent status cell if field is agent.status and `origialField` is `observer.serial_number` with %s hook',
+    'should render SentinelOne agent status cell if field is agent.status and `originalField` is `observer.serial_number` with %s hook',
     (hookName) => {
       const hook = hooksToMock[hookName];
       useAgentStatusHookMock.mockImplementation(() => hook);
@@ -133,9 +139,36 @@ describe('<HighlightedFieldsCell />', () => {
       expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
     }
   );
+  it.each(Object.keys(hooksToMock))(
+    'should render Crowdstrike agent status cell if field is agent.status and `originalField` is `crowdstrike.event.DeviceId` with %s hook',
+    (hookName) => {
+      const hook = hooksToMock[hookName];
+      useAgentStatusHookMock.mockImplementation(() => hook);
 
+      (hook as jest.Mock).mockReturnValue({
+        isFetched: true,
+        isLoading: false,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <HighlightedFieldsCell
+            values={['value']}
+            field={'agent.status'}
+            originalField="crowdstrike.event.DeviceId"
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
+    }
+  );
   it('should not render if values is null', () => {
-    const { container } = render(<HighlightedFieldsCell values={null} field={'field'} />);
+    const { container } = render(
+      <TestProviders>
+        <HighlightedFieldsCell values={null} field={'field'} />
+      </TestProviders>
+    );
 
     expect(container).toBeEmptyDOMElement();
   });

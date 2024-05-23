@@ -46,7 +46,7 @@ import {
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
-import { runPanelPlacementStrategy } from '../../component/panel_placement/place_new_panel_strategies';
+import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
 import { DashboardPublicState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
@@ -195,10 +195,17 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
+  const dashboardBackupState = dashboardBackup.getState(loadDashboardReturn.dashboardId);
   const sessionStorageInput = ((): Partial<SavedDashboardInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
+    return dashboardBackupState?.dashboardState;
   })();
+
+  if (useSessionStorageIntegration) {
+    untilDashboardReady().then((dashboardContainer) => {
+      dashboardContainer.restoredRuntimeState = dashboardBackupState?.panels;
+    });
+  }
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
@@ -307,7 +314,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Place the incoming embeddable if there is one
   // --------------------------------------------------------------------------------------
-  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.() as any;
+  const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
   if (incomingEmbeddable) {
     const scrolltoIncomingEmbeddable = (container: DashboardContainer, id: string) => {
       container.setScrollToPanelId(id);

@@ -40,7 +40,7 @@ export const useIncomingEmbeddable = (selectedPage: CanvasPage) => {
 
   useEffect(() => {
     if (isByValueEnabled && incomingEmbeddable) {
-      const { embeddableId, input: incomingInput, type } = incomingEmbeddable as any;
+      const { embeddableId, input: incomingInput, type } = incomingEmbeddable;
 
       // retrieve existing element
       const originalElement = selectedPage.elements.find(

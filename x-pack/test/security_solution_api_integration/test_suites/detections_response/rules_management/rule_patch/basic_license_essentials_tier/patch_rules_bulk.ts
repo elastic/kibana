@@ -60,13 +60,21 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const rulePatchProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
+          max_signals: 200,
+          setup: '# some setup markdown',
           related_integrations: [
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
         });
+
+        const expectedRule = {
+          ...rulePatchProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
 
         await securitySolutionApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
@@ -76,8 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
           .bulkPatchRules({
             body: [
               {
-                rule_id: 'rule-1',
-                related_integrations: expectedRule.related_integrations,
+                ...rulePatchProperties,
               },
             ],
           })

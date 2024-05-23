@@ -152,6 +152,7 @@ xpack.screenshotting.enabled: false
 xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
+xpack.reporting.csv.maxConcurrentShardRequests: 0
 
 # Disabled Observability plugins
 xpack.ux.enabled: false

@@ -61,13 +61,21 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should patch defaultable fields', async () => {
-        const expectedRule = getCustomQueryRuleParams({
+        const rulePatchProperties = getCustomQueryRuleParams({
           rule_id: 'rule-1',
+          max_signals: 200,
+          setup: '# some setup markdown',
           related_integrations: [
             { package: 'package-a', version: '^1.2.3' },
             { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
           ],
+          required_fields: [{ name: '@timestamp', type: 'date' }],
         });
+
+        const expectedRule = {
+          ...rulePatchProperties,
+          required_fields: [{ name: '@timestamp', type: 'date', ecs: true }],
+        };
 
         await securitySolutionApi.createRule({
           body: getCustomQueryRuleParams({ rule_id: 'rule-1' }),
@@ -76,8 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body: patchedRuleResponse } = await securitySolutionApi
           .patchRule({
             body: {
-              rule_id: 'rule-1',
-              related_integrations: expectedRule.related_integrations,
+              ...rulePatchProperties,
             },
           })
           .expect(200);
@@ -225,6 +232,31 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body).toEqual({
           status_code: 404,
           message: 'rule_id: "fake_id" not found',
+        });
+      });
+
+      describe('max signals', () => {
+        afterEach(async () => {
+          await deleteAllRules(supertest, log);
+        });
+
+        it('does NOT patch a rule when max_signals is less than 1', async () => {
+          await securitySolutionApi.createRule({
+            body: getCustomQueryRuleParams({ rule_id: 'rule-1', max_signals: 100 }),
+          });
+
+          const { body } = await securitySolutionApi
+            .patchRule({
+              body: {
+                rule_id: 'rule-1',
+                max_signals: 0,
+              },
+            })
+            .expect(400);
+
+          expect(body.message).toEqual(
+            '[request body]: max_signals: Number must be greater than or equal to 1'
+          );
         });
       });
     });

@@ -899,6 +899,9 @@ Object {
       },
       "metas": Array [
         Object {
+          "x-oas-any-type": true,
+        },
+        Object {
           "x-oas-optional": true,
         },
       ],
@@ -1116,6 +1119,9 @@ Object {
         "presence": "optional",
       },
       "metas": Array [
+        Object {
+          "x-oas-any-type": true,
+        },
         Object {
           "x-oas-optional": true,
         },
@@ -1944,6 +1950,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -2227,6 +2238,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -2508,6 +2524,11 @@ Object {
                             "flags": Object {
                               "error": [Function],
                             },
+                            "metas": Array [
+                              Object {
+                                "x-oas-any-type": true,
+                              },
+                            ],
                             "type": "any",
                           },
                         },
@@ -3452,6 +3473,11 @@ Object {
                           "flags": Object {
                             "error": [Function],
                           },
+                          "metas": Array [
+                            Object {
+                              "x-oas-any-type": true,
+                            },
+                          ],
                           "type": "any",
                         },
                       },
@@ -3495,6 +3521,11 @@ Object {
                           "flags": Object {
                             "error": [Function],
                           },
+                          "metas": Array [
+                            Object {
+                              "x-oas-any-type": true,
+                            },
+                          ],
                           "type": "any",
                         },
                       },
@@ -3763,6 +3794,9 @@ Object {
                                 },
                                 "metas": Array [
                                   Object {
+                                    "x-oas-any-type": true,
+                                  },
+                                  Object {
                                     "x-oas-optional": true,
                                   },
                                 ],
@@ -3973,6 +4007,9 @@ Object {
                                     },
                                     "metas": Array [
                                       Object {
+                                        "x-oas-any-type": true,
+                                      },
+                                      Object {
                                         "x-oas-optional": true,
                                       },
                                     ],
@@ -4132,6 +4169,9 @@ Object {
                                                 "presence": "optional",
                                               },
                                               "metas": Array [
+                                                Object {
+                                                  "x-oas-any-type": true,
+                                                },
                                                 Object {
                                                   "x-oas-optional": true,
                                                 },
@@ -4443,6 +4483,9 @@ Object {
                                                             "presence": "optional",
                                                           },
                                                           "metas": Array [
+                                                            Object {
+                                                              "x-oas-any-type": true,
+                                                            },
                                                             Object {
                                                               "x-oas-optional": true,
                                                             },
@@ -5053,6 +5096,9 @@ Object {
                                           },
                                           "metas": Array [
                                             Object {
+                                              "x-oas-any-type": true,
+                                            },
+                                            Object {
                                               "x-oas-optional": true,
                                             },
                                           ],
@@ -5363,6 +5409,9 @@ Object {
                                                         "presence": "optional",
                                                       },
                                                       "metas": Array [
+                                                        Object {
+                                                          "x-oas-any-type": true,
+                                                        },
                                                         Object {
                                                           "x-oas-optional": true,
                                                         },
@@ -6048,7 +6097,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -6058,7 +6107,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -6547,7 +6596,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -6557,7 +6606,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -7109,7 +7158,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -7119,7 +7168,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -7543,7 +7592,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -7553,7 +7602,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -8083,7 +8132,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -8093,7 +8142,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -8795,7 +8844,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -8805,7 +8854,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -9507,7 +9556,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -9517,7 +9566,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },

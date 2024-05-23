@@ -82,6 +82,7 @@ import {
   MITRE_TACTIC,
   QUERY_BAR,
   REFERENCE_URLS_INPUT,
+  REQUIRED_FIELD_COMBO_BOX_INPUT,
   RISK_MAPPING_OVERRIDE_OPTION,
   RISK_OVERRIDE,
   RULE_DESCRIPTION_INPUT,
@@ -125,6 +126,8 @@ import {
   ALERTS_INDEX_BUTTON,
   INVESTIGATIONS_INPUT,
   QUERY_BAR_ADD_FILTER,
+  MAX_SIGNALS_INPUT,
+  SETUP_GUIDE_TEXTAREA,
   RELATED_INTEGRATION_COMBO_BOX_INPUT,
 } from '../screens/create_new_rule';
 import {
@@ -197,11 +200,25 @@ export const expandAdvancedSettings = () => {
   cy.get(ADVANCED_SETTINGS_BTN).click({ force: true });
 };
 
+export const fillMaxSignals = (maxSignals: number = ruleFields.maxSignals) => {
+  cy.get(MAX_SIGNALS_INPUT).clear({ force: true });
+  cy.get(MAX_SIGNALS_INPUT).type(maxSignals.toString());
+
+  return maxSignals;
+};
+
 export const fillNote = (note: string = ruleFields.investigationGuide) => {
   cy.get(INVESTIGATION_NOTES_TEXTAREA).clear({ force: true });
   cy.get(INVESTIGATION_NOTES_TEXTAREA).type(note, { force: true });
 
   return note;
+};
+
+export const fillSetup = (setup: string = ruleFields.setup) => {
+  cy.get(SETUP_GUIDE_TEXTAREA).clear({ force: true });
+  cy.get(SETUP_GUIDE_TEXTAREA).type(setup);
+
+  return setup;
 };
 
 export const fillMitre = (mitreAttacks: Threat[]) => {
@@ -464,6 +481,18 @@ export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
+export const fillRequiredFields = (): void => {
+  addRequiredField();
+  addRequiredField();
+};
+
+const addRequiredField = (): void => {
+  cy.contains('button', 'Add required field').should('be.enabled').click();
+
+  cy.get(REQUIRED_FIELD_COMBO_BOX_INPUT).last().should('be.enabled').click();
+  cy.get(COMBO_BOX_OPTION).first().click();
+};
+
 /**
  * use default schedule options
  */
@@ -584,16 +613,23 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
 };
 
-export const fillEsqlQueryBar = (query: string) => {
+const typeEsqlQueryBar = (query: string) => {
   // eslint-disable-next-line cypress/no-force
   cy.get(ESQL_QUERY_BAR_INPUT_AREA).should('not.be.disabled').type(query, { force: true });
 };
 
-export const clearEsqlQueryBar = () => {
-  // monaco editor under the hood is quite complex in matter to clear it
-  // underlying textarea holds just the last character of query displayed in search bar
-  // in order to clear it - it requires to select all text within editor and type in it
-  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a');
+/**
+ * clears ES|QL search bar first
+ * types new query
+ */
+export const fillEsqlQueryBar = (query: string) => {
+  // before typing anything in query bar, we need to clear it
+  // Since first click on ES|QL query bar trigger re-render. We need to clear search bar during second attempt
+  typeEsqlQueryBar(' ');
+  typeEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a{del}' : '{ctrl}a{del}');
+
+  // only after this query can be safely typed
+  typeEsqlQueryBar(query);
 };
 
 /**
@@ -908,6 +944,20 @@ export const openSuppressionFieldsTooltipAndCheckLicense = () => {
   cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
   // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
   cy.get(TOOLTIP).contains('Platinum license');
+};
+
+/**
+ * intercepts /internal/bsearch request that contains esqlQuery and adds alias to it
+ */
+export const interceptEsqlQueryFieldsRequest = (
+  esqlQuery: string,
+  alias: string = 'esqlQueryFields'
+) => {
+  cy.intercept('POST', '/internal/bsearch?*', (req) => {
+    if (req.body?.batch?.[0]?.request?.params?.query?.includes?.(esqlQuery)) {
+      req.alias = alias;
+    }
+  });
 };
 
 export const checkLoadQueryDynamically = () => {

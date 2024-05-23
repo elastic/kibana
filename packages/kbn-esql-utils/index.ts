@@ -8,7 +8,6 @@
 
 export {
   getESQLAdHocDataview,
-  getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
@@ -16,6 +15,9 @@ export {
   getInitialESQLQuery,
   getESQLWithSafeLimit,
   appendToESQLQuery,
+  appendWhereClauseToESQLQuery,
+  getESQLQueryColumns,
+  getESQLQueryColumnsRaw,
   TextBasedLanguages,
 } from './src';
 

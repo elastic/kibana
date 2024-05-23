@@ -561,6 +561,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           await transform.testExecution.logTestStep('again displays an empty index preview');
           await transform.wizard.assertIndexPreviewEmpty();
+          await transform.datePicker.assertDatePickerDataTierOptionsVisible(true);
 
           await transform.testExecution.logTestStep(
             `clicks the 'Use full data' button to auto-select time range`

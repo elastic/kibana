@@ -134,11 +134,17 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
-    it('should export rules with defaultbale fields when values are set', async () => {
+    it('should export rules with defaultable fields when values are set', async () => {
       const defaultableFields: BaseDefaultableFields = {
         related_integrations: [
           { package: 'package-a', version: '^1.2.3' },
           { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
+        ],
+        max_signals: 100,
+        setup: '# some setup markdown',
+        required_fields: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'my-non-ecs-field', type: 'keyword' },
         ],
       };
       const mockRule = getCustomQueryRuleParams(defaultableFields);
@@ -314,6 +320,8 @@ export default ({ getService }: FtrProviderContext): void => {
       const ruleId = 'ruleId';
       const ruleToDuplicate = getCustomQueryRuleParams({
         rule_id: ruleId,
+        max_signals: 100,
+        setup: '# some setup markdown',
         related_integrations: [
           { package: 'package-a', version: '^1.2.3' },
           { package: 'package-b', integration: 'integration-b', version: '~1.1.1' },
@@ -1146,6 +1154,210 @@ export default ({ getService }: FtrProviderContext): void => {
               const { body: updatedRule } = await fetchRule(ruleId).expect(200);
 
               expect(updatedRule.index).toEqual(resultingIndexPatterns);
+            });
+          }
+        );
+      });
+
+      describe('investigation fields actions', () => {
+        it('should set investigation fields in rules', async () => {
+          const ruleId = 'ruleId';
+          await createRule(supertest, log, getSimpleRule(ruleId));
+
+          const { body: bulkEditResponse } = await securitySolutionApi
+            .performBulkAction({
+              query: {},
+              body: {
+                query: '',
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.set_investigation_fields,
+                    value: { field_names: ['field-1'] },
+                  },
+                ],
+              },
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).toEqual({
+            field_names: ['field-1'],
+          });
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.investigation_fields).toEqual({ field_names: ['field-1'] });
+        });
+
+        it('should add investigation fields to rules', async () => {
+          const ruleId = 'ruleId';
+          const investigationFields = { field_names: ['field-1', 'field-2'] };
+          const resultingFields = { field_names: ['field-1', 'field-2', 'field-3'] };
+          await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: investigationFields,
+          });
+
+          const { body: bulkEditResponse } = await securitySolutionApi
+            .performBulkAction({
+              query: {},
+              body: {
+                query: '',
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.add_investigation_fields,
+                    value: { field_names: ['field-3'] },
+                  },
+                ],
+              },
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).toEqual(
+            resultingFields
+          );
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.investigation_fields).toEqual(resultingFields);
+        });
+
+        it('should delete investigation fields from rules', async () => {
+          const ruleId = 'ruleId';
+          const investigationFields = { field_names: ['field-1', 'field-2'] };
+          const resultingFields = { field_names: ['field-1'] };
+          await createRule(supertest, log, {
+            ...getSimpleRule(ruleId),
+            investigation_fields: investigationFields,
+          });
+
+          const { body: bulkEditResponse } = await securitySolutionApi
+            .performBulkAction({
+              query: {},
+              body: {
+                query: '',
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: BulkActionEditTypeEnum.delete_investigation_fields,
+                    value: { field_names: ['field-2'] },
+                  },
+                ],
+              },
+            })
+            .expect(200);
+
+          expect(bulkEditResponse.attributes.summary).toEqual({
+            failed: 0,
+            skipped: 0,
+            succeeded: 1,
+            total: 1,
+          });
+
+          // Check that the updated rule is returned with the response
+          expect(bulkEditResponse.attributes.results.updated[0].investigation_fields).toEqual(
+            resultingFields
+          );
+
+          // Check that the updates have been persisted
+          const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+          expect(updatedRule.investigation_fields).toEqual(resultingFields);
+        });
+
+        const skipIndexPatternsUpdateCases = [
+          // Delete no-ops
+          {
+            caseName: '0 existing fields - 2 fields = 0 fields',
+            existingInvestigationFields: undefined,
+            investigationFieldsToUpdate: { field_names: ['field-1', 'field-2'] },
+            resultingInvestigationFields: undefined,
+            operation: BulkActionEditTypeEnum.delete_investigation_fields,
+          },
+          {
+            caseName: '3 existing fields - 2 other fields (none of them) = 3 fields',
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToUpdate: { field_names: ['field-8', 'field-9'] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            operation: BulkActionEditTypeEnum.delete_investigation_fields,
+          },
+          // Add no-ops
+          {
+            caseName: '3 existing fields + 2 exisiting fields= 3 fields',
+            existingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            investigationFieldsToUpdate: { field_names: ['field-1', 'field-2'] },
+            resultingInvestigationFields: { field_names: ['field-1', 'field-2', 'field-3'] },
+            operation: BulkActionEditTypeEnum.add_investigation_fields,
+          },
+        ];
+
+        skipIndexPatternsUpdateCases.forEach(
+          ({
+            caseName,
+            existingInvestigationFields,
+            investigationFieldsToUpdate,
+            resultingInvestigationFields,
+            operation,
+          }) => {
+            it(`should skip rule updated for investigation fields, case: "${caseName}"`, async () => {
+              const ruleId = 'ruleId';
+
+              await createRule(supertest, log, {
+                ...getSimpleRule(ruleId),
+                investigation_fields: existingInvestigationFields,
+              });
+
+              const { body: bulkEditResponse } = await securitySolutionApi
+                .performBulkAction({
+                  query: {},
+                  body: {
+                    query: '',
+                    action: BulkActionTypeEnum.edit,
+                    [BulkActionTypeEnum.edit]: [
+                      {
+                        type: operation,
+                        value: investigationFieldsToUpdate,
+                      },
+                    ],
+                  },
+                })
+                .expect(200);
+
+              expect(bulkEditResponse.attributes.summary).toEqual({
+                failed: 0,
+                skipped: 1,
+                succeeded: 0,
+                total: 1,
+              });
+
+              // Check that the rules is returned as skipped with expected skip reason
+              expect(bulkEditResponse.attributes.results.skipped[0].skip_reason).toEqual(
+                'RULE_NOT_MODIFIED'
+              );
+
+              // Check that the no changes have been persisted
+              const { body: updatedRule } = await fetchRule(ruleId).expect(200);
+
+              expect(updatedRule.investigation_fields).toEqual(resultingInvestigationFields);
             });
           }
         );

@@ -52,6 +52,7 @@ export async function getAllStats(
  * @param {Array} clusters The Elasticsearch clusters
  * @param {Object} kibana The Kibana instances keyed by Cluster UUID
  * @param {Object} logstash The Logstash nodes keyed by Cluster UUID
+ * @param {Object} beats The Beats nodes keyed by Cluster UUID
  *
  * Returns the clusters joined with the Kibana and Logstash instances under each cluster's {@code stack_stats}.
  */
