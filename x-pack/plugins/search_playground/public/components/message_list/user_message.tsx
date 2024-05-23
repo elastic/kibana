@@ -57,6 +57,7 @@ export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) 
           })}
         />
       }
+      data-test-subj="userMessage"
     >
       <EuiText size="s" css={UserMessageCSS}>
         <p>{content}</p>
