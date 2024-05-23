@@ -214,6 +214,12 @@ export interface AgentEnrollmentFlyoutFinalStepExtension {
   Component: ComponentType<{}>;
 }
 
+export interface PliAuthBlockExtension {
+  package: string;
+  view: 'pli-auth-block';
+  Component: ComponentType<{}>;
+}
+
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
   | PackagePolicyReplaceDefineStepExtension
@@ -226,4 +232,5 @@ export type UIExtensionPoint =
   | PackageGenericErrorsListExtension
   | AgentEnrollmentFlyoutFinalStepExtension
   | PackagePolicyCreateMultiStepExtension
-  | EndpointAgentTamperProtectionExtension;
+  | EndpointAgentTamperProtectionExtension
+  | PliAuthBlockExtension;

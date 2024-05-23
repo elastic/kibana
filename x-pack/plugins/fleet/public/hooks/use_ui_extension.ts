@@ -23,9 +23,9 @@ export const useUIExtension = <V extends UIExtensionPoint['view'] = UIExtensionP
 ): NarrowExtensionPoint<V> | undefined => {
   const registeredExtensions = useContext(UIExtensionsContext);
 
+  console.log(registeredExtensions);
+  console.log('###############registeredExtensions');
   if (!registeredExtensions) {
-    console.log(registeredExtensions);
-    console.log('###############registeredExtensions');
     throw new Error('useUIExtension called outside of UIExtensionsContext');
   }
 

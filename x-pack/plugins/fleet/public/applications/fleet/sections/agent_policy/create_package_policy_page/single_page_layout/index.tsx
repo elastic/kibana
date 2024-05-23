@@ -308,6 +308,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
+  const activePliBlock = useUIExtension(packagePolicy.package?.name ?? '', 'pli-auth-block');
+  console.log(packagePolicy.package?.name);
+  console.log('activePliBlock:', activePliBlock);
   const replaceDefineStepView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-replace-define-step'
@@ -438,11 +441,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  return (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
-      hi
-    </CreatePackagePolicySinglePageLayout>
-  );
+  if (activePliBlock) {
+    const C = activePliBlock.Component;
+    console.log('asdf', C);
+    return (
+      <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+        <C />
+      </CreatePackagePolicySinglePageLayout>
+    );
+  }
 
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">

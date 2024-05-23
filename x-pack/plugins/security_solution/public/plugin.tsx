@@ -20,6 +20,7 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { LazyPliBlockCsp } from './cloud_security_posture/lazy_pli_block_csp';
 import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
@@ -267,6 +268,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         package: 'cribl',
         view: 'package-policy-replace-define-step',
         Component: LazyCustomCriblExtension,
+      });
+
+      registerExtension({
+        package: 'cloud_security_posture',
+        view: 'pli-auth-block',
+        Component: LazyPliBlockCsp,
       });
     }
 
