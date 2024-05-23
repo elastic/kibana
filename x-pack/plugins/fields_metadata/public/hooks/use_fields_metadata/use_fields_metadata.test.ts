@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { createUseFieldsMetadataHook } from './use_fields_metadata';
+import { createUseFieldsMetadataHook, UseFieldsMetadataParams } from './use_fields_metadata';
 import { createFieldsMetadataClientMock } from '../../services/fields_metadata/fields_metadata_client.mock';
 import { FindFieldsMetadataResponsePayload } from '../../../common/latest';
 
@@ -27,10 +27,9 @@ const fields: FindFieldsMetadataResponsePayload['fields'] = {
   },
 };
 
-const mockedFieldsMetadataResponse: FindFieldsMetadataResponsePayload = { fields };
+const mockedFieldsMetadataResponse = { fields };
 
 const fieldsMetadataClient = createFieldsMetadataClientMock();
-fieldsMetadataClient.find.mockResolvedValue(mockedFieldsMetadataResponse);
 
 const useFieldsMetadata = createUseFieldsMetadataHook({ fieldsMetadataClient });
 
@@ -39,7 +38,8 @@ describe('useFieldsMetadata', () => {
     jest.clearAllMocks();
   });
 
-  it('should return the fields record from API', async () => {
+  it('should return the fieldsMetadata value from the API', async () => {
+    fieldsMetadataClient.find.mockResolvedValue(mockedFieldsMetadataResponse);
     const { result, waitForNextUpdate } = renderHook(() => useFieldsMetadata());
 
     expect(result.current.loading).toBe(true);
@@ -53,49 +53,30 @@ describe('useFieldsMetadata', () => {
     expect(error).toBeFalsy();
   });
 
-  // it('should call API with correct input', async () => {
-  //   const ruleId = 'c95bc120-1d56-11ed-9cc7-e7214ada1128';
-  //   const query = {
-  //     term: {
-  //       'kibana.alert.rule.uuid': ruleId,
-  //     },
-  //   };
-  //   mockedPostAPI.mockResolvedValue(mockedFieldsMetadataResponse);
+  it('should call the fieldsMetadata service with the passed parameters', async () => {
+    fieldsMetadataClient.find.mockResolvedValue(mockedFieldsMetadataResponse);
+    const params: UseFieldsMetadataParams = {
+      attributes: ['description', 'short'],
+      fieldNames: ['@timestamp', 'agent.name'],
+      integration: 'integration_name',
+      dataset: 'dataset_name',
+    };
 
-  //   const { waitForNextUpdate } = renderHook(() =>
-  //     useFieldsMetadata({
-  //       featureIds,
-  //       query,
-  //     })
-  //   );
+    const { waitForNextUpdate } = renderHook(() => useFieldsMetadata(params));
 
-  //   await waitForNextUpdate();
+    await waitForNextUpdate();
 
-  //   const body = JSON.stringify({
-  //     aggs: {
-  //       count: {
-  //         terms: { field: ALERT_STATUS },
-  //       },
-  //     },
-  //     feature_ids: featureIds,
-  //     query,
-  //     size: 0,
-  //   });
+    expect(fieldsMetadataClient.find).toHaveBeenCalledWith(params);
+  });
 
-  //   expect(mockedPostAPI).toHaveBeenCalledWith(
-  //     FIND_FIELDS_METADATA_URL,
-  //     expect.objectContaining({ body })
-  //   );
-  // });
+  it('should return an error if the API call fails', async () => {
+    const error = new Error('Fetch fields metadata Failed');
+    fieldsMetadataClient.find.mockRejectedValueOnce(error);
 
-  // it('should return error if API call fails', async () => {
-  //   const error = new Error('Fetch Alerts Count Failed');
-  //   mockedPostAPI.mockRejectedValueOnce(error);
+    const { result, waitForNextUpdate } = renderHook(() => useFieldsMetadata());
 
-  //   const { result, waitForNextUpdate } = renderHook(() => useFieldsMetadata({ featureIds }));
+    await waitForNextUpdate();
 
-  //   await waitForNextUpdate();
-
-  //   expect(result.current.error?.message).toMatch(error.message);
-  // });
+    expect(result.current.error?.message).toMatch(error.message);
+  });
 });

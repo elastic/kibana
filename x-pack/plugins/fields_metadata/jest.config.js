@@ -7,7 +7,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
+  rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/fields_metadata'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/fields_metadata',
   coverageReporters: ['text', 'html'],
