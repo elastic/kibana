@@ -5,13 +5,29 @@
  * 2.0.
  */
 
+import React from 'react';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-plugin/public';
 import type { SecuritySubPlugin } from '../app/types';
-import { routes } from './routes';
+import { withSubPluginRouteSuspense } from '../common/components/with_sub_plugin_route_suspense';
+
+const CloudSecurityPostureLazy = React.lazy(() =>
+  import(
+    /* webpackChunkName: "sub_plugin-cloud_security_posture" */
+    './routes'
+  ).then(({ CloudSecurityPosture }) => ({ default: CloudSecurityPosture }))
+);
 
 export class CloudSecurityPosture {
   public setup() {}
 
   public start(): SecuritySubPlugin {
-    return { routes };
+    return {
+      routes: [
+        {
+          path: CLOUD_SECURITY_POSTURE_BASE_PATH,
+          component: withSubPluginRouteSuspense(CloudSecurityPostureLazy),
+        },
+      ],
+    };
   }
 }

@@ -7,15 +7,7 @@
 
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import {
-  LANDING_PATH,
-  OVERVIEW_PATH,
-  DATA_QUALITY_PATH,
-  DETECTION_RESPONSE_PATH,
-  SecurityPageName,
-  ENTITY_ANALYTICS_PATH,
-} from '../../common/constants';
-import type { SecuritySubPluginRoutes } from '../app/types';
+import { SecurityPageName } from '../../common/constants';
 
 import { StatefulOverview } from './pages/overview';
 import { DataQuality } from './pages/data_quality';
@@ -25,7 +17,7 @@ import { EntityAnalyticsPage } from '../entity_analytics/pages/entity_analytics_
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { LandingPage } from './pages/landing';
 
-const OverviewRoutes = () => (
+export const OverviewRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.overview}>
       <StatefulOverview />
@@ -33,7 +25,7 @@ const OverviewRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const DetectionResponseRoutes = () => (
+export const DetectionResponseRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.detectionAndResponse}>
       <DetectionResponse />
@@ -41,7 +33,7 @@ const DetectionResponseRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const LandingRoutes = () => (
+export const LandingRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.landing}>
       <LandingPage />
@@ -49,7 +41,7 @@ const LandingRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const EntityAnalyticsRoutes = () => (
+export const EntityAnalyticsRoutes = () => (
   <PluginTemplateWrapper>
     <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
       <EntityAnalyticsPage />
@@ -57,33 +49,10 @@ const EntityAnalyticsRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const DataQualityRoutes = () => (
+export const DataQualityRoutes = () => (
   <PluginTemplateWrapper>
     <SecurityRoutePageWrapper pageName={SecurityPageName.dataQuality}>
       <DataQuality />
     </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
-
-export const routes: SecuritySubPluginRoutes = [
-  {
-    path: OVERVIEW_PATH,
-    component: OverviewRoutes,
-  },
-  {
-    path: DETECTION_RESPONSE_PATH,
-    component: DetectionResponseRoutes,
-  },
-  {
-    path: LANDING_PATH,
-    render: LandingRoutes,
-  },
-  {
-    path: ENTITY_ANALYTICS_PATH,
-    render: EntityAnalyticsRoutes,
-  },
-  {
-    path: DATA_QUALITY_PATH,
-    component: DataQualityRoutes,
-  },
-];

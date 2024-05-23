@@ -69,14 +69,3 @@ const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
 
 EntityAnalyticsAssetClassificationContainer.displayName =
   'EntityAnalyticsAssetClassificationContainer';
-
-export const routes = [
-  {
-    path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
-    component: EntityAnalyticsManagementContainer,
-  },
-  {
-    path: ENTITY_ANALYTICS_ASSET_CRITICALITY_PATH,
-    component: EntityAnalyticsAssetClassificationContainer,
-  },
-];

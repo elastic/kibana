@@ -7,12 +7,9 @@
 
 import React from 'react';
 import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
-import {
-  CLOUD_SECURITY_POSTURE_BASE_PATH,
-  type CspSecuritySolutionContext,
-} from '@kbn/cloud-security-posture-plugin/public';
+import { type CspSecuritySolutionContext } from '@kbn/cloud-security-posture-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
+import type { SecurityPageName } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
@@ -29,7 +26,7 @@ const cspSecuritySolutionContext: CspSecuritySolutionContext = {
   getSpyRouteComponent: () => CloudPostureSpyRoute,
 };
 
-const CloudSecurityPosture = () => {
+export const CloudSecurityPosture = () => {
   const { cloudSecurityPosture } = useKibana().services;
   const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
 
@@ -43,12 +40,4 @@ const CloudSecurityPosture = () => {
     </PluginTemplateWrapper>
   );
 };
-
 CloudSecurityPosture.displayName = 'CloudSecurityPosture';
-
-export const routes: SecuritySubPluginRoutes = [
-  {
-    path: CLOUD_SECURITY_POSTURE_BASE_PATH,
-    component: CloudSecurityPosture,
-  },
-];

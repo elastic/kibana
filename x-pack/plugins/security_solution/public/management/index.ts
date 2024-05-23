@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Reducer, CombinedState } from 'redux';
-import { routes } from './routes';
 import type { StartPlugins } from '../types';
 import type { SecuritySubPluginWithStore } from '../app/types';
 import { managementReducer } from './store/reducer';
 import type { AppAction } from '../common/store/actions';
 import { managementMiddlewareFactory } from './store/middleware';
 import type { ManagementState } from './types';
+import { MANAGE_PATH } from '../../common';
+import { MANAGEMENT_PATH } from '../../common/constants';
+import { withSubPluginRouteSuspense } from '../common/components/with_sub_plugin_route_suspense';
 
 /**
  * Internally, our state is sometimes immutable, ignore that in our external
@@ -31,6 +34,19 @@ export interface ManagementPluginReducer {
   management: Reducer<CombinedState<ManagementState>, AppAction>;
 }
 
+const loadRoutes = () =>
+  import(
+    /* webpackChunkName: "sub_plugin-management" */
+    './routes'
+  );
+
+const ManagementLandingLazy = React.lazy(() =>
+  loadRoutes().then(({ ManagementLanding }) => ({ default: ManagementLanding }))
+);
+const ManagementRoutesLazy = React.lazy(() =>
+  loadRoutes().then(({ ManagementRoutes }) => ({ default: ManagementRoutes }))
+);
+
 export class Management {
   public setup() {}
 
@@ -39,7 +55,6 @@ export class Management {
     plugins: StartPlugins
   ): SecuritySubPluginWithStore<'management', ManagementState> {
     return {
-      routes,
       store: {
         initialState: {
           /**
@@ -56,6 +71,16 @@ export class Management {
         reducer: { management: managementReducer } as unknown as ManagementPluginReducer,
         middleware: managementMiddlewareFactory(core, plugins),
       },
+      routes: [
+        {
+          path: MANAGE_PATH,
+          component: withSubPluginRouteSuspense(ManagementLandingLazy),
+        },
+        {
+          path: MANAGEMENT_PATH,
+          component: withSubPluginRouteSuspense(ManagementRoutesLazy),
+        },
+      ],
     };
   }
 }

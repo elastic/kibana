@@ -5,15 +5,4 @@
  * 2.0.
  */
 
-import type { SecuritySubPlugin } from '../app/types';
-import { routes } from './routes';
-
-export class ThreatIntelligence {
-  public setup() {}
-
-  public start(): SecuritySubPlugin {
-    return {
-      routes,
-    };
-  }
-}
+export { withSubPluginRouteSuspense } from './with_sub_plugin_route_suspense';

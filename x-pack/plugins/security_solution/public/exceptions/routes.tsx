@@ -51,13 +51,4 @@ const ExceptionsContainerComponent: React.FC = () => {
   );
 };
 
-const Exceptions = React.memo(ExceptionsContainerComponent);
-
-const renderExceptionsRoutes = () => <Exceptions />;
-
-export const routes = [
-  {
-    path: EXCEPTIONS_PATH,
-    render: renderExceptionsRoutes,
-  },
-];
+export const Exceptions = React.memo(ExceptionsContainerComponent);

@@ -5,15 +5,29 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { SecuritySubPlugin } from '../app/types';
-import { routes } from './routes';
+import { INVESTIGATIONS_PATH } from '../../common/constants';
+import { withSubPluginRouteSuspense } from '../common/components/with_sub_plugin_route_suspense';
+
+const InvestigationsPageLazy = React.lazy(() =>
+  import(
+    /* webpackChunkName: "sub_plugin-investigations" */
+    './routes'
+  ).then(({ InvestigationsPage }) => ({ default: InvestigationsPage }))
+);
 
 export class Investigations {
   public setup() {}
 
   public start(): SecuritySubPlugin {
     return {
-      routes,
+      routes: [
+        {
+          path: INVESTIGATIONS_PATH,
+          component: withSubPluginRouteSuspense(InvestigationsPageLazy),
+        },
+      ],
     };
   }
 }

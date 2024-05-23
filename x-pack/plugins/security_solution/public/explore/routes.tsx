@@ -11,13 +11,11 @@ import { UsersContainer } from './users/pages';
 import { HostsContainer } from './hosts/pages';
 import { NetworkContainer } from './network/pages';
 
-import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
-import { EXPLORE_PATH, HOSTS_PATH, NETWORK_PATH, USERS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { ExploreLandingPage } from './landing';
 
-const ExploreLanding = () => (
+export const ExploreLanding = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
       <ExploreLandingPage />
@@ -25,7 +23,7 @@ const ExploreLanding = () => (
   </PluginTemplateWrapper>
 );
 
-const NetworkRoutes = () => (
+export const NetworkRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.network}>
       <NetworkContainer />
@@ -33,7 +31,7 @@ const NetworkRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const UsersRoutes = () => (
+export const UsersRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.users}>
       <UsersContainer />
@@ -41,30 +39,10 @@ const UsersRoutes = () => (
   </PluginTemplateWrapper>
 );
 
-const HostsRoutes = () => (
+export const HostsRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.hosts}>
       <HostsContainer />
     </TrackApplicationView>
   </PluginTemplateWrapper>
 );
-
-export const routes: SecuritySubPluginRoutes = [
-  {
-    path: EXPLORE_PATH,
-    exact: true,
-    component: ExploreLanding,
-  },
-  {
-    path: NETWORK_PATH,
-    component: NetworkRoutes,
-  },
-  {
-    path: USERS_PATH,
-    component: UsersRoutes,
-  },
-  {
-    path: HOSTS_PATH,
-    component: HostsRoutes,
-  },
-];

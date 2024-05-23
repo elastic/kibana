@@ -10,8 +10,7 @@ import type {
   CloudDefendPageId,
   CloudDefendSecuritySolutionContext,
 } from '@kbn/cloud-defend-plugin/public';
-import { CLOUD_DEFEND_BASE_PATH } from '@kbn/cloud-defend-plugin/public';
-import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
+import type { SecurityPageName } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
@@ -28,7 +27,7 @@ const cloudDefendSecuritySolutionContext: CloudDefendSecuritySolutionContext = {
   getSpyRouteComponent: () => CloudDefendSpyRoute,
 };
 
-const CloudDefend = () => {
+export const CloudDefend = () => {
   const { cloudDefend } = useKibana().services;
   const CloudDefendRouter = cloudDefend.getCloudDefendRouter();
 
@@ -40,12 +39,4 @@ const CloudDefend = () => {
     </PluginTemplateWrapper>
   );
 };
-
 CloudDefend.displayName = 'CloudDefend';
-
-export const routes: SecuritySubPluginRoutes = [
-  {
-    path: CLOUD_DEFEND_BASE_PATH,
-    component: CloudDefend,
-  },
-];

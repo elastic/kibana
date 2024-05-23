@@ -7,7 +7,6 @@
 
 import React, { memo, useMemo } from 'react';
 import type { SecuritySolutionPluginContext } from '@kbn/threat-intelligence-plugin/public';
-import { THREAT_INTELLIGENCE_BASE_PATH } from '@kbn/threat-intelligence-plugin/public';
 import type { Store } from 'redux';
 import { useSelector } from 'react-redux';
 import type { SelectedDataView } from '@kbn/threat-intelligence-plugin/public/types';
@@ -22,7 +21,6 @@ import { FiltersGlobal } from '../common/components/filters_global';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { licenseService } from '../common/hooks/use_license';
 import { SecurityPageName } from '../app/types';
-import type { SecuritySubPluginRoutes } from '../app/types';
 import { useSourcererDataView } from '../common/containers/sourcerer';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SiemSearchBar } from '../common/components/search_bar';
@@ -32,7 +30,7 @@ import { InputsModelId } from '../common/store/inputs/constants';
 import { ArtifactFlyout } from '../management/components/artifact_list_page/components/artifact_flyout';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
-const ThreatIntelligence = memo(() => {
+export const ThreatIntelligence = memo(() => {
   const { threatIntelligence, http } = useKibana().services;
   const ThreatIntelligencePlugin = threatIntelligence.getComponent();
 
@@ -97,10 +95,3 @@ const ThreatIntelligence = memo(() => {
 });
 
 ThreatIntelligence.displayName = 'ThreatIntelligence';
-
-export const routes: SecuritySubPluginRoutes = [
-  {
-    path: THREAT_INTELLIGENCE_BASE_PATH,
-    render: () => <ThreatIntelligence />,
-  },
-];

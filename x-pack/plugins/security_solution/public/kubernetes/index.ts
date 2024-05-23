@@ -5,15 +5,29 @@
  * 2.0.
  */
 
+import React from 'react';
+import { KUBERNETES_PATH } from '@kbn/kubernetes-security-plugin/public';
 import type { SecuritySubPlugin } from '../app/types';
-import { routes } from './routes';
+import { withSubPluginRouteSuspense } from '../common/components/with_sub_plugin_route_suspense';
+
+const KubernetesRoutesLazy = React.lazy(() =>
+  import(
+    /* webpackChunkName: "sub_plugin-kubernetes" */
+    './routes'
+  ).then(({ KubernetesRoutes }) => ({ default: KubernetesRoutes }))
+);
 
 export class Kubernetes {
   public setup() {}
 
   public start(): SecuritySubPlugin {
     return {
-      routes,
+      routes: [
+        {
+          path: KUBERNETES_PATH,
+          component: withSubPluginRouteSuspense(KubernetesRoutesLazy),
+        },
+      ],
     };
   }
 }
