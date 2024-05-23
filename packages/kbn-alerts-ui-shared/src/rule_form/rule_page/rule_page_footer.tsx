@@ -17,6 +17,7 @@ import {
 import { useRuleFormState } from '../hooks';
 import { isValidRule } from '../validation';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
+import { RulePageConfirmCreateRule } from './rule_page_confirm_create_rule';
 
 export interface RulePageFooterProps {
   isEdit?: boolean;
@@ -27,6 +28,7 @@ export interface RulePageFooterProps {
 
 export const RulePageFooter = (props: RulePageFooterProps) => {
   const [showRequestModal, setShowRequestModal] = useState<boolean>(false);
+  const [showCreateConfirmation, setShowCreateConfirmation] = useState<boolean>(false);
 
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
@@ -51,6 +53,23 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
     setShowRequestModal(false);
   }, []);
 
+  const onSaveClick = useCallback(() => {
+    if (isEdit) {
+      onSave();
+    } else {
+      setShowCreateConfirmation(true);
+    }
+  }, [isEdit, onSave]);
+
+  const onCreateConfirmClick = useCallback(() => {
+    setShowCreateConfirmation(false);
+    onSave();
+  }, [onSave]);
+
+  const onCreateCancelClick = useCallback(() => {
+    setShowCreateConfirmation(false);
+  }, []);
+
   return (
     <>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -73,7 +92,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                onClick={onSave}
+                onClick={onSaveClick}
                 disabled={isSaving || hasErrors}
                 isLoading={isSaving}
               >
@@ -85,6 +104,12 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
       </EuiFlexGroup>
       {showRequestModal && (
         <RulePageShowRequestModal onClose={onCloseShowRequestModalClick} isEdit={isEdit} />
+      )}
+      {showCreateConfirmation && (
+        <RulePageConfirmCreateRule
+          onConfirm={onCreateConfirmClick}
+          onCancel={onCreateCancelClick}
+        />
       )}
     </>
   );

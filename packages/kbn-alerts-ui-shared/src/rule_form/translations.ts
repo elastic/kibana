@@ -370,6 +370,14 @@ export const RULE_CREATE_SUCCESS_TEXT = (ruleName: string) =>
     },
   });
 
+export const RULE_CREATE_ERROR_TEXT = i18n.translate('alertsUIShared.ruleForm.createErrorText', {
+  defaultMessage: 'Cannot create rule.',
+});
+
+export const RULE_EDIT_ERROR_TEXT = i18n.translate('alertsUIShared.ruleForm.editErrorText', {
+  defaultMessage: 'Cannot update rule.',
+});
+
 export const RULE_EDIT_SUCCESS_TEXT = (ruleName: string) =>
   i18n.translate('alertsUIShared.ruleForm.editSuccessText', {
     defaultMessage: 'Updated "{ruleName}"',
@@ -377,3 +385,45 @@ export const RULE_EDIT_SUCCESS_TEXT = (ruleName: string) =>
       ruleName,
     },
   });
+
+export const CIRCUIT_BREAKER_SEE_FULL_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.circuitBreakerSeeFullErrorText',
+  {
+    defaultMessage: 'See full error',
+  }
+);
+
+export const CIRCUIT_BREAKER_HIDE_FULL_ERROR_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.circuitBreakerHideFullErrorText',
+  {
+    defaultMessage: 'Hide full error',
+  }
+);
+
+export const CONFIRMATION_RULE_SAVE_TITLE = i18n.translate(
+  'alertsUIShared.ruleForm.confirmRuleSaveTitle',
+  {
+    defaultMessage: 'Save rule with no actions?',
+  }
+);
+
+export const CONFIRM_RULE_SAVE_CONFIRM_BUTTON_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.confirmRuleSaveConfirmButtonText',
+  {
+    defaultMessage: 'Save rule',
+  }
+);
+
+export const CONFIRM_RULE_SAVE_CANCEL_BUTTON_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.confirmRuleSaveCancelButtonText',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+export const CONFIRM_RULE_SAVE_MESSAGE_TEXT = i18n.translate(
+  'alertsUIShared.ruleForm.confirmRuleSaveMessageText',
+  {
+    defaultMessage: 'You can add an action at anytime.',
+  }
+);

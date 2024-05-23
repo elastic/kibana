@@ -7,14 +7,14 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { HttpStart, IHttpFetchError } from '@kbn/core-http-browser';
 import { RuleFormData } from '../../rule_form';
 import { updateRule } from '../apis';
 
 export interface UseUpdateRuleProps {
   http: HttpStart;
   onSuccess?: (formData: RuleFormData) => void;
-  onError?: (error: unknown) => void;
+  onError?: (error: IHttpFetchError<{ message: string }>) => void;
 }
 
 export const useUpdateRule = (props: UseUpdateRuleProps) => {

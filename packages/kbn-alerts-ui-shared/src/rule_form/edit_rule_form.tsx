@@ -8,14 +8,16 @@
 
 import React, { useCallback } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleFormData, RuleFormPlugins } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useUpdateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
 import { RuleFormHealthCheckError } from './rule_form_errors/rule_form_health_check_error';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
-import { RuleFormRuleOrRuleTypeError } from './rule_form_errors';
-import { RULE_EDIT_SUCCESS_TEXT } from './translations';
+import { RuleFormCircuitBreakerError, RuleFormRuleOrRuleTypeError } from './rule_form_errors';
+import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
+import { parseRuleCircuitBreakerErrorMessage } from './utils';
 
 export interface EditRuleFormProps {
   id: string;
@@ -24,13 +26,27 @@ export interface EditRuleFormProps {
 
 export const EditRuleForm = (props: EditRuleFormProps) => {
   const { id, plugins } = props;
-  const { http, notification, docLinks, ruleTypeRegistry } = plugins;
+  const { http, notification, docLinks, ruleTypeRegistry, i18n, theme } = plugins;
   const { toasts } = notification;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({
     http,
     onSuccess: ({ name }) => {
       toasts.addSuccess(RULE_EDIT_SUCCESS_TEXT(name));
+    },
+    onError: (error) => {
+      const message = parseRuleCircuitBreakerErrorMessage(
+        error.body?.message || RULE_EDIT_ERROR_TEXT
+      );
+      toasts.addDanger({
+        title: message.summary,
+        ...(message.details && {
+          text: toMountPoint(
+            <RuleFormCircuitBreakerError>{message.details}</RuleFormCircuitBreakerError>,
+            { i18n, theme }
+          ),
+        }),
+      });
     },
   });
 

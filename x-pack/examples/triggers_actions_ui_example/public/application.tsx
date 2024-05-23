@@ -46,6 +46,8 @@ export interface TriggersActionsUiExampleComponentParams {
   notification: CoreStart['notifications'];
   application: CoreStart['application'];
   docLinks: CoreStart['docLinks'];
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
   basename: string;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
@@ -62,6 +64,8 @@ const TriggersActionsUiExampleApp = ({
   application,
   notification,
   docLinks,
+  i18n,
+  theme,
   data,
   charts,
   dataViews,
@@ -178,6 +182,8 @@ const TriggersActionsUiExampleApp = ({
                   application,
                   notification,
                   docLinks,
+                  i18n,
+                  theme,
                   charts,
                   data,
                   dataViews,
@@ -198,6 +204,8 @@ const TriggersActionsUiExampleApp = ({
                   application,
                   notification,
                   docLinks,
+                  theme,
+                  i18n,
                   charts,
                   data,
                   dataViews,
@@ -236,7 +244,7 @@ export const renderApp = (
   deps: TriggersActionsUiExamplePublicStartDeps,
   { appBasePath, element }: AppMountParameters
 ) => {
-  const { http, notifications, docLinks, application } = core;
+  const { http, notifications, docLinks, application, i18n, theme } = core;
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
   ReactDOM.render(
@@ -256,6 +264,8 @@ export const renderApp = (
             notification={notifications}
             application={application}
             docLinks={docLinks}
+            i18n={i18n}
+            theme={theme}
             triggersActionsUi={deps.triggersActionsUi}
             data={deps.data}
             charts={deps.charts}

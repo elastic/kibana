@@ -23,15 +23,17 @@ export const GET_DEFAULT_FORM_DATA = ({
   ruleTypeId,
   name,
   consumer,
+  schedule,
 }: {
   ruleTypeId: RuleFormData['ruleTypeId'];
   name: RuleFormData['name'];
   consumer: RuleFormData['consumer'];
+  schedule?: RuleFormData['schedule'];
 }) => {
   return {
     tags: [],
     params: {},
-    schedule: {
+    schedule: schedule || {
       interval: DEFAULT_RULE_INTERVAL,
     },
     consumer,

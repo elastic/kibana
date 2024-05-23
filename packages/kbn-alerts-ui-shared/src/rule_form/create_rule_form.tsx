@@ -8,16 +8,25 @@
 
 import React, { useCallback } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
 import { ALERTING_FEATURE_ID, DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from '../common/hooks';
 import { RulePage } from './rule_page';
-import { RuleFormHealthCheckError, RuleFormRuleOrRuleTypeError } from './rule_form_errors';
+import {
+  RuleFormCircuitBreakerError,
+  RuleFormHealthCheckError,
+  RuleFormRuleOrRuleTypeError,
+} from './rule_form_errors';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
-import { getInitialMultiConsumer } from './utils';
-import { RULE_CREATE_SUCCESS_TEXT } from './translations';
+import {
+  getInitialMultiConsumer,
+  getInitialSchedule,
+  parseRuleCircuitBreakerErrorMessage,
+} from './utils';
+import { RULE_CREATE_SUCCESS_TEXT, RULE_CREATE_ERROR_TEXT } from './translations';
 
 export interface CreateRuleFormProps {
   ruleTypeId: string;
@@ -40,13 +49,27 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     filteredRuleTypes = [],
   } = props;
 
-  const { http, docLinks, notification, ruleTypeRegistry } = plugins;
+  const { http, docLinks, notification, ruleTypeRegistry, i18n, theme } = plugins;
   const { toasts } = notification;
 
   const { mutate, isLoading: isSaving } = useCreateRule({
     http,
     onSuccess: ({ name }) => {
       toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));
+    },
+    onError: (error) => {
+      const message = parseRuleCircuitBreakerErrorMessage(
+        error.body?.message || RULE_CREATE_ERROR_TEXT
+      );
+      toasts.addDanger({
+        title: message.summary,
+        ...(message.details && {
+          text: toMountPoint(
+            <RuleFormCircuitBreakerError>{message.details}</RuleFormCircuitBreakerError>,
+            { i18n, theme }
+          ),
+        }),
+      });
     },
   });
 
@@ -86,6 +109,10 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           ruleTypeId,
           name: `${ruleType.name} rule`,
           consumer,
+          schedule: getInitialSchedule({
+            ruleType,
+            minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+          }),
         }),
         plugins,
         minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
