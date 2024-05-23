@@ -12,9 +12,10 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { sendRequest } from '../../../hooks';
+import { INGEST_SAVED_OBJECT_INDEX } from '../../../../../../common/constants';
 
 const fetchSavedObjectNames = async (type: string) => {
-  const path = `/.kibana/_search`;
+  const path = `/${INGEST_SAVED_OBJECT_INDEX}/_search`;
   const body = {
     size: 0,
     query: {

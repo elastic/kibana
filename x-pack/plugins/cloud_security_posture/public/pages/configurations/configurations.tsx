@@ -12,14 +12,14 @@ import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../common/constants';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
-import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
+import { useDataView } from '../../common/api/use_data_view';
 import { cloudPosturePages, findingsNavigation } from '../../common/navigation/constants';
 import { LatestFindingsContainer } from './latest_findings/latest_findings_container';
 import { DataViewContext } from '../../common/contexts/data_view_context';
 
 export const Configurations = () => {
   const location = useLocation();
-  const dataViewQuery = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const dataViewQuery = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
   const { data: getSetupStatus } = useCspSetupStatusApi();
   const hasConfigurationFindings =
     getSetupStatus?.kspm.status === 'indexed' || getSetupStatus?.cspm.status === 'indexed';

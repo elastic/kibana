@@ -225,13 +225,18 @@ export function GroupListView({
                   sloView={sloView}
                 />
                 <EuiSpacer size="m" />
-                <EuiTablePagination
-                  pageCount={Math.ceil(total / itemsPerPage)}
-                  activePage={page}
-                  onChangePage={handlePageClick}
-                  itemsPerPage={itemsPerPage}
-                  onChangeItemsPerPage={(perPage) => setItemsPerPage(perPage)}
-                />
+                {total > 0 && total > itemsPerPage ? (
+                  <EuiTablePagination
+                    pageCount={Math.ceil(total / itemsPerPage)}
+                    activePage={page}
+                    onChangePage={handlePageClick}
+                    itemsPerPage={itemsPerPage}
+                    onChangeItemsPerPage={(perPage) => {
+                      setPage(0);
+                      setItemsPerPage(perPage);
+                    }}
+                  />
+                ) : null}
               </>
             )}
           </MemoEuiAccordion>
