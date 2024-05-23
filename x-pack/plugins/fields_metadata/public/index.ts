@@ -7,15 +7,13 @@
 
 import { FieldsMetadataPlugin } from './plugin';
 
+export function plugin() {
+  return new FieldsMetadataPlugin();
+}
+
 export type {
   FieldsMetadataPublicSetup,
   FieldsMetadataPublicStart,
   FieldsMetadataPublicSetupDeps,
   FieldsMetadataPublicStartDeps,
 } from './types';
-
-// This exports static code and TypeScript types,
-// as well as, Kibana Platform `plugin()` initializer.
-export function plugin() {
-  return new FieldsMetadataPlugin();
-}

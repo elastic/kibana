@@ -12,6 +12,3 @@ export const createFieldsMetadataPluginStartMock = (): jest.Mocked<FieldsMetadat
   client: createFieldsMetadataServiceStartMock().client,
   useFieldsMetadata: jest.fn(),
 });
-
-export const _ensureTypeCompatibility = (): FieldsMetadataPublicStart =>
-  createFieldsMetadataPluginStartMock();
