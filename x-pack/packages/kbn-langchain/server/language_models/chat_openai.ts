@@ -12,18 +12,13 @@ import { get } from 'lodash/fp';
 
 import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
-import {
-  ChatCompletion,
-  ChatCompletionChunk,
-  ChatCompletionCreateParamsStreaming,
-  ChatCompletionCreateParamsNonStreaming,
-} from 'openai/resources/chat/completions';
+import type OpenAI from 'openai';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
-import { InvokeAIActionParamsSchema } from './types';
+import { InvokeAIActionParamsSchema, RunActionParamsSchema } from './types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 
-interface ActionsClientChatOpenAIParams {
+export interface ActionsClientChatOpenAIParams {
   actions: ActionsPluginStart;
   connectorId: string;
   llmType?: string;
@@ -47,15 +42,14 @@ interface ActionsClientChatOpenAIParams {
  * and iterates over the chunks to form the response.
  */
 export class ActionsClientChatOpenAI extends ChatOpenAI {
-  // set streaming to true always
-  streaming = true;
+  streaming: boolean;
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
   protected llmType: string;
   // ChatOpenAI class needs these, but they do not matter as we override the openai client with the actions client
   azureOpenAIApiKey = '';
   openAIApiKey = '';
-  model?: string;
+  model: string;
   #temperature?: number;
 
   // Kibana variables
@@ -78,12 +72,13 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     maxRetries,
     model,
     signal,
+    streaming = true,
     temperature,
     timeout,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
-      streaming: true,
+      streaming,
       // matters only for the LangSmith logs (Metadata > Invocation Params), which are misleading if this is not set
       modelName: model ?? DEFAULT_OPEN_AI_MODEL,
       // these have to be initialized, but are not actually used since we override the openai client with the actions client
@@ -102,9 +97,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#request = request;
     this.#timeout = timeout;
     this.#actionResultData = '';
-    this.streaming = true;
+    this.streaming = streaming;
     this.#signal = signal;
-    this.model = model;
+    this.model = model ?? DEFAULT_OPEN_AI_MODEL;
     // to be passed to the actions client
     this.#temperature = temperature;
     // matters only for LangSmith logs (Metadata > Invocation Params)
@@ -128,20 +123,18 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   }
 
   async completionWithRetry(
-    request: ChatCompletionCreateParamsStreaming
-  ): Promise<AsyncIterable<ChatCompletionChunk>>;
+    request: OpenAI.ChatCompletionCreateParamsStreaming
+  ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk>>;
 
   async completionWithRetry(
-    request: ChatCompletionCreateParamsNonStreaming
-  ): Promise<ChatCompletion>;
+    request: OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<OpenAI.ChatCompletion>;
 
   async completionWithRetry(
-    completionRequest: ChatCompletionCreateParamsStreaming | ChatCompletionCreateParamsNonStreaming
-  ): Promise<AsyncIterable<ChatCompletionChunk> | ChatCompletion> {
-    if (!completionRequest.stream) {
-      // fallback for typescript, should never be hit
-      return super.completionWithRetry(completionRequest);
-    }
+    completionRequest:
+      | OpenAI.ChatCompletionCreateParamsStreaming
+      | OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk> | OpenAI.ChatCompletion> {
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
       this.#logger.debug(
@@ -159,10 +152,17 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         throw new Error(`${LLM_TYPE}: ${actionResult?.message} - ${actionResult?.serviceMessage}`);
       }
 
+      if (!this.streaming) {
+        // typecasting as the `run` subaction returns the OpenAI.ChatCompletion directly from OpenAI
+        const chatCompletion = get('data', actionResult) as OpenAI.ChatCompletion;
+
+        return chatCompletion;
+      }
+
       // cast typing as this is the contract of the actions client
       const result = get('data', actionResult) as {
-        consumerStream: Stream<ChatCompletionChunk>;
-        tokenCountStream: Stream<ChatCompletionChunk>;
+        consumerStream: Stream<OpenAI.ChatCompletionChunk>;
+        tokenCountStream: Stream<OpenAI.ChatCompletionChunk>;
       };
 
       if (result.consumerStream == null) {
@@ -172,39 +172,47 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       return result.consumerStream;
     });
   }
-  formatRequestForActionsClient(completionRequest: ChatCompletionCreateParamsStreaming): {
+  formatRequestForActionsClient(
+    completionRequest:
+      | OpenAI.ChatCompletionCreateParamsNonStreaming
+      | OpenAI.ChatCompletionCreateParamsStreaming
+  ): {
     actionId: string;
     params: {
-      subActionParams: InvokeAIActionParamsSchema;
+      subActionParams: InvokeAIActionParamsSchema | RunActionParamsSchema;
       subAction: string;
     };
     signal?: AbortSignal;
   } {
+    const body = {
+      temperature: this.#temperature,
+      // possible client model override
+      // security sends this from connectors, it is only missing from preconfigured connectors
+      // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
+      model: this.model,
+      // ensure we take the messages from the completion request, not the client request
+      n: completionRequest.n,
+      stop: completionRequest.stop,
+      functions: completionRequest.functions,
+      messages: completionRequest.messages.map((message) => ({
+        role: message.role,
+        content: message.content ?? '',
+        ...('name' in message ? { name: message?.name } : {}),
+        ...('function_call' in message ? { function_call: message?.function_call } : {}),
+        ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
+        ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
+      })),
+    };
     // create a new connector request body with the assistant message:
     return {
       actionId: this.#connectorId,
       params: {
-        // stream must already be true here
-        // langchain expects stream to be of type AsyncIterator<ChatCompletionChunk>
-        subAction: 'invokeAsyncIterator',
+        // langchain expects stream to be of type AsyncIterator<OpenAI.ChatCompletionChunk>
+        // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
+        // which may contain non-content messages like functions
+        subAction: completionRequest.stream ? 'invokeAsyncIterator' : 'run',
         subActionParams: {
-          temperature: this.#temperature,
-          // possible client model override
-          // security sends this from connectors, it is only missing from preconfigured connectors
-          // this should be undefined otherwise so the connector handles the model (stack_connector has access to preconfigured connector model values)
-          model: this.model,
-          // ensure we take the messages from the completion request, not the client request
-          n: completionRequest.n,
-          stop: completionRequest.stop,
-          functions: completionRequest.functions,
-          messages: completionRequest.messages.map((message) => ({
-            role: message.role,
-            content: message.content ?? '',
-            ...('name' in message ? { name: message?.name } : {}),
-            ...('function_call' in message ? { function_call: message?.function_call } : {}),
-            ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
-            ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
-          })),
+          ...(completionRequest.stream ? body : { body: JSON.stringify(body) }),
           signal: this.#signal,
           // This timeout is large because LangChain prompts can be complicated and take a long time
           timeout: this.#timeout ?? DEFAULT_TIMEOUT,
