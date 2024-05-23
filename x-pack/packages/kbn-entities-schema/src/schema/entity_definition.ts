@@ -30,7 +30,9 @@ export const entityDefinitionSchema = z.object({
   staticFields: z.optional(z.record(z.string(), z.string())),
   history: z.object({
     timestampField: z.string(),
-    interval: durationSchema,
+    interval: durationSchema.refine((val) => val.asMinutes() >= 1, {
+      message: 'The history.interval can not be less than 1m',
+    }),
     initialLookback: z.optional(durationSchema),
     settings: z.optional(
       z.object({
