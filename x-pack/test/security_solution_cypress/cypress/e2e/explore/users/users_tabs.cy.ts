@@ -24,7 +24,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'users' });
 
-    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
+    cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
   });
 
   beforeEach(() => {
@@ -34,7 +34,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
 
   after(() => {
     cy.task('esArchiverUnload', { archiveName: 'users' });
-    cy.task('esArchiverUnload', { archiveName: 'risk_users' });
+    cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
   });
 
   describe('Users page tabs', () => {
@@ -68,7 +68,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EVENTS_TAB_CONTENT).should('exist');
     });
 
-    it(`renders users risk tab`, () => {
+    it(`renders users risk tab`, { tags: ['@skipInserverless'] }, () => {
       waitForTabToBeLoaded(RISK_SCORE_TAB);
 
       cy.get(RISK_SCORE_TAB_CONTENT).should('exist');
