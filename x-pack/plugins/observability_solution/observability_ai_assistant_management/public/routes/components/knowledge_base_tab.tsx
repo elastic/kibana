@@ -106,6 +106,15 @@ export function KnowledgeBaseTab() {
       },
     },
     {
+      name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.createdBy', {
+        defaultMessage: 'Created by',
+      }),
+      width: '140px',
+      render: (category: KnowledgeBaseEntryCategory) => {
+        return category.entries[0]?.user?.name;
+      },
+    },
+    {
       field: '@timestamp',
       name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.dateCreated', {
         defaultMessage: 'Date created',
@@ -180,7 +189,7 @@ export function KnowledgeBaseTab() {
     isLoading,
     refetch,
   } = useGetKnowledgeBaseEntries({ query, sortBy, sortDirection });
-  const categories = categorizeEntries({ entries });
+  const categorizedEntries = categorizeEntries({ entries });
 
   const handleChangeSort = ({
     sort,
@@ -304,7 +313,7 @@ export function KnowledgeBaseTab() {
           <EuiBasicTable<KnowledgeBaseEntryCategory>
             data-test-subj="knowledgeBaseTable"
             columns={columns}
-            items={categories}
+            items={categorizedEntries}
             loading={isLoading}
             sorting={{
               sort: {
@@ -334,7 +343,10 @@ export function KnowledgeBaseTab() {
           selectedCategory.entries[0].role === 'assistant_summarization') ? (
           <KnowledgeBaseEditManualEntryFlyout
             entry={selectedCategory.entries[0]}
-            onClose={() => setSelectedCategory(undefined)}
+            onClose={() => {
+              setSelectedCategory(undefined);
+              refetch();
+            }}
           />
         ) : (
           <KnowledgeBaseCategoryFlyout

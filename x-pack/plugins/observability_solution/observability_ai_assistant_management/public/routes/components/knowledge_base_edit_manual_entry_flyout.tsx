@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -42,6 +43,11 @@ export function KnowledgeBaseEditManualEntryFlyout({
   const { mutateAsync: createEntry, isLoading } = useCreateKnowledgeBaseEntry();
   const { mutateAsync: deleteEntry, isLoading: isDeleting } = useDeleteKnowledgeBaseEntry();
 
+  const isSystemPromptDefaultValue = entry?.labels?.category === 'instruction' ?? false;
+  const [isSystemPrompt, setIsSystemPrompt] = useState(isSystemPromptDefaultValue);
+
+  const [isPublic, setIsPublic] = useState(entry?.public ?? false);
+
   const [newEntryId, setNewEntryId] = useState(entry?.id ?? '');
   const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
 
@@ -49,13 +55,21 @@ export function KnowledgeBaseEditManualEntryFlyout({
   const isEntryTextInvalid = newEntryText.trim() === '';
   const isFormInvalid = isEntryIdInvalid || isEntryTextInvalid;
 
-  const handleSubmitNewEntryClick = async () => {
-    createEntry({
+  const handleSubmit = async () => {
+    await createEntry({
       entry: {
         id: newEntryId,
         text: newEntryText,
+        public: isPublic,
+        labels: isSystemPrompt
+          ? {
+              category: 'instruction',
+            }
+          : {},
       },
-    }).then(onClose);
+    });
+
+    onClose();
   };
 
   const handleDelete = async () => {
@@ -130,9 +144,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
-
         <EuiSpacer size="m" />
-
         <EuiFormRow
           fullWidth
           label={i18n.translate(
@@ -157,6 +169,34 @@ export function KnowledgeBaseEditManualEntryFlyout({
             onChange={(text) => setNewEntryText(text)}
           />
         </EuiFormRow>
+        <EuiSpacer size="m" />
+
+        <EuiFormRow fullWidth>
+          <EuiCheckbox
+            id="isPublicCheckbox"
+            checked={isPublic}
+            label={i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiCheckbox.isPublicLabel',
+              { defaultMessage: 'Public: Entry should be available to all users' }
+            )}
+            onChange={(e) => {
+              setIsPublic(e.target.checked);
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow fullWidth>
+          <EuiCheckbox
+            id="isSystemPromptCheckbox"
+            checked={isSystemPrompt}
+            label={i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiCheckbox.isSystemPromptLabel',
+              { defaultMessage: 'System prompt: Entry should be included in the system prompt' }
+            )}
+            onChange={(e) => {
+              setIsSystemPrompt(e.target.checked);
+            }}
+          />
+        </EuiFormRow>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
@@ -178,7 +218,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
               data-test-subj="knowledgeBaseEditManualEntryFlyoutSaveButton"
               fill
               isLoading={isLoading}
-              onClick={handleSubmitNewEntryClick}
+              onClick={handleSubmit}
               isDisabled={isFormInvalid}
             >
               {i18n.translate(

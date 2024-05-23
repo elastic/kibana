@@ -34,6 +34,7 @@ import {
 import { addLensDocsToKb } from './service/knowledge_base_service/kb_docs/lens';
 import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
+import { aiAssistantCapabilities } from '../common/capabilities';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -81,7 +82,7 @@ export class ObservabilityAIAssistantPlugin
             ],
             read: [],
           },
-          ui: ['show'],
+          ui: [aiAssistantCapabilities.show],
         },
         read: {
           disabled: true,

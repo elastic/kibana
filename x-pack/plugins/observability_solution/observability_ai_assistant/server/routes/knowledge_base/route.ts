@@ -120,20 +120,26 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    const { id, text } = resources.params.body;
+    const {
+      id,
+      text,
+      public: isPublic,
+      confidence,
+      is_correction: isCorrection,
+      labels,
+      role,
+    } = resources.params.body;
 
     return client.createKnowledgeBaseEntry({
       entry: {
         id,
         text,
         doc_id: id,
-        confidence: resources.params.body.confidence ?? 'high',
-        is_correction: resources.params.body.is_correction ?? false,
-        public: resources.params.body.public ?? true,
-        labels: resources.params.body.labels ?? {},
-        role:
-          (resources.params.body.role as KnowledgeBaseEntryRole) ??
-          KnowledgeBaseEntryRole.UserEntry,
+        confidence: confidence ?? 'high',
+        is_correction: isCorrection ?? false,
+        public: isPublic ?? true,
+        labels: labels ?? {},
+        role: (role as KnowledgeBaseEntryRole) ?? KnowledgeBaseEntryRole.UserEntry,
       },
     });
   },
