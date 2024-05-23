@@ -10,7 +10,6 @@ import { BehaviorSubject } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type { StateComparators } from '@kbn/presentation-publishing';
-import type { Filter, Query } from '@kbn/es-query';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../../application/services/anomaly_explorer_charts_service';
 import type {
@@ -36,14 +35,6 @@ export const initializeAnomalyChartsControls = (
   const interval$ = new BehaviorSubject<number | undefined>(undefined);
   const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
-  // Anomaly charts embeddable should consume parent api (i.e. from dashboard global search bar)
-  // since it doesn't need to have its own query and filters
-  // @ts-expect-error Embeddable parentApi has query$
-  const query$ = parentApi?.query$ ?? new BehaviorSubject<Query | undefined>(undefined);
-  // @ts-expect-error Embeddable parentApi has filter$
-  const filters$ = parentApi?.filters$ ?? new BehaviorSubject<Filter[] | undefined>(undefined);
-  // @ts-expect-error Embeddable lastReloadRequestTime has filter$
-  const refresh$ = parentApi?.lastReloadRequestTime$ ?? new BehaviorSubject<void>(undefined);
 
   const updateUserInput = (update: AnomalyChartsEmbeddableState) => {
     jobIds$.next(update.jobIds);
@@ -63,8 +54,6 @@ export const initializeAnomalyChartsControls = (
       maxSeriesToPlot: maxSeriesToPlot$.value,
       severityThreshold: severityThreshold$.value,
       selectedEntities: selectedEntities$.value,
-      filters: filters$.value,
-      query: query$.value,
     };
   };
 
@@ -72,9 +61,11 @@ export const initializeAnomalyChartsControls = (
     jobIds: [jobIds$, (arg: JobId[]) => jobIds$.next(arg), fastIsEqual],
     maxSeriesToPlot: [maxSeriesToPlot$, (arg: number) => maxSeriesToPlot$.next(arg)],
     severityThreshold: [severityThreshold$, (arg?: number) => severityThreshold$.next(arg)],
-    selectedEntities: [selectedEntities$, (arg?: MlEntityField[]) => selectedEntities$.next(arg)],
-    filters: [filters$, (arg?: Filter[]) => filters$.next(arg)],
-    query: [query$, (arg?: Query) => query$.next(arg)],
+    selectedEntities: [
+      selectedEntities$,
+      (arg?: MlEntityField[]) => selectedEntities$.next(arg),
+      fastIsEqual,
+    ],
   };
   const onRenderComplete = () => dataLoading$.next(false);
   const onLoading = (v: boolean) => dataLoading$.next(v);
@@ -91,9 +82,6 @@ export const initializeAnomalyChartsControls = (
       updateSelectedEntities,
     } as AnomalyChartsComponentApi,
     dataLoadingApi: {
-      query$,
-      filters$,
-      refresh$,
       dataLoading: dataLoading$,
       setInterval,
       onRenderComplete,

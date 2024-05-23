@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { DefaultEmbeddableApi, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
   EmbeddableApiContext,
@@ -112,8 +112,6 @@ export interface AnomalyChartsEmbeddableRuntimeState {
   // Embeddable inputs which are not included in the default interface
   severityThreshold?: number;
   selectedEntities?: MlEntityField[];
-  filters?: Filter[];
-  query?: Query;
 }
 export interface AnomalyChartsEmbeddableOverridableState
   extends AnomalyChartsEmbeddableRuntimeState {
@@ -130,8 +128,6 @@ export interface AnomalyChartsComponentApi {
 }
 export interface AnomalyChartsDataLoadingApi {
   refresh$: PublishingSubject<number | undefined>;
-  filters$: PublishingSubject<Filter[] | undefined>;
-  query$: PublishingSubject<Query | AggregateQuery | undefined>;
   onRenderComplete: () => void;
   onLoading: (v: boolean) => void;
   onError: (error?: Error) => void;
@@ -148,7 +144,6 @@ export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoad
 
 export type AnomalyChartsEmbeddableApi = MlEmbeddableBaseApi<AnomalyChartsEmbeddableState> &
   PublishesDataViews &
-  PublishesUnifiedSearch &
   PublishesWritablePanelTitle &
   HasEditCapabilities &
   AnomalyChartsApi;
