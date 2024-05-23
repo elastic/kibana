@@ -6,10 +6,10 @@
  */
 
 import { GeminiConnector } from './gemini';
-import { ServiceParams } from '@kbn/actions-plugin/server';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { Config, Secrets, RunActionParams } from '../../../common/gemini/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
-import { Logger } from '@kbn/logging';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Services } from '@kbn/actions-plugin/server/types';
 import {
   KibanaRequest,
@@ -24,6 +24,7 @@ import { AxiosResponse, AxiosHeaders } from 'axios';
 import { RunApiResponse } from '../../../common/gemini/types';
 import { RunApiResponseSchema } from '../../../common/gemini/schema';
 
+jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
 jest.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', () => ({
   assertURL: jest.fn(),
 }));
@@ -33,7 +34,7 @@ jest.mock('@kbn/actions-plugin/server', () => {
 
   return {
     ...originalModule,
-    SubActionConnector: jest.fn().mockImplementation(
+    SubActionConnector: SubActionConnector.arguments(
       (
         ...args: ConstructorParameters<typeof originalModule.SubActionConnector> // Capture constructor arguments
       ) => {
@@ -70,18 +71,6 @@ describe('GeminiConnector', () => {
     validateEmailAddresses: jest.fn(),
     enableFooterInEmail: jest.fn().mockReturnValue(true),
     getMaxQueued: jest.fn().mockReturnValue(100),
-  };
-
-  const mockLogger: Logger = {
-    trace: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    log: jest.fn(),
-    isLevelEnabled: jest.fn().mockReturnValue(true), // Enable all levels by default
-    get: jest.fn((...childContextPaths: string[]) => mockLogger), // Return the same mock for child loggers
   };
 
   const mockServices: Services = {
@@ -133,6 +122,8 @@ describe('GeminiConnector', () => {
     params: {},
     query: {},
     body: {},
+    httpVersion: '',
+    protocol: 'http1'
   };
 
   beforeEach(() => {
@@ -146,9 +137,20 @@ describe('GeminiConnector', () => {
         gcpProjectID: 'my-project-12345',
       },
       secrets: {
-        credentialsJson: 'some-random-string',
+        credentialsJson: JSON.stringify({
+          "type": "service_account",
+          "project_id": "",
+          "private_key_id": "",
+          "private_key": "-----BEGIN PRIVATE KEY----------END PRIVATE KEY-----\n",
+          "client_email": "",
+          "client_id": "",
+          "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+          "token_uri": "https://oauth2.googleapis.com/token",
+          "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+          "client_x509_cert_url": ""
+        }),
       },
-      logger: mockLogger,
+      logger: loggingSystemMock.createLogger(),
       services: mockServices,
       request: mockKibanaRequest,
     };
@@ -161,7 +163,7 @@ describe('GeminiConnector', () => {
       const dashboardId = 'some-dashboard-id';
 
       // Mock initDashboard to simulate a successful dashboard fetch
-      jest.spyOn(connector, 'initDashboard').mockResolvedValueOnce({ success: true });
+      jest.spyOn(connector, 'getDashboard').mockResolvedValueOnce({ available: true });
 
       const response = await connector.getDashboard({ dashboardId });
       expect(response).toEqual({ available: true });
