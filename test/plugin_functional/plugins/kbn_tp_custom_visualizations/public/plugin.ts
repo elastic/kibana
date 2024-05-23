@@ -12,7 +12,7 @@ import { Plugin as ExpressionsPlugin } from '@kbn/expressions-plugin/public';
 
 import { SelfChangingEditor } from './self_changing_vis/self_changing_editor';
 import { selfChangingVisFn, SelfChangingVisParams } from './self_changing_vis_fn';
-import { selfChangingVisRenderer } from './self_changing_vis_renderer';
+import { getSelfChangingVisRenderer } from './self_changing_vis_renderer';
 import { toExpressionAst } from './to_ast';
 
 export interface SetupDependencies {
@@ -32,7 +32,7 @@ export class CustomVisualizationsPublicPlugin
     /**
      * Register a renderer for your visualization
      */
-    expressions.registerRenderer(selfChangingVisRenderer);
+    expressions.registerRenderer(getSelfChangingVisRenderer(core));
 
     /**
      * Create the visualization type with definition

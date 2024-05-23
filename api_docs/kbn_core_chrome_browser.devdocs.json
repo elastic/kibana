@@ -3940,6 +3940,33 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.EuiSideNavItemTypeEnhanced",
+        "type": "Type",
+        "tags": [],
+        "label": "EuiSideNavItemTypeEnhanced",
+        "description": [
+          "\nTemporary helper interface while we have to maintain both the legacy side navigation\nand the new \"solution view\" one. The legacy uses EuiSideNavItemType and its properties are not fully compatible\nwith the NodeDefinition. Solution teams declare their \"classic\" navigation using the EuiSideNavItemType.\nConverting those to the `NodeDefinition` require some additional props."
+        ],
+        "signature": [
+          "Omit<",
+          "EuiSideNavItemType",
+          "<T>, \"items\"> & { items?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.EuiSideNavItemTypeEnhanced",
+            "text": "EuiSideNavItemTypeEnhanced"
+          },
+          "<unknown>[] | undefined; iconToString?: string | undefined; nameToString?: string | undefined; }"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.EuiThemeSize",
         "type": "Type",
         "tags": [],
