@@ -189,7 +189,9 @@ export default function ({ getService }: FtrProviderContext) {
             version: '8.14.0',
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path);
+        await reportingAPI.waitForJobToFinish(res.path, undefined, undefined, {
+          timeout: 80 * 1000,
+        });
         return reportingAPI.getCompletedJobOutput(res.path);
       }
 
