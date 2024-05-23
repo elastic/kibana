@@ -634,7 +634,7 @@ export class FleetPlugin
     // We only retry when this feature flag is enabled (Serverless)
     const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
 
-    const fleetSetupPromise = (async () => {
+    const fleetSetup = async () => {
       try {
         // Fleet remains `available` during setup as to excessively delay Kibana's boot process.
         // This should be reevaluated as Fleet's setup process is optimized and stabilized.
@@ -715,7 +715,9 @@ export class FleetPlugin
           },
         });
       }
-    })();
+    };
+
+    const fleetSetupPromise = fleetSetup();
 
     const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     return {
