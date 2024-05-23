@@ -4367,6 +4367,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-quality-plugin@link:x-pack/plugins/data_quality":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-search-plugin@link:test/plugin_functional/plugins/data_search":
   version "0.0.0"
   uid ""

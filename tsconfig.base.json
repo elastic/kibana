@@ -666,6 +666,8 @@
       "@kbn/data-forge/*": ["x-pack/packages/kbn-data-forge/*"],
       "@kbn/data-plugin": ["src/plugins/data"],
       "@kbn/data-plugin/*": ["src/plugins/data/*"],
+      "@kbn/data-quality-plugin": ["x-pack/plugins/data_quality"],
+      "@kbn/data-quality-plugin/*": ["x-pack/plugins/data_quality/*"],
       "@kbn/data-search-plugin": ["test/plugin_functional/plugins/data_search"],
       "@kbn/data-search-plugin/*": ["test/plugin_functional/plugins/data_search/*"],
       "@kbn/data-service": ["packages/kbn-data-service"],

@@ -1,0 +1,23 @@
+{
+  "type": "plugin",
+  "id": "@kbn/data-quality-plugin",
+  "owner": "@elastic/obs-ux-logs",
+  "plugin": {
+    "id": "dataQuality",
+    "server": false,
+    "browser": true,
+    "configPath": ["xpack", "data_quality"],
+    "requiredPlugins": [
+      "datasetQuality",
+      "management",
+  ],
+    "optionalPlugins": [],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+    ],
+    "extraPublicDirs": [
+      "common",
+    ]
+  }
+}

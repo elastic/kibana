@@ -1,0 +1,24 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*",
+    "public/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/dataset-quality-plugin",
+    "@kbn/i18n",
+    "@kbn/io-ts-utils",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/management-plugin",
+    "@kbn/react-kibana-context-render",
+    "@kbn/shared-ux-router",
+  ],
+  "exclude": ["target/**/*"]
+}
