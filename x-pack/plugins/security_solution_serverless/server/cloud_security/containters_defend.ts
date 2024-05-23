@@ -11,6 +11,8 @@ import type { Tier, UsageRecord } from '../types';
 import type { CloudSecurityMeteringCallbackInput } from './types';
 import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
+const BATCH_SIZE = 1000;
+
 export interface CloudDefendHeartbeat {
   '@timestamp': string;
   'agent.id': string;
@@ -59,6 +61,7 @@ export const getHeartbeatRecords = async (
   return await esClient.search<CloudDefendHeartbeat>(
     {
       index: CLOUD_DEFEND_HEARTBEAT_INDEX,
+      size: BATCH_SIZE,
       sort: 'event.ingested',
       query: {
         bool: {

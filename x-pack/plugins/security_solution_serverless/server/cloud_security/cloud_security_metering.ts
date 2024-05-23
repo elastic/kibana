@@ -26,7 +26,7 @@ export const cloudSecurityMetringCallback = async ({
   const tier: Tier = getCloudProductTier(config, logger);
 
   try {
-    const cloudSecuritySolutions: CloudSecuritySolutions[] = [CLOUD_DEFEND];
+    const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM, CLOUD_DEFEND];
 
     const promiseResults = await Promise.allSettled(
       cloudSecuritySolutions.map((cloudSecuritySolution) => {
