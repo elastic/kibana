@@ -655,7 +655,9 @@ export function XYChart({
       range: [min, max],
       table,
       column: xAxisColumnIndex,
-      ...(table.meta?.type === 'es_ql' ? { timeFieldName: xAccessor } : {}),
+      ...(table.meta?.type === 'es_ql'
+        ? { timeFieldName: table.columns[xAxisColumnIndex].name }
+        : {}),
     };
     onSelectRange(context);
   };

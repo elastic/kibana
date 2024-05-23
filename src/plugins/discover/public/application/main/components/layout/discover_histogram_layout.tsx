@@ -61,6 +61,9 @@ export const DiscoverHistogramLayout = ({
         type: 'datatable' as 'datatable',
         rows: datatable.result!.map((r) => r.raw),
         columns: datatable.esqlQueryColumns || [],
+        meta: {
+          type: 'es_ql',
+        },
       };
     }
   }, [datatable, isEsqlMode]);
