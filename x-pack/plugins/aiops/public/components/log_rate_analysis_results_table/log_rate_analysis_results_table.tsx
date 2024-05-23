@@ -14,7 +14,6 @@ import type { EuiTableSortingType } from '@elastic/eui';
 import { useEuiBackgroundColor, EuiBasicTable } from '@elastic/eui';
 
 import type { SignificantItem } from '@kbn/ml-agg-utils';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import {
   setPinnedSignificantItem,
   setSelectedSignificantItem,
@@ -22,6 +21,7 @@ import {
   useAppSelector,
 } from '@kbn/aiops-log-rate-analysis/state';
 
+import type { GroupTableItemGroup } from '@kbn/aiops-log-rate-analysis/state';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 import { useColumns, SIG_ITEMS_TABLE } from './use_columns';
 
@@ -32,11 +32,8 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_SORT_DIRECTION_ZERO_DOCS_FALLBACK = 'desc';
 
 interface LogRateAnalysisResultsTableProps {
-  significantItems: SignificantItem[];
-  loading: boolean;
-  isExpandedRow?: boolean;
+  groupFilter?: GroupTableItemGroup[];
   searchQuery: estypes.QueryDslQueryContainer;
-  timeRangeMs: TimeRangeMs;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -45,17 +42,37 @@ interface LogRateAnalysisResultsTableProps {
 }
 
 export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> = ({
-  significantItems,
-  loading,
-  isExpandedRow,
+  groupFilter,
   searchQuery,
-  timeRangeMs,
   barColorOverride,
   barHighlightColorOverride,
   skippedColumns,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
+
+  const allSignificantItems = useAppSelector((s) => s.logRateAnalysisResults.significantItems);
+
+  const significantItems = useMemo(() => {
+    if (!groupFilter) {
+      return allSignificantItems;
+    }
+
+    return groupFilter.reduce<SignificantItem[]>((p, groupItem) => {
+      const st = allSignificantItems.find(
+        (d) => d.fieldName === groupItem.fieldName && d.fieldValue === groupItem.fieldValue
+      );
+
+      if (st !== undefined) {
+        p.push({
+          ...st,
+          unique: (groupItem.duplicate ?? 0) <= 1,
+        });
+      }
+
+      return p;
+    }, []);
+  }, [allSignificantItems, groupFilter]);
 
   const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
   const pinnedGroup = useAppSelector((s) => s.logRateAnalysisTableRow.pinnedGroup);
@@ -82,12 +99,9 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
     SIG_ITEMS_TABLE,
     skippedColumns,
     searchQuery,
-    timeRangeMs,
-    loading,
-    zeroDocsFallback,
     barColorOverride,
     barHighlightColorOverride,
-    isExpandedRow
+    groupFilter !== undefined
   );
 
   const onChange = useCallback((tableSettings) => {

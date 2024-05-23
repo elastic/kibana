@@ -378,7 +378,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     return p + c.groupItemsSortedByUniqueness.length;
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
-  const timeRangeMs = { from: earliest ?? 0, to: latest ?? 0 };
 
   // Disable the grouping switch toggle only if no groups were found,
   // the toggle wasn't enabled already and no fields were selected to be skipped.
@@ -560,8 +559,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
             skippedColumns={skippedColumns}
             significantItems={data.significantItems}
             groupTableItems={groupTableItems}
-            loading={isRunning}
-            timeRangeMs={timeRangeMs}
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}
@@ -570,9 +567,6 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
         {showLogRateAnalysisResultsTable && !groupResults ? (
           <LogRateAnalysisResultsTable
             skippedColumns={skippedColumns}
-            significantItems={data.significantItems}
-            loading={isRunning}
-            timeRangeMs={timeRangeMs}
             searchQuery={searchQuery}
             barColorOverride={barColorOverride}
             barHighlightColorOverride={barHighlightColorOverride}

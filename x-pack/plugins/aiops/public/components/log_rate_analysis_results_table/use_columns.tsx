@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { getCategoryQuery } from '@kbn/aiops-log-pattern-analysis/get_category_query';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { FieldStatsServices } from '@kbn/unified-field-list/src/components/field_stats';
 import { getFailedTransactionsCorrelationImpactLabel } from './get_failed_transactions_correlation_impact_label';
 import { FieldStatsPopover } from '../field_stats_popover';
@@ -23,6 +22,7 @@ import { useViewInDiscoverAction } from './use_view_in_discover_action';
 import { useViewInLogPatternAnalysisAction } from './use_view_in_log_pattern_analysis_action';
 import { useCopyToClipboardAction } from './use_copy_to_clipboard_action';
 import { MiniHistogram } from '../mini_histogram';
+import { useAppSelector } from '@kbn/aiops-log-rate-analysis/state';
 
 const TRUNCATE_TEXT_LINES = 3;
 const ACTIONS_COLUMN_WIDTH = '60px';
@@ -97,9 +97,6 @@ export const useColumns = (
   tableType: TableType,
   skippedColumns: string[],
   searchQuery: estypes.QueryDslQueryContainer,
-  timeRangeMs: TimeRangeMs,
-  loading: boolean,
-  zeroDocsFallback: boolean,
   barColorOverride?: string,
   barHighlightColorOverride?: string,
   isExpandedRow: boolean = false
@@ -110,6 +107,12 @@ export const useColumns = (
   const viewInDiscoverAction = useViewInDiscoverAction(dataView.id);
   const viewInLogPatternAnalysisAction = useViewInLogPatternAnalysisAction(dataView.id);
   const copyToClipBoardAction = useCopyToClipboardAction();
+
+  const { earliest, latest } = useAppSelector((s) => s.logRateAnalysis);
+  const timeRangeMs = { from: earliest ?? 0, to: latest ?? 0 };
+
+  const loading = useAppSelector((s) => s.logRateAnalysisStream.isRunning);
+  const zeroDocsFallback = useAppSelector((s) => s.logRateAnalysisResults.zeroDocsFallback);
 
   const isGroupsTable = tableType === GROUPS_TABLE;
 

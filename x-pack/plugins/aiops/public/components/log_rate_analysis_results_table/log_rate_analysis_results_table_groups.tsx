@@ -35,7 +35,6 @@ import {
   useAppSelector,
   type GroupTableItem,
 } from '@kbn/aiops-log-rate-analysis/state';
-import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { stringHash } from '@kbn/ml-string-hash';
 
 import usePrevious from 'react-use/lib/usePrevious';
@@ -57,9 +56,7 @@ interface LogRateAnalysisResultsTableProps {
   skippedColumns: string[];
   significantItems: SignificantItem[];
   groupTableItems: GroupTableItem[];
-  loading: boolean;
   searchQuery: estypes.QueryDslQueryContainer;
-  timeRangeMs: TimeRangeMs;
   /** Optional color override for the default bar color for charts */
   barColorOverride?: string;
   /** Optional color override for the highlighted bar color for charts */
@@ -70,8 +67,6 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
   skippedColumns,
   significantItems,
   groupTableItems,
-  loading,
-  timeRangeMs,
   searchQuery,
   barColorOverride,
   barHighlightColorOverride,
@@ -109,26 +104,7 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
       itemIdToExpandedRowMapValues[item.id] = (
         <LogRateAnalysisResultsTable
           skippedColumns={skippedColumns}
-          significantItems={item.groupItemsSortedByUniqueness.reduce<SignificantItem[]>(
-            (p, groupItem) => {
-              const st = significantItems.find(
-                (d) => d.fieldName === groupItem.fieldName && d.fieldValue === groupItem.fieldValue
-              );
-
-              if (st !== undefined) {
-                p.push({
-                  ...st,
-                  unique: (groupItem.duplicate ?? 0) <= 1,
-                });
-              }
-
-              return p;
-            },
-            []
-          )}
-          loading={loading}
-          isExpandedRow
-          timeRangeMs={timeRangeMs}
+          groupFilter={item.groupItemsSortedByUniqueness}
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
@@ -264,9 +240,6 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
     GROUPS_TABLE,
     skippedColumns,
     searchQuery,
-    timeRangeMs,
-    loading,
-    zeroDocsFallback,
     barColorOverride,
     barHighlightColorOverride
   ) as Array<EuiBasicTableColumn<GroupTableItem>>;
