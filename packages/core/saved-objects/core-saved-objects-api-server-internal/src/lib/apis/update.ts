@@ -178,7 +178,9 @@ export const executeUpdate = async <T>(
       attributes: {
         ...(await encryptionHelper.optionallyEncryptAttributes(type, id, namespace, upsert)),
       },
+      created_at: time,
       updated_at: time,
+      ...(updatedBy && { created_by: updatedBy }),
       ...(updatedBy && { updated_by: updatedBy }),
       ...(Array.isArray(references) && { references }),
     }) as SavedObjectSanitizedDoc<T>;
@@ -235,7 +237,9 @@ export const executeUpdate = async <T>(
     updatedOrCreatedSavedObject = {
       id,
       type,
+      created_at: time,
       updated_at: time,
+      ...(updatedBy && { created_by: updatedBy }),
       ...(updatedBy && { updated_by: updatedBy }),
       version: encodeHitVersion(createDocResponseBody),
       namespaces,
@@ -277,7 +281,7 @@ export const executeUpdate = async <T>(
       namespaces: savedObjectNamespaces,
       attributes: updatedAttributes,
       updated_at: time,
-      ...(updatedBy && { updated_by: updatedBy }),
+      updated_by: updatedBy,
       ...(Array.isArray(references) && { references }),
     });
 

@@ -21,10 +21,11 @@ export const sampleDashboard = {
   version: 2,
 };
 
-const usernameOrRole = 'content_manager_dashboard';
+const role = 'content_manager_dashboard';
+const users = ['content_manager_dashboard_1', 'content_manager_dashboard_2'] as const;
 export async function setupInteractiveUser({ getService }: Pick<FtrProviderContext, 'getService'>) {
   const security = getService('security');
-  await security.role.create(usernameOrRole, {
+  await security.role.create(role, {
     elasticsearch: { cluster: [], indices: [], run_as: [] },
     kibana: [
       {
@@ -35,25 +36,30 @@ export async function setupInteractiveUser({ getService }: Pick<FtrProviderConte
     ],
   });
 
-  await security.user.create(usernameOrRole, {
-    password: usernameOrRole,
-    roles: [usernameOrRole],
-    full_name: usernameOrRole.toUpperCase(),
-    email: `${usernameOrRole}@elastic.co`,
-  });
+  for (const user of users) {
+    await security.user.create(user, {
+      password: user,
+      roles: [role],
+      full_name: user.toUpperCase(),
+      email: `${user}@elastic.co`,
+    });
+  }
 }
 
 export async function cleanupInteractiveUser({
   getService,
 }: Pick<FtrProviderContext, 'getService'>) {
   const security = getService('security');
-  await security.user.delete(usernameOrRole);
-  await security.role.delete(usernameOrRole);
+  for (const user of users) {
+    await security.user.delete(user);
+  }
+  await security.role.delete(role);
 }
 
 export async function loginAsInteractiveUser({
   getService,
-}: Pick<FtrProviderContext, 'getService'>): Promise<{
+  username = users[0],
+}: Pick<FtrProviderContext, 'getService'> & { username?: typeof users[number] }): Promise<{
   Cookie: string;
 }> {
   const supertest = getService('supertestWithoutAuth');
@@ -65,7 +71,7 @@ export async function loginAsInteractiveUser({
       providerType: 'basic',
       providerName: 'basic',
       currentURL: '/',
-      params: { username: usernameOrRole, password: usernameOrRole },
+      params: { username, password: username },
     })
     .expect(200);
   const cookie = parseCookie(response.header['set-cookie'][0])!.cookieString();
