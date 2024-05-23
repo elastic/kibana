@@ -21,9 +21,10 @@ import { TimeBuckets } from '@kbn/ml-time-buckets';
 import useObservable from 'react-use/lib/useObservable';
 import type { TimeRange } from '@kbn/es-query';
 import type {
-  AnomalyChartsEmbeddableCustomInput,
+  AnomalyChartsEmbeddableOverridableState,
   AnomalyChartsEmbeddableServices,
   AnomalyChartsApi,
+  AnomalyChartsAttachmentApi,
 } from '..';
 
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
@@ -35,9 +36,10 @@ import { useAnomalyChartsData } from './use_anomaly_charts_data';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
-export interface AnomalyChartsContainerProps extends Partial<AnomalyChartsEmbeddableCustomInput> {
+export interface AnomalyChartsContainerProps
+  extends Partial<AnomalyChartsEmbeddableOverridableState> {
   lastReloadRequestTime?: number;
-  api: AnomalyChartsApi;
+  api: AnomalyChartsApi | AnomalyChartsAttachmentApi;
   id: string;
   services: AnomalyChartsEmbeddableServices;
   timeRange$: Observable<TimeRange | undefined>;

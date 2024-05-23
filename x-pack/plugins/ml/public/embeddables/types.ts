@@ -22,6 +22,7 @@ import type {
   PublishesDataViews,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
+import { type BehaviorSubject } from 'rxjs';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
 import type { MlDependencies } from '../application/app';
 import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
@@ -122,12 +123,11 @@ export interface AnomalyChartsComponentApi {
   maxSeriesToPlot$: PublishingSubject<number>;
   severityThreshold$: PublishingSubject<number>;
   selectedEntities$: PublishingSubject<MlEntityField[] | undefined>;
-  updateUserInput: (input: AnomalyChartsEmbeddableCustomInput) => void;
+  updateUserInput: (input: AnomalyChartsEmbeddableOverridableState) => void;
   updateSeverityThreshold: (v?: number) => void;
   updateSelectedEntities: (entities?: MlEntityField[] | undefined) => void;
 }
 export interface AnomalyChartsDataLoadingApi {
-  refresh$: PublishingSubject<number | undefined>;
   onRenderComplete: () => void;
   onLoading: (v: boolean) => void;
   onError: (error?: Error) => void;
@@ -153,14 +153,25 @@ export interface AnomalyChartsFieldSelectionApi {
   entityFields: PublishingSubject<MlEntityField[] | undefined>;
 }
 
-export type AnomalyChartsEmbeddableCustomInput = AnomalyChartsEmbeddableOverridableState;
+export interface AnomalyChartsAttachmentState extends AnomalyChartsEmbeddableState {
+  query?: Query;
+  filters?: Filter[];
+}
+
+export interface AnomalyChartsAttachmentApi extends AnomalyChartsApi {
+  parentApi: {
+    query$: BehaviorSubject<Query | undefined>;
+    filters$: BehaviorSubject<Filter[] | undefined>;
+    timeRange$: BehaviorSubject<TimeRange | undefined>;
+  };
+}
 
 /**
  * Persisted state for the Anomaly Charts Embeddable.
  */
 export interface AnomalyChartsEmbeddableState
   extends SerializedTitles,
-    AnomalyChartsEmbeddableCustomInput {}
+    AnomalyChartsEmbeddableOverridableState {}
 
 /** Manual input by the user */
 export interface SingleMetricViewerEmbeddableUserInput {

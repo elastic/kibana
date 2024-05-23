@@ -17,18 +17,17 @@ import type { PersistableStateAttachmentViewProps } from '@kbn/cases-plugin/publ
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiDescriptionList, htmlIdGenerator } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { LazyAnomalyChartsContainer } from '../embeddables/anomaly_charts/lazy_anomaly_charts_container';
 import { initializeAnomalyChartsControls } from '../embeddables/anomaly_charts/initialize_anomaly_charts_controls';
 import type {
-  AnomalyChartsApi,
-  AnomalyChartsEmbeddableCustomInput,
-  AnomalyChartsEmbeddableState,
   AnomalyChartsEmbeddableServices,
+  AnomalyChartsAttachmentState,
+  AnomalyChartsAttachmentApi,
 } from '../embeddables';
 
-interface AnomalyChartsCaseAttachmentProps extends AnomalyChartsEmbeddableCustomInput {
+interface AnomalyChartsCaseAttachmentProps extends AnomalyChartsAttachmentState {
   services: AnomalyChartsEmbeddableServices;
 }
 const AnomalyChartsCaseAttachment = ({
@@ -51,10 +50,15 @@ const AnomalyChartsCaseAttachment = ({
 
   const api = useMemo(
     () => {
+      const filters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters ?? []);
+      const query$ = new BehaviorSubject<Query | undefined>(initialState.query ?? undefined);
+      const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
+
       const anomalyChartsApi = initializeAnomalyChartsControls(initialState);
-      const combined: AnomalyChartsApi = {
+      const combined: AnomalyChartsAttachmentApi = {
         ...anomalyChartsApi.anomalyChartsControlsApi,
         ...anomalyChartsApi.dataLoadingApi,
+        parentApi: { filters$, query$, timeRange$ },
       };
       return combined;
     },
@@ -67,7 +71,6 @@ const AnomalyChartsCaseAttachment = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [initialState.timeRange?.from, initialState.timeRange?.to]
   );
-
   return (
     <div css={css({ display: 'flex', width: '100%' })}>
       <KibanaRenderContextProvider {...coreStartServices}>
@@ -103,7 +106,7 @@ export const initializeAnomalyChartsAttachment = memoize(
         });
 
         const inputProps =
-          persistableStateAttachmentState as unknown as AnomalyChartsEmbeddableState;
+          persistableStateAttachmentState as unknown as AnomalyChartsAttachmentState;
 
         const descriptions = useMemo(() => {
           const listItems = [
