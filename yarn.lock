@@ -5095,6 +5095,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/langchain@link:x-pack/packages/kbn-langchain":
+  version "0.0.0"
+  uid ""
+
 "@kbn/language-documentation-popover@link:packages/kbn-language-documentation-popover":
   version "0.0.0"
   uid ""
@@ -6292,10 +6296,6 @@
   uid ""
 
 "@kbn/snapshot-restore-plugin@link:x-pack/plugins/snapshot_restore":
-  version "0.0.0"
-  uid ""
-
-"@kbn/solution-nav-es@link:packages/solution-nav/es":
   version "0.0.0"
   uid ""
 

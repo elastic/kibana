@@ -312,8 +312,8 @@
             "pluginId": "@kbn/unified-field-list",
             "scope": "common",
             "docId": "kibKbnUnifiedFieldListPluginApi",
-            "section": "def-common.FieldPopoverFooterProps",
-            "text": "FieldPopoverFooterProps"
+            "section": "def-common.FieldVisualizeButtonProps",
+            "text": "FieldVisualizeButtonProps"
           },
           ">) => JSX.Element"
         ],
@@ -334,8 +334,8 @@
                 "pluginId": "@kbn/unified-field-list",
                 "scope": "common",
                 "docId": "kibKbnUnifiedFieldListPluginApi",
-                "section": "def-common.FieldPopoverFooterProps",
-                "text": "FieldPopoverFooterProps"
+                "section": "def-common.FieldVisualizeButtonProps",
+                "text": "FieldVisualizeButtonProps"
               },
               ">"
             ],
@@ -5486,9 +5486,7 @@
             "docId": "kibKbnUnifiedFieldListPluginApi",
             "section": "def-common.FieldVisualizeButtonProps",
             "text": "FieldVisualizeButtonProps"
-          },
-          " | ",
-          "FieldCategorizeButtonProps"
+          }
         ],
         "path": "packages/kbn-unified-field-list/src/components/field_popover/field_popover_footer.tsx",
         "deprecated": false,
