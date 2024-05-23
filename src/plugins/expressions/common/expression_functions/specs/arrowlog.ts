@@ -22,8 +22,19 @@ export const arrowlog: ExpressionFunctionArrowlog = {
   inputTypes: ['arrow'],
   help: 'Outputs the first row of arrow table to the console. This function is for debug purposes',
   fn: (input: { type: 'arrow'; table: Table }) => {
-    // eslint-disable-next-line no-console
-    console.log(input.table.get(0)!.toJSON());
+    let x = 0;
+    console.time('pass over');
+    for (let i = 0; i < input.table.numRows; i++) {
+      x += input.table.get(i)!.time;
+    }
+    console.timeEnd('pass over');
+
+    console.time('pass over2');
+    for (let i = 0; i < input.table.numRows; i++) {
+      x += input.table.getChild('time')!.get(i);
+    }
+    console.timeEnd('pass over2');
+    console.log(input.table.get(0)!.toJSON(), x);
     return input;
   },
 };
