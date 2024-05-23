@@ -9,6 +9,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesWritableUnifiedSearch } from '@kbn/presentation-publishing';
+import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import React, { useEffect, useMemo, useRef, type FC } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import type {
@@ -72,13 +73,16 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
   );
 
   const parentApi = useMemo<
-    PublishesWritableUnifiedSearch & { executionContext: KibanaExecutionContext }
+    PublishesWritableUnifiedSearch & {
+      executionContext: KibanaExecutionContext;
+    } & HasSerializedChildState<AnomalySwimLaneEmbeddableState>
   >(() => {
     const filters$ = new BehaviorSubject<Filter[] | undefined>(filters);
     const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(query);
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(timeRange);
 
     return {
+      getSerializedStateForChild: () => ({ rawState }),
       filters$,
       setFilters: (newFilters) => {
         filters$.next(newFilters);
@@ -115,10 +119,7 @@ export const AnomalySwimLane: FC<AnomalySwimLaneProps> = ({
     <ReactEmbeddableRenderer<AnomalySwimLaneEmbeddableState, AnomalySwimLaneEmbeddableApi>
       maybeId={id}
       type={ANOMALY_SWIMLANE_EMBEDDABLE_TYPE}
-      state={{
-        rawState,
-      }}
-      parentApi={parentApi}
+      getParentApi={() => parentApi}
       onApiAvailable={(api) => {
         embeddableApi.current = api;
       }}
