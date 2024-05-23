@@ -65,6 +65,11 @@ async function getSpacesUsage(
             size: knownFeatureIds.length,
           },
         },
+        solution: {
+          terms: {
+            field: 'space.solution',
+          },
+        },
       },
       size: 0,
     },
@@ -74,11 +79,12 @@ async function getSpacesUsage(
 
   const count = hits?.total?.value ?? 0;
   const disabledFeatureBuckets = aggregations?.disabledFeatures?.buckets ?? [];
+  const solutionBuckets = aggregations?.solution?.buckets ?? [];
 
-  const initialCounts = knownFeatureIds.reduce((acc, featureId) => {
+  const initialCounts = knownFeatureIds.reduce<Record<string, number>>((acc, featureId) => {
     acc[featureId] = 0;
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
 
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -89,6 +95,15 @@ async function getSpacesUsage(
     initialCounts
   );
 
+  const solutions = solutionBuckets.reduce<Record<string, number>>(
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    (acc, { key, doc_count }) => {
+      acc[key] = doc_count;
+      return acc;
+    },
+    {}
+  );
+
   const usesFeatureControls = Object.values(disabledFeatures).some(
     (disabledSpaceCount) => disabledSpaceCount > 0
   );
@@ -97,6 +112,7 @@ async function getSpacesUsage(
     count,
     usesFeatureControls,
     disabledFeatures,
+    solutions,
   } as UsageData;
 }
 
@@ -117,6 +133,7 @@ export interface UsageData extends UsageStats {
   enabled: boolean;
   count?: number;
   usesFeatureControls?: boolean;
+  solutions: Record<string, number>;
   disabledFeatures: {
     // "feature": number;
     [key: string]: number | undefined;
@@ -170,6 +187,32 @@ export function getSpacesUsageCollector(
         _meta: {
           description:
             'Indicates if at least one feature is disabled in at least one space. This is a signal that space-level feature controls are in use. This does not account for role-based (security) feature controls.',
+        },
+      },
+      solutions: {
+        classic: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have solutionn set to classic.',
+          },
+        },
+        search: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have solutionn set to search.',
+          },
+        },
+        observability: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have solutionn set to observability.',
+          },
+        },
+        security: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces which have solutionn set to security.',
+          },
         },
       },
       disabledFeatures: {
