@@ -5,19 +5,9 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { lazy } from 'react';
 
-const withSuspenseUpsell = <T extends object = {}>(
-  Component: React.ComponentType<T>
-): React.FC<T> =>
-  function WithSuspenseUpsell(props) {
-    return (
-      <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-        <Component {...props} />
-      </Suspense>
-    );
-  };
+import { withSuspenseUpsell } from '@kbn/security-solution-upselling/helpers';
 
 export const ThreatIntelligencePaywallLazy = withSuspenseUpsell(
   lazy(() => import('./pages/threat_intelligence_paywall'))
@@ -31,6 +21,22 @@ export const EndpointExceptionsDetailsUpsellingLazy = withSuspenseUpsell(
   lazy(() => import('./pages/endpoint_management/endpoint_exceptions_details'))
 );
 
-export const EntityAnalyticsUpsellingLazy = withSuspenseUpsell(
-  lazy(() => import('@kbn/security-solution-upselling/pages/entity_analytics'))
+export const EntityAnalyticsUpsellingPageLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('@kbn/security-solution-upselling/pages/entity_analytics').then(
+      ({ EntityAnalyticsUpsellingPage }) => ({
+        default: EntityAnalyticsUpsellingPage,
+      })
+    )
+  )
+);
+
+export const EntityAnalyticsUpsellingSectionLazy = withSuspenseUpsell(
+  lazy(() =>
+    import('@kbn/security-solution-upselling/sections/entity_analytics').then(
+      ({ EntityAnalyticsUpsellingSection }) => ({
+        default: EntityAnalyticsUpsellingSection,
+      })
+    )
+  )
 );
