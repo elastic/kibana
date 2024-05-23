@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import { createUseFieldsMetadataHookMock } from './hooks/use_fields_metadata/use_fields_metadata.mock';
 import { createFieldsMetadataServiceStartMock } from './services/fields_metadata/fields_metadata_service.mock';
-import { FieldsMetadataPublicStart } from './types';
 
-const createFieldsMetadataPublicStartMock = (): jest.Mocked<FieldsMetadataPublicStart> => ({
+const createFieldsMetadataPublicStartMock = () => ({
   client: createFieldsMetadataServiceStartMock().client,
-  useFieldsMetadata: jest.fn(),
+  useFieldsMetadata: createUseFieldsMetadataHookMock(),
 });
 
 export const fieldsMetadataPluginPublicMock = {
