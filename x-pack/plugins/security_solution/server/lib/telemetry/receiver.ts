@@ -419,9 +419,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               latest_metrics: {
                 top_hits: {
                   size: 1,
-                  _source: {
-                    excludes: ['*'],
-                  },
+                  _source: false,
                   sort: [
                     {
                       '@timestamp': {
@@ -523,6 +521,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
         const buckets = endpointMetadataResponse?.aggregations?.endpoint_metadata?.buckets ?? [];
 
         return buckets.reduce((cache, endpointAgentId) => {
+          // const id = endpointAgentId.latest_metadata.hits.hits[0]._id;
           const doc = endpointAgentId.latest_metadata.hits.hits[0]._source;
           cache.set(endpointAgentId.key, doc);
           return cache;
