@@ -116,7 +116,14 @@ export const getSavedObjectTypes = (
           prerelease_integrations_enabled: { type: 'boolean' },
           secret_storage_requirements_met: { type: 'boolean' },
           output_secret_storage_requirements_met: { type: 'boolean' },
-          fleet_setup_status: { type: 'keyword' },
+          fleet_setup_status: { type: 'keyword' }, // TODO remove
+          fleet_setup: {
+            properties: {
+              status: { type: 'keyword' },
+              uuid: { type: 'text' },
+              started_at: { type: 'date' },
+            },
+          },
         },
       },
       migrations: {
@@ -132,6 +139,22 @@ export const getSavedObjectTypes = (
               type: 'mappings_addition',
               addedMappings: {
                 fleet_setup_status: { type: 'keyword' },
+              },
+            },
+          ],
+        },
+        3: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                fleet_setup: {
+                  properties: {
+                    status: { type: 'keyword' },
+                    uuid: { type: 'text' },
+                    started_at: { type: 'date' },
+                  },
+                },
               },
             },
           ],

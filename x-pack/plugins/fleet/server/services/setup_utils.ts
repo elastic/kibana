@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { appContextService } from '.';
-
 // the promise which tracks the setup
 let status: Promise<any> | undefined;
 let isPending = false;
@@ -19,7 +17,6 @@ export async function awaitIfPending<T>(asyncFunction: () => Promise<T>): Promis
   if (isPending) {
     // don't run concurrent installs
     // return a promise which will eventually resolve/reject
-    appContextService.getLogger().info(`Fleet setup is already pending, return promise`);
     return status;
   } else {
     // create the initial promise

@@ -11,6 +11,7 @@ import apm from 'elastic-apm-node';
 
 import { compact } from 'lodash';
 import pMap from 'p-map';
+import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
@@ -68,8 +69,35 @@ export async function setupFleet(
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
   const t = apm.startTransaction('fleet-setup', 'fleet');
-
+  const logger = appContextService.getLogger();
   try {
+    // check if fleet setup is already started
+    const settings = await settingsService.getSettingsOrUndefined(soClient);
+
+    if (settings && settings.fleet_setup?.status === 'in_progress') {
+      logger.info('Fleet setup already in progress, aborting');
+      return {
+        isInitialized: false,
+        nonFatalErrors: [],
+      };
+    }
+
+    try {
+      await settingsService.saveSettings(
+        soClient,
+        {
+          ...settings,
+          fleet_setup: {
+            status: 'in_progress',
+            uuid: uuidv4(),
+            started_at: new Date().toISOString(),
+          },
+        },
+        0
+      );
+    } catch (error) {
+      logger.warn(`Error setting fleet setup status to in_progress: ${error}`);
+    }
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {
     apm.captureError(error);
@@ -77,6 +105,13 @@ export async function setupFleet(
     throw error;
   } finally {
     t.end();
+    try {
+      await settingsService.saveSettings(soClient, {
+        fleet_setup: { status: 'complete' },
+      });
+    } catch (error) {
+      logger.warn(`Error clearing fleet setup status: ${error}`);
+    }
   }
 }
 
