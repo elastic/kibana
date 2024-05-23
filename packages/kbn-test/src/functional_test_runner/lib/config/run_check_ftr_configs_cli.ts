@@ -23,14 +23,6 @@ const THIS_REL = Path.relative(REPO_ROOT, THIS_PATH);
 const IGNORED_PATHS = [
   THIS_PATH,
   Path.resolve(REPO_ROOT, 'packages/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
-  Path.resolve(
-    REPO_ROOT,
-    'x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/config.base.ts'
-  ),
-  Path.resolve(
-    REPO_ROOT,
-    'x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.base.ts'
-  ),
 ];
 
 export async function runCheckFtrConfigsCli() {

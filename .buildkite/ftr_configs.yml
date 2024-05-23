@@ -1,6 +1,7 @@
 disabled:
   # TODO: Enable once RBAC timeline search strategy test updated
-  - x-pack/test/timeline/security_and_spaces/config_basic.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint/configs/config.base.ts
+  - x-pack/test/security_solution_api_integration/test_suites/security_solution_endpoint_api_int/configs/config.base.ts
 
   # Base config files, only necessary to inform config finding script
   - test/functional/config.base.js
