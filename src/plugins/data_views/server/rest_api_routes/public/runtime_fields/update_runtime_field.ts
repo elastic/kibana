@@ -25,6 +25,7 @@ import {
   SERVICE_KEY_LEGACY,
   SERVICE_KEY_TYPE,
   INITIAL_REST_VERSION,
+  UPDATE_RUNTIME_FIELD_DESCRIPTION,
 } from '../../../constants';
 import { responseFormatter } from './response_formatter';
 import { runtimeResponseSchema } from '../../schema';
@@ -67,7 +68,7 @@ export const updateRuntimeField = async ({
 };
 
 const updateRuntimeFieldRouteFactory =
-  (path: string, serviceKey: SERVICE_KEY_TYPE) =>
+  (path: string, serviceKey: SERVICE_KEY_TYPE, description?: string) =>
   (
     router: IRouter,
     getStartServices: StartServicesAccessor<
@@ -76,7 +77,7 @@ const updateRuntimeFieldRouteFactory =
     >,
     usageCollection?: UsageCounter
   ) => {
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
@@ -139,7 +140,8 @@ const updateRuntimeFieldRouteFactory =
 
 export const registerUpdateRuntimeFieldRoute = updateRuntimeFieldRouteFactory(
   SPECIFIC_RUNTIME_FIELD_PATH,
-  SERVICE_KEY
+  SERVICE_KEY,
+  UPDATE_RUNTIME_FIELD_DESCRIPTION
 );
 
 export const registerUpdateRuntimeFieldRouteLegacy = updateRuntimeFieldRouteFactory(

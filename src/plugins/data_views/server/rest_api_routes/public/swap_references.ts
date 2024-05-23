@@ -15,7 +15,12 @@ import type {
   DataViewsServerPluginStartDependencies,
   DataViewsServerPluginStart,
 } from '../../types';
-import { DATA_VIEW_SWAP_REFERENCES_PATH, INITIAL_REST_VERSION } from '../../constants';
+import {
+  DATA_VIEW_SWAP_REFERENCES_PATH,
+  INITIAL_REST_VERSION,
+  PREVIEW_SWAP_REFERENCES_DESCRIPTION,
+  SWAP_REFERENCES_DESCRIPTION,
+} from '../../constants';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 interface GetDataViewArgs {
@@ -58,7 +63,10 @@ export const swapReferencesRoute =
     const path = previewRoute
       ? `${DATA_VIEW_SWAP_REFERENCES_PATH}/_preview`
       : DATA_VIEW_SWAP_REFERENCES_PATH;
-    router.versioned.post({ path, access: 'public' }).addVersion(
+    const description = previewRoute
+      ? PREVIEW_SWAP_REFERENCES_DESCRIPTION
+      : SWAP_REFERENCES_DESCRIPTION;
+    router.versioned.post({ path, access: 'public', description }).addVersion(
       {
         version: INITIAL_REST_VERSION,
         validate: {
