@@ -1,7 +1,7 @@
 {
   "components": {
     "schemas": {
-      "core.status.redactedResponse": {
+      "core_status_redactedResponse": {
         "additionalProperties": false,
         "description": "A minimal representation of Kibana's operational status.",
         "properties": {
@@ -58,7 +58,7 @@
         ],
         "type": "object"
       },
-      "core.status.response": {
+      "core_status_response": {
         "additionalProperties": false,
         "description": "Kibana's operational status as well as a detailed breakdown of plugin statuses indication of various loads (like event loop utilization and network traffic) at time of request.",
         "properties": {
@@ -490,10 +490,10 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/core.status.response"
+                      "$ref": "#/components/schemas/core_status_response"
                     },
                     {
-                      "$ref": "#/components/schemas/core.status.redactedResponse"
+                      "$ref": "#/components/schemas/core_status_redactedResponse"
                     }
                   ],
                   "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
@@ -508,10 +508,10 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/core.status.response"
+                      "$ref": "#/components/schemas/core_status_response"
                     },
                     {
-                      "$ref": "#/components/schemas/core.status.redactedResponse"
+                      "$ref": "#/components/schemas/core_status_redactedResponse"
                     }
                   ],
                   "description": "Kibana's operational status. A minimal response is sent for unauthorized users."
