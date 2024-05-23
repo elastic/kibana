@@ -30,7 +30,7 @@ pageLoadAssetSize:
   data: 454087
   datasetQuality: 50624
   dataViewEditor: 28082
-  dataViewFieldEditor: 27000
+  dataViewFieldEditor: 42017
   dataViewManagement: 5300
   dataViews: 65000
   dataVisualizer: 27530
@@ -61,6 +61,7 @@ pageLoadAssetSize:
   expressionXY: 45000
   features: 21723
   fieldFormats: 65209
+  fieldsMetadata: 82448
   files: 22673
   filesManagement: 18683
   fileUpload: 25664
@@ -179,4 +180,3 @@ pageLoadAssetSize:
   visTypeXy: 46868
   visualizations: 90000
   watcher: 43598
-  fieldsMetadata: 82448
