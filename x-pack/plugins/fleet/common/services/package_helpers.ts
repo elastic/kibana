@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../types';
+import { uniqBy } from 'lodash';
+
+import type { PackageInfo, PackagePolicy } from '../types';
 
 /**
  * Return true if a package need Elastic Agent to be run as root/administrator
@@ -15,4 +17,15 @@ export function isRootPrivilegesRequired(packageInfo: PackageInfo) {
     packageInfo.agent?.privileges?.root ||
     packageInfo.data_streams?.some((d) => d.agent?.privileges?.root)
   );
+}
+
+export function getRootIntegrations(
+  packagePolicies: PackagePolicy[]
+): Array<{ name: string; title: string }> {
+  return uniqBy(
+    packagePolicies
+      .map((policy) => policy.package)
+      .filter((pkg) => (pkg && pkg.requires_root) || false),
+    (pkg) => pkg!.name
+  ).map((pkg) => ({ name: pkg!.name, title: pkg!.title }));
 }

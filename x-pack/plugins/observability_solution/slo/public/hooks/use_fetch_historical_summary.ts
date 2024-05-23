@@ -24,8 +24,8 @@ export interface Params {
   sloList: SLOWithSummaryResponse[];
   shouldRefetch?: boolean;
   range?: {
-    from: string;
-    to: string;
+    from: Date;
+    to: Date;
   };
 }
 
@@ -45,7 +45,12 @@ export function useFetchHistoricalSummary({
     revision: slo.revision,
     objective: slo.objective,
     budgetingMethod: slo.budgetingMethod,
-    range,
+    range: range
+      ? {
+          from: range?.from.toISOString(),
+          to: range?.to.toISOString(),
+        }
+      : undefined,
   }));
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({

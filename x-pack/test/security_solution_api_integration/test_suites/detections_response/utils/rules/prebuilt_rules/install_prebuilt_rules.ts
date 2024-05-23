@@ -30,7 +30,7 @@ import { refreshSavedObjectIndices } from '../../refresh_index';
  */
 export const installPrebuiltRules = async (
   es: Client,
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   rules?: RuleVersionSpecifier[]
 ): Promise<PerformRuleInstallationResponseBody> => {
   let payload = {};
