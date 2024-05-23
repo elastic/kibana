@@ -46,6 +46,7 @@
     "@kbn/i18n",
     "@kbn/core-security-common",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/langchain",
   ],
   "exclude": [
     "target/**/*",

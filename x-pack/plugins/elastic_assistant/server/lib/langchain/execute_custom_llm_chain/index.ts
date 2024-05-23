@@ -13,18 +13,18 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
 import {
+  getDefaultArguments,
   ActionsClientChatOpenAI,
-  ActionsClientLlm,
-} from '@kbn/elastic-assistant-common/impl/language_models';
-import { getDefaultArguments } from '@kbn/elastic-assistant-common/impl/language_models/constants';
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 import { AgentExecutor } from '../executors/types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
+import { withAssistantSpan } from '../tracers/with_assistant_span';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
- * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientLlm,
+ * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientSimpleChatModel,
  * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
  *
  */
@@ -49,9 +49,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   size,
   traceOptions,
 }) => {
-  // TODO implement llmClass for bedrock streaming
-  // tracked here: https://github.com/elastic/security-team/issues/7363
-  const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
+  const isOpenAI = llmType === 'openai';
+  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
   const llm = new llmClass({
     actions,
@@ -103,13 +102,9 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     size,
   };
 
-  const tools: ToolInterface[] = assistantTools
-    .filter((tool) =>
-      isStream
-        ? tool.id !== 'esql-knowledge-base-tool'
-        : tool.id !== 'esql-knowledge-base-structured-tool'
-    )
-    .flatMap((tool) => tool.getTool(assistantToolParams) ?? []);
+  const tools: ToolInterface[] = assistantTools.flatMap(
+    (tool) => tool.getTool(assistantToolParams) ?? []
+  );
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
@@ -118,15 +113,20 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     verbose: false,
     handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
   };
-  // isStream check is not on agentType alone because typescript doesn't like
-  const executor = isStream
+  // isOpenAI check is not on agentType alone because typescript doesn't like
+  const executor = isOpenAI
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
         ...executorArgs,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
-        agentType: 'chat-conversational-react-description',
+        agentType: 'structured-chat-zero-shot-react-description',
         ...executorArgs,
+        returnIntermediateSteps: false,
+        agentArgs: {
+          // this is important to help LangChain correctly format tool input
+          humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
+        },
       });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
