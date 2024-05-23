@@ -51,6 +51,7 @@ describe('configure', () => {
     key: 'template_sample_1',
     name: 'Sample template 1',
     description: 'this is first sample template',
+    tags: ['foo', 'bar', 'foobar'],
     caseFields: {
       title: 'Case with sample template 1',
       description: 'case desc',
@@ -81,6 +82,7 @@ describe('configure', () => {
     key: 'template_sample_2',
     name: 'Sample template 2',
     description: 'this is second sample template',
+    tags: [],
     caseFields: {
       title: 'Case with sample template 2',
       tags: ['sample-2'],

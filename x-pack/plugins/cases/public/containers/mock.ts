@@ -1190,12 +1190,14 @@ export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
     key: 'test_template_2',
     name: 'Second test template',
     description: 'This is a second test template',
+    tags: [],
     caseFields: {},
   },
   {
     key: 'test_template_3',
     name: 'Third test template',
     description: 'This is a third test template with few case fields',
+    tags: ['foo'],
     caseFields: {
       title: 'This is case title using a test template',
       severity: CaseSeverity.MEDIUM,
@@ -1206,6 +1208,7 @@ export const templatesConfigurationMock: CasesConfigurationUITemplate[] = [
     key: 'test_template_4',
     name: 'Fourth test template',
     description: 'This is a fourth test template',
+    tags: ['foo', 'bar'],
     caseFields: {
       title: 'Case with sample template 4',
       description: 'case desc',
