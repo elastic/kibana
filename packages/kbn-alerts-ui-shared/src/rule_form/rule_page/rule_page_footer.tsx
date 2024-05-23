@@ -15,7 +15,6 @@ import {
   RULE_PAGE_FOOTER_SAVE_TEXT,
 } from '../translations';
 import { useRuleFormState } from '../hooks';
-import { RuleFormData } from '../types';
 import { isValidRule } from '../validation';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 
@@ -23,7 +22,7 @@ export interface RulePageFooterProps {
   isEdit?: boolean;
   isSaving?: boolean;
   onCancel: () => void;
-  onSave: (formData: RuleFormData) => void;
+  onSave: () => void;
 }
 
 export const RulePageFooter = (props: RulePageFooterProps) => {
@@ -32,10 +31,6 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
   const { isEdit = false, isSaving = false, onCancel, onSave } = props;
 
   const { formData, errors } = useRuleFormState();
-
-  const onSaveInternal = useCallback(() => {
-    onSave(formData);
-  }, [onSave, formData]);
 
   const hasErrors = useMemo(() => {
     return !!(errors && !isValidRule(formData, errors));
@@ -78,7 +73,7 @@ export const RulePageFooter = (props: RulePageFooterProps) => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                onClick={onSaveInternal}
+                onClick={onSave}
                 disabled={isSaving || hasErrors}
                 isLoading={isSaving}
               >

@@ -361,3 +361,19 @@ export const RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT = i18n.translate(
       'There was an error loading the rule or rule type. Please ensure you have access to the rule or rule type selected.',
   }
 );
+
+export const RULE_CREATE_SUCCESS_TEXT = (ruleName: string) =>
+  i18n.translate('alertsUIShared.ruleForm.createSuccessText', {
+    defaultMessage: 'Created rule "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });
+
+export const RULE_EDIT_SUCCESS_TEXT = (ruleName: string) =>
+  i18n.translate('alertsUIShared.ruleForm.editSuccessText', {
+    defaultMessage: 'Updated "{ruleName}"',
+    values: {
+      ruleName,
+    },
+  });

@@ -7,46 +7,57 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
-// import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { RuleFormData, RuleFormPlugins } from './types';
-import { GET_DEFAULT_FORM_DATA } from './constants';
+import { ALERTING_FEATURE_ID, DEFAULT_VALID_CONSUMERS, GET_DEFAULT_FORM_DATA } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from '../common/hooks';
-
 import { RulePage } from './rule_page';
-import { RuleFormHealthCheckError } from './rule_form_health_check_error';
-import {
-  RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE,
-  RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT,
-} from './translations';
+import { RuleFormHealthCheckError, RuleFormRuleOrRuleTypeError } from './rule_form_errors';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
+import { getInitialMultiConsumer } from './utils';
+import { RULE_CREATE_SUCCESS_TEXT } from './translations';
 
 export interface CreateRuleFormProps {
   ruleTypeId: string;
   plugins: RuleFormPlugins;
-  // formData?: RuleFormData;
-  // consumer: RuleCreationValidConsumer;
-  // canChangeTrigger?: boolean;
-  // hideGrouping?: boolean;
-  // filteredRuleTypes?: string[];
-  // validConsumers?: RuleCreationValidConsumer[];
-  // useRuleProducer?: boolean;
-  // initialSelectedConsumer?: RuleCreationValidConsumer | null;
+  consumer?: string;
+  multiConsumerSelection?: RuleCreationValidConsumer | null;
+  hideInterval?: boolean;
+  validConsumers?: RuleCreationValidConsumer[];
+  filteredRuleTypes?: string[];
+  useRuleProducer?: boolean;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
-  // const { formData, plugins, ruleTypeModel, ruleType, validConsumers } = props;
-  const { ruleTypeId, plugins } = props;
-  const { http, docLinks, notification, ruleTypeRegistry } = plugins;
+  const {
+    ruleTypeId,
+    plugins,
+    consumer = ALERTING_FEATURE_ID,
+    multiConsumerSelection,
+    validConsumers = DEFAULT_VALID_CONSUMERS,
+    filteredRuleTypes = [],
+  } = props;
 
-  const { mutate, isLoading: isSaving } = useCreateRule({ http });
+  const { http, docLinks, notification, ruleTypeRegistry } = plugins;
+  const { toasts } = notification;
+
+  const { mutate, isLoading: isSaving } = useCreateRule({
+    http,
+    onSuccess: ({ name }) => {
+      toasts.addSuccess(RULE_CREATE_SUCCESS_TEXT(name));
+    },
+  });
 
   const { isLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError } = useLoadDependencies({
     http,
     toasts: notification.toasts,
     ruleTypeRegistry,
     ruleTypeId,
+    consumer,
+    validConsumers,
+    filteredRuleTypes,
   });
 
   const onSave = useCallback(
@@ -61,18 +72,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   }
 
   if (!ruleType || !ruleTypeModel) {
-    return (
-      <EuiEmptyPrompt
-        color="danger"
-        iconType="error"
-        title={<h2>{RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE}</h2>}
-        body={
-          <EuiText>
-            <p>{RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT}</p>
-          </EuiText>
-        }
-      />
-    );
+    return <RuleFormRuleOrRuleTypeError />;
   }
 
   if (healthCheckError) {
@@ -85,17 +85,22 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         formData: GET_DEFAULT_FORM_DATA({
           ruleTypeId,
           name: `${ruleType.name} rule`,
+          consumer,
         }),
         plugins,
         minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
         selectedRuleTypeModel: ruleTypeModel,
+        selectedRuleType: ruleType,
+        multiConsumerSelection: getInitialMultiConsumer({
+          multiConsumerSelection,
+          validConsumers,
+          ruleType,
+        }),
       }}
     >
       <RulePage
         canShowConsumerSelection
-        selectedRuleTypeModel={ruleTypeModel}
-        selectedRuleType={ruleType}
-        // validConsumers={validConsumers}
+        validConsumers={validConsumers}
         isSaving={isSaving}
         onSave={onSave}
       />

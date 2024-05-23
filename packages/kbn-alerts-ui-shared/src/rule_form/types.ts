@@ -23,8 +23,9 @@ import type {
   RuleAction,
   RuleSystemAction,
 } from '@kbn/alerting-types';
+import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { TypeRegistry } from '../common/type_registry';
-// import type { RuleTypeWithDescription } from '../common/types';
+import { RuleTypeWithDescription } from '../common/types';
 
 export type RuleTypeParams = Record<string, unknown>;
 
@@ -102,6 +103,11 @@ export interface RuleTypeModel<Params extends RuleTypeParams = RuleTypeParams> {
     | React.LazyExoticComponent<ComponentType<any>>;
 }
 
+export type RuleTypeItems = Array<{
+  ruleTypeModel: RuleTypeModel;
+  ruleType: RuleTypeWithDescription;
+}>;
+
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
 
 export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
@@ -132,7 +138,9 @@ export interface RuleFormState<Params extends RuleTypeParams = RuleTypeParams> {
   formData: RuleFormData<Params>;
   plugins: RuleFormPlugins;
   errors?: RuleFormErrors;
+  selectedRuleType: RuleTypeWithDescription;
   selectedRuleTypeModel: RuleTypeModel<Params>;
+  multiConsumerSelection?: RuleCreationValidConsumer | null;
   metadata?: Record<string, unknown>;
   minimumScheduleInterval?: MinimumScheduleInterval;
   canShowConsumerSelection?: boolean;

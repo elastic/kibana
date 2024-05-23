@@ -8,6 +8,7 @@
 
 import { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
+import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { useMemo } from 'react';
 import {
   useHealthCheck,
@@ -16,17 +17,30 @@ import {
   useResolveRule,
 } from '../../common/hooks';
 import { RuleTypeRegistryContract } from '../types';
+import { getAvailableRuleTypes } from '../utils';
 
 export interface UseLoadDependencies {
   http: HttpStart;
   toasts: ToastsStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
+  consumer?: string;
   id?: string;
   ruleTypeId?: string;
+  validConsumers?: RuleCreationValidConsumer[];
+  filteredRuleTypes?: string[];
 }
 
 export const useLoadDependencies = (props: UseLoadDependencies) => {
-  const { http, toasts, ruleTypeRegistry, id, ruleTypeId } = props;
+  const {
+    http,
+    toasts,
+    ruleTypeRegistry,
+    consumer,
+    validConsumers,
+    id,
+    ruleTypeId,
+    filteredRuleTypes = [],
+  } = props;
 
   const { data: uiConfig, isLoading: isLoadingUiConfig } = useLoadUiConfig({ http });
 
@@ -39,28 +53,36 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
   } = useLoadRuleTypesQuery({
     http,
     toasts,
+    filteredRuleTypes,
   });
 
   const computedRuleTypeId = useMemo(() => {
     return fetchedFormData?.ruleTypeId || ruleTypeId;
   }, [fetchedFormData, ruleTypeId]);
 
-  const ruleTypes = [...ruleTypeIndex.values()];
-
-  const ruleType = ruleTypes.find((rt) => rt.id === computedRuleTypeId);
-
-  const ruleTypeModel = useMemo(() => {
-    let model;
-    try {
-      model = ruleTypeRegistry.get(computedRuleTypeId!);
-    } catch (e) {
-      return null;
+  const authorizedRuleTypeItems = useMemo(() => {
+    const computedConsumer = consumer || fetchedFormData?.consumer;
+    if (!computedConsumer) {
+      return [];
     }
-    return model;
-  }, [ruleTypeRegistry, computedRuleTypeId]);
+    return getAvailableRuleTypes({
+      consumer: computedConsumer,
+      ruleTypes: [...ruleTypeIndex.values()],
+      ruleTypeRegistry,
+      validConsumers,
+    });
+  }, [consumer, ruleTypeIndex, ruleTypeRegistry, validConsumers, fetchedFormData]);
+
+  const [ruleType, ruleTypeModel] = useMemo(() => {
+    const item = authorizedRuleTypeItems.find(({ ruleType: rt }) => {
+      return rt.id === computedRuleTypeId;
+    });
+
+    return [item?.ruleType, item?.ruleTypeModel];
+  }, [authorizedRuleTypeItems, computedRuleTypeId]);
 
   const isLoading = useMemo(() => {
-    if (typeof id === 'undefined') {
+    if (id === undefined) {
       return isLoadingUiConfig || isLoadingHealthCheck || isLoadingRuleTypes;
     }
     return isLoadingUiConfig || isLoadingHealthCheck || isLoadingRule || isLoadingRuleTypes;

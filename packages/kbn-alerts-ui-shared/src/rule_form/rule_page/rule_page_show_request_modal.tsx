@@ -54,11 +54,17 @@ export interface RulePageShowRequestModalProps {
 export const RulePageShowRequestModal = (props: RulePageShowRequestModalProps) => {
   const { onClose, isEdit = false } = props;
 
-  const { formData, id } = useRuleFormState();
+  const { formData, id, multiConsumerSelection } = useRuleFormState();
 
   const formattedRequest = useMemo(() => {
-    return stringifyBodyRequest({ formData, isEdit });
-  }, [formData, isEdit]);
+    return stringifyBodyRequest({
+      formData: {
+        ...formData,
+        ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+      },
+      isEdit,
+    });
+  }, [formData, isEdit, multiConsumerSelection]);
 
   return (
     <EuiModal aria-labelledby="showRequestModal" onClose={onClose}>

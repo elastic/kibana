@@ -15,6 +15,7 @@ import {
   CONSUMER_SELECT_COMBO_BOX_TITLE,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
+import { getValidatedMultiConsumer } from '../utils';
 
 export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
   AlertConsumers.LOGS,
@@ -24,13 +25,7 @@ export const VALID_CONSUMERS: RuleCreationValidConsumer[] = [
 ];
 
 export interface RuleConsumerSelectionProps {
-  consumers: RuleCreationValidConsumer[];
-  /* FUTURE ENGINEER
-   * if this prop is set to null then we wont initialize the value and the user will have to set it
-   * if this prop is set to a valid consumers then we will set it up to what was passed
-   * if this prop is not valid or undefined but the valid consumers has stackAlerts then we will default it to stackAlerts
-   */
-  initialSelectedConsumer?: RuleCreationValidConsumer | null;
+  validConsumers: RuleCreationValidConsumer[];
 }
 
 const SINGLE_SELECTION = { asPlainText: true };
@@ -38,26 +33,20 @@ const SINGLE_SELECTION = { asPlainText: true };
 type ComboBoxOption = EuiComboBoxOptionOption<RuleCreationValidConsumer>;
 
 export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
-  const { consumers } = props;
+  const { validConsumers } = props;
 
-  const { formData, errors = {} } = useRuleFormState();
-
-  const { consumer: selectedConsumer } = formData;
+  const { multiConsumerSelection, errors = {} } = useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
   const isInvalid = (errors.consumer?.length || 0) > 0;
 
   const validatedSelectedConsumer = useMemo(() => {
-    if (
-      selectedConsumer &&
-      consumers.includes(selectedConsumer as RuleCreationValidConsumer) &&
-      FEATURE_NAME_MAP[selectedConsumer]
-    ) {
-      return selectedConsumer;
-    }
-    return null;
-  }, [selectedConsumer, consumers]);
+    return getValidatedMultiConsumer({
+      multiConsumerSelection,
+      validConsumers,
+    });
+  }, [multiConsumerSelection, validConsumers]);
 
   const selectedOptions = useMemo(() => {
     if (validatedSelectedConsumer) {
@@ -72,7 +61,7 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
   }, [validatedSelectedConsumer]);
 
   const formattedSelectOptions = useMemo(() => {
-    return consumers
+    return validConsumers
       .reduce<ComboBoxOption[]>((result, consumer) => {
         if (FEATURE_NAME_MAP[consumer]) {
           result.push({
@@ -84,19 +73,19 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
         return result;
       }, [])
       .sort((a, b) => a.value!.localeCompare(b.value!));
-  }, [consumers]);
+  }, [validConsumers]);
 
   const onConsumerChange = useCallback(
     (selected: ComboBoxOption[]) => {
       if (selected.length > 0) {
         const newSelectedConsumer = selected[0];
         dispatch({
-          type: 'setConsumer',
+          type: 'setMultiConsumer',
           payload: newSelectedConsumer.value!,
         });
       } else {
         dispatch({
-          type: 'setConsumer',
+          type: 'setMultiConsumer',
           payload: 'alerts',
         });
       }
@@ -104,7 +93,7 @@ export const RuleConsumerSelection = (props: RuleConsumerSelectionProps) => {
     [dispatch]
   );
 
-  if (consumers.length <= 1 || consumers.includes(AlertConsumers.OBSERVABILITY)) {
+  if (validConsumers.length <= 1 || validConsumers.includes(AlertConsumers.OBSERVABILITY)) {
     return null;
   }
 

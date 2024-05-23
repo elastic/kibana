@@ -9,7 +9,7 @@
 import React, { useMemo } from 'react';
 import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { healthCheckErrors, HealthCheckErrors } from '../common/types';
+import { healthCheckErrors, HealthCheckErrors } from '../../common/types';
 
 import {
   HEALTH_CHECK_ALERTS_ERROR_TITLE,
@@ -21,7 +21,7 @@ import {
   HEALTH_CHECK_API_KEY_DISABLED_ERROR_TITLE,
   HEALTH_CHECK_API_KEY_DISABLED_ERROR_TEXT,
   HEALTH_CHECK_ACTION_TEXT,
-} from './translations';
+} from '../translations';
 
 export interface RuleFormHealthCheckErrorProps {
   error: HealthCheckErrors;

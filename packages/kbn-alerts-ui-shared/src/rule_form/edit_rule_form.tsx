@@ -7,18 +7,15 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { RuleFormData, RuleFormPlugins } from './types';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useUpdateRule } from '../common/hooks';
-
 import { RulePage } from './rule_page';
-import { RuleFormHealthCheckError } from './rule_form_health_check_error';
-import {
-  RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE,
-  RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT,
-} from './translations';
+import { RuleFormHealthCheckError } from './rule_form_errors/rule_form_health_check_error';
 import { useLoadDependencies } from './hooks/use_load_dependencies';
+import { RuleFormRuleOrRuleTypeError } from './rule_form_errors';
+import { RULE_EDIT_SUCCESS_TEXT } from './translations';
 
 export interface EditRuleFormProps {
   id: string;
@@ -28,8 +25,14 @@ export interface EditRuleFormProps {
 export const EditRuleForm = (props: EditRuleFormProps) => {
   const { id, plugins } = props;
   const { http, notification, docLinks, ruleTypeRegistry } = plugins;
+  const { toasts } = notification;
 
-  const { mutate, isLoading: isSaving } = useUpdateRule({ http });
+  const { mutate, isLoading: isSaving } = useUpdateRule({
+    http,
+    onSuccess: ({ name }) => {
+      toasts.addSuccess(RULE_EDIT_SUCCESS_TEXT(name));
+    },
+  });
 
   const { isLoading, ruleType, ruleTypeModel, uiConfig, healthCheckError, fetchedFormData } =
     useLoadDependencies({
@@ -54,18 +57,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   }
 
   if (!ruleType || !ruleTypeModel || !fetchedFormData) {
-    return (
-      <EuiEmptyPrompt
-        color="danger"
-        iconType="error"
-        title={<h2>{RULE_FORM_RULE_NOT_FOUND_ERROR_TITLE}</h2>}
-        body={
-          <EuiText>
-            <p>{RULE_FORM_RULE_NOT_FOUND_ERROR_TEXT}</p>
-          </EuiText>
-        }
-      />
-    );
+    return <RuleFormRuleOrRuleTypeError />;
   }
 
   if (healthCheckError) {
@@ -80,16 +72,11 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
           id,
           plugins,
           minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+          selectedRuleType: ruleType,
           selectedRuleTypeModel: ruleTypeModel,
         }}
       >
-        <RulePage
-          isEdit
-          selectedRuleTypeModel={ruleTypeModel}
-          selectedRuleType={ruleType}
-          isSaving={isSaving}
-          onSave={onSave}
-        />
+        <RulePage isEdit isSaving={isSaving} onSave={onSave} />
       </RuleFormStateProvider>
     </div>
   );

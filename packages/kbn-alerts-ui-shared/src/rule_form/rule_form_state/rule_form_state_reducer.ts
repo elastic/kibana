@@ -57,6 +57,10 @@ export type RuleFormStateReducerAction =
       payload: RuleFormData['consumer'];
     }
   | {
+      type: 'setMultiConsumer';
+      payload: RuleFormState['multiConsumerSelection'];
+    }
+  | {
       type: 'setMetadata';
       payload: Record<string, unknown>;
     };
@@ -64,15 +68,28 @@ export type RuleFormStateReducerAction =
 const getUpdateWithValidation =
   (ruleFormState: RuleFormState) =>
   (updater: () => RuleFormData): RuleFormState => {
-    const { minimumScheduleInterval, selectedRuleTypeModel } = ruleFormState;
+    const { minimumScheduleInterval, selectedRuleTypeModel, multiConsumerSelection } =
+      ruleFormState;
+
     const formData = updater();
+
+    const formDataWithMultiConsumer = {
+      ...formData,
+      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+    };
 
     return {
       ...ruleFormState,
       formData,
       errors: {
-        ...validateRuleBase({ formData, minimumScheduleInterval }),
-        ...validateRuleParams({ formData, ruleTypeModel: selectedRuleTypeModel }),
+        ...validateRuleBase({
+          formData: formDataWithMultiConsumer,
+          minimumScheduleInterval,
+        }),
+        ...validateRuleParams({
+          formData: formDataWithMultiConsumer,
+          ruleTypeModel: selectedRuleTypeModel,
+        }),
       },
     };
   };
@@ -158,6 +175,13 @@ export const ruleFormStateReducer = (
         ...formData,
         consumer: payload,
       }));
+    }
+    case 'setMultiConsumer': {
+      const { payload } = action;
+      return {
+        ...ruleFormState,
+        multiConsumerSelection: payload,
+      };
     }
     case 'setMetadata': {
       const { payload } = action;

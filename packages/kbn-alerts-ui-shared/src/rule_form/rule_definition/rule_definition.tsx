@@ -22,13 +22,7 @@ import {
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import {
-  RuleCreationValidConsumer,
-  ES_QUERY_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
-import type { RuleTypeModel } from '../types';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   DOC_LINK_TITLE,
   LOADING_RULE_TYPE_PARAMS_TITLE,
@@ -44,40 +38,39 @@ import {
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
-import { RuleTypeWithDescription } from '../../common/types';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
-
-const MULTI_CONSUMER_RULE_TYPE_IDS = [
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-  ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-];
+import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
+import { getAuthorizedConsumers } from '../utils';
 
 interface RuleDefinitionProps {
   canShowConsumerSelection?: boolean;
-  authorizedConsumers?: RuleCreationValidConsumer[];
-  selectedRuleTypeModel: RuleTypeModel;
-  selectedRuleType: RuleTypeWithDescription;
   validConsumers?: RuleCreationValidConsumer[];
 }
 
 export const RuleDefinition = (props: RuleDefinitionProps) => {
-  const {
-    canShowConsumerSelection = false,
-    authorizedConsumers = [],
-    selectedRuleTypeModel,
-    selectedRuleType,
-  } = props;
+  const { canShowConsumerSelection = false, validConsumers } = props;
 
-  const { formData, plugins, errors, metadata, id } = useRuleFormState();
+  const { formData, plugins, errors, metadata, id, selectedRuleType, selectedRuleTypeModel } =
+    useRuleFormState();
 
   const dispatch = useRuleFormDispatch();
 
   const { charts, data, dataViews, unifiedSearch, docLinks } = plugins!;
 
-  const { params, schedule, alertDelay, notifyWhen } = formData;
+  const { params, schedule, alertDelay, notifyWhen, consumer } = formData;
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(!!alertDelay);
+
+  const authorizedConsumers = useMemo(() => {
+    if (!validConsumers?.length) {
+      return [];
+    }
+    return getAuthorizedConsumers({
+      consumer,
+      ruleType: selectedRuleType,
+      validConsumers,
+    });
+  }, [consumer, selectedRuleType, validConsumers]);
 
   const shouldShowConsumerSelect = useMemo(() => {
     if (!canShowConsumerSelection) {
@@ -236,7 +229,7 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
               </EuiText>
             }
           >
-            <RuleConsumerSelection consumers={authorizedConsumers} />
+            <RuleConsumerSelection validConsumers={authorizedConsumers} />
           </EuiDescribedFormGroup>
         )}
         <EuiFlexItem>

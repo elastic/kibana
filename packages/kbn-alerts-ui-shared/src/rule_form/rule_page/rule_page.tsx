@@ -25,17 +25,12 @@ import {
   RuleDetails,
   RulePageNameInput,
   RulePageFooter,
-  RuleTypeModel,
   RuleFormData,
 } from '..';
-import { RuleTypeWithDescription } from '../../common/types';
 import { useRuleFormState } from '../hooks';
 
 export interface RulePageProps {
   canShowConsumerSelection?: boolean;
-  authorizedConsumers?: RuleCreationValidConsumer[];
-  selectedRuleTypeModel: RuleTypeModel;
-  selectedRuleType: RuleTypeWithDescription;
   validConsumers?: RuleCreationValidConsumer[];
   isEdit?: boolean;
   isSaving?: boolean;
@@ -45,9 +40,6 @@ export interface RulePageProps {
 export const RulePage = (props: RulePageProps) => {
   const {
     canShowConsumerSelection = false,
-    authorizedConsumers,
-    selectedRuleTypeModel,
-    selectedRuleType,
     validConsumers,
     isEdit = false,
     isSaving = false,
@@ -56,6 +48,8 @@ export const RulePage = (props: RulePageProps) => {
 
   const {
     plugins: { application },
+    formData,
+    multiConsumerSelection,
   } = useRuleFormState();
 
   const styles = useEuiBackgroundColorCSS().transparent;
@@ -66,6 +60,13 @@ export const RulePage = (props: RulePageProps) => {
     });
   }, [application]);
 
+  const onSaveInternal = useCallback(() => {
+    onSave({
+      ...formData,
+      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+    });
+  }, [onSave, formData, multiConsumerSelection]);
+
   const steps: EuiStepsProps['steps'] = useMemo(() => {
     return [
       {
@@ -73,9 +74,6 @@ export const RulePage = (props: RulePageProps) => {
         children: (
           <RuleDefinition
             canShowConsumerSelection={canShowConsumerSelection}
-            authorizedConsumers={authorizedConsumers}
-            selectedRuleTypeModel={selectedRuleTypeModel}
-            selectedRuleType={selectedRuleType}
             validConsumers={validConsumers}
           />
         ),
@@ -101,13 +99,7 @@ export const RulePage = (props: RulePageProps) => {
         ),
       },
     ];
-  }, [
-    canShowConsumerSelection,
-    authorizedConsumers,
-    selectedRuleTypeModel,
-    selectedRuleType,
-    validConsumers,
-  ]);
+  }, [canShowConsumerSelection, validConsumers]);
 
   return (
     <EuiPageTemplate grow bottomBorder offset={0} css={styles}>
@@ -134,7 +126,12 @@ export const RulePage = (props: RulePageProps) => {
         <EuiSteps steps={steps} />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section>
-        <RulePageFooter isEdit={isEdit} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
+        <RulePageFooter
+          isEdit={isEdit}
+          isSaving={isSaving}
+          onCancel={onCancel}
+          onSave={onSaveInternal}
+        />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );
