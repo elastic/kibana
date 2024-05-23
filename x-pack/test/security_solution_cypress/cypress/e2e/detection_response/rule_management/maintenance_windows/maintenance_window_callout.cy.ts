@@ -12,6 +12,7 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
+// https://github.com/elastic/kibana/issues/184160
 describe(
   'Maintenance window callout on Rule Management page',
   { tags: ['@ess', '@skipInServerless'] },
