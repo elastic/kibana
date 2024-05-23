@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { memo, type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import type { LogRateHistogramItem } from '@kbn/aiops-log-rate-analysis';
@@ -62,7 +62,7 @@ type DocumentCountChartReduxProps = Omit<
  * @param props - The properties passed to the DocumentCountChart component.
  * @returns The DocumentCountChart component enhanced with automatic analysis start capabilities.
  */
-export const DocumentCountChartRedux: FC<DocumentCountChartReduxProps> = (props) => {
+export const DocumentCountChartRedux: FC<DocumentCountChartReduxProps> = memo((props) => {
   const dispatch = useAppDispatch();
   const currentSelectedGroup = useCurrentSelectedGroup();
   const currentSelectedSignificantItem = useCurrentSelectedSignificantItem();
@@ -123,4 +123,4 @@ export const DocumentCountChartRedux: FC<DocumentCountChartReduxProps> = (props)
       setAutoRunAnalysisFn={(d: boolean) => dispatch(setAutoRunAnalysis(d))}
     />
   );
-};
+});
