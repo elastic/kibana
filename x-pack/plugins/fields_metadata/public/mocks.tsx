@@ -8,7 +8,11 @@
 import { createFieldsMetadataServiceStartMock } from './services/fields_metadata/fields_metadata_service.mock';
 import { FieldsMetadataPublicStart } from './types';
 
-export const createFieldsMetadataPluginStartMock = (): jest.Mocked<FieldsMetadataPublicStart> => ({
+const createFieldsMetadataPublicStartMock = (): jest.Mocked<FieldsMetadataPublicStart> => ({
   client: createFieldsMetadataServiceStartMock().client,
   useFieldsMetadata: jest.fn(),
 });
+
+export const fieldsMetadataPluginPublicMock = {
+  createStartContract: createFieldsMetadataPublicStartMock,
+};
