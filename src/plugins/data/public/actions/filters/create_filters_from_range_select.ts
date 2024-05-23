@@ -16,7 +16,7 @@ import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
 
-interface RangeSelectDataContext {
+export interface RangeSelectDataContext {
   table: Datatable;
   column: number;
   range: number[];
