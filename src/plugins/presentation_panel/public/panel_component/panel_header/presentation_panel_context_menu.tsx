@@ -18,6 +18,7 @@ import {
   EuiContextMenuPanelDescriptor,
   EuiIcon,
   EuiPopover,
+  EuiSkeletonRectangle,
   EuiSkeletonText,
   EuiToolTip,
   IconType,
@@ -29,11 +30,11 @@ import {
   useBatchedOptionalPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
+import { Subscription } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
-// import moveSVG from './move.svg';
 
 export const PresentationPanelContextMenu = ({
   api,
@@ -72,21 +73,29 @@ export const PresentationPanelContextMenu = ({
   useEffect(() => {
     if (!api) return;
 
-    setMenuPanelsLoading(true);
-    let canceled = false;
+    let cancelled = false;
+    const subscriptions = new Subscription();
+    const apiContext = { embeddable: api };
+
+    const handleActionCompatibilityChange = (isCompatible: boolean, action: Action<object>) => {
+      if (cancelled) return;
+      setContextMenuActions((currentActions) => {
+        const newActions = currentActions?.filter((current) => current.id !== action.id);
+        if (isCompatible) return [...newActions, action];
+        return newActions;
+      });
+    };
+
     (async () => {
-      /**
-       * Build and update all actions
-       */
       let compatibleActions: Array<Action<object>> = await (async () => {
-        if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, { embeddable: api });
+        if (getActions) return await getActions(CONTEXT_MENU_TRIGGER, apiContext);
         return (
           (await uiActions.getTriggerCompatibleActions(CONTEXT_MENU_TRIGGER, {
             embeddable: api,
           })) ?? []
         );
       })();
-      if (canceled) return;
+      if (cancelled) return;
 
       const disabledActions = api.disabledActionIds?.value;
       if (disabledActions) {
@@ -103,27 +112,57 @@ export const PresentationPanelContextMenu = ({
         ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
       );
 
+      setContextMenuActions(compatibleActions);
+
+      // subscribe to any frequently changing context menu actions
+      const frequentlyChangingActions = uiActions.getFrequentlyChangingActionsForTrigger(
+        CONTEXT_MENU_TRIGGER,
+        apiContext
+      );
+
+      for (const frequentlyChangingAction of frequentlyChangingActions) {
+        subscriptions.add(
+          frequentlyChangingAction.subscribeToCompatibilityChanges(
+            apiContext,
+            (isCompatible, action) =>
+              handleActionCompatibilityChange(isCompatible, action as Action<object>)
+          )
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+      subscriptions.unsubscribe();
+    };
+  }, [actionPredicate, api, getActions, isContextMenuOpen, parentViewMode]);
+
+  useEffect(() => {
+    if (!api) return;
+    setMenuPanelsLoading(true);
+
+    /**
+     *
+     * Build and update all actions
+     */
+    const apiContext = { embeddable: api };
+
+    (async () => {
       /**
        * Build context menu panel from actions
        */
       const panels = await buildContextMenuForActions({
-        actions: compatibleActions.map((action) => ({
+        actions: contextMenuActions.map((action) => ({
           action,
-          context: { embeddable: api },
+          context: apiContext,
           trigger: contextMenuTrigger,
         })),
         closeMenu: () => setIsContextMenuOpen(false),
       });
-      if (canceled) return;
 
       setMenuPanelsLoading(false);
-      setContextMenuActions(compatibleActions);
       setContextMenuPanels(panels);
     })();
-    return () => {
-      canceled = true;
-    };
-  }, [actionPredicate, api, getActions, isContextMenuOpen, parentViewMode]);
+  }, [api, contextMenuActions]);
 
   const showNotification = useMemo(
     () => contextMenuActions.some((action) => action.showNotification),
@@ -156,7 +195,7 @@ export const PresentationPanelContextMenu = ({
           {viewMode === 'edit' && (
             <>
               <div
-                data-test-subj={`embPanel__floatingActions__${api?.uuid}__left`}
+                data-test-subj={`embPanel__floatingActions__left`}
                 className={classNames(
                   'embPanel__floatingActions',
                   'embPanel__floatingActionsLeft',
@@ -178,7 +217,7 @@ export const PresentationPanelContextMenu = ({
             </>
           )}
           <div
-            data-test-subj={`embPanel__floatingActions__${api?.uuid}__right`}
+            data-test-subj={`embPanel__floatingActions__right`}
             className={classNames(
               'embPanel__floatingActions',
               'embPanel__floatingActionsRight',
@@ -188,51 +227,63 @@ export const PresentationPanelContextMenu = ({
               }
             )}
           >
-            {mainMenu?.items?.map(({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-              <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                <EuiButtonIcon
-                  iconType={icon as IconType}
-                  color="text"
-                  onClick={onClick as MouseEventHandler}
-                  data-test-subj={dataTestSubj}
-                  aria-label={name as string}
-                />
-              </EuiToolTip>
-            ))}
-            {moreMenu?.items?.length && (
-              <EuiPopover
-                repositionOnScroll
-                panelPaddingSize="none"
-                anchorPosition="downRight"
-                button={ContextMenuButton}
-                isOpen={isContextMenuOpen}
-                className={contextMenuClasses}
-                closePopover={() => setIsContextMenuOpen(false)}
-                data-test-subj={
-                  isContextMenuOpen
-                    ? 'embeddablePanelContextMenuOpen'
-                    : 'embeddablePanelContextMenuClosed'
-                }
-              >
-                {menuPanelsLoading ? (
-                  <EuiContextMenuPanel
-                    className="embPanel__optionsMenuPopover-loading"
-                    title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
-                      defaultMessage: 'Options',
-                    })}
-                  >
-                    <EuiContextMenuItem>
-                      <EuiSkeletonText />
-                    </EuiContextMenuItem>
-                  </EuiContextMenuPanel>
-                ) : (
-                  <EuiContextMenu
-                    data-test-subj="presentationPanelContextMenuItems"
-                    initialPanelId={moreMenu.id}
-                    panels={[moreMenu]}
-                  />
+            {menuPanelsLoading ? (
+              <>
+                <EuiSkeletonRectangle width="16px" height="16px" />
+                <EuiSkeletonRectangle width="16px" height="16px" />
+                <EuiSkeletonRectangle width="16px" height="16px" />
+              </>
+            ) : (
+              <>
+                {mainMenu?.items?.map(
+                  ({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+                    <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                      <EuiButtonIcon
+                        iconType={icon as IconType}
+                        color="text"
+                        onClick={onClick as MouseEventHandler}
+                        data-test-subj={dataTestSubj}
+                        aria-label={name as string}
+                      />
+                    </EuiToolTip>
+                  )
                 )}
-              </EuiPopover>
+                {moreMenu?.items?.length && (
+                  <EuiPopover
+                    repositionOnScroll
+                    panelPaddingSize="none"
+                    anchorPosition="downRight"
+                    button={ContextMenuButton}
+                    isOpen={isContextMenuOpen}
+                    className={contextMenuClasses}
+                    closePopover={() => setIsContextMenuOpen(false)}
+                    data-test-subj={
+                      isContextMenuOpen
+                        ? 'embeddablePanelContextMenuOpen'
+                        : 'embeddablePanelContextMenuClosed'
+                    }
+                  >
+                    {menuPanelsLoading ? (
+                      <EuiContextMenuPanel
+                        className="embPanel__optionsMenuPopover-loading"
+                        title={i18n.translate('presentationPanel.contextMenu.loadingTitle', {
+                          defaultMessage: 'Options',
+                        })}
+                      >
+                        <EuiContextMenuItem>
+                          <EuiSkeletonText />
+                        </EuiContextMenuItem>
+                      </EuiContextMenuPanel>
+                    ) : (
+                      <EuiContextMenu
+                        data-test-subj="presentationPanelContextMenuItems"
+                        initialPanelId={moreMenu.id}
+                        panels={[moreMenu]}
+                      />
+                    )}
+                  </EuiPopover>
+                )}
+              </>
             )}
           </div>
         </>

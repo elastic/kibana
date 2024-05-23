@@ -66,7 +66,7 @@ const onClick =
 const wrapMainPanelItemsIntoSubmenu = (panels: Record<string, PanelDescriptor>, id: string) => {
   const panel = panels[id];
   if (!panel) return;
-  const maxItemsBeforeWrapping = 4;
+  const maxItemsBeforeWrapping = 3;
   if (!panel.items) return;
   if (panel.items.length <= maxItemsBeforeWrapping) return;
   const visibleItems = panel.items.slice(0, maxItemsBeforeWrapping - 1) as ItemDescriptor[];

@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
+import { isLensApi } from '../embeddable';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
@@ -19,8 +20,8 @@ export const createOpenInDiscoverAction = (
   locator: DiscoverAppLocator,
   dataViews: Pick<DataViewsService, 'get'>,
   hasDiscoverAccess: boolean
-) =>
-  createAction<EmbeddableApiContext>({
+) => {
+  const actionDefinition = {
     type: ACTION_OPEN_IN_DISCOVER,
     id: ACTION_OPEN_IN_DISCOVER,
     order: 20, // right before Maximize/Minimize panel which is 19
@@ -47,8 +48,23 @@ export const createOpenInDiscoverAction = (
         embeddable: context.embeddable,
       });
     },
+    couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {
+      return hasDiscoverAccess && isLensApi(embeddable);
+    },
+    subscribeToCompatibilityChanges(
+      { embeddable }: EmbeddableApiContext,
+      onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
+    ) {
+      if (!isLensApi(embeddable)) throw new IncompatibleActionError();
+      return embeddable.canViewUnderlyingData$.subscribe((canViewUnderlyingData) => {
+        onChange(canViewUnderlyingData, actionDefinition);
+      });
+    },
     execute: async (context: EmbeddableApiContext) => {
       const { execute } = await getDiscoverHelpersAsync();
       return execute({ ...context, locator, dataViews, hasDiscoverAccess });
     },
-  });
+  };
+
+  return createAction<EmbeddableApiContext>(actionDefinition);
+};

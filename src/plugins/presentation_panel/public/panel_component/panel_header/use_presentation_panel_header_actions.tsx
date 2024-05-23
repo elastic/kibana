@@ -37,7 +37,7 @@ export const usePresentationPanelHeaderActions = <
    * Change Actions need to be subscribed to so they can change over the lifetime of this panel.
    */
   useEffect(() => {
-    let canceled = false;
+    let cancelled = false;
     const subscriptions = new Subscription();
     const getTriggerCompatibleActions = getActions ?? uiActions.getTriggerCompatibleActions;
     const getActionsForTrigger = async (triggerId: string) => {
@@ -58,7 +58,7 @@ export const usePresentationPanelHeaderActions = <
       isCompatible: boolean,
       action: AnyApiAction
     ) => {
-      if (canceled) return;
+      if (cancelled) return;
       (type === 'badge' ? setBadges : setNotifications)((currentActions) => {
         const newActions = currentActions?.filter((current) => current.id !== action.id);
         if (isCompatible) return [...newActions, action];
@@ -71,7 +71,7 @@ export const usePresentationPanelHeaderActions = <
         getActionsForTrigger(PANEL_BADGE_TRIGGER),
         getActionsForTrigger(PANEL_NOTIFICATION_TRIGGER),
       ]);
-      if (canceled) return;
+      if (cancelled) return;
       setBadges(initialBadges);
       setNotifications(initialNotifications);
 
@@ -84,8 +84,8 @@ export const usePresentationPanelHeaderActions = <
       );
       for (const badge of frequentlyChangingBadges) {
         subscriptions.add(
-          badge.subscribeToCompatibilityChanges(apiContext, (isComptaible, action) =>
-            handleActionCompatibilityChange('badge', isComptaible, action as AnyApiAction)
+          badge.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
+            handleActionCompatibilityChange('badge', isCompatible, action as AnyApiAction)
           )
         );
       }
@@ -97,15 +97,15 @@ export const usePresentationPanelHeaderActions = <
       );
       for (const notification of frequentlyChangingNotifications) {
         subscriptions.add(
-          notification.subscribeToCompatibilityChanges(apiContext, (isComptaible, action) =>
-            handleActionCompatibilityChange('notification', isComptaible, action as AnyApiAction)
+          notification.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
+            handleActionCompatibilityChange('notification', isCompatible, action as AnyApiAction)
           )
         );
       }
     })();
 
     return () => {
-      canceled = true;
+      cancelled = true;
       subscriptions.unsubscribe();
     };
     // Disable exhaustive deps because this is meant to be run once on mount.
