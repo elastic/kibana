@@ -8,7 +8,7 @@
 
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
-import { VisualizeSerializedState } from '../../../react_embeddable/types';
+import { VisualizeEditorInput } from '../../../react_embeddable/types';
 import {
   ByValueVisInstance,
   EmbeddableApiHandler,
@@ -23,7 +23,7 @@ export const useVisByValue = (
   eventEmitter: EventEmitter,
   isChromeVisible: boolean | undefined,
   embeddableApiHandler: EmbeddableApiHandler,
-  valueInput?: VisualizeSerializedState,
+  valueInput?: VisualizeEditorInput,
   originatingApp?: string,
   originatingPath?: string
 ) => {

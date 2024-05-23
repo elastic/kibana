@@ -7,6 +7,7 @@
  */
 
 import { serializeState, deserializeState } from './state';
+import { VisualizeSerializedState } from './types';
 
 describe('visualize_embeddable', () => {
   test('extracts saved search references for search source state and does not store them in state', () => {
@@ -124,7 +125,7 @@ describe('visualize_embeddable', () => {
         id: 'uwu',
       },
       references: [{ name: 'x', id: '123', type: 'index-pattern' }],
-    });
+    }) as VisualizeSerializedState;
     expect(embeddedState.savedVis.data.searchSource.index).toBe('123');
     expect(
       (embeddedState.savedVis.data.searchSource as { indexRefName: string }).indexRefName
@@ -164,7 +165,7 @@ describe('visualize_embeddable', () => {
       references: [
         { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', id: '123', type: 'index-pattern' },
       ],
-    });
+    }) as VisualizeSerializedState;
     expect(embeddedState.savedVis.data.searchSource.index).toBe('123');
     expect(embeddedState.savedVis.data.searchSource.indexRefName).toBe(undefined);
   });
@@ -199,7 +200,7 @@ describe('visualize_embeddable', () => {
         id: 'uwu',
       },
       references: [{ name: 'search_0', id: '123', type: 'search' }],
-    });
+    }) as VisualizeSerializedState;
     expect(embeddedState.savedVis.data.savedSearchId).toBe('123');
   });
 
@@ -234,7 +235,7 @@ describe('visualize_embeddable', () => {
         id: 'uwu',
       },
       references: [{ name: 'search_0', id: '123', type: 'search' }],
-    });
+    }) as VisualizeSerializedState;
     expect(embeddedState.savedVis.data.savedSearchId).toBe('123');
   });
 });

@@ -12,7 +12,7 @@ import { createVisAsync } from '../../vis_async';
 import { convertToSerializedVis, getSavedVisualization } from '../../utils/saved_visualize_utils';
 import { SerializedVis, Vis, VisSavedObject } from '../..';
 import type { VisInstance, VisualizeServices } from '../types';
-import { VisualizeSerializedState } from '../../react_embeddable/types';
+import { VisualizeEditorInput } from '../../react_embeddable/types';
 
 const createLinkedSavedSearch = async (vis: Vis, visualizeServices: VisualizeServices) => {
   const { savedSearch: savedSearchApi } = visualizeServices;
@@ -34,7 +34,7 @@ const createLinkedSavedSearch = async (vis: Vis, visualizeServices: VisualizeSer
 
 export const getVisualizationInstanceFromInput = async (
   visualizeServices: VisualizeServices,
-  input: VisualizeSerializedState
+  input: VisualizeEditorInput
 ) => {
   const { data, spaces, savedObjectsTagging, ...startServices } = visualizeServices;
   const visState = input.savedVis as SerializedVis;

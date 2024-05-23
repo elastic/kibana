@@ -7,15 +7,22 @@
  */
 import { Reference } from '@kbn/content-management-utils';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
+import type { TimeRange } from '@kbn/es-query';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
 import { HasVisualizeConfig } from '../embeddable';
-import type { VisParams } from '../types';
+import type { VisParams, Vis } from '../types';
 import type { SerializedVis } from '../vis';
 
 export type VisualizeSerializedState = SerializedTitles & {
   id: string;
   savedVis: SerializedVis<VisParams>;
+};
+
+export type VisualizeEditorInput = Omit<VisualizeSerializedState, 'savedVis'> & {
+  savedVis?: SerializedVis<VisParams>;
+  timeRange: TimeRange;
+  vis?: Vis<VisParams> & { colors?: Record<string, string>; legendOpen?: boolean };
 };
 
 export interface VisualizeSavedObjectState {

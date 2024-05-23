@@ -35,7 +35,7 @@ export type {
   VisualizationClient,
   SerializableAttributes,
 } from './vis_types';
-export type { VisualizeSerializedState } from './react_embeddable/types';
+export type { VisualizeEditorInput } from './react_embeddable/types';
 export type { Vis, SerializedVis, SerializedVisData, VisData } from './vis';
 export type { SchemaConfig } from '../common/types';
 export { updateOldState } from './legacy/vis_update_state';

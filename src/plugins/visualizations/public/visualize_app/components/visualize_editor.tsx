@@ -25,14 +25,14 @@ import { VisualizeServices } from '../types';
 import { VisualizeEditorCommon } from './visualize_editor_common';
 import { VisualizeAppProps } from '../app';
 import { VisualizeConstants } from '../../../common/constants';
-import { VisualizeSerializedState } from '../../react_embeddable/types';
+import { VisualizeEditorInput } from '../../react_embeddable/types';
 
 export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const [originatingApp, setOriginatingApp] = useState<string>();
   const [originatingPath, setOriginatingPath] = useState<string>();
   const [embeddableIdValue, setEmbeddableId] = useState<string>();
-  const [embeddableInput, setEmbeddableInput] = useState<VisualizeSerializedState>();
+  const [embeddableInput, setEmbeddableInput] = useState<VisualizeEditorInput>();
   const { services } = useKibana<VisualizeServices>();
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(!visualizationIdFromUrl);
@@ -56,7 +56,7 @@ export const VisualizeEditor = ({ onAppLeave }: VisualizeAppProps) => {
     } else {
       data.search.session.start();
     }
-    setEmbeddableInput(valueInputValue as VisualizeSerializedState | undefined);
+    setEmbeddableInput(valueInputValue as VisualizeEditorInput | undefined);
     setEmbeddableId(embeddableId);
     setOriginatingApp(value);
     setOriginatingPath(pathValue);

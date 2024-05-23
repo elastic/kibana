@@ -11,7 +11,7 @@ import { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { useEffect, useRef, useState } from 'react';
 
-import { VisualizeSerializedState } from '../../../react_embeddable/types';
+import { VisualizeEditorInput } from '../../../react_embeddable/types';
 import { VisualizeConstants } from '../../../../common/constants';
 import { getTypes } from '../../../services';
 import {
@@ -40,7 +40,7 @@ export const useSavedVisInstance = (
   embeddableApiHandler: EmbeddableApiHandler,
   originatingApp: string | undefined,
   visualizationIdFromUrl: string | undefined,
-  embeddableInput?: VisualizeSerializedState
+  embeddableInput?: VisualizeEditorInput
 ) => {
   const [state, setState] = useState<{
     savedVisInstance?: SavedVisInstance;
@@ -105,7 +105,6 @@ export const useSavedVisInstance = (
           );
         }
 
-        console.log('EMBEDDABLE INPUT', embeddableInput);
         if (embeddableInput && embeddableInput.timeRange) {
           savedVisInstance.panelTimeRange = embeddableInput.timeRange;
         }

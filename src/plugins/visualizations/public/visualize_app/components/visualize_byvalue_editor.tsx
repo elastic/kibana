@@ -24,7 +24,7 @@ import {
   useEmbeddableApiHandler,
 } from '../utils';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeSerializedState } from '../../react_embeddable/types';
+import { VisualizeEditorInput } from '../../react_embeddable/types';
 
 export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [originatingApp, setOriginatingApp] = useState<string>();
@@ -33,7 +33,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
   const [eventEmitter] = useState(new EventEmitter());
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [embeddableId, setEmbeddableId] = useState<string>();
-  const [valueInput, setValueInput] = useState<VisualizeSerializedState>();
+  const [valueInput, setValueInput] = useState<VisualizeEditorInput>();
 
   const embeddableApiHandler = useEmbeddableApiHandler();
   const [openInspectorFn] = embeddableApiHandler.openInspector;
@@ -49,7 +49,7 @@ export const VisualizeByValueEditor = ({ onAppLeave }: VisualizeAppProps) => {
 
     setOriginatingPath(pathValue);
     setOriginatingApp(value);
-    setValueInput(valueInputValue as VisualizeSerializedState | undefined);
+    setValueInput(valueInputValue as VisualizeEditorInput | undefined);
     setEmbeddableId(embeddableIdValue);
 
     if (!valueInputValue) {

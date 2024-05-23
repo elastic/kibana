@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { VisualizeSerializedState } from '@kbn/visualizations-plugin/public';
+import { VisualizeEditorInput } from '@kbn/visualizations-plugin/public';
 
-export function toExpression(input: VisualizeSerializedState & { savedObjectId: string }): string {
+export function toExpression(input: VisualizeEditorInput & { savedObjectId: string }): string {
   const expressionParts = [] as string[];
 
   expressionParts.push('savedVisualization');
@@ -31,7 +31,6 @@ export function toExpression(input: VisualizeSerializedState & { savedObjectId: 
       .reduce((_, part) => expressionParts.push(part), 0);
   }
 
-  // @ts-expect-error LegendOpen missing on VisualizeSerializedState type
   if (input.vis?.legendOpen !== undefined && input.vis.legendOpen === false) {
     expressionParts.push(`hideLegend=true`);
   }

@@ -8,7 +8,7 @@
 import { omit } from 'lodash';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { SavedObjectReference } from '@kbn/core/types';
-import type { VisualizeSerializedState } from '@kbn/visualizations-plugin/public/react_embeddable/types';
+import type { VisualizeEditorInput } from '@kbn/visualizations-plugin/public/react_embeddable/types';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -26,7 +26,9 @@ interface Arguments {
   title: string | null;
 }
 
-type Output = EmbeddableExpression<VisualizeSerializedState & { savedObjectId: string }>;
+type Output = EmbeddableExpression<
+  Omit<VisualizeEditorInput, 'savedVis'> & { savedObjectId: string }
+>;
 
 const defaultTimeRange = {
   from: 'now-15m',
@@ -75,7 +77,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
     fn: (input, { id, timerange, colors, hideLegend, title }) => {
       const filters = input ? input.and : [];
 
-      const visOptions = {};
+      const visOptions = {} as NonNullable<VisualizeEditorInput['vis']>;
 
       if (colors) {
         visOptions.colors = colors.reduce((reduction, color) => {
