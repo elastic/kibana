@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Event, LLMSpanAttributes } from '@langtrase/trace-attributes';
 import { Span } from '@opentelemetry/api';
 import { FunctionDefinition } from 'openai/resources';
 import { ignoreElements, last, merge, OperatorFunction, share, tap } from 'rxjs';
