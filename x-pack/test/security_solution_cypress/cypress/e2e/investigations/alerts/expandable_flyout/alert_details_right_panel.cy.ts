@@ -67,7 +67,8 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
   beforeEach(() => {
     deleteAlertsAndRules();
-    login();
+    // We need to use the 'soc_manager' role in order to have the 'Respond' action displayed
+    login('soc_manager');
     createRule(rule);
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
