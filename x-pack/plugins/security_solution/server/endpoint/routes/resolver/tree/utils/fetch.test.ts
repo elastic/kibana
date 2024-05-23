@@ -48,18 +48,21 @@ describe('fetcher test', () => {
   const schemaIDParent = {
     id: 'id',
     parent: 'parent',
+    agentId: 'agent.id',
   };
 
   const schemaIDParentAncestry = {
     id: 'id',
     parent: 'parent',
     ancestry: 'ancestry',
+    agentId: 'agent.id',
   };
 
   const schemaIDParentName = {
     id: 'id',
     parent: 'parent',
     name: 'name',
+    agentId: 'agent.id',
   };
 
   let client: jest.Mocked<IScopedClusterClient>;
@@ -119,14 +122,14 @@ describe('fetcher test', () => {
 
     it('returns the correct results without the ancestry defined', async () => {
       /**
-        .
-        └── 0
-            ├── 1
-            │   └── 2
-            └── 3
-                ├── 4
-                └── 5
-        */
+       .
+       └── 0
+       ├── 1
+       │   └── 2
+       └── 3
+       ├── 4
+       └── 5
+       */
       const level1 = [
         {
           id: '1',
@@ -361,11 +364,11 @@ describe('fetcher test', () => {
   describe('retrieving leaf nodes', () => {
     it('correctly identifies the leaf nodes in a response without the ancestry field', () => {
       /**
-        .
-        └── 0
-            ├── 1
-            ├── 2
-            └── 3
+       .
+       └── 0
+       ├── 1
+       ├── 2
+       └── 3
        */
       const results = [
         {
@@ -387,10 +390,10 @@ describe('fetcher test', () => {
 
     it('correctly ignores nodes without the proper fields', () => {
       /**
-        .
-        └── 0
-            ├── 1
-            ├── 2
+       .
+       └── 0
+       ├── 1
+       ├── 2
        */
       const results = [
         {
@@ -432,10 +435,10 @@ describe('fetcher test', () => {
     describe('with the ancestry field defined', () => {
       it('correctly identifies the leaf nodes in a response with the ancestry field', () => {
         /**
-          .
-          ├── 1
-          │   └── 2
-          └── 3
+         .
+         ├── 1
+         │   └── 2
+         └── 3
          */
         const results = [
           {
@@ -464,10 +467,10 @@ describe('fetcher test', () => {
 
       it('falls back to using parent field if it cannot find the ancestry field', () => {
         /**
-          .
-          ├── 1
-          │   └── 2
-          └── 3
+         .
+         ├── 1
+         │   └── 2
+         └── 3
          */
         const results = [
           {
@@ -494,13 +497,13 @@ describe('fetcher test', () => {
 
       it('correctly identifies the leaf nodes with a tree with multiple leaves', () => {
         /**
-          .
-          └── 0
-              ├── 1
-              │   └── 2
-              └── 3
-                  ├── 4
-                  └── 5
+         .
+         └── 0
+         ├── 1
+         │   └── 2
+         └── 3
+         ├── 4
+         └── 5
          */
         const results = [
           {
@@ -539,17 +542,17 @@ describe('fetcher test', () => {
 
       it('correctly identifies the leaf nodes with multiple queried nodes', () => {
         /**
-          .
-          ├── 0
-          │   ├── 1
-          │   │   └── 2
-          │   └── 3
-          │       ├── 4
-          │       └── 5
-          └── a
-              └── b
-                  ├── c
-                  └── d
+         .
+         ├── 0
+         │   ├── 1
+         │   │   └── 2
+         │   └── 3
+         │       ├── 4
+         │       └── 5
+         └── a
+         └── b
+         ├── c
+         └── d
          */
         const results = [
           {
@@ -603,15 +606,15 @@ describe('fetcher test', () => {
 
       it('correctly identifies the leaf nodes with an unbalanced tree', () => {
         /**
-          .
-          ├── 0
-          │   ├── 1
-          │   │   └── 2
-          │   └── 3
-          │       ├── 4
-          │       └── 5
-          └── a
-              └── b
+         .
+         ├── 0
+         │   ├── 1
+         │   │   └── 2
+         │   └── 3
+         │       ├── 4
+         │       └── 5
+         └── a
+         └── b
          */
         const results = [
           {

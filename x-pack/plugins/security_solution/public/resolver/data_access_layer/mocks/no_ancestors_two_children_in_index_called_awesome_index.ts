@@ -161,6 +161,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         indices,
         ancestors,
         descendants,
+        agentId,
       }: {
         dataId: string;
         schema: ResolverSchema;
@@ -168,6 +169,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
         indices: string[];
         ancestors: number;
         descendants: number;
+        agentId: string;
       }): Promise<ResolverNode[]> {
         const { treeResponse } = mockTreeWithNoAncestorsAnd2Children({
           originID: metadata.entityIDs.origin,
@@ -192,6 +194,7 @@ export function noAncestorsTwoChildenInIndexCalledAwesomeIndex(): {
                 parent: 'process.parent.entity_id',
                 ancestry: 'process.Ext.ancestry',
                 name: 'process.name',
+                agentId: 'agent.id',
               },
               id: metadata.entityIDs.origin,
             },

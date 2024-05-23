@@ -40,10 +40,12 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
       entityID,
       timeRange,
       indexPatterns,
+      agentId,
     }: {
       entityID: string;
       timeRange?: TimeRange;
       indexPatterns: string[];
+      agentId: string;
     }): Promise<ResolverRelatedEvents> {
       const response: ResolverPaginatedEvents = await context.http.post(
         '/api/endpoint/resolver/events',
@@ -55,6 +57,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
             filter: JSON.stringify({
               bool: {
                 filter: [
+                  { term: { 'agent.id': agentId } },
                   { term: { 'process.entity_id': entityID } },
                   { bool: { must_not: { term: { 'event.category': 'process' } } } },
                 ],

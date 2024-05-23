@@ -31,6 +31,7 @@ interface Metadata {
     origin: 'origin';
   };
 }
+
 export function oneNodeWithPaginatedEvents(): {
   dataAccessLayer: DataAccessLayer;
   metadata: Metadata;
@@ -151,6 +152,7 @@ export function oneNodeWithPaginatedEvents(): {
         indices,
         ancestors,
         descendants,
+        agentId,
       }: {
         dataId: string;
         schema: ResolverSchema;
@@ -158,6 +160,7 @@ export function oneNodeWithPaginatedEvents(): {
         indices: string[];
         ancestors: number;
         descendants: number;
+        agentId: string;
       }): Promise<ResolverNode[]> {
         return mockTree.nodes;
       },
@@ -174,6 +177,7 @@ export function oneNodeWithPaginatedEvents(): {
               parent: 'process.parent.entity_id',
               ancestry: 'process.Ext.ancestry',
               name: 'process.name',
+              agentId: 'agent.id',
             },
             id: metadata.entityIDs.origin,
           },
