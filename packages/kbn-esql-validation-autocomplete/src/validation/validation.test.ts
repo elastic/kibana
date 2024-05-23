@@ -2702,6 +2702,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings('from a_index | sort coalesce(numberField)', []);
+        testErrorsAndWarnings('from a_index | eval coalesce(cartesianPointField)', []);
       });
 
       describe('concat', () => {
@@ -3969,29 +3970,13 @@ describe('validation logic', () => {
         testErrorsAndWarnings('row mv_dedupe(to_version("1.0.0"))', []);
         testErrorsAndWarnings('row var = mv_dedupe(to_version("a"))', []);
 
-        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianpoint("POINT (30 10)"))', [
-          'Argument of [mv_dedupe] must be [boolean], found value [to_cartesianpoint("POINT (30 10)")] type [cartesian_point]',
-        ]);
-
         testErrorsAndWarnings('from a_index | where mv_dedupe(numberField) > 0', []);
 
-        testErrorsAndWarnings('from a_index | where mv_dedupe(cartesianPointField) > 0', [
-          'Argument of [mv_dedupe] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
-        ]);
-
         testErrorsAndWarnings('from a_index | where length(mv_dedupe(stringField)) > 0', []);
-
-        testErrorsAndWarnings('from a_index | where length(mv_dedupe(cartesianPointField)) > 0', [
-          'Argument of [mv_dedupe] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
-        ]);
 
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(booleanField)', []);
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(to_boolean(booleanField))', []);
-
-        testErrorsAndWarnings('from a_index | eval mv_dedupe(cartesianPointField)', [
-          'Argument of [mv_dedupe] must be [boolean], found value [cartesianPointField] type [cartesian_point]',
-        ]);
 
         testErrorsAndWarnings('from a_index | eval var = mv_dedupe(dateField)', []);
         testErrorsAndWarnings('from a_index | eval mv_dedupe(dateField)', []);
@@ -4012,6 +3997,60 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort mv_dedupe(booleanField)', []);
+        testErrorsAndWarnings('row mv_dedupe(to_cartesianpoint("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_dedupe(to_cartesianpoint(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_dedupe(to_cartesianshape("POINT (30 10)"))', []);
+
+        testErrorsAndWarnings(
+          'row var = mv_dedupe(to_cartesianshape(to_cartesianpoint("POINT (30 10)")))',
+          []
+        );
+
+        testErrorsAndWarnings('row var = mv_dedupe(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_dedupe(to_geopoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geopoint(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row mv_dedupe(to_geoshape("POINT (30 10)"))', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_geoshape(to_geopoint("POINT (30 10)")))', []);
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(cartesianPointField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_dedupe(to_cartesianpoint(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(cartesianShapeField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(cartesianShapeField)', []);
+
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_dedupe(to_cartesianshape(cartesianPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(geoPointField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(geoPointField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_dedupe(to_geopoint(geoPointField))',
+          []
+        );
+        testErrorsAndWarnings('from a_index | eval var = mv_dedupe(geoShapeField)', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(geoShapeField)', []);
+        testErrorsAndWarnings(
+          'from a_index | eval var = mv_dedupe(to_geoshape(geoPointField))',
+          []
+        );
+
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(numberField, extraArg)', [
+          'Error: [mv_dedupe] function expects exactly one argument, got 2.',
+        ]);
+
+        testErrorsAndWarnings('from a_index | sort mv_dedupe(numberField)', []);
       });
 
       describe('mv_first', () => {

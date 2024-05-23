@@ -10459,6 +10459,11 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval coalesce(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = concat(\"a\", \"a\")",
       "error": [],
       "warning": []
@@ -13244,34 +13249,13 @@
       "warning": []
     },
     {
-      "query": "row var = mv_dedupe(to_cartesianpoint(\"POINT (30 10)\"))",
-      "error": [
-        "Argument of [mv_dedupe] must be [boolean], found value [to_cartesianpoint(\"POINT (30 10)\")] type [cartesian_point]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where mv_dedupe(numberField) > 0",
       "error": [],
       "warning": []
     },
     {
-      "query": "from a_index | where mv_dedupe(cartesianPointField) > 0",
-      "error": [
-        "Argument of [mv_dedupe] must be [boolean], found value [cartesianPointField] type [cartesian_point]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from a_index | where length(mv_dedupe(stringField)) > 0",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | where length(mv_dedupe(cartesianPointField)) > 0",
-      "error": [
-        "Argument of [mv_dedupe] must be [boolean], found value [cartesianPointField] type [cartesian_point]"
-      ],
       "warning": []
     },
     {
@@ -13287,13 +13271,6 @@
     {
       "query": "from a_index | eval var = mv_dedupe(to_boolean(booleanField))",
       "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval mv_dedupe(cartesianPointField)",
-      "error": [
-        "Argument of [mv_dedupe] must be [boolean], found value [cartesianPointField] type [cartesian_point]"
-      ],
       "warning": []
     },
     {
@@ -13370,6 +13347,128 @@
     },
     {
       "query": "from a_index | sort mv_dedupe(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_dedupe(to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_dedupe(to_cartesianpoint(to_cartesianpoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_dedupe(to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_dedupe(to_cartesianshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_dedupe(to_cartesianshape(to_cartesianpoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_dedupe(to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_dedupe(to_geopoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_dedupe(to_geopoint(to_geopoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_dedupe(to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row mv_dedupe(to_geoshape(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_dedupe(to_geoshape(to_geopoint(\"POINT (30 10)\")))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_dedupe(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_dedupe(to_cartesianpoint(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_dedupe(cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_dedupe(cartesianShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_dedupe(to_cartesianshape(cartesianPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_dedupe(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_dedupe(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_dedupe(to_geopoint(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_dedupe(geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_dedupe(geoShapeField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = mv_dedupe(to_geoshape(geoPointField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_dedupe(numberField, extraArg)",
+      "error": [
+        "Error: [mv_dedupe] function expects exactly one argument, got 2."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort mv_dedupe(numberField)",
       "error": [],
       "warning": []
     },

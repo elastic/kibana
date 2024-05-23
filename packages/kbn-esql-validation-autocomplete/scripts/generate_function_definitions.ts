@@ -246,6 +246,18 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
       ])
       .flat(),
   },
+  mv_dedupe: {
+    signatures: supportedFieldTypes.map<FunctionDefinition['signatures'][number]>((type) => ({
+      params: [
+        {
+          name: 'field',
+          type,
+          optional: false,
+        },
+      ],
+      returnType: type,
+    })),
+  },
 };
 
 /**

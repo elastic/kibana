@@ -1646,11 +1646,11 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'boolean',
+          type: 'number',
           optional: false,
         },
       ],
-      returnType: 'boolean',
+      returnType: 'number',
     },
     {
       params: [
@@ -1666,11 +1666,21 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'number',
+          type: 'string',
           optional: false,
         },
       ],
-      returnType: 'number',
+      returnType: 'string',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'boolean',
+          optional: false,
+        },
+      ],
+      returnType: 'boolean',
     },
     {
       params: [
@@ -1686,11 +1696,41 @@ const mvDedupeDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
-          type: 'string',
+          type: 'cartesian_point',
           optional: false,
         },
       ],
-      returnType: 'string',
+      returnType: 'cartesian_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'cartesian_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'cartesian_shape',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_point',
+          optional: false,
+        },
+      ],
+      returnType: 'geo_point',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'geo_shape',
+          optional: false,
+        },
+      ],
+      returnType: 'geo_shape',
     },
     {
       params: [
