@@ -34,7 +34,7 @@ export async function resetPreconfiguredAgentPolicies(
   await _deleteExistingData(soClient, esClient, logger, agentPolicyId);
   await _deleteGhostPackagePolicies(soClient, esClient, logger);
   await _deletePreconfigurationDeleteRecord(soClient, logger, agentPolicyId);
-
+  appContextService.getLogger().info('Call Fleet setup from reset preconfigured API handler');
   await setupFleet(soClient, esClient);
 }
 

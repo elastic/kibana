@@ -659,6 +659,7 @@ export class FleetPlugin
         // Retry Fleet setup w/ backoff
         await backOff(
           async () => {
+            appContextService.getLogger().info('Call Fleet setup from plugin start');
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
               core.elasticsearch.client.asInternalUser
