@@ -24,7 +24,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'users' });
 
-    cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
+    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
   });
 
   beforeEach(() => {
@@ -34,7 +34,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
 
   after(() => {
     cy.task('esArchiverUnload', { archiveName: 'users' });
-    cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
+    cy.task('esArchiverUnload', { archiveName: 'risk_users' });
   });
 
   describe('Users page tabs', () => {
