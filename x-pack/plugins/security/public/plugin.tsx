@@ -191,7 +191,7 @@ export class SecurityPlugin
     core: CoreStart,
     { management, share }: PluginStartDependencies
   ): SecurityPluginStart {
-    const { application, http, notifications, docLinks } = core;
+    const { application, http, notifications } = core;
     const { anonymousPaths } = http;
 
     const logoutUrl = getLogoutUrl(http);
@@ -202,7 +202,7 @@ export class SecurityPlugin
     this.sessionTimeout = new SessionTimeout(core, notifications, sessionExpired, http, tenant);
 
     this.sessionTimeout.start();
-    this.securityCheckupService.start({ http, notifications, docLinks });
+    this.securityCheckupService.start(core);
     this.securityApiClients.userProfiles.start();
 
     if (management) {
