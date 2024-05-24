@@ -124,6 +124,9 @@ describe('Class Report', () => {
 
   it('throws error if converted to task JSON before being synced with ES storage', () => {
     const report = new Report({ jobtype: 'spam', payload: {} } as any);
+    // @ts-ignore null is not applicable to string
+    report._index = null;
+
     expect(() => report.updateWithEsDoc(report)).toThrowErrorMatchingInlineSnapshot(
       `"Report object from ES has missing fields!"`
     );

@@ -34,7 +34,11 @@ import {
 
 import { useCancelAddPackagePolicy } from '../hooks';
 
-import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
+import {
+  getRootPrivilegedDataStreams,
+  isRootPrivilegesRequired,
+  splitPkgKey,
+} from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
 import {
@@ -75,6 +79,7 @@ import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
+import { UnprivilegedConfirmModal } from './confirm_modal';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -324,6 +329,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateNewAgentPolicy,
       updateAgentPolicy,
       setSelectedPolicyTab,
+      packageInfo,
     });
 
   const replaceStepConfigurePackagePolicy =
@@ -436,6 +442,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       />
     );
   }
+
+  const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -445,8 +454,24 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             agentPolicy={agentPolicy}
             onConfirm={onSubmit}
             onCancel={() => setFormState('VALID')}
+            showUnprivilegedAgentsCallout={Boolean(
+              packageInfo &&
+                isRootPrivilegesRequired(packageInfo) &&
+                (agentPolicy?.unprivileged_agents ?? 0) > 0
+            )}
+            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
+            dataStreams={rootPrivilegedDataStreams}
           />
         )}
+        {formState === 'CONFIRM_UNPRIVILEGED' && agentPolicy ? (
+          <UnprivilegedConfirmModal
+            onCancel={() => setFormState('VALID')}
+            onConfirm={onSubmit}
+            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
+            agentPolicyName={agentPolicy?.name ?? ''}
+            dataStreams={rootPrivilegedDataStreams}
+          />
+        ) : null}
         {formState === 'SUBMITTED_NO_AGENTS' &&
           agentPolicy &&
           packageInfo &&

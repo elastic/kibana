@@ -29,7 +29,7 @@ import { getFieldValue } from '../host_isolation/helpers';
 export interface ResponderContextMenuItemProps {
   endpointId: string;
   onClick?: () => void;
-  agentType?: ResponseActionAgentType;
+  agentType: ResponseActionAgentType;
   eventData?: TimelineEventsDetailsItem[] | null;
 }
 
@@ -72,7 +72,7 @@ const getThirdPartyAgentInfo = (
 export const useResponderActionData = ({
   endpointId,
   onClick,
-  agentType = 'endpoint',
+  agentType,
   eventData,
 }: ResponderContextMenuItemProps): {
   handleResponseActionsClick: () => void;
@@ -112,6 +112,10 @@ export const useResponderActionData = ({
       }
     }
 
+    if (!endpointId) {
+      return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
+    }
+
     // Still loading host info
     if (isFetching) {
       return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
@@ -141,6 +145,7 @@ export const useResponderActionData = ({
     return [false, undefined];
   }, [
     isEndpointHost,
+    endpointId,
     isFetching,
     error,
     hostInfo?.host_status,
@@ -160,10 +165,10 @@ export const useResponderActionData = ({
         platform: agentInfoFromAlert.host.os.family,
       });
     }
-    if (hostInfo) {
+    if (isEndpointHost && hostInfo) {
       showResponseActionsConsole({
         agentId: hostInfo.metadata.agent.id,
-        agentType: 'endpoint',
+        agentType,
         capabilities: (hostInfo.metadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
         hostName: hostInfo.metadata.host.name,
         platform: hostInfo.metadata.host.os.name.toLowerCase() as Platform,

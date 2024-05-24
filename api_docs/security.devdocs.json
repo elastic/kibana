@@ -5038,7 +5038,7 @@
         "label": "CreateAPIKeyParams",
         "description": [],
         "signature": [
-          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{} & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
+          "Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; role_descriptors: Record<string, Readonly<{} & {}>>; }> | Readonly<{ type?: \"rest\" | undefined; metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { name: string; kibana_role_descriptors: Record<string, Readonly<{} & { kibana: Readonly<{ base?: string[] | undefined; feature?: Record<string, string[]> | undefined; } & { spaces: string[] | \"*\"[]; }>[]; elasticsearch: Readonly<{ cluster?: string[] | undefined; indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; }>[] | undefined; remote_cluster?: Readonly<{} & { privileges: string[]; clusters: string[]; }>[] | undefined; remote_indices?: Readonly<{ query?: string | undefined; field_security?: Record<\"grant\" | \"except\", string[]> | undefined; allow_restricted_indices?: boolean | undefined; } & { names: string[]; privileges: string[]; clusters: string[]; }>[] | undefined; run_as?: string[] | undefined; } & {}>; }>>; }> | Readonly<{ metadata?: Readonly<{} & {}> | undefined; expiration?: string | undefined; } & { type: \"cross_cluster\"; name: string; access: Readonly<{ search?: Readonly<{ query?: any; field_security?: any; allow_restricted_indices?: boolean | undefined; } & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }>"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
@@ -5070,7 +5070,7 @@
         "label": "CreateCrossClusterAPIKeyParams",
         "description": [],
         "signature": [
-          "{ readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly type: \"cross_cluster\"; readonly name: string; readonly access: Readonly<{ search?: Readonly<{} & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }"
+          "{ readonly metadata?: Readonly<{} & {}> | undefined; readonly expiration?: string | undefined; readonly type: \"cross_cluster\"; readonly name: string; readonly access: Readonly<{ search?: Readonly<{ query?: any; field_security?: any; allow_restricted_indices?: boolean | undefined; } & { names: string[]; }>[] | undefined; replication?: Readonly<{} & { names: string[]; }>[] | undefined; } & {}>; }"
         ],
         "path": "x-pack/packages/security/plugin_types_server/src/authentication/api_keys/api_keys.ts",
         "deprecated": false,
@@ -6250,7 +6250,8 @@
             "section": "def-common.RestApiKey",
             "text": "RestApiKey"
           },
-          " extends BaseApiKey"
+          " extends ",
+          "BaseApiKey"
         ],
         "path": "x-pack/plugins/security/common/model/api_key.ts",
         "deprecated": false,
