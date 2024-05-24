@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiBadge,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { CasesConfigurationUITemplate } from '../../../common/ui';
 
 export interface Props {
@@ -15,6 +23,7 @@ export interface Props {
 
 const TemplatesListComponent: React.FC<Props> = (props) => {
   const { templates } = props;
+  const { euiTheme } = useEuiTheme();
 
   return templates.length ? (
     <>
@@ -25,7 +34,7 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
             <React.Fragment key={template.key}>
               <EuiPanel
                 paddingSize="s"
-                data-test-subj={`custom-field-${template.key}`}
+                data-test-subj={`template-${template.key}`}
                 hasShadow={false}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -36,6 +45,17 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                           <h4>{template.name}</h4>
                         </EuiText>
                       </EuiFlexItem>
+                      {template.tags?.length
+                        ? template.tags.map((tag, index) => (
+                            <EuiBadge
+                              key={`${template.key}-tag-${index}`}
+                              data-test-subj={`${template.key}-tag-${index}`}
+                              color={euiTheme.colors.body}
+                            >
+                              {tag}
+                            </EuiBadge>
+                          ))
+                        : null}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>

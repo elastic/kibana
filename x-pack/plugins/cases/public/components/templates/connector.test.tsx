@@ -52,7 +52,6 @@ const defaultProps = {
 
 describe('Connector', () => {
   let appMockRender: AppMockRenderer;
-  const onSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();

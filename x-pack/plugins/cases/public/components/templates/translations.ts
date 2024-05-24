@@ -59,3 +59,9 @@ export const CASE_FIELDS = i18n.translate('xpack.cases.templates.caseFields', {
 export const CONNECTOR_FIELDS = i18n.translate('xpack.cases.templates.connectorFields', {
   defaultMessage: 'External Connector Fields',
 });
+
+export const MAX_TEMPLATE_LIMIT = (maxTemplates: number) =>
+  i18n.translate('xpack.cases.templates.maxTemplateLimit', {
+    values: { maxTemplates },
+    defaultMessage: 'Maximum number of {maxTemplates} templates reached.',
+  });

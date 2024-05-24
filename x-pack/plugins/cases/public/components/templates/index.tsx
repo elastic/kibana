@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiPanel,
@@ -13,11 +13,12 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
-
+import { MAX_TEMPLATES_LENGTH } from '../../../common/constants';
+import type { CasesConfigurationUITemplate } from '../../../common/ui';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
-import type { CasesConfigurationUITemplate } from '../../../common/ui';
 import * as i18n from './translations';
 import { TemplatesList } from './templates_list';
 
@@ -36,16 +37,17 @@ const TemplatesComponent: React.FC<Props> = ({
 }) => {
   const { permissions } = useCasesContext();
   const canAddTemplates = permissions.create && permissions.update;
+  const [error, setError] = useState<boolean>(false);
 
   const onAddCustomField = useCallback(() => {
-    // if (customFields.length === MAX_CUSTOM_FIELDS_PER_CASE && !error) {
-    //   setError(true);
-    //   return;
-    // }
+    if (templates.length === MAX_TEMPLATES_LENGTH && !error) {
+      setError(true);
+      return;
+    }
 
     handleAddTemplate();
-    // setError(false);
-  }, [handleAddTemplate]);
+    setError(false);
+  }, [handleAddTemplate, error, templates]);
 
   return (
     <EuiDescribedFormGroup
@@ -65,15 +67,13 @@ const TemplatesComponent: React.FC<Props> = ({
         {templates.length ? (
           <>
             <TemplatesList templates={templates} />
-            {/* {error ? (
+            {error ? (
               <EuiFlexGroup justifyContent="center">
                 <EuiFlexItem grow={false}>
-                  <EuiText color="danger">
-                    {i18n.MAX_CUSTOM_FIELD_LIMIT(MAX_CUSTOM_FIELDS_PER_CASE)}
-                  </EuiText>
+                  <EuiText color="danger">{i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            ) : null} */}
+            ) : null}
           </>
         ) : null}
         <EuiSpacer size="m" />
@@ -90,7 +90,7 @@ const TemplatesComponent: React.FC<Props> = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 isLoading={isLoading}
-                isDisabled={disabled}
+                isDisabled={disabled || error}
                 size="s"
                 onClick={onAddCustomField}
                 iconType="plusInCircle"

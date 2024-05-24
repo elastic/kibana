@@ -736,7 +736,7 @@ describe('ConfigureCases', () => {
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
       userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.click(screen.getByTestId('customFieldFlyout-save'));
+      userEvent.click(screen.getByTestId('customFieldFlyoutSave'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -781,7 +781,7 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('customFieldFlyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('customFieldFlyout-cancel'));
+      userEvent.click(screen.getByTestId('customFieldFlyoutCancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('customFieldFlyout')).not.toBeInTheDocument();
@@ -796,7 +796,7 @@ describe('ConfigureCases', () => {
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-      userEvent.click(screen.getByTestId('customFieldFlyout-save'));
+      userEvent.click(screen.getByTestId('customFieldFlyoutSave'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({

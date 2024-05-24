@@ -76,7 +76,7 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
 
   return (
     <EuiFlyout onClose={onCloseFlyout} data-test-subj={dataTestSubj}>
-      <EuiFlyoutHeader hasBorder data-test-subj={`${dataTestSubj}-header`}>
+      <EuiFlyoutHeader hasBorder data-test-subj={`${dataTestSubj}Header`}>
         <EuiTitle size="s">
           <h3 id="flyoutTitle">
             {type === 'customField' ? i18n.ADD_CUSTOM_FIELD : i18n.CRATE_TEMPLATE}
@@ -100,12 +100,12 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
           />
         ) : null}
       </EuiFlyoutBody>
-      <EuiFlyoutFooter data-test-subj={`${dataTestSubj}-footer`}>
+      <EuiFlyoutFooter data-test-subj={`${dataTestSubj}Footer`}>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onCloseFlyout}
-              data-test-subj={`${dataTestSubj}-cancel`}
+              data-test-subj={`${dataTestSubj}Cancel`}
               disabled={disabled}
               isLoading={isLoading}
             >
@@ -117,7 +117,7 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
               <EuiButton
                 fill
                 onClick={handleSaveField}
-                data-test-subj={`${dataTestSubj}-save`}
+                data-test-subj={`${dataTestSubj}Save`}
                 disabled={disabled}
                 isLoading={isLoading}
               >

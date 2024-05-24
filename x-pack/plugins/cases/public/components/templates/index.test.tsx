@@ -1,0 +1,95 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
+
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
+
+import { MAX_TEMPLATES_LENGTH } from '../../../common/constants';
+import { Templates } from '.';
+import * as i18n from './translations';
+import { templatesConfigurationMock } from '../../containers/mock';
+
+describe('Templates', () => {
+  let appMockRender: AppMockRenderer;
+
+  const props = {
+    disabled: false,
+    isLoading: false,
+    templates: [],
+    handleAddTemplate: jest.fn(),
+  };
+
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+    jest.clearAllMocks();
+  });
+
+  it('renders correctly', async () => {
+    appMockRender.render(<Templates {...props} />);
+
+    expect(await screen.findByTestId('templates-form-group')).toBeInTheDocument();
+    expect(await screen.findByTestId('add-template')).toBeInTheDocument();
+  });
+
+  it('renders templates correctly', async () => {
+    appMockRender.render(<Templates {...{ ...props, templates: templatesConfigurationMock }} />);
+
+    expect(await screen.findByTestId('add-template')).toBeInTheDocument();
+    expect(await screen.findByTestId('templates-list')).toBeInTheDocument();
+  });
+
+  it('renders loading state correctly', async () => {
+    appMockRender.render(<Templates {...{ ...props, isLoading: true }} />);
+
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
+  });
+
+  it('renders disabled state correctly', async () => {
+    appMockRender.render(<Templates {...{ ...props, disabled: true }} />);
+
+    expect(await screen.findByTestId('add-template')).toHaveAttribute('disabled');
+  });
+
+  it('calls onChange on add option click', async () => {
+    appMockRender.render(<Templates {...props} />);
+
+    userEvent.click(await screen.findByTestId('add-template'));
+
+    expect(props.handleAddTemplate).toBeCalled();
+  });
+
+  it('shows the experimental badge', async () => {
+    appMockRender.render(<Templates {...props} />);
+
+    expect(await screen.findByTestId('case-experimental-badge')).toBeInTheDocument();
+  });
+
+  it('shows error when templates reaches the limit', async () => {
+    const mockTemplates = [];
+
+    for (let i = 0; i < 6; i++) {
+      mockTemplates.push({
+        key: `field_key_${i + 1}`,
+        name: `template_${i + 1}`,
+        description: 'random foobar',
+        caseFields: null,
+      });
+    }
+    const templates = [...templatesConfigurationMock, ...mockTemplates];
+
+    appMockRender.render(<Templates {...{ ...props, templates }} />);
+
+    userEvent.click(await screen.findByTestId('add-template'));
+
+    expect(await screen.findByText(i18n.MAX_TEMPLATE_LIMIT(MAX_TEMPLATES_LENGTH)));
+    expect(await screen.findByTestId('add-template')).toHaveAttribute('disabled');
+  });
+});

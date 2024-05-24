@@ -11,10 +11,11 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import type { TemplateFormState } from './form';
 import { TemplateForm } from './form';
-import { connectorsMock } from '../../containers/mock';
+import { connectorsMock, customFieldsConfigurationMock } from '../../containers/mock';
 import userEvent from '@testing-library/user-event';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
+import { MAX_TAGS_PER_TEMPLATE, MAX_TEMPLATE_TAG_LENGTH } from '../../../common/constants';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -257,6 +258,170 @@ describe('TemplateForm', () => {
           syncAlerts: true,
         },
       });
+    });
+  });
+
+  it('serializes the custom fields data correctly', async () => {
+    let formState: TemplateFormState;
+
+    const onChangeState = (state: TemplateFormState) => (formState = state);
+
+    appMockRenderer.render(
+      <TemplateForm
+        {...{
+          ...defaultProps,
+          configurationCustomFields: customFieldsConfigurationMock,
+          onChange: onChangeState,
+        }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
+
+    userEvent.paste(
+      await screen.findByTestId('template-description-input'),
+      'this is a first template'
+    );
+
+    const textField = customFieldsConfigurationMock[0];
+    const toggleField = customFieldsConfigurationMock[3];
+
+    const textCustomField = await screen.findByTestId(
+      `${textField.key}-${textField.type}-create-custom-field`
+    );
+
+    userEvent.clear(textCustomField);
+    userEvent.paste(textCustomField, 'My text test value 1');
+
+    userEvent.click(
+      await screen.findByTestId(`${toggleField.key}-${toggleField.type}-create-custom-field`)
+    );
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(true);
+
+      expect(data).toEqual({
+        key: expect.anything(),
+        name: 'Template 1',
+        description: 'this is a first template',
+        tags: [],
+        caseFields: {
+          connectorId: 'none',
+          fields: null,
+          syncAlerts: true,
+          customFields: {
+            test_key_1: 'My text test value 1',
+            test_key_2: true,
+            test_key_4: true,
+          },
+        },
+      });
+    });
+  });
+
+  it('shows from state as invalid when template name missing', async () => {
+    let formState: TemplateFormState;
+
+    const onChangeState = (state: TemplateFormState) => (formState = state);
+
+    appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('template-name-input'), '');
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(false);
+
+      expect(data).toEqual({});
+    });
+  });
+
+  it('shows from state as invalid when template description missing', async () => {
+    let formState: TemplateFormState;
+
+    const onChangeState = (state: TemplateFormState) => (formState = state);
+
+    appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(false);
+
+      expect(data).toEqual({});
+    });
+  });
+
+  it('shows from state as invalid when template tags are more than 10', async () => {
+    let formState: TemplateFormState;
+
+    const onChangeState = (state: TemplateFormState) => (formState = state);
+
+    appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    const tagsArray = Array(MAX_TAGS_PER_TEMPLATE + 1).fill('foo');
+
+    const templateTags = await screen.findByTestId('template-tags');
+
+    tagsArray.forEach((tag) => {
+      userEvent.paste(within(templateTags).getByRole('combobox'), 'template-1');
+      userEvent.keyboard('{enter}');
+    });
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(false);
+
+      expect(data).toEqual({});
+    });
+  });
+
+  it('shows from state as invalid when template tag is more than 50 characters', async () => {
+    let formState: TemplateFormState;
+
+    const onChangeState = (state: TemplateFormState) => (formState = state);
+
+    appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    const x = 'a'.repeat(MAX_TEMPLATE_TAG_LENGTH + 1);
+
+    const templateTags = await screen.findByTestId('template-tags');
+
+    userEvent.paste(within(templateTags).getByRole('combobox'), x);
+    userEvent.keyboard('{enter}');
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(false);
+
+      expect(data).toEqual({});
     });
   });
 });
