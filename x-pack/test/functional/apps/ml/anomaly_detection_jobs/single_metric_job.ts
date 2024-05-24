@@ -422,8 +422,8 @@ export default function ({ getService }: FtrProviderContext) {
         shortDurationEndDate
       );
 
-      await ml.jobWizardCommon.clickNextButton();
-      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.advanceToPickFieldsSection();
+      await ml.jobWizardCommon.advanceToJobDetailsSection();
       await ml.jobWizardCommon.assertJobIdInputExists();
       await ml.jobWizardCommon.setJobId(`${jobIdClone}-again`);
       await ml.jobWizardCommon.advanceToValidationSection();
