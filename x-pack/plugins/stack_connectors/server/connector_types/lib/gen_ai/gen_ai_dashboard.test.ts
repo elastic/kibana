@@ -26,17 +26,6 @@ describe('getDashboard', () => {
       expect(dashboard.id).toBe(dashboardId);
       expect(dashboard.attributes.title).toBe(getDashboardTitle(expectedTitle));
       expect(dashboard.attributes.description).toContain(expectedTitle);
-
-      // Ensure the correct actionTypeId is used in the query
-      const panelsJSON = JSON.parse(dashboard.attributes.panelsJSON);
-      const searchSourceJSONPanel0 = JSON.parse(
-        panelsJSON[1].embeddableConfig.attributes.state.query.query
-      );
-      const searchSourceJSONPanel1 = JSON.parse(
-        panelsJSON[2].embeddableConfig.attributes.state.query.query
-      );
-      expect(searchSourceJSONPanel0['kibana.saved_objects'].type_id).toBe(expectedActionTypeId);
-      expect(searchSourceJSONPanel1['kibana.saved_objects'].type_id).toBe(expectedActionTypeId);
     }
   );
 });

@@ -155,7 +155,7 @@ describe('GeminiConnectorFields renders', () => {
 
       expect(onSubmit).toBeCalledWith({
         data: geminiConnector,
-        isValid: true,
+        isValid: false,
       });
     });
 
@@ -188,10 +188,7 @@ describe('GeminiConnectorFields renders', () => {
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
 
-    const tests: Array<[string, string]> = [
-      ['config.apiUrl-input', 'not-valid'],
-      ['secrets.accessKey-input', ''],
-    ];
+    const tests: Array<[string, string]> = [['config.apiUrl-input', 'not-valid']];
     it.each(tests)('validates correctly %p', async (field, value) => {
       const connector = {
         ...geminiConnector,

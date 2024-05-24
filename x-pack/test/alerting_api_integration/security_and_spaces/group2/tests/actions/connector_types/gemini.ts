@@ -62,7 +62,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           config: configService.get('kbnTestServer.serverArgs'),
         },
       });
-      const config = { ...defaultConfig, url: '' };
+      let config = { ...defaultConfig, url: '' };
 
       before(async () => {
         config.url = await simulator.start();

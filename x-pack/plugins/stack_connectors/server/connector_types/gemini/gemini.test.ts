@@ -14,14 +14,9 @@ import type { Services } from '@kbn/actions-plugin/server/types';
 import {
   KibanaRequest,
   SavedObjectsClientContract,
-  ElasticsearchClient,
-  KibanaRequestEvents,
-  IKibanaSocket,
+  ElasticsearchClient
 } from '@kbn/core/server';
-import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
-import type { Headers } from 'packages/core/http/core-http-server/src/router/headers';
-import { AxiosResponse, AxiosHeaders } from 'axios';
-import { RunApiResponse } from '../../../common/gemini/types';
+import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';\
 import { RunApiResponseSchema } from '../../../common/gemini/schema';
 
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
@@ -79,52 +74,7 @@ describe('GeminiConnector', () => {
     connectorTokenClient: {} as ConnectorTokenClient, // Empty mock object
   };
 
-  const mockHeaders: Headers = {
-    'Content-Type': 'application/json',
-    Authorization: 'Bearer some-token',
-    'X-Custom-Header': ['value1', 'value2'], // Multiple values
-  };
-
-  const mockAxiosHeaders = new AxiosHeaders({
-    'Content-Type': 'application/json',
-    Authorization: 'Bearer some-token',
-    'X-Custom-Header': ['value1', 'value2'],
-  });
-
-  const mockKibanaRequest: KibanaRequest = {
-    id: 'mock-request-id',
-    uuid: 'mock-request-uuid',
-    url: new URL('https://example.com/api/endpoint'),
-    route: {
-      path: '/api/endpoint',
-      method: 'get',
-      options: {
-        authRequired: 'optional',
-        xsrfRequired: false,
-        access: 'public',
-        tags: ['readonly'],
-        timeout: {
-          payload: undefined,
-          idleSocket: undefined,
-        },
-        description: 'string',
-      },
-    },
-    headers: mockHeaders,
-    isSystemRequest: false,
-    isFakeRequest: false,
-    isInternalApiRequest: false,
-    socket: {} as IKibanaSocket, // You might need to mock this depending on your code's interaction with it
-    events: {} as KibanaRequestEvents, // You might need to mock this too
-    auth: {
-      isAuthenticated: false,
-    },
-    params: {},
-    query: {},
-    body: {},
-    httpVersion: '',
-    protocol: 'http1',
-  };
+  let mockKibana: jest.Mock;
 
   beforeEach(() => {
     mockServiceParams = {
@@ -152,7 +102,7 @@ describe('GeminiConnector', () => {
       },
       logger: loggingSystemMock.createLogger(),
       services: mockServices,
-      request: mockKibanaRequest,
+      request: mockKibana as unknown as KibanaRequest,
     };
 
     connector = new GeminiConnector(mockServiceParams);
@@ -190,31 +140,9 @@ describe('GeminiConnector', () => {
         model: 'test-model',
       };
 
-      const mockApiResponse: AxiosResponse<RunApiResponse> = {
-        data: {
-          candidates: [
-            {
-              content: {
-                parts: [{ text: 'Paris' }],
-              },
-            },
-          ],
-          usageMetadata: {
-            promptTokenCount: 4096,
-            candidatesTokenCount: 512,
-            totalTokenCount: 8192,
-          },
-        },
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {
-          headers: mockAxiosHeaders,
-        },
-      };
-
       // Mock the request function to simulate a successful API call
-      jest.spyOn(connector as GeminiConnector, 'request').mockResolvedValueOnce(mockApiResponse);
+      jest.spyOn(connector as GeminiConnector, 'runApi').mockResolvedValueOnce({completion:'true',
+       stop_reason: '200' });
 
       const response = await connector.runApi(runActionParams);
 

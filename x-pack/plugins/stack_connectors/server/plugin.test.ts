@@ -131,7 +131,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(7);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(8);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -172,6 +172,13 @@ describe('Stack Connectors Plugin', () => {
         expect.objectContaining({
           id: '.resilient',
           name: 'IBM Resilient',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        7,
+        expect.objectContaining({
+          id: '.gemini',
+          name: 'Google Gemini',
         })
       );
     });
