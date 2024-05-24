@@ -3608,6 +3608,9 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         advanced: { enabled: false },
         basic: { enabled: true },
       },
+      [FeatureName.DOCUMENT_LEVEL_SECURITY]: {
+        enabled: true,
+      },
       [FeatureName.INCREMENTAL_SYNC]: {
         enabled: true,
       },
