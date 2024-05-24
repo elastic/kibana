@@ -17,6 +17,10 @@ export function initGetShareableReferencesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_get_shareable_references',
+      options: {
+        access: 'public',
+        description: `Get shareable references`,
+      },
       validate: {
         body: schema.object({
           objects: schema.arrayOf(schema.object({ type: schema.string(), id: schema.string() })),

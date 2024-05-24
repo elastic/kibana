@@ -20,6 +20,10 @@ export function initPostSpacesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/space',
+      options: {
+        access: 'public',
+        description: `Create a space`,
+      },
       validate: {
         body: spaceSchema,
       },

@@ -18,6 +18,10 @@ export function initGetSpaceApi(deps: ExternalRouteDeps) {
   router.get(
     {
       path: '/api/spaces/space/{id}',
+      options: {
+        access: 'public',
+        description: `Get a space`,
+      },
       validate: {
         params: schema.object({
           id: schema.string(),

@@ -18,6 +18,10 @@ export function initDisableLegacyUrlAliasesApi(deps: ExternalRouteDeps) {
   router.post(
     {
       path: '/api/spaces/_disable_legacy_url_aliases',
+      options: {
+        access: 'public',
+        description: `Disable legacy URL aliases`,
+      },
       validate: {
         body: schema.object({
           aliases: schema.arrayOf(

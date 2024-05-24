@@ -20,6 +20,10 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
   router.put(
     {
       path: '/api/spaces/space/{id}',
+      options: {
+        access: 'public',
+        description: `Update a space`,
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
