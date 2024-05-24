@@ -9,7 +9,7 @@ steps:
       preemptible: true
     depends_on:
       - build
-      - quick_checks
+      # - quick_checks
     timeout_in_minutes: 30
     soft_fail: true
     retry:
