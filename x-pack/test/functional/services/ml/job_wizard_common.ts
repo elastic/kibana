@@ -669,9 +669,7 @@ export function MachineLearningJobWizardCommonProvider(
         timeout: 3_000,
       });
       await testSubjects.click('mlJobWizardJobDetailsStep');
-      await testSubjects.existOrFail('mlJobWizardStepTitleJobDetails', {
-        timeout: 3_000,
-      });
+      await this.assertJobDetailsSectionExists();
     },
 
     async assertValidationCallouts(expectedCallOutSelectors: string[]) {
