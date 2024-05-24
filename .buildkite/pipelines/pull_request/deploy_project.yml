@@ -3,7 +3,11 @@ steps:
     label: 'Build Project Image'
     key: build_project_image
     agents:
-      queue: n2-16-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-16
+      preemptible: true
     timeout_in_minutes: 60
     soft_fail: true
     retry:
@@ -13,7 +17,11 @@ steps:
   - command: .buildkite/scripts/steps/serverless/deploy.sh
     label: 'Deploy Project'
     agents:
-      queue: kibana-default
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
+      preemptible: true
     timeout_in_minutes: 10
     depends_on:
       - build_project_image
