@@ -19,7 +19,6 @@
     "@kbn/zod-helpers",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/core",
-    "@kbn/actions-plugin",
-    "@kbn/logging-mocks",
+    "@kbn/logging",
   ]
 }

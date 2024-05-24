@@ -16,8 +16,7 @@ const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
 
 export const navTabsUsersDetails = (
   userName: string,
-  hasMlUserPermissions: boolean,
-  isRiskyUserEnabled: boolean
+  hasMlUserPermissions: boolean
 ): UsersDetailsNavTab => {
   const hiddenTabs = [];
 
@@ -50,10 +49,6 @@ export const navTabsUsersDetails = (
 
   if (!hasMlUserPermissions) {
     hiddenTabs.push(UsersTableType.anomalies);
-  }
-
-  if (!isRiskyUserEnabled) {
-    hiddenTabs.push(UsersTableType.risk);
   }
 
   return omit(hiddenTabs, userDetailsNavTabs);

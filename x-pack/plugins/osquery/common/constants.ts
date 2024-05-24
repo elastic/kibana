@@ -15,6 +15,7 @@ export const RESULTS_INDEX = `${OSQUERY_LOGS_BASE}.results`;
 export const OSQUERY_ACTIONS_INDEX = `${ACTIONS_INDEX}-*`;
 
 export const ACTION_RESPONSES_INDEX = `.logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
+export const ACTION_RESPONSES_DATA_STREAM_INDEX = `logs-${OSQUERY_INTEGRATION_NAME}.action.responses`;
 
 export const DEFAULT_PLATFORM = 'linux,windows,darwin';
 
