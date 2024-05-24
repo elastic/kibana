@@ -106,7 +106,7 @@ const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
     chartsData,
     isLoading: isExplorerLoading,
     error,
-  } = useAnomalyChartsData(api, services, timeRange$, chartWidth, severity.val, renderCallbacks);
+  } = useAnomalyChartsData(api, services, chartWidth, severity.val, renderCallbacks);
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();

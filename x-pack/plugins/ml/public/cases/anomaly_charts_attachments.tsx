@@ -32,7 +32,7 @@ interface AnomalyChartsCaseAttachmentProps extends AnomalyChartsAttachmentState 
 }
 const AnomalyChartsCaseAttachment = ({
   services,
-  ...initialState
+  ...rawState
 }: AnomalyChartsCaseAttachmentProps) => {
   const id = useMemo(() => htmlIdGenerator()(), []);
   const [coreStartServices, pluginStartServices, mlServices] = services;
@@ -48,23 +48,24 @@ const AnomalyChartsCaseAttachment = ({
     []
   );
 
-  const api = useMemo(
-    () => {
-      const filters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters ?? []);
-      const query$ = new BehaviorSubject<Query | undefined>(initialState.query ?? undefined);
-      const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
+  const api = useMemo(() => {
+    const initialState: AnomalyChartsAttachmentState = rawState ?? {};
+    const filters$ = new BehaviorSubject<Filter[] | undefined>(initialState.filters ?? []);
+    const query$ = new BehaviorSubject<Query | undefined>(initialState.query ?? undefined);
+    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(initialState.timeRange);
 
-      const anomalyChartsApi = initializeAnomalyChartsControls(initialState);
-      const combined: AnomalyChartsAttachmentApi = {
-        ...anomalyChartsApi.anomalyChartsControlsApi,
-        ...anomalyChartsApi.dataLoadingApi,
-        parentApi: { filters$, query$, timeRange$ },
-      };
-      return combined;
-    },
+    const anomalyChartsApi = initializeAnomalyChartsControls(initialState);
+    const combined: AnomalyChartsAttachmentApi = {
+      ...anomalyChartsApi.anomalyChartsControlsApi,
+      ...anomalyChartsApi.dataLoadingApi,
+      parentApi: { filters$, query$, timeRange$ },
+    };
+    return combined;
+    // Initialize services upon first mount already,
+    // as state management for cases
+    // already handled by the initial state
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+  }, []);
 
   return (
     <div css={css({ display: 'flex', width: '100%' })}>
@@ -72,12 +73,13 @@ const AnomalyChartsCaseAttachment = ({
         <KibanaContextProvider services={contextServices}>
           <LazyAnomalyChartsContainer
             id={`case-anomaly-charts-${id}`}
-            severityThreshold={initialState.severityThreshold}
+            severityThreshold={rawState.severityThreshold}
             api={api}
             services={services}
             onLoading={api.onLoading}
             onRenderComplete={api.onRenderComplete}
             onError={api.onError}
+            timeRange$={api.parentApi.timeRange$}
           />
         </KibanaContextProvider>
       </KibanaRenderContextProvider>

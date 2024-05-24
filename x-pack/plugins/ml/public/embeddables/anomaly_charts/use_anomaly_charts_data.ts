@@ -6,10 +6,8 @@
  */
 
 import { useState, useMemo, useEffect } from 'react';
-import type { Observable } from 'rxjs';
 import { combineLatest, tap, debounceTime, switchMap, skipWhile, of } from 'rxjs';
 import { Subject, catchError } from 'rxjs';
-import type { TimeRange } from '@kbn/es-query';
 import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { fetch$ } from '@kbn/presentation-publishing';
@@ -31,7 +29,6 @@ const FETCH_RESULTS_DEBOUNCE_MS = 500;
 export function useAnomalyChartsData(
   api: AnomalyChartsApi,
   services: [CoreStart, MlStartDependencies, AnomalyChartsServices],
-  timeRange$: Observable<TimeRange | undefined>,
   chartWidth: number,
   severity: number,
   renderCallbacks: {
