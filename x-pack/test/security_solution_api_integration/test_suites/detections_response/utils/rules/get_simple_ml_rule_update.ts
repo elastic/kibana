@@ -22,4 +22,5 @@ export const getSimpleMlRuleUpdate = (ruleId = 'rule-1', enabled = false): RuleU
   severity: 'high',
   machine_learning_job_id: ['some_job_id'],
   type: 'machine_learning',
+  interval: '24h',
 });
