@@ -5,7 +5,7 @@ steps:
       image: family/kibana-ubuntu-2004
       imageProject: elastic-images-qa
       provider: gcp
-      machineType: c2-standard-16
+      machineType: c3-standard-22
     timeout_in_minutes: 75
     retry:
       automatic:
