@@ -10,14 +10,20 @@ import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/con
 import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const es = getService('es');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('filter fields', () => {
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       await es.index({
         index: 'helloworld1',
         refresh: true,
@@ -32,13 +38,16 @@ export default function ({ getService }: FtrProviderContext) {
         body: { bye: 'world' },
       });
     });
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('can filter', async () => {
-      const a = await supertest
+      const a = await supertestWithoutAuth
         .put(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({ pattern: 'helloworld*' })
         .send({ index_filter: { exists: { field: 'bye' } } });
 
