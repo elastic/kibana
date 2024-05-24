@@ -105,12 +105,12 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       })}
     >
       <FloatingActions
+        api={api}
         className={classNames({
           'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
           'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
         })}
         viewMode={viewMode}
-        embeddable={api}
         disabledActions={[]}
         isEnabled={true}
       >
