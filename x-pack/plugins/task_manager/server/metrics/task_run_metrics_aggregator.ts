@@ -7,6 +7,7 @@
 
 import { JsonObject } from '@kbn/utility-types';
 import { merge } from 'lodash';
+import { Logger } from '@kbn/core/server';
 import { isUserError } from '../task_running';
 import { isOk, Ok, unwrap } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
@@ -63,12 +64,16 @@ export interface TaskRunMetric extends JsonObject {
 }
 
 export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunMetric> {
+  private logger: Logger;
   private counter: MetricCounterService<TaskRunMetric> = new MetricCounterService(
     Object.values(TaskRunKeys),
     TaskRunMetricKeys.OVERALL
   );
   private delayHistogram = new SimpleHistogram(HDR_HISTOGRAM_MAX, HDR_HISTOGRAM_BUCKET_SIZE);
 
+  constructor(logger: Logger) {
+    this.logger = logger;
+  }
   public initialMetric(): TaskRunMetric {
     return merge(this.counter.initialMetrics(), {
       by_type: {},
@@ -96,6 +101,9 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
   public processTaskLifecycleEvent(taskEvent: TaskLifecycleEvent) {
     if (isTaskRunEvent(taskEvent)) {
       this.processTaskRunEvent(taskEvent);
+      this.logger.debug(
+        `Collected metrics after processing lifecycle event - ${JSON.stringify(this.collect())}`
+      );
     } else if (isTaskManagerStatEvent(taskEvent)) {
       this.processTaskManagerStatEvent(taskEvent);
     }
@@ -115,6 +123,7 @@ export class TaskRunMetricsAggregator implements ITaskMetricsAggregator<TaskRunM
     if (success) {
       this.incrementCounters(TaskRunKeys.SUCCESS, taskType, taskTypeGroup);
     } else {
+      this.logger.debug(`Incrementing error counter for task ${task.taskType}`);
       // increment total error counts
       this.incrementCounters(TaskRunKeys.TOTAL_ERRORS, taskType, taskTypeGroup);
 

@@ -6250,7 +6250,8 @@
             "section": "def-common.RestApiKey",
             "text": "RestApiKey"
           },
-          " extends BaseApiKey"
+          " extends ",
+          "BaseApiKey"
         ],
         "path": "x-pack/plugins/security/common/model/api_key.ts",
         "deprecated": false,

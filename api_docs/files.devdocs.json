@@ -5277,7 +5277,7 @@
               "\nAttributes to update."
             ],
             "signature": [
-              "{ name: string; meta: unknown; alt: string | undefined; }"
+              "{ meta: unknown; name: string; alt: string | undefined; }"
             ],
             "path": "src/plugins/files/server/file_service/file_action_types.ts",
             "deprecated": false,
@@ -6869,7 +6869,7 @@
           "\nThe set of file metadata that can be updated."
         ],
         "signature": [
-          "{ name: string; meta: Meta | undefined; alt: string | undefined; }"
+          "{ meta: Meta | undefined; name: string; alt: string | undefined; }"
         ],
         "path": "src/plugins/files/common/types.ts",
         "deprecated": false,

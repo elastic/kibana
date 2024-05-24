@@ -87,20 +87,12 @@ export async function retrievePoliciesFields(
   return await getFieldsByTypeHelper(customQuery, callbacks).getFieldsMap();
 }
 
-export async function retrieveMetadataFields(callbacks?: ESQLCallbacks): Promise<Set<string>> {
-  if (!callbacks || !callbacks.getMetaFields) {
-    return new Set();
-  }
-  const fields = await callbacks.getMetaFields();
-  return new Set(fields);
-}
-
 export async function retrieveFieldsFromStringSources(
   queryString: string,
   commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLRealField>> {
-  if (!callbacks || !callbacks?.getMetaFields) {
+  if (!callbacks) {
     return new Map();
   }
   const customQuery = buildQueryForFieldsForStringSources(queryString, commands);
