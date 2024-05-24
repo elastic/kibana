@@ -114,9 +114,7 @@ export class ProjectNavigationService {
     );
 
     return {
-      setProjectHome: (homeHref: string) => {
-        this.projectHome$.next(homeHref);
-      },
+      setProjectHome: this.setProjectHome.bind(this),
       getProjectHome$: () => {
         return this.projectHome$.asObservable();
       },
@@ -408,12 +406,23 @@ export class ProjectNavigationService {
           return;
         }
 
-        const { sideNavComponent } = definition;
+        const { sideNavComponent, homePage = '' } = definition;
+        const homePageLink = this.navLinksService?.get(homePage);
+
         if (sideNavComponent) {
           this.setSideNavComponent(sideNavComponent);
         }
+
+        if (homePageLink) {
+          this.setProjectHome(homePageLink.href);
+        }
+
         this.initNavigation(nextId, definition.navigationTree$);
       });
+  }
+
+  private setProjectHome(homeHref: string) {
+    this.projectHome$.next(homeHref);
   }
 
   private goToSolutionHome(id: string) {
