@@ -1,11 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import { EuiCodeBlock, EuiAccordion, EuiPanel, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface DocsResultsProps {
-  docs: Array<object>;
+  docs: object[];
 }
 
-const DocResults = ({ docs }: DocsResultsProps) => {
+export const DocResults = ({ docs }: DocsResultsProps) => {
   const simpleAccordionId = useGeneratedHtmlId({ prefix: 'docs_results' });
 
   return (
@@ -28,5 +36,3 @@ const DocResults = ({ docs }: DocsResultsProps) => {
     </div>
   );
 };
-
-export default DocResults;

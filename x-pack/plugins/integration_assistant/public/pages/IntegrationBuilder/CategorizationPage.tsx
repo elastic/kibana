@@ -1,12 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
-import { useGlobalStore } from '@Stores/useGlobalStore';
+import { useGlobalStore } from '../../stores/useGlobalStore';
 
-import EmptyPrompt from '@components/EmptyPrompt/EmptyPrompt';
-import CategorizationButtons from '@Components/Categorization/CategorizationButtons';
-import PipelineResults from '@Components/IntegrationResults/PipelineResults';
-import RoutePaths from '@Constants/routePaths';
+import EmptyPrompt from '../../components/EmptyPrompt/EmptyPrompt';
+import CategorizationButtons from '../../components/Categorization/CategorizationButtons';
+import PipelineResults from '../../components/IntegrationResults/PipelineResults';
+import RoutePaths from '../../constants/routePaths';
 
-const CategorizationPage = () => {
+export const CategorizationPage = () => {
   const ingestPipeline = useGlobalStore((state) => state.ingestPipeline);
 
   if (Object.keys(ingestPipeline).length <= 0) {
@@ -19,12 +27,10 @@ const CategorizationPage = () => {
     );
   }
   return (
-      <EuiPageTemplate.Section>
-        <PipelineResults pipeline={ingestPipeline} />
-        <EuiSpacer />
-        <CategorizationButtons />
-      </EuiPageTemplate.Section>
+    <EuiPageTemplate.Section>
+      <PipelineResults pipeline={ingestPipeline} />
+      <EuiSpacer />
+      <CategorizationButtons />
+    </EuiPageTemplate.Section>
   );
 };
-
-export default CategorizationPage;

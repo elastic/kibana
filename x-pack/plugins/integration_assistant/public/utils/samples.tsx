@@ -1,5 +1,13 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { htmlIdGenerator } from '@elastic/eui';
-import { ECSFIELDS } from '@Constants/ecsFields';
+import { ECSFIELDS } from '../constants/ecsFields';
+import { EcsMappingTableItem } from '../types';
 
 function isEmptyValue(value): boolean {
   return value === null || value === '';
@@ -46,7 +54,7 @@ export function traverseAndMatchFields(
   mergedObject: object,
   packageName: string,
   dataStreamName: string,
-  path: string[] = [],
+  path: string[] = []
 ): EcsMappingTableItem[] {
   const makeId = htmlIdGenerator();
   let matches: EcsMappingTableItem[] = [];
@@ -54,7 +62,7 @@ export function traverseAndMatchFields(
   Object.entries(mapping).forEach(([key, value]) => {
     if (typeof value === 'object' && value !== null) {
       matches = matches.concat(
-        traverseAndMatchFields(value, mergedObject, packageName, dataStreamName, path.concat(key)),
+        traverseAndMatchFields(value, mergedObject, packageName, dataStreamName, path.concat(key))
       );
     } else {
       const matchKey = value;
@@ -65,11 +73,11 @@ export function traverseAndMatchFields(
 
       matches.push({
         sourceField: fullPath,
-        destinationField: destinationField,
+        destinationField,
         isEcs: isECS,
         description: isECS ? ECSFIELDS[matchKey] : '',
         id: makeId(),
-        exampleValue: exampleValue,
+        exampleValue,
       });
     }
   });

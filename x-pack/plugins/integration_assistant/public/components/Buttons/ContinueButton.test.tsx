@@ -1,9 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 import { userEvent } from '@testing-library/user-event';
-import ContinueButton from '@Components/Buttons/ContinueButton';
-import RoutePaths from '@Constants/routePaths';
+import ContinueButton from './ContinueButton';
+import RoutePaths from '../../constants/routePaths';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 describe('ContinueButton Tests', () => {
@@ -17,7 +25,7 @@ describe('ContinueButton Tests', () => {
       render(
         <Router>
           <ContinueButton continuePath={RoutePaths.INGEST_PIPELINES_PATH} isDisabled={false} />
-        </Router>,
+        </Router>
       );
       const user = userEvent.setup();
       await act(async () => {
@@ -31,8 +39,11 @@ describe('ContinueButton Tests', () => {
       const ecsButtonContinue = useGlobalStore.getState().ecsButtonContinue;
       render(
         <Router>
-          <ContinueButton continuePath={RoutePaths.INGEST_PIPELINES_PATH} isDisabled={!ecsButtonContinue} />
-        </Router>,
+          <ContinueButton
+            continuePath={RoutePaths.INGEST_PIPELINES_PATH}
+            isDisabled={!ecsButtonContinue}
+          />
+        </Router>
       );
       expect(screen.getByLabelText('continue-button')).toBeDefined();
       expect(screen.getByLabelText('continue-button')).toBeDisabled();

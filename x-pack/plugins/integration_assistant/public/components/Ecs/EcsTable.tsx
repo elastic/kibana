@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import {
   EuiBasicTable,
   EuiFlexItem,
@@ -12,8 +20,9 @@ import {
 import { useState } from 'react';
 import { getUpdatedPipeline } from '@Api/services/ecsMappingService';
 import { useGlobalStore } from '@Stores/useGlobalStore';
+import { EcsMappingTableItem } from '../../types';
 
-const EcsTable = () => {
+export const EcsTable = () => {
   const packageName = useGlobalStore((state) => state.packageName);
   const dataStreamName = useGlobalStore((state) => state.dataStreamName);
   const formSamples = useGlobalStore((state) => state.formSamples);
@@ -21,8 +30,12 @@ const EcsTable = () => {
   const ecsMappingTablePopoverState = useGlobalStore((state) => state.ecsMappingTablePopoverState);
   const ecsMappingTableState = useGlobalStore((state) => state.ecsMappingTableState);
   const mapping = useGlobalStore((state) => state.mapping);
-  const setEcsMappingTablePopoverState = useGlobalStore((state) => state.setEcsMappingTablePopoverState);
-  const setIntegrationBuilderChainItemsState = useGlobalStore((state) => state.setIntegrationBuilderChainItemsState);
+  const setEcsMappingTablePopoverState = useGlobalStore(
+    (state) => state.setEcsMappingTablePopoverState
+  );
+  const setIntegrationBuilderChainItemsState = useGlobalStore(
+    (state) => state.setIntegrationBuilderChainItemsState
+  );
   const setContinueButtonState = useGlobalStore((state) => state.setContinueButtonState);
   const setIsLoadingState = useGlobalStore((state) => state.setIsLoadingState);
   const updateEcsMappingTableItem = useGlobalStore((state) => state.updateEcsMappingTableItem);
@@ -37,7 +50,11 @@ const EcsTable = () => {
     setIsLoadingState('ecsMappingIsLoading', true);
     setContinueButtonState('ecsButtonContinue', false);
     updateEcsMappingTableItem(id, newDestinationField);
-    updateChainItem(`${packageName}.${dataStreamName}.${sourceField}`, newDestinationField, 'mapping');
+    updateChainItem(
+      `${packageName}.${dataStreamName}.${sourceField}`,
+      newDestinationField,
+      'mapping'
+    );
 
     const req = { packageName, dataStreamName, formSamples, mapping };
     const response = await getUpdatedPipeline(req);
@@ -79,7 +96,11 @@ const EcsTable = () => {
     };
   };
 
-  const { pageOfItems, totalItemCount } = getEcsTablePage(ecsMappingTableState, pageIndex, pageSize);
+  const { pageOfItems, totalItemCount } = getEcsTablePage(
+    ecsMappingTableState,
+    pageIndex,
+    pageSize
+  );
 
   const pagination = {
     pageIndex,
@@ -176,5 +197,3 @@ const EcsTable = () => {
     </EuiPanel>
   );
 };
-
-export default EcsTable;

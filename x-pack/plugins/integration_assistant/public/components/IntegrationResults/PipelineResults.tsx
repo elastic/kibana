@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import { EuiCodeBlock, EuiAccordion, EuiPanel, useGeneratedHtmlId } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -5,7 +13,7 @@ interface PipelineResultsProps {
   pipeline: object;
 }
 
-const PipelineResults = ({ pipeline }: PipelineResultsProps) => {
+export const PipelineResults = ({ pipeline }: PipelineResultsProps) => {
   const simpleAccordionId = useGeneratedHtmlId({ prefix: 'ingest_pipeline_results' });
 
   return (
@@ -28,5 +36,3 @@ const PipelineResults = ({ pipeline }: PipelineResultsProps) => {
     </div>
   );
 };
-
-export default PipelineResults;

@@ -1,3 +1,11 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import {
   EuiForm,
   EuiFieldText,
@@ -9,11 +17,11 @@ import {
   EuiSelect,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import EcsButtons from '@components/Ecs/EcsButtons';
+import { EcsButtons } from './EcsButtons';
 import { useGlobalStore } from '@Stores/useGlobalStore';
-import EcsFileUpload from '@Components/Ecs/EcsFileUpload';
+import { EcsFileUpload } from './EcsFileUpload';
 
-const EcsForm = () => {
+export const EcsForm = () => {
   const packageName = useGlobalStore((state) => state.packageName);
   const packageTitle = useGlobalStore((state) => state.packageTitle);
   const packageVersion = useGlobalStore((state) => state.packageVersion);
@@ -30,7 +38,7 @@ const EcsForm = () => {
   const onInputTypeChange = (selected) => {
     setEcsMappingFormArrayValue(
       'inputTypes',
-      selected.map((item) => item.label),
+      selected.map((item) => item.label)
     );
   };
 
@@ -57,7 +65,10 @@ const EcsForm = () => {
               onChange={(e) => handleFormStateChange('packageTitle', e.target.value)}
             />
           </EuiFormRow>
-          <EuiFormRow label="Package Version" helpText="The initial version of the package, default 0.1.0">
+          <EuiFormRow
+            label="Package Version"
+            helpText="The initial version of the package, default 0.1.0"
+          >
             <EuiFieldText
               placeholder="0.1.0"
               aria-label="package-version"
@@ -65,7 +76,10 @@ const EcsForm = () => {
               onChange={(e) => handleFormStateChange('packageVersion', e.target.value)}
             />
           </EuiFormRow>
-          <EuiFormRow label="Data Stream Name" helpText="Which product from the vendor? (e.g. asa, firewall, etc.)">
+          <EuiFormRow
+            label="Data Stream Name"
+            helpText="Which product from the vendor? (e.g. asa, firewall, etc.)"
+          >
             <EuiFieldText
               placeholder="audit"
               aria-label="ds-name"
@@ -73,7 +87,10 @@ const EcsForm = () => {
               onChange={(e) => handleFormStateChange('dataStreamName', e.target.value)}
             />
           </EuiFormRow>
-          <EuiFormRow label="Data Stream Title" helpText="The title for the Data Stream used in the integration UI">
+          <EuiFormRow
+            label="Data Stream Title"
+            helpText="The title for the Data Stream used in the integration UI"
+          >
             <EuiFieldText
               placeholder="MySQL Audit logs"
               aria-label="ds-name"
@@ -131,5 +148,3 @@ const EcsForm = () => {
     </EuiPanel>
   );
 };
-
-export default EcsForm;

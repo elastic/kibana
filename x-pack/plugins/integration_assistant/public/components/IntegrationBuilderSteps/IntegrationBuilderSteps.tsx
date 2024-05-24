@@ -1,10 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 import { useNavigate } from 'react-router-dom';
 
-import RoutePaths from '@Constants/routePaths';
+import RoutePaths from '../../constants/routePaths';
 
-const IntegrationBuilderSteps = () => {
+export const IntegrationBuilderSteps = () => {
   const step1 = useGlobalStore((state) => state.integrationBuilderStep1);
   const step2 = useGlobalStore((state) => state.integrationBuilderStep2);
   const step3 = useGlobalStore((state) => state.integrationBuilderStep3);
@@ -60,5 +68,3 @@ const IntegrationBuilderSteps = () => {
 
   return <EuiStepsHorizontal steps={horizontalSteps} size="m" />;
 };
-
-export default IntegrationBuilderSteps;

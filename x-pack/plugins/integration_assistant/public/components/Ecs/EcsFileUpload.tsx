@@ -1,7 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import { EuiFilePicker, useGeneratedHtmlId } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 
-const EcsFileUpload = () => {
+export const EcsFileUpload = () => {
   const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
   const addFormSamples = useGlobalStore((state) => state.addFormSamples);
 
@@ -63,5 +71,3 @@ const EcsFileUpload = () => {
     />
   );
 };
-
-export default EcsFileUpload;

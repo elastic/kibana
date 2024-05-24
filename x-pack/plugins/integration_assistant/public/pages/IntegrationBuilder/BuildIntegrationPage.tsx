@@ -1,12 +1,17 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
-import BuildIntegrationButtons from '@components/BuildIntegration/BuildIntegrationButtons';
+import BuildIntegrationButtons from '../../components/BuildIntegration/BuildIntegrationButtons';
 
-const BuildIntegration = () => {
+export const BuildIntegration = () => {
   return (
-      <EuiPageTemplate.Section grow={false}>
-        <BuildIntegrationButtons />
-      </EuiPageTemplate.Section>
+    <EuiPageTemplate.Section grow={false}>
+      <BuildIntegrationButtons />
+    </EuiPageTemplate.Section>
   );
 };
-
-export default BuildIntegration;

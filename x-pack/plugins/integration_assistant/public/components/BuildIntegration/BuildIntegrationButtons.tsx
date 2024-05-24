@@ -1,12 +1,20 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 
 import { buildIntegration, installIntegration } from '@api/services/integrationBuilderService';
-import RoutePaths from '@Constants/routePaths';
-import ActionButton from '@Components/Buttons/ActionButton';
-import GoBackButton from '@Components/Buttons/GoBackButton';
+import RoutePaths from '../../constants/routePaths';
+import ActionButton from '../Buttons/ActionButton';
+import GoBackButton from '../Buttons/GoBackButton';
 
-const BuildIntegrationButtons = () => {
+export const BuildIntegrationButtons = () => {
   const integrationBuilderZipFile = useGlobalStore((state) => state.integrationBuilderZipFile);
   const packageName = useGlobalStore((state) => state.packageName);
   const packageTitle = useGlobalStore((state) => state.packageTitle);
@@ -17,8 +25,12 @@ const BuildIntegrationButtons = () => {
   const ingestPipeline = useGlobalStore((state) => state.ingestPipeline);
   const docs = useGlobalStore((state) => state.docs);
 
-  const setIntegrationBuilderZipFile = useGlobalStore((state) => state.setIntegrationBuilderZipFile);
-  const setIntegrationBuilderStepsState = useGlobalStore((state) => state.setIntegrationBuilderStepsState);
+  const setIntegrationBuilderZipFile = useGlobalStore(
+    (state) => state.setIntegrationBuilderZipFile
+  );
+  const setIntegrationBuilderStepsState = useGlobalStore(
+    (state) => state.setIntegrationBuilderStepsState
+  );
 
   const onBuildClick = async () => {
     const req = {
@@ -63,10 +75,12 @@ const BuildIntegrationButtons = () => {
     <EuiFlexGroup>
       <ActionButton text="Build Integration" onActionClick={onBuildClick} />
       <ActionButton text="Download Integration" onActionClick={onDownloadClick} />
-      <ActionButton text="Install To Kibana (Not Implemented)" onActionClick={onInstallClick} isDisabled={true}/>
+      <ActionButton
+        text="Install To Kibana (Not Implemented)"
+        onActionClick={onInstallClick}
+        isDisabled={true}
+      />
       <GoBackButton path={RoutePaths.INTEGRATION_BUILDER_RESULTS_PATH} />
     </EuiFlexGroup>
   );
 };
-
-export default BuildIntegrationButtons;

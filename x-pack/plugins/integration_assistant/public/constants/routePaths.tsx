@@ -1,4 +1,11 @@
-enum RoutePaths {
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export enum RoutePaths {
   BASE_PATH = '/',
   ECS_MAPPING_PATH = '/integration_builder/ecs_mapping',
   CATEGORIZATION_PATH = '/integration_builder/categorization',
@@ -7,5 +14,3 @@ enum RoutePaths {
   INTEGRATION_BUILDER_BUILD_PATH = '/integration_builder/build',
   AGENT_ANALYZER_PATH = '/agent_analyzer',
 }
-
-export default RoutePaths;
