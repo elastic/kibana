@@ -47,9 +47,9 @@ export const buildActionResultsQuery = ({
 
   let index: string;
   if (useNewDataStream) {
-    index = `${ACTION_RESPONSES_DATA_STREAM_INDEX}-default*`;
+    index = `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`;
   } else if (componentTemplateExists) {
-    index = `${ACTION_RESPONSES_INDEX}-default*`;
+    index = `${ACTION_RESPONSES_INDEX}*`;
   } else {
     index = `${AGENT_ACTIONS_RESULTS_INDEX}*`;
   }
