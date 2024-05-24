@@ -77,7 +77,9 @@ export const fetchSimpleLogRateAnalysis = async (
   start: string,
   end: string,
   timefield: string,
-  abortSignal: AbortSignal
+  abortSignal?: AbortSignal,
+  keywordFieldCandidates: string[] = [],
+  textFieldCandidates: string[] = []
 ) => {
   const debugStartTime = Date.now();
 
@@ -118,8 +120,8 @@ export const fetchSimpleLogRateAnalysis = async (
 
   // FIELD CANDIDATES
 
-  const keywordFieldCandidates: string[] = [];
-  const textFieldCandidates: string[] = [];
+  const includeFieldCandidates =
+    keywordFieldCandidates.length === 0 && textFieldCandidates.length === 0;
 
   const indexInfoParams: AiopsLogRateAnalysisSchema = {
     index,
@@ -134,7 +136,8 @@ export const fetchSimpleLogRateAnalysis = async (
     esClient,
     indexInfoParams,
     ['message', 'error.message'],
-    abortSignal
+    abortSignal,
+    includeFieldCandidates
   );
 
   const baselineNumBuckets =

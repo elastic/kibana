@@ -47,7 +47,7 @@ export const fetchChangePointDetection = async (
   latestMs: number,
   timefield: string,
   searchQuery: estypes.QueryDslQueryContainer,
-  abortSignal: AbortSignal
+  abortSignal?: AbortSignal
 ): Promise<ChangePointDetectionResponse> => {
   const barTarget = 75;
 
