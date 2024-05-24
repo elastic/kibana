@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { expect as jestExpect } from 'expect';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FLEET_AGENT_POLICIES_SCHEMA_VERSION } from '@kbn/fleet-plugin/server/constants';
 import { skipIfNoDockerRegistry, generateAgent } from '../../helpers';
