@@ -43,51 +43,74 @@ export const fetchIndexInfo = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
   textFieldCandidatesOverrides: string[] = [],
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
+  includeFieldCandidates = true
 ): Promise<IndexInfo> => {
   const { index } = params;
-  // Get all supported fields
-  const respMapping = await esClient.fieldCaps(
-    {
-      fields: '*',
-      filters: '-metadata',
-      include_empty_fields: false,
-      index,
-      index_filter: {
-        range: {
-          [params.timeFieldName]: {
-            gte: params.deviationMin,
-            lte: params.deviationMax,
-          },
-        },
-      },
-      types: [...SUPPORTED_ES_FIELD_TYPES, ...SUPPORTED_ES_FIELD_TYPES_TEXT],
-    },
-    { signal: abortSignal, maxRetries: 0 }
-  );
 
   const allFieldNames: string[] = [];
 
   const acceptableFields: Set<string> = new Set();
   const acceptableTextFields: Set<string> = new Set();
 
-  Object.entries(respMapping.fields).forEach(([key, value]) => {
-    const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
-    const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
-    const isAggregatable = fieldTypes.some((type) => value[type].aggregatable);
-    const isTextField = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES_TEXT.includes(type));
+  let fieldCandidates: string[] = [];
+  let textFieldCandidates: string[] = [];
 
-    // Check if fieldName is something we can aggregate on
-    if (isSupportedType && isAggregatable) {
-      acceptableFields.add(key);
-    }
+  if (includeFieldCandidates) {
+    // Get all supported fields
+    const respMapping = await esClient.fieldCaps(
+      {
+        fields: '*',
+        filters: '-metadata,-parent',
+        include_empty_fields: false,
+        index,
+        index_filter: {
+          range: {
+            [params.timeFieldName]: {
+              gte: params.deviationMin,
+              lte: params.deviationMax,
+            },
+          },
+        },
+        types: [...SUPPORTED_ES_FIELD_TYPES, ...SUPPORTED_ES_FIELD_TYPES_TEXT],
+      },
+      { signal: abortSignal, maxRetries: 0 }
+    );
 
-    if (isTextField && TEXT_FIELD_WHITE_LIST.includes(key)) {
-      acceptableTextFields.add(key);
-    }
+    Object.entries(respMapping.fields).forEach(([key, value]) => {
+      const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
+      const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
+      const isAggregatable = fieldTypes.some((type) => value[type].aggregatable);
+      const isTextField = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES_TEXT.includes(type));
 
-    allFieldNames.push(key);
-  });
+      // Check if fieldName is something we can aggregate on
+      if (isSupportedType && isAggregatable) {
+        acceptableFields.add(key);
+      }
+
+      if (isTextField && TEXT_FIELD_WHITE_LIST.includes(key)) {
+        acceptableTextFields.add(key);
+      }
+
+      allFieldNames.push(key);
+    });
+
+    const textFieldCandidatesOverridesWithKeywordPostfix = textFieldCandidatesOverrides.map(
+      (d) => `${d}.keyword`
+    );
+
+    fieldCandidates = [...acceptableFields].filter(
+      (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
+    );
+    textFieldCandidates = [...acceptableTextFields].filter((field) => {
+      const fieldName = field.replace(new RegExp(/\.text$/), '');
+      return (
+        (!fieldCandidates.includes(fieldName) &&
+          !fieldCandidates.includes(`${fieldName}.keyword`)) ||
+        textFieldCandidatesOverrides.includes(field)
+      );
+    });
+  }
 
   // Get the total doc count for the baseline time range
   const respBaselineTotalDocCount = await esClient.search(
@@ -106,21 +129,6 @@ export const fetchIndexInfo = async (
       maxRetries: 0,
     }
   );
-
-  const textFieldCandidatesOverridesWithKeywordPostfix = textFieldCandidatesOverrides.map(
-    (d) => `${d}.keyword`
-  );
-
-  const fieldCandidates: string[] = [...acceptableFields].filter(
-    (field) => !textFieldCandidatesOverridesWithKeywordPostfix.includes(field)
-  );
-  const textFieldCandidates: string[] = [...acceptableTextFields].filter((field) => {
-    const fieldName = field.replace(new RegExp(/\.text$/), '');
-    return (
-      (!fieldCandidates.includes(fieldName) && !fieldCandidates.includes(`${fieldName}.keyword`)) ||
-      textFieldCandidatesOverrides.includes(field)
-    );
-  });
 
   const baselineTotalDocCount = (respBaselineTotalDocCount.hits.total as estypes.SearchTotalHits)
     .value;
