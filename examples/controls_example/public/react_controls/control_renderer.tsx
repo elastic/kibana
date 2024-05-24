@@ -11,7 +11,7 @@ import { v4 as generateId } from 'uuid';
 // import { ControlPanel } from './control_panel';
 // import { getReactEmbeddableFactory } from './react_embeddable_registry';
 // import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import { OverlayStart } from '@kbn/core/public';
+import { CoreStart, OverlayStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
@@ -33,16 +33,12 @@ export const ControlRenderer = <
   maybeId,
   getParentApi,
   onApiAvailable,
-  services,
 }: {
   maybeId?: string;
   type: string;
   // parentApi: ControlGroupApi;
   getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
-
-  /** TODO: Remove this */
-  services: { overlays: OverlayStart; dataViews: DataViewsPublicPluginStart };
 }) => {
   // const cleanupFunction = useRef<(() => void) | null>(null);
 

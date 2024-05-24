@@ -30,6 +30,7 @@ import {
 import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { BehaviorSubject } from 'rxjs';
+import { openEditControlGroupFlyout } from '../react_controls/control_group/open_edit_control_group_flyout';
 import { ControlGroupApi } from '../react_controls/control_group/types';
 
 const toggleViewButtons = [
@@ -117,14 +118,15 @@ export const ReactControlExample = ({
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend="This is a basic group"
-            options={toggleViewButtons}
-            idSelected={`viewModeToggle_${viewModeSelected}`}
-            onChange={(_, value) => {
-              viewMode.next(value);
+          <EuiButton
+            fill
+            onClick={() => {
+              controlGroupApi?.onEdit();
             }}
-          />
+            size="s"
+          >
+            Control group settings
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -135,6 +137,16 @@ export const ReactControlExample = ({
           >
             Serialize control group
           </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend="Change the view mode"
+            options={toggleViewButtons}
+            idSelected={`viewModeToggle_${viewModeSelected}`}
+            onChange={(_, value) => {
+              viewMode.next(value);
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -161,7 +173,7 @@ export const ReactControlExample = ({
               {
                 name: 'controlGroup_a957862f-beae-4f0c-8a3a-a6ea4c235651:searchControlDataView',
                 type: 'index-pattern',
-                id: dataViews[0].id ?? 'The error check above prevents this :)',
+                id: dataViews?.[0].id ?? 'The error check above prevents this :)',
               },
             ],
           }),

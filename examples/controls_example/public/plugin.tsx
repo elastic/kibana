@@ -43,7 +43,7 @@ export class ControlsExamplePlugin
         core.getStartServices(),
       ]);
       return getControlGroupEmbeddableFactory({
-        overlays: coreStart.overlays,
+        core: coreStart,
         dataViews: depsStart.data.dataViews,
       });
     });

@@ -10,17 +10,14 @@ import { EuiFormControlLayout, EuiFormLabel, htmlIdGenerator } from '@elastic/eu
 // import { ControlError } from '@kbn/controls-plugin/public/control_group/component/control_error_component';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
-import { isPromise } from '@kbn/std';
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
-import useAsync from 'react-use/lib/useAsync';
 import { ControlError } from './control_error_component';
 import { ControlPanelProps, DefaultControlApi } from './types';
 
@@ -79,18 +76,6 @@ export const ControlPanel = <
         'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
-      // className={classNames({
-      //   'controlFrame--twoLine': usingTwoLineLayout,
-      //   'controlFrame--oneLine': !usingTwoLineLayout,
-      //   // 'controlFrameWrapper--grow': grow,
-      //   // // 'controlFrameWrapper-isDragging': isDragging,
-      //   // // 'controlFrameWrapper-isEditable': isEditable,
-      //   // 'controlFrameWrapper--small': width === 'small',
-      //   // 'controlFrameWrapper--medium': width === 'medium',
-      //   // 'controlFrameWrapper--large': width === 'large',
-      //   // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-      //   // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
-      // })}
       viewMode={viewMode}
       embeddable={api}
       disabledActions={[]}
@@ -110,6 +95,18 @@ export const ControlPanel = <
       ) : (
         <EuiFormControlLayout
           fullWidth
+          className={classNames({
+            'controlFrame--twoLine': usingTwoLineLayout,
+            'controlFrame--oneLine': !usingTwoLineLayout,
+            'controlFrameWrapper--grow': grow,
+            // 'controlFrameWrapper-isDragging': isDragging,
+            // 'controlFrameWrapper-isEditable': isEditable,
+            'controlFrameWrapper--small': width === 'small',
+            'controlFrameWrapper--medium': width === 'medium',
+            'controlFrameWrapper--large': width === 'large',
+            // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
+            // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
+          })}
           isLoading={Boolean(dataLoading)}
           prepend={
             api?.getCustomPrepend ? (

@@ -16,12 +16,13 @@ import {
   DEFAULT_CONTROL_STYLE,
 } from '@kbn/controls-plugin/common';
 import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
-import { OverlayStart } from '@kbn/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { combineCompatibleApis } from '@kbn/presentation-containers';
 import {
   apiPublishesDataViews,
   apiPublishesFilters,
@@ -32,9 +33,9 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
-import { combineCompatibleApis } from '@kbn/presentation-containers';
 import { ControlRenderer } from '../control_renderer';
 import { DefaultControlApi } from '../types';
+import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
 import {
   ControlGroupApi,
@@ -44,7 +45,7 @@ import {
 } from './types';
 
 export const getControlGroupEmbeddableFactory = (services: {
-  overlays: OverlayStart;
+  core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
 }) => {
   const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
@@ -55,7 +56,6 @@ export const getControlGroupEmbeddableFactory = (services: {
     type: CONTROL_GROUP_TYPE,
     deserializeState: (state) => deserializeControlGroup(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
-      console.log(initialState.panels);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const grow = new BehaviorSubject<boolean>(initialState.defaultControlGrow);
       const width = new BehaviorSubject<ControlWidth>(initialState.defaultControlWidth);
@@ -110,7 +110,21 @@ export const getControlGroupEmbeddableFactory = (services: {
             [key: string]: unknown;
           }>,
           onEdit: async () => {
-            // TODO: Edit control group settings
+            // TODO: Clean up state manager to only editable state
+            openEditControlGroupFlyout(
+              api,
+              {
+                chainingSystem: chainingSystem$,
+                defaultControlGrow: grow,
+                defaultControlWidth: width,
+                controlStyle: controlStyle$,
+                panels: panels$,
+                showApplySelections,
+                ignoreParentSettings,
+                anyChildHasUnsavedChanges,
+              },
+              { core: services.core }
+            );
           },
           isEditingEnabled: () => true,
           getTypeDisplayName: () =>
@@ -118,7 +132,7 @@ export const getControlGroupEmbeddableFactory = (services: {
               defaultMessage: 'Controls',
             }),
           getChildState: (childId) => {
-            console.log(childId, panels$.getValue());
+            // TODO: Fix type error
             return panels$.getValue()[childId];
           },
           serializeState: () => {
@@ -184,7 +198,6 @@ export const getControlGroupEmbeddableFactory = (services: {
                 <ControlRenderer
                   key={uuid}
                   maybeId={id}
-                  services={services}
                   type={panels[id].type}
                   // state={panels[id]}
                   // parentApi={api}
