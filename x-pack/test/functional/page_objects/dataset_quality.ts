@@ -107,7 +107,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       return PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
-        '/data/data-quality',
+        '/data/data_quality',
         queryStringParams,
         {
           // the check sometimes is too slow for the page so it misses the point
