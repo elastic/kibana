@@ -30,8 +30,8 @@ const getParameters = async (event: RangeSelectDataContext) => {
   if (isOfAggregateQueryType(event.query)) {
     const field = new DataViewField({
       name: column.name,
-      type: column?.meta?.type ?? 'unknown',
-      esTypes: column?.meta?.esType ? ([column.meta.esType] as string[]) : undefined,
+      type: column.meta?.type ?? 'unknown',
+      esTypes: column.meta?.esType ? ([column.meta.esType] as string[]) : undefined,
       searchable: true,
       aggregatable: false,
     });
@@ -40,7 +40,8 @@ const getParameters = async (event: RangeSelectDataContext) => {
       field,
       indexPattern: undefined,
     };
-  } else if ('sourceParams' in column.meta) {
+  }
+  if (column.meta && 'sourceParams' in column.meta) {
     const { indexPatternId, ...aggConfigs } = column.meta.sourceParams;
     const indexPattern = await getIndexPatterns().get(indexPatternId);
     const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
@@ -52,12 +53,11 @@ const getParameters = async (event: RangeSelectDataContext) => {
       field,
       indexPattern,
     };
-  } else {
-    return {
-      field: undefined,
-      indexPattern: undefined,
-    };
   }
+  return {
+    field: undefined,
+    indexPattern: undefined,
+  };
 };
 
 export async function createFiltersFromRangeSelectAction(event: RangeSelectDataContext) {
@@ -69,7 +69,7 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
 
   const { field, indexPattern } = await getParameters(event);
 
-  if (!params.field || event.range.length <= 1) {
+  if (!field || event.range.length <= 1) {
     return [];
   }
 
@@ -80,7 +80,7 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
     return [];
   }
 
-  const isDate = params.field.type === 'date';
+  const isDate = field.type === 'date';
 
   const range: RangeFilterParams = {
     gte: isDate ? moment(min).toISOString() : min,
@@ -90,5 +90,5 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
   if (isDate) {
     range.format = 'strict_date_optional_time';
   }
-  return mapAndFlattenFilters([buildRangeFilter(params.field, range, params.indexPattern)]);
+  return mapAndFlattenFilters([buildRangeFilter(field, range, indexPattern)]);
 }

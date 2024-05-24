@@ -1369,10 +1369,7 @@ export class Embeddable
     } else if (isLensTableRowContextMenuClickEvent(event)) {
       eventHandler = this.input.onTableRowClick;
     }
-    const esqlQuery =
-      this.isTextBasedLanguage()
-        ? this.savedVis?.state.query
-        : undefined;
+    const esqlQuery = this.isTextBasedLanguage() ? this.savedVis?.state.query : undefined;
 
     eventHandler?.({
       ...event.data,
