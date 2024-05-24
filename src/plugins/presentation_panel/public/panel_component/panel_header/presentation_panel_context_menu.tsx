@@ -45,8 +45,14 @@ import { getContextMenuAriaLabel } from '../presentation_panel_strings';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 
 const QUICK_ACTION_IDS = {
-  edit: ['editPanel', 'ACTION_CONFIGURE_IN_LENS', 'ACTION_CUSTOMIZE_PANEL'],
-  view: ['ACTION_OPEN_IN_DISCOVER', 'openInspector'],
+  edit: [
+    'editPanel',
+    'ACTION_CONFIGURE_IN_LENS',
+    'ACTION_CUSTOMIZE_PANEL',
+    'editAnomalyChartsPanelAction',
+    'ACTION_OPEN_IN_DISCOVER',
+  ],
+  view: ['ACTION_OPEN_IN_DISCOVER', 'openInspector', 'togglePanel'],
 };
 
 const allowedNotificationActions = ['ACTION_FILTERS_NOTIFICATION'];
@@ -98,7 +104,10 @@ export const PresentationPanelContextMenu = ({
 
   const showDescription = description && (!title || hideTitle);
 
-  const quickActionIds = QUICK_ACTION_IDS[parentViewMode === 'edit' ? 'edit' : 'view'];
+  const quickActionIds = useMemo(
+    () => QUICK_ACTION_IDS[parentViewMode === 'edit' ? 'edit' : 'view'],
+    [parentViewMode]
+  );
 
   useEffect(() => {
     if (!api) return;
@@ -168,7 +177,7 @@ export const PresentationPanelContextMenu = ({
       cancelled = true;
       subscriptions.unsubscribe();
     };
-  }, [api, quickActionIds]);
+  }, []);
 
   useEffect(() => {
     if (!api) return;

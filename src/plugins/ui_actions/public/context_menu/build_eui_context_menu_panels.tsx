@@ -179,8 +179,6 @@ export async function buildContextMenuForActions({
 
   // wrapMainPanelItemsIntoSubmenu(panels, 'mainMenu');
 
-  const sortedPanels = Object.values(panels).sort;
-
   for (const panel of Object.values(panels)) {
     if (panel._level === 0) {
       if (panels.mainMenu.items.length > 0) {
@@ -189,7 +187,7 @@ export async function buildContextMenuForActions({
           key: panel.id + '__separator',
         });
       }
-      if (panel.items.length > 5) {
+      if (panel.items.length > 4) {
         panels.mainMenu.items.push({
           name: panel.title || panel.id,
           icon: panel._icon || 'empty',
