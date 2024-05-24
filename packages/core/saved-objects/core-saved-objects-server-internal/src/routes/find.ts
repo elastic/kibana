@@ -36,7 +36,7 @@ export const registerFindRoute = (
       path: '/_find',
       options: {
         access: 'public',
-        description: `Get saved objects`,
+        description: `Search for saved objects`,
       },
       validate: {
         query: schema.object({
