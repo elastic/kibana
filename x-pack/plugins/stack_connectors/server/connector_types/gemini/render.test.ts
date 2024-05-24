@@ -9,12 +9,10 @@ import { renderParameterTemplates } from './render';
 import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { SUB_ACTION } from '../../../common/gemini/constants';
 import { Logger } from '@kbn/logging';
-import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 
 // Mock the renderMustacheString function
 jest.mock('@kbn/actions-plugin/server/lib/mustache_renderer', () => ({
-  renderMustacheString: jest.fn((variables)
-  ),
+  renderMustacheString: jest.fn(variables),
 }));
 
 const mockLogger: Logger = {
@@ -58,9 +56,7 @@ describe('Gemini - renderParameterTemplates', () => {
     };
 
     const runResult = renderParameterTemplates(mockLogger, runParams, variables);
-    expect(runResult.subActionParams.body).toEqual(
-      JSON.stringify({ message: 'Hello, !' })
-    );
+    expect(runResult.subActionParams.body).toEqual(JSON.stringify({ message: 'Hello, !' }));
 
     const testResult = renderParameterTemplates(mockLogger, testParams, variables);
     expect(testResult.subActionParams.body).toEqual(JSON.stringify({ test: 'someValue works!' }));
@@ -93,4 +89,3 @@ describe('Gemini - renderParameterTemplates', () => {
 function variables(this: any, ...args: any[]): unknown {
   throw new Error('Function not implemented.');
 }
-
