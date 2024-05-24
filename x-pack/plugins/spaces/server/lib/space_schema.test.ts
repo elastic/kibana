@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { spaceSchema } from './space_schema';
+import { getSpaceSchema } from './space_schema';
+
+// non-serverless space schema
+const spaceSchema = getSpaceSchema(false);
 
 const defaultProperties = {
   id: 'foo',
@@ -234,7 +237,7 @@ describe('#imageUrl', () => {
 describe('#solution', () => {
   it('should throw error if solution is defined in serverless offering', () => {
     expect(() =>
-      spaceSchema.validate({ ...defaultProperties, solution: 'search' }, { serverless: true })
+      getSpaceSchema(true).validate({ ...defaultProperties, solution: 'search' })
     ).toThrow();
   });
 

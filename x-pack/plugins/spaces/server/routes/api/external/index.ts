@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 
 import { initCopyToSpacesApi } from './copy_to_space';
@@ -27,7 +25,7 @@ export interface ExternalRouteDeps {
   getSpacesService: () => SpacesServiceStart;
   usageStatsServicePromise: Promise<UsageStatsServiceSetup>;
   log: Logger;
-  buildFlavor: BuildFlavor;
+  isServerless: boolean;
 }
 
 export function initExternalSpacesApi(deps: ExternalRouteDeps) {
@@ -38,7 +36,7 @@ export function initExternalSpacesApi(deps: ExternalRouteDeps) {
   // In the serverless environment, Spaces are enabled but are effectively hidden from the user. We
   // do not support more than 1 space: the default space. These HTTP APIs for creating, deleting,
   // updating, and manipulating saved objects across multiple spaces are not needed.
-  if (deps.buildFlavor !== 'serverless') {
+  if (!deps.isServerless) {
     initPutSpacesApi(deps);
     initDeleteSpacesApi(deps);
     initPostSpacesApi(deps);

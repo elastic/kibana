@@ -177,7 +177,7 @@ export class SpacesPlugin
       getStartServices: core.getStartServices,
       getSpacesService,
       usageStatsServicePromise,
-      buildFlavor: this.initializerContext.env.packageInfo.buildFlavor,
+      isServerless: this.initializerContext.env.packageInfo.buildFlavor === 'serverless',
     });
 
     initInternalSpacesApi({

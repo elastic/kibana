@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { MAX_SPACE_INITIALS } from '../../common';
 
 export const SPACE_ID_REGEX = /^[a-z0-9_\-]+$/;
 
-export const spaceSchema = schema.object({
+const spaceSchema = schema.object({
   id: schema.string({
     validate: (value) => {
       if (!SPACE_ID_REGEX.test(value)) {
@@ -20,17 +20,6 @@ export const spaceSchema = schema.object({
     },
   }),
   name: schema.string({ minLength: 1 }),
-  solution: offeringBasedSchema({
-    traditional: schema.maybe(
-      schema.oneOf([
-        schema.literal('security'),
-        schema.literal('observability'),
-        schema.literal('search'),
-        schema.literal('classic'),
-      ])
-    ),
-    serverless: schema.never(),
-  }),
   description: schema.maybe(schema.string()),
   initials: schema.maybe(schema.string({ maxLength: MAX_SPACE_INITIALS })),
   color: schema.maybe(
@@ -54,3 +43,18 @@ export const spaceSchema = schema.object({
     })
   ),
 });
+
+const solutionSchema = schema.oneOf([
+  schema.literal('security'),
+  schema.literal('observability'),
+  schema.literal('search'),
+  schema.literal('classic'),
+]);
+
+export const getSpaceSchema = (isServerless: boolean) => {
+  if (isServerless) {
+    return spaceSchema;
+  }
+
+  return spaceSchema.extends({ solution: schema.maybe(solutionSchema) });
+};
