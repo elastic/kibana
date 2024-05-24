@@ -332,7 +332,7 @@ class AgentPolicyService {
       {
         ...agentPolicy,
         status: 'active',
-        is_managed: agentPolicy.is_managed ?? false,
+        is_managed: (agentPolicy.is_managed || agentPolicy?.supports_agentless) ?? false,
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
