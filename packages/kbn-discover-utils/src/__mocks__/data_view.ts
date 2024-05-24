@@ -123,7 +123,7 @@ export const buildDataViewMock = ({
       return dataViewFields.find((field) => field.name === timeFieldName);
     },
     getAllowHidden: () => false,
-    getIfScriptedField: () => {
+    getScriptedField: () => {
       return dataViewFields.find((field) => field.name === timeFieldName);
     },
   } as unknown as DataView;
