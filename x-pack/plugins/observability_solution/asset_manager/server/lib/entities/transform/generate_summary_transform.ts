@@ -59,9 +59,9 @@ export function generateSummaryTransform(
       aggs: {
         ...generateSummaryMetricAggregations(definition),
         ...generateSummaryMetadataAggregations(definition),
-        'entity.latestTimestamp': {
+        'entity.lastSeenTimestamp': {
           max: {
-            field: '@timestamp',
+            field: 'entity.lastSeenTimestamp',
           },
         },
         'entity.firstSeenTimestamp': {

@@ -38,7 +38,7 @@ Object {
           },
         },
       },
-      "entity.latestTimestamp": Object {
+      "entity.lastSeenTimestamp": Object {
         "max": Object {
           "field": "@timestamp",
         },
@@ -178,7 +178,7 @@ Object {
           "field": "@timestamp",
         },
       },
-      "entity.latestTimestamp": Object {
+      "entity.lastSeenTimestamp": Object {
         "max": Object {
           "field": "@timestamp",
         },

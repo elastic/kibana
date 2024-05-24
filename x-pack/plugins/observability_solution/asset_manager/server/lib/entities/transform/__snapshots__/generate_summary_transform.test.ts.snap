@@ -43,9 +43,9 @@ Object {
           "field": "@timestamp",
         },
       },
-      "entity.latestTimestamp": Object {
+      "entity.lastSeenTimestamp": Object {
         "max": Object {
-          "field": "@timestamp",
+          "field": "entity.lastSeenTimestamp",
         },
       },
       "entity.metadata.host.name": Object {

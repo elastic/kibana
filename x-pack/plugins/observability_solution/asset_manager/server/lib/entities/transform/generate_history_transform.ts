@@ -88,7 +88,7 @@ export function generateHistoryTransform(
       aggs: {
         ...generateHistoryMetricAggregations(definition),
         ...generateHistoryMetadataAggregations(definition),
-        'entity.latestTimestamp': {
+        'entity.lastSeenTimestamp': {
           max: {
             field: definition.history.timestampField,
           },

@@ -18,7 +18,10 @@ const entitySchema = z.object({
 });
 
 export const entitySummarySchema = z.intersection(
-  entitySchema,
+  entitySchema.extend({
+    lastSeenTimestamp: z.string(),
+    firstSeenTimestamp: z.string(),
+  }),
   z.record(z.string(), z.string().or(z.number()))
 );
 

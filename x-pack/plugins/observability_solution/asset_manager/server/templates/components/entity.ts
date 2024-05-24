@@ -29,7 +29,7 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
               ignore_above: 1024,
               type: 'keyword',
             },
-            latestTimestamp: {
+            lastSeenTimestamp: {
               type: 'date',
             },
             firstSeenTimestamp: {
