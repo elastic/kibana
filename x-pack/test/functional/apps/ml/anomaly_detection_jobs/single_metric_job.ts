@@ -441,7 +441,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Feb 7, 2016 @ 00:00:00.000',
         'Feb 11, 2016 @ 23:59:54.000'
       );
-      await ml.jobWizardCommon.advanceToValidationSection();
+      await ml.jobWizardCommon.goToValidationStep();
       await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout success']);
       await ml.jobWizardCommon.assertCalloutText(
         'mlValidationCallout success',

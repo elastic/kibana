@@ -650,6 +650,13 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
+    async goToValidationStep() {
+      await retry.tryForTime(60_000, async () => {
+        await testSubjects.existOrFail('mlJobWizardValidationStep');
+        await testSubjects.click('mlJobWizardValidationStep');
+      });
+    },
+
     async setTimeRange({ startTime, endTime }: { startTime?: string; endTime?: string }) {
       const opts = {
         clearWithKeyboard: true,
