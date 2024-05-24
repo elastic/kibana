@@ -187,7 +187,8 @@ export const CloudSecurityDataTable = ({
     const getWrapperHeight = () => {
       if (height) return height;
 
-      if (isVirtualizationEnabled) return 'auto';
+      // If virtualization is not needed the table will render unconstrained.
+      if (!isVirtualizationEnabled) return 'auto';
 
       const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
       const filterBarHeight = filters?.length > 0 ? 40 : 0;
