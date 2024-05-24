@@ -31,10 +31,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
-import {
-  getMaxPackageName,
-  isRootPrivilegesRequired,
-} from '../../../../../../../../common/services';
+import { getMaxPackageName } from '../../../../../../../../common/services';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -267,16 +264,6 @@ export function useOnSubmit({
         formState !== 'CONFIRM'
       ) {
         setFormState('CONFIRM');
-        return;
-      }
-      if (
-        packageInfo &&
-        isRootPrivilegesRequired(packageInfo) &&
-        (agentPolicy?.unprivileged_agents ?? 0) > 0 &&
-        formState !== 'CONFIRM' &&
-        formState !== 'CONFIRM_UNPRIVILEGED'
-      ) {
-        setFormState('CONFIRM_UNPRIVILEGED');
         return;
       }
       let createdPolicy = overrideCreatedAgentPolicy;
