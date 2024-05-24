@@ -18,7 +18,6 @@ import { TestProviders } from '../../../mock/test_providers/test_providers';
 const defaultProps = {
   anonymized: 0,
   isDataAnonymizable: false,
-  showIcon: false,
 };
 
 describe('AnonymizedStat', () => {
@@ -30,26 +29,6 @@ describe('AnonymizedStat', () => {
     );
 
     expect(screen.getByTestId('anonymizedFieldsStat')).toHaveTextContent('0Anonymized');
-  });
-
-  it('shows the anonymization icon when showIcon is true', () => {
-    render(
-      <TestProviders>
-        <AnonymizedStat {...defaultProps} showIcon={true} />
-      </TestProviders>
-    );
-
-    expect(screen.getByTestId('anonymizationIcon')).toBeInTheDocument();
-  });
-
-  it('does NOT show the anonymization icon when showIcon is false', () => {
-    render(
-      <TestProviders>
-        <AnonymizedStat {...defaultProps} showIcon={false} />
-      </TestProviders>
-    );
-
-    expect(screen.queryByTestId('anonymizationIcon')).not.toBeInTheDocument();
   });
 
   it('shows the correct tooltip content when anonymized is 0 and isDataAnonymizable is false', async () => {

@@ -10,8 +10,17 @@ import { mockAlertPromptContext } from '../../mock/prompt_context';
 import { getNewSelectedPromptContext } from '.';
 
 describe('getNewSelectedPromptContext', () => {
-  const defaultAllow = ['field1', 'field2'];
-  const defaultAllowReplacement = ['field3', 'field4'];
+  const anonymizationFields = {
+    total: 4,
+    page: 1,
+    perPage: 1000,
+    data: [
+      { field: 'field1', id: 'field1', allowed: true, anonymized: false },
+      { field: 'field2', id: 'field2', allowed: true, anonymized: false },
+      { field: 'field3', id: 'field3', allowed: false, anonymized: true },
+      { field: 'field4', id: 'field4', allowed: false, anonymized: true },
+    ],
+  };
 
   it("returns empty `allow` and `allowReplacement` for string `rawData`, because it's not anonymized", async () => {
     const promptContext: PromptContext = {
@@ -20,14 +29,12 @@ describe('getNewSelectedPromptContext', () => {
     };
 
     const result = await getNewSelectedPromptContext({
-      defaultAllow,
-      defaultAllowReplacement,
+      anonymizationFields,
       promptContext,
     });
 
     const excepted: SelectedPromptContext = {
-      allow: [],
-      allowReplacement: [],
+      contextAnonymizationFields: undefined,
       promptContextId: promptContext.id,
       rawData: 'string data',
     };
@@ -42,15 +49,21 @@ describe('getNewSelectedPromptContext', () => {
     };
 
     const excepted: SelectedPromptContext = {
-      allow: [...defaultAllow],
-      allowReplacement: [...defaultAllowReplacement],
+      contextAnonymizationFields: {
+        total: 2,
+        page: 1,
+        perPage: 1000,
+        data: [
+          { field: 'field1', id: 'field1', allowed: true, anonymized: false },
+          { field: 'field2', id: 'field2', allowed: true, anonymized: false },
+        ],
+      },
       promptContextId: promptContext.id,
       rawData: { field1: ['value1'], field2: ['value2'] },
     };
 
     const result = await getNewSelectedPromptContext({
-      defaultAllow,
-      defaultAllowReplacement,
+      anonymizationFields,
       promptContext,
     });
 
@@ -64,8 +77,7 @@ describe('getNewSelectedPromptContext', () => {
     };
 
     await getNewSelectedPromptContext({
-      defaultAllow,
-      defaultAllowReplacement,
+      anonymizationFields,
       promptContext,
     });
 

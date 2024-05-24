@@ -8,5 +8,6 @@
 
 export * from './customization_types';
 export * from './customization_provider';
+export * from './defaults';
 export * from './types';
 export type { DiscoverCustomization, DiscoverCustomizationService } from './customization_service';

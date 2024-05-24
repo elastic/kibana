@@ -14,8 +14,7 @@ describe('correlations', () => {
         { fieldName: 'the-field-1', fieldValue: 'the-value-1' },
         { fieldName: 'the-field-2', fieldValue: 'the-value-2' },
       ];
-      const prioritziedFieldValuePairs =
-        getPrioritizedFieldValuePairs(fieldValuePairs);
+      const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(fieldValuePairs);
       expect(prioritziedFieldValuePairs.map((d) => d.fieldName)).toEqual([
         'the-field-1',
         'the-field-2',
@@ -27,8 +26,7 @@ describe('correlations', () => {
         { fieldName: 'service.version', fieldValue: 'the-value-1' },
         { fieldName: 'the-field-2', fieldValue: 'the-value-2' },
       ];
-      const prioritziedFieldValuePairs =
-        getPrioritizedFieldValuePairs(fieldValuePairs);
+      const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(fieldValuePairs);
       expect(prioritziedFieldValuePairs.map((d) => d.fieldName)).toEqual([
         'service.version',
         'the-field-2',
@@ -40,8 +38,7 @@ describe('correlations', () => {
         { fieldName: 'the-field-1', fieldValue: 'the-value-1' },
         { fieldName: 'service.version', fieldValue: 'the-value-2' },
       ];
-      const prioritziedFieldValuePairs =
-        getPrioritizedFieldValuePairs(fieldValuePairs);
+      const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(fieldValuePairs);
       expect(prioritziedFieldValuePairs.map((d) => d.fieldName)).toEqual([
         'service.version',
         'the-field-1',
@@ -54,8 +51,7 @@ describe('correlations', () => {
         { fieldName: 'service.version', fieldValue: 'the-value-2' },
         { fieldName: 'cloud.the-field-3', fieldValue: 'the-value-3' },
       ];
-      const prioritziedFieldValuePairs =
-        getPrioritizedFieldValuePairs(fieldValuePairs);
+      const prioritziedFieldValuePairs = getPrioritizedFieldValuePairs(fieldValuePairs);
       expect(prioritziedFieldValuePairs.map((d) => d.fieldName)).toEqual([
         'service.version',
         'cloud.the-field-3',

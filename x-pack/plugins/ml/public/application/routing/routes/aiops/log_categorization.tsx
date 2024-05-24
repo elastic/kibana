@@ -8,14 +8,18 @@
 import type { FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { ML_PAGES } from '../../../../locator';
 import type { NavigateToPath } from '../../../contexts/kibana';
 import type { MlRoute } from '../../router';
 import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
-import { LogCategorizationPage as Page } from '../../../aiops/log_categorization';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { DataSourceContextProvider } from '../../../contexts/ml';
+
+const Page = dynamic(async () => ({
+  default: (await import('../../../aiops/log_categorization')).LogCategorizationPage,
+}));
 
 export const logCategorizationRouteFactory = (
   navigateToPath: NavigateToPath,

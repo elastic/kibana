@@ -12,7 +12,6 @@ import { css } from '@emotion/react';
 import {
   EuiPopover,
   EuiPanel,
-  EuiBadge,
   EuiHorizontalRule,
   EuiButton,
   EuiContextMenuPanel,
@@ -359,13 +358,8 @@ export function ChangeDataView({
             }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
-              defaultMessage: 'Try ES|QL',
+              defaultMessage: 'Language: ES|QL',
             })}
-            <EuiBadge color="hollow">
-              {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTechPreviewLabel', {
-                defaultMessage: 'Technical preview',
-              })}
-            </EuiBadge>
           </EuiButton>
         </EuiPanel>
       );

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  kqlQuery,
-  rangeQuery,
-  termQuery,
-} from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   FAAS_ID,
@@ -83,10 +79,7 @@ export async function getActiveInstancesTimeseries({
     },
   };
 
-  const { aggregations } = await apmEventClient.search(
-    'get_active_instances',
-    params
-  );
+  const { aggregations } = await apmEventClient.search('get_active_instances', params);
 
   return (
     aggregations?.timeseriesData?.buckets?.map((timeseriesBucket) => ({

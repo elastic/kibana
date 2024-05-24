@@ -100,6 +100,8 @@ describe('Policy Windows Event Collection Card', () => {
             'Events' +
             'API' +
             'DLL and Driver Load' +
+            'DNS' +
+            'File' +
             'Network' +
             'Process' +
             'Registry' +

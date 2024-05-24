@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+// These register helper functions have no async imports themselves, so they
+// can be bundled together for a single async chunk.
 export { registerEmbeddables } from '../embeddables';
-export { registerManagementSection } from '../application/management';
 export { registerMlUiActions } from '../ui_actions';
 export { registerSearchLinks } from './register_search_links';
-export { registerMlAlerts } from '../alerting';
-export { registerMapExtension } from '../maps/register_map_extension';
 export { registerCasesAttachments } from '../cases';

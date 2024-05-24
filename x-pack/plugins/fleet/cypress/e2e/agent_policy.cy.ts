@@ -98,27 +98,43 @@ describe('Edit agent policy', () => {
     cy.intercept('/api/fleet/enrollment_api_keys/key-1', {
       item: apiKey,
     });
-    cy.intercept('/api/fleet/fleet_server_hosts', {
-      items: [
-        {
+    cy.intercept('/internal/fleet/settings/enrollment', {
+      fleet_server: {
+        policies: [
+          {
+            id: 'fleet-server-policy',
+            name: 'Fleet Server policy',
+            description: 'desc',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            status: 'active',
+            package_policies: [],
+          },
+        ],
+        has_active: true,
+        host: {
           id: 'fleet-default-fleet-server-host',
           name: 'Default',
           is_default: true,
           host_urls: ['https://192.168.1.23:8220'],
           is_preconfigured: true,
         },
-        {
+      },
+    });
+    cy.intercept('/internal/fleet/settings/enrollment?agentPolicyId=policy-1', {
+      fleet_server: {
+        policies: [],
+        has_active: true,
+        host: {
           id: 'fleet-server-1',
           name: 'custom host',
           host_urls: ['https://xxx.yyy.zzz:443'],
           is_default: false,
           is_preconfigured: false,
         },
-      ],
-      page: 1,
-      perPage: 10000,
-      total: 2,
+      },
     });
+
     cy.visit('/app/fleet/policies/policy-1');
 
     cy.getBySel(AGENT_POLICY_DETAILS_PAGE.ADD_AGENT_LINK).click();

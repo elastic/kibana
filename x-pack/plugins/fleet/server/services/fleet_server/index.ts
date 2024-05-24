@@ -9,10 +9,13 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import semverGte from 'semver/functions/gte';
 import semverCoerce from 'semver/functions/coerce';
 
-import { FLEET_SERVER_SERVERS_INDEX } from '../../constants';
-import { getAgentVersionsForAgentPolicyIds } from '../agents';
+import { FLEET_SERVER_SERVERS_INDEX, SO_SEARCH_LIMIT } from '../../constants';
+import { getAgentsByKuery, getAgentStatusById } from '../agents';
 
 import { packagePolicyService } from '../package_policy';
+import { agentPolicyService } from '../agent_policy';
+import { appContextService } from '..';
+
 /**
  * Check if at least one fleet server is connected
  */
@@ -28,11 +31,20 @@ export async function hasFleetServers(esClient: ElasticsearchClient) {
   return (res.hits.total as number) > 0;
 }
 
-export async function allFleetServerVersionsAreAtLeast(
+/**
+ * This function checks if all Fleet Server agents are running at least a given version, but with
+ * some important caveats related to enabling the secrets storage feature:
+ *
+ * 1. Any unenrolled agents are ignored if they are running an outdated version
+ * 2. Managed agents in an inactive state are ignored if they are running an outdated version.
+ */
+export async function checkFleetServerVersionsForSecretsStorage(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   version: string
 ): Promise<boolean> {
+  const logger = appContextService.getLogger();
+
   let hasMore = true;
   const policyIds = new Set<string>();
   let page = 1;
@@ -52,17 +64,67 @@ export async function allFleetServerVersionsAreAtLeast(
     }
   }
 
-  const versionCounts = await getAgentVersionsForAgentPolicyIds(esClient, [...policyIds]);
-  const versions = Object.keys(versionCounts);
+  const managedAgentPolicies = await agentPolicyService.getAllManagedAgentPolicies(soClient);
+  const fleetServerAgents = await getAgentsByKuery(esClient, soClient, {
+    showInactive: true,
+    perPage: SO_SEARCH_LIMIT,
+  });
 
-  // there must be at least one fleet server agent for this check to pass
-  if (versions.length === 0) {
+  if (fleetServerAgents.agents.length === 0) {
     return false;
   }
 
-  return _allVersionsAreAtLeast(version, versions);
-}
+  let result = true;
 
-function _allVersionsAreAtLeast(version: string, versions: string[]) {
-  return versions.every((v) => semverGte(semverCoerce(v)!, version));
+  for (const fleetServerAgent of fleetServerAgents.agents) {
+    const agentVersion = fleetServerAgent.local_metadata?.elastic?.agent?.version;
+
+    if (!agentVersion) {
+      continue;
+    }
+
+    const isNewerVersion = semverGte(semverCoerce(agentVersion)!, version);
+
+    if (!isNewerVersion) {
+      const agentStatus = await getAgentStatusById(esClient, soClient, fleetServerAgent.id);
+
+      // Any unenrolled Fleet Server agents can be ignored
+      if (
+        agentStatus === 'unenrolled' ||
+        fleetServerAgent.status === 'unenrolling' ||
+        fleetServerAgent.unenrolled_at
+      ) {
+        logger.debug(
+          `Found unenrolled Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring`
+        );
+        continue;
+      }
+
+      const isManagedAgentPolicy = managedAgentPolicies.some(
+        (managedPolicy) => managedPolicy.id === fleetServerAgent.policy_id
+      );
+
+      // If this is an agent enrolled in a managed policy, and it is no longer active then we ignore it if it's
+      // running on an outdated version. This prevents users with offline Elastic Agent on Cloud policies from
+      // being stuck when it comes to enabling secrets, as agents can't be unenrolled from managed policies via Fleet UI.
+      if (
+        (isManagedAgentPolicy && ['offline', 'inactive'].includes(agentStatus)) ||
+        !fleetServerAgent.active
+      ) {
+        logger.debug(
+          `Found outdated managed Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} when checking for secrets storage compatibility - ignoring due to ${agentStatus} status`
+        );
+        continue;
+      }
+
+      logger.debug(
+        `Found outdated Fleet Server agent ${fleetServerAgent.id} on version ${agentVersion} - secrets won't be enabled until all Fleet Server agents are running at least ${version}`
+      );
+
+      result = false;
+      break;
+    }
+  }
+
+  return result;
 }

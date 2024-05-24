@@ -13,6 +13,10 @@ export enum ProductFeatureSecurityKey {
    */
   investigationGuide = 'investigation_guide',
   /**
+   * Enables Investigation guide interactions (e.g., osquery, timelines, etc.)
+   */
+  investigationGuideInteractions = 'investigation_guide_interactions',
+  /**
    * Enables access to the Endpoint List and associated views that allows management of hosts
    * running endpoint security
    */
@@ -107,6 +111,7 @@ export enum SecuritySubFeatureId {
   processOperations = 'processOperationsSubFeature',
   fileOperations = 'fileOperationsSubFeature',
   executeAction = 'executeActionSubFeature',
+  scanAction = 'scanActionSubFeature',
 }
 
 /** Sub-features IDs for Cases */
@@ -117,5 +122,5 @@ export enum CasesSubFeatureId {
 
 /** Sub-features IDs for Security Assistant */
 export enum AssistantSubFeatureId {
-  createConversation = 'createConversationSubFeature',
+  updateAnonymization = 'updateAnonymizationSubFeature',
 }

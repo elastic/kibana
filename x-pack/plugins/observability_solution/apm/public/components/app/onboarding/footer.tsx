@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -34,11 +28,7 @@ export function Footer() {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="apmTutorialFooterButton"
-            fill
-            href={apmLink}
-          >
+          <EuiButton data-test-subj="apmTutorialFooterButton" fill href={apmLink}>
             {i18n.translate('xpack.apm.onboarding.footer.cta', {
               defaultMessage: 'Launch APM',
             })}

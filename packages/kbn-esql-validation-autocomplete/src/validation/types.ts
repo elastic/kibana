@@ -32,7 +32,6 @@ export interface ReferenceMaps {
   variables: Map<string, ESQLVariable[]>;
   fields: Map<string, ESQLRealField>;
   policies: Map<string, ESQLPolicy>;
-  metadataFields: Set<string>;
   query: string;
 }
 
@@ -95,6 +94,10 @@ export interface ValidationErrors {
   unsupportedFunctionForCommandOption: {
     message: string;
     type: { name: string; command: string; option: string };
+  };
+  unsupportedLiteralOption: {
+    message: string;
+    type: { name: string; value: string; supportedOptions: string };
   };
   shadowFieldType: {
     message: string;

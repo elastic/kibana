@@ -33,25 +33,15 @@ import {
 } from '../../../../../common/ux_ui_filter';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { TRANSACTION_PAGE_LOAD } from '../../../../../common/transaction_types';
-import {
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-} from '../../../../../common/elasticsearch_fieldnames';
+import { SERVICE_NAME, TRANSACTION_TYPE } from '../../../../../common/elasticsearch_fieldnames';
 
-const filterNames: UxLocalUIFilterName[] = [
-  'location',
-  'device',
-  'os',
-  'browser',
-];
+const filterNames: UxLocalUIFilterName[] = ['location', 'device', 'os', 'browser'];
 
 export const getExcludedName = (filterName: string) => {
   return `${filterName}Excluded` as UxLocalUIFilterName;
 };
 
-const RUM_DATA_FILTERS = [
-  { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } },
-];
+const RUM_DATA_FILTERS = [{ term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_LOAD } }];
 
 function LocalUIFilters() {
   const { dataViewTitle, dataView } = useDataView();
@@ -62,9 +52,7 @@ function LocalUIFilters() {
     invertFilter,
     clearValues,
   } = useLocalUIFilters({
-    filterNames: uxLocalUIFilterNames.filter(
-      (name) => !['serviceName'].includes(name)
-    ),
+    filterNames: uxLocalUIFilterNames.filter((name) => !['serviceName'].includes(name)),
   });
 
   const {
@@ -113,23 +101,15 @@ function LocalUIFilters() {
                 dataViewTitle={dataViewTitle}
                 label={uxFiltersByName[filterName].title}
                 asCombobox={false}
-                selectedValue={
-                  filters.find((ft) => ft.name === filterName && !ft.excluded)
-                    ?.value
-                }
+                selectedValue={filters.find((ft) => ft.name === filterName && !ft.excluded)?.value}
                 excludedValue={
-                  filters.find(
-                    (ft) =>
-                      ft.name === getExcludedName(filterName) && ft.excluded
-                  )?.value
+                  filters.find((ft) => ft.name === getExcludedName(filterName) && ft.excluded)
+                    ?.value
                 }
                 asFilterButton={true}
                 onChange={(values, excludedValues) => {
                   setFilterValue(filterName, values || []);
-                  setFilterValue(
-                    getExcludedName(filterName),
-                    excludedValues || []
-                  );
+                  setFilterValue(getExcludedName(filterName), excludedValues || []);
                 }}
                 filters={getFilters}
                 time={{ from: start!, to: end! }}

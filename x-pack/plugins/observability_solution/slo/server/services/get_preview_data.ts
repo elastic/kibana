@@ -26,7 +26,7 @@ import { getElasticsearchQueryOrThrow } from './transform_generators';
 import { buildParamValues } from './transform_generators/synthetics_availability';
 import { typedSearch } from '../utils/queries';
 import { APMTransactionDurationIndicator } from '../domain/models';
-import { computeSLI } from '../domain/services';
+import { computeSLIForPreview } from '../domain/services';
 import {
   GetCustomMetricIndicatorAggregation,
   GetHistogramIndicatorAggregation,
@@ -41,6 +41,7 @@ interface Options {
   };
   interval: string;
   instanceId?: string;
+  remoteName?: string;
   groupBy?: string;
   groupings?: Record<string, unknown>;
 }
@@ -74,8 +75,12 @@ export class GetPreviewData {
 
     const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await typedSearch(this.esClient, {
-      index: indicator.params.index,
+      index,
       size: 0,
       query: {
         bool: {
@@ -130,7 +135,7 @@ export class GetPreviewData {
         const total = bucket.total?.value ?? 0;
         return {
           date: bucket.key_as_string,
-          sliValue: computeSLI(good, total),
+          sliValue: computeSLIForPreview(good, total),
           events: {
             good,
             total,
@@ -166,8 +171,12 @@ export class GetPreviewData {
     if (!!indicator.params.filter)
       filter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       size: 0,
       query: {
         bool: {
@@ -216,7 +225,7 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total
-          ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
+          ? computeSLIForPreview(bucket.good.doc_count, bucket.total.doc_count)
           : null,
       events: {
         good: bucket.good?.doc_count ?? 0,
@@ -241,8 +250,12 @@ export class GetPreviewData {
 
     this.getGroupingsFilter(options, filter);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       size: 0,
       query: {
         bool: {
@@ -277,7 +290,9 @@ export class GetPreviewData {
     return result.aggregations?.perMinute.buckets.map((bucket) => ({
       date: bucket.key_as_string,
       sliValue:
-        !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
+        !!bucket.good && !!bucket.total
+          ? computeSLIForPreview(bucket.good.value, bucket.total.value)
+          : null,
       events: {
         good: bucket.good?.value ?? 0,
         bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
@@ -300,8 +315,12 @@ export class GetPreviewData {
     ];
     this.getGroupingsFilter(options, filter);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       size: 0,
       query: {
         bool: {
@@ -336,7 +355,9 @@ export class GetPreviewData {
     return result.aggregations?.perMinute.buckets.map((bucket) => ({
       date: bucket.key_as_string,
       sliValue:
-        !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
+        !!bucket.good && !!bucket.total
+          ? computeSLIForPreview(bucket.good.value, bucket.total.value)
+          : null,
       events: {
         good: bucket.good?.value ?? 0,
         bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
@@ -362,8 +383,12 @@ export class GetPreviewData {
 
     this.getGroupingsFilter(options, filter);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       size: 0,
       query: {
         bool: {
@@ -409,8 +434,12 @@ export class GetPreviewData {
 
     this.getGroupingsFilter(options, filter);
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${indicator.params.index}`
+      : indicator.params.index;
+
     const result = await this.esClient.search({
-      index: indicator.params.index,
+      index,
       size: 0,
       query: {
         bool: {
@@ -440,7 +469,7 @@ export class GetPreviewData {
       date: bucket.key_as_string,
       sliValue:
         !!bucket.good && !!bucket.total
-          ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
+          ? computeSLIForPreview(bucket.good.doc_count, bucket.total.doc_count)
           : null,
       events: {
         good: bucket.good?.doc_count ?? 0,
@@ -488,8 +517,12 @@ export class GetPreviewData {
         terms: { 'monitor.project.id': projects },
       });
 
+    const index = options.remoteName
+      ? `${options.remoteName}:${SYNTHETICS_INDEX_PATTERN}`
+      : SYNTHETICS_INDEX_PATTERN;
+
     const result = await this.esClient.search({
-      index: SYNTHETICS_INDEX_PATTERN,
+      index,
       size: 0,
       query: {
         bool: {
@@ -541,7 +574,7 @@ export class GetPreviewData {
       const total = bucket.total?.doc_count ?? 0;
       data.push({
         date: bucket.key_as_string,
-        sliValue: computeSLI(good, total),
+        sliValue: computeSLIForPreview(good, total),
         events: {
           good,
           bad,
@@ -559,21 +592,21 @@ export class GetPreviewData {
       // Timeslice metric so that the chart is as close to the evaluation as possible.
       // Otherwise due to how the statistics work, the values might not look like
       // they've breached the threshold.
+      const rangeDuration = moment(params.range.to).diff(params.range.from, 'ms');
       const bucketSize =
         params.indicator.type === 'sli.metric.timeslice' &&
-        params.range.end - params.range.start <= 86_400_000 &&
+        rangeDuration <= 86_400_000 &&
         params.objective?.timesliceWindow
           ? params.objective.timesliceWindow.asMinutes()
           : Math.max(
-              calculateAuto
-                .near(100, moment.duration(params.range.end - params.range.start, 'ms'))
-                ?.asMinutes() ?? 0,
+              calculateAuto.near(100, moment.duration(rangeDuration, 'ms'))?.asMinutes() ?? 0,
               1
             );
       const options: Options = {
         instanceId: params.instanceId,
-        range: params.range,
+        range: { start: params.range.from.getTime(), end: params.range.to.getTime() },
         groupBy: params.groupBy,
+        remoteName: params.remoteName,
         groupings: params.groupings,
         interval: `${bucketSize}m`,
       };

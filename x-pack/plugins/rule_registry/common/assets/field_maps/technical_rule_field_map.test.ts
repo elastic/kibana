@@ -134,6 +134,11 @@ it('matches snapshot', () => {
         "required": false,
         "type": "keyword",
       },
+      "kibana.alert.rule.execution.timestamp": Object {
+        "array": false,
+        "required": false,
+        "type": "date",
+      },
       "kibana.alert.rule.execution.uuid": Object {
         "array": false,
         "required": false,

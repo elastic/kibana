@@ -8,11 +8,7 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
-import {
-  AGENT_NAME,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-} from '../../../common/es_fields/apm';
+import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type LookupServicesResponse = Array<{
@@ -79,9 +75,7 @@ export async function lookupServices({
     response.aggregations?.services.buckets.map((bucket) => {
       return {
         serviceName: bucket.key as string,
-        environments: bucket.environments.buckets.map(
-          (envBucket) => envBucket.key as string
-        ),
+        environments: bucket.environments.buckets.map((envBucket) => envBucket.key as string),
         agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
       };
     }) ?? []

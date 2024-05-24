@@ -9,11 +9,13 @@
 import { CoreEditor, Range, Token } from '../../types';
 
 export interface ResultTerm {
+  meta?: string;
   context?: AutoCompleteContext;
   insertValue?: string;
   name?: string;
   value?: string;
   score?: number;
+  template?: { __raw?: boolean; value?: string; [key: string]: unknown };
 }
 
 export interface DataAutoCompleteRulesOneOf {

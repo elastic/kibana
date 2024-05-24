@@ -249,7 +249,7 @@ export class Plugin implements InfraClientPluginClass {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
-      const visibleIn: AppDeepLinkLocations[] = this.isServerlessEnv ? ['globalSearch'] : [];
+      const visibleIn: AppDeepLinkLocations[] = ['globalSearch'];
 
       return [
         {
@@ -343,9 +343,10 @@ export class Plugin implements InfraClientPluginClass {
       title: 'infra',
       visibleIn: [],
       mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
         const { renderApp } = await import('./apps/legacy_app');
 
-        return renderApp(params);
+        return renderApp(coreStart, params);
       },
     });
 

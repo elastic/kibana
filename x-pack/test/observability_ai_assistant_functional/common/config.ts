@@ -7,15 +7,24 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { merge } from 'lodash';
-import supertest from 'supertest';
-import { format, UrlObject } from 'url';
+import { UrlObject } from 'url';
+import type { EBTHelpersContract } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import {
+  editorUser,
+  viewerUser,
+} from '../../observability_ai_assistant_api_integration/common/users/users';
+import {
+  KibanaEBTServerProvider,
+  KibanaEBTUIProvider,
+} from '../../../../test/analytics/services/kibana_ebt';
 import {
   ObservabilityAIAssistantFtrConfig,
   CreateTest as CreateTestAPI,
   createObservabilityAIAssistantAPIConfig,
 } from '../../observability_ai_assistant_api_integration/common/config';
 import {
-  createObservabilityAIAssistantApiClient,
+  getScopedApiClient,
   ObservabilityAIAssistantAPIClient,
 } from '../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
 import { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
@@ -27,11 +36,16 @@ export interface TestConfig extends CreateTestAPI {
       observabilityAIAssistantUI: (
         context: InheritedFtrProviderContext
       ) => Promise<ObservabilityAIAssistantUIService>;
-      observabilityAIAssistantAPIClient: () => Promise<
-        Awaited<ReturnType<CreateTestAPI['services']['observabilityAIAssistantAPIClient']>> & {
-          testUser: ObservabilityAIAssistantAPIClient;
-        }
-      >;
+      observabilityAIAssistantAPIClient: () => Promise<{
+        adminUser: ObservabilityAIAssistantAPIClient;
+        viewerUser: ObservabilityAIAssistantAPIClient;
+        editorUser: ObservabilityAIAssistantAPIClient;
+      }>;
+      kibana_ebt_server: (context: InheritedFtrProviderContext) => EBTHelpersContract;
+      kibana_ebt_ui: (context: InheritedFtrProviderContext) => EBTHelpersContract;
+      apmSynthtraceEsClient: (
+        context: InheritedFtrProviderContext
+      ) => Promise<ApmSynthtraceEsClient>;
     };
 }
 
@@ -52,6 +66,8 @@ export function createTestConfig(
       kibanaConfig,
     });
 
+    const kibanaServer = baseConfig.servers.kibana as UrlObject;
+
     return merge(
       {
         services: testConfig.get('services'),
@@ -63,19 +79,14 @@ export function createTestConfig(
           observabilityAIAssistantUI: (context: InheritedFtrProviderContext) =>
             ObservabilityAIAssistantUIProvider(context),
           observabilityAIAssistantAPIClient: async (context: InheritedFtrProviderContext) => {
-            const otherUsers = await baseConfig.services.observabilityAIAssistantAPIClient();
             return {
-              ...otherUsers,
-              testUser: createObservabilityAIAssistantApiClient(
-                supertest(
-                  format({
-                    ...(baseConfig.servers.kibana as UrlObject),
-                    auth: `test_user:changeme`,
-                  })
-                )
-              ),
+              adminUser: await getScopedApiClient(kibanaServer, 'elastic'),
+              viewerUser: await getScopedApiClient(kibanaServer, viewerUser.username),
+              editorUser: await getScopedApiClient(kibanaServer, editorUser.username),
             };
           },
+          kibana_ebt_server: KibanaEBTServerProvider,
+          kibana_ebt_ui: KibanaEBTUIProvider,
         },
       }
     );

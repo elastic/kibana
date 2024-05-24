@@ -6,25 +6,16 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiSuperSelect,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSuperSelect, EuiText } from '@elastic/eui';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import { MapTypes } from '../../../../../../common/mobile/constants';
 
 const options: Array<EuiSuperSelectOption<MapTypes>> = [
   {
     value: MapTypes.Http,
-    label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests',
-      {
-        defaultMessage: 'HTTP requests',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests', {
+      defaultMessage: 'HTTP requests',
+    }),
     description: i18n.translate(
       'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests.subtitle',
       {
@@ -35,12 +26,9 @@ const options: Array<EuiSuperSelectOption<MapTypes>> = [
   },
   {
     value: MapTypes.Session,
-    label: i18n.translate(
-      'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions',
-      {
-        defaultMessage: 'Sessions',
-      }
-    ),
+    label: i18n.translate('xpack.apm.serviceOverview.embeddedMap.dropdown.sessions', {
+      defaultMessage: 'Sessions',
+    }),
     description: i18n.translate(
       'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions.subtitle',
       {
@@ -69,8 +57,7 @@ export function EmbeddedMapSelect({
   selectedMap: MapTypes;
   onChange: (value: MapTypes) => void;
 }) {
-  const currentMap =
-    options.find(({ value }) => value === selectedMap) ?? options[0];
+  const currentMap = options.find(({ value }) => value === selectedMap) ?? options[0];
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">

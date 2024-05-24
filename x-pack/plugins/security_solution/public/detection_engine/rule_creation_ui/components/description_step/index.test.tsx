@@ -263,7 +263,7 @@ describe('description_step', () => {
         mockLicenseService
       );
 
-      expect(result.length).toEqual(12);
+      expect(result.length).toEqual(14);
     });
   });
 
@@ -559,8 +559,23 @@ describe('description_step', () => {
       });
     });
 
+    describe('setup', () => {
+      test('returns default "setup" description', () => {
+        const result: ListItems[] = getDescriptionItem(
+          'setup',
+          'Setup guide',
+          mockAboutStep,
+          mockFilterManager,
+          mockLicenseService
+        );
+
+        expect(result[0].title).toEqual('Setup guide');
+        expect(React.isValidElement(result[0].description)).toBeTruthy();
+      });
+    });
+
     describe('alert suppression', () => {
-      const ruleTypesWithoutSuppression: Type[] = ['eql', 'esql', 'machine_learning', 'new_terms'];
+      const ruleTypesWithoutSuppression: Type[] = ['machine_learning'];
       const suppressionFields = {
         groupByDuration: {
           unit: 'm',
@@ -751,6 +766,33 @@ describe('description_step', () => {
 
             expect(result).toEqual([]);
           });
+        });
+      });
+
+      describe('maxSignals', () => {
+        test('returns default "max signals" description', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'maxSignals',
+            'Max alerts per run',
+            mockAboutStep,
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result[0].title).toEqual('Max alerts per run');
+          expect(result[0].description).toEqual(100);
+        });
+
+        test('returns empty array when "value" is a undefined', () => {
+          const result: ListItems[] = getDescriptionItem(
+            'maxSignals',
+            'Max alerts per run',
+            { ...mockAboutStep, maxSignals: undefined },
+            mockFilterManager,
+            mockLicenseService
+          );
+
+          expect(result.length).toEqual(0);
         });
       });
     });

@@ -26,15 +26,15 @@ const REFRESH_INTERVAL = 10000;
 export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploymentUrl }) => {
   const { docLinks } = useStartServices();
 
-  const { refresh } = useFleetStatus();
+  const { refetch } = useFleetStatus();
 
   useEffect(() => {
     const interval = setInterval(() => {
-      refresh();
+      refetch();
     }, REFRESH_INTERVAL);
 
     return () => clearInterval(interval);
-  }, [refresh]);
+  }, [refetch]);
 
   return (
     <>

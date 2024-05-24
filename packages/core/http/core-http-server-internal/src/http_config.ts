@@ -46,7 +46,7 @@ const validHostName = () => {
  * We assume the URL does not contain anything after the pathname so that
  * we can safely append values to the pathname at runtime.
  */
-function validateCdnURL(urlString: string): undefined | string {
+export const validateCdnURL = (urlString: string) => {
   const cdnURL = new URL(urlString);
   const errors: string[] = [];
   if (cdnURL.hash.length) {
@@ -58,7 +58,7 @@ function validateCdnURL(urlString: string): undefined | string {
   if (errors.length) {
     return `CDN URL "${cdnURL.href}" is invalid:${EOL}${errors.join(EOL)}`;
   }
-}
+};
 
 const configSchema = schema.object(
   {
@@ -81,6 +81,9 @@ const configSchema = schema.object(
     }),
     cdn: schema.object({
       url: schema.maybe(schema.uri({ scheme: ['http', 'https'], validate: validateCdnURL })),
+    }),
+    oas: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
     }),
     cors: schema.object(
       {
@@ -290,6 +293,9 @@ export class HttpConfig implements IHttpConfig {
     allowCredentials: boolean;
     allowOrigin: string[];
   };
+  public oas: {
+    enabled: boolean;
+  };
   public securityResponseHeaders: Record<string, string | string[]>;
   public customResponseHeaders: Record<string, string | string[]>;
   public maxPayload: ByteSizeValue;
@@ -363,6 +369,7 @@ export class HttpConfig implements IHttpConfig {
     this.restrictInternalApis = rawHttpConfig.restrictInternalApis ?? false;
     this.eluMonitor = rawHttpConfig.eluMonitor;
     this.versioned = rawHttpConfig.versioned;
+    this.oas = rawHttpConfig.oas;
   }
 }
 

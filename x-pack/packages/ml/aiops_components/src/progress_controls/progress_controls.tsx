@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 
 import {
   useEuiTheme,
@@ -49,7 +49,7 @@ interface ProgressControlProps {
  * @param props ProgressControls component props
  * @returns The ProgressControls component.
  */
-export const ProgressControls: FC<ProgressControlProps> = (props) => {
+export const ProgressControls: FC<PropsWithChildren<ProgressControlProps>> = (props) => {
   const {
     children,
     isBrushCleared,
@@ -62,6 +62,8 @@ export const ProgressControls: FC<ProgressControlProps> = (props) => {
     shouldRerunAnalysis,
     runAnalysisDisabled = false,
   } = props;
+
+  const progressOutput = Math.round(progress * 100);
 
   const { euiTheme } = useEuiTheme();
   const runningProgressBarStyles = useAnimatedProgressBarBackground(euiTheme.colors.success);
@@ -147,7 +149,7 @@ export const ProgressControls: FC<ProgressControlProps> = (props) => {
                 data-test-subj="aiopsProgressTitleMessage"
                 id="xpack.aiops.progressTitle"
                 defaultMessage="Progress: {progress}% — {progressMessage}"
-                values={{ progress: Math.round(progress * 100), progressMessage }}
+                values={{ progress: progressOutput, progressMessage }}
               />
             </EuiText>
           </EuiFlexItem>
@@ -156,7 +158,7 @@ export const ProgressControls: FC<ProgressControlProps> = (props) => {
               aria-label={i18n.translate('xpack.aiops.progressAriaLabel', {
                 defaultMessage: 'Progress',
               })}
-              value={Math.round(progress * 100)}
+              value={progressOutput}
               max={100}
               size="m"
             />

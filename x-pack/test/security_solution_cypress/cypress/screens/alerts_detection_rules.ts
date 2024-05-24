@@ -285,10 +285,10 @@ export const ALERT_SUPPRESSION_DURATION_TITLE =
 export const ALERT_SUPPRESSION_DURATION_VALUE =
   '[data-test-subj="alertSuppressionDurationPropertyValue"]';
 
-export const ALERT_SUPPRESSION_FIELD_TITLE =
-  '[data-test-subj="alertSuppressionSuppressionFieldPropertyTitle"]';
-export const ALERT_SUPPRESSION_FIELD_VALUE =
-  '[data-test-subj="alertSuppressionSuppressionFieldPropertyValue"]';
+export const ALERT_SUPPRESSION_MISSING_FIELD_TITLE =
+  '[data-test-subj="alertSuppressionMissingFieldPropertyTitle"]';
+export const ALERT_SUPPRESSION_MISSING_FIELD_VALUE =
+  '[data-test-subj="alertSuppressionMissingFieldsPropertyValue"]';
 
 export const DATA_VIEW_ID_TITLE = '[data-test-subj="dataViewIdPropertyTitle"]';
 export const DATA_VIEW_ID_VALUE = '[data-test-subj="dataViewIdPropertyValue"]';

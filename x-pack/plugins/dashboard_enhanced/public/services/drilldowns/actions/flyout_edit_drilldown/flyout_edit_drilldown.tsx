@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   tracksOverlays,
   type PresentationContainer,
@@ -41,7 +41,7 @@ export interface FlyoutEditDrilldownParams {
 }
 
 export type FlyoutEditDrilldownActionApi = CanAccessViewMode &
-  HasDynamicActions &
+  Required<HasDynamicActions> &
   HasParentApi<Partial<PresentationContainer & TracksOverlays>> &
   HasSupportedTriggers &
   Partial<HasUniqueId>;
@@ -92,7 +92,7 @@ export class FlyoutEditDrilldownAction implements Action<EmbeddableApiContext> {
           templates={templates}
           onClose={close}
         />,
-        { theme$: core.theme.theme$ }
+        core
       ),
       {
         ownFocus: true,

@@ -2,11 +2,10 @@ COSH
 
 Syntax
 Parameters
-n
-Numeric expression. If null, the function returns null.
-Supported types
-DescriptionReturns the hyperbolic
-cosine.Example
+angle
+An angle, in radians. If null, the function returns null.
+DescriptionReturns the hyperbolic cosine of an angle.Supported types
+Example
 ```esql
 ROW a=1.8
 | EVAL cosh=COSH(a)

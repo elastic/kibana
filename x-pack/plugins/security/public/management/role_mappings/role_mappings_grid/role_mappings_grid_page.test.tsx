@@ -17,6 +17,7 @@ import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers
 import { EmptyPrompt } from './empty_prompt';
 import { RoleMappingsGridPage } from './role_mappings_grid_page';
 import { rolesAPIClientMock } from '../../roles/index.mock';
+import { securityFeaturesAPIClientMock } from '../../security_features/security_features_api_client.mock';
 import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
 
@@ -26,6 +27,7 @@ describe('RoleMappingsGridPage', () => {
 
   const renderView = (
     roleMappingsAPI: ReturnType<typeof roleMappingsAPIClientMock.create>,
+    securityFeaturesAPI: ReturnType<typeof securityFeaturesAPIClientMock.create>,
     rolesAPI: ReturnType<typeof rolesAPIClientMock.create> = rolesAPIClientMock.create(),
     readOnly: boolean = false
   ) => {
@@ -40,6 +42,7 @@ describe('RoleMappingsGridPage', () => {
         <RoleMappingsGridPage
           rolesAPIClient={rolesAPI}
           roleMappingsAPI={roleMappingsAPI}
+          securityFeaturesAPI={securityFeaturesAPI}
           notifications={coreStart.notifications}
           docLinks={coreStart.docLinks}
           history={history}
@@ -58,13 +61,14 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a create prompt when no role mappings exist', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(EmptyPrompt)).toHaveLength(0);
 
@@ -88,12 +92,13 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a permission denied message when unauthorized to manage role mappings', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: false,
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: false,
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(PermissionDenied)).toHaveLength(0);
 
@@ -107,6 +112,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a warning when there are no compatible realms enabled', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some realm',
@@ -115,12 +121,12 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: false,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     expect(wrapper.find(SectionLoading)).toHaveLength(1);
     expect(wrapper.find(NoCompatibleRealms)).toHaveLength(0);
 
@@ -133,6 +139,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders links to mapped roles, even if the roles API call returns nothing', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some realm',
@@ -141,12 +148,12 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -157,6 +164,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('describes the number of mapped role templates', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some realm',
@@ -165,12 +173,12 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -181,6 +189,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('allows role mappings to be deleted, refreshing the grid after', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some-realm',
@@ -189,8 +198,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
     roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
@@ -200,7 +209,7 @@ describe('RoleMappingsGridPage', () => {
       },
     ]);
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
@@ -224,6 +233,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders a warning when a mapping is assigned a deprecated role', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some-realm',
@@ -232,8 +242,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
     roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
@@ -254,7 +264,7 @@ describe('RoleMappingsGridPage', () => {
       },
     ]);
 
-    const wrapper = renderView(roleMappingsAPI, roleAPIClient);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, roleAPIClient);
     await nextTick();
     wrapper.update();
 
@@ -269,6 +279,7 @@ describe('RoleMappingsGridPage', () => {
 
   it('renders role mapping actions as appropriate', async () => {
     const roleMappingsAPI = roleMappingsAPIClientMock.create();
+    const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
     roleMappingsAPI.getRoleMappings.mockResolvedValue([
       {
         name: 'some-realm',
@@ -277,8 +288,8 @@ describe('RoleMappingsGridPage', () => {
         rules: { field: { username: '*' } },
       },
     ]);
-    roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-      canManageRoleMappings: true,
+    securityFeaturesAPI.checkFeatures.mockResolvedValue({
+      canReadSecurity: true,
       hasCompatibleRealms: true,
     });
     roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
@@ -288,32 +299,26 @@ describe('RoleMappingsGridPage', () => {
       },
     ]);
 
-    const wrapper = renderView(roleMappingsAPI);
+    const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI);
     await nextTick();
     wrapper.update();
 
-    const editButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="editRoleMappingButton-some-realm"]'
-    );
+    const editButton = wrapper.find('a[data-test-subj="editRoleMappingButton-some-realm"]');
     expect(editButton).toHaveLength(1);
     expect(editButton.prop('href')).toBe('/edit/some-realm');
 
-    const cloneButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="cloneRoleMappingButton-some-realm"]'
-    );
+    const cloneButton = wrapper.find('a[data-test-subj="cloneRoleMappingButton-some-realm"]');
     expect(cloneButton).toHaveLength(1);
     expect(cloneButton.prop('href')).toBe('/clone/some-realm');
 
-    const actionMenuButton = wrapper.find(
-      'EuiButtonIcon[data-test-subj="euiCollapsedItemActionsButton"]'
-    );
+    const actionMenuButton = wrapper.find('button[data-test-subj="euiCollapsedItemActionsButton"]');
     expect(actionMenuButton).toHaveLength(1);
 
     actionMenuButton.simulate('click');
     wrapper.update();
 
     const deleteButton = wrapper.find(
-      'EuiButtonEmpty[data-test-subj="deleteRoleMappingButton-some-realm"]'
+      'button[data-test-subj="deleteRoleMappingButton-some-realm"]'
     );
     expect(deleteButton).toHaveLength(1);
   });
@@ -321,13 +326,14 @@ describe('RoleMappingsGridPage', () => {
   describe('read-only', () => {
     it('renders an empty prompt when no role mappings exist', async () => {
       const roleMappingsAPI = roleMappingsAPIClientMock.create();
+      const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
       roleMappingsAPI.getRoleMappings.mockResolvedValue([]);
-      roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-        canManageRoleMappings: true,
+      securityFeaturesAPI.checkFeatures.mockResolvedValue({
+        canReadSecurity: true,
         hasCompatibleRealms: true,
       });
 
-      const wrapper = renderView(roleMappingsAPI, undefined, true);
+      const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, undefined, true);
       expect(wrapper.find(SectionLoading)).toHaveLength(1);
       expect(wrapper.find(EmptyPrompt)).toHaveLength(0);
 
@@ -348,6 +354,7 @@ describe('RoleMappingsGridPage', () => {
 
     it('hides controls when `readOnly` is enabled', async () => {
       const roleMappingsAPI = roleMappingsAPIClientMock.create();
+      const securityFeaturesAPI = securityFeaturesAPIClientMock.create();
       roleMappingsAPI.getRoleMappings.mockResolvedValue([
         {
           name: 'some-realm',
@@ -356,8 +363,8 @@ describe('RoleMappingsGridPage', () => {
           rules: { field: { username: '*' } },
         },
       ]);
-      roleMappingsAPI.checkRoleMappingFeatures.mockResolvedValue({
-        canManageRoleMappings: true,
+      securityFeaturesAPI.checkFeatures.mockResolvedValue({
+        canReadSecurity: true,
         hasCompatibleRealms: true,
       });
       roleMappingsAPI.deleteRoleMappings.mockResolvedValue([
@@ -367,34 +374,26 @@ describe('RoleMappingsGridPage', () => {
         },
       ]);
 
-      const wrapper = renderView(roleMappingsAPI, undefined, true);
+      const wrapper = renderView(roleMappingsAPI, securityFeaturesAPI, undefined, true);
       await nextTick();
       wrapper.update();
 
-      const bulkButton = wrapper.find('EuiButtonEmpty[data-test-subj="bulkDeleteActionButton"]');
+      const bulkButton = wrapper.find('[data-test-subj="bulkDeleteActionButton"]');
       expect(bulkButton).toHaveLength(0);
 
-      const createButton = wrapper.find('EuiButton[data-test-subj="createRoleMappingButton"]');
+      const createButton = wrapper.find('[data-test-subj="createRoleMappingButton"]');
       expect(createButton).toHaveLength(0);
 
-      const editButton = wrapper.find(
-        'EuiButtonEmpty[data-test-subj="editRoleMappingButton-some-realm"]'
-      );
+      const editButton = wrapper.find('[data-test-subj="editRoleMappingButton-some-realm"]');
       expect(editButton).toHaveLength(0);
 
-      const cloneButton = wrapper.find(
-        'EuiButtonEmpty[data-test-subj="cloneRoleMappingButton-some-realm"]'
-      );
+      const cloneButton = wrapper.find('[data-test-subj="cloneRoleMappingButton-some-realm"]');
       expect(cloneButton).toHaveLength(0);
 
-      const deleteButton = wrapper.find(
-        'EuiButtonEmpty[data-test-subj="deleteRoleMappingButton-some-realm"]'
-      );
+      const deleteButton = wrapper.find('[data-test-subj="deleteRoleMappingButton-some-realm"]');
       expect(deleteButton).toHaveLength(0);
 
-      const actionMenuButton = wrapper.find(
-        'EuiButtonIcon[data-test-subj="euiCollapsedItemActionsButton"]'
-      );
+      const actionMenuButton = wrapper.find('[data-test-subj="euiCollapsedItemActionsButton"]');
       expect(actionMenuButton).toHaveLength(0);
     });
   });

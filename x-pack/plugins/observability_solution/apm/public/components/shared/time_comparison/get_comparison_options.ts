@@ -41,13 +41,10 @@ function formatDate({
   previousPeriodStart: moment.Moment;
   previousPeriodEnd: moment.Moment;
 }) {
-  const isDifferentYears =
-    previousPeriodStart.get('year') !== currentPeriodEnd.get('year');
+  const isDifferentYears = previousPeriodStart.get('year') !== currentPeriodEnd.get('year');
   const dateFormat = isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
 
-  return `${previousPeriodStart.format(
-    dateFormat
-  )} - ${previousPeriodEnd.format(dateFormat)}`;
+  return `${previousPeriodStart.format(dateFormat)} - ${previousPeriodEnd.format(dateFormat)}`;
 }
 
 export function isDefined<T>(argument: T | undefined | null): argument is T {
@@ -131,10 +128,7 @@ export function getComparisonOptions({
   if (msDiff < twentyFiveHoursInMs) {
     // Less than 25 hours. This is because relative times may be rounded when
     // asking for a day, which can result in a duration > 24h. (e.g. rangeFrom: 'now-24h/h, rangeTo: 'now')
-    comparisonTypes = [
-      TimeRangeComparisonEnum.DayBefore,
-      TimeRangeComparisonEnum.WeekBefore,
-    ];
+    comparisonTypes = [TimeRangeComparisonEnum.DayBefore, TimeRangeComparisonEnum.WeekBefore];
   } else if (msDiff < eightDaysInMs) {
     // Less than 8 days. This is because relative times may be rounded when
     // asking for a week, which can result in a duration > 7d. (e.g. rangeFrom: 'now-7d/d, rangeTo: 'now')
@@ -143,9 +137,7 @@ export function getComparisonOptions({
     comparisonTypes = [TimeRangeComparisonEnum.PeriodBefore];
   }
 
-  const hasMLJob =
-    isDefined(anomalyDetectionJobsData) &&
-    anomalyDetectionJobsData.jobs.length > 0;
+  const hasMLJob = isDefined(anomalyDetectionJobsData) && anomalyDetectionJobsData.jobs.length > 0;
 
   const comparisonOptions = getSelectOptions({
     comparisonTypes,
@@ -157,15 +149,12 @@ export function getComparisonOptions({
   if (showSelectedBoundsOption && hasMLJob) {
     const disabled =
       anomalyDetectionJobsStatus === 'success' &&
-      !anomalyDetectionJobsData.jobs.some(
-        (j) => j.environment === preferredEnvironment
-      );
+      !anomalyDetectionJobsData.jobs.some((j) => j.environment === preferredEnvironment);
     comparisonOptions.push({
       value: TimeRangeComparisonEnum.ExpectedBounds,
       text: disabled
         ? i18n.translate('xpack.apm.comparison.mlExpectedBoundsDisabledText', {
-            defaultMessage:
-              'Expected bounds (Anomaly detection must be enabled for env)',
+            defaultMessage: 'Expected bounds (Anomaly detection must be enabled for env)',
           })
         : i18n.translate('xpack.apm.comparison.mlExpectedBoundsText', {
             defaultMessage: 'Expected bounds',

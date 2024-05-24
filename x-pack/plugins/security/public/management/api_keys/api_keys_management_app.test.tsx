@@ -32,11 +32,13 @@ describe('apiKeysManagementApp', () => {
       },
     };
 
-    coreStartMock.http.get.mockResolvedValue({
+    coreStartMock.http.post.mockResolvedValue({
       apiKeys: [],
       canManageCrossClusterApiKeys: true,
       canManageApiKeys: true,
       canManageOwnApiKeys: true,
+      aggregations: {},
+      aggregationsTotal: 0,
     });
 
     authc.getCurrentUser.mockResolvedValue(
@@ -56,7 +58,8 @@ describe('apiKeysManagementApp', () => {
         element,
         setBreadcrumbs,
         history,
-        theme$: themeServiceMock.createTheme$(),
+        theme: coreStartMock.theme,
+        theme$: themeServiceMock.createTheme$(), // needed as a deprecated field in ManagementAppMountParams
       });
     });
 

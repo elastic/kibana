@@ -82,10 +82,7 @@ interface Tab {
 }
 
 export const SearchApplicationApiIntegrationStage: React.FC = () => {
-  const {
-    application,
-    share: { url },
-  } = useValues(KibanaLogic);
+  const { application, share } = useValues(KibanaLogic);
   const [selectedTab, setSelectedTab] = React.useState<TabId>('apirequest');
   const { searchApplicationName } = useValues(SearchApplicationViewLogic);
   const { apiKey } = useValues(SearchApplicationApiLogic);
@@ -130,7 +127,7 @@ export const SearchApplicationApiIntegrationStage: React.FC = () => {
 
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
   const consolePreviewLink = canShowDevtools
-    ? url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
+    ? share?.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
         {
           loadFrom: `data:text/plain,${compressToEncodedURIComponent(
             consoleRequest(searchApplicationName, params)

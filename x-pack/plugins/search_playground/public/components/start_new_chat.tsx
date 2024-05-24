@@ -5,13 +5,26 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useFormContext } from 'react-hook-form';
+import { useSearchParams } from 'react-router-dom-v5-compat';
+import { useUsageTracker } from '../hooks/use_usage_tracker';
+import { useLoadConnectors } from '../hooks/use_load_connectors';
 import { SourcesPanelForStartChat } from './sources_panel/sources_panel_for_start_chat';
-import { SummarizationPanelForStartChat } from './summarization_panel/summarization_panel_for_start_chat';
+import { SetUpConnectorPanelForStartChat } from './set_up_connector_panel_for_start_chat';
 import { ChatFormFields } from '../types';
+import { AnalyticsEvents } from '../analytics/constants';
+import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 
 const maxWidthPage = 640;
 
@@ -21,10 +34,27 @@ interface StartNewChatProps {
 
 export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
   const { euiTheme } = useEuiTheme();
+  const { data: connectors } = useLoadConnectors();
   const { watch } = useFormContext();
+  const usageTracker = useUsageTracker();
+
+  const [searchParams] = useSearchParams();
+  const index = useMemo(() => searchParams.get('default-index'), [searchParams]);
+  const { addIndex } = useSourceIndicesFields();
+
+  useEffect(() => {
+    if (index) {
+      addIndex(index);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index]);
+
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.startNewChatPageLoaded);
+  }, [usageTracker]);
 
   return (
-    <EuiFlexGroup justifyContent="center" className="eui-yScroll">
+    <EuiFlexGroup justifyContent="center" className="eui-yScroll" data-test-subj="startChatPage">
       <EuiFlexGroup
         css={{
           height: 'fit-content',
@@ -38,7 +68,7 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="m">
             <EuiTitle>
-              <h2>
+              <h2 data-test-subj="startNewChatTitle">
                 <FormattedMessage
                   id="xpack.searchPlayground.startNewChat.title"
                   defaultMessage="Start a new chat"
@@ -49,9 +79,19 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
             <EuiIcon type="discuss" size="xl" />
           </EuiFlexGroup>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.searchPlayground.startNewChat.description"
+                defaultMessage="Combine your Elasticsearch data with the power of large language models for retrieval augmented generation (RAG). Use the UI to view and edit the Elasticsearch queries used to search your data, then download the code to integrate into your own application."
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <SummarizationPanelForStartChat />
+          <SetUpConnectorPanelForStartChat />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
@@ -63,7 +103,12 @@ export const StartNewChat: React.FC<StartNewChatProps> = ({ onStartClick }) => {
             fill
             iconType="arrowRight"
             iconSide="right"
-            disabled={!watch(ChatFormFields.openAIKey) || !watch(ChatFormFields.indices, []).length}
+            data-test-subj="startChatButton"
+            disabled={
+              !watch(ChatFormFields.indices, [])?.length ||
+              !Object.keys(connectors || {}).length ||
+              !watch(ChatFormFields.elasticsearchQuery, '')
+            }
             onClick={onStartClick}
           >
             <FormattedMessage

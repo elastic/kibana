@@ -20,7 +20,7 @@ type RuleCreateBody = Omit<
   | 'lastRun'
   | 'nextRun'
 >;
-const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
+export const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
   actions,
   alertDelay,

@@ -6,6 +6,7 @@
  */
 
 import pick from 'lodash/pick';
+import get from 'lodash/get';
 import partition from 'lodash/partition';
 
 import type { SignalSourceHit } from '../types';
@@ -15,16 +16,26 @@ import type { SignalSourceHit } from '../types';
  * 1. first one, where no suppressed by field has empty value
  * 2. where any of fields is empty
  */
-export const partitionMissingFieldsEvents = (
-  events: SignalSourceHit[],
-  suppressedBy: string[] = []
-): SignalSourceHit[][] => {
+export const partitionMissingFieldsEvents = <
+  T extends SignalSourceHit | { event: SignalSourceHit } | Record<string, string | null | number>
+>(
+  events: T[],
+  suppressedBy: string[] = [],
+  // path to fields property within event object. At this point, it can be in root of event object or within event key
+  fieldsPath: ['event', 'fields'] | ['fields'] | [] = [],
+  mergeSourceAndFields: boolean = false
+): T[][] => {
   return partition(events, (event) => {
     if (suppressedBy.length === 0) {
       return true;
     }
-    const hasMissingFields =
-      Object.keys(pick(event.fields, suppressedBy)).length < suppressedBy.length;
+    const eventFields = fieldsPath.length ? get(event, fieldsPath) : event;
+    const sourceFields =
+      (event as SignalSourceHit)?._source || (event as { event: SignalSourceHit })?.event?._source;
+
+    const fields = mergeSourceAndFields ? { ...sourceFields, ...eventFields } : eventFields;
+
+    const hasMissingFields = Object.keys(pick(fields, suppressedBy)).length < suppressedBy.length;
 
     return !hasMissingFields;
   });

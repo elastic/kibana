@@ -18,7 +18,7 @@ FROM source command returns a table with data from a data stream, index,
 or alias. Each row in the resulting table represents a document. Each column
 corresponds to a field, and can be accessed by the name of that field.
 By default, an ES|QL query without an explicit LIMIT uses an implicit
-limit of 500. This applies to
+limit of 1000. This applies to
 ```esql
 FROM too. A FROM command without LIMIT:
 ```
@@ -30,7 +30,7 @@ FROM employees
 is executed as:
 ```esql
 FROM employees
-| LIMIT 500
+| LIMIT 1000
 ```
 
 Examples
@@ -51,7 +51,13 @@ or aliases:
 FROM employees-00001,other-employees-*
 ```
 
-Use the METADATA directive to enable metadata fields:
+Use the format <remote_cluster_name>:<target> to query data streams and indices
+on remote clusters:
 ```esql
-FROM employees [METADATA _id]
+FROM cluster_one:employees-00001,cluster_two:other-employees-*
+```
+
+See using ES|QL across clusters.Use the optional METADATA directive to enable metadata fields:
+```esql
+FROM employees METADATA _id
 ```

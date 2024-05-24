@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { EventAction } from './types/v1';
+
 export const SESSION_VIEW_APP_ID = 'sessionView';
 export const USAGE_COLLECTION_APP_NAME = 'session_view'; // underscore delimited is required
 
@@ -177,3 +179,9 @@ export const ALERT_FIELDS = PROCESS_EVENT_FIELDS.concat([
   'kibana.alert.rule.parameters.query',
   'kibana.alert.rule.query',
 ]);
+export const EVENT_ACTION_FORK: EventAction = 'fork';
+export const EVENT_ACTION_END: EventAction = 'end';
+// exec event.action is used by Endpoint and Cloud Defend
+export const EVENT_ACTION_EXEC: EventAction = 'exec';
+// executed event.action is used by Auditbeat
+export const EVENT_ACTION_EXECUTED: EventAction = 'executed';

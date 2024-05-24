@@ -42,19 +42,15 @@ export async function createAgentKey({
     username,
     has_all_requested: hasRequiredPrivileges,
     cluster: clusterPrivileges,
-  } = await coreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges(
-    {
-      body: {
-        application: [application],
-        cluster: CLUSTER_PRIVILEGES,
-      },
-    }
-  );
+  } = await coreContext.elasticsearch.client.asCurrentUser.security.hasPrivileges({
+    body: {
+      application: [application],
+      cluster: CLUSTER_PRIVILEGES,
+    },
+  });
 
   if (!hasRequiredPrivileges) {
-    const missingPrivileges = Object.entries(
-      userApplicationPrivileges.apm[resource]
-    )
+    const missingPrivileges = Object.entries(userApplicationPrivileges.apm[resource])
       .filter((x) => !x[1])
       .map((x) => x[0]);
 
@@ -66,9 +62,7 @@ export async function createAgentKey({
       ', '
     )}${
       missingClusterPrivileges && missingClusterPrivileges.length > 0
-        ? ` and following cluster privileges - ${missingClusterPrivileges.join(
-            ', '
-          )} privilege(s)`
+        ? ` and following cluster privileges - ${missingClusterPrivileges.join(', ')} privilege(s)`
         : ''
     }.\
     You might try with the superuser, or add the missing APM application privileges to the role of the authenticated user, eg.:
@@ -102,10 +96,9 @@ export async function createAgentKey({
     },
   };
 
-  const agentKey =
-    await coreContext.elasticsearch.client.asCurrentUser.security.createApiKey({
-      body,
-    });
+  const agentKey = await coreContext.elasticsearch.client.asCurrentUser.security.createApiKey({
+    body,
+  });
 
   return {
     agentKey,

@@ -15,7 +15,7 @@ import {
   timestamp,
 } from '../../mock/enriched_field_metadata/mock_enriched_field_metadata';
 import { mockPartitionedFieldMetadata } from '../../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
-import { mockStatsGreenIndex } from '../../mock/stats/mock_stats_green_index';
+import { mockStatsAuditbeatIndex } from '../../mock/stats/mock_stats_packetbeat_index';
 import {
   getEcsCompliantColor,
   getMissingTimestampComment,
@@ -83,7 +83,7 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
           patternDocsCount: 57410,
           setSelectedTabId: jest.fn(),
-          stats: mockStatsGreenIndex,
+          stats: mockStatsAuditbeatIndex,
           baseTheme: DARK_THEME,
         }).map((x) => omit(['append', 'content'], x))
       ).toEqual([

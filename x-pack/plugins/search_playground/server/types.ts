@@ -5,9 +5,15 @@
  * 2.0.
  */
 
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchPlaygroundPluginStart {}
+
+export interface SearchPlaygroundPluginStartDependencies {
+  actions: ActionsPluginStartContract;
+}
 
 export * from '../common/types';

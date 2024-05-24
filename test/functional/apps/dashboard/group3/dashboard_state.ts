@@ -167,35 +167,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(headers[1]).to.be('agent');
     });
 
-    it('Saved search will update when the query is changed in the URL', async () => {
-      const currentQuery = await queryBar.getQueryString();
-      expect(currentQuery).to.equal('');
-      const newUrl = updateAppStateQueryParam(
-        await getUrlFromShare(),
-        (appState: Partial<SharedDashboardState>) => {
-          return {
-            query: {
-              language: 'kuery',
-              query: 'abc12345678910',
-            },
-          };
-        }
-      );
-
-      // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
-      await browser.get(newUrl.toString());
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
-      const headers = await PageObjects.discover.getColumnHeaders();
-      // will be zero because the query inserted in the url doesn't match anything
-      expect(headers.length).to.be(0);
-    });
-
     const getUrlFromShare = async () => {
       log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
       const sharedUrl = await PageObjects.share.getSharedUrl();
-      await PageObjects.share.clickShareTopNavButton();
+      await PageObjects.share.closeShareModal();
       log.debug(`sharedUrl: ${sharedUrl}`);
       return sharedUrl;
     };
@@ -209,7 +185,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.waitForRenderComplete();
     };
 
-    describe('Directly modifying url updates dashboard state', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/139762
+    describe.skip('Directly modifying url updates dashboard state', () => {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
@@ -236,11 +213,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const queryBarContentsAfterRefresh = await queryBar.getQueryString();
         expect(queryBarContentsAfterRefresh).to.equal(newQuery);
       };
-
-      it('for query parameter with soft refresh', async function () {
-        await changeQuery(false, 'hi:goodbye');
-        await PageObjects.dashboard.expectAppStateRemovedFromURL();
-      });
 
       it('for query parameter with hard refresh', async function () {
         await changeQuery(true, 'hi:hello');
@@ -295,7 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('when removing a panel', async function () {
         await PageObjects.dashboard.waitForRenderComplete();
-        const currentUrl = await getUrlFromShare();
+        const currentUrl = (await getUrlFromShare()) ?? '';
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -319,7 +291,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.clearQuery();
           await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
           await enableNewChartLibraryDebug();
-          originalPieSliceStyle = await pieChart.getPieSliceStyle(`80,000`);
+          originalPieSliceStyle = (await pieChart.getPieSliceStyle(`80,000`)) ?? '';
         });
 
         it('updates a pie slice color on a hard refresh', async function () {

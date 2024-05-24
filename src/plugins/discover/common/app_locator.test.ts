@@ -15,7 +15,7 @@ import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item
 import { FilterStateStore } from '@kbn/es-query';
 import { DiscoverAppLocatorDefinition } from './app_locator';
 import { SerializableRecord } from '@kbn/utility-types';
-import { addProfile } from './customizations';
+import { createDataViewDataSource, createEsqlDataSource } from './data_sources';
 
 const dataViewId: string = 'c367b774-a4c2-11ea-bb37-0242ac130002';
 const savedSearchId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -58,20 +58,13 @@ describe('Discover url generator', () => {
     expect(_g).toEqual(undefined);
   });
 
-  test('can specify profile', async () => {
-    const { locator } = await setup();
-    const { path } = await locator.getLocation({ profile: 'test', dataViewId: '123' });
-
-    expect(path).toBe(`${addProfile('#/', 'test')}?_a=(index:'123')`);
-  });
-
   test('can specify specific data view', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({ dataViewId });
     const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
 
     expect(_a).toEqual({
-      index: dataViewId,
+      dataSource: createDataViewDataSource({ dataViewId }),
     });
     expect(_g).toEqual(undefined);
   });
@@ -107,6 +100,25 @@ describe('Discover url generator', () => {
       query: {
         language: 'kuery',
         query: 'foo',
+      },
+    });
+    expect(_g).toEqual(undefined);
+  });
+
+  test('can specify an ES|QL query', async () => {
+    const { locator } = await setup();
+    const { path } = await locator.getLocation({
+      dataViewId,
+      query: {
+        esql: 'SELECT * FROM test',
+      },
+    });
+    const { _a, _g } = getStatesFromKbnUrl(path, ['_a', '_g']);
+
+    expect(_a).toEqual({
+      dataSource: createEsqlDataSource(),
+      query: {
+        esql: 'SELECT * FROM test',
       },
     });
     expect(_g).toEqual(undefined);

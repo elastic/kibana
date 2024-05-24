@@ -82,12 +82,7 @@ export function ApmServiceTemplate(props: Props) {
   );
 }
 
-function TemplateWithContext({
-  title,
-  children,
-  selectedTab,
-  searchBarOptions,
-}: Props) {
+function TemplateWithContext({ title, children, selectedTab, searchBarOptions }: Props) {
   const {
     path: { serviceName },
     query,
@@ -133,9 +128,7 @@ function TemplateWithContext({
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="l">
-                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">
-                      {serviceName}
-                    </h1>
+                    <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -187,11 +180,7 @@ export function isMetricsTabHidden({
   if (isAWSLambdaAgentName(serverlessType)) {
     return !isAwsLambdaEnabled;
   }
-  return (
-    !agentName ||
-    isRumAgentName(agentName) ||
-    isAzureFunctionsAgentName(serverlessType)
-  );
+  return !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType);
 }
 
 export function isInfraTabHidden({
@@ -215,22 +204,14 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, serverlessType } = useApmServiceContext();
   const { core, plugins } = useApmPluginContext();
   const { capabilities } = core.application;
-  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
-    plugins,
-    capabilities
-  );
+  const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(plugins, capabilities);
 
   const router = useApmRouter();
-  const isInfraTabAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.InfrastructureTabAvailable
-  );
+  const isInfraTabAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfrastructureTabAvailable);
 
   const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
 
-  const isAwsLambdaEnabled = core.uiSettings.get<boolean>(
-    enableAwsLambdaMetrics,
-    true
-  );
+  const isAwsLambdaEnabled = core.uiSettings.get<boolean>(enableAwsLambdaMetrics, true);
 
   const {
     path: { serviceName },
@@ -242,32 +223,23 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
 
   const { data: serviceAlertsCount = { alertsCount: 0 } } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/alerts_count',
-        {
-          params: {
-            path: {
-              serviceName,
-            },
-            query: {
-              start,
-              end,
-              environment,
-            },
+      return callApmApi('GET /internal/apm/services/{serviceName}/alerts_count', {
+        params: {
+          path: {
+            serviceName,
           },
-        }
-      );
+          query: {
+            start,
+            end,
+            environment,
+          },
+        },
+      });
     },
     [serviceName, start, end, environment]
   );
 
-  const query = omit(
-    queryFromUrl,
-    'page',
-    'pageSize',
-    'sortField',
-    'sortDirection'
-  );
+  const query = omit(queryFromUrl, 'page', 'pageSize', 'sortField', 'sortDirection');
 
   const tabs: Tab[] = [
     {
@@ -320,9 +292,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
         defaultMessage: 'Metrics',
       }),
-      append: isServerlessAgentName(serverlessType) && (
-        <TechnicalPreviewBadge icon="beaker" />
-      ),
+      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
       hidden: isMetricsTabHidden({
         agentName,
         serverlessType,
@@ -364,13 +334,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
         defaultMessage: 'Logs',
       }),
-      append: isServerlessAgentName(serverlessType) && (
-        <TechnicalPreviewBadge icon="beaker" />
-      ),
-      hidden:
-        !agentName ||
-        isRumAgentName(agentName) ||
-        isAzureFunctionsAgentName(serverlessType),
+      append: isServerlessAgentName(serverlessType) && <TechnicalPreviewBadge icon="beaker" />,
+      hidden: !agentName || isRumAgentName(agentName) || isAzureFunctionsAgentName(serverlessType),
     },
     {
       key: 'alerts',

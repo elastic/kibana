@@ -52,6 +52,7 @@ import { jobsApiProvider } from './jobs';
 import { savedObjectsApiProvider } from './saved_objects';
 import { trainedModelsApiProvider } from './trained_models';
 import { notificationsProvider } from './notifications';
+import { inferenceModelsApiProvider } from './inference_models';
 
 export interface MlHasPrivilegesResponse {
   hasPrivileges?: estypes.SecurityHasPrivilegesResponse;
@@ -438,20 +439,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
-    getFieldCaps({ index, fields }: { index: string; fields: string[] }) {
-      const body = JSON.stringify({
-        ...(index !== undefined ? { index } : {}),
-        ...(fields !== undefined ? { fields } : {}),
-      });
-
-      return httpService.http<any>({
-        path: `${ML_INTERNAL_BASE_PATH}/indices/field_caps`,
-        method: 'POST',
-        body,
-        version: '1',
-      });
-    },
-
     recognizeIndex({
       indexPatternTitle,
       filter,
@@ -814,6 +801,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jobs: jobsApiProvider(httpService),
     savedObjects: savedObjectsApiProvider(httpService),
     trainedModels: trainedModelsApiProvider(httpService),
+    inferenceModels: inferenceModelsApiProvider(httpService),
     notifications: notificationsProvider(httpService),
     jsonSchema: jsonSchemaProvider(httpService),
   };

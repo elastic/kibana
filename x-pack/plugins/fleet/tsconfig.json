@@ -105,5 +105,8 @@
     "@kbn/core-http-server-mocks",
     "@kbn/code-editor",
     "@kbn/core-test-helpers-model-versions",
+    "@kbn/zod-helpers",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-kibana-context-render",
   ]
 }

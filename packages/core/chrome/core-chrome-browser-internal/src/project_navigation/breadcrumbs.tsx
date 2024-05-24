@@ -40,8 +40,8 @@ export function buildBreadcrumbs({
   activeNodes: ChromeProjectNavigationNode[][];
   solutionNavigations?: {
     definitions: SolutionNavigationDefinitions;
-    activeId: string;
-    onChange: (id: string, options?: { redirect?: boolean }) => void;
+    activeId: string | null;
+    onChange: (id: string) => void;
   };
 }): ChromeProjectBreadcrumb[] {
   const rootCrumb = buildRootCrumb({
@@ -106,8 +106,8 @@ function buildRootCrumb({
   cloudLinks: CloudLinks;
   solutionNavigations?: {
     definitions: SolutionNavigationDefinitions;
-    activeId: string;
-    onChange: (id: string, options?: { redirect?: boolean }) => void;
+    activeId: string | null;
+    onChange: (id: string) => void;
   };
 }): ChromeProjectBreadcrumb {
   if (solutionNavigations) {

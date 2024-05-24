@@ -7,7 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../../common';
+import type {
+  Role,
+  RoleIndexPrivilege,
+  RoleRemoteClusterPrivilege,
+  RoleRemoteIndexPrivilege,
+} from '../../../../common';
 import { MAX_NAME_LENGTH, NAME_REGEX } from '../../../../common/constants';
 
 interface RoleValidatorOptions {
@@ -78,6 +83,26 @@ export class RoleValidator {
         )
       );
     }
+    return valid();
+  }
+  public validateRemoteClusterPrivileges(role: Role): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    const areRemoteClustersInvalid = role.elasticsearch.remote_cluster?.some(
+      (remoteClusterPrivilege) => {
+        return (
+          this.validateRemoteClusterPrivilegeClusterField(remoteClusterPrivilege).isInvalid ||
+          this.validateRemoteClusterPrivilegePrivilegesField(remoteClusterPrivilege).isInvalid
+        );
+      }
+    );
+
+    if (areRemoteClustersInvalid) {
+      return invalid();
+    }
+
     return valid();
   }
 
@@ -239,6 +264,58 @@ export class RoleValidator {
     return valid();
   }
 
+  public validateRemoteClusterPrivilegeClusterField(
+    remoteClusterPrivilege: RoleRemoteClusterPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!remoteClusterPrivilege.privileges.length) {
+      return valid();
+    }
+
+    if (!remoteClusterPrivilege.clusters.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.oneClusterRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one cluster',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
+  public validateRemoteClusterPrivilegePrivilegesField(
+    remoteClusterPrivilege: RoleRemoteClusterPrivilege
+  ): RoleValidationResult {
+    if (!this.shouldValidate) {
+      return valid();
+    }
+
+    // Ignore if all other fields are empty
+    if (!remoteClusterPrivilege.clusters.length) {
+      return valid();
+    }
+
+    if (!remoteClusterPrivilege.privileges.length) {
+      return invalid(
+        i18n.translate(
+          'xpack.security.management.editRole.validateRole.oneRemoteClusterPrivilegeRequiredWarningMessage',
+          {
+            defaultMessage: 'Enter or select at least one privilege',
+          }
+        )
+      );
+    }
+
+    return valid();
+  }
+
   public validateSelectedSpaces(
     spaceIds: string[],
     privilege: string | null
@@ -313,12 +390,15 @@ export class RoleValidator {
     const { isInvalid: areIndicesInvalid } = this.validateIndexPrivileges(role);
     const { isInvalid: areRemoteIndicesInvalid } = this.validateRemoteIndexPrivileges(role);
     const { isInvalid: areSpacePrivilegesInvalid } = this.validateSpacePrivileges(role);
+    const { isInvalid: areRemoteClusterPrivilegesInvalid } =
+      this.validateRemoteClusterPrivileges(role);
 
     if (
       isNameInvalid ||
       areIndicesInvalid ||
       areRemoteIndicesInvalid ||
-      areSpacePrivilegesInvalid
+      areSpacePrivilegesInvalid ||
+      areRemoteClusterPrivilegesInvalid
     ) {
       return invalid();
     }

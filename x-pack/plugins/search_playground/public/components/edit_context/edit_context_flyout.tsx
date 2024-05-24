@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -15,31 +15,33 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiFlyoutFooter,
+  EuiLink,
   EuiSpacer,
   EuiText,
-  EuiPanel,
-  EuiAccordion,
-  EuiSelectable,
   EuiSelect,
-  EuiSelectableOption,
+  EuiSuperSelect,
+  EuiFormRow,
 } from '@elastic/eui';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../common/doc_links';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { useIndicesFields } from '../../hooks/use_indices_fields';
 import { getDefaultSourceFields } from '../../utils/create_query';
+import { AnalyticsEvents } from '../../analytics/constants';
 
 interface EditContextFlyoutProps {
   onClose: () => void;
 }
 
 export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose }) => {
-  const { watch } = useFormContext<ChatForm>();
-  const selectedIndices: string[] = watch('indices');
-  const { fields } = useIndicesFields(selectedIndices || []);
-  const defaultFields = useMemo(() => getDefaultSourceFields(fields), [fields]);
-  const [sourceFields, setSourceFields] = useState(defaultFields);
+  const usageTracker = useUsageTracker();
+  const { getValues } = useFormContext<ChatForm>();
+  const selectedIndices: string[] = getValues(ChatFormFields.indices);
+  const { fields } = useIndicesFields(selectedIndices);
+  const defaultFields = getDefaultSourceFields(fields);
 
   const {
     field: { onChange: onChangeSize, value: docSizeInitialValue },
@@ -50,38 +52,46 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
   const [docSize, setDocSize] = useState(docSizeInitialValue);
 
   const {
-    field: { onChange: onChangeSourceFields },
+    field: { onChange: onChangeSourceFields, value: sourceFields },
   } = useController({
     name: ChatFormFields.sourceFields,
+    defaultValue: defaultFields,
   });
 
-  useEffect(() => {
-    if (selectedIndices?.length > 0) {
-      setSourceFields(defaultFields);
-    }
-  }, [selectedIndices, defaultFields]);
+  const [tempSourceFields, setTempSourceFields] = useState(sourceFields);
 
-  const toggleSourceField = (index: string, f: EuiSelectableOption[]) => {
-    setSourceFields({
-      ...sourceFields,
-      [index]: f.filter(({ checked }) => checked === 'on').map(({ label }) => label),
+  const updateSourceField = (index: string, field: string) => {
+    setTempSourceFields({
+      ...tempSourceFields,
+      [index]: [field],
     });
+    usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
   };
 
   const saveSourceFields = () => {
-    onChangeSourceFields(sourceFields);
+    usageTracker?.click(AnalyticsEvents.editContextSaved);
+    onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
 
+  const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
+    setDocSize(Number(e.target.value));
+  };
+
+  useEffect(() => {
+    usageTracker?.load(AnalyticsEvents.editContextFlyoutOpened);
+  }, [usageTracker]);
+
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="s">
+    <EuiFlyout ownFocus onClose={onClose} size="s" data-test-subj="editContextFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.title"
-              defaultMessage="Edit Context"
+              defaultMessage="Edit context"
             />
           </h2>
         </EuiTitle>
@@ -90,78 +100,88 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.editContext.flyout.description"
-              defaultMessage="Documents retrieved and selected fields will be used to build the context."
+              defaultMessage="Context is the information you provide to the LLM, by selecting fields from your Elasticsearch documents. Optimize context for better results."
             />
+            <EuiLink
+              href={docLinks.context}
+              target="_blank"
+              data-test-subj="context-optimization-documentation-link"
+            >
+              <FormattedMessage
+                id="xpack.searchPlayground.editContext.flyout.learnMoreLink"
+                defaultMessage=" Learn more."
+              />
+            </EuiLink>
           </p>
         </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup>
           <EuiFlexItem grow={3}>
-            <EuiFlexGroup direction="column">
+            <EuiFlexGroup direction="column" gutterSize="l">
               <EuiFlexItem grow={false}>
-                <EuiSelect
-                  prepend={i18n.translate(
+                <EuiFormRow
+                  label={i18n.translate(
                     'xpack.searchPlayground.editContext.flyout.docsRetrievedCount',
                     {
-                      defaultMessage: 'Retrieved Documents',
+                      defaultMessage: 'Number of documents sent to LLM',
                     }
                   )}
-                  options={[
-                    {
-                      value: 3,
-                      text: '3',
-                    },
-                    {
-                      value: 5,
-                      text: '5',
-                    },
-                    {
-                      value: 10,
-                      text: '10',
-                    },
-                  ]}
-                  value={docSize}
-                  onChange={(e) => setDocSize(Number(e.target.value))}
-                />
-              </EuiFlexItem>
-              <EuiText>
-                <h5>
-                  <FormattedMessage
-                    id="xpack.searchPlayground.editContext.flyout.table.title"
-                    defaultMessage="Selected Fields"
+                >
+                  <EuiSelect
+                    options={[
+                      {
+                        value: 1,
+                        text: '1',
+                      },
+                      {
+                        value: 3,
+                        text: '3',
+                      },
+                      {
+                        value: 5,
+                        text: '5',
+                      },
+                      {
+                        value: 10,
+                        text: '10',
+                      },
+                    ]}
+                    value={docSize}
+                    onChange={handleDocSizeChange}
                   />
-                </h5>
-              </EuiText>
-              {Object.entries(fields).map(([index, group], i) => (
-                <EuiFlexItem grow={false} key={index}>
-                  <EuiPanel grow={false} hasShadow={false} hasBorder>
-                    <EuiAccordion
-                      initialIsOpen={i === 0}
-                      id={index}
-                      buttonContent={
-                        <EuiText>
-                          <h5>{index}</h5>
-                        </EuiText>
-                      }
-                    >
-                      <EuiSpacer size="s" />
-                      <EuiSelectable
-                        aria-label="Select context fields"
-                        options={group.source_fields.map((field) => ({
-                          label: field,
-                          checked: sourceFields[index]?.includes(field) ? 'on' : undefined,
-                        }))}
-                        onChange={(newOptions) => toggleSourceField(index, newOptions)}
-                        listProps={{ bordered: false }}
-                        singleSelection="always"
-                      >
-                        {(list) => list}
-                      </EuiSelectable>
-                    </EuiAccordion>
-                  </EuiPanel>
-                </EuiFlexItem>
-              ))}
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup direction="column" gutterSize="m">
+                  <EuiFlexItem>
+                    <EuiText>
+                      <h5>
+                        <FormattedMessage
+                          id="xpack.searchPlayground.editContext.flyout.table.title"
+                          defaultMessage="Select fields"
+                        />
+                      </h5>
+                    </EuiText>
+                  </EuiFlexItem>
+                  {Object.entries(fields).map(([index, group]) => (
+                    <EuiFlexItem grow={false} key={index}>
+                      <EuiFormRow label={index}>
+                        <EuiSuperSelect
+                          data-test-subj={`contextFieldsSelectable_${index}`}
+                          options={group.source_fields.map((field) => ({
+                            value: field,
+                            inputDisplay: field,
+                            'data-test-subj': 'contextField',
+                          }))}
+                          valueOfSelected={tempSourceFields[index]?.[0]}
+                          onChange={(value) => updateSourceField(index, value)}
+                        />
+                      </EuiFormRow>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

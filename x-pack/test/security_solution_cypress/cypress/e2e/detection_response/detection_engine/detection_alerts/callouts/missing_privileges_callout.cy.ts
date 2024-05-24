@@ -47,7 +47,7 @@ const waitForPageTitleToBeShown = () => {
 // FLAKY: https://github.com/elastic/kibana/issues/178176
 describe.skip(
   'Detections > Callouts',
-  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
+  { tags: ['@ess', '@serverless', '@skipInServerless'] },
   () => {
     before(() => {
       // First, we have to open the app on behalf of a privileged user in order to initialize it.

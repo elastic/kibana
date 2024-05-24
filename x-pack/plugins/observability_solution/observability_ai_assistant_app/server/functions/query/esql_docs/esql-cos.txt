@@ -2,10 +2,9 @@ COS
 
 Syntax
 Parameters
-n
-Numeric expression. If null, the function returns null.
-DescriptionReturns the cosine of n. Input
-expected in radians.Supported types
+angle
+An angle, in radians. If null, the function returns null.
+DescriptionReturns the cosine of an angle.Supported types
 Example
 ```esql
 ROW a=1.8

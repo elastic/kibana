@@ -5,32 +5,53 @@
  * 2.0.
  */
 
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
+import { isAllowed, isAnonymized } from '@kbn/elastic-assistant-common';
+import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { PromptContext, SelectedPromptContext } from '../../assistant/prompt_context/types';
 
 export async function getNewSelectedPromptContext({
-  defaultAllow,
-  defaultAllowReplacement,
+  anonymizationFields,
   promptContext,
 }: {
-  defaultAllow: string[];
-  defaultAllowReplacement: string[];
+  anonymizationFields?: FindAnonymizationFieldsResponse;
   promptContext: PromptContext;
 }): Promise<SelectedPromptContext> {
   const rawData = await promptContext.getPromptContext();
 
   if (typeof rawData === 'string') {
     return {
-      allow: [],
-      allowReplacement: [],
+      contextAnonymizationFields: undefined,
       promptContextId: promptContext.id,
       rawData,
+      replacements: promptContext.replacements,
     };
   } else {
+    const extendedAnonymizationData = Object.keys(rawData).reduce<AnonymizationFieldResponse[]>(
+      (acc, field) => [
+        ...acc,
+        {
+          id: field,
+          field,
+          allowed: isAllowed({ anonymizationFields: anonymizationFields?.data ?? [], field }),
+          anonymized: isAnonymized({
+            anonymizationFields: anonymizationFields?.data ?? [],
+            field,
+          }),
+        },
+      ],
+      []
+    );
     return {
-      allow: [...defaultAllow],
-      allowReplacement: [...defaultAllowReplacement],
+      contextAnonymizationFields: {
+        page: 1,
+        perPage: 1000,
+        total: extendedAnonymizationData.length,
+        data: extendedAnonymizationData,
+      },
       promptContextId: promptContext.id,
       rawData,
+      replacements: promptContext.replacements,
     };
   }
 }

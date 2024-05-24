@@ -8,10 +8,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { chunk, debounce } from 'lodash';
 
-import type {
-  IHttpFetchError,
-  ResponseErrorBody,
-} from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 
 import {
   DEBOUNCE_INTERVAL,
@@ -53,10 +50,7 @@ export function useLatencyCorrelations() {
     getReducer<LatencyCorrelationsResponse & CorrelationsProgress>(),
     getInitialResponse()
   );
-  const setResponse = useMemo(
-    () => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL),
-    []
-  );
+  const setResponse = useMemo(() => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL), []);
 
   const abortCtrl = useRef(new AbortController());
 
@@ -91,19 +85,16 @@ export function useLatencyCorrelations() {
         percentileThresholdValue,
         durationMin,
         durationMax,
-      } = await callApmApi(
-        'POST /internal/apm/latency/overall_distribution/transactions',
-        {
-          signal: abortCtrl.current.signal,
-          params: {
-            body: {
-              ...fetchParams,
-              percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
-              chartType: LatencyDistributionChartType.latencyCorrelations,
-            },
+      } = await callApmApi('POST /internal/apm/latency/overall_distribution/transactions', {
+        signal: abortCtrl.current.signal,
+        params: {
+          body: {
+            ...fetchParams,
+            percentileThreshold: DEFAULT_PERCENTILE_THRESHOLD,
+            chartType: LatencyDistributionChartType.latencyCorrelations,
           },
-        }
-      );
+        },
+      });
       responseUpdate.overallHistogram = overallHistogram;
       responseUpdate.totalDocCount = totalDocCount;
       responseUpdate.percentileThresholdValue = percentileThresholdValue;
@@ -169,8 +160,7 @@ export function useLatencyCorrelations() {
         setResponse({
           loaded:
             LOADED_FIELD_CANDIDATES +
-            (chunkLoadCounter / fieldCandidateChunks.length) *
-              PROGRESS_STEP_FIELD_VALUE_PAIRS,
+            (chunkLoadCounter / fieldCandidateChunks.length) * PROGRESS_STEP_FIELD_VALUE_PAIRS,
         });
       }
 
@@ -184,10 +174,7 @@ export function useLatencyCorrelations() {
 
       const fieldsToSample = new Set<string>();
       const latencyCorrelations: LatencyCorrelation[] = [];
-      const fieldValuePairChunks = chunk(
-        getPrioritizedFieldValuePairs(fieldValuePairs),
-        chunkSize
-      );
+      const fieldValuePairChunks = chunk(getPrioritizedFieldValuePairs(fieldValuePairs), chunkSize);
 
       const fallbackResults: LatencyCorrelation[] = [];
       for (const fieldValuePairChunk of fieldValuePairChunks) {
@@ -210,11 +197,10 @@ export function useLatencyCorrelations() {
           significantCorrelations.latencyCorrelations.forEach((d) => {
             fieldsToSample.add(d.fieldName);
           });
-          latencyCorrelations.push(
-            ...significantCorrelations.latencyCorrelations
-          );
-          responseUpdate.latencyCorrelations =
-            getLatencyCorrelationsSortedByCorrelation([...latencyCorrelations]);
+          latencyCorrelations.push(...significantCorrelations.latencyCorrelations);
+          responseUpdate.latencyCorrelations = getLatencyCorrelationsSortedByCorrelation([
+            ...latencyCorrelations,
+          ]);
         } else {
           // If there's no correlation results that matches the criteria
           // Consider the fallback results
@@ -228,8 +214,7 @@ export function useLatencyCorrelations() {
           ...responseUpdate,
           loaded:
             LOADED_FIELD_VALUE_PAIRS +
-            (chunkLoadCounter / fieldValuePairChunks.length) *
-              PROGRESS_STEP_CORRELATIONS,
+            (chunkLoadCounter / fieldValuePairChunks.length) * PROGRESS_STEP_CORRELATIONS,
         });
 
         if (abortCtrl.current.signal.aborted) {
@@ -250,8 +235,7 @@ export function useLatencyCorrelations() {
           ...responseUpdate,
           loaded:
             LOADED_FIELD_VALUE_PAIRS +
-            (chunkLoadCounter / fieldValuePairChunks.length) *
-              PROGRESS_STEP_CORRELATIONS,
+            (chunkLoadCounter / fieldValuePairChunks.length) * PROGRESS_STEP_CORRELATIONS,
         });
       }
       setResponse.flush();
@@ -266,10 +250,7 @@ export function useLatencyCorrelations() {
       if (!abortCtrl.current.signal.aborted) {
         const err = e as Error | IHttpFetchError<ResponseErrorBody>;
         setResponse({
-          error:
-            'response' in err
-              ? err.body?.message ?? err.response?.statusText
-              : err.message,
+          error: 'response' in err ? err.body?.message ?? err.response?.statusText : err.message,
           isRunning: false,
         });
         setResponse.flush();

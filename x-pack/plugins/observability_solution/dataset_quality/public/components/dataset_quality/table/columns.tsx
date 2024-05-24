@@ -16,6 +16,8 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiText,
+  formatNumber,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -23,13 +25,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { formatBytes } from '@kbn/formatters';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
+  BYTE_NUMBER_FORMAT,
 } from '../../../../common/constants';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicator } from '../../quality_indicator';
+import { DatasetQualityIndicator, QualityIndicator } from '../../quality_indicator';
 import { IntegrationIcon } from '../../common';
 import { useLinkToLogsExplorer } from '../../../hooks';
 import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
@@ -54,7 +56,11 @@ const sizeColumnName = i18n.translate('xpack.datasetQuality.sizeColumnName', {
 });
 
 const degradedDocsColumnName = i18n.translate('xpack.datasetQuality.degradedDocsColumnName', {
-  defaultMessage: 'Degraded Docs',
+  defaultMessage: 'Degraded Docs (%)',
+});
+
+const datasetQualityColumnName = i18n.translate('xpack.datasetQuality.datasetQualityColumnName', {
+  defaultMessage: 'Dataset Quality',
 });
 
 const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivityColumnName', {
@@ -83,38 +89,65 @@ const inactiveDatasetActivityColumnTooltip = i18n.translate(
   }
 );
 
-const degradedDocsDescription = (minimimPercentage: number) =>
+const degradedDocsDescription = (
+  quality: string,
+  minimimPercentage: number,
+  comparator: string = ''
+) =>
   i18n.translate('xpack.datasetQuality.degradedDocsQualityDescription', {
-    defaultMessage: 'greater than {minimimPercentage}%',
-    values: { minimimPercentage },
+    defaultMessage: '{quality} -{comparator} {minimimPercentage}%',
+    values: { quality, minimimPercentage, comparator },
   });
 
 const degradedDocsColumnTooltip = (
   <FormattedMessage
     id="xpack.datasetQuality.degradedDocsColumnTooltip"
-    defaultMessage="The percentage of degraded documents —documents with the {ignoredProperty} property— in your dataset. {visualQueue}"
+    defaultMessage="The percentage of documents with the {ignoredProperty} property in your dataset."
     values={{
       ignoredProperty: (
         <EuiCode language="json" transparentBackground>
           _ignored
         </EuiCode>
       ),
+    }}
+  />
+);
+
+const datasetQualityColumnTooltip = (
+  <FormattedMessage
+    id="xpack.datasetQuality.datasetQualityColumnTooltip"
+    defaultMessage="Quality is based on the percentage of degraded docs in a dataset. {visualQueue}"
+    values={{
       visualQueue: (
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexItem>
             <QualityIndicator
               quality="poor"
-              description={` ${degradedDocsDescription(POOR_QUALITY_MINIMUM_PERCENTAGE)}`}
+              description={` ${degradedDocsDescription(
+                'Poor',
+                POOR_QUALITY_MINIMUM_PERCENTAGE,
+                ' greater than'
+              )}`}
             />
           </EuiFlexItem>
           <EuiFlexItem>
             <QualityIndicator
               quality="degraded"
-              description={` ${degradedDocsDescription(DEGRADED_QUALITY_MINIMUM_PERCENTAGE)}`}
+              description={` ${degradedDocsDescription(
+                'Degraded',
+                DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
+                ' greater than'
+              )}`}
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <QualityIndicator quality="good" description={' 0%'} />
+            <QualityIndicator
+              quality="good"
+              description={` ${degradedDocsDescription(
+                'Good',
+                DEGRADED_QUALITY_MINIMUM_PERCENTAGE
+              )}`}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       ),
@@ -126,14 +159,18 @@ export const getDatasetQualityTableColumns = ({
   fieldFormats,
   selectedDataset,
   openFlyout,
+  loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
+  isSizeStatsAvailable,
   isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
   selectedDataset?: FlyoutDataset;
+  loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
+  isSizeStatsAvailable: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
@@ -146,7 +183,7 @@ export const getDatasetQualityTableColumns = ({
         return (
           <EuiButtonIcon
             data-test-subj="datasetQualityExpandButton"
-            size="m"
+            size="xs"
             color="text"
             onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
             iconType={isExpanded ? 'minimize' : 'expand'}
@@ -193,12 +230,46 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
+    ...(isSizeStatsAvailable
+      ? [
+          {
+            name: sizeColumnName,
+            field: 'sizeBytes',
+            sortable: true,
+            render: (_: any, dataStreamStat: DataStreamStat) => {
+              return (
+                <EuiSkeletonRectangle
+                  width="60px"
+                  height="20px"
+                  borderRadius="m"
+                  isLoading={loadingDataStreamStats || loadingDegradedStats}
+                >
+                  {formatNumber(
+                    DataStreamStat.calculateFilteredSize(dataStreamStat),
+                    BYTE_NUMBER_FORMAT
+                  )}
+                </EuiSkeletonRectangle>
+              );
+            },
+            width: '100px',
+          },
+        ]
+      : []),
     {
-      name: sizeColumnName,
-      field: 'sizeBytes',
+      name: (
+        <EuiToolTip content={datasetQualityColumnTooltip}>
+          <span>
+            {`${datasetQualityColumnName} `}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </span>
+        </EuiToolTip>
+      ),
+      field: 'degradedDocs.percentage',
       sortable: true,
-      render: (_, dataStreamStat: DataStreamStat) => formatBytes(dataStreamStat.sizeBytes || 0),
-      width: '100px',
+      render: (_, dataStreamStat: DataStreamStat) => (
+        <DatasetQualityIndicator isLoading={loadingDegradedStats} dataStreamStat={dataStreamStat} />
+      ),
+      width: '140px',
     },
     {
       name: (
@@ -222,22 +293,27 @@ export const getDatasetQualityTableColumns = ({
     {
       name: lastActivityColumnName,
       field: 'lastActivity',
-      render: (timestamp: number) => {
-        if (!isActiveDataset(timestamp)) {
-          return (
+      render: (timestamp: number) => (
+        <EuiSkeletonRectangle
+          width="200px"
+          height="20px"
+          borderRadius="m"
+          isLoading={loadingDataStreamStats}
+        >
+          {!isActiveDataset(timestamp) ? (
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
               <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
                 <EuiIcon tabIndex={0} type="iInCircle" size="s" />
               </EuiToolTip>
             </EuiFlexGroup>
-          );
-        }
-
-        return fieldFormats
-          .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-          .convert(timestamp);
-      },
+          ) : (
+            fieldFormats
+              .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+              .convert(timestamp)
+          )}
+        </EuiSkeletonRectangle>
+      ),
       width: '300px',
       sortable: true,
     },

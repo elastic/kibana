@@ -16,8 +16,7 @@ import type {
   DataMsg,
   DataTotalHits$,
   SavedSearchData,
-} from '../services/discover_data_state_container';
-import { RecordRawType } from '../services/discover_data_state_container';
+} from '../state_management/discover_data_state_container';
 
 /**
  * Sends COMPLETE message to the main$ observable with the information
@@ -37,13 +36,7 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
   if (main$.getValue().fetchStatus === FetchStatus.COMPLETE) {
     return;
   }
-  const recordRawType = main$.getValue().recordRawType;
-  main$.next({
-    fetchStatus: FetchStatus.COMPLETE,
-    foundDocuments,
-    error: undefined,
-    recordRawType,
-  });
+  main$.next({ fetchStatus: FetchStatus.COMPLETE, foundDocuments, error: undefined });
 }
 
 /**
@@ -51,11 +44,7 @@ export function sendCompleteMsg(main$: DataMain$, foundDocuments = true) {
  */
 export function sendPartialMsg(main$: DataMain$) {
   if (main$.getValue().fetchStatus === FetchStatus.LOADING) {
-    const recordRawType = main$.getValue().recordRawType;
-    main$.next({
-      fetchStatus: FetchStatus.PARTIAL,
-      recordRawType,
-    });
+    main$.next({ fetchStatus: FetchStatus.PARTIAL });
   }
 }
 
@@ -64,13 +53,10 @@ export function sendPartialMsg(main$: DataMain$) {
  */
 export function sendLoadingMsg<T extends DataMsg>(
   data$: BehaviorSubject<T>,
-  props: Omit<T, 'fetchStatus'>
+  props?: Omit<T, 'fetchStatus'>
 ) {
   if (data$.getValue().fetchStatus !== FetchStatus.LOADING) {
-    data$.next({
-      ...props,
-      fetchStatus: FetchStatus.LOADING,
-    } as T);
+    data$.next({ ...props, fetchStatus: FetchStatus.LOADING } as T);
   }
 }
 
@@ -79,10 +65,7 @@ export function sendLoadingMsg<T extends DataMsg>(
  */
 export function sendLoadingMoreMsg(documents$: DataDocuments$) {
   if (documents$.getValue().fetchStatus !== FetchStatus.LOADING_MORE) {
-    documents$.next({
-      ...documents$.getValue(),
-      fetchStatus: FetchStatus.LOADING_MORE,
-    });
+    documents$.next({ ...documents$.getValue(), fetchStatus: FetchStatus.LOADING_MORE });
   }
 }
 
@@ -116,38 +99,17 @@ export function sendLoadingMoreFinishedMsg(
  * Send ERROR message
  */
 export function sendErrorMsg(data$: DataMain$ | DataDocuments$ | DataTotalHits$, error?: Error) {
-  const recordRawType = data$.getValue().recordRawType;
-  data$.next({
-    fetchStatus: FetchStatus.ERROR,
-    error,
-    recordRawType,
-  });
+  data$.next({ fetchStatus: FetchStatus.ERROR, error });
 }
 
 /**
  * Sends a RESET message to all data subjects
  * Needed when data view is switched or a new runtime field is added
  */
-export function sendResetMsg(
-  data: SavedSearchData,
-  initialFetchStatus: FetchStatus,
-  recordRawType: RecordRawType
-) {
-  data.main$.next({
-    fetchStatus: initialFetchStatus,
-    foundDocuments: undefined,
-    recordRawType,
-  });
-  data.documents$.next({
-    fetchStatus: initialFetchStatus,
-    result: [],
-    recordRawType,
-  });
-  data.totalHits$.next({
-    fetchStatus: initialFetchStatus,
-    result: undefined,
-    recordRawType,
-  });
+export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
+  data.main$.next({ fetchStatus: initialFetchStatus, foundDocuments: undefined });
+  data.documents$.next({ fetchStatus: initialFetchStatus, result: [] });
+  data.totalHits$.next({ fetchStatus: initialFetchStatus, result: undefined });
 }
 
 /**

@@ -6,13 +6,7 @@
  */
 
 import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiBasicTableColumn, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useDiagnosticsContext } from './context/use_diagnostics';
@@ -25,8 +19,7 @@ export function DiagnosticsDataStreams() {
   return (
     <>
       <EuiText>
-        This section shows the APM data streams and their underlying index
-        template.
+        This section shows the APM data streams and their underlying index template.
       </EuiText>
       <EuiSpacer />
       <DataStreamsTable data={diagnosticsBundle} />
@@ -61,20 +54,9 @@ function DataStreamsTable({ data }: { data?: DiagnosticsBundle }) {
     },
   ];
 
-  return (
-    <EuiBasicTable
-      items={data?.dataStreams ?? []}
-      rowHeader="firstName"
-      columns={columns}
-    />
-  );
+  return <EuiBasicTable items={data?.dataStreams ?? []} rowHeader="firstName" columns={columns} />;
 }
 
-export function getIndexTemplateState(
-  diagnosticsBundle: DiagnosticsBundle,
-  templateName: string
-) {
-  return diagnosticsBundle.apmIndexTemplates.find(
-    ({ name }) => templateName === name
-  );
+export function getIndexTemplateState(diagnosticsBundle: DiagnosticsBundle, templateName: string) {
+  return diagnosticsBundle.apmIndexTemplates.find(({ name }) => templateName === name);
 }

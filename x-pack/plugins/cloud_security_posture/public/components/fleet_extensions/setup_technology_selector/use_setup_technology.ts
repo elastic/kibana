@@ -38,8 +38,15 @@ export const useSetupTechnology = ({
     return SetupTechnology.AGENT_BASED;
   });
 
+  const [isDirty, setIsDirty] = useState<boolean>(false);
+
+  const updateSetupTechnology = (value: SetupTechnology) => {
+    setSetupTechnology(value);
+    setIsDirty(true);
+  };
+
   useEffect(() => {
-    if (isEditPage) {
+    if (isEditPage || isDirty) {
       return;
     }
 
@@ -58,7 +65,7 @@ export const useSetupTechnology = ({
     } else {
       setSetupTechnology(SetupTechnology.AGENT_BASED);
     }
-  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable, isEditPage]);
+  }, [agentPolicyId, agentlessPolicyId, isAgentlessAvailable, isDirty, isEditPage]);
 
   useEffect(() => {
     if (isEditPage) {
@@ -74,5 +81,6 @@ export const useSetupTechnology = ({
     isAgentlessAvailable,
     setupTechnology,
     setSetupTechnology,
+    updateSetupTechnology,
   };
 };

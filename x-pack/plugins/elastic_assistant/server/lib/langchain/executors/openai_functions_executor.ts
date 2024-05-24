@@ -10,9 +10,7 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool } from 'langchain/tools/chain';
 
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { ActionsClientLlm } from '../llm/actions_client_llm';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 import { AgentExecutor } from './types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
@@ -30,16 +28,21 @@ export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
   actions,
   connectorId,
   esClient,
+  esStore,
   langChainMessages,
   llmType,
   logger,
   request,
-  elserId,
-  kbResource,
-  telemetry,
   traceOptions,
 }) => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
+  const llm = new ActionsClientLlm({
+    actions,
+    connectorId,
+    request,
+    llmType,
+    logger,
+    model: request.body.model,
+  });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
@@ -51,16 +54,6 @@ export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
     outputKey: 'output',
     returnMessages: true,
   });
-
-  // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(
-    esClient,
-    KNOWLEDGE_BASE_INDEX_PATTERN,
-    logger,
-    telemetry,
-    elserId,
-    kbResource
-  );
 
   const modelExists = await esStore.isModelInstalled();
   if (!modelExists) {

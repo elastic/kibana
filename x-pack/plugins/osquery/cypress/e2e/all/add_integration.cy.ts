@@ -35,6 +35,7 @@ import {
   interceptPackId,
   interceptAgentPolicyId,
   policyContainsIntegration,
+  checkDataStreamsInPolicyDetails,
 } from '../../tasks/integrations';
 import { ServerlessRoleName } from '../../support/roles';
 
@@ -92,6 +93,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.visit(createOldOsqueryPath(oldVersion));
       addCustomIntegration(integrationName, policyName);
       policyContainsIntegration(integrationName, policyName);
+      checkDataStreamsInPolicyDetails();
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
       cy.getBySel('PackagePoliciesTableUpgradeButton').click();
@@ -101,11 +103,10 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains(`version: ${oldVersion}`).should('not.exist');
     });
   });
-
-  describe('Add integration to policy', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/170593
+  describe.skip('Add integration to policy', () => {
     const [integrationName, policyName] = generateRandomStringName(2);
     let policyId: string;
-
     beforeEach(() => {
       interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
@@ -136,6 +137,8 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
       cy.getBySel('confirmModalCancelButton').click();
       cy.get(`[title="${integrationName}"]`).should('exist');
+      policyContainsIntegration(integrationName, policyName);
+      checkDataStreamsInPolicyDetails();
       cy.visit(OSQUERY);
       cy.contains('Live queries history');
     });
@@ -175,6 +178,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
           cy.getBySel('agentActionsBtn').click();
         });
       integrationExistsWithinPolicyDetails(integrationName);
+      checkDataStreamsInPolicyDetails();
       cy.contains(`version: ${oldVersion}`);
       cy.getBySel('euiFlyoutCloseButton').click();
 
@@ -210,7 +214,7 @@ describe('ALL - Add Integration', { tags: ['@ess', '@serverless'] }, () => {
           cy.contains('Osquery Manager').and('not.contain', `v${oldVersion}`);
         });
       integrationExistsWithinPolicyDetails(integrationName);
-
+      checkDataStreamsInPolicyDetails();
       // test list of prebuilt queries
       navigateTo('/app/osquery/saved_queries');
       cy.get(TABLE_ROWS).should('have.length.above', 5);

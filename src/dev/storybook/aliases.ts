@@ -16,6 +16,7 @@ export const storybookAliases = {
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'packages/kbn-cell-actions/.storybook',
   cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
+  cloud: 'packages/cloud/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover: 'packages/kbn-language-documentation-popover/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
@@ -50,6 +51,8 @@ export const storybookAliases = {
   observability: 'x-pack/plugins/observability_solution/observability/.storybook',
   observability_ai_assistant:
     'x-pack/plugins/observability_solution/observability_ai_assistant/.storybook',
+  observability_ai_assistant_app:
+    'x-pack/plugins/observability_solution/observability_ai_assistant_app/.storybook',
   presentation: 'src/plugins/presentation_util/storybook',
   random_sampling: 'x-pack/packages/kbn-random-sampling/.storybook',
   text_based_editor: 'packages/kbn-text-based-editor/.storybook',

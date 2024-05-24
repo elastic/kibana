@@ -51,4 +51,22 @@ describe('history local storage', function () {
       JSON.stringify(historyItems)
     );
   });
+
+  it('should allow maximum x queries ', function () {
+    addQueriesToCache({
+      queryString: 'row 1',
+      timeZone: 'Browser',
+    });
+    // allow maximum 2 queries
+    updateCachedQueries(
+      {
+        queryString: 'row 1',
+        status: 'success',
+      },
+      2
+    );
+
+    const historyItems = getCachedQueries();
+    expect(historyItems.length).toBe(2);
+  });
 });

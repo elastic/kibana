@@ -14,6 +14,8 @@ import {
   SCHEMA_SEARCH_V8_8_0,
   SCHEMA_SEARCH_MODEL_VERSION_1,
   SCHEMA_SEARCH_MODEL_VERSION_2,
+  SCHEMA_SEARCH_MODEL_VERSION_3,
+  SCHEMA_SEARCH_MODEL_VERSION_4,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -52,6 +54,20 @@ export function getSavedSearchObjectType(
         schemas: {
           forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_2.extends({}, { unknowns: 'ignore' }),
           create: SCHEMA_SEARCH_MODEL_VERSION_2,
+        },
+      },
+      3: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_3.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_3,
+        },
+      },
+      4: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_4.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_4,
         },
       },
     },

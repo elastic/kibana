@@ -40,7 +40,7 @@ describe('StepAboutRuleToggleDetails', () => {
         stepDataDetails={{
           note: stepDataMock.note,
           description: stepDataMock.description,
-          setup: '',
+          setup: stepDataMock.setup,
         }}
         stepData={stepDataMock}
         rule={mockRule('mocked-rule-id')}
@@ -82,28 +82,30 @@ describe('StepAboutRuleToggleDetails', () => {
   });
 
   describe('note value is empty string', () => {
-    test('it does not render toggle buttons', () => {
+    test('it does render toggle buttons if setup is not empty', () => {
       const mockAboutStepWithoutNote = {
         ...stepDataMock,
         note: '',
       };
-      const wrapper = shallow(
-        <StepAboutRuleToggleDetails
-          loading={false}
-          stepDataDetails={{
-            note: '',
-            description: stepDataMock.description,
-            setup: '',
-          }}
-          stepData={mockAboutStepWithoutNote}
-          rule={mockRule('mocked-rule-id')}
-        />
+      const wrapper = mount(
+        <ThemeProvider theme={mockTheme}>
+          <StepAboutRuleToggleDetails
+            loading={false}
+            stepDataDetails={{
+              note: '',
+              description: stepDataMock.description,
+              setup: stepDataMock.setup,
+            }}
+            stepData={mockAboutStepWithoutNote}
+            rule={mockRule('mocked-rule-id')}
+          />
+        </ThemeProvider>
       );
 
-      expect(wrapper.find('[data-test-subj="stepAboutDetailsToggle"]').exists()).toBeFalsy();
+      expect(wrapper.find(EuiButtonGroup).exists()).toBeTruthy();
+      expect(wrapper.find('#details').at(0).prop('isSelected')).toBeTruthy();
+      expect(wrapper.find('#setup').at(0).prop('isSelected')).toBeFalsy();
       expect(wrapper.find('[data-test-subj="stepAboutDetailsNoteContent"]').exists()).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="stepAboutDetailsSetupContent"]').exists()).toBeFalsy();
-      expect(wrapper.find('[data-test-subj="stepAboutDetailsContent"]').exists()).toBeTruthy();
     });
   });
 
@@ -116,7 +118,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: stepDataMock.note,
               description: stepDataMock.description,
-              setup: '',
+              setup: stepDataMock.setup,
             }}
             stepData={stepDataMock}
             rule={mockRule('mocked-rule-id')}
@@ -137,7 +139,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: stepDataMock.note,
               description: stepDataMock.description,
-              setup: '',
+              setup: stepDataMock.setup,
             }}
             stepData={stepDataMock}
             rule={mockRule('mocked-rule-id')}
@@ -212,7 +214,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: stepDataMock.note,
               description: stepDataMock.description,
-              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              setup: stepDataMock.setup,
             }}
             stepData={stepDataMock}
             rule={mockRule('mocked-rule-id')}
@@ -234,7 +236,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: stepDataMock.note,
               description: stepDataMock.description,
-              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              setup: stepDataMock.setup,
             }}
             stepData={stepDataMock}
             rule={mockRule('mocked-rule-id')}
@@ -253,7 +255,7 @@ describe('StepAboutRuleToggleDetails', () => {
       expect(wrapper.find('[idSelected="setup"]').exists()).toBeTruthy();
     });
 
-    test('it displays notes markdown when user toggles to "setup"', () => {
+    test('it displays setup markdown when user toggles to "setup"', () => {
       const wrapper = mount(
         <ThemeProvider theme={mockTheme}>
           <StepAboutRuleToggleDetails
@@ -261,7 +263,7 @@ describe('StepAboutRuleToggleDetails', () => {
             stepDataDetails={{
               note: stepDataMock.note,
               description: stepDataMock.description,
-              setup: stepDataMock.note, // TODO: Update to mockRule.setup once supported in UI (and mock can be updated)
+              setup: stepDataMock.setup,
             }}
             stepData={stepDataMock}
             rule={mockRule('mocked-rule-id')}
@@ -273,7 +275,7 @@ describe('StepAboutRuleToggleDetails', () => {
 
       expect(wrapper.find('EuiButtonGroup[idSelected="setup"]').exists()).toBeTruthy();
       expect(wrapper.find('div.euiMarkdownFormat').text()).toEqual(
-        'this is some markdown documentation'
+        'this is some setup documentation'
       );
     });
   });

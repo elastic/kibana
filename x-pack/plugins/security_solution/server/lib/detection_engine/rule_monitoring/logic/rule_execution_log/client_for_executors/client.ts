@@ -164,7 +164,7 @@ export const createRuleExecutionLogClientForExecutors = (
   };
 
   const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
-    const { newStatus, message, metrics } = args;
+    const { newStatus, message, metrics, userError } = args;
 
     if (newStatus === RuleExecutionStatusEnum.running) {
       return;
@@ -189,7 +189,7 @@ export const createRuleExecutionLogClientForExecutors = (
     }
 
     if (newStatus === RuleExecutionStatusEnum.failed) {
-      ruleResultService.addLastRunError(message);
+      ruleResultService.addLastRunError(message, userError ?? false);
     } else if (newStatus === RuleExecutionStatusEnum['partial failure']) {
       ruleResultService.addLastRunWarning(message);
     }
@@ -233,6 +233,7 @@ interface NormalizedStatusChangeArgs {
   newStatus: RuleExecutionStatus;
   message: string;
   metrics?: RuleExecutionMetrics;
+  userError?: boolean;
 }
 
 const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
@@ -242,7 +243,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
       message: '',
     };
   }
-  const { newStatus, message, metrics } = args;
+  const { newStatus, message, metrics, userError } = args;
 
   return {
     newStatus,
@@ -255,6 +256,7 @@ const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChan
           execution_gap_duration_s: normalizeGap(metrics.executionGap),
         }
       : undefined,
+    userError,
   };
 };
 

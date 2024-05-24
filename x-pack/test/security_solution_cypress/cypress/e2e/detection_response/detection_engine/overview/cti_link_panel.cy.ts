@@ -36,7 +36,7 @@ describe.skip('CTI Link Panel', { tags: ['@ess', '@serverless', '@skipInServerle
   // TODO: https://github.com/elastic/kibana/issues/161539
   describe(
     'enabled threat intel module',
-    { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+    { tags: ['@ess', '@serverless', '@skipInServerless'] },
     () => {
       before(() => {
         // illegal_argument_exception: unknown setting [index.lifecycle.name]

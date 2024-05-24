@@ -12,7 +12,6 @@ export const createParser = () => {
 
   let at, // The index of the current character
     ch, // The current character
-    annos, // annotations
     escapee = {
       '"': '"',
       '\\': '\\',
@@ -24,8 +23,44 @@ export const createParser = () => {
       t: '\t',
     },
     text,
-    annotate = function (type, text) {
-      annos.push({ type: type, text: text, at: at });
+    errors,
+    addError = function (text) {
+      errors.push({ text: text, offset: at });
+    },
+    requests,
+    requestStartOffset,
+    requestEndOffset,
+    getLastRequest = function() {
+      return requests.length > 0 ? requests.pop() : {};
+    },
+    addRequestStart = function() {
+      requestStartOffset = at - 1;
+      requests.push({ startOffset: requestStartOffset });
+    },
+    addRequestMethod = function(method) {
+      const lastRequest = getLastRequest();
+      lastRequest.method = method;
+      requests.push(lastRequest);
+      requestEndOffset = at - 1;
+    },
+    addRequestUrl = function(url) {
+      const lastRequest = getLastRequest();
+      lastRequest.url = url;
+      requests.push(lastRequest);
+      requestEndOffset = at - 1;
+    },
+    addRequestData = function(data) {
+      const lastRequest = getLastRequest();
+      const dataArray = lastRequest.data || [];
+      dataArray.push(data);
+      lastRequest.data = dataArray;
+      requests.push(lastRequest);
+      requestEndOffset = at - 1;
+    },
+    addRequestEnd = function() {
+      const lastRequest = getLastRequest();
+      lastRequest.endOffset = requestEndOffset;
+      requests.push(lastRequest);
     },
     error = function (m) {
       throw {
@@ -373,14 +408,18 @@ export const createParser = () => {
     },
     request = function () {
       white();
-      method();
+      addRequestStart();
+      const parsedMethod = method();
+      addRequestMethod(parsedMethod);
       strictWhite();
-      url();
+      const parsedUrl = url();
+      addRequestUrl(parsedUrl);
       strictWhite(); // advance to one new line
       newLine();
       strictWhite();
       if (ch == '{') {
-        object();
+        const parsedObject = object();
+        addRequestData(parsedObject);
       }
       // multi doc request
       strictWhite(); // advance to one new line
@@ -388,11 +427,13 @@ export const createParser = () => {
       strictWhite();
       while (ch == '{') {
         // another object
-        object();
+        const parsedObject = object();
+        addRequestData(parsedObject);
         strictWhite();
         newLine();
         strictWhite();
       }
+      addRequestEnd();
     },
     comment = function () {
       while (ch == '#') {
@@ -417,7 +458,7 @@ export const createParser = () => {
           request();
           white();
         } catch (e) {
-          annotate('error', e.message);
+          addError(e.message);
           // snap
           const substring = text.substr(at);
           const nextMatch = substring.search(/^POST|HEAD|GET|PUT|DELETE|PATCH/m);
@@ -432,15 +473,16 @@ export const createParser = () => {
 
     text = source;
     at = 0;
-    annos = [];
+    errors = [];
+    requests = [];
     next();
     multi_request();
     white();
     if (ch) {
-      annotate('error', 'Syntax error');
+      addError('Syntax error');
     }
 
-    result = { annotations: annos };
+    result = { errors, requests };
 
     return typeof reviver === 'function'
       ? (function walk(holder, key) {

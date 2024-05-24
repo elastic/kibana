@@ -18,10 +18,11 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ESQLSearchReponse as ESQLSearchResponse } from '@kbn/es-types';
 import {
@@ -311,7 +312,7 @@ describe('CsvESQLGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { filter: undefined, locale: 'en', query: '' } },
+        { params: { filter: undefined, locale: 'en', query: '', version: ESQL_LATEST_VERSION } },
         {
           strategy: 'esql',
           transport: {
@@ -389,7 +390,7 @@ describe('CsvESQLGenerator', () => {
       );
 
       expect(mockDataClientSearchFn).toBeCalledWith(
-        { params: { filter: undefined, locale: 'en', query: '' } },
+        { params: { filter: undefined, locale: 'en', query: '', version: ESQL_LATEST_VERSION } },
         {
           strategy: 'esql',
           transport: {
@@ -485,6 +486,7 @@ describe('CsvESQLGenerator', () => {
             },
             locale: 'en',
             query: '',
+            version: ESQL_LATEST_VERSION,
           },
         },
         {

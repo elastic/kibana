@@ -9,23 +9,24 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { AwaitingControlGroupAPI, ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import styled from 'styled-components';
 import { Filter } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { SearchState } from '../../hooks/use_url_search_state';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/constants';
 
 interface Props {
   initialState: SearchState;
   loading: boolean;
+  dataView?: DataView;
   onStateChange: (newState: Partial<SearchState>) => void;
 }
 
-export function QuickFilters({ initialState: { tagsFilter, statusFilter }, onStateChange }: Props) {
-  const { dataView, loading } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  });
+export function QuickFilters({
+  dataView,
+  initialState: { tagsFilter, statusFilter },
+  onStateChange,
+}: Props) {
   const [controlGroupAPI, setControlGroupAPI] = useState<AwaitingControlGroupAPI>();
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export function QuickFilters({ initialState: { tagsFilter, statusFilter }, onSta
     };
   }, [controlGroupAPI, onStateChange]);
 
-  if (loading || !dataView) {
+  if (!dataView) {
     return null;
   }
 

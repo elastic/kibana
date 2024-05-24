@@ -48,8 +48,7 @@ export const computeExpectationsAndRanges = (
   const expectations = [tempPercentiles[0]];
   for (let i = 1; i < tempPercentiles.length; i++) {
     expectations.push(
-      (tempFractions[i - 1] * tempPercentiles[i - 1] +
-        tempFractions[i] * tempPercentiles[i]) /
+      (tempFractions[i - 1] * tempPercentiles[i - 1] + tempFractions[i] * tempPercentiles[i]) /
         (tempFractions[i - 1] + tempFractions[i])
     );
   }

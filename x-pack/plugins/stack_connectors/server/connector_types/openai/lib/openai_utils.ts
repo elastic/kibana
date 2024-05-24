@@ -33,14 +33,12 @@ export const getRequestWithStreamOption = (
   stream: boolean,
   defaultModel: string
 ): string => {
-  if (!APIS_ALLOWING_STREAMING.has(url)) {
-    return body;
-  }
-
   try {
     const jsonBody = JSON.parse(body);
     if (jsonBody) {
-      jsonBody.stream = stream;
+      if (APIS_ALLOWING_STREAMING.has(url)) {
+        jsonBody.stream = stream;
+      }
       jsonBody.model = jsonBody.model || defaultModel;
     }
 
@@ -50,4 +48,11 @@ export const getRequestWithStreamOption = (
   }
 
   return body;
+};
+
+// removes the chat completions endpoint from the OpenAI url in order
+// to provide the correct endpoint for the OpenAI node package
+export const removeEndpointFromUrl = (url: string): string => {
+  const endpointToRemove = /\/chat\/completions\/?$/;
+  return url.replace(endpointToRemove, '');
 };

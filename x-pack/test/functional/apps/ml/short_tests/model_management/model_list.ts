@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           'should display the stats bar with the total number of models'
         );
         // +1 because of the built-in model
-        await ml.trainedModels.assertStats(37);
+        await ml.trainedModels.assertStats(38);
 
         await ml.testExecution.logTestStep('should display the table');
         await ml.trainedModels.assertTableExists();

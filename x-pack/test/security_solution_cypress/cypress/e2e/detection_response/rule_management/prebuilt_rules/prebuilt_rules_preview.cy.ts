@@ -137,8 +137,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
       { package: 'windows', version: '^1.5.0' },
     ],
     required_fields: [
-      { ecs: true, name: 'event.type', type: 'keyword' },
-      { ecs: true, name: 'file.extension', type: 'keyword' },
+      { name: 'event.type', type: 'keyword' },
+      { name: 'file.extension', type: 'keyword' },
     ],
     timeline_id: '3e827bab-838a-469f-bd1e-5e19a2bff2fd',
     timeline_title: 'Alerts Involving a Single User Timeline',
@@ -252,6 +252,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     query: 'process where process.name == "regsvr32.exe"',
     index: ['winlogbeat-*', 'logs-endpoint.events.*'],
     filters,
+    alert_suppression: undefined,
   });
 
   const THREAT_MATCH_INDEX_PATTERN_RULE = createRuleAssetSavedObject({
@@ -326,6 +327,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         $state: { store: 'appState' },
       },
     ],
+    alert_suppression: undefined,
   });
 
   const ESQL_RULE = createRuleAssetSavedObject({
@@ -335,6 +337,14 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     type: 'esql',
     language: 'esql',
     query: 'FROM .alerts-security.alerts-default | STATS count = COUNT(@timestamp) BY @timestamp',
+    alert_suppression: {
+      group_by: [
+        'Endpoint.policy.applied.artifacts.global.identifiers.name',
+        'Endpoint.policy.applied.id',
+      ],
+      duration: { unit: 'm', value: 5 },
+      missing_fields_strategy: 'suppress',
+    },
   });
 
   const RULE_WITHOUT_INVESTIGATION_AND_SETUP_GUIDES = createRuleAssetSavedObject({
@@ -619,25 +629,23 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           const { query } = NEW_TERMS_INDEX_PATTERN_RULE['security-rule'] as { query: string };
           assertCustomQueryPropertyShown(query);
         });
+
+        it('ESQL rule properties', () => {
+          clickAddElasticRulesButton();
+
+          openRuleInstallPreview(ESQL_RULE['security-rule'].name);
+
+          assertCommonPropertiesShown(commonProperties);
+
+          const { query } = ESQL_RULE['security-rule'] as { query: string };
+          assertEsqlQueryPropertyShown(query);
+
+          const { alert_suppression: alertSuppression } = ESQL_RULE['security-rule'] as {
+            alert_suppression: AlertSuppression;
+          };
+          assertAlertSuppressionPropertiesShown(alertSuppression);
+        });
       });
-
-      describe(
-        'Skip in Serverless environment',
-        { tags: TEST_ENV_TAGS.filter((tag) => tag !== '@serverless') },
-        () => {
-          /* Serverless environment doesn't support ESQL rules just yet */
-          it('ESQL rule properties', () => {
-            clickAddElasticRulesButton();
-
-            openRuleInstallPreview(ESQL_RULE['security-rule'].name);
-
-            assertCommonPropertiesShown(commonProperties);
-
-            const { query } = ESQL_RULE['security-rule'] as { query: string };
-            assertEsqlQueryPropertyShown(query);
-          });
-        }
-      );
     });
   });
 
@@ -1047,26 +1055,24 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           };
           assertCustomQueryPropertyShown(query);
         });
+
+        it('ESQL rule properties', () => {
+          clickRuleUpdatesTab();
+
+          openRuleUpdatePreview(UPDATED_ESQL_RULE['security-rule'].name);
+          selectPreviewTab(PREVIEW_TABS.OVERVIEW);
+
+          assertCommonPropertiesShown(commonProperties);
+
+          const { query } = UPDATED_ESQL_RULE['security-rule'] as { query: string };
+          assertEsqlQueryPropertyShown(query);
+
+          const { alert_suppression: alertSuppression } = UPDATED_ESQL_RULE['security-rule'] as {
+            alert_suppression: AlertSuppression;
+          };
+          assertAlertSuppressionPropertiesShown(alertSuppression);
+        });
       });
-
-      describe(
-        'Skip in Serverless environment',
-        { tags: TEST_ENV_TAGS.filter((tag) => tag !== '@serverless') },
-        () => {
-          /* Serverless environment doesn't support ESQL rules just yet */
-          it('ESQL rule properties', () => {
-            clickRuleUpdatesTab();
-
-            openRuleUpdatePreview(UPDATED_ESQL_RULE['security-rule'].name);
-            selectPreviewTab(PREVIEW_TABS.OVERVIEW);
-
-            assertCommonPropertiesShown(commonProperties);
-
-            const { query } = UPDATED_ESQL_RULE['security-rule'] as { query: string };
-            assertEsqlQueryPropertyShown(query);
-          });
-        }
-      );
     });
 
     describe('Viewing rule changes in JSON diff view', { tags: TEST_ENV_TAGS }, () => {

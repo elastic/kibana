@@ -6,7 +6,8 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
@@ -85,7 +86,7 @@ function App({
   }, [coreStart, coreSetup, pluginsStart, pluginsSetup, profilingFetchServices]);
 
   return (
-    <KibanaThemeProvider theme$={theme$}>
+    <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...coreStart, ...pluginsStart, storage }}>
         <i18nCore.Context>
           <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
@@ -117,7 +118,7 @@ function App({
           </RedirectAppLinks>
         </i18nCore.Context>
       </KibanaContextProvider>
-    </KibanaThemeProvider>
+    </KibanaRenderContextProvider>
   );
 }
 

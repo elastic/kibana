@@ -14,12 +14,7 @@ interface Props extends APMLinkExtendProps {
 }
 
 function ErrorDetailLink({ serviceName, errorGroupId, ...rest }: Props) {
-  return (
-    <LegacyAPMLink
-      path={`/services/${serviceName}/errors/${errorGroupId}`}
-      {...rest}
-    />
-  );
+  return <LegacyAPMLink path={`/services/${serviceName}/errors/${errorGroupId}`} {...rest} />;
 }
 
 export { ErrorDetailLink };

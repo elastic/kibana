@@ -17,7 +17,6 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { VisTypeTimeseriesPublicConfig } from '../config';
@@ -60,7 +59,6 @@ export interface TimeseriesVisDependencies extends Partial<CoreStart> {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timefilter: TimefilterContract;
-  theme: ThemeServiceStart;
   appName: string;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   notifications: CoreStart['notifications'];
@@ -86,7 +84,7 @@ export class MetricsPlugin implements Plugin<void, void> {
     expressions.registerRenderer(
       getTimeseriesVisRenderer({
         uiSettings: core.uiSettings,
-        theme: core.theme,
+        core,
       })
     );
     setUISettings(core.uiSettings);

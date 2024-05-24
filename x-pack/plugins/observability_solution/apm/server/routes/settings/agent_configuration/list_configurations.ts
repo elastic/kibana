@@ -28,21 +28,14 @@ export async function listConfigurations({
   };
 
   const [agentConfigs, appliedEtags = []] = await Promise.all([
-    internalESClient.search<AgentConfiguration>(
-      'list_agent_configuration',
-      params
-    ),
+    internalESClient.search<AgentConfiguration>('list_agent_configuration', params),
     apmEventClient ? getAgentConfigEtagMetrics(apmEventClient) : undefined,
   ]);
 
-  return agentConfigs.hits.hits
-    .map(convertConfigSettingsToString)
-    .map((hit) => {
-      return {
-        ...hit._source,
-        applied_by_agent:
-          hit._source.applied_by_agent ||
-          appliedEtags.includes(hit._source.etag),
-      };
-    });
+  return agentConfigs.hits.hits.map(convertConfigSettingsToString).map((hit) => {
+    return {
+      ...hit._source,
+      applied_by_agent: hit._source.applied_by_agent || appliedEtags.includes(hit._source.etag),
+    };
+  });
 }

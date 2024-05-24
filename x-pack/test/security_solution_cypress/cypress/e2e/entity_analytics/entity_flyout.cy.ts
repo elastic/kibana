@@ -32,7 +32,7 @@ import {
   ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_SELECTOR,
 } from '../../screens/asset_criticality/flyouts';
 import { deleteCriticality } from '../../tasks/api_calls/entity_analytics';
-import { mockFleetInstalledIntegrations } from '../../tasks/fleet_integrations';
+import { mockFleetIntegrations } from '../../tasks/fleet_integrations';
 import {
   expandManagedDataEntraPanel,
   expandManagedDataOktaPanel,
@@ -129,23 +129,39 @@ describe(
             .contains('High Impact')
             .should('be.visible');
         });
+        it('should unassign asset criticality state', () => {
+          cy.log('asset criticality update');
+          expandFirstAlertUserFlyout();
+          selectAssetCriticalityLevel('High Impact');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('High Impact')
+            .should('be.visible');
+          selectAssetCriticalityLevel('Unassigned');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_LEVEL)
+            .contains('Unassigned')
+            .should('be.visible');
+        });
       });
 
       // https://github.com/elastic/kibana/issues/179248
-      describe('Managed data section', { tags: ['@brokenInServerlessQA'] }, () => {
+      describe('Managed data section', { tags: ['@skipInServerlessMKI'] }, () => {
         beforeEach(() => {
-          mockFleetInstalledIntegrations([
+          mockFleetIntegrations([
             {
               package_name: ENTRA_ID_PACKAGE_NAME,
-              is_enabled: true,
               package_title: 'azure entra',
-              package_version: 'test_package_version',
+              latest_package_version: 'test_package_version',
+              installed_package_version: 'test_package_version',
+              is_installed: true,
+              is_enabled: true,
             },
             {
               package_name: OKTA_PACKAGE_NAME,
-              is_enabled: true,
               package_title: 'okta',
-              package_version: 'test_package_version',
+              latest_package_version: 'test_package_version',
+              installed_package_version: 'test_package_version',
+              is_installed: true,
+              is_enabled: true,
             },
           ]);
         });

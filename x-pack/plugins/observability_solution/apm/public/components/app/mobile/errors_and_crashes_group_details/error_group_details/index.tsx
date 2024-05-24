@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
@@ -106,9 +100,7 @@ export function ErrorGroupDetails() {
       appVersion,
       netConnectionType,
     },
-  } = useApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
-  );
+  } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}');
   const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
     osVersion,
@@ -121,23 +113,20 @@ export function ErrorGroupDetails() {
   useBreadcrumb(
     () => ({
       title: groupId,
-      href: apmRouter.link(
-        '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
-        {
-          path: {
-            serviceName,
-            groupId,
-          },
-          query: {
-            rangeFrom,
-            rangeTo,
-            environment,
-            kuery: kueryWithMobileFilters,
-            serviceGroup,
-            comparisonEnabled,
-          },
-        }
-      ),
+      href: apmRouter.link('/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}', {
+        path: {
+          serviceName,
+          groupId,
+        },
+        query: {
+          rangeFrom,
+          rangeTo,
+          environment,
+          kuery: kueryWithMobileFilters,
+          serviceGroup,
+          comparisonEnabled,
+        },
+      }),
     }),
     [
       apmRouter,
@@ -152,15 +141,11 @@ export function ErrorGroupDetails() {
     ]
   );
 
-  const {
-    data: errorSamplesData = emptyErrorSamples,
-    status: errorSamplesFetchStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples',
-          {
+  const { data: errorSamplesData = emptyErrorSamples, status: errorSamplesFetchStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (start && end) {
+          return callApmApi('GET /internal/apm/services/{serviceName}/errors/{groupId}/samples', {
             params: {
               path: {
                 serviceName,
@@ -173,27 +158,22 @@ export function ErrorGroupDetails() {
                 end,
               },
             },
-          }
-        );
-      }
-    },
-    [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
-  );
+          });
+        }
+      },
+      [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
+    );
 
-  const {
-    errorDistributionData,
-    errorDistributionStatus: errorDistributionStatus,
-  } = useErrorGroupDistributionFetcher({
-    serviceName,
-    groupId,
-    environment,
-    kuery: kueryWithMobileFilters,
-  });
+  const { errorDistributionData, errorDistributionStatus: errorDistributionStatus } =
+    useErrorGroupDistributionFetcher({
+      serviceName,
+      groupId,
+      environment,
+      kuery: kueryWithMobileFilters,
+    });
 
   useEffect(() => {
-    const selectedSample = errorSamplesData?.errorSampleIds.find(
-      (sample) => sample === errorId
-    );
+    const selectedSample = errorSamplesData?.errorSampleIds.find((sample) => sample === errorId);
 
     if (errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
       // selected sample was not found. select a new one:
@@ -219,10 +199,7 @@ export function ErrorGroupDetails() {
 
   return (
     <>
-      <ErrorGroupHeader
-        groupId={groupId}
-        occurrencesCount={errorSamplesData?.occurrencesCount}
-      />
+      <ErrorGroupHeader groupId={groupId} occurrencesCount={errorSamplesData?.occurrencesCount} />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s">
         <ChartPointerEventContextProvider>
@@ -230,19 +207,13 @@ export function ErrorGroupDetails() {
             <ErrorDistribution
               fetchStatus={errorDistributionStatus}
               distribution={errorDistributionData}
-              title={i18n.translate(
-                'xpack.apm.errorGroupDetails.occurrencesChartLabel',
-                {
-                  defaultMessage: 'Error occurrences',
-                }
-              )}
+              title={i18n.translate('xpack.apm.errorGroupDetails.occurrencesChartLabel', {
+                defaultMessage: 'Error occurrences',
+              })}
               height={300}
-              tip={i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorRateChart.tip',
-                {
-                  defaultMessage: `Error rate is measured in transactions per minute.`,
-                }
-              )}
+              tip={i18n.translate('xpack.apm.serviceDetails.metrics.errorRateChart.tip', {
+                defaultMessage: `Error rate is measured in transactions per minute.`,
+              })}
             />
           </EuiFlexItem>
         </ChartPointerEventContextProvider>

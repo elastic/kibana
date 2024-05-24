@@ -9,6 +9,7 @@ import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { sessionViewBasicProcessMock } from '../../../common/mocks/constants/session_view_process.mock';
 import { DetailPanelProcessTab } from '.';
+import { CLOUD_DEFEND_INDEX } from '../../methods';
 
 describe('DetailPanelProcessTab component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -25,6 +26,7 @@ describe('DetailPanelProcessTab component', () => {
     it('renders DetailPanelProcessTab correctly', async () => {
       renderResult = mockedContext.render(
         <DetailPanelProcessTab
+          index={CLOUD_DEFEND_INDEX}
           selectedProcess={{
             ...sessionViewBasicProcessMock,
             getEndTime: () => MOCK_PROCESS_END,

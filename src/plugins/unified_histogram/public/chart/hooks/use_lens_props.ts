@@ -12,25 +12,28 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
-import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../../types';
-import type { LensAttributesContext } from '../utils/get_lens_attributes';
-import { useStableCallback } from './use_stable_callback';
+import type {
+  UnifiedHistogramInputMessage,
+  UnifiedHistogramRequestContext,
+  UnifiedHistogramVisContext,
+} from '../../types';
+import { useStableCallback } from '../../hooks/use_stable_callback';
 
 export const useLensProps = ({
   request,
   getTimeRange,
   refetch$,
-  attributesContext,
+  visContext,
   onLoad,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
   refetch$: Observable<UnifiedHistogramInputMessage>;
-  attributesContext: LensAttributesContext;
+  visContext: UnifiedHistogramVisContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
   const buildLensProps = useCallback(() => {
-    const { attributes, requestData } = attributesContext;
+    const { attributes, requestData } = visContext;
     return {
       requestData: JSON.stringify(requestData),
       lensProps: getLensProps({
@@ -40,7 +43,7 @@ export const useLensProps = ({
         onLoad,
       }),
     };
-  }, [attributesContext, getTimeRange, onLoad, request?.searchSessionId]);
+  }, [visContext, getTimeRange, onLoad, request?.searchSessionId]);
 
   const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));

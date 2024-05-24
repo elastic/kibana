@@ -20,6 +20,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const TEST_DS_NAME = 'test-ds-1';
 
   describe('Data Streams', function () {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/181242
+    this.tags(['failsOnMKI']);
     before(async () => {
       log.debug('Creating required data stream');
       try {
@@ -119,22 +121,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       expect(await successToast.getVisibleText()).to.contain('Data retention updated');
     });
 
-    it('allows to disable data retention', async () => {
+    it('disabling data retention in serverless is not allowed', async () => {
       // Open details flyout
       await pageObjects.indexManagement.clickDataStreamNameLink(TEST_DS_NAME);
       // Open the edit retention dialog
       await testSubjects.click('manageDataStreamButton');
       await testSubjects.click('editDataRetentionButton');
 
-      // Disable infinite retention
-      await testSubjects.click('dataRetentionEnabledField > input');
-
-      // Submit the form
-      await testSubjects.click('saveButton');
-
-      // Expect to see a success toast
-      const successToast = await toasts.getElementByIndex(1);
-      expect(await successToast.getVisibleText()).to.contain('Data retention disabled');
+      expect(await testSubjects.exists('dataRetentionEnabledField')).to.be(false);
     });
   });
 };

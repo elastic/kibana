@@ -35,10 +35,9 @@ export function Variables({ vars }: Props) {
         <EuiAccordion
           id="local-variables"
           className="euiAccordion"
-          buttonContent={i18n.translate(
-            'xpack.apm.stacktraceTab.localVariablesToogleButtonLabel',
-            { defaultMessage: 'Local variables' }
-          )}
+          buttonContent={i18n.translate('xpack.apm.stacktraceTab.localVariablesToogleButtonLabel', {
+            defaultMessage: 'Local variables',
+          })}
         >
           <React.Fragment>
             <KeyValueTable keyValuePairs={flattenedVariables} />

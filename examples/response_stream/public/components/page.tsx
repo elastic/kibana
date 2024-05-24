@@ -6,20 +6,19 @@
  * Side Public License, v 1.
  */
 
-import * as React from 'react';
-
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 
 export interface PageProps {
   title?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ title = 'Untitled', children }) => {
+export const Page: FC<PropsWithChildren<PageProps>> = ({ title = 'Untitled', children }) => {
   return (
     <>
       <EuiPageTemplate.Header>
         <EuiTitle size="l">
-          <h1>{title}</h1>
+          <h1 data-test-subj="responseStreamPageTitle">{title}</h1>
         </EuiTitle>
       </EuiPageTemplate.Header>
       <EuiPageTemplate.Section>{children}</EuiPageTemplate.Section>

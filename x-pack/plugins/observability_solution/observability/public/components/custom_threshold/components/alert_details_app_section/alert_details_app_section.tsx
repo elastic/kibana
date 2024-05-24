@@ -39,13 +39,12 @@ import type {
 import moment from 'moment';
 import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import { TimeRange } from '@kbn/es-query';
-import { AlertHistoryChart } from './alert_history';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { getGroupFilters } from '../../../../../common/custom_threshold_rule/helpers/get_group';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { AlertSummaryField } from '../../../..';
-import { AlertParams, MetricExpression } from '../../types';
+import { AlertParams } from '../../types';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
 import { CustomThresholdRule, CustomThresholdAlert } from '../types';
@@ -55,6 +54,7 @@ import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
 import { getViewInAppUrl } from '../../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { SearchConfigurationWithExtractedReferenceType } from '../../../../../common/custom_threshold_rule/types';
+import { generateChartTitleAndTooltip } from './helpers/generate_chart_title_and_tooltip';
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
@@ -62,44 +62,6 @@ interface AppSectionProps {
   ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
-
-const CHART_TITLE_LIMIT = 120;
-
-const equationResultText = i18n.translate('xpack.observability.customThreshold.alertChartTitle', {
-  defaultMessage: 'Equation result for ',
-});
-
-const generateChartTitleAndTooltip = (criterion: MetricExpression) => {
-  const metricNameResolver: Record<string, string> = {};
-
-  criterion.metrics.forEach(
-    (metric) =>
-      (metricNameResolver[metric.name] = `${metric.aggType} (${
-        metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
-      })`)
-  );
-
-  let equation = criterion.equation
-    ? criterion.equation
-    : criterion.metrics.map((m) => m.name).join(' + ');
-
-  Object.keys(metricNameResolver)
-    .sort()
-    .reverse()
-    .forEach((metricName) => {
-      equation = equation.replaceAll(metricName, metricNameResolver[metricName]);
-    });
-
-  const chartTitle =
-    equation.length > CHART_TITLE_LIMIT
-      ? `${equation.substring(0, CHART_TITLE_LIMIT)}...`
-      : equation;
-
-  return {
-    tooltip: `${equationResultText}${equation}`,
-    title: `${equationResultText}${chartTitle}`,
-  };
-};
 
 // eslint-disable-next-line import/no-default-export
 export default function AlertDetailsAppSection({
@@ -204,7 +166,6 @@ export default function AlertDetailsAppSection({
               <EuiLink
                 data-test-subj="o11yCustomThresholdAlertDetailsViewRelatedLogs"
                 href={viewInAppUrl}
-                target="_blank"
               >
                 {i18n.translate(
                   'xpack.observability.alertDetailsAppSection.a.viewRelatedLogsLabel',
@@ -261,7 +222,11 @@ export default function AlertDetailsAppSection({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data.search.searchSource]);
 
-  const overview = !!ruleParams.criteria ? (
+  if (!ruleParams.criteria) {
+    return null;
+  }
+
+  return (
     <EuiFlexGroup direction="column" data-test-subj="thresholdAlertOverviewSection">
       {ruleParams.criteria.map((criterion, index) => (
         <EuiFlexItem key={`criterion-${index}`}>
@@ -327,9 +292,6 @@ export default function AlertDetailsAppSection({
       {hasLogRateAnalysisLicense && (
         <LogRateAnalysis alert={alert} dataView={dataView} rule={rule} services={services} />
       )}
-      <AlertHistoryChart alert={alert} dataView={dataView} rule={rule} />
     </EuiFlexGroup>
-  ) : null;
-
-  return overview;
+  );
 }

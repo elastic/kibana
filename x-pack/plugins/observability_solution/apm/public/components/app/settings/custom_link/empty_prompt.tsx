@@ -12,11 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CreateCustomLinkButton } from './create_custom_link_button';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-export function EmptyPrompt({
-  onCreateCustomLinkClick,
-}: {
-  onCreateCustomLinkClick: () => void;
-}) {
+export function EmptyPrompt({ onCreateCustomLinkClick }: { onCreateCustomLinkClick: () => void }) {
   const { docLinks } = useApmPluginContext().core;
   return (
     <EuiEmptyPrompt

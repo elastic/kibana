@@ -22,14 +22,13 @@ import type {
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
+  FunctionArgSignature,
   FunctionDefinition,
   SignatureArgType,
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
-  extractSingleType,
-  getAllArrayTypes,
-  getAllArrayValues,
+  extractSingularType,
   getColumnHit,
   getCommandDefinition,
   getFunctionDefinition,
@@ -51,6 +50,7 @@ import {
   isSettingItem,
   isAssignment,
   isVariable,
+  isValidLiteralOption,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import { getMessageFromId, getUnknownTypeLabel } from './errors';
@@ -68,19 +68,39 @@ import {
   retrieveFields,
   retrievePolicies,
   retrievePoliciesFields,
-  retrieveMetadataFields,
   retrieveFieldsFromStringSources,
 } from './resources';
+import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
+import { getParamAtPosition } from '../autocomplete/helper';
+import { METADATA_FIELDS } from '../shared/constants';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
   actualArg: ESQLAstItem,
-  argDef: SignatureArgType,
+  argDef: FunctionArgSignature,
   references: ReferenceMaps,
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
   if (isLiteralItem(actualArg)) {
+    if (
+      actualArg.literalType === 'string' &&
+      argDef.literalOptions &&
+      isValidLiteralOption(actualArg, argDef)
+    ) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unsupportedLiteralOption',
+          values: {
+            name: astFunction.name,
+            value: actualArg.value,
+            supportedOptions: argDef.literalOptions?.map((option) => `"${option}"`).join(', '),
+          },
+          locations: actualArg.location,
+        })
+      );
+    }
+
     if (!isEqualType(actualArg, argDef, references, parentCommand)) {
       messages.push(
         getMessageFromId({
@@ -184,7 +204,7 @@ function validateFunctionColumnArg(
     if (actualArg.name) {
       const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
       if (!columnCheck) {
-        if (argDef.literalOnly) {
+        if (argDef.constantOnly) {
           messages.push(
             getMessageFromId({
               messageId: 'expectedConstant',
@@ -207,7 +227,7 @@ function validateFunctionColumnArg(
           );
         }
       } else {
-        if (argDef.literalOnly) {
+        if (argDef.constantOnly) {
           messages.push(
             getMessageFromId({
               messageId: 'expectedConstant',
@@ -277,6 +297,7 @@ function validateFunction(
   parentCommand: string,
   parentOption: string | undefined,
   references: ReferenceMaps,
+  forceConstantOnly: boolean = false,
   isNested?: boolean
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
@@ -326,35 +347,28 @@ function validateFunction(
   }
   const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
-    const refSignature = fnDefinition.signatures[0];
-    const numArgs =
-      refSignature.minParams ?? refSignature.params.filter(({ optional }) => !optional).length;
-    if (
-      !refSignature.minParams &&
-      refSignature.params.filter(({ optional }) => !optional).length === refSignature.params.length
-    ) {
+    const { max, min } = getMaxMinNumberOfParams(fnDefinition);
+    if (max === min) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentNumber',
           values: {
             fn: astFunction.name,
-            numArgs:
-              refSignature.minParams ??
-              refSignature.params.filter(({ optional }) => !optional).length,
+            numArgs: max,
             passedArgs: astFunction.args.length,
           },
           locations: astFunction.location,
         })
       );
-    } else if (Math.max(astFunction.args.length - refSignature.params.length, 0) > 0) {
+    } else if (astFunction.args.length > max) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentNumberTooMany',
           values: {
             fn: astFunction.name,
-            numArgs: refSignature.params.length,
+            numArgs: max,
             passedArgs: astFunction.args.length,
-            extraArgs: Math.max(astFunction.args.length - refSignature.params.length, 0),
+            extraArgs: astFunction.args.length - max,
           },
           locations: astFunction.location,
         })
@@ -365,9 +379,9 @@ function validateFunction(
           messageId: 'wrongArgumentNumberTooFew',
           values: {
             fn: astFunction.name,
-            numArgs,
+            numArgs: min,
             passedArgs: astFunction.args.length,
-            missingArgs: Math.max(numArgs - astFunction.args.length, 0),
+            missingArgs: min - astFunction.args.length,
           },
           locations: astFunction.location,
         })
@@ -375,21 +389,58 @@ function validateFunction(
     }
   }
   // now perform the same check on all functions args
-  for (const arg of astFunction.args) {
+  for (let i = 0; i < astFunction.args.length; i++) {
+    const arg = astFunction.args[i];
+
+    const allMatchingArgDefinitionsAreConstantOnly = matchingSignatures.every((signature) => {
+      return signature.params[i]?.constantOnly;
+    });
     const wrappedArray = Array.isArray(arg) ? arg : [arg];
     for (const subArg of wrappedArray) {
       if (isFunctionItem(subArg)) {
-        messages.push(
-          ...validateFunction(
-            subArg,
-            parentCommand,
-            parentOption,
-            references,
-            // use the nesting flag for now just for stats
-            // TODO: revisit this part later on to make it more generic
-            parentCommand === 'stats' ? isNested || !isAssignment(astFunction) : false
-          )
+        const messagesFromArg = validateFunction(
+          subArg,
+          parentCommand,
+          parentOption,
+          references,
+          /**
+           * The constantOnly constraint needs to be enforced for arguments that
+           * are functions as well, regardless of whether the definition for the
+           * sub function's arguments includes the constantOnly flag.
+           *
+           * Example:
+           * bucket(@timestamp, abs(bytes), "", "")
+           *
+           * In the above example, the abs function is not defined with the
+           * constantOnly flag, but the second parameter in bucket _is_ defined
+           * with the constantOnly flag.
+           *
+           * Because of this, the abs function's arguments inherit the constraint
+           * and each should be validated as if each were constantOnly.
+           */
+          allMatchingArgDefinitionsAreConstantOnly || forceConstantOnly,
+          // use the nesting flag for now just for stats
+          // TODO: revisit this part later on to make it more generic
+          parentCommand === 'stats' ? isNested || !isAssignment(astFunction) : false
         );
+
+        if (messagesFromArg.some(({ code }) => code === 'expectedConstant')) {
+          const consolidatedMessage = getMessageFromId({
+            messageId: 'expectedConstant',
+            values: {
+              fn: astFunction.name,
+              given: subArg.text,
+            },
+            locations: subArg.location,
+          });
+
+          messages.push(
+            consolidatedMessage,
+            ...messagesFromArg.filter(({ code }) => code !== 'expectedConstant')
+          );
+        } else {
+          messages.push(...messagesFromArg);
+        }
       }
     }
   }
@@ -404,64 +455,52 @@ function validateFunction(
   const failingSignatures: ESQLMessage[][] = [];
   for (const signature of matchingSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    signature.params.forEach((argDef, index) => {
-      const outerArg = astFunction.args[index]!;
-      if (!outerArg && argDef.optional) {
+    astFunction.args.forEach((outerArg, index) => {
+      const argDef = getParamAtPosition(signature, index);
+      if ((!outerArg && argDef?.optional) || !argDef) {
         // that's ok, just skip it
         // the else case is already catched with the argument counts check
         // few lines above
         return;
       }
-      // if the arg is an array of values, check each element
-      if (Array.isArray(outerArg) && isArrayType(argDef.type)) {
-        const extractedType = extractSingleType(argDef.type);
-        const everyArgInListMessages = outerArg
-          .map((arg) => {
-            return [
-              validateFunctionLiteralArg,
-              validateNestedFunctionArg,
-              validateFunctionColumnArg,
-            ].flatMap((validateFn) => {
-              return validateFn(
-                astFunction,
-                arg,
-                { ...argDef, type: extractedType },
-                references,
-                parentCommand
-              );
-            });
-          })
-          .filter((ms) => ms.length);
-        if (everyArgInListMessages.length) {
-          failingSignature.push(
-            getMessageFromId({
-              messageId: 'wrongArgumentType',
-              values: {
-                name: astFunction.name,
-                argType: argDef.type,
-                value: `(${getAllArrayValues(outerArg).join(', ')})`,
-                givenType: `(${getAllArrayTypes(outerArg, parentCommand, references).join(', ')})`,
-              },
-              locations: {
-                min: (outerArg[0] as ESQLSingleAstItem).location.min,
-                max: (outerArg[outerArg.length - 1] as ESQLSingleAstItem).location.max,
-              },
-            })
-          );
-        }
-        return;
-      }
-      const wrappedArg = Array.isArray(outerArg) ? outerArg : [outerArg];
-      for (const actualArg of wrappedArg) {
-        const argValidationMessages = [
+
+      // check every element of the argument (may be an array of elements, or may be a single element)
+      const hasMultipleElements = Array.isArray(outerArg);
+      const argElements = hasMultipleElements ? outerArg : [outerArg];
+      const singularType = extractSingularType(argDef.type);
+      const messagesFromAllArgElements = argElements.flatMap((arg) => {
+        return [
           validateFunctionLiteralArg,
           validateNestedFunctionArg,
           validateFunctionColumnArg,
         ].flatMap((validateFn) => {
-          return validateFn(astFunction, actualArg, argDef, references, parentCommand);
+          return validateFn(
+            astFunction,
+            arg,
+            {
+              ...argDef,
+              type: singularType,
+              constantOnly: forceConstantOnly || argDef.constantOnly,
+            },
+            references,
+            parentCommand
+          );
         });
-        failingSignature.push(...argValidationMessages);
-      }
+      });
+
+      const shouldCollapseMessages = isArrayType(argDef.type) && hasMultipleElements;
+      failingSignature.push(
+        ...(shouldCollapseMessages
+          ? collapseWrongArgumentTypeMessages(
+              messagesFromAllArgElements,
+              outerArg,
+              astFunction.name,
+              argDef.type,
+              parentCommand,
+              references
+            )
+          : messagesFromAllArgElements)
+      );
     });
     if (failingSignature.length) {
       failingSignatures.push(failingSignature);
@@ -551,7 +590,8 @@ function validateOption(
   }
   // use dedicate validate fn if provided
   if (optionDef.validate) {
-    messages.push(...optionDef.validate(option, command, referenceMaps.metadataFields));
+    const fields = METADATA_FIELDS;
+    messages.push(...optionDef.validate(option, command, new Set(fields)));
   }
   if (!optionDef.skipCommonValidation) {
     option.args.forEach((arg) => {
@@ -831,7 +871,6 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
-  getMetaFields: ['unknownMetadataField'],
 };
 
 /**
@@ -900,15 +939,13 @@ async function validateAst(
 
   const { ast, errors } = await astProvider(queryString);
 
-  const [sources, availableFields, availablePolicies, availableMetadataFields] = await Promise.all([
+  const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
     // retrieve available fields (if a source command has been defined)
     retrieveFields(queryString, ast, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(ast, callbacks),
-    // retrieve available metadata fields
-    retrieveMetadataFields(callbacks),
   ]);
 
   if (availablePolicies.size) {
@@ -942,7 +979,6 @@ async function validateAst(
       fields: availableFields,
       policies: availablePolicies,
       variables,
-      metadataFields: availableMetadataFields,
       query: queryString,
     });
     messages.push(...commandMessages);

@@ -23,7 +23,7 @@ import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { dashboardUrlParams } from '../../dashboard_router';
 import { shareModalStrings } from '../../_dashboard_app_strings';
 import { pluginServices } from '../../../services/plugin_services';
-import { convertPanelMapToSavedPanels } from '../../../../common';
+import { convertPanelMapToSavedPanels, DashboardPanelMap } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container';
 
 const showFilterBarId = 'showFilterBar';
@@ -59,6 +59,7 @@ export function ShowShareModal({
         },
       },
     },
+    notifications,
     share: { toggleShareContextMenu },
   } = pluginServices.getServices();
 
@@ -122,18 +123,23 @@ export function ShowShareModal({
   };
 
   let unsavedStateForLocator: DashboardLocatorParams = {};
-  const unsavedDashboardState = dashboardBackup.getState(savedObjectId);
+  const { dashboardState: unsavedDashboardState, panels } =
+    dashboardBackup.getState(savedObjectId) ?? {};
+
+  const allPanels: DashboardPanelMap = {
+    ...(unsavedDashboardState?.panels ?? {}),
+    ...((panels as DashboardPanelMap) ?? {}),
+  };
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
-      panels: unsavedDashboardState.panels
-        ? (convertPanelMapToSavedPanels(
-            unsavedDashboardState.panels
-          ) as DashboardLocatorParams['panels'])
-        : undefined,
+      panels:
+        allPanels && Object.keys(allPanels).length > 0
+          ? (convertPanelMapToSavedPanels(allPanels) as DashboardLocatorParams['panels'])
+          : undefined,
 
       // options
       useMargins: unsavedDashboardState?.useMargins,
@@ -175,6 +181,11 @@ export function ShowShareModal({
     shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',
+    objectTypeMeta: {
+      title: i18n.translate('dashboard.share.shareModal.title', {
+        defaultMessage: 'Share this dashboard',
+      }),
+    },
     sharingData: {
       title:
         dashboardTitle ||
@@ -197,5 +208,6 @@ export function ShowShareModal({
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,
+    toasts: notifications.toasts,
   });
 }

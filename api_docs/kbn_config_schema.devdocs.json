@@ -1227,6 +1227,26 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.Type.getSchema",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "getSchema",
+            "description": [],
+            "signature": [
+              "() => ",
+              "AnySchema",
+              "<any>"
+            ],
+            "path": "packages/kbn-config-schema/src/types/type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
             "id": "def-common.Type.getSchemaStructure",
             "type": "Function",
             "tags": [],
@@ -1776,7 +1796,9 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<string>; literal: <T extends string | number | boolean | null>(value: T) => ",
+          "<string>; lazy: <T>(id: string) => ",
+          "Lazy",
+          "<T>; literal: <T extends string | number | boolean | null>(value: T) => ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1967,7 +1989,7 @@
             "text": "Type"
           },
           "<K>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C | D | E | F | G | H | I | J | K> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2057,7 +2079,7 @@
             "text": "Type"
           },
           "<J>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C | D | E | F | G | H | I | J> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2139,7 +2161,7 @@
             "text": "Type"
           },
           "<I>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C | D | E | F | G | H | I> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2213,7 +2235,7 @@
             "text": "Type"
           },
           "<H>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C | D | E | F | G | H> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2279,7 +2301,7 @@
             "text": "Type"
           },
           "<G>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C | D | E | F | G> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2337,7 +2359,7 @@
             "text": "Type"
           },
           "<F>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C | D | E | F> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2387,7 +2409,7 @@
             "text": "Type"
           },
           "<E>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C | D | E> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2429,7 +2451,7 @@
             "text": "Type"
           },
           "<D>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C | D> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2463,7 +2485,7 @@
             "text": "Type"
           },
           "<C>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B | C> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2489,7 +2511,7 @@
             "text": "Type"
           },
           "<B>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A | B> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2507,7 +2529,7 @@
             "text": "Type"
           },
           "<A>], options?: ",
-          "TypeOptions",
+          "UnionTypeOptions",
           "<A> | undefined): ",
           {
             "pluginId": "@kbn/config-schema",
@@ -2593,7 +2615,23 @@
         "label": "TypeOf",
         "description": [],
         "signature": [
-          "RT[\"type\"]"
+          "RT extends () => ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<any> ? ReturnType<RT>[\"type\"] : RT extends ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<any> ? RT[\"type\"] : never"
         ],
         "path": "packages/kbn-config-schema/src/types/object_type.ts",
         "deprecated": false,
@@ -2602,6 +2640,21 @@
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/config-schema",
+        "id": "def-common.metaFields",
+        "type": "Object",
+        "tags": [],
+        "label": "metaFields",
+        "description": [],
+        "signature": [
+          "{ readonly META_FIELD_X_OAS_ANY: \"x-oas-any-type\"; readonly META_FIELD_X_OAS_OPTIONAL: \"x-oas-optional\"; readonly META_FIELD_X_OAS_DEPRECATED: \"x-oas-deprecated\"; readonly META_FIELD_X_OAS_MAX_LENGTH: \"x-oas-max-length\"; readonly META_FIELD_X_OAS_MIN_LENGTH: \"x-oas-min-length\"; readonly META_FIELD_X_OAS_GET_ADDITIONAL_PROPERTIES: \"x-oas-get-additional-properties\"; }"
+        ],
+        "path": "packages/kbn-config-schema/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/config-schema",
         "id": "def-common.schema",
@@ -3128,6 +3181,36 @@
           },
           {
             "parentPluginId": "@kbn/config-schema",
+            "id": "def-common.schema.lazy",
+            "type": "Function",
+            "tags": [],
+            "label": "lazy",
+            "description": [],
+            "signature": [
+              "<T>(id: string) => ",
+              "Lazy",
+              "<T>"
+            ],
+            "path": "packages/kbn-config-schema/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/config-schema",
+                "id": "def-common.schema.lazy.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "path": "packages/kbn-config-schema/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/config-schema",
             "id": "def-common.schema.literal",
             "type": "Function",
             "tags": [],
@@ -3600,7 +3683,7 @@
                 "text": "Type"
               },
               "<K>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C | D | E | F | G | H | I | J | K> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -3690,7 +3773,7 @@
                 "text": "Type"
               },
               "<J>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C | D | E | F | G | H | I | J> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -3772,7 +3855,7 @@
                 "text": "Type"
               },
               "<I>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C | D | E | F | G | H | I> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -3846,7 +3929,7 @@
                 "text": "Type"
               },
               "<H>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C | D | E | F | G | H> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -3912,7 +3995,7 @@
                 "text": "Type"
               },
               "<G>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C | D | E | F | G> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -3970,7 +4053,7 @@
                 "text": "Type"
               },
               "<F>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C | D | E | F> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -4020,7 +4103,7 @@
                 "text": "Type"
               },
               "<E>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C | D | E> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -4062,7 +4145,7 @@
                 "text": "Type"
               },
               "<D>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C | D> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -4096,7 +4179,7 @@
                 "text": "Type"
               },
               "<C>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B | C> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -4122,7 +4205,7 @@
                 "text": "Type"
               },
               "<B>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A | B> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",
@@ -4140,7 +4223,7 @@
                 "text": "Type"
               },
               "<A>], options?: ",
-              "TypeOptions",
+              "UnionTypeOptions",
               "<A> | undefined): ",
               {
                 "pluginId": "@kbn/config-schema",

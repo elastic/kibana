@@ -7,3 +7,15 @@
 
 @import 'app';
 @import 'components/index';
+
+.ace_editor.ace_autocomplete {
+  resize: horizontal;
+
+  // These negative z-index's ensure to expose the resizer on Safari.
+  .ace_scroller {
+    z-index: -1;
+  }
+  .ace_scrollbar.ace_scrollbar-v {
+    z-index: -1;
+  }
+}

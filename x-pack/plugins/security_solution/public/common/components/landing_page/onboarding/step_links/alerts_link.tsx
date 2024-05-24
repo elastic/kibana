@@ -21,24 +21,33 @@ import { AddIntegrationCallout } from './add_integration_callout';
 import { VIEW_ALERTS, VIEW_ALERTS_CALLOUT_TITLE } from './translations';
 
 const AlertsButtonComponent = () => {
-  const { toggleTaskCompleteStatus, finishedSteps } = useStepContext();
+  const { toggleTaskCompleteStatus, onStepLinkClicked, finishedSteps } = useStepContext();
   const isIntegrationsStepComplete = finishedSteps[
     AddAndValidateYourDataCardsId.addIntegrations
   ]?.has(AddIntegrationsSteps.connectToDataSources);
 
   const onClick = useCallback(() => {
+    onStepLinkClicked({
+      originStepId: ViewAlertsSteps.viewAlerts,
+      stepLinkId: SecurityPageName.alerts,
+    });
     toggleTaskCompleteStatus({
       stepId: ViewAlertsSteps.viewAlerts,
+      stepLinkId: SecurityPageName.alerts,
       cardId: GetStartedWithAlertsCardsId.viewAlerts,
       sectionId: SectionId.getStartedWithAlerts,
       undo: false,
+      trigger: 'click',
     });
-  }, [toggleTaskCompleteStatus]);
+  }, [onStepLinkClicked, toggleTaskCompleteStatus]);
 
   return (
     <>
       {!isIntegrationsStepComplete && (
-        <AddIntegrationCallout stepName={VIEW_ALERTS_CALLOUT_TITLE} />
+        <AddIntegrationCallout
+          stepName={VIEW_ALERTS_CALLOUT_TITLE}
+          stepId={ViewAlertsSteps.viewAlerts}
+        />
       )}
       <LinkButton
         className="step-paragraph"

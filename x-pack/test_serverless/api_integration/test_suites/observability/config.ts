@@ -6,7 +6,8 @@
  */
 
 import { createTestConfig } from '../../config.base';
-import { services } from './apm_api_integration/common/services';
+import { services as apmServices } from './apm_api_integration/common/services';
+import { services as datasetQualityServices } from './dataset_quality_api_integration/common/services';
 
 export default createTestConfig({
   serverlessProject: 'oblt',
@@ -15,11 +16,11 @@ export default createTestConfig({
     reportName: 'Serverless Observability API Integration Tests',
   },
   suiteTags: { exclude: ['skipSvlOblt'] },
-  services,
+  services: { ...apmServices, ...datasetQualityServices },
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.ml.nlp.enabled=false'],
+  esServerArgs: ['xpack.ml.dfa.enabled=false'],
   // defined in MKI control plane
   kbnServerArgs: ['--xpack.uptime.service.manifestUrl=mockDevUrl'],
 });

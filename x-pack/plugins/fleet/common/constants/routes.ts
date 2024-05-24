@@ -105,6 +105,7 @@ export const FLEET_SERVER_HOST_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
   UPDATE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
   DELETE_PATTERN: `${API_ROOT}/fleet_server_hosts/{itemId}`,
+  POLICY_STATUS_PATTERN: `${API_ROOT}/fleet_server_policy_status`,
 };
 
 export const FLEET_PROXY_API_ROUTES = {
@@ -119,6 +120,7 @@ export const FLEET_PROXY_API_ROUTES = {
 export const SETTINGS_API_ROUTES = {
   INFO_PATTERN: `${API_ROOT}/settings`,
   UPDATE_PATTERN: `${API_ROOT}/settings`,
+  ENROLLMENT_INFO_PATTERN: `${INTERNAL_ROOT}/settings/enrollment`,
 };
 
 // App API routes
@@ -158,6 +160,7 @@ export const AGENT_API_ROUTES = {
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
   GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
+  DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

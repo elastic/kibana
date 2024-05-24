@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React from 'react';
-import { css } from '@emotion/react';
+import React, { useCallback, useRef } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { CLEAR_CHAT, SUBMIT_MESSAGE } from '../translations';
 
 interface OwnProps {
   isDisabled: boolean;
   isLoading: boolean;
+  isFlyoutMode: boolean;
+  promptValue?: string;
   onChatCleared: () => void;
   onSendMessage: () => void;
 }
@@ -27,37 +28,48 @@ export const ChatActions: React.FC<Props> = ({
   isLoading,
   onChatCleared,
   onSendMessage,
+  isFlyoutMode,
+  promptValue,
 }) => {
+  const submitTooltipRef = useRef<EuiToolTip | null>(null);
+
+  const closeTooltip = useCallback(() => {
+    submitTooltipRef?.current?.hideToolTip();
+  }, []);
+
   return (
-    <EuiFlexGroup
-      css={css`
-        position: absolute;
-      `}
-      direction="column"
-      gutterSize="xs"
-    >
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      {!isFlyoutMode && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="right" content={CLEAR_CHAT}>
+            <EuiButtonIcon
+              aria-label={CLEAR_CHAT}
+              color="danger"
+              data-test-subj="clear-chat"
+              display="base"
+              iconType="cross"
+              isDisabled={isDisabled}
+              onClick={onChatCleared}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="right" content={CLEAR_CHAT}>
-          <EuiButtonIcon
-            aria-label={CLEAR_CHAT}
-            color="danger"
-            data-test-subj="clear-chat"
-            display="base"
-            iconType="cross"
-            isDisabled={isDisabled}
-            onClick={onChatCleared}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="right" content={SUBMIT_MESSAGE}>
+        <EuiToolTip
+          ref={submitTooltipRef}
+          position="right"
+          content={SUBMIT_MESSAGE}
+          display="block"
+          onMouseOut={closeTooltip}
+        >
           <EuiButtonIcon
             aria-label={SUBMIT_MESSAGE}
             data-test-subj="submit-chat"
             color="primary"
-            display="base"
-            iconType="returnKey"
-            isDisabled={isDisabled}
+            display={isFlyoutMode && promptValue?.length ? 'fill' : 'base'}
+            size={isFlyoutMode ? 'm' : 'xs'}
+            iconType={isFlyoutMode ? 'kqlFunction' : 'returnKey'}
+            isDisabled={isDisabled || !promptValue?.length}
             isLoading={isLoading}
             onClick={onSendMessage}
           />

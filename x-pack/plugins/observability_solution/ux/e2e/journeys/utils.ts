@@ -28,18 +28,11 @@ export async function loginToKibana({
   page: Page;
   user?: { username: string; password: string };
 }) {
-  await page.fill(
-    '[data-test-subj=loginUsername]',
-    user?.username ?? 'elastic',
-    {
-      timeout: 60 * 1000,
-    }
-  );
+  await page.fill('[data-test-subj=loginUsername]', user?.username ?? 'elastic', {
+    timeout: 60 * 1000,
+  });
 
-  await page.fill(
-    '[data-test-subj=loginPassword]',
-    user?.password ?? 'changeme'
-  );
+  await page.fill('[data-test-subj=loginPassword]', user?.password ?? 'changeme');
 
   await page.click('[data-test-subj=loginSubmit]');
 
@@ -50,39 +43,22 @@ export const byTestId = (testId: string) => {
   return `[data-test-subj="${testId}"]`;
 };
 
-export const assertText = async ({
-  page,
-  text,
-}: {
-  page: Page;
-  text: string;
-}) => {
+export const assertText = async ({ page, text }: { page: Page; text: string }) => {
   await page.waitForSelector(`text=${text}`);
   expect(await page.$(`text=${text}`)).toBeTruthy();
 };
 
-export const assertNotText = async ({
-  page,
-  text,
-}: {
-  page: Page;
-  text: string;
-}) => {
+export const assertNotText = async ({ page, text }: { page: Page; text: string }) => {
   expect(await page.$(`text=${text}`)).toBeFalsy();
 };
 
 export const getQuerystring = (params: object) => {
   return Object.entries(params)
-    .map(
-      ([key, value]) =>
-        encodeURIComponent(key) + '=' + encodeURIComponent(value)
-    )
+    .map(([key, value]) => encodeURIComponent(key) + '=' + encodeURIComponent(value))
     .join('&');
 };
 
-export const delay = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+export const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const byLensTestId = (id: string) => `[data-test-embeddable-id="${id}"]`;
-export const byLensDataLayerId = (id: string) =>
-  `[data-ech-series-name="${id}"]`;
+export const byLensDataLayerId = (id: string) => `[data-ech-series-name="${id}"]`;

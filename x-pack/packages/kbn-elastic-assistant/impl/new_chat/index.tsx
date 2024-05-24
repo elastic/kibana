@@ -23,6 +23,8 @@ export type Props = Omit<PromptContext, 'id'> & {
   promptContextId?: string;
   /** Optionally specify color of empty button */
   color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
+  /** Required to identify the availability of the Assistant for the current license level */
+  isAssistantEnabled: boolean;
 };
 
 const NewChatComponent: React.FC<Props> = ({
@@ -36,6 +38,7 @@ const NewChatComponent: React.FC<Props> = ({
   promptContextId,
   suggestedUserPrompt,
   tooltip,
+  isAssistantEnabled,
 }) => {
   const { showAssistantOverlay } = useAssistantOverlay(
     category,
@@ -44,7 +47,8 @@ const NewChatComponent: React.FC<Props> = ({
     getPromptContext,
     promptContextId ?? null,
     suggestedUserPrompt,
-    tooltip
+    tooltip,
+    isAssistantEnabled
   );
 
   const showOverlay = useCallback(() => {

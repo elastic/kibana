@@ -1,0 +1,12 @@
+TO_UPPER
+
+Syntax
+Parameters
+str
+String expression. If null, the function returns null.
+DescriptionReturns a new string representing the input string converted to upper case.Supported types
+Example
+```esql
+ROW message = "Some Text"
+| EVAL message_upper = TO_UPPER(message)
+```

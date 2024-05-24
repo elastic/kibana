@@ -12,12 +12,17 @@ import {
   APP_ID,
   ENABLE_ASSET_CRITICALITY_SETTING,
 } from '../../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { checkAndInitAssetCriticalityResources } from '../check_and_init_asset_criticality_resources';
 import { buildRouteValidationWithZod } from '../../../../utils/build_validation/route_validation';
 import { AssetCriticalityRecordIdParts } from '../../../../../common/api/entity_analytics/asset_criticality';
 import { assertAdvancedSettingsEnabled } from '../../utils/assert_advanced_setting_enabled';
-export const assetCriticalityGetRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { AssetCriticalityAuditActions } from '../audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
+export const assetCriticalityGetRoute = (
+  router: EntityAnalyticsRoutesDeps['router'],
+  logger: Logger
+) => {
   router.versioned
     .get({
       access: 'internal',
@@ -51,6 +56,16 @@ export const assetCriticalityGetRoute = (router: SecuritySolutionPluginRouter, l
           if (!record) {
             return response.notFound();
           }
+
+          securitySolution.getAuditLogger()?.log({
+            message: 'User accessed the criticality level for an entity',
+            event: {
+              action: AssetCriticalityAuditActions.ASSET_CRITICALITY_GET,
+              category: AUDIT_CATEGORY.DATABASE,
+              type: AUDIT_TYPE.ACCESS,
+              outcome: AUDIT_OUTCOME.SUCCESS,
+            },
+          });
 
           return response.ok({ body: record });
         } catch (e) {

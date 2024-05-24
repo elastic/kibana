@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import deepEqual from 'fast-deep-equal';
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
@@ -18,7 +19,14 @@ import {
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { compareFilters, Filter, TimeRange } from '@kbn/es-query';
+import {
+  AggregateQuery,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  Query,
+  TimeRange,
+} from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
@@ -31,13 +39,14 @@ import {
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   GLOBAL_STATE_STORAGE_KEY,
+  PanelPlacementStrategy,
 } from '../../../dashboard_constants';
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
-import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
+import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
 import { DashboardPublicState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
@@ -186,10 +195,17 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
+  const dashboardBackupState = dashboardBackup.getState(loadDashboardReturn.dashboardId);
   const sessionStorageInput = ((): Partial<SavedDashboardInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
+    return dashboardBackupState?.dashboardState;
   })();
+
+  if (useSessionStorageIntegration) {
+    untilDashboardReady().then((dashboardContainer) => {
+      dashboardContainer.restoredRuntimeState = dashboardBackupState?.panels;
+    });
+  }
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
@@ -345,12 +361,14 @@ export const initializeDashboard = async ({
           const { width, height } = incomingEmbeddable.size;
           const currentPanels = container.getInput().panels;
           const embeddableId = incomingEmbeddable.embeddableId ?? v4();
-          const { findTopLeftMostOpenSpace } = panelPlacementStrategies;
-          const { newPanelPlacement } = findTopLeftMostOpenSpace({
-            width: width ?? DEFAULT_PANEL_WIDTH,
-            height: height ?? DEFAULT_PANEL_HEIGHT,
-            currentPanels,
-          });
+          const { newPanelPlacement } = runPanelPlacementStrategy(
+            PanelPlacementStrategy.findTopLeftMostOpenSpace,
+            {
+              width: width ?? DEFAULT_PANEL_WIDTH,
+              height: height ?? DEFAULT_PANEL_HEIGHT,
+              currentPanels,
+            }
+          );
           const newPanelState: DashboardPanelState = {
             explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
             type: incomingEmbeddable.type,
@@ -373,33 +391,6 @@ export const initializeDashboard = async ({
         }
       });
     }
-  }
-
-  // --------------------------------------------------------------------------------------
-  // Set up search sessions integration.
-  // --------------------------------------------------------------------------------------
-  let initialSearchSessionId;
-  if (searchSessionSettings) {
-    const { sessionIdToRestore } = searchSessionSettings;
-
-    // if this incoming embeddable has a session, continue it.
-    if (incomingEmbeddable?.searchSessionId) {
-      session.continue(incomingEmbeddable.searchSessionId);
-    }
-    if (sessionIdToRestore) {
-      session.restore(sessionIdToRestore);
-    }
-    const existingSession = session.getSessionId();
-
-    initialSearchSessionId =
-      sessionIdToRestore ??
-      (existingSession && incomingEmbeddable ? existingSession : session.start());
-
-    untilDashboardReady().then((container) => {
-      startDashboardSearchSessionIntegration.bind(container)(
-        creationOptions?.searchSessionSettings
-      );
-    });
   }
 
   // --------------------------------------------------------------------------------------
@@ -487,7 +478,7 @@ export const initializeDashboard = async ({
       startWith(dashboardContainer.getInput()),
       map((input) => input.filters),
       distinctUntilChanged((previous, current) => {
-        return compareFilters(previous ?? [], current ?? []);
+        return compareFilters(previous ?? [], current ?? [], COMPARE_ALL_OPTIONS);
       })
     );
 
@@ -503,6 +494,51 @@ export const initializeDashboard = async ({
       })
     );
   });
+
+  // --------------------------------------------------------------------------------------
+  // Set up parentApi.query$
+  // Can not use legacyEmbeddableToApi since query$ setting is delayed
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(
+      dashboardContainer.getInput().query
+    );
+    dashboardContainer.query$ = query$;
+    dashboardContainer.integrationSubscriptions.add(
+      dashboardContainer.getInput$().subscribe((input) => {
+        if (!deepEqual(query$.getValue() ?? [], input.query)) {
+          query$.next(input.query);
+        }
+      })
+    );
+  });
+
+  // --------------------------------------------------------------------------------------
+  // Set up search sessions integration.
+  // --------------------------------------------------------------------------------------
+  let initialSearchSessionId;
+  if (searchSessionSettings) {
+    const { sessionIdToRestore } = searchSessionSettings;
+
+    // if this incoming embeddable has a session, continue it.
+    if (incomingEmbeddable?.searchSessionId) {
+      session.continue(incomingEmbeddable.searchSessionId);
+    }
+    if (sessionIdToRestore) {
+      session.restore(sessionIdToRestore);
+    }
+    const existingSession = session.getSessionId();
+
+    initialSearchSessionId =
+      sessionIdToRestore ??
+      (existingSession && incomingEmbeddable ? existingSession : session.start());
+
+    untilDashboardReady().then((container) => {
+      startDashboardSearchSessionIntegration.bind(container)(
+        creationOptions?.searchSessionSettings
+      );
+    });
+  }
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };

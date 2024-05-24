@@ -33,6 +33,7 @@ import { ConnectorAdapter } from '../../../../connector_adapters/types';
 import { RuleDomain } from '../../types';
 import { RuleSystemAction } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
 jest.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -91,6 +92,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  backfillClient: backfillClientMock.create(),
   connectorAdapterRegistry,
   isSystemAction: jest.fn(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
@@ -3060,7 +3062,7 @@ describe('create()', () => {
     rulesClientParams.createAPIKey.mockImplementation(() => {
       throw new Error('no');
     });
-    expect(
+    await expect(
       async () => await rulesClient.create({ data })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Error creating rule: could not create API key - no"`
@@ -4351,6 +4353,36 @@ describe('create()', () => {
       const data = getMockData({ actions: [], systemActions: [systemAction, systemAction] });
       await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
         `[Error: Cannot use the same system action twice]`
+      );
+    });
+
+    test('should throw an error if the user does not have privileges to execute the action', async () => {
+      actionsAuthorization.ensureAuthorized.mockRejectedValueOnce(
+        new Error('Unauthorized to execute actions')
+      );
+
+      const data = getMockData({
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        systemActions: [
+          {
+            id: 'system_action-id',
+            params: {
+              foo: 'test',
+            },
+          },
+        ],
+      });
+
+      await expect(() => rulesClient.create({ data })).rejects.toMatchInlineSnapshot(
+        `[Error: Unauthorized to execute actions]`
       );
     });
   });

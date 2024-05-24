@@ -5,279 +5,31 @@
  * 2.0.
  */
 
-import React, { useMemo, type FC } from 'react';
-import moment from 'moment-timezone';
+import React, { type FC } from 'react';
 import { css } from '@emotion/react';
 
-import {
-  EuiButtonEmpty,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  useEuiTheme,
-  EuiCallOut,
-  EuiFlexItem,
-  EuiTabbedContent,
-} from '@elastic/eui';
+import { EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
 import { stringHash } from '@kbn/ml-string-hash';
-import { isDefined } from '@kbn/ml-is-defined';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-import { useEnabledFeatures } from '../../../../serverless_context';
-import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import type { TransformHealthAlertRule } from '../../../../../../common/types/alerting';
 
 import type { TransformListRow } from '../../../../common';
 
-import type { SectionConfig, SectionItem } from './expanded_row_details_pane';
 import { ExpandedRowDetailsPane } from './expanded_row_details_pane';
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
 import { ExpandedRowHealthPane } from './expanded_row_health_pane';
-import { TransformHealthColoredDot } from './transform_health_colored_dot';
-
-function getItemDescription(value: any) {
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-
-  return value.toString();
-}
-
-type Item = SectionItem;
+import { ExpandedRowStatsPane } from './expanded_row_stats_pane';
 
 interface Props {
   item: TransformListRow;
   onAlertEdit: (alertRule: TransformHealthAlertRule) => void;
-  transformsStatsLoading: boolean;
 }
 
-const NoStatsFallbackTabContent = ({
-  transformsStatsLoading,
-}: {
-  transformsStatsLoading: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
-
-  const content = transformsStatsLoading ? (
-    <EuiLoadingSpinner />
-  ) : (
-    <EuiFlexItem grow={true}>
-      <EuiCallOut
-        size="s"
-        color="warning"
-        iconType="iInCircle"
-        title={
-          <FormattedMessage
-            id="xpack.transform.transformList.noStatsAvailable"
-            defaultMessage="No stats available for this transform."
-          />
-        }
-      />
-    </EuiFlexItem>
-  );
-  return (
-    <EuiFlexGroup justifyContent="center" alignItems="center" css={{ height: euiTheme.size.xxxxl }}>
-      {content}
-    </EuiFlexGroup>
-  );
-};
-
-export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoading }) => {
-  const { showNodeInfo } = useEnabledFeatures();
-
-  const stateItems: Item[] = [];
-  stateItems.push({
-    title: 'ID',
-    description: item.id,
-  });
-  const configItems = useMemo(() => {
-    const configs: Item[] = [
-      {
-        title: 'transform_id',
-        description: item.id,
-      },
-      {
-        title: 'transform_version',
-        description: item.config.version ?? '',
-      },
-      {
-        title: 'description',
-        description: item.config.description ?? '',
-      },
-      {
-        title: 'create_time',
-        description:
-          formatHumanReadableDateTimeSeconds(moment(item.config.create_time).unix() * 1000) ?? '',
-      },
-      {
-        title: 'source_index',
-        description: Array.isArray(item.config.source.index)
-          ? item.config.source.index[0]
-          : item.config.source.index,
-      },
-      {
-        title: 'destination_index',
-        description: item.config.dest.index,
-      },
-      {
-        title: 'authorization',
-        description: item.config.authorization ? JSON.stringify(item.config.authorization) : '',
-      },
-    ];
-    if (isDefined(item.config.settings?.num_failure_retries)) {
-      configs.push({
-        title: 'num_failure_retries',
-        description: item.config.settings?.num_failure_retries ?? '',
-      });
-    }
-    return configs;
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item?.config]);
-
-  const checkpointingItems: Item[] = [];
-  if (isTransformListRowWithStats(item)) {
-    stateItems.push({
-      title: 'state',
-      description: item.stats.state,
-    });
-    if (showNodeInfo && item.stats.node !== undefined) {
-      stateItems.push({
-        title: 'node.name',
-        description: item.stats.node.name,
-      });
-    }
-    if (item.stats.health !== undefined) {
-      stateItems.push({
-        title: 'health',
-        description: <TransformHealthColoredDot healthStatus={item.stats.health.status} />,
-      });
-    }
-
-    if (item.stats.checkpointing.changes_last_detected_at !== undefined) {
-      checkpointingItems.push({
-        title: 'changes_last_detected_at',
-        description: formatHumanReadableDateTimeSeconds(
-          item.stats.checkpointing.changes_last_detected_at
-        ),
-      });
-    }
-
-    if (item.stats.checkpointing.last !== undefined) {
-      checkpointingItems.push({
-        title: 'last.checkpoint',
-        description: item.stats.checkpointing.last.checkpoint,
-      });
-      if (item.stats.checkpointing.last.timestamp_millis !== undefined) {
-        checkpointingItems.push({
-          title: 'last.timestamp',
-          description: formatHumanReadableDateTimeSeconds(
-            item.stats.checkpointing.last.timestamp_millis
-          ),
-        });
-        checkpointingItems.push({
-          title: 'last.timestamp_millis',
-          description: item.stats.checkpointing.last.timestamp_millis,
-        });
-      }
-    }
-
-    if (item.stats.checkpointing.last_search_time !== undefined) {
-      checkpointingItems.push({
-        title: 'last_search_time',
-        description: formatHumanReadableDateTimeSeconds(item.stats.checkpointing.last_search_time),
-      });
-    }
-
-    if (item.stats.checkpointing.next !== undefined) {
-      checkpointingItems.push({
-        title: 'next.checkpoint',
-        description: item.stats.checkpointing.next.checkpoint,
-      });
-      if (item.stats.checkpointing.next.checkpoint_progress !== undefined) {
-        checkpointingItems.push({
-          title: 'next.checkpoint_progress.total_docs',
-          description: item.stats.checkpointing.next.checkpoint_progress.total_docs,
-        });
-        checkpointingItems.push({
-          title: 'next.checkpoint_progress.docs_remaining',
-          description: item.stats.checkpointing.next.checkpoint_progress.docs_remaining,
-        });
-        checkpointingItems.push({
-          title: 'next.checkpoint_progress.percent_complete',
-          description: item.stats.checkpointing.next.checkpoint_progress.percent_complete,
-        });
-      }
-    }
-
-    if (item.stats.checkpointing.operations_behind !== undefined) {
-      checkpointingItems.push({
-        title: 'operations_behind',
-        description: item.stats.checkpointing.operations_behind,
-      });
-    }
-  }
-
-  const state: SectionConfig = {
-    title: 'State',
-    items: stateItems,
-    position: 'right',
-  };
-
-  const general: SectionConfig = {
-    title: 'General',
-    items: configItems,
-    position: 'left',
-  };
-
-  const alertRuleItems: Item[] | undefined = item.alerting_rules?.map((rule) => {
-    return {
-      title: (
-        <EuiButtonEmpty
-          iconType={'documentEdit'}
-          iconSide={'left'}
-          onClick={() => {
-            onAlertEdit(rule);
-          }}
-          flush="left"
-          size={'xs'}
-          iconSize={'s'}
-        >
-          {rule.name}
-        </EuiButtonEmpty>
-      ),
-      description: rule.executionStatus.status,
-    };
-  });
-
-  const checkpointing: SectionConfig = {
-    title: 'Checkpointing',
-    items: checkpointingItems,
-    position: 'right',
-  };
-
-  const alertingRules: SectionConfig = {
-    title: i18n.translate('xpack.transform.transformList.transformDetails.alertRulesTitle', {
-      defaultMessage: 'Alert rules',
-    }),
-    items: alertRuleItems!,
-    position: 'right',
-  };
-
-  const stats: SectionConfig = {
-    title: 'Stats',
-    items: isTransformListRowWithStats(item)
-      ? Object.entries(item.stats.stats).map((s) => {
-          return { title: s[0].toString(), description: getItemDescription(s[1]) };
-        })
-      : [],
-    position: 'left',
-  };
-
+export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
   const tabId = stringHash(item.id);
 
   const tabs = [
@@ -290,17 +42,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
           defaultMessage: 'Details',
         }
       ),
-      content: (
-        <ExpandedRowDetailsPane
-          sections={[
-            general,
-            state,
-            checkpointing,
-            ...(alertingRules.items ? [alertingRules] : []),
-          ]}
-          dataTestSubj={'transformDetailsTabContent'}
-        />
-      ),
+      content: <ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />,
     },
     {
       id: `transform-stats-tab-${tabId}`,
@@ -311,11 +53,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit, transformsStatsLoadi
           defaultMessage: 'Stats',
         }
       ),
-      content: isTransformListRowWithStats(item) ? (
-        <ExpandedRowDetailsPane sections={[stats]} dataTestSubj={'transformStatsTabContent'} />
-      ) : (
-        <NoStatsFallbackTabContent transformsStatsLoading={transformsStatsLoading} />
-      ),
+      content: <ExpandedRowStatsPane item={item} />,
     },
     {
       id: `transform-json-tab-${tabId}`,

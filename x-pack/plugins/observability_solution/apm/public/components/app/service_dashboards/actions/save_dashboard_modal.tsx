@@ -76,17 +76,14 @@ export function SaveDashboardModal({
 
   const isEditMode = !!currentDashboard?.id;
 
-  const options = allAvailableDashboards?.map(
-    (dashboardItem: DashboardItem) => ({
-      label: dashboardItem.attributes.title,
-      value: dashboardItem.id,
-      disabled:
-        serviceDashboards?.some(
-          ({ dashboardSavedObjectId }) =>
-            dashboardItem.id === dashboardSavedObjectId
-        ) ?? false,
-    })
-  );
+  const options = allAvailableDashboards?.map((dashboardItem: DashboardItem) => ({
+    label: dashboardItem.attributes.title,
+    value: dashboardItem.id,
+    disabled:
+      serviceDashboards?.some(
+        ({ dashboardSavedObjectId }) => dashboardItem.id === dashboardSavedObjectId
+      ) ?? false,
+  }));
   const onClickSave = useCallback(
     async function () {
       const [newDashboard] = selectedDashboard;
@@ -123,13 +120,10 @@ export function SaveDashboardModal({
       } catch (error) {
         console.error(error);
         notifications.toasts.addDanger({
-          title: i18n.translate(
-            'xpack.apm.serviceDashboards.addFailure.toast.title',
-            {
-              defaultMessage: 'Error while adding "{dashboardName}" dashboard',
-              values: { dashboardName: newDashboard.label },
-            }
-          ),
+          title: i18n.translate('xpack.apm.serviceDashboards.addFailure.toast.title', {
+            defaultMessage: 'Error while adding "{dashboardName}" dashboard',
+            values: { dashboardName: newDashboard.label },
+          }),
           text: error.body.message,
         });
       }
@@ -154,18 +148,12 @@ export function SaveDashboardModal({
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           {isEditMode
-            ? i18n.translate(
-                'xpack.apm.serviceDashboards.selectDashboard.modalTitle.edit',
-                {
-                  defaultMessage: 'Edit dashboard',
-                }
-              )
-            : i18n.translate(
-                'xpack.apm.serviceDashboards.selectDashboard.modalTitle.link',
-                {
-                  defaultMessage: 'Select dashboard',
-                }
-              )}
+            ? i18n.translate('xpack.apm.serviceDashboards.selectDashboard.modalTitle.edit', {
+                defaultMessage: 'Edit dashboard',
+              })
+            : i18n.translate('xpack.apm.serviceDashboards.selectDashboard.modalTitle.link', {
+                defaultMessage: 'Select dashboard',
+              })}
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
@@ -174,12 +162,9 @@ export function SaveDashboardModal({
           <EuiComboBox
             isLoading={status === FETCH_STATUS.LOADING || isLoading}
             isDisabled={status === FETCH_STATUS.LOADING || isEditMode}
-            placeholder={i18n.translate(
-              'xpack.apm.serviceDashboards.selectDashboard.placeholder',
-              {
-                defaultMessage: 'Select dashboard',
-              }
-            )}
+            placeholder={i18n.translate('xpack.apm.serviceDashboards.selectDashboard.placeholder', {
+              defaultMessage: 'Select dashboard',
+            })}
             singleSelection={{ asPlainText: true }}
             options={options}
             selectedOptions={selectedDashboard}
@@ -192,12 +177,9 @@ export function SaveDashboardModal({
             compressed
             label={
               <p>
-                {i18n.translate(
-                  'xpack.apm.dashboard.addDashboard.useContextFilterLabel',
-                  {
-                    defaultMessage: 'Filter by service and environment',
-                  }
-                )}{' '}
+                {i18n.translate('xpack.apm.dashboard.addDashboard.useContextFilterLabel', {
+                  defaultMessage: 'Filter by service and environment',
+                })}{' '}
                 <EuiToolTip
                   position="bottom"
                   content={i18n.translate(
@@ -208,7 +190,13 @@ export function SaveDashboardModal({
                     }
                   )}
                 >
-                  <EuiIcon type="questionInCircle" title="Icon with tooltip" />
+                  <EuiIcon
+                    type="questionInCircle"
+                    title={i18n.translate(
+                      'xpack.apm.saveDashboardModal.euiIcon.iconWithTooltipLabel',
+                      { defaultMessage: 'Icon with tooltip' }
+                    )}
+                  />
                 </EuiToolTip>
               </p>
             }
@@ -224,12 +212,9 @@ export function SaveDashboardModal({
           onClick={onClose}
           isDisabled={status === FETCH_STATUS.LOADING || isLoading}
         >
-          {i18n.translate(
-            'xpack.apm.serviceDashboards.selectDashboard.cancel',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
+          {i18n.translate('xpack.apm.serviceDashboards.selectDashboard.cancel', {
+            defaultMessage: 'Cancel',
+          })}
         </EuiButtonEmpty>
         <EuiButton
           data-test-subj="apmSelectDashboardButton"
@@ -238,18 +223,12 @@ export function SaveDashboardModal({
           fill
         >
           {isEditMode
-            ? i18n.translate(
-                'xpack.apm.serviceDashboards.selectDashboard.edit',
-                {
-                  defaultMessage: 'Save',
-                }
-              )
-            : i18n.translate(
-                'xpack.apm.serviceDashboards.selectDashboard.add',
-                {
-                  defaultMessage: 'Link dashboard',
-                }
-              )}
+            ? i18n.translate('xpack.apm.serviceDashboards.selectDashboard.edit', {
+                defaultMessage: 'Save',
+              })
+            : i18n.translate('xpack.apm.serviceDashboards.selectDashboard.add', {
+                defaultMessage: 'Link dashboard',
+              })}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
@@ -258,31 +237,24 @@ export function SaveDashboardModal({
 
 function getLinkSuccessToastLabels(dashboardName: string) {
   return {
-    title: i18n.translate(
-      'xpack.apm.serviceDashboards.linkSuccess.toast.title',
-      {
-        defaultMessage: 'Added "{dashboardName}" dashboard',
-        values: { dashboardName },
-      }
-    ),
+    title: i18n.translate('xpack.apm.serviceDashboards.linkSuccess.toast.title', {
+      defaultMessage: 'Added "{dashboardName}" dashboard',
+      values: { dashboardName },
+    }),
     text: i18n.translate('xpack.apm.serviceDashboards.linkSuccess.toast.text', {
-      defaultMessage:
-        'Your dashboard is now visible in the service overview page.',
+      defaultMessage: 'Your dashboard is now visible in the service overview page.',
     }),
   };
 }
 
 function getEditSuccessToastLabels(dashboardName: string) {
   return {
-    title: i18n.translate(
-      'xpack.apm.serviceDashboards.editSuccess.toast.title',
-      {
-        defaultMessage: 'Edited "{dashboardName}" dashboard',
-        values: { dashboardName },
-      }
-    ),
+    title: i18n.translate('xpack.apm.serviceDashboards.editSuccess.toast.title', {
+      defaultMessage: 'Edited "{dashboardName}" dashboard',
+      values: { dashboardName },
+    }),
     text: i18n.translate('xpack.apm.serviceDashboards.editSuccess.toast.text', {
-      defaultMessage: 'Your dashboard link have been updated',
+      defaultMessage: 'Your dashboard link has been updated',
     }),
   };
 }

@@ -20,6 +20,7 @@ spec:
     spec:
       env:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
       allow_rebuilds: false
       branch_configuration: main
       default_branch: main
@@ -34,6 +35,11 @@ spec:
         build_tags: false
         prefix_pull_request_fork_branch_names: false
         skip_pull_request_builds_for_existing_commits: true
+      schedules:
+        Purge cloud deployments (hourly):
+          cronline: 0 * * * * America/New_York
+          branch: main
+          message: 'Purge cloud deployments'
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ

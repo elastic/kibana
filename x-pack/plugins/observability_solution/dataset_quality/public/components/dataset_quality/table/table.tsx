@@ -81,7 +81,6 @@ export const Table = () => {
         onChange={onTableChange}
         pagination={pagination}
         data-test-subj="datasetQualityTable"
-        isSelectable
         rowProps={{
           'data-test-subj': 'datasetQualityTableRow',
         }}

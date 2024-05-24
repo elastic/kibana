@@ -5,22 +5,13 @@
  * 2.0.
  */
 import { Chart, Datum, Flame, Settings, Tooltip } from '@elastic/charts';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  euiPaletteColorBlind,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, euiPaletteColorBlind } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  FETCH_STATUS,
-  useFetcher,
-  isPending,
-} from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
 
@@ -39,8 +30,7 @@ export function CriticalPathFlamegraph(
   const { start, end, traceIds, traceIdsFetchStatus } = props;
 
   const serviceName = 'serviceName' in props ? props.serviceName : null;
-  const transactionName =
-    'transactionName' in props ? props.transactionName : null;
+  const transactionName = 'transactionName' in props ? props.transactionName : null;
 
   // Use a reference to time range, to not invalidate the API fetch
   // we only care for traceIds, start/end are there to limit the search
@@ -49,34 +39,31 @@ export function CriticalPathFlamegraph(
   const timerange = useRef({ start, end });
   timerange.current = { start, end };
 
-  const {
-    data: { criticalPath } = { criticalPath: null },
-    status: criticalPathFetchStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (!traceIds.length) {
-        return Promise.resolve({ criticalPath: null });
-      }
+  const { data: { criticalPath } = { criticalPath: null }, status: criticalPathFetchStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (!traceIds.length) {
+          return Promise.resolve({ criticalPath: null });
+        }
 
-      return callApmApi('POST /internal/apm/traces/aggregated_critical_path', {
-        params: {
-          body: {
-            start: timerange.current.start,
-            end: timerange.current.end,
-            traceIds,
-            serviceName,
-            transactionName,
+        return callApmApi('POST /internal/apm/traces/aggregated_critical_path', {
+          params: {
+            body: {
+              start: timerange.current.start,
+              end: timerange.current.end,
+              traceIds,
+              serviceName,
+              transactionName,
+            },
           },
-        },
-      });
-    },
-    [timerange, traceIds, serviceName, transactionName]
-  );
+        });
+      },
+      [timerange, traceIds, serviceName, transactionName]
+    );
 
   const chartThemes = useChartThemes();
 
-  const isLoading =
-    isPending(traceIdsFetchStatus) || isPending(criticalPathFetchStatus);
+  const isLoading = isPending(traceIdsFetchStatus) || isPending(criticalPathFetchStatus);
 
   const flameGraph = useMemo(() => {
     if (!criticalPath) {
@@ -120,8 +107,7 @@ export function CriticalPathFlamegraph(
             <Chart key={flameGraph.key} className={chartClassName}>
               <Tooltip
                 customTooltip={(tooltipProps) => {
-                  const valueIndex = tooltipProps.values[0]
-                    .valueAccessor as number;
+                  const valueIndex = tooltipProps.values[0].valueAccessor as number;
                   const operationId = flameGraph.operationId[valueIndex];
                   const operationMetadata = criticalPath?.metadata[operationId];
                   const countInclusive = flameGraph.viewModel.value[valueIndex];
