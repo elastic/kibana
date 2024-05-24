@@ -13,7 +13,6 @@ import {
   RoleCredentials,
   SupertestWithoutAuthType,
 } from '../../../../../shared/services';
-import type { Agent as SuperTestAgent } from 'supertest';
 
 interface CreateEsQueryRuleParams {
   size: number;
