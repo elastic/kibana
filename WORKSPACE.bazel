@@ -7,20 +7,24 @@ workspace(
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-# Fetch Node.js rules
 http_archive(
   name = "build_bazel_rules_nodejs",
-  patch_args = ["-p1"],
-  patches = ["//:src/dev/bazel/rules_nodejs_patches/normalized_paths_for_windows_runfiles.patch"],
-  sha256 = "6f15d75f9e99c19d9291ff8e64e4eb594a6b7d25517760a75ad3621a7a48c2df",
-  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/4.7.0/rules_nodejs-4.7.0.tar.gz"],
+#  patch_args = ["-p1"],
+#  patches = ["//:src/dev/bazel/rules_nodejs_patches/normalized_paths_for_windows_runfiles.patch"],
+  sha256 = "709cc0dcb51cf9028dd57c268066e5bc8f03a119ded410a13b5c3925d6e43c48",
+  urls = ["https://github.com/bazelbuild/rules_nodejs/releases/download/5.8.4/rules_nodejs-5.8.4.tar.gz"],
 )
 
-# Now that we have the rules let's import from them to complete the work
-load("@build_bazel_rules_nodejs//:index.bzl", "node_repositories", "yarn_install")
+load("@build_bazel_rules_nodejs//:repositories.bzl", "build_bazel_rules_nodejs_dependencies")
+build_bazel_rules_nodejs_dependencies()
+
+load("@rules_nodejs//nodejs:repositories.bzl", "nodejs_register_toolchains")
+
+load("@rules_nodejs//nodejs:yarn_repositories.bzl", "yarn_repositories")
 
 # Setup the Node.js toolchain for the architectures we want to support
-node_repositories(
+
+nodejs_register_toolchains("my_node", 'True',
   node_repositories = {
     "20.13.1-darwin_amd64": ("node-v20.13.1-darwin-x64.tar.gz", "node-v20.13.1-darwin-x64", "80bde95dc976b84db5ca566738c07305087ae578f5f3b05191e0e6ff54aaeaf2"),
     "20.13.1-darwin_arm64": ("node-v20.13.1-darwin-arm64.tar.gz", "node-v20.13.1-darwin-arm64", "c30fe595f59dcd2c5158da6bf8bc251ffc85ca37304afa89db150fb3c62c4507"),
@@ -32,14 +36,22 @@ node_repositories(
   node_urls = [
     "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v{version}/{filename}",
   ],
-  yarn_repositories = {
+);
+
+yarn_repositories(
+  name = "yarn",
+  yarn_releases = {
     "1.22.21": ("yarn-v1.22.21.tar.gz", "yarn-v1.22.21", "a55bb4e85405f5dfd6e7154a444e7e33ad305d7ca858bad8546e932a6688df08"),
   },
   yarn_version = "1.22.21",
   yarn_urls = [
     "https://github.com/yarnpkg/yarn/releases/download/v{version}/{filename}",
   ],
+  node_repository = "my_node"
 )
+
+# Now that we have the rules let's import from them to complete the work
+load("@build_bazel_rules_nodejs//:index.bzl", "yarn_install")
 
 # Run yarn_install rule to take care of dependencies
 #
@@ -52,6 +64,7 @@ yarn_install(
     "//:.yarnrc",
     "//:preinstall_check.js",
   ],
+  node_repository = "my_node",
   exports_directories_only = True,
   symlink_node_modules = True,
   quiet = False,
