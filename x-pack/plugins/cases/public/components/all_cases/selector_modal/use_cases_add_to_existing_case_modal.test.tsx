@@ -22,7 +22,7 @@ import { CasesContext } from '../../cases_context';
 import {
   CasesContextStoreActionsList,
   getInitialCasesContextState,
-} from '../../cases_context/cases_context_reducer';
+} from '../../cases_context/state/cases_context_reducer';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';

@@ -10,7 +10,7 @@ import { getAllCasesSelectorModalNoProviderLazy } from '../../client/ui/get_all_
 import { getCreateCaseFlyoutLazyNoProvider } from '../../client/ui/get_create_case_flyout';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
-import { getInitialCasesContextState } from './cases_context_reducer';
+import { getInitialCasesContextState } from './state/cases_context_reducer';
 import { CasesGlobalComponents } from './cases_global_components';
 
 jest.mock('../../client/ui/get_create_case_flyout');

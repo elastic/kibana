@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { useCasesContextState } from './use_cases_context_state';
+import { useCasesStateContext } from './cases_state_context';
 
 export type UseIsAddToCaseOpen = () => boolean;
 
-/*
- ** This hook is to check if the add to existing case modal or create new case modal is open
+/**
+ * This hook is to check if the "add to case" is open, either the modal or the flyout
  */
 export const useIsAddToCaseOpen: UseIsAddToCaseOpen = () => {
-  const { selectCaseModal, createCaseFlyout } = useCasesContextState();
+  const { selectCaseModal, createCaseFlyout } = useCasesStateContext();
   return selectCaseModal.isModalOpen || createCaseFlyout.isFlyoutOpen;
 };
