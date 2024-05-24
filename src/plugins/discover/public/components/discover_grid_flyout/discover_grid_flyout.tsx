@@ -46,6 +46,7 @@ export interface DiscoverGridFlyoutProps {
   columnsMeta?: DataTableColumnsMeta;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
+  flyoutType?: 'push' | 'overlay';
   dataView: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
@@ -73,6 +74,7 @@ export function DiscoverGridFlyout({
   savedSearchId,
   filters,
   query,
+  flyoutType = 'push',
   onFilter,
   onClose,
   onRemoveColumn,
@@ -222,7 +224,7 @@ export function DiscoverGridFlyout({
       <EuiFlyoutResizable
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
-        type="push"
+        type={flyoutType}
         size={flyoutWidth}
         pushMinBreakpoint="xl"
         data-test-subj="docTableDetailsFlyout"

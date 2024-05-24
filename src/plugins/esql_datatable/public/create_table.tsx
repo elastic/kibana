@@ -42,11 +42,10 @@ type DataTableColumnsMeta = Record<
 
 /*
 Remaining tasks:
-- Implement the row height settings.
-- Is it a good idea to render the flyout from the Discover plugin? Maybe is smarter to create a component here.
-- Fullscreen doesn't work great, let's hide it.
-- The flyout doesn't render when the assistant is in flyout mode.
-- We need to hide actions on the flyout that do not make sense (all the filter ones, make the toggle column in table functional)
+- Is it a good idea to render the flyout from the Discover plugin? Maybe is smarter to move it on another package.
+- The flyout doesn't render when the assistant is in flyout mode, ould possibly change to overlay but it has a weird behavior
+- The row settings popover closes when I set the height, it should stay open (must be related to the flyout bug)
+- Keep the selected columns in LLM
 **/
 
 export const ESQLTable = (props: ESQLDatatableProps) => {
@@ -60,6 +59,8 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
   const deps = value?.[0];
   const storage = new Storage(localStorage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+  const [activeColumns, setActiveColumns] = useState<string[]>([]);
+  const [rowHeight, setRowHeight] = useState<number>(5);
 
   if (props.dataView.fields.getByName('@timestamp')?.type === 'date') {
     props.dataView.timeFieldName = '@timestamp';
@@ -78,15 +79,21 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
         hits={displayedRows}
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        onFilter={() => {}}
-        onRemoveColumn={() => {}}
-        onAddColumn={() => {}}
+        onFilter={undefined}
+        // could possibly change to overlay but it has a weird behavior
+        flyoutType="push"
+        onRemoveColumn={(column) => {
+          setActiveColumns(activeColumns.filter((c) => c !== column));
+        }}
+        onAddColumn={(column) => {
+          setActiveColumns([...activeColumns, column]);
+        }}
         onClose={() => setExpandedDoc(undefined)}
         setExpandedDoc={setExpandedDoc}
         query={props.query}
       />
     ),
-    [props.dataView, props.query]
+    [activeColumns, props.dataView, props.query]
   );
 
   if (loading || !deps || !UnifiedDataTable) return <EuiLoadingSpinner />;
@@ -112,7 +119,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
     >
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
         <UnifiedDataTableMemoized
-          columns={[]}
+          columns={activeColumns}
           rows={rows.map((row: Record<string, string>, idx: number) => {
             return {
               id: String(idx),
@@ -135,7 +142,9 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
           dataView={props.dataView}
           sampleSizeState={500}
           rowsPerPageState={10}
-          onSetColumns={() => {}}
+          onSetColumns={(columns) => {
+            setActiveColumns(columns);
+          }}
           expandedDoc={expandedDoc}
           setExpandedDoc={setExpandedDoc}
           showTimeCol
@@ -145,6 +154,10 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
           ariaLabelledBy="ESQLDatatable"
           maxDocFieldsDisplayed={100}
           renderDocumentView={renderDocumentView}
+          showFullScreenButton={false}
+          configRowHeight={5}
+          rowHeightState={rowHeight}
+          onUpdateRowHeight={setRowHeight}
         />
       </CellActionsProvider>
     </KibanaContextProvider>
