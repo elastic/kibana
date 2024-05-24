@@ -29,8 +29,9 @@ import { usageTracker } from './usage_tracker';
 import { createToolingLogger, wrapErrorAndRejectPromise } from './utils';
 
 /**
- * Will ensure that at least one fleet server is present in the `.fleet-servers` index. This will
- * enable the `Agent` section of kibana Fleet to be displayed
+ * Will ensure that at least one fleet server is present in the `.fleet-agents` index. This will
+ * enable the `Agent` section of kibana Fleet to be displayed. We skip on serverless because
+ * Fleet Server agents are not checked against there.
  *
  * @param esClient
  * @param kbnClient
@@ -41,13 +42,14 @@ export const enableFleetServerIfNecessary = usageTracker.track(
   'enableFleetServerIfNecessary',
   async (
     esClient: Client,
+    isServerless: boolean = false,
     kbnClient: KbnClient,
     log: ToolingLog = createToolingLogger(),
     version: string = kibanaPackageJson.version
   ) => {
     const agentPolicy = await getOrCreateFleetServerAgentPolicy(kbnClient, log);
 
-    if (!(await hasFleetServerAgent(esClient, agentPolicy.id))) {
+    if (!isServerless && !(await hasFleetServerAgent(esClient, agentPolicy.id))) {
       log.debug(`Indexing a new fleet server agent`);
       const lastCheckin = new Date();
       lastCheckin.setFullYear(lastCheckin.getFullYear() + 1);

@@ -45,6 +45,7 @@ export interface CyLoadEndpointDataOptions
   isolation: boolean;
   bothIsolatedAndNormalEndpoints?: boolean;
   alertIds?: string[];
+  isServerless?: boolean;
 }
 
 /**
@@ -73,6 +74,7 @@ export const cyLoadEndpointDataHandler = async (
     isolation,
     numResponseActions,
     alertIds,
+    isServerless = false,
   } = options;
 
   const DocGenerator = EndpointDocGenerator.custom({
@@ -106,6 +108,7 @@ export const cyLoadEndpointDataHandler = async (
     withResponseActions,
     numResponseActions,
     alertIds,
+    isServerless,
     log
   );
 
