@@ -21,6 +21,7 @@ const ALL_ENABLED = {
   canEnable: true,
   isEnabled: true,
   isValidApiKey: true,
+  isServiceAllowed: false,
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -99,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
               isValidApiKey: false,
               // api key is not there, as it's deleted at the start of the tests
               isEnabled: false,
+              isServiceAllowed: false,
             });
           }
         });
@@ -188,6 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           canEnable: false,
           isEnabled: true,
           isValidApiKey: true,
+          isServiceAllowed: false,
         });
       });
 
@@ -201,6 +204,7 @@ export default function ({ getService }: FtrProviderContext) {
           canEnable: false,
           isEnabled: true,
           isValidApiKey: true,
+          isServiceAllowed: false,
         });
       });
     });

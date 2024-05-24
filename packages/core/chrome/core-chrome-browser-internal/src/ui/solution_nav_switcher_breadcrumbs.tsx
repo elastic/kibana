@@ -21,7 +21,7 @@ export const getSolutionNavSwitcherBreadCrumb = ({
   cloudLinks,
 }: {
   definitions: SolutionNavigationDefinitions;
-  activeId: string;
+  activeId: string | null;
   onChange: (id: string) => void;
   cloudLinks: CloudLinks;
 }): ChromeProjectBreadcrumb => {
