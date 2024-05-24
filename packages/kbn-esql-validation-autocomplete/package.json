@@ -5,6 +5,6 @@
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "sideEffects": false,
   "scripts": {
-    "maketests": "ts-node --transpileOnly ./scripts/generate_function_validation_tests.ts"
+    "maketests": "tsx --transpileOnly ./scripts/generate_function_validation_tests.ts"
   }
 }

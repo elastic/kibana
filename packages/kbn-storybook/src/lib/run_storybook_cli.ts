@@ -56,7 +56,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
 
       logger.setLevel(getLogLevelFromFlags(flags));
 
-      // force storybook to use our transpilation rather than ts-node or anything else
+      // force storybook to use our transpilation rather than tsx or anything else
       interpret.extensions['.ts'] = [require.resolve('@kbn/babel-register/install')];
       interpret.extensions['.tsx'] = [require.resolve('@kbn/babel-register/install')];
       interpret.extensions['.jsx'] = [require.resolve('@kbn/babel-register/install')];

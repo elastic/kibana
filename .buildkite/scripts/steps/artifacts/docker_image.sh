@@ -94,7 +94,7 @@ gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_BUCKET/$GIT_ABBREV_COMM
 gcloud auth revoke "$GCS_SA_CDN_EMAIL"
 
 echo "--- Validate CDN assets"
-ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
+tsx "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/validate_cdn_assets.ts" \
   "$GCS_SA_CDN_URL" \
   "$CDN_ASSETS_FOLDER"
 

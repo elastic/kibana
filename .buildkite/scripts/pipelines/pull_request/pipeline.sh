@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-ts-node .buildkite/scripts/pipelines/pull_request/pipeline.ts
+tsx .buildkite/scripts/pipelines/pull_request/pipeline.ts

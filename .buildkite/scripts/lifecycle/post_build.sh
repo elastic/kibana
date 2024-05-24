@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-BUILD_SUCCESSFUL=$(ts-node "$(dirname "${0}")/build_status.ts")
+BUILD_SUCCESSFUL=$(tsx "$(dirname "${0}")/build_status.ts")
 export BUILD_SUCCESSFUL
 
 if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
@@ -11,7 +11,7 @@ fi
 
 # Skip indexing the same metrics twice
 if [[ "${BUILDKITE_RETRY_COUNT:-0}" == "0" ]]; then
-  ts-node "$(dirname "${0}")/ci_stats_complete.ts"
+  tsx "$(dirname "${0}")/ci_stats_complete.ts"
 fi
 
 if [[ "${GITHUB_PR_NUMBER:-}" ]]; then

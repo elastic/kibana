@@ -9,7 +9,7 @@ if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
 fi
 
 
-ts-node "$(dirname "${0}")/ci_stats_start.ts"
+tsx "$(dirname "${0}")/ci_stats_start.ts"
 
 # We resolve the latest manifest URL at the beginning of the build to ensure that all steps in the build will use the same manifest
 # Otherwise, the manifest could change if a step is running around the time that a new one is promoted

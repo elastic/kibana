@@ -7,4 +7,4 @@
 # 2.0.
 #
 
-npx ts-node "$(dirname "${0}")/create_role_and_user.ts" "$@"
+npx tsx "$(dirname "${0}")/create_role_and_user.ts" "$@"

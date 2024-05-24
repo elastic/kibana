@@ -8,13 +8,13 @@ if [[ "$(type -t retry)" != "function" ]]; then
   source "$(dirname "${BASH_SOURCE[0]}")/util.sh"
 fi
 
-# `rm -rf <ts-node node_modules dir>; npm install -g ts-node` will cause ts-node bin files to be messed up
-# but literally just calling `npm install -g ts-node` a second time fixes it
+# `rm -rf <tsx node_modules dir>; npm install -g tsx` will cause tsx bin files to be messed up
+# but literally just calling `npm install -g tsx` a second time fixes it
 # this is only on newer versions of npm
-npm_install_global ts-node
-if ! ts-node --version; then
-  npm_install_global ts-node
-  ts-node --version;
+npm_install_global tsx
+if ! tsx --version; then
+  npm_install_global tsx
+  tsx --version;
 fi
 
 cd '.buildkite'

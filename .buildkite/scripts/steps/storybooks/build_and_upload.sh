@@ -4,4 +4,4 @@ set -euo pipefail
 
 .buildkite/scripts/bootstrap.sh
 
-ts-node .buildkite/scripts/steps/storybooks/build_and_upload.ts
+tsx .buildkite/scripts/steps/storybooks/build_and_upload.ts
