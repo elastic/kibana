@@ -646,7 +646,7 @@ export function MachineLearningJobWizardCommonProvider(
       await retry.tryForTime(60_000, async () => {
         await testSubjects.existOrFail('mlJobWizardTimeRangeStep');
         await testSubjects.click('mlJobWizardTimeRangeStep');
-        await testSubjects.existOrFail('mlJobWizardStepTitleTimeRange');
+        await this.assertTimeRangeSectionExists();
       });
     },
 
