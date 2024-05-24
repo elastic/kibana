@@ -12,6 +12,7 @@ import { downloadToString } from '../../lib/download';
 export async function getNodeShasums(log: ToolingLog, nodeVersion: string) {
   const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-pointer-compression/dist/v${nodeVersion}/SHASUMS256.txt`;
 
+  // no-op commit to rebuild distribution
   log.debug('Downloading shasum values for node version', nodeVersion, 'from', url);
 
   const checksum = await downloadToString({ log, url, expectStatus: 200 });
