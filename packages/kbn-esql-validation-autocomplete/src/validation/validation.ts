@@ -70,7 +70,8 @@ import {
   retrievePoliciesFields,
   retrieveFieldsFromStringSources,
 } from './resources';
-import { collapseWrongArgumentTypeMessages } from './helpers';
+import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
+import { getParamAtPosition } from '../autocomplete/helper';
 import { METADATA_FIELDS } from '../shared/constants';
 
 function validateFunctionLiteralArg(
@@ -346,35 +347,28 @@ function validateFunction(
   }
   const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
-    const refSignature = fnDefinition.signatures[0];
-    const numArgs =
-      refSignature.minParams ?? refSignature.params.filter(({ optional }) => !optional).length;
-    if (
-      !refSignature.minParams &&
-      refSignature.params.filter(({ optional }) => !optional).length === refSignature.params.length
-    ) {
+    const { max, min } = getMaxMinNumberOfParams(fnDefinition);
+    if (max === min) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentNumber',
           values: {
             fn: astFunction.name,
-            numArgs:
-              refSignature.minParams ??
-              refSignature.params.filter(({ optional }) => !optional).length,
+            numArgs: max,
             passedArgs: astFunction.args.length,
           },
           locations: astFunction.location,
         })
       );
-    } else if (Math.max(astFunction.args.length - refSignature.params.length, 0) > 0) {
+    } else if (astFunction.args.length > max) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentNumberTooMany',
           values: {
             fn: astFunction.name,
-            numArgs: refSignature.params.length,
+            numArgs: max,
             passedArgs: astFunction.args.length,
-            extraArgs: Math.max(astFunction.args.length - refSignature.params.length, 0),
+            extraArgs: astFunction.args.length - max,
           },
           locations: astFunction.location,
         })
@@ -385,9 +379,9 @@ function validateFunction(
           messageId: 'wrongArgumentNumberTooFew',
           values: {
             fn: astFunction.name,
-            numArgs,
+            numArgs: min,
             passedArgs: astFunction.args.length,
-            missingArgs: Math.max(numArgs - astFunction.args.length, 0),
+            missingArgs: min - astFunction.args.length,
           },
           locations: astFunction.location,
         })
@@ -461,9 +455,9 @@ function validateFunction(
   const failingSignatures: ESQLMessage[][] = [];
   for (const signature of matchingSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    signature.params.forEach((argDef, index) => {
-      const outerArg = astFunction.args[index]!;
-      if (!outerArg && argDef.optional) {
+    astFunction.args.forEach((outerArg, index) => {
+      const argDef = getParamAtPosition(signature, index);
+      if ((!outerArg && argDef?.optional) || !argDef) {
         // that's ok, just skip it
         // the else case is already catched with the argument counts check
         // few lines above
