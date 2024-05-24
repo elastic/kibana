@@ -390,7 +390,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('job cloning with too short of a job creation time range results in validation callouts', async () => {
-      await ml.testExecution.logTestStep('job creation loads the job management page');
+      await ml.testExecution.logTestStep('job cloning loads the job management page');
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();
 
