@@ -280,7 +280,7 @@ function runEvaluations() {
             );
             log.write('-------------------------------------------');
 
-            const scoresByScenario: {
+            const scoresByCategory: {
               [key: string]: {
                 score: number;
                 total: number;
@@ -295,13 +295,13 @@ function runEvaluations() {
                 },
                 result
               ) => {
-                const scenario = result.suite;
-                if (!acc[scenario]) {
-                  acc[scenario] = { score: 0, total: 0 };
+                const category = result.category;
+                if (!acc[category]) {
+                  acc[category] = { score: 0, total: 0 };
                 }
                 result.scores.forEach((score) => {
-                  acc[scenario].score += score.score;
-                  acc[scenario].total += 1;
+                  acc[category].score += score.score;
+                  acc[category].total += 1;
                 });
                 return acc;
               },
@@ -309,10 +309,10 @@ function runEvaluations() {
             );
 
             log.write('-------------------------------------------');
-            log.write(`Model ${connector.id} Scores per Scenario`);
-            Object.entries(scoresByScenario).forEach(([scenario, { score, total }]) => {
+            log.write(`Model ${connector.id} Scores per Category`);
+            Object.entries(scoresByCategory).forEach(([category, { score, total }]) => {
               log.write('-------------------------');
-              log.write(`Scenario: ${scenario} - Scored ${score} out of ${total}`);
+              log.write(`Category: ${category} - Scored ${score} out of ${total}`);
             });
             log.write('-------------------------------------------');
           });

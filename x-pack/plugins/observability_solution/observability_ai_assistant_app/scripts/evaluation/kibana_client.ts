@@ -199,7 +199,7 @@ export class KibanaClient {
     }
 
     let currentTitle: string = '';
-    let suiteName: string = '';
+    let firstSuiteName: string = '';
 
     suite.beforeEach(function () {
       const currentTest: Mocha.Test = this.currentTest;
@@ -211,7 +211,7 @@ export class KibanaClient {
         parent = parent.parent;
       }
       currentTitle = titles.reverse().join(' ');
-      suiteName = titles.filter((item) => item !== '')[0];
+      firstSuiteName = titles.filter((item) => item !== '')[0];
     });
 
     suite.afterEach(function () {
@@ -508,7 +508,7 @@ export class KibanaClient {
 
         const result: EvaluationResult = {
           name: currentTitle,
-          suite: suiteName,
+          category: firstSuiteName,
           conversationId,
           messages,
           passed: scoredCriteria.every(({ score }) => score >= 1),
