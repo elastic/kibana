@@ -45,6 +45,7 @@ import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
 import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
+import type { TimeRange } from '../../../rule_gaps/types';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -57,6 +58,7 @@ interface ColumnsProps {
 
 interface ActionColumnsProps {
   showExceptionsDuplicateConfirmation: () => Promise<string | null>;
+  showManualRuleRunConfirmation: () => Promise<TimeRange | null>;
   confirmDeletion: () => Promise<boolean>;
 }
 
@@ -233,10 +235,12 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
 const useActionsColumn = ({
   showExceptionsDuplicateConfirmation,
+  showManualRuleRunConfirmation,
   confirmDeletion,
 }: ActionColumnsProps): EuiTableActionsColumnType<Rule> => {
   const actions = useRulesTableActions({
     showExceptionsDuplicateConfirmation,
+    showManualRuleRunConfirmation,
     confirmDeletion,
   });
 
@@ -251,10 +255,12 @@ export const useRulesColumns = ({
   mlJobs,
   startMlJobs,
   showExceptionsDuplicateConfirmation,
+  showManualRuleRunConfirmation,
   confirmDeletion,
 }: UseColumnsProps): TableColumn[] => {
   const actionsColumn = useActionsColumn({
     showExceptionsDuplicateConfirmation,
+    showManualRuleRunConfirmation,
     confirmDeletion,
   });
   const ruleNameColumn = useRuleNameColumn();
@@ -363,11 +369,13 @@ export const useMonitoringColumns = ({
   mlJobs,
   startMlJobs,
   showExceptionsDuplicateConfirmation,
+  showManualRuleRunConfirmation,
   confirmDeletion,
 }: UseColumnsProps): TableColumn[] => {
   const docLinks = useKibana().services.docLinks;
   const actionsColumn = useActionsColumn({
     showExceptionsDuplicateConfirmation,
+    showManualRuleRunConfirmation,
     confirmDeletion,
   });
   const ruleNameColumn = useRuleNameColumn();

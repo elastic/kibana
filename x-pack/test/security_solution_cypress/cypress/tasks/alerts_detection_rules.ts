@@ -55,6 +55,8 @@ import {
   CONFIRM_DELETE_RULE_BTN,
   AUTO_REFRESH_POPOVER_TRIGGER_BUTTON,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
+  RULE_DETAILS_MANUAL_RULE_RUN_BTN,
+  MANUAL_RULE_RUN_ACTION_BTN,
 } from '../screens/alerts_detection_rules';
 import type { RULES_MONITORING_TABLE } from '../screens/alerts_detection_rules';
 import { EUI_CHECKBOX } from '../screens/common/controls';
@@ -86,6 +88,14 @@ export const duplicateFirstRule = () => {
   cy.get(DUPLICATE_RULE_ACTION_BTN).should('be.visible');
   cy.get(DUPLICATE_RULE_ACTION_BTN).click();
   cy.get(CONFIRM_DUPLICATE_RULE).click();
+};
+
+export const manuallyRunFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN).should('be.visible');
+  cy.get(COLLAPSED_ACTION_BTN).first().click();
+  cy.get(MANUAL_RULE_RUN_ACTION_BTN).should('be.visible');
+  cy.get(MANUAL_RULE_RUN_ACTION_BTN).click();
+  cy.get(MODAL_CONFIRMATION_BTN).click();
 };
 
 /**
@@ -126,6 +136,13 @@ export const deleteRuleFromDetailsPage = () => {
   cy.get(RULE_DETAILS_DELETE_BTN).click();
   cy.get(RULE_DETAILS_DELETE_BTN).should('not.exist');
   cy.get(CONFIRM_DELETE_RULE_BTN).click();
+};
+
+export const manualRuleRunFromDetailsPage = () => {
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
+  cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).click();
+  cy.get(RULE_DETAILS_MANUAL_RULE_RUN_BTN).should('not.exist');
+  cy.get(MODAL_CONFIRMATION_BTN).click();
 };
 
 export const exportRule = (name: string) => {

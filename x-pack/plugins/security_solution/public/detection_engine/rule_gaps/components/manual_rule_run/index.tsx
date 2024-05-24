@@ -1,0 +1,124 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import {
+  EuiBetaBadge,
+  EuiConfirmModal,
+  EuiDatePicker,
+  EuiDatePickerRange,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  EuiHorizontalRule,
+  EuiSpacer,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
+import moment from 'moment';
+import React, { useCallback, useState } from 'react';
+import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../../../common/translations';
+
+import * as i18n from './translations';
+
+interface ManualRuleRunModalProps {
+  onCancel: () => void;
+  onConfirm: (timeRange: { startDate: moment.Moment; endDate: moment.Moment }) => void;
+}
+
+const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModalProps) => {
+  const modalTitleId = useGeneratedHtmlId();
+
+  const [startDate, setStartDate] = useState(moment().subtract(1, 'd'));
+  const [endDate, setEndDate] = useState(moment());
+  const isInvalid = startDate.isAfter(endDate);
+
+  const handleConfirm = useCallback(() => {
+    onConfirm({ startDate, endDate });
+  }, [endDate, onConfirm, startDate]);
+
+  return (
+    <EuiConfirmModal
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
+      onCancel={onCancel}
+      onConfirm={handleConfirm}
+      confirmButtonText={i18n.MANUAL_RULE_RUN_CONFIRM_BUTTON}
+      cancelButtonText={i18n.MANUAL_RULE_RUN_CANCEL_BUTTON}
+      confirmButtonDisabled={isInvalid}
+    >
+      <EuiForm data-test-subj="manual-rule-run-modal-form">
+        <EuiSpacer size="m" />
+        <EuiFormRow
+          label={
+            <EuiFlexGroup>
+              <EuiFlexItem>{i18n.MANUAL_RULE_RUN_TIME_RANGE_TITLE}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBetaBadge
+                  label={TECHNICAL_PREVIEW}
+                  tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          isInvalid={isInvalid}
+          error={isInvalid ? i18n.MANUAL_RULE_RUN_INVALID_TIME_RANGE_ERROR : null}
+        >
+          <EuiDatePickerRange
+            data-test-subj="manual-rule-run-time-range"
+            readOnly={true}
+            startDateControl={
+              <EuiDatePicker
+                aria-label="Start date range"
+                selected={startDate}
+                onChange={(date) => date && setStartDate(date)}
+                startDate={startDate}
+                endDate={endDate}
+                showTimeSelect={true}
+              />
+            }
+            endDateControl={
+              <EuiDatePicker
+                aria-label="End date range"
+                selected={endDate}
+                onChange={(date) => date && setEndDate(date)}
+                startDate={startDate}
+                endDate={endDate}
+                showTimeSelect={true}
+              />
+            }
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule />
+        <EuiFormRow data-test-subj="start-date-picker" label={i18n.MANUAL_RULE_RUN_START_AT_TITLE}>
+          <EuiDatePicker
+            aria-label="Start date picker"
+            inline
+            selected={startDate}
+            onChange={(date) => date && setStartDate(date)}
+            startDate={startDate}
+            endDate={endDate}
+            showTimeSelect={true}
+          />
+        </EuiFormRow>
+        <EuiHorizontalRule />
+        <EuiFormRow data-test-subj="end-date-picker" label={i18n.MANUAL_RULE_RUN_END_AT_TITLE}>
+          <EuiDatePicker
+            aria-label="End date picker"
+            inline
+            selected={endDate}
+            onChange={(date) => date && setEndDate(date)}
+            startDate={startDate}
+            endDate={endDate}
+            showTimeSelect={true}
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </EuiConfirmModal>
+  );
+};
+
+export const ManualRuleRunModal = React.memo(ManualRuleRunModalComponent);
+ManualRuleRunModal.displayName = 'ManualRuleRunModal';
