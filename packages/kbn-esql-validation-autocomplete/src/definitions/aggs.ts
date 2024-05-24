@@ -41,11 +41,11 @@ function createNumericAggDefinition({
           })),
         ],
         returnType: 'number',
-        examples: [
-          `from index | stats result = ${name}(field${extraParamsExample})`,
-          `from index | stats ${name}(field${extraParamsExample})`,
-        ],
       },
+    ],
+    examples: [
+      `from index | stats result = ${name}(field${extraParamsExample})`,
+      `from index | stats ${name}(field${extraParamsExample})`,
     ],
   };
 }
@@ -103,14 +103,13 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
           returnType: 'number',
-          examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
         },
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
           returnType: 'number',
-          examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
         },
       ],
+      examples: [`from index | stats result = max(field)`, `from index | stats max(field)`],
     },
     {
       name: 'min',
@@ -123,14 +122,13 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [{ name: 'column', type: 'number', noNestingFunctions: true }],
           returnType: 'number',
-          examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
         },
         {
           params: [{ name: 'column', type: 'date', noNestingFunctions: true }],
           returnType: 'number',
-          examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
         },
       ],
+      examples: [`from index | stats result = min(field)`, `from index | stats min(field)`],
     },
   ])
   .concat([
@@ -153,9 +151,9 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
             },
           ],
           returnType: 'number',
-          examples: [`from index | stats result = count(field)`, `from index | stats count(field)`],
         },
       ],
+      examples: [`from index | stats result = count(field)`, `from index | stats count(field)`],
     },
     {
       name: 'count_distinct',
@@ -174,11 +172,11 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
             { name: 'precision', type: 'number', noNestingFunctions: true, optional: true },
           ],
           returnType: 'number',
-          examples: [
-            `from index | stats result = count_distinct(field)`,
-            `from index | stats count_distinct(field)`,
-          ],
         },
+      ],
+      examples: [
+        `from index | stats result = count_distinct(field)`,
+        `from index | stats count_distinct(field)`,
       ],
     },
     {
@@ -195,19 +193,17 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
           returnType: 'cartesian_point',
-          examples: [
-            `from index | stats result = st_centroid_agg(cartesian_field)`,
-            `from index | stats st_centroid_agg(cartesian_field)`,
-          ],
         },
         {
           params: [{ name: 'column', type: 'geo_point', noNestingFunctions: true }],
           returnType: 'geo_point',
-          examples: [
-            `from index | stats result = st_centroid_agg(geo_field)`,
-            `from index | stats st_centroid_agg(geo_field)`,
-          ],
         },
+      ],
+      examples: [
+        `from index | stats result = st_centroid_agg(cartesian_field)`,
+        `from index | stats st_centroid_agg(cartesian_field)`,
+        `from index | stats result = st_centroid_agg(geo_field)`,
+        `from index | stats st_centroid_agg(geo_field)`,
       ],
     },
     {
@@ -221,11 +217,11 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
         {
           params: [{ name: 'expression', type: 'any', noNestingFunctions: true }],
           returnType: 'any',
-          examples: [
-            'from index | stats all_agents=values(agents.keyword)',
-            'from index | stats all_sorted_agents=mv_sort(values(agents.keyword))',
-          ],
         },
+      ],
+      examples: [
+        'from index | stats all_agents=values(agents.keyword)',
+        'from index | stats all_sorted_agents=mv_sort(values(agents.keyword))',
       ],
     },
   ]);

@@ -24,7 +24,7 @@ export async function deleteEntityDefinition(
 
   if (response.total === 0) {
     logger.error(`Unable to delete entity definition [${definition.id}] because it doesn't exist.`);
-    throw new EntityDefinitionNotFound(`Entity defintion with [${definition.id}] not found.`);
+    throw new EntityDefinitionNotFound(`Entity definition with [${definition.id}] not found.`);
   }
 
   await soClient.delete(SO_ENTITY_DEFINITION_TYPE, response.saved_objects[0].id);

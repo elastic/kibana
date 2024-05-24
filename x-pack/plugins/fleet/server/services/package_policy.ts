@@ -43,6 +43,7 @@ import {
   isInputOnlyPolicyTemplate,
   getNormalizedDataStreams,
   getNormalizedInputs,
+  isRootPrivilegesRequired,
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
@@ -328,6 +329,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           logger,
         });
       }
+
+      const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+      if (enrichedPackagePolicy.package && requiresRoot) {
+        enrichedPackagePolicy.package = {
+          ...enrichedPackagePolicy.package,
+          requires_root: requiresRoot,
+        };
+      }
     }
 
     const isoDate = new Date().toISOString();
@@ -457,6 +466,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             : inputs;
 
           elasticsearch = pkgInfo?.elasticsearch;
+
+          const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+          if (packagePolicy.package && requiresRoot) {
+            packagePolicy.package = {
+              ...packagePolicy.package,
+              requires_root: requiresRoot,
+            };
+          }
         }
 
         policiesToCreate.push({
@@ -862,6 +879,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         assetsMap
       );
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+
+      const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+      if (restOfPackagePolicy.package && requiresRoot) {
+        restOfPackagePolicy.package = {
+          ...restOfPackagePolicy.package,
+          requires_root: requiresRoot,
+        };
+      }
     }
 
     // Handle component template/mappings updates for experimental features, e.g. synthetic source
@@ -1042,6 +1067,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               assetsMap
             );
             elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
+
+            const requiresRoot = isRootPrivilegesRequired(pkgInfo);
+            if (restOfPackagePolicy.package && requiresRoot) {
+              restOfPackagePolicy.package = {
+                ...restOfPackagePolicy.package,
+                requires_root: requiresRoot,
+              };
+            }
           }
         }
 

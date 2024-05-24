@@ -27,7 +27,6 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
           { name: 'buckets', type: 'time_literal', constantOnly: true },
         ],
         returnType: 'date',
-        examples: ['from index | eval hd = bucket(hire_date, 1 hour)'],
       },
       {
         params: [
@@ -35,7 +34,6 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
           { name: 'buckets', type: 'number', constantOnly: true },
         ],
         returnType: 'number',
-        examples: ['from index | eval hd = bucket(bytes, 1 hour)'],
       },
       {
         params: [
@@ -45,9 +43,6 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
           { name: 'endDate', type: 'string', constantOnly: true },
         ],
         returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
       },
       {
         params: [
@@ -57,9 +52,6 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
           { name: 'endDate', type: 'date', constantOnly: true },
         ],
         returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
       },
       {
         params: [
@@ -69,9 +61,6 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
           { name: 'endDate', type: 'date', constantOnly: true },
         ],
         returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
       },
       {
         params: [
@@ -81,9 +70,6 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
           { name: 'endDate', type: 'string', constantOnly: true },
         ],
         returnType: 'date',
-        examples: [
-          'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
-        ],
       },
       {
         params: [
@@ -93,8 +79,14 @@ export const groupingFunctionDefinitions: FunctionDefinition[] = [
           { name: 'endValue', type: 'number', constantOnly: true },
         ],
         returnType: 'number',
-        examples: ['from index | eval bs = bucket(bytes, 20, 25324, 74999)'],
       },
+    ],
+    examples: [
+      'from index | eval hd = bucket(bytes, 1 hour)',
+      'from index | eval hd = bucket(hire_date, 1 hour)',
+      'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+      'from index | eval hd = bucket(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")',
+      'from index | eval bs = bucket(bytes, 20, 25324, 74999)',
     ],
   },
 ];

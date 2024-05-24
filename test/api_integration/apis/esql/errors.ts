@@ -11,7 +11,6 @@ import Path from 'path';
 import expect from '@kbn/expect';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import uniqBy from 'lodash/uniqBy';
 import { groupBy, mapValues } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -127,7 +126,6 @@ export default function ({ getService }: FtrProviderContext) {
         path: '/_query',
         body: {
           query,
-          version: ESQL_LATEST_VERSION,
         },
       });
       return { resp, error: undefined };
