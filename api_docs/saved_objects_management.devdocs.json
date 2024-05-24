@@ -679,7 +679,7 @@
             "label": "obj",
             "description": [],
             "signature": [
-              "{ id: string; type: string; meta: { title?: string | undefined; icon?: string | undefined; }; managed?: boolean | undefined; overwrite?: boolean | undefined; }"
+              "{ id: string; meta: { title?: string | undefined; icon?: string | undefined; }; type: string; managed?: boolean | undefined; overwrite?: boolean | undefined; }"
             ],
             "path": "src/plugins/saved_objects_management/public/lib/process_import_response.ts",
             "deprecated": false,
