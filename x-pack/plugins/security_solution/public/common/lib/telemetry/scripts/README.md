@@ -2,6 +2,15 @@
 
 The purpose of the scripts is to map telemetry fields to runtime fields on the appropriate security solution ebt data views on the staging cluster. This can be used to automate the addition of new fields to the data views. 
 
+### Events
+- The browser ebt events come from `telemetryEvents` imported from `x-pack/plugins/security_solution/public/common/lib/telemetry/events/telemetry_events`
+- The server ebt events come from:
+  - `events` imported from `x-pack/plugins/elastic-assistant/server/lib/telemetry/event_based_telemetry`
+  - `telemetryEvents` imported from `x-pack/plugins/security_solution_serverless/server/telemetry/event_based_telemetry`
+  - `events` imported from `x-pack/plugins/security_solution/server/lib/telemetry/event_based/events`
+
+If you have further events to be included in the data views, please update the script to include the event schema.
+
 ### Usage
 
 1. Login with Vault (`vault login -method github`), ensure you have siem-team access. If you have never accessed Vault before, follow [these instructions](https://github.com/elastic/infra/blob/master/docs/vault/README.md)
