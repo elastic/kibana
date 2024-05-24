@@ -33,7 +33,14 @@ export class SpacesSavedObjectsService {
       },
       modelVersions: {
         1: {
-          changes: [],
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                solution: { type: 'keyword' },
+              },
+            },
+          ],
           schemas: {
             create: SpacesSavedObjectSchemas['8.8.0'].extends({
               solution: schema.maybe(
