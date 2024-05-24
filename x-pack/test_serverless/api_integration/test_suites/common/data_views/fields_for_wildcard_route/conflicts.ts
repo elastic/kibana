@@ -9,27 +9,34 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION_INTERNAL } from '@kbn/data-views-plugin/server/constants';
 import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import expect from '@kbn/expect';
+import { InternalRequestHeader, RoleCredentials } from '../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('conflicts', function () {
-    before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
-    );
-    after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
-    );
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts');
+    });
+    after(async () => {
+      await esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/conflicts');
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+    });
 
     it('flags fields with mismatched types as conflicting', () =>
-      supertest
+      supertestWithoutAuth
         .get(FIELDS_FOR_WILDCARD_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
-        // TODO: API requests in Serverless require internal request headers
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(internalReqHeader)
+        .set(roleAuthc.apiKeyHeader)
         .query({ pattern: 'logs-2017.01.*' })
         .expect(200)
         .then((resp) => {
