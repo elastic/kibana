@@ -47,7 +47,7 @@ export interface CompareDocumentsProps {
   showFullScreenButton?: boolean;
   fieldFormats: FieldFormatsStart;
   getDocById: (id: string) => DataTableRecord | undefined;
-  setSelectedDocs: (selectedDocs: string[]) => void;
+  replaceSelectedDocs: (selectedDocs: string[]) => void;
   setIsCompareActive: (isCompareActive: boolean) => void;
 }
 
@@ -72,7 +72,7 @@ const CompareDocuments = ({
   showFullScreenButton,
   fieldFormats,
   getDocById,
-  setSelectedDocs,
+  replaceSelectedDocs,
   setIsCompareActive,
 }: CompareDocumentsProps) => {
   // Memoize getDocById to ensure we don't lose access to the comparison docs if, for example,
@@ -111,17 +111,17 @@ const CompareDocuments = ({
     fieldColumnId,
     selectedDocs,
     getDocById: memoizedGetDocById,
-    setSelectedDocs,
+    replaceSelectedDocs,
   });
   const comparisonColumnVisibility = useMemo<EuiDataGridColumnVisibility>(
     () => ({
       visibleColumns: comparisonColumns.map(({ id: columnId }) => columnId),
       setVisibleColumns: (visibleColumns) => {
         const [_fieldColumnId, ...newSelectedDocs] = visibleColumns;
-        setSelectedDocs(newSelectedDocs);
+        replaceSelectedDocs(newSelectedDocs);
       },
     }),
-    [comparisonColumns, setSelectedDocs]
+    [comparisonColumns, replaceSelectedDocs]
   );
   const additionalControls = useMemo(
     () => (

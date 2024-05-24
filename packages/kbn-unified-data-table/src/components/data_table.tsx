@@ -1034,7 +1034,7 @@ export const UnifiedDataTable = ({
               showFullScreenButton={showFullScreenButton}
               fieldFormats={fieldFormats}
               getDocById={getDocById}
-              setSelectedDocs={replaceSelectedDocs}
+              replaceSelectedDocs={replaceSelectedDocs}
               setIsCompareActive={setIsCompareActive}
             />
           ) : (

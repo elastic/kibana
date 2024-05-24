@@ -691,7 +691,7 @@ describe('UnifiedDataTable', () => {
       // additional controls become available after selecting a document
       act(() => {
         component
-          .find('[data-gridcell-column-id="select"] .euiCheckbox__input')
+          .find('.euiDataGridRowCell[data-gridcell-column-id="select"] .euiCheckbox__input')
           .first()
           .simulate('change');
       });
