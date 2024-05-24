@@ -26,5 +26,6 @@
     "@kbn/i18n",
     "@kbn/actions-plugin",
     "@kbn/config-schema",
+    "@kbn/react-kibana-context-render",
   ]
 }

@@ -33,7 +33,6 @@ import {
 } from '../../../../../../../../../common/services';
 
 import type {
-  NewPackagePolicy,
   NewPackagePolicyInputStream,
   PackageInfo,
   RegistryStreamWithDataStream,
@@ -57,11 +56,9 @@ const ScrollAnchor = styled.div`
 `;
 
 interface Props {
-  packagePolicy: NewPackagePolicy;
   packageInputStream: RegistryStreamWithDataStream;
   packageInfo: PackageInfo;
   packagePolicyInputStream: NewPackagePolicyInputStream;
-  updatePackagePolicy: (updatedPackagePolicy: Partial<NewPackagePolicy>) => void;
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
@@ -70,11 +67,9 @@ interface Props {
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
   ({
-    packagePolicy,
     packageInputStream,
     packageInfo,
     packagePolicyInputStream,
-    updatePackagePolicy,
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
@@ -136,9 +131,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
           }
         });
       }
-
       return [_requiredVars, _advancedVars];
-    }, [packageInputStream.vars]);
+    }, [packageInputStream]);
 
     const advancedVarsWithErrorsCount: number = useMemo(
       () =>
@@ -171,7 +165,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
 
     return (
       <>
-        <EuiFlexGrid columns={2}>
+        <EuiFlexGrid columns={2} data-test-subj="streamOptions.inputStreams">
           <ScrollAnchor ref={containerRef} />
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none" alignItems="flexStart">
@@ -185,6 +179,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   {packageInfo.type !== 'input' && (
                     <EuiFlexItem grow={false}>
                       <EuiSwitch
+                        data-test-subj="streamOptions.switch"
                         label={packageInputStream.title}
                         disabled={packagePolicyInputStream.keep_enabled}
                         checked={packagePolicyInputStream.enabled}
@@ -227,7 +222,6 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                 const varConfigEntry = packagePolicyInputStream.vars?.[varName];
                 const value = varConfigEntry?.value;
                 const frozen = varConfigEntry?.frozen ?? false;
-
                 return (
                   <EuiFlexItem key={varName}>
                     <PackagePolicyInputVarField

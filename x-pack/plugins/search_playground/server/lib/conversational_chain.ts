@@ -150,6 +150,7 @@ class ConversationalChainFn {
       {
         callbacks: [
           {
+            // callback for chat based models (OpenAI)
             handleChatModelStart(
               llm,
               msg: BaseMessage[][],
@@ -163,6 +164,15 @@ class ConversationalChainFn {
                 data.appendMessageAnnotation({
                   type: 'prompt_token_count',
                   count: getTokenEstimateFromMessages(msg),
+                });
+              }
+            },
+            // callback for prompt based models (Bedrock uses ActionsClientLlm)
+            handleLLMStart(llm, input, runId, parentRunId, extraParams, tags, metadata) {
+              if (metadata?.type === 'question_answer_qa') {
+                data.appendMessageAnnotation({
+                  type: 'prompt_token_count',
+                  count: getTokenEstimate(input[0]),
                 });
               }
             },
