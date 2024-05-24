@@ -466,7 +466,7 @@ export default function ({ getService }: FtrProviderContext) {
       const tooLarge = '100000000MB';
       await ml.jobWizardCommon.setModelMemoryLimit(tooLarge);
 
-      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.advanceToValidationSection();
       await ml.jobWizardCommon.assertValidationCallouts(['mlValidationCallout warning']);
       await ml.jobWizardCommon.assertCalloutText(
         'mlValidationCallout warning',
