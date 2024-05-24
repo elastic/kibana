@@ -29,8 +29,8 @@ export function ViewInAPMButton({
   to: string;
   kuery?: string;
 }) {
-  const { share } = useApmPluginContext();
-  const serviceNavigator = share.url.locators.get(APM_APP_LOCATOR_ID);
+  const { share } = useApmPluginContext() || {};
+  const serviceNavigator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
 
   if (!serviceNavigator) {
     return null;
