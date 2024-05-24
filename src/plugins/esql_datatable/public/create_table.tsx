@@ -43,8 +43,6 @@ type DataTableColumnsMeta = Record<
 /*
 Remaining tasks:
 - Is it a good idea to render the flyout from the Discover plugin? Maybe is smarter to move it on another package.
-- The flyout doesn't render when the assistant is in flyout mode, ould possibly change to overlay but it has a weird behavior
-- The row settings popover closes when I set the height, it should stay open (must be related to the flyout bug)
 - Keep the selected columns in LLM
 **/
 
@@ -80,8 +78,8 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
         onFilter={undefined}
-        // could possibly change to overlay but it has a weird behavior
-        flyoutType="push"
+        // can possibly change to push if on conversations app
+        flyoutType="overlay"
         onRemoveColumn={(column) => {
           setActiveColumns(activeColumns.filter((c) => c !== column));
         }}
@@ -97,8 +95,6 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
   );
 
   if (loading || !deps || !UnifiedDataTable) return <EuiLoadingSpinner />;
-
-  const UnifiedDataTableMemoized = React.memo(UnifiedDataTable);
 
   const columnsMeta = props.columns.reduce((acc, column) => {
     acc[column.id] = {
@@ -118,7 +114,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
       }}
     >
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
-        <UnifiedDataTableMemoized
+        <UnifiedDataTable
           columns={activeColumns}
           rows={rows.map((row: Record<string, string>, idx: number) => {
             return {
