@@ -25,24 +25,24 @@ export function getLogStreamEmbeddableFactory(services: Services) {
     type: LOG_STREAM_EMBEDDABLE,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi) => {
-      const timeRange = initializeTimeRange(state);
+      const timeRangeContext = initializeTimeRange(state);
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
 
       const api = buildApi(
         {
-          ...timeRange.api,
+          ...timeRangeContext.api,
           ...titlesApi,
           serializeState: () => {
             return {
               rawState: {
-                ...timeRange.serialize(),
+                ...timeRangeContext.serialize(),
                 ...serializeTitles(),
               },
             };
           },
         },
         {
-          ...timeRange.comparators,
+          ...timeRangeContext.comparators,
           ...titleComparators,
         }
       );
@@ -64,7 +64,7 @@ export function getLogStreamEmbeddableFactory(services: Services) {
               setDarkMode(theme.darkMode);
             });
             return () => subscription.unsubscribe();
-          }, [services.coreStart.theme.theme$]);
+          }, []);
 
           return !startTimestamp || !endTimestamp ? null : (
             <CoreProviders
