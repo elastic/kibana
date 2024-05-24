@@ -141,7 +141,7 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       // settings.startNow was added in 8.15.0
       settings: {
         ...storedSLO.settings,
-        startNow: storedSLO.settings?.startNow ?? false,
+        preventInitialBackfill: storedSLO.settings?.preventInitialBackfill ?? false,
       },
     });
 

@@ -33,7 +33,7 @@ export function fromRemoteSummaryDocumentToSloDefinition(
       syncDelay: '1m',
       frequency: '1m',
       // added in 8.15.0
-      startNow: false,
+      preventInitialBackfill: false,
     },
     revision: summaryDoc.slo.revision,
     enabled: true,
