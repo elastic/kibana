@@ -32,8 +32,8 @@ Object {
       "namespace": "default",
       "package": Object {
         "name": "system",
+        "requires_root": true,
         "title": "System",
-        "version": "1.56.0",
       },
       "revision": 1,
       "updated_by": "elastic",

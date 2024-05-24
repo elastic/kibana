@@ -6,6 +6,7 @@
  */
 
 import pRetry from 'p-retry';
+import type { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,

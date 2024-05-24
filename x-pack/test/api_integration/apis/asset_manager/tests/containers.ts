@@ -23,8 +23,8 @@ export default function ({ getService }: FtrProviderContext) {
       await synthtrace.clean();
     });
 
-    it('should return container assets', async () => {
-      await synthtrace.index(generateContainersData({ from, to, count: 5 }));
+    it('should return docker container assets', async () => {
+      await synthtrace.index(generateDockerContainersData({ from, to, count: 5 }));
 
       const response = await supertest
         .get(routePaths.GET_CONTAINERS)
@@ -38,8 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.containers.length).to.equal(5);
     });
 
-    it('should return a specific container asset by EAN', async () => {
-      await synthtrace.index(generateContainersData({ from, to, count: 5 }));
+    it('should return a specific docker container asset by EAN', async () => {
+      await synthtrace.index(generateDockerContainersData({ from, to, count: 5 }));
       const testEan = 'container:container-id-1';
 
       const response = await supertest
@@ -56,8 +56,68 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body.containers[0]['asset.ean']).to.equal(testEan);
     });
 
-    it('should return a filtered list of container assets by ID wildcard pattern', async () => {
-      await synthtrace.index(generateContainersData({ from, to, count: 15 }));
+    it('should return a filtered list of docker container assets by ID wildcard pattern', async () => {
+      await synthtrace.index(generateDockerContainersData({ from, to, count: 15 }));
+      const testIdPattern = '*id-1*';
+
+      const response = await supertest
+        .get(routePaths.GET_CONTAINERS)
+        .query({
+          from,
+          to,
+          stringFilters: JSON.stringify({ id: testIdPattern }),
+        })
+        .expect(200);
+
+      expect(response.body).to.have.property('containers');
+      expect(response.body.containers.length).to.equal(6);
+
+      const ids = response.body.containers.map((result: Asset) => result['asset.id']);
+
+      expect(ids).to.eql([
+        'container-id-1',
+        'container-id-10',
+        'container-id-11',
+        'container-id-12',
+        'container-id-13',
+        'container-id-14',
+      ]);
+    });
+
+    it('should return k8s container assets', async () => {
+      await synthtrace.index(generateK8sContainersData({ from, to, count: 5 }));
+      const response = await supertest
+        .get(routePaths.GET_CONTAINERS)
+        .query({
+          from,
+          to,
+        })
+        .expect(200);
+
+      expect(response.body).to.have.property('containers');
+      expect(response.body.containers.length).to.equal(5);
+    });
+
+    it('should return a specific k8s container asset by EAN', async () => {
+      await synthtrace.index(generateK8sContainersData({ from, to, count: 5 }));
+      const testEan = 'container:container-id-1';
+
+      const response = await supertest
+        .get(routePaths.GET_CONTAINERS)
+        .query({
+          from,
+          to,
+          stringFilters: JSON.stringify({ ean: testEan }),
+        })
+        .expect(200);
+
+      expect(response.body).to.have.property('containers');
+      expect(response.body.containers.length).to.equal(1);
+      expect(response.body.containers[0]['asset.ean']).to.equal(testEan);
+    });
+
+    it('should return a filtered list of k8s container assets by ID wildcard pattern', async () => {
+      await synthtrace.index(generateK8sContainersData({ from, to, count: 15 }));
       const testIdPattern = '*id-1*';
 
       const response = await supertest
@@ -86,7 +146,30 @@ export default function ({ getService }: FtrProviderContext) {
   });
 }
 
-function generateContainersData({
+function generateDockerContainersData({
+  from,
+  to,
+  count = 1,
+}: {
+  from: string;
+  to: string;
+  count: number;
+}) {
+  const range = timerange(from, to);
+
+  const containers = Array(count)
+    .fill(0)
+    .map((_, idx) => infra.dockerContainer(`container-id-${idx}`));
+
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) =>
+      containers.map((container) => container.metrics().timestamp(timestamp))
+    );
+}
+
+function generateK8sContainersData({
   from,
   to,
   count = 1,
@@ -100,7 +183,7 @@ function generateContainersData({
   const containers = Array(count)
     .fill(0)
     .map((_, idx) =>
-      infra.container(`container-id-${idx}`, `container-uid-${idx + 1000}`, `node-name-${idx}`)
+      infra.k8sContainer(`container-id-${idx}`, `container-uid-${idx + 1000}`, `node-name-${idx}`)
     );
 
   return range
