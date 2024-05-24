@@ -13,8 +13,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlObltNavigation = getService('svlObltNavigation');
   const SvlObltOnboardingStreamLogFilePage = getPageObject('SvlObltOnboardingStreamLogFilePage');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/168037
-  describe.skip('landing page', function () {
+  describe('landing page', function () {
     before(async () => {
       await svlCommonPage.login();
     });
