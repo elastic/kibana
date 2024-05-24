@@ -31,7 +31,7 @@ main () {
 
   # Check for differences
   set +e
-  git diff --exit-code --quiet "$destination_file"
+  git diff --exit-code --quiet .
   if [ $? -eq 0 ]; then
     echo "No differences found. Our work is done here."
     exit
