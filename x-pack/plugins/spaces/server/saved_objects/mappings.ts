@@ -19,6 +19,9 @@ export const SpacesSavedObjectMappings = deepFreeze({
         },
       },
     },
+    solution: {
+      type: 'keyword',
+    },
   },
 } as const);
 
