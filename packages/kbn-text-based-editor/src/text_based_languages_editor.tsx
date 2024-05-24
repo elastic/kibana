@@ -416,7 +416,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
-      getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
