@@ -50,9 +50,7 @@ export const PresentationPanelHeader = <
   );
 
   const showPanelBar =
-    (!hideTitle && (panelTitle || panelDescription)) ||
-    badgeElements.length > 0 ||
-    notificationElements.length > 0;
+    (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
 
   const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
   const ariaLabelElement = (
@@ -61,7 +59,7 @@ export const PresentationPanelHeader = <
     </EuiScreenReaderOnly>
   );
 
-  const headerClasses = classNames('embPanel__header', {
+  const headerClasses = classNames('embPanel__header', 'embPanel--dragHandle', {
     'embPanel__header--floater': !showPanelBar,
   });
 

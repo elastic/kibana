@@ -90,7 +90,9 @@ export const PresentationPanelInternal = <
   }, [dataLoading, blockingError]);
 
   return (
-    <PresentationPanelContextMenu {...{ index, api, getActions, actionPredicate, viewMode }}>
+    <PresentationPanelContextMenu
+      {...{ index, api, getActions, actionPredicate, viewMode, showNotifications }}
+    >
       <EuiPanel
         role="figure"
         paddingSize="none"

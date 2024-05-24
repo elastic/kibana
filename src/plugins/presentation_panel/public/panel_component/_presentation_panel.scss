@@ -186,57 +186,56 @@
   z-index: $euiZLevel1;
 }
 
-.embPanel__floatingActionsWrapper {
+.embPanel__floatingActionsAnchor {
   position: relative;
   height: 100%;
-  z-index: $euiZLevel1; // apply high z-index to all children
+
+  .embPanel_floatingActionsWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $euiSizeS;
+    z-index: $euiZLevel1; // apply high z-index to all children
+  }
 
   .embPanel__floatingActions {
-    opacity: 0;
-    // slower transition on hover leave in case the user accidentally stops hover
-    transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
-
     position: absolute;
     padding: $euiSizeXS;
     
     // OVER PANEL
     // border-radius: $euiBorderRadius;
-    // z-index: $euiZLevel9; 
     // top: (-$euiSizeL);
     
     // UNDER PANEL
-    z-index: -1;
     border-top-right-radius: $euiBorderRadius;
     border-top-left-radius: $euiBorderRadius;
-    top: 0;
+    top: $euiSizeXS;
 
     background-color: $euiColorEmptyShade;
     box-shadow: 0 0 0 1px $euiColorLightShade;
     height: $euiSizeXL;
 
     &:not(.embPanel__floatingActions--openContextMenu) {
-      opacity: 0;
-      // slower transition on hover leave in case the user accidentally stops hover
-      transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
-      top: 0;
-    }
-  
-    &.embPanel__floatingActions--openContextMenu {
+      // z-index: -1;
+      // opacity: 0;
+      // // slower transition on hover leave in case the user accidentally stops hover
+      // transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
+      // top: $euiSizeXS;
+      
+      // Always show: REMOVE THESE
       opacity: 1;
       transition: visibility $euiAnimSpeedFast, opacity $euiAnimSpeedFast;
       top: -$euiSizeXL;
+      z-index: $euiZLevel9; 
     }
   }
 
-  &:hover, &:focus-within {
-    .embPanel__floatingActions {
-      opacity: 1;
-      transition: visibility $euiAnimSpeedFast, opacity $euiAnimSpeedFast;
-      top: -$euiSizeXL;
-    }
-  }
-
-  .embPanel__floatingActionsLeft {
+   .embPanel__floatingActionsLeft {
     left: $euiSize;
     padding: $euiSizeS;
 
@@ -254,4 +253,19 @@
   .embPanel__floatingActionsRight {
     right: $euiSize;
   }
+
+  .embPanel__descriptionTooltipAnchor {
+    padding: $euiSizeXS;
+  }
+
+  &:hover .embPanel__floatingActions, &:focus-within .embPanel__floatingActions, .embPanel__floatingActions--openContextMenu {
+      opacity: 1;
+      transition: visibility $euiAnimSpeedFast, opacity $euiAnimSpeedFast;
+      top: -$euiSizeXL;
+      z-index: $euiZLevel9; 
+  }
+
+ 
+
+
 }
