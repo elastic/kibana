@@ -12,7 +12,6 @@ import { initializeTimeRange, initializeTitles, useFetchContext } from '@kbn/pre
 import type { LogStreamApi, LogStreamSerializedState, Services } from './types';
 import { datemathToEpochMillis } from '../../utils/datemath';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { LOG_STREAM_EMBEDDABLE } from './constants';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CoreProviders } from '../../apps/common_providers';
