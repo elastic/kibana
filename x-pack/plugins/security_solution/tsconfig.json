@@ -15,7 +15,11 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -201,6 +205,9 @@
     "@kbn/deeplinks-security",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/esql-ast"
+    "@kbn/esql-ast",
+    "@kbn/field-utils",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/langchain"
   ]
 }

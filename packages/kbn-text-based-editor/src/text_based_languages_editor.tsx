@@ -9,6 +9,7 @@
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
+import { isEqual } from 'lodash';
 import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
@@ -50,9 +51,8 @@ import {
   type MonacoMessage,
   getWrappedInPipesCode,
   parseErrors,
-  getIndicesList,
-  getRemoteIndicesList,
   clearCacheWhenOld,
+  getESQLSources,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -61,7 +61,6 @@ import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 import { addQueriesToCache, updateCachedQueries } from './history_local_storage';
 
 import './overwrite.scss';
-import { isEqual } from 'lodash';
 
 export interface TextBasedLanguagesEditorProps {
   /** The aggregate type query */
@@ -184,6 +183,23 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
+
+  const editorShouldNotValidate = useMemo(() => {
+    return (
+      isLoading ||
+      isDisabled ||
+      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')) ||
+      Boolean(!isCodeEditorExpandedFocused && queryString === '')
+    );
+  }, [
+    codeOneLiner,
+    isCodeEditorExpandedFocused,
+    isCompactFocused,
+    isDisabled,
+    isLoading,
+    queryString,
+  ]);
+
   const [abortController, setAbortController] = useState(new AbortController());
   // contains both client side validation and server messages
   const [editorMessages, setEditorMessages] = useState<{
@@ -360,14 +376,24 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
   }, []);
 
-  const esqlCallbacks: ESQLCallbacks = useMemo(
-    () => ({
+  const { cache: dataSourcesCache, memoizedSources } = useMemo(() => {
+    const fn = memoize(
+      (...args: [DataViewsPublicPluginStart]) => ({
+        timestamp: Date.now(),
+        result: getESQLSources(...args),
+      }),
+      ({ esql }) => esql
+    );
+
+    return { cache: fn.cache, memoizedSources: fn };
+  }, []);
+
+  const esqlCallbacks: ESQLCallbacks = useMemo(() => {
+    const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        const [remoteIndices, localIndices] = await Promise.all([
-          getRemoteIndicesList(dataViews),
-          getIndicesList(dataViews),
-        ]);
-        return [...localIndices, ...remoteIndices];
+        clearCacheWhenOld(dataSourcesCache, queryString);
+        const sources = await memoizedSources(dataViews).result;
+        return sources;
       },
       getFieldsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
@@ -391,7 +417,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
-      getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -400,16 +425,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
-    }),
-    [
-      dataViews,
-      expressions,
-      indexManagementApiService,
-      esqlFieldsCache,
-      memoizedFieldsFromESQL,
-      abortController,
-    ]
-  );
+    };
+    return callbacks;
+  }, [
+    queryString,
+    memoizedSources,
+    dataSourcesCache,
+    dataViews,
+    esqlFieldsCache,
+    memoizedFieldsFromESQL,
+    expressions,
+    abortController,
+    indexManagementApiService,
+  ]);
 
   const parseMessages = useCallback(async () => {
     if (editorModel.current) {
@@ -420,32 +448,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       warnings: [],
     };
   }, [esqlCallbacks, queryString]);
-
-  // clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone
-
-  useEffect(() => {
-    console.log('changed : ', { clientParserMessages });
-  }, [clientParserMessages]);
-
-  useEffect(() => {
-    console.log('changed : ', { isLoading });
-  }, [isLoading]);
-
-  useEffect(() => {
-    console.log('changed : ', { isQueryLoading });
-  }, [isQueryLoading]);
-
-  useEffect(() => {
-    console.log('changed : ', { queryString });
-  }, [queryString]);
-
-  useEffect(() => {
-    console.log('changed : ', { timeZone });
-  }, [timeZone]);
-
-  useEffect(() => {
-    console.log('changed : ', { parseMessages });
-  }, [parseMessages]);
 
   useEffect(() => {
     const validateQuery = async () => {
@@ -482,9 +484,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     }
   }, [clientParserMessages, isLoading, isQueryLoading, parseMessages, queryString, timeZone]);
 
+  useEffect(() => {
+    if (code === '') {
+      setEditorMessages({ errors: [], warnings: [] });
+    }
+  }, [code]);
+
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
-      if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed()) return;
+      if (!editorModel.current || language !== 'esql' || editorModel.current.isDisposed() || !code)
+        return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
       const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
       const markers = [];
@@ -498,12 +507,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return;
       }
     },
-    [language, parseMessages]
+    [code, language, parseMessages]
   );
 
   useDebounceWithOptions(
     async () => {
-      if (!editorModel.current) return;
+      if (!editorModel.current || editorShouldNotValidate) return;
       const subscription = { active: true };
       if (code === codeWhenSubmitted && (serverErrors || serverWarning)) {
         const parsedErrors = parseErrors(serverErrors || [], code);
@@ -673,10 +682,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     lightbulb: {
       enabled: false,
     },
-    readOnly:
-      isLoading ||
-      isDisabled ||
-      Boolean(!isCompactFocused && codeOneLiner && codeOneLiner.includes('...')),
+    readOnly: editorShouldNotValidate,
   };
 
   if (isCompactFocused) {

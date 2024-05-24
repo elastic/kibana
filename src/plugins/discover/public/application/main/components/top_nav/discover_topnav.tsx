@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -24,18 +23,14 @@ import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
 import { useDiscoverTopNav } from './use_discover_topnav';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
-  updateQuery: (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => void;
   stateContainer: DiscoverStateContainer;
-  textBasedLanguageModeErrors?: Error;
-  textBasedLanguageModeWarning?: string;
+  esqlModeErrors?: Error;
+  esqlModeWarning?: string;
   onFieldEdited: () => Promise<void>;
   isLoading?: boolean;
   onCancelClick?: () => void;
@@ -44,9 +39,8 @@ export interface DiscoverTopNavProps {
 export const DiscoverTopNav = ({
   savedQuery,
   stateContainer,
-  updateQuery,
-  textBasedLanguageModeErrors,
-  textBasedLanguageModeWarning,
+  esqlModeErrors,
+  esqlModeWarning,
   onFieldEdited,
   isLoading,
   onCancelClick,
@@ -64,17 +58,15 @@ export const DiscoverTopNav = ({
   const query = useAppStateSelector((state) => state.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
-  console.log({ dataView });
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
   const savedSearch = useSavedSearchInitial();
+  const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
-    // always show the timepicker for text based languages
-    const isTextBased = isTextBasedQuery(query);
+    // always show the timepicker for ES|QL mode
     return (
-      isTextBased ||
-      (!isTextBased && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
+      isEsqlMode || (!isEsqlMode && dataView.isTimeBased() && dataView.type !== DataViewType.ROLLUP)
     );
-  }, [dataView, query]);
+  }, [dataView, isEsqlMode]);
 
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -158,7 +150,7 @@ export const DiscoverTopNav = ({
     }
   };
 
-  const onTextBasedSavedAndExit = useCallback(
+  const onEsqlSavedAndExit = useCallback(
     ({ onSave, onCancel }) => {
       onSaveSearch({
         savedSearch: stateContainer.savedSearchState.getState(),
@@ -237,13 +229,12 @@ export const DiscoverTopNav = ({
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
-  console.log({ dataView });
   return (
     <SearchBar
       {...topNavProps}
       appName="discover"
       indexPatterns={[dataView]}
-      onQuerySubmit={updateQuery}
+      onQuerySubmit={stateContainer.actions.onUpdateQuery}
       onCancel={onCancelClick}
       isLoading={isLoading}
       onSavedQueryIdChange={updateSavedQueryId}
@@ -265,11 +256,9 @@ export const DiscoverTopNav = ({
         shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
       }
       displayStyle="detached"
-      textBasedLanguageModeErrors={
-        textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
-      }
-      textBasedLanguageModeWarning={textBasedLanguageModeWarning}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+      textBasedLanguageModeErrors={esqlModeErrors ? [esqlModeErrors] : undefined}
+      textBasedLanguageModeWarning={esqlModeWarning}
+      onTextBasedSavedAndExit={onEsqlSavedAndExit}
       prependFilterBar={
         searchBarCustomization?.PrependFilterBar ? (
           <searchBarCustomization.PrependFilterBar />
