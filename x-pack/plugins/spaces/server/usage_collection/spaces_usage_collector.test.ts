@@ -169,7 +169,7 @@ describe('with a basic license', () => {
           disabledFeatures: {
             terms: { field: 'space.disabledFeatures', include: ['feature1', 'feature2'], size: 2 },
           },
-          solution: { terms: { field: 'space.solution' } },
+          solution: { terms: { field: 'space.solution', size: 4 } },
         },
         query: { term: { type: { value: 'space' } } },
         size: 0,

@@ -46,6 +46,8 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
+  const knownSolutions = ['classic', 'search', 'observability', 'security'];
+
   const resp = (await esClient.search({
     index: kibanaIndex,
     body: {
@@ -68,6 +70,7 @@ async function getSpacesUsage(
         solution: {
           terms: {
             field: 'space.solution',
+            size: knownSolutions.length,
           },
         },
       },
@@ -86,6 +89,11 @@ async function getSpacesUsage(
     return acc;
   }, {});
 
+  const initialSolutionCounts = knownSolutions.reduce<Record<string, number>>((acc, solution) => {
+    acc[solution] = 0;
+    return acc;
+  }, {});
+
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
     // eslint-disable-next-line @typescript-eslint/naming-convention
     (acc, { key, doc_count }) => {
@@ -101,7 +109,7 @@ async function getSpacesUsage(
       acc[key] = doc_count;
       return acc;
     },
-    {}
+    initialSolutionCounts
   );
 
   const usesFeatureControls = Object.values(disabledFeatures).some(
