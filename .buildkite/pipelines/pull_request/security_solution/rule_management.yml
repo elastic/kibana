@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
@@ -20,7 +20,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
@@ -38,7 +38,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
@@ -56,7 +56,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4

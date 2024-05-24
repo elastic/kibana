@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/fleet_cypress.sh
     label: 'Fleet Cypress Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4

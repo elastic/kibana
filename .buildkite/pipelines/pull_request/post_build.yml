@@ -5,7 +5,7 @@ steps:
   - command: .buildkite/scripts/lifecycle/post_build.sh
     label: Post-Build
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

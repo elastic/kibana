@@ -3,7 +3,7 @@ steps:
     label: 'Build Project Image'
     key: build_project_image
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-16
@@ -17,7 +17,7 @@ steps:
   - command: .buildkite/scripts/steps/serverless/deploy.sh
     label: 'Deploy Project'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4

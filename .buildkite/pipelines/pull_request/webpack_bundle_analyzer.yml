@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/webpack_bundle_analyzer/build_and_upload.sh
     label: 'Build Webpack Bundle Analyzer reports'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4

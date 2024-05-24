@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/uptime_plugin.sh
     label: 'Uptime @elastic/synthetics Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4

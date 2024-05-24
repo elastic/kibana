@@ -2,7 +2,7 @@ steps:
   - command: .buildkite/scripts/steps/functional/slo_plugin_e2e.sh
     label: 'SLO Plugin @elastic/synthetics Tests'
     agents:
-      image: family/kibana-ubuntu-2004
+      image: family/kibana-fips-ubuntu-2004
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
