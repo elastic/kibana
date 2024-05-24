@@ -23,6 +23,8 @@ export const FEATURE_KEYS = {
   GET_FILE: 'Get file',
   UPLOAD: 'Upload file',
   EXECUTE: 'Execute command',
+  // TODO:  for API changes in a subsequent PR
+  // SCAN: 'Scan files',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
   ENDPOINT_EXCEPTIONS: 'Endpoint exceptions',
 } as const;
@@ -39,6 +41,8 @@ const RESPONSE_ACTIONS_FEATURE_KEY: Readonly<Record<ResponseActionsApiCommandNam
     'get-file': 'GET_FILE',
     execute: 'EXECUTE',
     upload: 'UPLOAD',
+    // TODO:  for API changes in a subsequent PR
+    // scan: 'SCAN',
   };
 
 export const getResponseActionFeatureKey = (

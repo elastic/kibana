@@ -23,6 +23,7 @@ import type {
   ItemDefinition,
 } from '@kbn/core-chrome-browser/src';
 import type { Location } from 'history';
+import type { MouseEventHandler } from 'react';
 import { getPresets } from './navigation_presets';
 
 const wrapIdx = (index: number): string => `[${index}]`;
@@ -212,15 +213,17 @@ function getNodeStatus(
     deepLink,
     cloudLink,
     sideNavStatus,
+    onClick,
   }: {
     link?: string;
     deepLink?: ChromeNavLink;
     cloudLink?: CloudLinkId;
     sideNavStatus?: SideNavNodeStatus;
+    onClick?: MouseEventHandler<HTMLButtonElement | HTMLElement>;
   },
   { cloudLinks }: { cloudLinks: CloudLinks }
 ): SideNavNodeStatus | 'remove' {
-  if (link && !deepLink) {
+  if (link && !deepLink && !onClick) {
     // If a link is provided, but no deepLink is found, don't render anything
     return 'remove';
   }
@@ -259,7 +262,7 @@ function validateNodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
->({ id, link, href, cloudLink, renderAs }: NodeDefinition<LinkId, Id, ChildrenId>) {
+>({ id, link, href, cloudLink, renderAs, onClick }: NodeDefinition<LinkId, Id, ChildrenId>) {
   if (link && cloudLink) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. Only one of "link" or "cloudLink" can be provided.`
@@ -275,9 +278,9 @@ function validateNodeProps<
       `[Chrome navigation] Error in node [${id}]. If renderAs is set to "panelOpener", a "link" must also be provided.`
     );
   }
-  if (renderAs === 'item' && !link) {
+  if (renderAs === 'item' && !link && !onClick) {
     throw new Error(
-      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" must also be provided.`
+      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" or "onClick" must also be provided.`
     );
   }
 }
@@ -302,7 +305,7 @@ const initNavNode = <
 ): ChromeProjectNavigationNode | null => {
   validateNodeProps(node);
 
-  const { cloudLink, link, children, ...navNodeFromProps } = node;
+  const { cloudLink, link, children, onClick, ...navNodeFromProps } = node;
   const deepLink = link !== undefined ? deepLinks[link] : undefined;
   const sideNavStatus = getNodeStatus(
     {
@@ -310,6 +313,7 @@ const initNavNode = <
       deepLink,
       cloudLink,
       sideNavStatus: navNodeFromProps.sideNavStatus,
+      onClick,
     },
     { cloudLinks }
   );
@@ -324,7 +328,7 @@ const initNavNode = <
   const href = isElasticInternalLink ? cloudLinks[cloudLink]?.href : node.href;
   const path = parentNodePath ? `${parentNodePath}.${id}` : id;
 
-  if (href && !isAbsoluteLink(href)) {
+  if (href && !isAbsoluteLink(href) && !onClick) {
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
   }
 
@@ -332,6 +336,7 @@ const initNavNode = <
     ...navNodeFromProps,
     id,
     href: getNavigationNodeHref({ href, deepLink }),
+    onClick,
     path,
     title,
     deepLink,
