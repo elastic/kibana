@@ -328,7 +328,7 @@ describe('when on the package policy create page', () => {
       });
     });
 
-    test('should show root privileges calloutnwith data streams on create page', async () => {
+    test('should show root privileges callout with data streams on create page', async () => {
       (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
         getMockPackageInfo({ dataStreamRequiresRoot: true })
       );

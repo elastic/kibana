@@ -16,7 +16,7 @@ interface Props {
 export const RootPrivilegesCallout: React.FC<Props> = ({ dataStreams }) => {
   return (
     <EuiCallOut
-      size="s"
+      size="m"
       color="warning"
       title={
         <FormattedMessage
