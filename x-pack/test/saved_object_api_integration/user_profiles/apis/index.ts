@@ -20,5 +20,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./bulk_create'));
     loadTestFile(require.resolve('./update'));
+    loadTestFile(require.resolve('./bulk_update'));
   });
 }
