@@ -39,6 +39,7 @@ import {
   selectTimelineColumns,
   selectTimelineDateRange,
   selectTimelineESQLOptions,
+  selectTimelinesItemPageOptions,
   selectTimelinesItemsPerPage,
 } from '../../../../store/selectors';
 
@@ -71,6 +72,10 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
 
   const timelineItemsPerPage = useSelector((state: State) =>
     selectTimelinesItemsPerPage(state, timelineId)
+  );
+
+  const timelineItemPageOptions = useSelector((state: State) =>
+    selectTimelinesItemPageOptions(state, timelineId)
   );
 
   const timelineColumns = useSelector((state: State) => selectTimelineColumns(state, timelineId));
@@ -263,6 +268,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
             isSortEnabled={true}
             timelineId={timelineId}
             itemsPerPage={timelineItemsPerPage}
+            itemsPerPageOptions={timelineItemPageOptions}
             sort={esqlSort}
             events={data.data}
             refetch={refetch}

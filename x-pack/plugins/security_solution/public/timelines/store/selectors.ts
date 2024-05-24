@@ -210,3 +210,8 @@ export const selectTimelinesItemsPerPage = createSelector(
   selectTimelineById,
   (timeline) => timeline?.itemsPerPage
 );
+
+export const selectTimelinesItemPageOptions = createSelector(
+  selectTimelineById,
+  (timeline) => timeline?.itemsPerPageOptions
+);
