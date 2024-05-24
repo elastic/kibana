@@ -73,26 +73,6 @@ export async function setupFleet(
   let created;
   try {
     try {
-      // check if fleet setup is already started
-      const { attributes: fleetSetupLock } = await soClient.get<FleetSetupLock>(
-        FLEET_SETUP_LOCK_TYPE,
-        FLEET_SETUP_LOCK_TYPE
-      );
-
-      if (fleetSetupLock?.status === 'in_progress') {
-        logger.info('Fleet setup already in progress, abort setup');
-        return {
-          isInitialized: false,
-          nonFatalErrors: [],
-        };
-      }
-    } catch (error) {
-      if (error.isBoom && error.output.statusCode === 404) {
-        logger.info('Fleet setup lock does not exist, continue setup');
-      }
-    }
-
-    try {
       created = await soClient.create<FleetSetupLock>(
         FLEET_SETUP_LOCK_TYPE,
         {
@@ -104,8 +84,7 @@ export async function setupFleet(
       );
       logger.info(`Fleet setup lock created: ${JSON.stringify(created)}`);
     } catch (error) {
-      // TODO only abort if conflict error?
-      logger.warn(`Error creating fleet setup lock, abort setup: ${error}`);
+      logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
       return {
         isInitialized: false,
         nonFatalErrors: [],
@@ -121,11 +100,13 @@ export async function setupFleet(
     // only delete lock if it was created by this instance
     if (created) {
       try {
-        // TODO retry?
         await soClient.delete(FLEET_SETUP_LOCK_TYPE, FLEET_SETUP_LOCK_TYPE, { refresh: true });
         logger.info(`Fleet setup lock deleted`);
       } catch (error) {
-        logger.warn(`Error clearing fleet setup status: ${error}`);
+        // ignore 404 errors
+        if (error.statusCode !== 404) {
+          logger.error('Could not delete fleet setup lock', error);
+        }
       }
     }
   }
