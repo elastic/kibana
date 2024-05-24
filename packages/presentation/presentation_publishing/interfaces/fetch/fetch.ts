@@ -24,6 +24,7 @@ import {
   tap,
 } from 'rxjs';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { useEffect, useMemo } from 'react';
 import {
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
@@ -33,7 +34,6 @@ import {
 import { apiPublishesSearchSession, PublishesSearchSession } from './publishes_search_session';
 import { apiHasParentApi, HasParentApi } from '../has_parent_api';
 import { apiPublishesReload } from './publishes_reload';
-import { useEffect, useMemo } from 'react';
 import { useStateFromPublishingSubject } from '../../publishing_subject/publishing_subject';
 
 export interface FetchContext {
