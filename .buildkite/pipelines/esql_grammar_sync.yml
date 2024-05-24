@@ -1,6 +1,15 @@
 steps:
   - command: .buildkite/scripts/steps/esql_grammar_sync.sh
-    label: ES|QL Grammar Sync
+    label: Grammar Sync
+    timeout_in_minutes: 10
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      preemptible: true
+  - command: .buildkite/scripts/steps/esql_generate_function_definitions.sh
+    label: Generate Function Definitions
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
