@@ -5,10 +5,8 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type {
-  NavigationTreeDefinition,
-  SolutionNavigationDefinition,
-} from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { of } from 'rxjs';
 
 const title = i18n.translate(
@@ -350,10 +348,11 @@ const navTree: NavigationTreeDefinition = {
   ],
 };
 
-export const definition: SolutionNavigationDefinition = {
+export const definition: AddSolutionNavigationArg = {
   id: 'oblt',
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
   navigationTree$: of(navTree),
+  dataTestSubj: 'observabilitySideNav',
 };

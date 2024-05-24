@@ -461,6 +461,10 @@ export class Plugin
       updater$: this.appUpdater$,
     });
 
+    import('./navigation_tree').then(({ definition }) => {
+      return pluginsStart.navigation.addSolutionNavigation(definition);
+    });
+
     return {
       config,
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
