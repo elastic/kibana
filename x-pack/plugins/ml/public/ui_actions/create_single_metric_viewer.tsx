@@ -42,6 +42,7 @@ export function createAddSingleMetricViewerPanelAction(
         getIconType: () => PLUGIN_ICON,
       },
     ],
+    getIconType: () => 'visLine',
     getDisplayName: () =>
       i18n.translate('xpack.ml.components.singleMetricViewerEmbeddable.displayName', {
         defaultMessage: 'Single metric viewer',
