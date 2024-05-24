@@ -8,18 +8,24 @@ report_main_step () {
 main () {
   cd "$PARENT_DIR"
 
-  report_main_step "Cloning Elasticsearch repository..."
+  report_main_step "Cloning Elasticsearch repository"
 
   rm -rf elasticsearch
   git clone https://github.com/elastic/elasticsearch --depth 1
 
+  report_main_step "Bootstraping Kibana"
+
+  cd "$KIBANA_DIR"
+
+  .buildkite/scripts/bootstrap.sh
+
   cd "$KIBANA_DIR/packages/kbn-esql-validation-autocomplete"
 
-  report_main_step "Generate function definitions..."
+  report_main_step "Generate function definitions"
 
   yarn make:defs $PARENT_DIR/elasticsearch
 
-  report_main_step "Generate function validation tests..."
+  report_main_step "Generate function validation tests"
   
   yarn make:tests
 
