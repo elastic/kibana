@@ -55,6 +55,7 @@ xpack.fleet.internal.registry.excludePackages: [
     'beaconing',
     'cloud_security_posture',
     'cloud_defend',
+    'security_detection_engine',
 
     # Removed in 8.11 integrations
     'cisco',
