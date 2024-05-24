@@ -13,13 +13,13 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 export interface ConnectionDetailsGlobalDependencies {
   start: {
     core: {
+      analytics: CoreStart['analytics'];
       i18n: CoreStart['i18n'];
       docLinks: CoreStart['docLinks'];
       theme: CoreStart['theme'];
       http: CoreStart['http'];
       application: CoreStart['application'];
       overlays: CoreStart['overlays'];
-      analytics?: CoreStart['analytics'];
     };
     plugins: {
       cloud?: CloudStart;
