@@ -18,7 +18,7 @@ steps:
       provider: gcp
       machineType: c3-standard-22
       preemptible: true
-      spotZones: 'us-central1-a,us-central1-b,us-central1-c,us-central1-f'
+      spotZones: 'us-central1-a,us-central1-b,us-central1-c'
     key: build
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 60
@@ -35,7 +35,7 @@ steps:
       provider: gcp
       machineType: c3-standard-4
       preemptible: true
-      spotZones: 'us-central1-a,us-central1-b,us-central1-c,us-central1-f'
+      spotZones: 'us-central1-a,us-central1-b,us-central1-c'
     key: quick_checks
     timeout_in_minutes: 60
     retry:
