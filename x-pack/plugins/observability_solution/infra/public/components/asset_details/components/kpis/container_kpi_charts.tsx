@@ -38,10 +38,9 @@ export const ContainerKpiCharts = ({
   searchSessionId,
   loading = false,
 }: ContainerKpiChartsProps) => {
-  const isK8Container = useIntegrationCheck({ dependsOn: INTEGRATIONS.kubernetesContainer });
-
-  return isK8Container ? (
-    <KubernetesKpiCharts
+  const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
+  return isDockerContainer ? (
+    <DockerKpiCharts
       dateRange={dateRange}
       dataView={dataView}
       filters={filters}
@@ -51,7 +50,7 @@ export const ContainerKpiCharts = ({
       loading={loading}
     />
   ) : (
-    <DockerKpiCharts
+    <KubernetesKpiCharts
       dateRange={dateRange}
       dataView={dataView}
       filters={filters}
