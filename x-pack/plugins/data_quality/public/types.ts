@@ -6,7 +6,7 @@
  */
 
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
+import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataQualityPluginSetup {}
@@ -20,5 +20,5 @@ export interface AppPluginSetupDependencies {
 
 export interface AppPluginStartDependencies {
   datasetQuality: DatasetQualityPluginStart;
-  management: ManagementSetup;
+  management: ManagementStart;
 }
