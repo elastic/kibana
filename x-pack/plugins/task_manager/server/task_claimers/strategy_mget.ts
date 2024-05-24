@@ -108,6 +108,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     });
 
     if (docs.length === 0) {
+      // eslint-disable-next-line no-console
       console.log(`*** Room for ${initialCapacity} tasks and claimed 0 tasks.`);
       return emptyClaimOwnershipResult();
     }
@@ -195,6 +196,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
     apmTrans.end('success');
 
+    // eslint-disable-next-line no-console
     console.log(`*** Room for ${initialCapacity} tasks and claimed ${finalResults.length} tasks.`);
     return {
       stats: {
