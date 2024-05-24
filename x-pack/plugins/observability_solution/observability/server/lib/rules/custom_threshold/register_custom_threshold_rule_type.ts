@@ -77,8 +77,7 @@ export function thresholdRuleType(
   logger: Logger,
   locators: CustomThresholdLocators
 ) {
-  const comparators: string[] = Object.values(COMPARATORS);
-  comparators.push(LEGACY_COMPARATORS.OUTSIDE_RANGE);
+  const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
     comparator: oneOfLiterals(comparators),

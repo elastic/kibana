@@ -53,15 +53,14 @@ export function registerMetricThresholdRuleType(
   if (!featureFlags.metricThresholdAlertRuleEnabled) {
     return;
   }
-  const comparators: string[] = Object.values(COMPARATORS);
-  comparators.push(LEGACY_COMPARATORS.OUTSIDE_RANGE);
+  const comparator = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
-    comparator: oneOfLiterals(comparators),
+    comparator: oneOfLiterals(comparator),
     timeUnit: schema.string(),
     timeSize: schema.number(),
     warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
-    warningComparator: schema.maybe(oneOfLiterals(comparators)),
+    warningComparator: schema.maybe(oneOfLiterals(comparator)),
   };
 
   const nonCountCriterion = schema.object({
