@@ -70,23 +70,10 @@ export default function ({ getService }: FtrProviderContext) {
       'kibana.version',
       'kibana.alert.consecutive_matches',
     ];
-    const svlCommonApi = getService('svlCommonApi');
-    const svlUserManager = getService('svlUserManager');
-    const supertestWithoutAuth = getService('supertestWithoutAuth');
-    let roleAuthc: RoleCredentials;
-    let internalReqHeader: InternalRequestHeader;
 
     before(async () => {
       roleAuthc = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-    });
-
-    before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
-      internalReqHeader = svlCommonApi.getInternalRequestHeader();
-    });
-    after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     afterEach(async () => {
@@ -101,6 +88,10 @@ export default function ({ getService }: FtrProviderContext) {
         .set(roleAuthc.apiKeyHeader)
         .expect(204);
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
+    });
+
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     it('should schedule actions for summary of alerts per rule run', async () => {
