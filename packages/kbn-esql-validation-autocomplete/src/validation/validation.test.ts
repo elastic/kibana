@@ -4052,6 +4052,8 @@ describe('validation logic', () => {
         ]);
 
         testErrorsAndWarnings('from a_index | sort mv_dedupe(numberField)', []);
+        testErrorsAndWarnings('row var = mv_dedupe(to_cartesianpoint("POINT (30 10)"))', []);
+        testErrorsAndWarnings('from a_index | eval mv_dedupe(cartesianPointField)', []);
       });
 
       describe('mv_first', () => {
