@@ -10,15 +10,11 @@ import { renderHook } from '@testing-library/react-hooks';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { CasesContext } from '../../cases_context';
-import {
-  CasesContextStoreActionsList,
-  getInitialCasesContextState,
-} from '../../cases_context/state/cases_context_reducer';
+import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { useCasesAddToNewCaseFlyout } from './use_cases_add_to_new_case_flyout';
 import { allCasesPermissions } from '../../../common/mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
-import { BehaviorSubject } from 'rxjs';
 
 jest.mock('../../../common/use_cases_toast');
 
@@ -42,7 +38,6 @@ describe('use cases add to new case flyout hook', () => {
             dispatch,
             features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
             releasePhase: 'ga',
-            casesContextState$: new BehaviorSubject(getInitialCasesContextState()),
           }}
         >
           {children}
