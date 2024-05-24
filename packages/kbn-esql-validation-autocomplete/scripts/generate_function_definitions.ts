@@ -354,7 +354,6 @@ import type { FunctionDefinition } from './types';
   const pathToElasticsearch = process.argv[2];
 
   const ESFunctionDefinitionsDirectory = join(
-    __dirname,
     pathToElasticsearch,
     'docs/reference/esql/functions/kibana/definition'
   );
