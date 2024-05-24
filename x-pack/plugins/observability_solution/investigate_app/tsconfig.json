@@ -50,6 +50,6 @@
     "@kbn/alerts-ui-shared",
     "@kbn/es-query",
     "@kbn/slo-plugin",
-    "@kbn/ui-actions-plugin",
+    "@kbn/ui-actions-plugin"
   ],
 }
