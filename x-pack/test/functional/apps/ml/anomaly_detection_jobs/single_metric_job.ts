@@ -397,7 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(`cloning job: [${jobId}]`);
       await ml.jobTable.clickCloneJobAction(jobId);
 
-      await ml.testExecution.logTestStep('job creation displays the time range step');
+      await ml.testExecution.logTestStep('job cloning displays the time range step');
       await ml.jobWizardCommon.assertTimeRangeSectionExists();
 
       await ml.testExecution.logTestStep('job cloning sets the time range');
