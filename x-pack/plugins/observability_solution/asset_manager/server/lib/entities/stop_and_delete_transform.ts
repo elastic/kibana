@@ -35,7 +35,7 @@ export async function stopAndDeleteHistoryTransform(
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot stop or delete entity transforms`);
+    logger.error(`Cannot stop or delete history transform [${definition.id}]`);
     throw e;
   }
 }
@@ -63,7 +63,7 @@ export async function stopAndDeleteSummaryTransform(
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot stop or delete entity transforms`);
+    logger.error(`Cannot stop or delete summary transform [${definition.id}]`);
     throw e;
   }
 }

@@ -30,7 +30,7 @@ export async function startTransform(
       { logger }
     );
   } catch (err) {
-    logger.error(`Cannot start entity transforms.`);
+    logger.error(`Cannot start entity transforms [${definition.id}]`);
     throw err;
   }
 }
