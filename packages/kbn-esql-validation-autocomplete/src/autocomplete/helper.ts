@@ -7,6 +7,7 @@
  */
 
 import type { ESQLAstItem, ESQLCommand, ESQLFunction } from '@kbn/esql-ast';
+import { FunctionDefinition } from '../definitions/types';
 import { getFunctionDefinition, isAssignment, isFunctionItem } from '../shared/helpers';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
@@ -36,4 +37,21 @@ export function getFunctionsToIgnoreForStats(command: ESQLCommand, argIndex: num
   }
   const arg = command.args[argIndex];
   return isFunctionItem(arg) ? getFnContent(arg) : [];
+}
+
+/**
+ * Given a function signature, returns the parameter at the given position.
+ *
+ * Takes into account variadic functions (minParams), returning the last
+ * parameter if the position is greater than the number of parameters.
+ *
+ * @param signature
+ * @param position
+ * @returns
+ */
+export function getParamAtPosition(
+  { params, minParams }: FunctionDefinition['signatures'][number],
+  position: number
+) {
+  return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }

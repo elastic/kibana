@@ -26,8 +26,8 @@ const examplesLabel = i18n.translate(
 export const buildFunctionDocumentation = (
   signatures: Array<{
     declaration: string;
-    examples?: string[];
-  }>
+  }>,
+  examples: string[] | undefined
 ) => `
 ---
 \
@@ -41,28 +41,23 @@ ${signatures
 `
   )
   .join('\n\n')}
+  ${
+    examples?.length
+      ? `\
 ---
-${
-  signatures.some((examples) => examples)
-    ? `\
 ***${examplesLabel}***
 \
-${signatures
-  .filter(({ examples }) => examples)
-  .map(
-    ({ examples }) => `
-  ${examples!
+  ${examples
     .map(
       (i) => `
-  - \`\`${i}\`\`)
+  - \`\`${i}\`\`
 `
     )
     .join('')}
   
 `
-  )}`
-    : ''
-}`;
+      : ''
+  }`;
 
 /** @internal **/
 export const buildDocumentation = (declaration: string, examples?: string[]) => `
