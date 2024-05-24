@@ -54,5 +54,7 @@ export interface ClientConfigType {
   enableDataStreamsStorageColumn?: boolean;
   enableMappingsSourceFieldSection?: boolean;
   enableTogglingDataRetention?: boolean;
-  enableSemanticText?: boolean;
+  dev: {
+    enableSemanticText?: boolean;
+  };
 }

@@ -63,7 +63,7 @@ export class IndexMgmtUIPlugin
       enableDataStreamsStorageColumn,
       enableMappingsSourceFieldSection,
       enableTogglingDataRetention,
-      enableSemanticText,
+      dev: { enableSemanticText },
     } = ctx.config.get<ClientConfigType>();
     this.config = {
       isIndexManagementUiEnabled,

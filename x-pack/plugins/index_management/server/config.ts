@@ -35,6 +35,8 @@ const schemaLatest = schema.object(
     dev: schema.object({
       // deprecated as unused after index details page has been implemented
       enableIndexDetailsPage: schema.boolean({ defaultValue: false }),
+      // deprecate as unused after semantic text is enabled everywhere
+      enableSemanticText: schema.boolean({ defaultValue: false }),
     }),
     enableIndexStats: offeringBasedSchema({
       // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
@@ -62,7 +64,6 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
-    enableSemanticText: schema.boolean({ defaultValue: false }),
   },
   { defaultValue: undefined }
 );
@@ -70,6 +71,9 @@ const schemaLatest = schema.object(
 const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
   exposeToBrowser: {
     ui: true,
+    dev: {
+      enableSemanticText: true,
+    },
     enableIndexActions: true,
     enableLegacyTemplates: true,
     enableIndexStats: true,
@@ -77,7 +81,6 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableDataStreamsStorageColumn: true,
     enableMappingsSourceFieldSection: true,
     enableTogglingDataRetention: true,
-    enableSemanticText: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],
