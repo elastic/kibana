@@ -37,23 +37,25 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
         var namespace = checkDefaultNamespace(request.query.namespace);
         var period = checkDefaultPeriod(request.query.period);
         var deployNames = new Array();
+        var deployments = new Array();
+
         const client = (await context.core).elasticsearch.client.asCurrentUser;
-        if (request.query.name === undefined){
+        if (request.query.name === undefined) {
           const dslDeploys: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
             _source: false,
             fields: [
-            'resource.attributes.k8s.deployment.name',
+              'resource.attributes.k8s.deployment.name',
             ],
             query: {
               bool: {
-                must:[{ exists: { field: 'resource.attributes.k8s.deployment.name' } }]
+                must: [{ exists: { field: 'resource.attributes.k8s.deployment.name' } }]
               },
             },
             aggs: {
-                unique_values: {
-                    terms: { field: 'resource.attributes.k8s.deployment.name', size: 500 },
-                },
+              unique_values: {
+                terms: { field: 'resource.attributes.k8s.deployment.name', size: 500 },
+              },
             },
           };
           const deployEsResponse = await client.search(dslDeploys);
@@ -65,7 +67,7 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
             });
           }
           console.log(deployNames);
-        
+
         } else if (request.query.name !== undefined) {
           deployNames.push(request.query.name)
         }
@@ -74,11 +76,6 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
             {
               term: {
                 'resource.attributes.k8s.deployment.name': name,
-              },
-            },
-            {
-              term: {
-                'resource.attributes.k8s.namespace.name': namespace,
               },
             },
             { exists: { field: 'metrics.k8s.pod.phase' } }
@@ -105,7 +102,7 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
           // console.log(mustsPods);
           // console.log(dslPods);
           const esResponsePods = await client.search(dslPods);
-          //console.log(esResponsePods);
+          console.log("rs"+esResponsePods);
           if (esResponsePods.hits.hits.length > 0) {
             var pod_reasons = new Array();
             var pod_metrics = new Array();
@@ -118,16 +115,18 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
 
             const hitsPods = esResponsePods.hits.hits[0];
             const { fields = {} } = hitsPods
+            var namespace1 = extractFieldValue(fields['resource.attributes.k8s.namespace.name'])
             const hitsPodsAggs = esResponsePods.aggregations.unique_values["buckets"];
             //console.log("hitspods:"+hitsPodsAggs);
             var time = extractFieldValue(fields['@timestamp']);
+            console.log("ns:"+namespace1)
             for (var entries of hitsPodsAggs) {
               const podName = entries.key;
 
-              const dslPodsMemory = defineQueryForAllPodsMemoryUtilisation(podName, namespace, client, period)
+              const dslPodsMemory = defineQueryForAllPodsMemoryUtilisation(podName, namespace1, client, period)
               //console.log(dslPodsMemory);
               const esResponsePods = await client.search(dslPodsMemory);
-              const [pod] = calulcatePodsMemoryUtilisation(podName, namespace, esResponsePods)
+              const [pod] = calulcatePodsMemoryUtilisation(podName, namespace1, esResponsePods)
               pod_reasons.push(pod.reason);
               pod_metrics.push(pod);
             }
@@ -165,35 +164,34 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
               deviation_alarm = "Low"
             }
 
-            //End of Create overall message for deployment
+            var deployments_single = {
+              'name': name,
+              'pods': pod_metrics,
+              'message': `Deployment has memory usage ${memory} and deviation ${deviation_alarm}`,
+              'reason': reasons,
+            };
 
-            return response.ok({
-              body: {
-                time: time,
-                name: request.query.name,
-                namespace: namespace,
-                pods: pod_metrics,
-                alarm: memory,
-                message: {
-                  usage: memory,
-                  deviation: deviation_alarm
-                },
-                reason: reasons,
-              },
-            });
+            deployments.push(deployments_single)
           } else {
-            const message = `Deployment ${namespace}/${request.query.name} not found`
-            return response.ok({
-              body: {
-                time: '',
-                message: message,
-                name: request.query.name,
-                namespace: namespace,
-                reason: "Not found",
-              },
-            });
+            const message = `Deployment ${name} not found`
+            deployments_single = {
+              'name': name,
+              'pods': [],
+              'message': message,
+              'reason': "Not found",
+            }
+            deployments.push(deployments_single)
           }
         }
+        //End of Create overall message for deployment
+        return response.ok({
+          body: {
+            time: time,
+            deployments: deployments
+          },
+        });
+
+
       }
     );
 };
