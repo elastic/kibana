@@ -7,9 +7,13 @@
 
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import type { SupertestWithoutAuthType } from '../../../../../shared/services';
-import { RoleCredentials } from '../../../../../shared/services';
-import { InternalRequestHeader } from '../../../../../shared/services';
+import type { Agent as SuperTestAgent } from 'supertest';
+import {
+  InternalRequestHeader,
+  RoleCredentials,
+  SupertestWithoutAuthType,
+} from '../../../../../shared/services';
+
 interface CreateEsQueryRuleParams {
   size: number;
   thresholdComparator: string;
@@ -136,9 +140,7 @@ export async function createEsQueryRule({
 export const generateUniqueKey = () => uuidv4().replace(/-/g, '');
 
 export async function createAnomalyRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   name = generateUniqueKey(),
   actions = [],
   tags = ['foo', 'bar'],
@@ -149,9 +151,7 @@ export async function createAnomalyRule({
   ruleTypeId = 'apm.anomaly',
   params,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -162,10 +162,10 @@ export async function createAnomalyRule({
   ruleTypeId?: string;
   params?: any;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/api/alerting/rule`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       enabled,
       params: params || {
@@ -190,9 +190,7 @@ export async function createAnomalyRule({
 }
 
 export async function createLatencyThresholdRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   name = generateUniqueKey(),
   actions = [],
   tags = ['foo', 'bar'],
@@ -203,9 +201,7 @@ export async function createLatencyThresholdRule({
   ruleTypeId = 'apm.transaction_duration',
   params,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -216,10 +212,10 @@ export async function createLatencyThresholdRule({
   ruleTypeId?: string;
   params?: any;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/api/alerting/rule`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       enabled,
       params: params || {
@@ -243,9 +239,7 @@ export async function createLatencyThresholdRule({
 }
 
 export async function createInventoryRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   name = generateUniqueKey(),
   actions = [],
   tags = ['foo', 'bar'],
@@ -256,9 +250,7 @@ export async function createInventoryRule({
   ruleTypeId = 'metrics.alert.inventory.threshold',
   params,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   name?: string;
   consumer?: string;
   actions?: any[];
@@ -269,10 +261,10 @@ export async function createInventoryRule({
   ruleTypeId?: string;
   params?: any;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/api/alerting/rule`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       enabled,
       params: params || {
@@ -309,46 +301,38 @@ export async function createInventoryRule({
 }
 
 export async function disableRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_disable`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .expect(204);
   return body;
 }
 
 export async function updateEsQueryRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
   updates,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
   updates: any;
 }) {
-  const { body: r } = await supertestWithoutAuth
+  const { body: r } = await supertest
     .get(`/api/alerting/rule/${ruleId}`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .expect(200);
-  const body = await supertestWithoutAuth
+  const body = await supertest
     .put(`/api/alerting/rule/${ruleId}`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       ...{
         name: r.name,
@@ -371,117 +355,93 @@ export async function updateEsQueryRule({
 }
 
 export async function runRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
-  const response = await supertestWithoutAuth
+  const response = await supertest
     .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .expect(204);
   return response;
 }
 
 export async function muteRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_mute_all`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .expect(204);
   return body;
 }
 
 export async function enableRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_enable`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .expect(204);
   return body;
 }
 
 export async function muteAlert({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
   alertId,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
   alertId: string;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .expect(204);
   return body;
 }
 
 export async function unmuteRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/api/alerting/rule/${ruleId}/_unmute_all`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .expect(204);
   return body;
 }
 
 export async function snoozeRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
-  const { body } = await supertestWithoutAuth
+  const { body } = await supertest
     .post(`/internal/alerting/rule/${ruleId}/_snooze`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader)
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .send({
       snooze_schedule: {
         duration: 100000000,
@@ -497,22 +457,18 @@ export async function snoozeRule({
 }
 
 export async function findRule({
-  supertestWithoutAuth,
-  roleAuthc,
-  internalReqHeader,
+  supertest,
   ruleId,
 }: {
-  supertestWithoutAuth: SupertestWithoutAuthType;
-  roleAuthc: RoleCredentials;
-  internalReqHeader: InternalRequestHeader;
+  supertest: SuperTestAgent;
   ruleId: string;
 }) {
   if (!ruleId) {
     throw new Error(`'ruleId' is undefined`);
   }
-  const response = await supertestWithoutAuth
+  const response = await supertest
     .get(`/api/alerting/rule/${ruleId}`)
-    .set(internalReqHeader)
-    .set(roleAuthc.apiKeyHeader);
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo');
   return response.body || {};
 }

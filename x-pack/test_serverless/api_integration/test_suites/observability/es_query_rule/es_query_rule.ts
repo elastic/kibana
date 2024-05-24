@@ -13,17 +13,28 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from '../../common/alerting/helpers/alerting_api_helper';
+
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
   const supertest = getService('supertest');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const alertingApi = getService('alertingApi');
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('ElasticSearch query rule', () => {
     const RULE_TYPE_ID = '.es-query';
     const ALERT_ACTION_INDEX = 'alert-action-es-query';
     let actionId: string;
     let ruleId: string;
+
+    before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
 
     after(async () => {
       await supertest
@@ -40,6 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
         conflicts: 'proceed',
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('Rule creation', () => {
@@ -50,7 +62,9 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         const createdRule = await createEsQueryRule({
-          supertest,
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           consumer: 'observability',
           name: 'always fire',
           ruleTypeId: RULE_TYPE_ID,
