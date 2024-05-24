@@ -32,6 +32,7 @@ Object {
       "namespace": "default",
       "package": Object {
         "name": "system",
+        "requires_root": true,
         "title": "System",
       },
       "revision": 1,
