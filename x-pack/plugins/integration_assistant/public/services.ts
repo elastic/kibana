@@ -1,65 +1,56 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
-  RANDOM_NUMBER_ROUTE_PATH,
-  RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
-  POST_MESSAGE_ROUTE_PATH,
-  INTERNAL_GET_MESSAGE_BY_ID_ROUTE,
+  ECS_GRAPH_PATH,
+  CATEGORZATION_GRAPH_PATH,
+  RELATED_GRAPH_PATH,
+  INTEGRATION_BUILDER_PATH,
 } from '../common';
 
 export interface Services {
-  fetchRandomNumber: () => Promise<number | IHttpFetchError>;
-  fetchRandomNumberBetween: (max: number) => Promise<number | IHttpFetchError>;
-  postMessage: (message: string, id: string) => Promise<undefined | IHttpFetchError>;
-  getMessageById: (id: string) => Promise<string | IHttpFetchError>;
-  addSuccessToast: (message: string) => void;
+  runEcsGraph: () => Promise<number | IHttpFetchError>;
+  runCategorizationGraph: () => Promise<number | IHttpFetchError>;
+  runRelatedGraph: () => Promise<number | IHttpFetchError>;
+  runIntegrationBuilder: () => Promise<number | IHttpFetchError>;
 }
 
 export function getServices(core: CoreStart): Services {
   return {
-    addSuccessToast: (message: string) => core.notifications.toasts.addSuccess(message),
-    fetchRandomNumber: async () => {
+    runEcsGraph: async () => {
       try {
-        const response = await core.http.fetch<{ randomNumber: number }>(RANDOM_NUMBER_ROUTE_PATH);
-        return response.randomNumber;
+        const response = await core.http.fetch<{}>(ECS_GRAPH_PATH);
+        return response;
       } catch (e) {
         return e;
       }
     },
-    fetchRandomNumberBetween: async (max: number) => {
+    runCategorizationGraph: async () => {
       try {
-        const response = await core.http.fetch<{ randomNumber: number }>(
-          RANDOM_NUMBER_BETWEEN_ROUTE_PATH,
-          { query: { max } }
-        );
-        return response.randomNumber;
+        const response = await core.http.fetch<{}>(CATEGORZATION_GRAPH_PATH);
+        return response;
       } catch (e) {
         return e;
       }
     },
-    postMessage: async (message: string, id: string) => {
+    runRelatedGraph: async () => {
       try {
-        await core.http.post(`${POST_MESSAGE_ROUTE_PATH}/${id}`, {
-          body: JSON.stringify({ message }),
-        });
+        const response = await core.http.fetch<{}>(RELATED_GRAPH_PATH);
+        return response;
       } catch (e) {
         return e;
       }
     },
-    getMessageById: async (id: string) => {
+    runIntegrationBuilder: async () => {
       try {
-        const response = await core.http.get<{ message: string }>(
-          `${INTERNAL_GET_MESSAGE_BY_ID_ROUTE}/${id}`
-        );
-        return response.message;
+        const response = await core.http.fetch<{}>(INTEGRATION_BUILDER_PATH);
+        return response;
       } catch (e) {
         return e;
       }
