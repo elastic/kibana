@@ -107,7 +107,10 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
       taskPartitioner,
     });
 
-    if (docs.length === 0) return emptyClaimOwnershipResult();
+    if (docs.length === 0) {
+      console.log(`*** Room for ${initialCapacity} tasks and claimed 0 tasks.`);
+      return emptyClaimOwnershipResult();
+    }
 
     const currentTasks = new Set<ConcreteTaskInstance>();
     const staleTasks = new Set<ConcreteTaskInstance>();
@@ -192,6 +195,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
 
     apmTrans.end('success');
 
+    console.log(`*** Room for ${initialCapacity} tasks and claimed ${finalResults.length} tasks.`);
     return {
       stats: {
         tasksUpdated: finalResults.length,
