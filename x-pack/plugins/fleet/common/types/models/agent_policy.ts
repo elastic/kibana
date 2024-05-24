@@ -86,7 +86,7 @@ export interface FullAgentPolicyInput {
     [key: string]: unknown;
   };
   streams?: FullAgentPolicyInputStream[];
-  processors?: Array<FullAgentPolicyAddFields>;
+  processors?: FullAgentPolicyAddFields[];
   [key: string]: any;
 }
 

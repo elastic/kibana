@@ -22,17 +22,19 @@ describe('AgentPolicyBaseSchema', () => {
         },
         {
           name: 'anotherName',
-          value: 'value'
+          value: 'value',
         },
         {
           name: 'anotherName',
-          value: 'value2'
-        }
+          value: 'value2',
+        },
       ];
 
       expect(() => {
         AgentPolicyBaseSchema.global_data_tags.validate(tags);
-      }).toThrow(`Found duplicate tag names: ['testName', 'anotherName'], duplicate tag names are not allowed.`);
+      }).toThrow(
+        `Found duplicate tag names: ['testName', 'anotherName'], duplicate tag names are not allowed.`
+      );
     });
 
     it('should throw an error if provided with tag names with spaces in it', () => {
@@ -49,7 +51,9 @@ describe('AgentPolicyBaseSchema', () => {
 
       expect(() => {
         AgentPolicyBaseSchema.global_data_tags.validate(tags);
-      }).toThrow(`Found tag names with spaces: [' testName', 'test Name'], tag names with spaces are not allowed.`);
+      }).toThrow(
+        `Found tag names with spaces: [' testName', 'test Name'], tag names with spaces are not allowed.`
+      );
     });
 
     it('should throw an error showing all validation errors', () => {
@@ -66,24 +70,26 @@ describe('AgentPolicyBaseSchema', () => {
 
       expect(() => {
         AgentPolicyBaseSchema.global_data_tags.validate(tags);
-      }).toThrow(`Found duplicate tag names: ['testName'], duplicate tag names are not allowed. Found tag names with spaces: [' testName', 'testName '], tag names with spaces are not allowed.`);
+      }).toThrow(
+        `Found duplicate tag names: ['testName'], duplicate tag names are not allowed. Found tag names with spaces: [' testName', 'testName '], tag names with spaces are not allowed.`
+      );
     });
 
     it('should not throw an error if provided with valid global data tags', () => {
       const tags: GlobalDataTag[] = [
         {
           name: 'testName',
-          value: 'testValue'
+          value: 'testValue',
         },
         {
           name: 'anotherName',
-          value: 'anotherValue'
-        }
-      ]
+          value: 'anotherValue',
+        },
+      ];
 
       expect(() => {
-        AgentPolicyBaseSchema.global_data_tags.validate(tags)
+        AgentPolicyBaseSchema.global_data_tags.validate(tags);
       }).not.toThrow();
-    })
+    });
   });
 });
