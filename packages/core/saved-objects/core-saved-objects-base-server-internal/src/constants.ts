@@ -185,7 +185,7 @@ export const HASH_TO_VERSION_MAP = {
   'ingest-agent-policies|0fd93cd11c019b118e93a9157c22057b': '10.1.0',
   'ingest-download-sources|0b0f6828e59805bd07a650d80817c342': '10.0.0',
   'ingest-outputs|b1237f7fdc0967709e75d65d208ace05': '10.6.0',
-  'ingest-package-policies|a1a074bad36e68d54f98d2158d60f879': '10.0.0',
+  'ingest-package-policies|aef7977b81f7930f23cbfd8711ba272e': '10.9.0',
   'inventory-view|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'kql-telemetry|3d1b76c39bfb2cc8296b024d73854724': '10.0.0',
   'legacy-url-alias|0750774cf16475f88f2361e99cc5c8f0': '8.2.0',

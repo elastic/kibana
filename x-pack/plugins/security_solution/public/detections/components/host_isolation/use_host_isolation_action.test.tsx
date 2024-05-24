@@ -16,17 +16,16 @@ import {
   useGetSentinelOneAgentStatus,
 } from '../../../management/hooks/agents/use_get_agent_status';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 
 jest.mock('../../../management/hooks/agents/use_get_agent_status');
 jest.mock('../../../common/hooks/use_experimental_features');
 
-type AgentType = 'endpoint' | 'sentinel_one' | 'crowdstrike';
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 const useGetSentinelOneAgentStatusMock = useGetSentinelOneAgentStatus as jest.Mock;
 const useGetAgentStatusMock = useGetAgentStatus as jest.Mock;
 const useAgentStatusHookMock = useAgentStatusHook as jest.Mock;
 
-// TODO TC: change crowdstrike tests when the useAgentStatus is implemented for Crowdstrike - now it defaults to `sentinel_one`
 describe('useHostIsolationAction', () => {
   describe.each([
     ['useGetSentinelOneAgentStatus', useGetSentinelOneAgentStatusMock],
@@ -40,7 +39,7 @@ describe('useHostIsolationAction', () => {
       return wrapper;
     };
 
-    const render = (agentTypeAlert: AgentType) =>
+    const render = (agentTypeAlert: ResponseActionAgentType) =>
       renderHook(
         () =>
           useHostIsolationAction({
@@ -48,6 +47,13 @@ describe('useHostIsolationAction', () => {
             detailsData:
               agentTypeAlert === 'sentinel_one'
                 ? [
+                    {
+                      category: 'kibana',
+                      field: 'kibana.alert.rule.uuid',
+                      isObjectArray: false,
+                      values: ['ruleId'],
+                      originalValue: ['ruleId'],
+                    },
                     {
                       category: 'event',
                       field: 'event.module',
@@ -65,6 +71,13 @@ describe('useHostIsolationAction', () => {
                   ]
                 : agentTypeAlert === 'crowdstrike'
                 ? [
+                    {
+                      category: 'kibana',
+                      field: 'kibana.alert.rule.uuid',
+                      isObjectArray: false,
+                      values: ['ruleId'],
+                      originalValue: ['ruleId'],
+                    },
                     {
                       category: 'event',
                       field: 'event.module',
@@ -116,8 +129,8 @@ describe('useHostIsolationAction', () => {
     it(`${name} is invoked as 'enabled' when Crowdstrike alert and FF enabled`, () => {
       render('crowdstrike');
 
-      expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
-        enabled: false,
+      expect(hook).toHaveBeenCalledWith(['expectedCrowdstrikeAgentId'], 'crowdstrike', {
+        enabled: true,
       });
     });
 
@@ -134,7 +147,7 @@ describe('useHostIsolationAction', () => {
       useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
       render('crowdstrike');
 
-      expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
+      expect(hook).toHaveBeenCalledWith(['expectedCrowdstrikeAgentId'], 'crowdstrike', {
         enabled: false,
       });
     });
@@ -142,7 +155,7 @@ describe('useHostIsolationAction', () => {
     it(`${name} is invoked as 'disabled' when endpoint alert`, () => {
       render('endpoint');
 
-      expect(hook).toHaveBeenCalledWith([''], 'sentinel_one', {
+      expect(hook).toHaveBeenCalledWith([''], 'endpoint', {
         enabled: false,
       });
     });

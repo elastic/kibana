@@ -102,3 +102,8 @@ export enum INTEGRATION_NAME {
   kubernetesContainer = 'kubernetesContainer',
   docker = 'docker',
 }
+
+export enum ASSET_DETAILS_ASSET_TYPE {
+  container = 'container',
+  host = 'host',
+}

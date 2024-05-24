@@ -168,7 +168,7 @@ test('pulls state from backup which overrides state from saved object', async ()
     });
   pluginServices.getServices().dashboardBackup.getState = jest
     .fn()
-    .mockReturnValue({ description: 'wow this description marginally better' });
+    .mockReturnValue({ dashboardState: { description: 'wow this description marginally better' } });
   const dashboard = await createDashboard({ useSessionStorageIntegration: true }, 0, 'wow-such-id');
   expect(dashboard).toBeDefined();
   expect(dashboard!.getState().explicitInput.description).toBe(

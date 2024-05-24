@@ -22,6 +22,8 @@ import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
+import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
+import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 
 const DROP_PROPS = {
@@ -60,9 +62,8 @@ export const DiscoverMainContent = ({
   panelsToggle,
   isChartAvailable,
 }: DiscoverMainContentProps) => {
-  const { trackUiMetric, dataVisualizer: dataVisualizerService } = useDiscoverServices();
+  const { trackUiMetric } = useDiscoverServices();
   const isEsqlMode = useIsEsqlMode();
-  const shouldShowViewModeToggle = dataVisualizerService !== undefined;
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
@@ -71,6 +72,8 @@ export const DiscoverMainContent = ({
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {
           trackUiMetric(METRIC_TYPE.CLICK, FIELD_STATISTICS_VIEW_CLICK);
+        } else if (mode === VIEW_MODE.PATTERN_LEVEL) {
+          trackUiMetric(METRIC_TYPE.CLICK, PATTERN_ANALYSIS_VIEW_CLICK);
         } else {
           trackUiMetric(METRIC_TYPE.CLICK, DOCUMENTS_VIEW_CLICK);
         }
@@ -81,31 +84,36 @@ export const DiscoverMainContent = ({
 
   const isDropAllowed = Boolean(onDropFieldToTable);
 
-  const viewModeToggle = useMemo(() => {
-    return shouldShowViewModeToggle ? (
-      <DocumentViewModeToggle
-        viewMode={viewMode}
-        isEsqlMode={isEsqlMode}
-        stateContainer={stateContainer}
-        setDiscoverViewMode={setDiscoverViewMode}
-        prepend={
-          React.isValidElement(panelsToggle)
-            ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
-            : undefined
-        }
-      />
-    ) : (
-      <React.Fragment />
-    );
-  }, [
-    shouldShowViewModeToggle,
-    viewMode,
-    isEsqlMode,
-    stateContainer,
-    setDiscoverViewMode,
-    panelsToggle,
-    isChartAvailable,
-  ]);
+  const renderViewModeToggle = useCallback(
+    (patternCount?: number) => {
+      return (
+        <DocumentViewModeToggle
+          viewMode={viewMode}
+          isEsqlMode={isEsqlMode}
+          stateContainer={stateContainer}
+          setDiscoverViewMode={setDiscoverViewMode}
+          patternCount={patternCount}
+          dataView={dataView}
+          prepend={
+            React.isValidElement(panelsToggle)
+              ? React.cloneElement(panelsToggle, { renderedFor: 'tabs', isChartAvailable })
+              : undefined
+          }
+        />
+      );
+    },
+    [
+      viewMode,
+      isEsqlMode,
+      stateContainer,
+      setDiscoverViewMode,
+      dataView,
+      panelsToggle,
+      isChartAvailable,
+    ]
+  );
+
+  const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
@@ -133,7 +141,8 @@ export const DiscoverMainContent = ({
               stateContainer={stateContainer}
               onFieldEdited={!isEsqlMode ? onFieldEdited : undefined}
             />
-          ) : (
+          ) : null}
+          {viewMode === VIEW_MODE.AGGREGATED_LEVEL ? (
             <>
               <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
               <FieldStatisticsTab
@@ -144,7 +153,16 @@ export const DiscoverMainContent = ({
                 trackUiMetric={trackUiMetric}
               />
             </>
-          )}
+          ) : null}
+          {viewMode === VIEW_MODE.PATTERN_LEVEL ? (
+            <PatternAnalysisTab
+              dataView={dataView}
+              stateContainer={stateContainer}
+              switchToDocumentView={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+              trackUiMetric={trackUiMetric}
+              renderViewModeToggle={renderViewModeToggle}
+            />
+          ) : null}
         </EuiFlexGroup>
       </DropOverlayWrapper>
     </Droppable>
