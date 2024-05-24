@@ -23,6 +23,7 @@ import {
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INGEST_SAVED_OBJECT_INDEX,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  FLEET_SETUP_LOCK_TYPE,
 } from '../constants';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -100,6 +101,22 @@ export const getSavedObjectTypes = (
   const { useSpaceAwareness } = options;
 
   return {
+    [FLEET_SETUP_LOCK_TYPE]: {
+      name: FLEET_SETUP_LOCK_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'agnostic',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        properties: {
+          status: { type: 'keyword' },
+          uuid: { type: 'text' },
+          started_at: { type: 'date' },
+        },
+      },
+    },
     // Deprecated
     [GLOBAL_SETTINGS_SAVED_OBJECT_TYPE]: {
       name: GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
@@ -116,14 +133,6 @@ export const getSavedObjectTypes = (
           prerelease_integrations_enabled: { type: 'boolean' },
           secret_storage_requirements_met: { type: 'boolean' },
           output_secret_storage_requirements_met: { type: 'boolean' },
-          fleet_setup_status: { type: 'keyword' }, // TODO remove
-          fleet_setup: {
-            properties: {
-              status: { type: 'keyword' },
-              uuid: { type: 'text' },
-              started_at: { type: 'date' },
-            },
-          },
         },
       },
       migrations: {
@@ -133,32 +142,6 @@ export const getSavedObjectTypes = (
       },
       modelVersions: {
         1: settingsV1,
-        2: {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                fleet_setup_status: { type: 'keyword' },
-              },
-            },
-          ],
-        },
-        3: {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                fleet_setup: {
-                  properties: {
-                    status: { type: 'keyword' },
-                    uuid: { type: 'text' },
-                    started_at: { type: 'date' },
-                  },
-                },
-              },
-            },
-          ],
-        },
       },
     },
     [AGENT_POLICY_SAVED_OBJECT_TYPE]: {

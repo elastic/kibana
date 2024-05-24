@@ -70,8 +70,7 @@ export async function settingsSetup(soClient: SavedObjectsClientContract) {
 
 export async function saveSettings(
   soClient: SavedObjectsClientContract,
-  newData: Partial<Omit<Settings, 'id'>>,
-  retryOnConflict?: number
+  newData: Partial<Omit<Settings, 'id'>>
 ): Promise<Partial<Settings> & Pick<Settings, 'id'>> {
   const data = { ...newData };
   if (data.fleet_server_hosts) {
@@ -90,8 +89,7 @@ export async function saveSettings(
     const res = await soClient.update<SettingsSOAttributes>(
       GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
       settings.id,
-      data,
-      { retryOnConflict }
+      data
     );
 
     return {

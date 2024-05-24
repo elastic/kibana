@@ -17,9 +17,9 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { MessageSigningError } from '../../common/errors';
 
-import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
+import { AUTO_UPDATE_PACKAGES, FLEET_SETUP_LOCK_TYPE } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
-import type { DefaultPackagesInstallationError } from '../../common/types';
+import type { DefaultPackagesInstallationError, FleetSetupLock } from '../../common/types';
 
 import { appContextService } from './app_context';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
@@ -70,33 +70,46 @@ export async function setupFleet(
 ): Promise<SetupStatus> {
   const t = apm.startTransaction('fleet-setup', 'fleet');
   const logger = appContextService.getLogger();
+  let created;
   try {
-    // check if fleet setup is already started
-    const settings = await settingsService.getSettingsOrUndefined(soClient);
+    try {
+      // check if fleet setup is already started
+      const { attributes: fleetSetupLock } = await soClient.get<FleetSetupLock>(
+        FLEET_SETUP_LOCK_TYPE,
+        FLEET_SETUP_LOCK_TYPE
+      );
 
-    if (settings && settings.fleet_setup?.status === 'in_progress') {
-      logger.info('Fleet setup already in progress, aborting');
+      if (fleetSetupLock?.status === 'in_progress') {
+        logger.info('Fleet setup already in progress, abort setup');
+        return {
+          isInitialized: false,
+          nonFatalErrors: [],
+        };
+      }
+    } catch (error) {
+      if (error.isBoom && error.output.statusCode === 404) {
+        logger.info('Fleet setup lock does not exist, continue setup');
+      }
+    }
+
+    try {
+      created = await soClient.create<FleetSetupLock>(
+        FLEET_SETUP_LOCK_TYPE,
+        {
+          status: 'in_progress',
+          uuid: uuidv4(),
+          started_at: new Date().toISOString(),
+        },
+        { id: FLEET_SETUP_LOCK_TYPE }
+      );
+      logger.info(`Fleet setup lock created: ${JSON.stringify(created)}`);
+    } catch (error) {
+      // TODO only abort if conflict error?
+      logger.warn(`Error creating fleet setup lock, abort setup: ${error}`);
       return {
         isInitialized: false,
         nonFatalErrors: [],
       };
-    }
-
-    try {
-      await settingsService.saveSettings(
-        soClient,
-        {
-          ...settings,
-          fleet_setup: {
-            status: 'in_progress',
-            uuid: uuidv4(),
-            started_at: new Date().toISOString(),
-          },
-        },
-        0
-      );
-    } catch (error) {
-      logger.warn(`Error setting fleet setup status to in_progress: ${error}`);
     }
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {
@@ -105,12 +118,15 @@ export async function setupFleet(
     throw error;
   } finally {
     t.end();
-    try {
-      await settingsService.saveSettings(soClient, {
-        fleet_setup: { status: 'complete' },
-      });
-    } catch (error) {
-      logger.warn(`Error clearing fleet setup status: ${error}`);
+    // only delete lock if it was created by this instance
+    if (created) {
+      try {
+        // TODO retry?
+        await soClient.delete(FLEET_SETUP_LOCK_TYPE, FLEET_SETUP_LOCK_TYPE, { refresh: true });
+        logger.info(`Fleet setup lock deleted`);
+      } catch (error) {
+        logger.warn(`Error clearing fleet setup status: ${error}`);
+      }
     }
   }
 }

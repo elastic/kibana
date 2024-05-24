@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export const INGEST_SAVED_OBJECT_INDEX = '.kibana_ingest';
-
-export const FLEET_SETUP_LOCK_TYPE = 'fleet-setup-lock';
+export interface FleetSetupLock {
+  status: string;
+  uuid: string;
+  started_at: string;
+}

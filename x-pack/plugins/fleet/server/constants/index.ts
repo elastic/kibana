@@ -90,6 +90,7 @@ export {
   OUTPUT_SECRETS_MINIMUM_FLEET_SERVER_VERSION,
   // outputs
   OUTPUT_HEALTH_DATA_STREAM,
+  FLEET_SETUP_LOCK_TYPE,
   type PrivilegeMapObject,
 } from '../../common/constants';
 
