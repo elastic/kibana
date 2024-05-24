@@ -75,6 +75,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
           <FormattedMessage
             id="xpack.csp.cloudPosturePage.vulnerabilitiesInstalledEmptyPrompt.promptTitle"
             defaultMessage="Detect vulnerabilities in your <br/> cloud assets"
+            ignoreTag
           />
         </h2>
       }
