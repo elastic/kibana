@@ -447,7 +447,7 @@ export abstract class AbstractDataView {
    * @param name field name
    * @returns DataViewFieldBase
    */
-  getIfScriptedField(name: string): DataViewFieldBase | undefined {
+  getScriptedField(name: string): DataViewFieldBase | undefined {
     // runtime fields override scripted fields
     if (this.runtimeFieldMap[name]) {
       return;

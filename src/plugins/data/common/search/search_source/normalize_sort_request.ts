@@ -41,8 +41,12 @@ function normalize(
   const [[sortField, sortOrder]] = Object.entries(sortable);
   const order = typeof sortOrder === 'object' ? sortOrder : { order: sortOrder };
 
-  if (indexPattern && typeof indexPattern !== 'string') {
-    const indexField = indexPattern.getIfScriptedField(sortField);
+  if (
+    indexPattern &&
+    typeof indexPattern !== 'string' &&
+    !indexPattern.getRuntimeField(sortField)
+  ) {
+    const indexField = indexPattern.getScriptedField(sortField);
     if (indexField && indexField.scripted) {
       return {
         _script: {

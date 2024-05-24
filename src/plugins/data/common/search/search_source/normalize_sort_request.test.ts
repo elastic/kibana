@@ -40,9 +40,10 @@ describe('SearchSource#normalizeSortRequest', function () {
 
   const indexPattern = {
     fields,
-    getIfScriptedField: (name: string) => {
+    getScriptedField: (name: string) => {
       return fields.find((field) => field.name === name);
     },
+    getRuntimeField: (name: string) => null,
   } as DataView;
 
   it('should return an array', function () {
