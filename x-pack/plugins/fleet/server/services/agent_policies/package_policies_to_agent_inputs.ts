@@ -7,7 +7,7 @@
 import { merge } from 'lodash';
 import deepMerge from 'deepmerge';
 
-import type { FullAgentPolicyAddFields, GlobalDataTag } from '@kbn/fleet-plugin/common/types';
+import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { isPackageLimited } from '../../../common/services';
 import type {
   PackagePolicy,
@@ -18,7 +18,7 @@ import type {
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '@kbn/fleet-plugin/common/constants/epm';
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
