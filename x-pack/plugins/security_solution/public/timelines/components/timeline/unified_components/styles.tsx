@@ -162,4 +162,9 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   .udtTimeline .euiDataGrid__rightControls {
     padding-right: 30px;
   }
+
+  .udtTimeline .euiDataGrid__leftControls {
+    display: flex;
+    align-items: baseline;
+  }
 `;
