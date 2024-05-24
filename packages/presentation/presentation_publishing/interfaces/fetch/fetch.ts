@@ -34,7 +34,7 @@ import { apiPublishesSearchSession, PublishesSearchSession } from './publishes_s
 import { apiHasParentApi, HasParentApi } from '../has_parent_api';
 import { apiPublishesReload } from './publishes_reload';
 import { useEffect, useMemo } from 'react';
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing/publishing_subject';
+import { useStateFromPublishingSubject } from '../../publishing_subject/publishing_subject';
 
 export interface FetchContext {
   isReload: boolean;
