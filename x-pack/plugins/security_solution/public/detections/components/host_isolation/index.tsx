@@ -65,7 +65,7 @@ export const HostIsolationPanel = React.memo(
             details
           );
         default:
-          getFieldValue({ category: 'host', field: 'host.name' }, details);
+          return getFieldValue({ category: 'host', field: 'host.name' }, details);
       }
     }, [agentType, details]);
 
