@@ -448,18 +448,8 @@ export function MachineLearningCommonUIProvider({
       }
     },
 
-    async getSwitchCheckedState(testSubj: string): Promise<boolean> {
-      const isSelected = await testSubjects.getAttribute(testSubj, 'aria-checked');
-      return isSelected === 'true';
-    },
-
     async toggleSwitchIfNeeded(testSubj: string, targetState: boolean) {
-      if ((await this.getSwitchCheckedState(testSubj)) !== targetState) {
-        await retry.tryForTime(5 * 1000, async () => {
-          await testSubjects.clickWhenNotDisabledWithoutRetry(testSubj);
-          await this.getSwitchCheckedState(testSubj);
-        });
-      }
+      await testSubjects.setEuiSwitch(testSubj, targetState ? 'check' : 'uncheck');
     },
   };
 }
