@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getRootIntegrations, isRootPrivilegesRequired } from './package_helpers';
+import {
+  getRootIntegrations,
+  getRootPrivilegedDataStreams,
+  isRootPrivilegesRequired,
+} from './package_helpers';
 
 describe('isRootPrivilegesRequired', () => {
   it('should return true if root privileges is required at root level', () => {
@@ -36,6 +40,42 @@ describe('isRootPrivilegesRequired', () => {
       data_streams: [],
     } as any);
     expect(res).toBe(false);
+  });
+});
+
+describe('getRootPrivilegedDataStreams', () => {
+  it('should return empty datastreams if root privileges is required at root level', () => {
+    const res = getRootPrivilegedDataStreams({
+      agent: {
+        privileges: {
+          root: true,
+        },
+      },
+    } as any);
+    expect(res).toEqual([]);
+  });
+  it('should return datastreams if root privileges is required at datastreams', () => {
+    const res = getRootPrivilegedDataStreams({
+      data_streams: [
+        {
+          name: 'syslog',
+          title: 'System syslog logs',
+          agent: {
+            privileges: { root: true },
+          },
+        },
+        {
+          name: 'sysauth',
+          title: 'System auth logs',
+        },
+      ],
+    } as any);
+    expect(res).toEqual([
+      {
+        name: 'syslog',
+        title: 'System syslog logs',
+      },
+    ]);
   });
 });
 
