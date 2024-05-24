@@ -18,6 +18,7 @@ import {
   EuiTabs,
   EuiLink,
   EuiBasicTable,
+  EuiTableSortingType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
@@ -126,6 +127,7 @@ const  KubernetesObservabilityComp = ({
   const [daemonsStatus, setDaemonsStatus] = useState([]);
   console.log("called");
   console.log(client);
+  
   useEffect(() => {
     client.getNodesMemory().then(data => {
       console.log(data);
@@ -134,7 +136,6 @@ const  KubernetesObservabilityComp = ({
       const keys = ['name', 'memory_utilization', 'message', 'alarm'];
 
       const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-      console.log("AAAAAAAAAAAAAA");
       setNodesMem(nodes);
       })
       .catch(error => {
@@ -150,7 +151,6 @@ const  KubernetesObservabilityComp = ({
       const keys = ['name', 'cpu_utilization', 'message', 'alarm'];
 
       const nodes = nodesArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
-      console.log("OOOOOOOOO");
       setNodesCpu(nodes);
       })
       .catch(error => {
@@ -163,8 +163,15 @@ const  KubernetesObservabilityComp = ({
       console.log(data);
       setDeploysStatusTime(data.time);
       const deployArray = data.deployments;
-      const keys = ['name', 'namespace', 'message', 'reason', 'events'];
-
+      const keys = ['name', 'namespace', 'status', 'message', 'reason', 'events'];
+      deployArray.map((deploy: any) => {
+        const reason = deploy.reason;
+        if (reason === '') {
+          deploy["status"] = "OK"
+        } else {
+          deploy["status"] = "Warning"
+        }
+      });
       const deploys = deployArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
       setDeploysStatus(deploys);
       })
@@ -178,8 +185,15 @@ const  KubernetesObservabilityComp = ({
       console.log(data);
       setDaemonsStatusTime(data.time);
       const daemonsArray = data.daemonsets;
-      const keys = ['name', 'namespace', 'message', 'reason', 'events'];
-
+      const keys = ['name', 'namespace', 'status', 'message', 'reason', 'events'];
+      daemonsArray.map((daemon: any) => {
+        const reason = daemon.reason;
+        if (reason === '') {
+          daemon["status"] = "OK"
+        } else {
+          daemon["status"] = "Warning"
+        }
+      });
       const daemons = daemonsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
       setDaemonsStatus(daemons);
       })
@@ -236,9 +250,15 @@ const  KubernetesObservabilityComp = ({
                 },
                 {
                   field: 'alarm',
-                  name: 'Alarm',
+                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
                 }
               ]}
+              sorting={{
+                sort: {
+                  field: 'memory_utilization',
+                  direction: 'desc',
+                },
+              }}
             />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -270,9 +290,15 @@ const  KubernetesObservabilityComp = ({
                 },
                 {
                   field: 'alarm',
-                  name: 'Alarm',
+                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
                 }
               ]}
+              sorting={{
+                sort: {
+                  field: 'cpu_utilization',
+                  direction: 'desc',
+                },
+              }}
             />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -297,6 +323,10 @@ const  KubernetesObservabilityComp = ({
                 {
                   field: 'namespace',
                   name: 'Namespace',
+                },
+                {
+                  field: 'status',
+                  name: 'Notification',
                 },
                 {
                   field: 'message',
@@ -335,6 +365,10 @@ const  KubernetesObservabilityComp = ({
                 {
                   field: 'namespace',
                   name: 'Namespace',
+                },
+                {
+                  field: 'status',
+                  name: 'Notification',
                 },
                 {
                   field: 'message',
