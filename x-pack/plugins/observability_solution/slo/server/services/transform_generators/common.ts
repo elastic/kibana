@@ -43,7 +43,7 @@ export function getTimesliceTargetComparator(timesliceTarget: number) {
 }
 
 /**
- * Use the settings.preventInitialBackfill flag to determine the range filter for the SLO
+ * Use the settings.preventInitialBackfill flag to determine the range filter for the rollup transform
  * preventInitialBackfill == true: we use the current time minus some buffer to account for the ingestion delay
  * preventInitialBackfill === false: we use the time window duration to get the data for the last N days
  */
