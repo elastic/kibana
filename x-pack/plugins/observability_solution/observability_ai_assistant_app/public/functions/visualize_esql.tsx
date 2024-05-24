@@ -331,7 +331,12 @@ export function VisualizeESQL({
         </EuiFlexGroup>
       )}
       {preferredChartType === ChartType.Table && (
-        <ESQLTable rows={rows} columns={columns} dataView={dataViewAsync.value} />
+        <ESQLTable
+          rows={rows}
+          columns={columns}
+          dataView={dataViewAsync.value}
+          query={{ esql: query }}
+        />
       )}
       {isSaveModalOpen ? (
         <lens.SaveModalComponent

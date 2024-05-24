@@ -41,7 +41,7 @@ const getStateParams = ({
   let appliedFilters: Filter[] = [];
   let query: Query | AggregateQuery | undefined;
   let timeRange: TimeRange | undefined;
-  if (!isEmbeddableView) {
+  if (!isEmbeddableView && filterManager) {
     // applied from discover main and context app
     appliedFilters = [...filterManager.getGlobalFilters(), ...filterManager.getAppFilters()];
     query = data.query.queryString.getQuery();
@@ -87,7 +87,7 @@ export const useNavigationProps = ({
         isEmbeddableView,
         columns,
         filters,
-        filterManager: services.filterManager,
+        filterManager: services?.filterManager,
         data: services.data,
         savedSearchId,
       }),
@@ -96,10 +96,10 @@ export const useNavigationProps = ({
 
   useEffect(() => {
     const dataViewId = typeof index === 'object' ? index.id : index;
-    services.locator
-      .getUrl({ dataViewId, ...buildParams() })
+    services?.locator
+      ?.getUrl({ dataViewId, ...buildParams() })
       .then((referrer) => {
-        return services.singleDocLocator.getRedirectUrl({ index, rowIndex, rowId, referrer });
+        return services?.singleDocLocator.getRedirectUrl({ index, rowIndex, rowId, referrer });
       })
       .then(setSingleDocHref);
   }, [
@@ -115,10 +115,10 @@ export const useNavigationProps = ({
   useEffect(() => {
     const params = buildParams();
     const dataViewId = typeof index === 'object' ? index.id : index;
-    services.locator
-      .getUrl({ dataViewId, ...params })
+    services?.locator
+      ?.getUrl({ dataViewId, ...params })
       .then((referrer) =>
-        services.contextLocator.getRedirectUrl({
+        services?.contextLocator.getRedirectUrl({
           index,
           rowId,
           columns: params.columns,
@@ -144,10 +144,10 @@ export const useNavigationProps = ({
       }
       event.preventDefault();
       const dataViewId = typeof index === 'object' ? index.id : index;
-      services.locator
-        .getUrl({ dataViewId, ...buildParams() })
+      services?.locator
+        ?.getUrl({ dataViewId, ...buildParams() })
         .then((referrer) =>
-          services.singleDocLocator.navigate({ index, rowIndex, rowId, referrer })
+          services?.singleDocLocator.navigate({ index, rowIndex, rowId, referrer })
         );
     },
     [buildParams, index, rowId, rowIndex, services.locator, services.singleDocLocator]
@@ -161,8 +161,8 @@ export const useNavigationProps = ({
       }
       event.preventDefault();
       const dataViewId = typeof index === 'object' ? index.id : index;
-      services.locator.getUrl({ dataViewId, ...params }).then((referrer) =>
-        services.contextLocator.navigate({
+      services?.locator?.getUrl({ dataViewId, ...params }).then((referrer) =>
+        services?.contextLocator.navigate({
           index,
           rowId,
           columns: params.columns,

@@ -14,7 +14,8 @@
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
-      "dataViews"
+      "dataViews",
+      "discover",
     ]
   }
 }

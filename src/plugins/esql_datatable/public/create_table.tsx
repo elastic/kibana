@@ -5,12 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { zipObject } from 'lodash';
 import type { ESQLRow } from '@kbn/es-types';
+import type { AggregateQuery } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import { DiscoverGridFlyout } from '@kbn/discover-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type {
   DatatableColumn,
@@ -27,6 +29,7 @@ interface ESQLDatatableProps {
   rows: ESQLRow[];
   dataView: DataView;
   columns: DatatableColumn[];
+  query: AggregateQuery;
 }
 
 type DataTableColumnsMeta = Record<
@@ -36,6 +39,15 @@ type DataTableColumnsMeta = Record<
     esType?: DatatableColumnMeta['esType'];
   }
 >;
+
+/*
+Remaining tasks:
+- Implement the row height settings.
+- Is it a good idea to render the flyout from the Discover plugin? Maybe is smarter to create a component here.
+- Fullscreen doesn't work great, let's hide it.
+- The flyout doesn't render when the assistant is in flyout mode.
+- We need to hide actions on the flyout that do not make sense (all the filter ones, make the toggle column in table functional)
+**/
 
 export const ESQLTable = (props: ESQLDatatableProps) => {
   const { loading, value } = useAsync(() => {
@@ -47,7 +59,39 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
   const UnifiedDataTable = value?.[1].default;
   const deps = value?.[0];
   const storage = new Storage(localStorage);
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+
+  if (props.dataView.fields.getByName('@timestamp')?.type === 'date') {
+    props.dataView.timeFieldName = '@timestamp';
+  }
+
+  const renderDocumentView = useCallback(
+    (
+      hit: DataTableRecord,
+      displayedRows: DataTableRecord[],
+      displayedColumns: string[],
+      customColumnsMeta?: DataTableColumnsMeta
+    ) => (
+      <DiscoverGridFlyout
+        dataView={props.dataView}
+        hit={hit}
+        hits={displayedRows}
+        columns={displayedColumns}
+        columnsMeta={customColumnsMeta}
+        onFilter={() => {}}
+        onRemoveColumn={() => {}}
+        onAddColumn={() => {}}
+        onClose={() => setExpandedDoc(undefined)}
+        setExpandedDoc={setExpandedDoc}
+        query={props.query}
+      />
+    ),
+    [props.dataView, props.query]
+  );
+
   if (loading || !deps || !UnifiedDataTable) return <EuiLoadingSpinner />;
+
+  const UnifiedDataTableMemoized = React.memo(UnifiedDataTable);
 
   const columnsMeta = props.columns.reduce((acc, column) => {
     acc[column.id] = {
@@ -67,7 +111,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
       }}
     >
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
-        <UnifiedDataTable
+        <UnifiedDataTableMemoized
           columns={[]}
           rows={rows.map((row: Record<string, string>, idx: number) => {
             return {
@@ -85,17 +129,22 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
             fieldFormats: deps.fieldFormats,
             storage,
           }}
-          isPlainRecord={true}
-          isSortEnabled
+          isPlainRecord
+          isSortEnabled={false}
           loadingState={DataLoadingState.loaded}
           dataView={props.dataView}
-          sampleSizeState={10}
+          sampleSizeState={500}
+          rowsPerPageState={10}
           onSetColumns={() => {}}
+          expandedDoc={expandedDoc}
+          setExpandedDoc={setExpandedDoc}
           showTimeCol
           useNewFieldsApi
-          // sort={['timestamp', 'desc']}
+          enableComparisonMode
           sort={[]}
           ariaLabelledBy="ESQLDatatable"
+          maxDocFieldsDisplayed={100}
+          renderDocumentView={renderDocumentView}
         />
       </CellActionsProvider>
     </KibanaContextProvider>
