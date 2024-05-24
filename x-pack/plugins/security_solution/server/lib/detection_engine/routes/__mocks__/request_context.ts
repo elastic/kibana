@@ -38,7 +38,7 @@ import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/
 import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
 import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { rulesManagementClientMock } from '../../rule_management/logic/crud/__mocks__/rules_management_client';
+import { rulesManagementClientMock } from '../../rule_management/logic/rule_management/__mocks__/rules_management_client';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();

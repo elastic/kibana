@@ -16,7 +16,7 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/rule_management/read_rules';
 import { getIdError, transform } from '../../../utils/utils';
 
 export const readRuleRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {

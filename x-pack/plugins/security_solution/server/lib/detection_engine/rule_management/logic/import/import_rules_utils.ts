@@ -16,7 +16,7 @@ import type { RuleToImport } from '../../../../../../common/api/detection_engine
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
-import type { IRulesManagementClient } from '../crud/rules_management_client';
+import type { IRulesManagementClient } from '../rule_management/rules_management_client';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {

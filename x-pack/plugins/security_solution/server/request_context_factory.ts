@@ -28,7 +28,7 @@ import type { EndpointAppContextService } from './endpoint/endpoint_app_context_
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
-import { createRulesManagementClient } from './lib/detection_engine/rule_management/logic/crud/rules_management_client';
+import { createRulesManagementClient } from './lib/detection_engine/rule_management/logic/rule_management/rules_management_client';
 
 export interface IRequestContextFactory {
   create(

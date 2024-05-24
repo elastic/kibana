@@ -37,13 +37,13 @@ import {
   CreateRuleExceptionsRequestParams,
 } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
-import { readRules } from '../../../rule_management/logic/crud/read_rules';
+import { readRules } from '../../../rule_management/logic/rule_management/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../rule_management/logic/exceptions/check_for_default_rule_exception_list';
 import type { RuleParams } from '../../../rule_schema';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { buildSiemResponse } from '../../../routes/utils';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
-import type { IRulesManagementClient } from '../../../rule_management/logic/crud/rules_management_client';
+import type { IRulesManagementClient } from '../../../rule_management/logic/rule_management/rules_management_client';
 
 export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
