@@ -1,9 +1,9 @@
 steps:
   - command: .buildkite/scripts/steps/functional/exploratory_view_plugin.sh
-    label: 'Exploratory View @elastic/synthetics Tests'
+    label: "Exploratory View @elastic/synthetics Tests"
     agents:
       image: family/kibana-fips-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-4
       preemptible: true
@@ -12,10 +12,10 @@ steps:
       - quick_checks
     timeout_in_minutes: 60
     artifact_paths:
-      - 'x-pack/plugins/observability_solution/exploratory_view/e2e/.journeys/**/*'
+      - "x-pack/plugins/observability_solution/exploratory_view/e2e/.journeys/**/*"
     retry:
       automatic:
-        - exit_status: '-1'
+        - exit_status: "-1"
           limit: 3
-        - exit_status: '*'
+        - exit_status: "*"
           limit: 1

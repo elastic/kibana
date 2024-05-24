@@ -1,9 +1,9 @@
 steps:
   - command: .buildkite/scripts/steps/test/kbn_handlebars.sh
-    label: 'Check @kbn/handlebars for upstream differences'
+    label: "Check @kbn/handlebars for upstream differences"
     agents:
       image: family/kibana-fips-ubuntu-2004
-      imageProject: elastic-images-prod
+      imageProject: elastic-images-qa
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
@@ -13,5 +13,5 @@ steps:
     timeout_in_minutes: 5
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: "*"
           limit: 1
