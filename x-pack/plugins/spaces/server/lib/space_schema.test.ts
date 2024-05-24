@@ -8,7 +8,8 @@
 import { getSpaceSchema } from './space_schema';
 
 // non-serverless space schema
-const spaceSchema = getSpaceSchema(false);
+const spaceBaseSchema = getSpaceSchema(false);
+const spaceServerlessSchema = getSpaceSchema(true);
 
 const defaultProperties = {
   id: 'foo',
@@ -18,7 +19,7 @@ const defaultProperties = {
 describe('#id', () => {
   test('is required', () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         id: undefined,
       })
@@ -29,7 +30,7 @@ describe('#id', () => {
 
   test('allows lowercase a-z, 0-9, "_" and "-"', () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         id: 'abcdefghijklmnopqrstuvwxyz0123456789_-',
       })
@@ -38,7 +39,7 @@ describe('#id', () => {
 
   test(`doesn't allow uppercase`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         id: 'Foo',
       })
@@ -49,7 +50,7 @@ describe('#id', () => {
 
   test(`doesn't allow an empty string`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         id: '',
       })
@@ -62,7 +63,7 @@ describe('#id', () => {
     (invalidCharacter) => {
       test(`doesn't allow ${invalidCharacter}`, () => {
         expect(() =>
-          spaceSchema.validate({
+          spaceBaseSchema.validate({
             ...defaultProperties,
             id: `foo-${invalidCharacter}`,
           })
@@ -75,7 +76,7 @@ describe('#id', () => {
 describe('#disabledFeatures', () => {
   test('is optional', () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         disabledFeatures: undefined,
       })
@@ -83,7 +84,7 @@ describe('#disabledFeatures', () => {
   });
 
   test('defaults to an empty array', () => {
-    const result = spaceSchema.validate({
+    const result = spaceBaseSchema.validate({
       ...defaultProperties,
       disabledFeatures: undefined,
     });
@@ -92,7 +93,7 @@ describe('#disabledFeatures', () => {
 
   test('must be an array if provided', () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         disabledFeatures: 'foo',
       })
@@ -103,7 +104,7 @@ describe('#disabledFeatures', () => {
 
   test('allows an array of strings', () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         disabledFeatures: ['foo', 'bar'],
       })
@@ -112,7 +113,7 @@ describe('#disabledFeatures', () => {
 
   test('does not allow an array containing non-string elements', () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         disabledFeatures: ['foo', true],
       })
@@ -125,7 +126,7 @@ describe('#disabledFeatures', () => {
 describe('#color', () => {
   test('is optional', () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         color: undefined,
       })
@@ -134,7 +135,7 @@ describe('#color', () => {
 
   test(`doesn't allow an empty string`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         color: '',
       })
@@ -145,7 +146,7 @@ describe('#color', () => {
 
   test(`allows lower case hex color code`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         color: '#aabbcc',
       })
@@ -154,7 +155,7 @@ describe('#color', () => {
 
   test(`allows upper case hex color code`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         color: '#AABBCC',
       })
@@ -163,7 +164,7 @@ describe('#color', () => {
 
   test(`allows numeric hex color code`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         color: '#123456',
       })
@@ -172,7 +173,7 @@ describe('#color', () => {
 
   test(`must start with a hash`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         color: '123456',
       })
@@ -183,7 +184,7 @@ describe('#color', () => {
 
   test(`cannot exceed 6 digits following the hash`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         color: '1234567',
       })
@@ -194,7 +195,7 @@ describe('#color', () => {
 
   test(`cannot be fewer than 6 digits following the hash`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         color: '12345',
       })
@@ -207,7 +208,7 @@ describe('#color', () => {
 describe('#imageUrl', () => {
   test('is optional', () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         imageUrl: undefined,
       })
@@ -216,7 +217,7 @@ describe('#imageUrl', () => {
 
   test(`must start with data:image`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         imageUrl: 'notValid',
       })
@@ -225,7 +226,7 @@ describe('#imageUrl', () => {
 
   test(`checking that a valid image is accepted as imageUrl`, () => {
     expect(() =>
-      spaceSchema.validate({
+      spaceBaseSchema.validate({
         ...defaultProperties,
         imageUrl:
           'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAIAAADYYG7QAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAZdEVYdFNvZnR3YXJlAHBhaW50Lm5ldCA0LjAuMTnU1rJkAAAB3klEQVRYR+2WzUrDQBCARzwqehE8ir1WPfgqRRA1bePBXgpe/MGCB9/Aiw+j+ASCB6kotklaEwW1F0WwNSaps9lV69awGzBpDzt8pJP9mXxsmk3ABH2oUEIilJAIJSRCCYlQQiKUkIh4QgY5agZodVjBowFrBktWQzDBU2ykiYaDuQpCYgnl3QunGzM6Z6YF+b5SkcgK1UH/aLbYReQiYL9d9/o+XFop5IU0Vl4uapAzoXC3eEBPw9vH1/wT6Vs2otPSkoH/IZzlzO/TU2vgQm8nl69Hp0H7nZ4OXogLJSSKBIUC3w88n+Ueyfv56fVZnqCQNVnCHbLrkV0Gd2d+GNkglsk438dhaTxloZDutV4wb06Vf40JcWZ2sMttPpE8NaHGeBnzIAhwPXqHseVB11EyLD0hxLUeaYud2a3B0g3k7GyFtrhX7F2RqhC+yV3jgTb2Rqdqf7/kUxYiWBOlTtXxfPJEtc8b5thGb+8AhL4ohnCNqQjZ2T2+K5rnw2M6KwEhKNDSGM3pTdxjhDgLbHkw/v/zw4AiPuSsfMzAiTidKxiF/ArpFqyzK8SMOlkwvloUMYRCtNvZLWeuIomd2Za/WZS4QomjhEQoIRFKSIQSEqGERAyfEH4YDBFQ/ARU6BiBxCAIQQAAAABJRU5ErkJggg==',
@@ -237,18 +238,18 @@ describe('#imageUrl', () => {
 describe('#solution', () => {
   it('should throw error if solution is defined in serverless offering', () => {
     expect(() =>
-      getSpaceSchema(true).validate({ ...defaultProperties, solution: 'search' })
+      spaceServerlessSchema.validate({ ...defaultProperties, solution: 'search' })
     ).toThrow();
   });
 
   it('should not throw error if solution is undefined in classic offering', () => {
     expect(() =>
-      spaceSchema.validate({ ...defaultProperties, solution: undefined }, {})
+      spaceBaseSchema.validate({ ...defaultProperties, solution: undefined }, {})
     ).not.toThrow();
   });
 
   it('should throw error if solution is invalid in classic offering', () => {
-    expect(() => spaceSchema.validate({ ...defaultProperties, solution: 'some_value' }, {}))
+    expect(() => spaceBaseSchema.validate({ ...defaultProperties, solution: 'some_value' }, {}))
       .toThrowErrorMatchingInlineSnapshot(`
       "[solution]: types that failed validation:
       - [solution.0]: expected value to equal [security]
@@ -258,7 +259,7 @@ describe('#solution', () => {
     `);
 
     expect(() =>
-      spaceSchema.validate({ ...defaultProperties, solution: ' search ' }, {})
+      spaceBaseSchema.validate({ ...defaultProperties, solution: ' search ' }, {})
     ).toThrow();
   });
 });
