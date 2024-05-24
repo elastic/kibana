@@ -7,6 +7,14 @@
 
 // DO NOT MODIFY THIS FILE BY HAND. IT IS MANAGED BY A CI JOB.
 
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 parser grammar esql_parser;
 
 options {tokenVocab=esql_lexer;}
@@ -24,6 +32,7 @@ sourceCommand
     : explainCommand
     | fromCommand
     | rowCommand
+    | metricsCommand
     | showCommand
     | metaCommand
     ;
@@ -105,11 +114,11 @@ field
     ;
 
 fromCommand
-    : FROM fromIdentifier (COMMA fromIdentifier)* metadata?
+    : FROM indexIdentifier (COMMA indexIdentifier)* metadata?
     ;
 
-fromIdentifier
-    : FROM_UNQUOTED_IDENTIFIER
+indexIdentifier
+    : INDEX_UNQUOTED_IDENTIFIER
     ;
 
 metadata
@@ -118,11 +127,15 @@ metadata
     ;
 
 metadataOption
-    : METADATA fromIdentifier (COMMA fromIdentifier)*
+    : METADATA indexIdentifier (COMMA indexIdentifier)*
     ;
 
 deprecated_metadata
     : OPENING_BRACKET metadataOption CLOSING_BRACKET
+    ;
+
+metricsCommand
+    : METRICS indexIdentifier (COMMA indexIdentifier)* aggregates=fields? (BY grouping=fields)?
     ;
 
 evalCommand

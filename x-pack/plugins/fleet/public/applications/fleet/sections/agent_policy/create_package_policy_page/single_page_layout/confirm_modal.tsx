@@ -15,6 +15,7 @@ export interface UnprivilegedConfirmModalProps {
   onCancel: () => void;
   agentPolicyName: string;
   unprivilegedAgentsCount: number;
+  dataStreams: Array<{ name: string; title: string }>;
 }
 
 export const UnprivilegedConfirmModal: React.FC<UnprivilegedConfirmModalProps> = ({
@@ -22,6 +23,7 @@ export const UnprivilegedConfirmModal: React.FC<UnprivilegedConfirmModalProps> =
   onCancel,
   agentPolicyName,
   unprivilegedAgentsCount,
+  dataStreams,
 }: UnprivilegedConfirmModalProps) => {
   return (
     <EuiConfirmModal
@@ -50,6 +52,7 @@ export const UnprivilegedConfirmModal: React.FC<UnprivilegedConfirmModalProps> =
       <UnprivilegedAgentsCallout
         unprivilegedAgentsCount={unprivilegedAgentsCount}
         agentPolicyName={agentPolicyName}
+        dataStreams={dataStreams}
       />
     </EuiConfirmModal>
   );
@@ -58,7 +61,8 @@ export const UnprivilegedConfirmModal: React.FC<UnprivilegedConfirmModalProps> =
 export const UnprivilegedAgentsCallout: React.FC<{
   agentPolicyName: string;
   unprivilegedAgentsCount: number;
-}> = ({ agentPolicyName, unprivilegedAgentsCount }) => {
+  dataStreams: Array<{ name: string; title: string }>;
+}> = ({ agentPolicyName, unprivilegedAgentsCount, dataStreams }) => {
   return (
     <EuiCallOut
       color="warning"
@@ -68,14 +72,32 @@ export const UnprivilegedAgentsCallout: React.FC<{
       })}
       data-test-subj="unprivilegedAgentsCallout"
     >
-      <FormattedMessage
-        id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsMessage"
-        defaultMessage="This integration requires Elastic Agents to have root privileges. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode using {agentPolicyName}. To ensure that all data required by the integration can be collected, re-enroll the {unprivilegedAgentsCount, plural, one {agent} other {agents}} using an account with root privileges."
-        values={{
-          unprivilegedAgentsCount,
-          agentPolicyName,
-        }}
-      />
+      {dataStreams.length === 0 ? (
+        <FormattedMessage
+          id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsMessage"
+          defaultMessage="This integration requires Elastic Agents to have root privileges. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode using {agentPolicyName}. To ensure that all data required by the integration can be collected, re-enroll the {unprivilegedAgentsCount, plural, one {agent} other {agents}} using an account with root privileges."
+          values={{
+            unprivilegedAgentsCount,
+            agentPolicyName,
+          }}
+        />
+      ) : (
+        <>
+          <FormattedMessage
+            id="xpack.fleet.addIntegration.confirmModal.unprivilegedAgentsDataStreamsMessage"
+            defaultMessage="This integration has the following data streams that require Elastic Agents to have root privileges. There {unprivilegedAgentsCount, plural, one {is # agent} other {are # agents}} running in an unprivileged mode using {agentPolicyName}. To ensure that all data required by the integration can be collected, re-enroll the {unprivilegedAgentsCount, plural, one {agent} other {agents}} using an account with root privileges."
+            values={{
+              unprivilegedAgentsCount,
+              agentPolicyName,
+            }}
+          />
+          <ul>
+            {dataStreams.map((item) => (
+              <li key={item.name}>{item.title}</li>
+            ))}
+          </ul>
+        </>
+      )}
     </EuiCallOut>
   );
 };
