@@ -3547,11 +3547,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 4,
         required: true,
         sensitive: false,
-        tooltip: getEnableDocumentLevelSecurityTooltip(
-          i18n.translate('searchConnectors.nativeConnectors.salesforce.name', {
-            defaultMessage: 'Salesforce',
-          })
-        ),
+        tooltip: ENABLE_DOCUMENT_LEVEL_SECURITY_TOOLTIP,
         type: FieldType.BOOLEAN,
         ui_restrictions: [],
         validations: [],
