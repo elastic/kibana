@@ -65,10 +65,10 @@ export const PresentationPanelContextMenu = ({
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
   const [hoverActionPanels, setHoverActionPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
-  console.log({ contextMenuPanels });
-
-  const [title, parentViewMode] = useBatchedOptionalPublishingSubjects(
+  const [title, description, hideTitle, parentViewMode] = useBatchedOptionalPublishingSubjects(
     api?.panelTitle,
+    api?.panelDescription,
+    api?.hidePanelTitle,
 
     /**
      * View mode changes often have the biggest influence over which actions will be compatible,
@@ -78,6 +78,8 @@ export const PresentationPanelContextMenu = ({
      */
     getViewModeSubject(api ?? undefined)
   );
+
+  const showDescription = description && (!title || hideTitle);
 
   const quickActionIds = QUICK_ACTION_IDS[parentViewMode === 'edit' ? 'edit' : 'view'];
 
@@ -122,8 +124,6 @@ export const PresentationPanelContextMenu = ({
       compatibleActions.sort(
         ({ order: orderA }, { order: orderB }) => (orderB || 0) - (orderA || 0)
       );
-
-      console.log({ compatibleActions });
 
       setContextMenuActions(compatibleActions.filter(({ id }) => !quickActionIds.includes(id)));
       setQuickActions(compatibleActions.filter(({ id }) => quickActionIds.includes(id)));
@@ -260,6 +260,27 @@ export const PresentationPanelContextMenu = ({
               </>
             ) : (
               <>
+                {showDescription && (
+                  <EuiToolTip
+                    title={!hideTitle ? title || undefined : undefined}
+                    content={description}
+                    delay="regular"
+                    position="top"
+                    anchorClassName="embPanel__titleTooltipAnchor"
+                    anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
+                  >
+                    <span
+                      data-test-subj="embeddablePanelTitleInner"
+                      className="embPanel__titleInner"
+                    >
+                      <EuiIcon
+                        type="iInCircle"
+                        color="subdued"
+                        data-test-subj="embeddablePanelTitleDescriptionIcon"
+                      />
+                    </span>
+                  </EuiToolTip>
+                )}
                 {hoverActionPanels[0]?.items?.map(
                   ({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
                     <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
