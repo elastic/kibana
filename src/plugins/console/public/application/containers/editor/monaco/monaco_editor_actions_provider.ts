@@ -347,7 +347,7 @@ export class MonacoEditorActionsProvider {
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     context: monaco.languages.CompletionContext
-  ) {
+  ): Promise<monaco.languages.CompletionList> {
     // determine autocomplete type
     const autocompleteType = await this.getAutocompleteType(model, position);
     if (!autocompleteType) {
@@ -384,7 +384,12 @@ export class MonacoEditorActionsProvider {
         position.lineNumber
       );
       const requestStartLineNumber = requests[0].startLineNumber;
-      const suggestions = getBodyCompletionItems(model, position, requestStartLineNumber, this);
+      const suggestions = await getBodyCompletionItems(
+        model,
+        position,
+        requestStartLineNumber,
+        this
+      );
       return {
         suggestions,
       };
@@ -394,12 +399,12 @@ export class MonacoEditorActionsProvider {
       suggestions: [],
     };
   }
-  public provideCompletionItems(
+  public async provideCompletionItems(
     model: monaco.editor.ITextModel,
     position: monaco.Position,
     context: monaco.languages.CompletionContext,
     token: monaco.CancellationToken
-  ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
+  ): Promise<monaco.languages.CompletionList> {
     return this.getSuggestions(model, position, context);
   }
 

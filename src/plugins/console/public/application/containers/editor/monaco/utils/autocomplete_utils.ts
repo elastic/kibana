@@ -256,22 +256,18 @@ export const getBodyCompletionItems = async (
   if (!context) {
     return [];
   }
-  if (!context.asyncResultsState?.isLoading) {
-    return getSuggestions(model, position, context, bodyContent);
-  } else {
-    // async suggestions
-    if (context.asyncResultsState) {
-      await context.asyncResultsState.results;
-      return getSuggestions(model, position, context, bodyContent);
-    }
+  if (context.asyncResultsState?.isLoading && context.asyncResultsState) {
+    const results = await context.asyncResultsState.results;
+    return getSuggestions(model, position, results, context, bodyContent);
   }
 
-  return [];
+  return getSuggestions(model, position, context.autoCompleteSet ?? [], context, bodyContent);
 };
 
 const getSuggestions = (
   model: monaco.editor.ITextModel,
   position: monaco.Position,
+  autocompleteSet: ResultTerm[],
   context: AutoCompleteContext,
   bodyContent: string
 ) => {
@@ -294,28 +290,25 @@ const getSuggestions = (
     endLineNumber: position.lineNumber,
     endColumn,
   };
-  if (context.autoCompleteSet && context.autoCompleteSet.length > 0) {
-    return (
-      context.autoCompleteSet
-        // filter out items that don't have name
-        .filter(({ name }) => name !== undefined)
-        // map autocomplete items to completion items
-        .map((item) => {
-          const suggestion = {
-            // convert name to a string
-            label: item.name + '',
-            insertText: getInsertText(item, bodyContent, context),
-            detail: i18nTexts.api,
-            // the kind is only used to configure the icon
-            kind: monaco.languages.CompletionItemKind.Constant,
-            range,
-            insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          };
-          return suggestion;
-        })
-    );
-  }
-  return [];
+  return (
+    autocompleteSet
+      // filter out items that don't have name
+      .filter(({ name }) => name !== undefined)
+      // map autocomplete items to completion items
+      .map((item) => {
+        const suggestion = {
+          // convert name to a string
+          label: item.name + '',
+          insertText: getInsertText(item, bodyContent, context),
+          detail: i18nTexts.api,
+          // the kind is only used to configure the icon
+          kind: monaco.languages.CompletionItemKind.Constant,
+          range,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+        };
+        return suggestion;
+      })
+  );
 };
 const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
