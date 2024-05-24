@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '../../../../common/utils/convert_legacy_outside_comparator';
 import {
   ABOVE_TEXT,
   ABOVE_OR_EQ_TEXT,
@@ -45,7 +46,9 @@ const recoveredComparatorToI18n = (
   }
 };
 
-const alertComparatorToI18n = (comparator: COMPARATORS) => {
+const alertComparatorToI18n = (comparator: COMPARATORS | LEGACY_COMPARATORS) => {
+  // We don't need to handle the LEGACY_COMPARATORS
+  // as it's converted on-the-fly to NOT_BETWEEN in the entry point of the rule executor
   switch (comparator) {
     case COMPARATORS.BETWEEN:
       return BETWEEN_TEXT;

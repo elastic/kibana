@@ -20,6 +20,7 @@ import {
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '../../../../common/utils/convert_legacy_outside_comparator';
 import {
   ABOVE_OR_EQ_TEXT,
   ABOVE_TEXT,
@@ -44,7 +45,7 @@ export interface FlyoutThresholdData {
   pctAboveThreshold: string;
 }
 
-const getI18nComparator = (comparator?: COMPARATORS) => {
+const getI18nComparator = (comparator?: COMPARATORS | LEGACY_COMPARATORS) => {
   switch (comparator) {
     case COMPARATORS.GREATER_THAN:
       return ABOVE_TEXT;
@@ -61,7 +62,7 @@ const getI18nComparator = (comparator?: COMPARATORS) => {
 const getPctAboveThreshold = (
   observedValue?: number,
   threshold?: number[],
-  comparator?: COMPARATORS
+  comparator?: COMPARATORS | LEGACY_COMPARATORS
 ): string => {
   if (!observedValue || !threshold || threshold.length > 1 || threshold[0] <= 0) return '';
 

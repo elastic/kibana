@@ -84,8 +84,6 @@ export const buildCustomThresholdRule = (
           threshold: [4],
           timeSize: 15,
           timeUnit: 'm',
-          warningComparator: COMPARATORS.GREATER_THAN,
-          warningThreshold: [2.2],
         },
         {
           comparator: COMPARATORS.GREATER_THAN,
