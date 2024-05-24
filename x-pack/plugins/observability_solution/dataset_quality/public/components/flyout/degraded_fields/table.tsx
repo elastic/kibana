@@ -28,12 +28,16 @@ export const DegradedFieldTable = () => {
       sorting={sort}
       onChange={onTableChange}
       pagination={pagination}
+      data-test-subj="datasetQualityFlyoutDegradedFieldTable"
+      rowProps={{
+        'data-test-subj': 'datasetQualityFlyoutDegradedTableRow',
+      }}
       noItemsMessage={
         loadingState.datasetDegradedFieldsLoading ? (
           flyoutDegradedFieldsTableLoadingText
         ) : (
           <EuiEmptyPrompt
-            data-test-subj="datasetQualityTableNoData"
+            data-test-subj="datasetQualityFlyoutDegradedTableNoData"
             layout="vertical"
             title={<h2>{flyoutDegradedFieldsTableNoData}</h2>}
             hasBorder={false}

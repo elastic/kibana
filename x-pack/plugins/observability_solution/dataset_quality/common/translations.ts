@@ -147,7 +147,7 @@ export const flyoutImprovementText = i18n.translate(
 export const flyoutImprovementTooltip = i18n.translate(
   'xpack.datasetQuality.flyoutDegradedFieldsSectionTooltip',
   {
-    defaultMessage: 'Some logical tooltip for Improvements',
+    defaultMessage: 'Set of degraded fields in the dataset.',
   }
 );
 

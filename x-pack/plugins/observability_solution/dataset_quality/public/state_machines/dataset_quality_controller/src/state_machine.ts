@@ -510,7 +510,7 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
           };
         }),
-        resetFlyoutOptions: assign((_context, _event) => ({ flyout: undefined })),
+        resetFlyoutOptions: assign((_context, _event) => ({ flyout: DEFAULT_CONTEXT.flyout })),
         storeDataStreamStats: assign((_context, event) => {
           if ('data' in event) {
             const dataStreamStats = event.data as DataStreamStat[];
