@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { nonNullable } from '../../../../../utils';
 import type {
   BaseIndexPatternColumn,
   FieldBasedOperationErrorMessage,
@@ -22,6 +21,7 @@ import { generateFormula } from './generate';
 import { filterByVisibleOperation } from './util';
 import { getManagedColumnsFrom } from '../../layer_helpers';
 import { generateMissingFieldMessage, getFilter, isColumnFormatted } from '../helpers';
+import { FORMULA_LAYER_ONLY_STATIC_VALUES } from '../../../../../user_messages_ids';
 
 const defaultLabel = i18n.translate('xpack.lens.indexPattern.formulaLabel', {
   defaultMessage: 'Formula',
@@ -76,8 +76,15 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
 
       const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
       const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
-      if (error || root == null) {
-        return error?.message ? [error.message] : [];
+      if (error || !root) {
+        return error?.message
+          ? [
+              {
+                uniqueId: error.id,
+                message: error.message,
+              },
+            ]
+          : [];
       }
 
       const errors = runASTValidation(
@@ -91,10 +98,13 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
 
       if (errors.length) {
         // remove duplicates
-        return uniqBy(errors, ({ message }) => message).map(({ type, message, extraInfo }) =>
-          type === 'missingField' && extraInfo?.missingFields
-            ? generateMissingFieldMessage(extraInfo.missingFields, columnId)
-            : message
+        return uniqBy(errors, ({ message }) => message).map(({ id, message, meta }) =>
+          id === 'missingField' && meta.fieldList.length > 0
+            ? generateMissingFieldMessage(meta.fieldList, columnId) // TODO: add missing field List
+            : {
+                uniqueId: id,
+                message,
+              }
         );
       }
 
@@ -113,11 +123,10 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
                 visibleOperationsMap,
                 targetBars
               );
-              return messages || [];
+              return messages;
             }
             return [];
           })
-          .filter(nonNullable)
           // dedup messages with the same content
           .reduce((memo, message) => {
             memo.add(message);
@@ -142,6 +151,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
 
       if (hasBuckets && !hasOtherMetrics && hasBeenEvaluated) {
         innerErrors.push({
+          uniqueId: FORMULA_LAYER_ONLY_STATIC_VALUES,
           message: i18n.translate('xpack.lens.indexPattern.noRealMetricError', {
             defaultMessage:
               'A layer with only static values will not show results, use at least one dynamic metric',
@@ -149,7 +159,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         });
       }
 
-      return innerErrors.length ? innerErrors : undefined;
+      return innerErrors;
     },
     getPossibleOperation() {
       return {

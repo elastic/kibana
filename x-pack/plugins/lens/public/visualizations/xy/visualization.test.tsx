@@ -231,36 +231,7 @@ describe('xy_visualization', () => {
                 "colorMode": Object {
                   "type": "categorical",
                 },
-                "paletteId": "${EUIAmsterdamColorBlindPalette.id}",
-                "specialAssignments": Array [
-                  Object {
-                    "color": Object {
-                      "type": "loop",
-                    },
-                    "rule": Object {
-                      "type": "other",
-                    },
-                    "touched": false,
-                  },
-                ],
-              },
-              "layerId": "l1",
-              "layerType": "data",
-              "palette": undefined,
-              "position": "top",
-              "seriesType": "bar_stacked",
-              "showGridlines": false,
-            },
-          ],
-          "legend": Object {
-            "isVisible": true,
-            "position": "right",
-          },
-          "preferredSeriesType": "bar_stacked",
-          "title": "Empty XY chart",
-          "valueLabels": "hide",
-        }
-      `);
+                "paletteId": "`);
     });
 
     it('loads from persisted state', () => {
@@ -3145,6 +3116,7 @@ describe('xy_visualization', () => {
                 "longMessage": "",
                 "severity": "error",
                 "shortMessage": "Annotations require a time based chart to work. Add a date histogram.",
+                "uniqueId": "annotation_missing_date_histogram",
               },
             ]
           `);
@@ -3309,6 +3281,7 @@ describe('xy_visualization', () => {
             />,
             "severity": "warning",
             "shortMessage": "",
+            "uniqueId": "xy_rendering_values_array",
           }
         `);
       });

@@ -62,7 +62,7 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     filterable: true,
-    getErrorMessage: jest.fn(() => ['mock error']),
+    getErrorMessage: jest.fn(() => []),
     buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',

@@ -121,35 +121,29 @@ export function isColumnInvalid(
   const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
   if (!column || !indexPattern) return;
 
-  const operationDefinition = column.operationType && operationDefinitionMap[column.operationType];
   // check also references for errors
   const referencesHaveErrors =
-    true &&
-    'references' in column &&
-    Boolean(
-      getReferencesErrors(layer, column, indexPattern, dateRange, targetBars).filter(Boolean).length
-    );
+    'references' in column
+      ? getReferencesErrors(layer, column, indexPattern, dateRange, targetBars).length > 0
+      : false;
 
-  const operationErrorMessages =
-    operationDefinition &&
-    operationDefinition.getErrorMessage?.(
-      layer,
-      columnId,
-      indexPattern,
-      dateRange,
-      operationDefinitionMap,
-      targetBars
-    );
+  const operationHasErrorMessages =
+    (
+      operationDefinitionMap[column.operationType]?.getErrorMessage?.(
+        layer,
+        columnId,
+        indexPattern,
+        dateRange,
+        operationDefinitionMap,
+        targetBars
+      ) ?? []
+    ).length > 0;
 
   // it looks like this is just a back-stop since we prevent
   // invalid filters from being set at the UI level
   const filterHasError = column.filter ? !isQueryValid(column.filter, indexPattern) : false;
 
-  return (
-    (operationErrorMessages && operationErrorMessages.length > 0) ||
-    referencesHaveErrors ||
-    filterHasError
-  );
+  return operationHasErrorMessages || referencesHaveErrors || filterHasError;
 }
 
 function getReferencesErrors(
@@ -183,7 +177,7 @@ export function fieldIsInvalid(
   if (!column || !hasField(column)) {
     return false;
   }
-  return Boolean(getInvalidFieldMessage(layer, columnId, indexPattern));
+  return getInvalidFieldMessage(layer, columnId, indexPattern).length > 0;
 }
 
 const accuracyModeDisabledWarning = (

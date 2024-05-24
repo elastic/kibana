@@ -44,6 +44,7 @@ describe('application-level user messages', () => {
           "longMessage": "Visualization type not found.",
           "severity": "error",
           "shortMessage": "",
+          "uniqueId": "editor_missing_vis_type",
         },
       ]
     `);
@@ -73,6 +74,7 @@ describe('application-level user messages', () => {
           "longMessage": "The visualization type id_for_type_that_doesnt_exist could not be resolved.",
           "severity": "error",
           "shortMessage": "Unknown visualization type",
+          "uniqueId": "editor_unknown_vis_type",
         },
       ]
     `);
@@ -102,6 +104,7 @@ describe('application-level user messages', () => {
           "longMessage": "Could not find datasource for the visualization",
           "severity": "error",
           "shortMessage": "Unknown datasource type",
+          "uniqueId": "editor_unknown_datasource_type",
         },
       ]
     `);
@@ -272,6 +275,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "warning",
           "shortMessage": "Deprecation notice!",
+          "uniqueId": "unique_id_3",
         },
       ]
     `);
@@ -292,6 +296,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "error",
           "shortMessage": "Warning on dimension 1!",
+          "uniqueId": "unique_id_1",
         },
       ]
     `);
@@ -312,6 +317,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "warning",
           "shortMessage": "Warning on dimension 2!",
+          "uniqueId": "unique_id_2",
         },
       ]
     `);
@@ -328,6 +334,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "error",
           "shortMessage": "Visualization error!",
+          "uniqueId": "unique_id_4",
         },
         Object {
           "displayLocations": Array [
@@ -339,6 +346,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "error",
           "shortMessage": "Visualization editor error!",
+          "uniqueId": "unique_id_5",
         },
       ]
     `);
@@ -370,6 +378,7 @@ describe('filtering user messages', () => {
           "longMessage": "",
           "severity": "warning",
           "shortMessage": "Visualization embeddable warning!",
+          "uniqueId": "unique_id_6",
         },
       ]
     `);

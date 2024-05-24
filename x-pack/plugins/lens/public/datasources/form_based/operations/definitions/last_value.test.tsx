@@ -962,6 +962,7 @@ describe('last_value', () => {
                 }
               }
             />,
+            "uniqueId": "field_not_found",
           },
         ]
       `);
@@ -1007,6 +1008,7 @@ describe('last_value', () => {
                 }
               }
             />,
+            "uniqueId": "last_value_op_sort_field_not_found",
           },
         ]
       `);

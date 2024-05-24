@@ -234,7 +234,7 @@ describe('getDisallowedTermsMessage()', () => {
       ]),
       'col1',
       indexPattern
-    )!.fixAction.newState;
+    )[0]!.fixAction!.newState;
     const newLayer = await fixAction(
       dataMock,
       coreMock,
@@ -282,7 +282,7 @@ describe('getDisallowedTermsMessage()', () => {
       ]),
       'col1',
       indexPattern
-    )!.fixAction.newState;
+    )[0]!.fixAction!.newState;
     const newLayer = await fixAction(
       dataMock,
       coreMock,
@@ -324,7 +324,7 @@ describe('getDisallowedTermsMessage()', () => {
       ]),
       'col1',
       indexPattern
-    )!.fixAction.newState;
+    )[0]!.fixAction!.newState;
     const newLayer = await fixAction(
       dataMock,
       coreMock,
@@ -365,7 +365,7 @@ describe('getDisallowedTermsMessage()', () => {
       ]),
       'col1',
       indexPattern
-    )!.fixAction.newState;
+    )[0]!.fixAction!.newState;
     const newLayer = await fixAction(
       dataMock,
       coreMock,

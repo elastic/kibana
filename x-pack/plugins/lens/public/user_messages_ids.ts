@@ -49,7 +49,7 @@ export const TIME_SHIFT_MULTIPLE_DATE_HISTOGRAMS = 'time_shift_multiple_date_his
 
 export const INTERVAL_OP_MISSING_UI_SETTINGS_HISTOGRAM_BAR_TARGET =
   'missing_ui_settings_histogram_bar_target';
-export const INTERVAL_OP_MISSING_TIME_RANGE = 'missing_time_range';
+export const INTERVAL_OP_MISSING_TIME_RANGE = 'interval_op_missing_time_range';
 export const INTERVAL_OP_MISSING_DATE_HISTOGRAM_TO_COMPUTE_INTERVAL =
   'missing_date_histogram_to_compute_interval';
 
@@ -58,6 +58,9 @@ export const TIMERANGE_OP_MISSING_TIME_RANGE = 'timerange_op_missing_time_range'
 
 export const LAST_VALUE_OP_SORT_FIELD_NOT_FOUND = 'last_value_op_sort_field_not_found';
 export const LAST_VALUE_OP_SORT_FIELD_INVALID_TYPE = 'last_value_op_sort_field_invalid_type';
+export const FORMULA_LAYER_ONLY_STATIC_VALUES = 'formula_layer_only_static_values';
+export const STATIC_VALUE_NOT_VALID_NUMBER = 'static_value_not_valid_number';
+
 /** Annotations require a time based chart to work. Add a date histogram. */
 export const ANNOTATION_MISSING_DATE_HISTOGRAM = 'annotation_missing_date_histogram';
 export const ANNOTATION_MISSING_TIME_FIELD = 'annotation_missing_time_field';

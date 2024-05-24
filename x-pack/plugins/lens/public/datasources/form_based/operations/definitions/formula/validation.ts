@@ -16,7 +16,6 @@ import {
   isAbsoluteTimeShift,
   parseTimeShift,
   REASON_IDS,
-  REASON_ID_TYPES,
   validateAbsoluteTimeShift,
 } from '@kbn/data-plugin/common';
 import { nonNullable } from '../../../../../utils';
@@ -38,94 +37,13 @@ import type {
 import type { FormBasedLayer } from '../../../types';
 import type { IndexPattern } from '../../../../../types';
 import type { TinymathNodeTypes } from './types';
+import { InvalidQueryError, ValidationErrors } from './validation_errors';
 
-interface ValidationErrors {
-  missingField: { message: string; type: { variablesLength: number; variablesList: string } };
-  missingOperation: {
-    message: string;
-    type: { operationLength: number; operationsList: string };
-  };
-  missingParameter: {
-    message: string;
-    type: { operation: string; params: string };
-  };
-  wrongTypeParameter: {
-    message: string;
-    type: { operation: string; params: string };
-  };
-  wrongTypeArgument: {
-    message: string;
-    type: { operation: string; name: string; type: string; expectedType: string };
-  };
-  wrongFirstArgument: {
-    message: string;
-    type: { operation: string; type: string; argument: string | number };
-  };
-  cannotAcceptParameter: { message: string; type: { operation: string } };
-  shouldNotHaveField: { message: string; type: { operation: string } };
-  tooManyArguments: { message: string; type: { operation: string } };
-  fieldWithNoOperation: {
-    message: string;
-    type: { field: string };
-  };
-  failedParsing: { message: string; type: { expression: string } };
-  duplicateArgument: {
-    message: string;
-    type: { operation: string; params: string };
-  };
-  missingMathArgument: {
-    message: string;
-    type: { operation: string; count: number; params: string };
-  };
-  tooManyQueries: {
-    message: string;
-    type: {};
-  };
-  tooManyFirstArguments: {
-    message: string;
-    type: {
-      operation: string;
-      type: string;
-      text: string;
-      supported?: number;
-    };
-  };
-  wrongArgument: {
-    message: string;
-    type: { operation: string; text: string; type: string };
-  };
-  wrongReturnedType: {
-    message: string;
-    type: { text: string };
-  };
-  filtersTypeConflict: {
-    message: string;
-    type: { operation: string; outerType: string; innerType: string };
-  };
-  useAlternativeFunction: {
-    message: string;
-    type: {
-      operation: string;
-      params: string;
-      alternativeFn: string;
-    };
-  };
-  invalidQuery: {
-    message: string;
-    type: { text: string };
-  };
-}
-
-type ErrorTypes = keyof ValidationErrors;
-type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
-
-export interface ErrorWrapper {
-  type: ErrorTypes;
+export type ErrorWrapper = ValidationErrors & {
   message: string;
   locations: TinymathLocation[];
   severity?: 'error' | 'warning';
-  extraInfo?: { missingFields: string[] };
-}
+};
 
 const DEFAULT_RETURN_TYPE = getTypeI18n('number');
 
@@ -179,7 +97,7 @@ export function hasInvalidOperations(
 export const getRawQueryValidationError = (
   text: string,
   operations: Record<string, unknown>
-): string[] => {
+): Array<InvalidQueryError & { message: string }> => {
   // try to extract the query context here
   const singleLine = text.split('\n').join('');
   const languagesRegexp = /(kql|lucene)/;
@@ -200,17 +118,29 @@ export const getRawQueryValidationError = (
     arg.split('count').filter((subArg) => languagesRegexp.test(subArg))
   );
   const [kqlQueries, luceneQueries] = partition(flattenArgs, (arg) => /kql/.test(arg));
-  const errors = [];
+  const errors: Array<InvalidQueryError & { message: string }> = [];
   for (const kqlQuery of kqlQueries) {
     const result = validateQueryQuotes(kqlQuery, 'kql');
     if (result) {
-      errors.push(result);
+      errors.push({
+        id: 'invalidQuery',
+        meta: {
+          language: 'kql',
+        },
+        message: result,
+      });
     }
   }
   for (const luceneQuery of luceneQueries) {
     const result = validateQueryQuotes(luceneQuery, 'lucene');
     if (result) {
-      errors.push(result);
+      errors.push({
+        id: 'invalidQuery',
+        meta: {
+          language: 'lucene',
+        },
+        message: result,
+      });
     }
   }
   return errors;
@@ -261,156 +191,172 @@ export const getQueryValidationError = (
   }
 };
 
-function getMessageFromId<K extends ErrorTypes>({
-  messageId,
-  values,
-  locations,
-}: {
-  messageId: K;
-  values: ErrorValues<K>;
-  locations: TinymathLocation[];
-}): ErrorWrapper {
-  // Use a less strict type instead of doing a typecast on each message type
-  // const out = values as unknown as Record<string, string>;
-
-  if (messageId === 'wrongFirstArgument') {
-    console.log(values);
-  }
-
-  switch (messageId) {
+function getMessageFromId(
+  { id, meta }: ValidationErrors,
+  locations: TinymathLocation[]
+): ErrorWrapper {
+  switch (id) {
+    case 'invalidQuery':
+      return {
+        id,
+        meta,
+        locations,
+        // this is just a placeholder because the actual message comes from the query validator
+        message: i18n.translate('xpack.lens.indexPattern.invalidQuery', {
+          defaultMessage: 'Invalid {language} query, please check the syntax and retry',
+          values: { operation: meta.language },
+        }),
+      };
     case 'wrongFirstArgument':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaOperationWrongFirstArgument', {
           defaultMessage:
             'The first argument for {operation} should be a {type} name. Found {argument}',
-          values: { operation: values.operation, type: out.type, argument: out.argument },
+          values: { operation: meta.operation, type: meta.type, argument: meta.argument },
         }),
       };
     case 'shouldNotHaveField':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaFieldNotRequired', {
           defaultMessage: 'The operation {operation} does not accept any field as argument',
-          values: { operation: out.operation },
+          values: { operation: meta.operation },
         }),
       };
     case 'cannotAcceptParameter':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaParameterNotRequired', {
           defaultMessage: 'The operation {operation} does not accept any parameter',
-          values: { operation: out.operation },
+          values: { operation: meta.operation },
         }),
       };
     case 'missingParameter':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaExpressionNotHandled', {
           defaultMessage:
             'The operation {operation} in the Formula is missing the following parameters: {params}',
-          values: { operation: out.operation, params: out.params },
+          values: { operation: meta.operation, params: meta.params },
         }),
       };
     case 'wrongTypeParameter':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongType', {
           defaultMessage:
             'The parameters for the operation {operation} in the Formula are of the wrong type: {params}',
-          values: { operation: out.operation, params: out.params },
+          values: { operation: meta.operation, params: meta.params },
         }),
       };
     case 'wrongTypeArgument':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaExpressionWrongTypeArgument', {
           defaultMessage:
             'The {name} argument for the operation {operation} in the Formula is of the wrong type: {type} instead of {expectedType}',
           values: {
-            operation: out.operation,
-            name: out.name,
-            type: out.type,
-            expectedType: out.expectedType,
+            operation: meta.operation,
+            name: meta.name,
+            type: meta.type,
+            expectedType: meta.expectedType,
           },
         }),
       };
     case 'duplicateArgument':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaOperationDuplicateParams', {
           defaultMessage:
             'The parameters for the operation {operation} have been declared multiple times: {params}',
-          values: { operation: out.operation, params: out.params },
+          values: { operation: meta.operation, params: meta.params },
         }),
       };
     case 'missingField':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaFieldNotFound', {
           defaultMessage:
-            '{variablesLength, plural, one {Field} other {Fields}} {variablesList} not found',
-          values: { variablesLength: out.variablesLength, variablesList: out.variablesList },
+            '{missingFieldCount, plural, one {Field} other {Fields}} {missingFieldList} not found',
+          values: {
+            missingFieldCount: meta.fieldList.length,
+            missingFieldList: meta.fieldList.join(', '),
+          },
         }),
       };
     case 'missingOperation':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.operationsNotFound', {
           defaultMessage:
             '{operationLength, plural, one {Operation} other {Operations}} {operationsList} not found',
-          values: { operationLength: out.operationLength, operationsList: out.operationsList },
+          values: { operationLength: meta.operationLength, operationsList: meta.operationsList },
         }),
       };
     case 'fieldWithNoOperation':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.fieldNoOperation', {
           defaultMessage: 'The field {field} cannot be used without operation',
-          values: { field: out.field },
+          values: { field: meta.field },
         }),
       };
     case 'failedParsing':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaExpressionParseError', {
           defaultMessage: 'The Formula {expression} cannot be parsed',
-          values: { expression: out.expression },
+          values: { expression: meta.expression },
         }),
       };
     case 'tooManyArguments':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaWithTooManyArguments', {
           defaultMessage: 'The operation {operation} has too many arguments',
-          values: { operation: out.operation },
+          values: { operation: meta.operation },
         }),
       };
     case 'missingMathArgument':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaMathMissingArgument', {
           defaultMessage:
             'The operation {operation} in the Formula is missing {count} arguments: {params}',
-          values: { operation: out.operation, count: out.count, params: out.params },
+          values: { operation: meta.operation, count: meta.count, params: meta.params },
         }),
       };
     case 'tooManyQueries':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaOperationDoubleQueryError', {
           defaultMessage: 'Use only one of kql= or lucene=, not both',
@@ -418,70 +364,128 @@ function getMessageFromId<K extends ErrorTypes>({
       };
     case 'tooManyFirstArguments':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaOperationTooManyFirstArguments', {
           defaultMessage:
             'The operation {operation} in the Formula requires a {supported, plural, one {single} other {supported}} {type}, found: {text}',
           values: {
-            operation: out.operation,
-            text: out.text,
-            type: out.type,
-            supported: out.supported || 1,
+            operation: meta.operation,
+            text: meta.text,
+            type: meta.type,
+            supported: meta.supported || 1,
           },
         }),
       };
     case 'wrongArgument':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaOperationwrongArgument', {
           defaultMessage:
             'The operation {operation} in the Formula does not support {type} parameters, found: {text}',
-          values: { operation: out.operation, text: out.text, type: out.type },
+          values: { operation: meta.operation, text: meta.text, type: meta.type },
         }),
       };
     case 'wrongReturnedType':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaOperationWrongReturnedType', {
           defaultMessage:
             'The return value type of the operation {text} is not supported in Formula',
-          values: { text: out.text },
+          values: { text: meta.text },
         }),
       };
     case 'filtersTypeConflict':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaOperationFiltersTypeConflicts', {
           defaultMessage:
             'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation',
-          values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
+          values: {
+            operation: meta.operation,
+            outerType: meta.outerType,
+            innerType: meta.innerType,
+          },
         }),
       };
     case 'useAlternativeFunction':
       return {
-        type: messageId,
+        id,
+        meta,
         locations,
         message: i18n.translate('xpack.lens.indexPattern.formulaUseAlternative', {
           defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead`,
           values: {
-            operation: out.operation,
-            params: out.params,
-            alternativeFn: out.alternativeFn,
+            operation: meta.operation,
+            params: meta.params,
+            alternativeFn: meta.alternativeFn,
           },
         }),
       };
-    // case 'mathRequiresFunction':
-    //   message = i18n.translate('xpack.lens.indexPattern.formulaMathRequiresFunctionLabel', {
-    //     defaultMessage; 'The function {name} requires an Elasticsearch function',
-    //     values: { ...values },
-    //   });
-    //   break;
-    default:
-      return undefined;
+    case REASON_IDS.missingTimerange:
+      return {
+        id,
+        meta,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.absoluteMissingTimeRange', {
+          defaultMessage: 'Invalid time shift. No time range found as reference',
+        }),
+      };
+    case REASON_IDS.invalidDate:
+      return {
+        id,
+        meta,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.absoluteInvalidDate', {
+          defaultMessage: 'Invalid time shift. The date is not of the correct format',
+        }),
+      };
+    case REASON_IDS.shiftAfterTimeRange:
+      return {
+        id,
+        meta,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.absoluteAfterTimeRange', {
+          defaultMessage: 'Invalid time shift. The provided date is after the current time range',
+        }),
+      };
+
+    case REASON_IDS.notAbsoluteTimeShift:
+      return {
+        id,
+        meta,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.notAbsoluteTimeShift', {
+          defaultMessage: 'Invalid time shift.',
+        }),
+      };
+    case 'invalidTimeShift':
+      return {
+        id,
+        meta,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.invalidTimeShift', {
+          defaultMessage:
+            'Invalid time shift. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
+        }),
+      };
+    case 'invalidReducedTimeRange':
+      return {
+        id,
+        meta,
+        locations,
+        message: i18n.translate('xpack.lens.indexPattern.invalidReducedTimeRange', {
+          defaultMessage:
+            'Invalid reduced time range. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
+        }),
+      };
   }
 }
 
@@ -497,23 +501,28 @@ export function tryToParse(
     // Internally the function has the following logic:
     // * if the formula contains no existing ES operation, assume it's a plain parse failure
     // * if the formula contains at least one existing operation, check for query problems
-    const maybeQueryProblems = getRawQueryValidationError(formula, operations);
-    if (maybeQueryProblems.length) {
-      // need to emulate an error shape here
+    // TODO: not sure why we just consider the first error here
+    const maybeQueryProblems = getRawQueryValidationError(formula, operations)[0];
+    if (maybeQueryProblems) {
       return {
         root: null,
-        error: { message: maybeQueryProblems[0], type: 'invalidQuery', locations: [] },
+        error: {
+          ...maybeQueryProblems,
+          locations: [],
+        },
       };
     }
     return {
       root: null,
-      error: getMessageFromId({
-        messageId: 'failedParsing',
-        values: {
-          expression: formula,
+      error: getMessageFromId(
+        {
+          id: 'failedParsing',
+          meta: {
+            expression: formula,
+          },
         },
-        locations: [],
-      }),
+        []
+      ),
     };
   }
   return { root, error: null };
@@ -538,13 +547,7 @@ function checkVariableEdgeCases(ast: TinymathAST, missingVariables: Set<string>)
   const invalidVariableErrors = [];
   if (isObject(ast) && ast.type === 'variable' && !missingVariables.has(ast.value)) {
     invalidVariableErrors.push(
-      getMessageFromId({
-        messageId: 'fieldWithNoOperation',
-        values: {
-          field: ast.value,
-        },
-        locations: [ast.location],
-      })
+      getMessageFromId({ id: 'fieldWithNoOperation', meta: { field: ast.value } }, [ast.location])
     );
   }
   return invalidVariableErrors;
@@ -561,14 +564,16 @@ function checkMissingVariableOrFunctions(
 
   if (missingOperations.names.length) {
     missingErrors.push(
-      getMessageFromId({
-        messageId: 'missingOperation',
-        values: {
-          operationLength: missingOperations.names.length,
-          operationsList: missingOperations.names.join(', '),
+      getMessageFromId(
+        {
+          id: 'missingOperation',
+          meta: {
+            operationLength: missingOperations.names.length,
+            operationsList: missingOperations.names.join(', '),
+          },
         },
-        locations: missingOperations.locations,
-      })
+        missingOperations.locations
+      )
     );
   }
   const missingVariables = findVariables(ast).filter(
@@ -579,15 +584,15 @@ function checkMissingVariableOrFunctions(
   // need to check the arguments here: check only strings for now
   if (missingVariables.length) {
     missingErrors.push({
-      ...getMessageFromId({
-        messageId: 'missingField',
-        values: {
-          variablesLength: missingVariables.length,
-          variablesList: missingVariables.map(({ value }) => value).join(', '),
+      ...getMessageFromId(
+        {
+          id: 'missingField',
+          meta: {
+            fieldList: [...new Set(missingVariables.map(({ value }) => value))],
+          },
         },
-        locations: missingVariables.map(({ location }) => location),
-      }),
-      extraInfo: { missingFields: [...new Set(missingVariables.map(({ value }) => value))] },
+        missingVariables.map(({ location }) => location)
+      ),
     });
   }
   const invalidVariableErrors = checkVariableEdgeCases(
@@ -595,27 +600,6 @@ function checkMissingVariableOrFunctions(
     new Set(missingVariables.map(({ value }) => value))
   );
   return [...missingErrors, ...invalidVariableErrors];
-}
-
-function getAbsoluteTimeShiftErrorMessage(reason: REASON_ID_TYPES) {
-  switch (reason) {
-    case REASON_IDS.missingTimerange:
-      return i18n.translate('xpack.lens.indexPattern.absoluteMissingTimeRange', {
-        defaultMessage: 'Invalid time shift. No time range found as reference',
-      });
-    case REASON_IDS.invalidDate:
-      return i18n.translate('xpack.lens.indexPattern.absoluteInvalidDate', {
-        defaultMessage: 'Invalid time shift. The date is not of the correct format',
-      });
-    case REASON_IDS.shiftAfterTimeRange:
-      return i18n.translate('xpack.lens.indexPattern.absoluteAfterTimeRange', {
-        defaultMessage: 'Invalid time shift. The provided date is after the current time range',
-      });
-    case REASON_IDS.notAbsoluteTimeShift:
-      return i18n.translate('xpack.lens.indexPattern.notAbsoluteTimeShift', {
-        defaultMessage: 'Invalid time shift.',
-      });
-  }
 }
 
 function getQueryValidationErrors(
@@ -629,8 +613,11 @@ function getQueryValidationErrors(
       const message = getQueryValidationError(arg, indexPattern);
       if (message) {
         errors.push({
-          type: 'invalidQuery',
+          id: 'invalidQuery',
           message,
+          meta: {
+            language: arg.name,
+          },
           locations: [arg.location],
         });
       }
@@ -641,7 +628,7 @@ function getQueryValidationErrors(
       if (parsedShift === 'invalid') {
         if (isAbsoluteTimeShift(arg.value)) {
           // try to parse as absolute time shift
-          const error = validateAbsoluteTimeShift(
+          const errorId = validateAbsoluteTimeShift(
             arg.value,
             dateRange
               ? {
@@ -650,34 +637,18 @@ function getQueryValidationErrors(
                 }
               : undefined
           );
-          if (error) {
-            errors.push({
-              type: error,
-              message: getAbsoluteTimeShiftErrorMessage(error),
-              locations: [arg.location],
-            });
+          if (errorId) {
+            errors.push(getMessageFromId({ id: errorId, meta: {} }, [arg.location]));
           }
         } else {
-          errors.push({
-            message: i18n.translate('xpack.lens.indexPattern.invalidTimeShift', {
-              defaultMessage:
-                'Invalid time shift. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
-            }),
-            locations: [arg.location],
-          });
+          errors.push(getMessageFromId({ id: 'invalidTimeShift', meta: {} }, [arg.location]));
         }
       }
     }
     if (arg.name === 'reducedTimeRange') {
       const parsedReducedTimeRange = parseTimeShift(arg.value || '');
       if (parsedReducedTimeRange === 'invalid' || parsedReducedTimeRange === 'previous') {
-        errors.push({
-          message: i18n.translate('xpack.lens.indexPattern.invalidReducedTimeRange', {
-            defaultMessage:
-              'Invalid reduced time range. Enter positive integer amount followed by one of the units s, m, h, d, w, M, y. For example 3h for 3 hours',
-          }),
-          locations: [arg.location],
-        });
+        errors.push(getMessageFromId({ id: 'invalidReducedTimeRange', meta: {} }, [arg.location]));
       }
     }
   });
@@ -707,15 +678,17 @@ function validateFiltersArguments(
   if (conflicts) {
     if (innerType && outerType) {
       errors.push(
-        getMessageFromId({
-          messageId: 'filtersTypeConflict',
-          values: {
-            operation: node.name,
-            innerType,
-            outerType,
+        getMessageFromId(
+          {
+            id: 'filtersTypeConflict',
+            meta: {
+              operation: node.name,
+              innerType,
+              outerType,
+            },
           },
-          locations: getNodeLocation(node),
-        })
+          getNodeLocation(node)
+        )
       );
     }
   }
@@ -735,40 +708,46 @@ function validateNameArguments(
   const missingParams = getMissingParams(nodeOperation, namedArguments);
   if (missingParams.length) {
     errors.push(
-      getMessageFromId({
-        messageId: 'missingParameter',
-        values: {
-          operation: node.name,
-          params: missingParams.map(({ name }) => name).join(', '),
+      getMessageFromId(
+        {
+          id: 'missingParameter',
+          meta: {
+            operation: node.name,
+            params: missingParams.map(({ name }) => name).join(', '),
+          },
         },
-        locations: getNodeLocation(node),
-      })
+        getNodeLocation(node)
+      )
     );
   }
   const wrongTypeParams = getWrongTypeParams(nodeOperation, namedArguments);
   if (wrongTypeParams.length) {
     errors.push(
-      getMessageFromId({
-        messageId: 'wrongTypeParameter',
-        values: {
-          operation: node.name,
-          params: wrongTypeParams.map(({ name }) => name).join(', '),
+      getMessageFromId(
+        {
+          id: 'wrongTypeParameter',
+          meta: {
+            operation: node.name,
+            params: wrongTypeParams.map(({ name }) => name).join(', '),
+          },
         },
-        locations: getNodeLocation(node),
-      })
+        getNodeLocation(node)
+      )
     );
   }
   const duplicateParams = getDuplicateParams(namedArguments);
   if (duplicateParams.length) {
     errors.push(
-      getMessageFromId({
-        messageId: 'duplicateArgument',
-        values: {
-          operation: node.name,
-          params: duplicateParams.join(', '),
+      getMessageFromId(
+        {
+          id: 'duplicateArgument',
+          meta: {
+            operation: node.name,
+            params: duplicateParams.join(', '),
+          },
         },
-        locations: getNodeLocation(node),
-      })
+        getNodeLocation(node)
+      )
     );
   }
   const queryValidationErrors = getQueryValidationErrors(namedArguments, indexPattern, dateRange);
@@ -777,13 +756,7 @@ function validateNameArguments(
   }
   const hasTooManyQueries = checkSingleQuery(namedArguments);
   if (hasTooManyQueries) {
-    errors.push(
-      getMessageFromId({
-        messageId: 'tooManyQueries',
-        values: {},
-        locations: getNodeLocation(node),
-      })
-    );
+    errors.push(getMessageFromId({ id: 'tooManyQueries', meta: {} }, getNodeLocation(node)));
   }
   return errors;
 }
@@ -796,13 +769,15 @@ function checkTopNodeReturnType(ast: TinymathAST): ErrorWrapper[] {
     (tinymathFunctions[ast.name]?.outputType || DEFAULT_RETURN_TYPE) !== DEFAULT_RETURN_TYPE
   ) {
     return [
-      getMessageFromId({
-        messageId: 'wrongReturnedType',
-        values: {
-          text: ast.text,
+      getMessageFromId(
+        {
+          id: 'wrongReturnedType',
+          meta: {
+            text: ast.text,
+          },
         },
-        locations: getNodeLocation(ast),
-      }),
+        getNodeLocation(ast)
+      ),
     ];
   }
   return [];
@@ -843,36 +818,40 @@ function runFullASTValidation(
         if (!isArgumentValidType(firstArg, 'variable')) {
           if (isMathNode(firstArg)) {
             errors.push(
-              getMessageFromId({
-                messageId: 'wrongFirstArgument',
-                values: {
-                  operation: node.name,
-                  type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
-                    defaultMessage: 'field',
-                  }),
-                  argument: `math operation`,
-                },
-                locations: getNodeLocation(node),
-              })
-            );
-          } else {
-            if (shouldHaveFieldArgument(node)) {
-              errors.push(
-                getMessageFromId({
-                  messageId: 'wrongFirstArgument',
-                  values: {
+              getMessageFromId(
+                {
+                  id: 'wrongFirstArgument',
+                  meta: {
                     operation: node.name,
                     type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
                       defaultMessage: 'field',
                     }),
-                    argument:
-                      getValueOrName(firstArg) ||
-                      i18n.translate('xpack.lens.indexPattern.formulaNoFieldForOperation', {
-                        defaultMessage: 'no field',
-                      }),
+                    argument: `math operation`,
                   },
-                  locations: getNodeLocation(node),
-                })
+                },
+                getNodeLocation(node)
+              )
+            );
+          } else {
+            if (shouldHaveFieldArgument(node)) {
+              errors.push(
+                getMessageFromId(
+                  {
+                    id: 'wrongFirstArgument',
+                    meta: {
+                      operation: node.name,
+                      type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+                        defaultMessage: 'field',
+                      }),
+                      argument:
+                        getValueOrName(firstArg) ||
+                        i18n.translate('xpack.lens.indexPattern.formulaNoFieldForOperation', {
+                          defaultMessage: 'no field',
+                        }),
+                    },
+                  },
+                  getNodeLocation(node)
+                )
               );
             }
           }
@@ -899,13 +878,15 @@ function runFullASTValidation(
         }
         if (!canHaveParams(nodeOperation) && namedArguments.length) {
           errors.push(
-            getMessageFromId({
-              messageId: 'cannotAcceptParameter',
-              values: {
-                operation: node.name,
+            getMessageFromId(
+              {
+                id: 'cannotAcceptParameter',
+                meta: {
+                  operation: node.name,
+                },
               },
-              locations: getNodeLocation(node),
-            })
+              getNodeLocation(node)
+            )
           );
         } else {
           const argumentsErrors = validateNameArguments(
@@ -937,21 +918,23 @@ function runFullASTValidation(
         // First field has a special handling
         if (isFirstArgumentNotValid) {
           errors.push(
-            getMessageFromId({
-              messageId: 'wrongFirstArgument',
-              values: {
-                operation: node.name,
-                type: i18n.translate('xpack.lens.indexPattern.formulaOperationValue', {
-                  defaultMessage: 'operation',
-                }),
-                argument:
-                  getValueOrName(firstArg) ||
-                  i18n.translate('xpack.lens.indexPattern.formulaNoOperation', {
-                    defaultMessage: 'no operation',
+            getMessageFromId(
+              {
+                id: 'wrongFirstArgument',
+                meta: {
+                  operation: node.name,
+                  type: i18n.translate('xpack.lens.indexPattern.formulaOperationValue', {
+                    defaultMessage: 'operation',
                   }),
+                  argument:
+                    getValueOrName(firstArg) ||
+                    i18n.translate('xpack.lens.indexPattern.formulaNoOperation', {
+                      defaultMessage: 'no operation',
+                    }),
+                },
               },
-              locations: getNodeLocation(node),
-            })
+              getNodeLocation(node)
+            )
           );
         }
         // Check for multiple function passed
@@ -971,13 +954,15 @@ function runFullASTValidation(
 
         if (!canHaveParams(nodeOperation) && namedArguments.length) {
           errors.push(
-            getMessageFromId({
-              messageId: 'cannotAcceptParameter',
-              values: {
-                operation: node.name,
+            getMessageFromId(
+              {
+                id: 'cannotAcceptParameter',
+                meta: {
+                  operation: node.name,
+                },
               },
-              locations: getNodeLocation(node),
-            })
+              getNodeLocation(node)
+            )
           );
         } else {
           // check for fields passed at any position
@@ -1150,27 +1135,31 @@ export function validateMathNodes(
     if (!node.args.length) {
       // we can stop here
       return errors.push(
-        getMessageFromId({
-          messageId: 'missingMathArgument',
-          values: {
-            operation: node.name,
-            count: mandatoryArguments.length,
-            params: mandatoryArguments.map(({ name }) => name).join(', '),
+        getMessageFromId(
+          {
+            id: 'missingMathArgument',
+            meta: {
+              operation: node.name,
+              count: mandatoryArguments.length,
+              params: mandatoryArguments.map(({ name }) => name).join(', '),
+            },
           },
-          locations: getNodeLocation(node),
-        })
+          getNodeLocation(node)
+        )
       );
     }
 
     if (node.args.length > positionalArguments.length) {
       errors.push(
-        getMessageFromId({
-          messageId: 'tooManyArguments',
-          values: {
-            operation: node.name,
+        getMessageFromId(
+          {
+            id: 'tooManyArguments',
+            meta: {
+              operation: node.name,
+            },
           },
-          locations: getNodeLocation(node),
-        })
+          getNodeLocation(node)
+        )
       );
     }
 
@@ -1183,13 +1172,15 @@ export function validateMathNodes(
     });
     if (hasFieldAsArgument) {
       errors.push(
-        getMessageFromId({
-          messageId: 'shouldNotHaveField',
-          values: {
-            operation: node.name,
+        getMessageFromId(
+          {
+            id: 'shouldNotHaveField',
+            meta: {
+              operation: node.name,
+            },
           },
-          locations: getNodeLocation(node),
-        })
+          getNodeLocation(node)
+        )
       );
     }
 
@@ -1208,30 +1199,34 @@ export function validateMathNodes(
 
       if (missingArgsWithoutAlternative.length) {
         errors.push(
-          getMessageFromId({
-            messageId: 'missingMathArgument',
-            values: {
-              operation: node.name,
-              count: mandatoryArguments.length - node.args.length,
-              params: missingArgsWithoutAlternative.map(({ name }) => name).join(', '),
+          getMessageFromId(
+            {
+              id: 'missingMathArgument',
+              meta: {
+                operation: node.name,
+                count: mandatoryArguments.length - node.args.length,
+                params: missingArgsWithoutAlternative.map(({ name }) => name).join(', '),
+              },
             },
-            locations: getNodeLocation(node),
-          })
+            getNodeLocation(node)
+          )
         );
       }
       if (missingArgsWithAlternatives.length) {
         // pick only the first missing argument alternative
         const [firstArg] = missingArgsWithAlternatives;
         errors.push(
-          getMessageFromId({
-            messageId: 'useAlternativeFunction',
-            values: {
-              operation: node.name,
-              params: firstArg.name,
-              alternativeFn: firstArg.alternativeWhenMissing,
+          getMessageFromId(
+            {
+              id: 'useAlternativeFunction',
+              meta: {
+                operation: node.name,
+                params: firstArg.name,
+                alternativeFn: firstArg.alternativeWhenMissing,
+              },
             },
-            locations: getNodeLocation(node),
-          })
+            getNodeLocation(node)
+          )
         );
       }
     }
@@ -1249,16 +1244,18 @@ export function validateMathNodes(
     for (const wrongTypeArgumentIndex of wrongTypeArgumentIndexes) {
       const arg = node.args[wrongTypeArgumentIndex];
       errors.push(
-        getMessageFromId({
-          messageId: 'wrongTypeArgument',
-          values: {
-            operation: node.name,
-            name: positionalArguments[wrongTypeArgumentIndex].name,
-            type: getArgumentType(arg, operations) || DEFAULT_RETURN_TYPE,
-            expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
+        getMessageFromId(
+          {
+            id: 'wrongTypeArgument',
+            meta: {
+              operation: node.name,
+              name: positionalArguments[wrongTypeArgumentIndex].name,
+              type: getArgumentType(arg, operations) || DEFAULT_RETURN_TYPE,
+              expectedType: positionalArguments[wrongTypeArgumentIndex].type || '',
+            },
           },
-          locations: getNodeLocation(node),
-        })
+          getNodeLocation(node)
+        )
       );
     }
   });
@@ -1284,46 +1281,52 @@ function validateFieldArguments(
   const errors = [];
   if (isFieldOperation && (fields.length > 1 || (fields.length === 1 && fields[0] !== firstArg))) {
     errors.push(
-      getMessageFromId({
-        messageId: 'tooManyFirstArguments',
-        values: {
-          operation: node.name,
-          type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
-            defaultMessage: 'field',
-          }),
-          supported: 1,
-          text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
+      getMessageFromId(
+        {
+          id: 'tooManyFirstArguments',
+          meta: {
+            operation: node.name,
+            type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+              defaultMessage: 'field',
+            }),
+            supported: 1,
+            text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
+          },
         },
-        locations: getNodeLocation(node),
-      })
+        getNodeLocation(node)
+      )
     );
   }
   if (isFieldOperation && fields.length === 1 && fields[0] === firstArg) {
     if (returnedType === 'ordinal') {
       errors.push(
-        getMessageFromId({
-          messageId: 'wrongReturnedType',
-          values: {
-            text: node.text ?? `${node.name}(${getValueOrName(firstArg)})`,
+        getMessageFromId(
+          {
+            id: 'wrongReturnedType',
+            meta: {
+              text: node.text ?? `${node.name}(${getValueOrName(firstArg)})`,
+            },
           },
-          locations: getNodeLocation(node),
-        })
+          getNodeLocation(node)
+        )
       );
     }
   }
   if (!isFieldOperation && fields.length) {
     errors.push(
-      getMessageFromId({
-        messageId: 'wrongArgument',
-        values: {
-          operation: node.name,
-          text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
-          type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
-            defaultMessage: 'field',
-          }),
+      getMessageFromId(
+        {
+          id: 'wrongArgument',
+          meta: {
+            operation: node.name,
+            text: (fields as TinymathVariable[]).map(({ text }) => text).join(', '),
+            type: i18n.translate('xpack.lens.indexPattern.formulaFieldValue', {
+              defaultMessage: 'field',
+            }),
+          },
         },
-        locations: getNodeLocation(node),
-      })
+        getNodeLocation(node)
+      )
     );
   }
   return errors;
@@ -1345,30 +1348,34 @@ function validateFunctionArguments(
   if (esOperations.length > requiredFunctions) {
     if (isFieldOperation) {
       errors.push(
-        getMessageFromId({
-          messageId: 'wrongArgument',
-          values: {
-            operation: node.name,
-            text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
-            type: i18n.translate('xpack.lens.indexPattern.formulaMetricValue', {
-              defaultMessage: 'metric',
-            }),
+        getMessageFromId(
+          {
+            id: 'wrongArgument',
+            meta: {
+              operation: node.name,
+              text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+              type: i18n.translate('xpack.lens.indexPattern.formulaMetricValue', {
+                defaultMessage: 'metric',
+              }),
+            },
           },
-          locations: getNodeLocation(node),
-        })
+          getNodeLocation(node)
+        )
       );
     } else {
       errors.push(
-        getMessageFromId({
-          messageId: 'tooManyFirstArguments',
-          values: {
-            operation: node.name,
-            type,
-            supported: requiredFunctions,
-            text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+        getMessageFromId(
+          {
+            id: 'tooManyFirstArguments',
+            meta: {
+              operation: node.name,
+              type,
+              supported: requiredFunctions,
+              text: (esOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+            },
           },
-          locations: getNodeLocation(node),
-        })
+          getNodeLocation(node)
+        )
       );
     }
   }
@@ -1378,15 +1385,17 @@ function validateFunctionArguments(
     ((!firstArgValidation && mathOperations.length) || mathOperations.length > 1)
   ) {
     errors.push(
-      getMessageFromId({
-        messageId: 'wrongArgument',
-        values: {
-          operation: node.name,
-          type,
-          text: (mathOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+      getMessageFromId(
+        {
+          id: 'wrongArgument',
+          meta: {
+            operation: node.name,
+            type,
+            text: (mathOperations as TinymathFunction[]).map(({ text }) => text).join(', '),
+          },
         },
-        locations: getNodeLocation(node),
-      })
+        getNodeLocation(node)
+      )
     );
   }
   return errors;

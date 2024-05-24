@@ -761,15 +761,18 @@ export function getFormBasedDatasource({
         layerErrorMessages,
         (layerId, columnId) => {
           const layer = state.layers[layerId];
-          return !isColumnInvalid(
+          const invalidColumn = isColumnInvalid(
             layer,
             columnId,
             framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
             framePublicAPI.dateRange,
             uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
+          console.log(`${columnId} is column valid: ${!invalidColumn}`, layer);
+          return !invalidColumn;
         }
       );
+      console.log(layerErrorMessages, dimensionErrorMessages);
 
       const timeShiftWarningMessages = getStateTimeShiftWarningMessages(
         data.datatableUtilities,

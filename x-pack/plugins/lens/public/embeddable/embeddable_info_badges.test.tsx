@@ -123,7 +123,8 @@ describe('EmbeddableFeatureBadge', () => {
       ).not.toBeInTheDocument();
     });
     it('should apply an horizontal if there are multiple messages without id', async () => {
-      const messages = [1, 2, 3].map((id) => ({
+      const messages = [1, 2, 3].map<UserMessage>((id) => ({
+        uniqueId: `${id}`,
         shortMessage: `Section${id}`,
         longMessage: <div>{id}</div>,
         severity: 'info' as const,
@@ -147,8 +148,9 @@ describe('EmbeddableFeatureBadge', () => {
           displayLocations: [],
         },
         {
+          uniqueId: 'myId2',
           shortMessage: `Section2`,
-          longMessage: <div>NoId</div>,
+          longMessage: <div>NoId</div>, // TODO: doesn't exist no id
           severity: 'info' as const,
           fixableInEditor: false,
           displayLocations: [],
@@ -159,17 +161,18 @@ describe('EmbeddableFeatureBadge', () => {
     });
 
     it('should apply rules taking into account grouped messages', async () => {
-      const messages = [
+      const messages: UserMessage[] = [
         {
+          uniqueId: 'myId1',
           shortMessage: `Section2`,
-          longMessage: <div>NoId</div>,
+          longMessage: <div>NoId</div>, // TODO: doesn't exist no id
           severity: 'info' as const,
           fixableInEditor: false,
           displayLocations: [],
         },
         // #1 rule here
         {
-          uniqueId: 'myId',
+          uniqueId: 'myId2',
           shortMessage: `Section1`,
           longMessage: <div>Grouped</div>,
           severity: 'info' as const,
@@ -177,7 +180,7 @@ describe('EmbeddableFeatureBadge', () => {
           displayLocations: [],
         },
         {
-          uniqueId: 'myId',
+          uniqueId: 'myId3',
           shortMessage: `Section1`,
           longMessage: <div>Grouped 2</div>,
           severity: 'info' as const,
@@ -186,7 +189,7 @@ describe('EmbeddableFeatureBadge', () => {
         },
         // #2 rule here
         {
-          uniqueId: 'myOtherId',
+          uniqueId: 'myOtherId4',
           shortMessage: `Section2`,
           longMessage: <div>Grouped3</div>,
           severity: 'info' as const,

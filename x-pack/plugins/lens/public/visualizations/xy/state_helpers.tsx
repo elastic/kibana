@@ -152,14 +152,14 @@ export const annotationLayerHasUnsavedChanges = (layer: XYAnnotationLayerConfig)
 };
 
 function createAnnotationErrorMessage(
+  uniqueId: string,
   errorMessage: string,
-  type: string,
   annotationId: string,
   annotationName: string
 ): UserMessage {
   return {
+    uniqueId,
     severity: 'error',
-    type,
     fixableInEditor: true,
     displayLocations: [
       { id: 'visualization' },
@@ -197,10 +197,10 @@ export function getAnnotationLayerErrors(
   if (annotation.timeField == null || annotation.timeField === '') {
     invalidMessages.push(
       createAnnotationErrorMessage(
+        ANNOTATION_MISSING_TIME_FIELD,
         i18n.translate('xpack.lens.xyChart.annotationError.timeFieldEmpty', {
           defaultMessage: 'Time field is missing',
         }),
-        ANNOTATION_MISSING_TIME_FIELD,
         annotation.id,
         annotation.label
       )
@@ -210,11 +210,11 @@ export function getAnnotationLayerErrors(
   if (annotation.timeField && !Boolean(layerDataView.getFieldByName(annotation.timeField))) {
     invalidMessages.push(
       createAnnotationErrorMessage(
+        ANNOTATION_TIME_FIELD_NOT_FOUND,
         i18n.translate('xpack.lens.xyChart.annotationError.timeFieldNotFound', {
           defaultMessage: 'Time field {timeField} not found in data view {dataView}',
           values: { timeField: annotation.timeField, dataView: layerDataView.title },
         }),
-        ANNOTATION_TIME_FIELD_NOT_FOUND,
         annotation.id,
         annotation.label
       )
@@ -225,8 +225,8 @@ export function getAnnotationLayerErrors(
   if (!isValid && error) {
     invalidMessages.push(
       createAnnotationErrorMessage(
-        error,
         ANNOTATION_INVALID_FILTER_QUERY,
+        error,
         annotation.id,
         annotation.label
       )
@@ -235,11 +235,11 @@ export function getAnnotationLayerErrors(
   if (annotation.textField && !Boolean(layerDataView.getFieldByName(annotation.textField))) {
     invalidMessages.push(
       createAnnotationErrorMessage(
+        ANNOTATION_TEXT_FIELD_NOT_FOUND,
         i18n.translate('xpack.lens.xyChart.annotationError.textFieldNotFound', {
           defaultMessage: 'Text field {textField} not found in data view {dataView}',
           values: { textField: annotation.textField, dataView: layerDataView.title },
         }),
-        ANNOTATION_TEXT_FIELD_NOT_FOUND,
         annotation.id,
         annotation.label
       )
@@ -255,6 +255,7 @@ export function getAnnotationLayerErrors(
     if (missingTooltipFields.length) {
       invalidMessages.push(
         createAnnotationErrorMessage(
+          ANNOTATION_MISSING_TOOLTIP_FIELD,
           i18n.translate('xpack.lens.xyChart.annotationError.tooltipFieldNotFound', {
             defaultMessage:
               'Tooltip {missingFields, plural, one {field} other {fields}} {missingTooltipFields} not found in data view {dataView}',
@@ -264,7 +265,6 @@ export function getAnnotationLayerErrors(
               dataView: layerDataView.title,
             },
           }),
-          ANNOTATION_MISSING_TOOLTIP_FIELD,
           annotation.id,
           annotation.label
         )
