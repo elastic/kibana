@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/global_data_tags_exclude';
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
 
 import type { PackagePolicy, PackagePolicyInput } from '../../types';
 
@@ -742,7 +742,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
 
   it('returns agent inputs with add fields process if global data tags are defined', async () => {
     const excludedInputs: PackagePolicyInput[] = [];
-    const expectedExcluded = []
+    const expectedExcluded = [];
 
     for (const input of GLOBAL_DATA_TAG_EXCLUDED_INPUTS) {
       excludedInputs.push({
@@ -776,7 +776,7 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
         revision: 1,
         type: input,
         use_output: 'default',
-      })
+      });
     }
 
     expect(

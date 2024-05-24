@@ -18,7 +18,7 @@ import type {
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
-import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '@kbn/fleet-plugin/common/constants/global_data_tags_exclude';
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '@kbn/fleet-plugin/common/constants/epm';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
