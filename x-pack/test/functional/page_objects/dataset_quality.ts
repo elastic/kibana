@@ -11,9 +11,9 @@ import expect from '@kbn/expect';
 import { TimeUnitId } from '@elastic/eui';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
-  OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
+  DATA_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
-} from '@kbn/observability-logs-explorer-plugin/common';
+} from '@kbn/data-quality-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -97,7 +97,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       pageState?: datasetQualityUrlSchemaV1.UrlSchema;
     } = {}) {
       const queryStringParams = querystring.stringify({
-        [OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY]: rison.encode(
+        [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
           datasetQualityUrlSchemaV1.urlSchemaRT.encode({
             ...defaultPageState,
             ...pageState,
@@ -106,8 +106,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       });
 
       return PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogsExplorer',
-        '/dataset-quality',
+        'management',
+        '/data/data-quality',
         queryStringParams,
         {
           // the check sometimes is too slow for the page so it misses the point
