@@ -33,10 +33,11 @@ import { RowCommandContext } from "./esql_parser";
 import { FieldsContext } from "./esql_parser";
 import { FieldContext } from "./esql_parser";
 import { FromCommandContext } from "./esql_parser";
-import { FromIdentifierContext } from "./esql_parser";
+import { IndexIdentifierContext } from "./esql_parser";
 import { MetadataContext } from "./esql_parser";
 import { MetadataOptionContext } from "./esql_parser";
 import { Deprecated_metadataContext } from "./esql_parser";
+import { MetricsCommandContext } from "./esql_parser";
 import { EvalCommandContext } from "./esql_parser";
 import { StatsCommandContext } from "./esql_parser";
 import { InlinestatsCommandContext } from "./esql_parser";
@@ -414,15 +415,15 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitFromCommand?: (ctx: FromCommandContext) => void;
 	/**
-	 * Enter a parse tree produced by `esql_parser.fromIdentifier`.
+	 * Enter a parse tree produced by `esql_parser.indexIdentifier`.
 	 * @param ctx the parse tree
 	 */
-	enterFromIdentifier?: (ctx: FromIdentifierContext) => void;
+	enterIndexIdentifier?: (ctx: IndexIdentifierContext) => void;
 	/**
-	 * Exit a parse tree produced by `esql_parser.fromIdentifier`.
+	 * Exit a parse tree produced by `esql_parser.indexIdentifier`.
 	 * @param ctx the parse tree
 	 */
-	exitFromIdentifier?: (ctx: FromIdentifierContext) => void;
+	exitIndexIdentifier?: (ctx: IndexIdentifierContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.metadata`.
 	 * @param ctx the parse tree
@@ -453,6 +454,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitDeprecated_metadata?: (ctx: Deprecated_metadataContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.metricsCommand`.
+	 * @param ctx the parse tree
+	 */
+	enterMetricsCommand?: (ctx: MetricsCommandContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.metricsCommand`.
+	 * @param ctx the parse tree
+	 */
+	exitMetricsCommand?: (ctx: MetricsCommandContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.evalCommand`.
 	 * @param ctx the parse tree
