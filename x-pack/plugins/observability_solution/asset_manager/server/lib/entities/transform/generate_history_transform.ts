@@ -29,7 +29,7 @@ export function generateHistoryTransform(
       range: {
         [definition.history.timestampField]: {
           gte: `now-${
-            definition.history.initialLookback?.toJSON() ??
+            definition.history.lookbackPeriod?.toJSON() ??
             definition.history.interval.asMinutes() * 5 + 'm'
           }`,
         },
