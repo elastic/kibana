@@ -9,10 +9,10 @@ import { ToolingLog } from '@kbn/tooling-log';
 import axios from 'axios';
 import { events as genAiEvents } from '@kbn/elastic-assistant-plugin/server/lib/telemetry/event_based_telemetry';
 
-// uncomment to run script, but do not commit as creates cirular dependency
-// import { telemetryEvents as serverlessEvents } from '@kbn/security-solution-serverless/server/telemetry/event_based_telemetry';
 import { events as securityEvents } from '../../../../../server/lib/telemetry/event_based/events';
 import { telemetryEvents } from '../events/telemetry_events';
+// uncomment and add to run script, but do not commit as creates cirular dependency
+// import { telemetryEvents as serverlessEvents } from '@kbn/security-solution-serverless/server/telemetry/event_based_telemetry';
 
 const logger = new ToolingLog({
   level: 'info',
@@ -97,8 +97,8 @@ async function cli(): Promise<void> {
     const events =
       telemetryType === 'browser'
         ? telemetryEvents
-        : // serverside events
-          [...genAiEvents, ...serverlessEvents, ...securityEvents];
+        : // serverside events, uncomment serverlessEvents import above for all events
+          [...genAiEvents, ...securityEvents]; // ...serverlessEvents,]
 
     events.forEach((event) => {
       const newProps = flattenSchema(event.schema);
