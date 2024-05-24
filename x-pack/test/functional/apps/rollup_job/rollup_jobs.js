@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   // Failing: See https://github.com/elastic/kibana/issues/184230
+  // Failing: See https://github.com/elastic/kibana/issues/184229
   describe.skip('rollup job', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision.
