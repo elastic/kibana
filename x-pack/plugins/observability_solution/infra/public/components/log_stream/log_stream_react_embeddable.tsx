@@ -1,27 +1,27 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { initializeTimeRange, initializeTitles, useFetchContext } from '@kbn/presentation-publishing';
+import {
+  initializeTimeRange,
+  initializeTitles,
+  useFetchContext,
+} from '@kbn/presentation-publishing';
+import { LogStream } from '@kbn/logs-shared-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { Query } from '@kbn/es-query';
 import type { LogStreamApi, LogStreamSerializedState, Services } from './types';
 import { datemathToEpochMillis } from '../../utils/datemath';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
 import { LOG_STREAM_EMBEDDABLE } from './constants';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { CoreProviders } from '../../apps/common_providers';
-import { Query } from '@kbn/es-query';
 
 export function getLogStreamEmbeddableFactory(services: Services) {
-  const factory: ReactEmbeddableFactory<
-    LogStreamSerializedState,
-    LogStreamApi
-  > = {
+  const factory: ReactEmbeddableFactory<LogStreamSerializedState, LogStreamApi> = {
     type: LOG_STREAM_EMBEDDABLE,
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi) => {
@@ -36,14 +36,14 @@ export function getLogStreamEmbeddableFactory(services: Services) {
             return {
               rawState: {
                 ...timeRange.serialize(),
-                ...serializeTitles()
+                ...serializeTitles(),
               },
             };
           },
         },
         {
           ...timeRange.comparators,
-          ...titleComparators
+          ...titleComparators,
         }
       );
 
@@ -65,28 +65,28 @@ export function getLogStreamEmbeddableFactory(services: Services) {
             });
             return () => subscription.unsubscribe();
           }, [services.coreStart.theme.theme$]);
-          
-          return !startTimestamp || !endTimestamp
-            ? null
-            : <CoreProviders
-                core={services.coreStart}
-                plugins={services.pluginDeps}
-                pluginStart={services.pluginStart}
-                theme$={services.coreStart.theme.theme$}
-              >
-                <EuiThemeProvider darkMode={darkMode}>
-                  <div style={{ width: '100%' }}>
-                    <LogStream
-                      logView={{ type: 'log-view-reference', logViewId: 'default' }}
-                      startTimestamp={startTimestamp}
-                      endTimestamp={endTimestamp}
-                      height="100%"
-                      query={query as Query | undefined}
-                      filters={filters}
-                    />
-                  </div>
-                </EuiThemeProvider>
-              </CoreProviders>;
+
+          return !startTimestamp || !endTimestamp ? null : (
+            <CoreProviders
+              core={services.coreStart}
+              plugins={services.pluginDeps}
+              pluginStart={services.pluginStart}
+              theme$={services.coreStart.theme.theme$}
+            >
+              <EuiThemeProvider darkMode={darkMode}>
+                <div style={{ width: '100%' }}>
+                  <LogStream
+                    logView={{ type: 'log-view-reference', logViewId: 'default' }}
+                    startTimestamp={startTimestamp}
+                    endTimestamp={endTimestamp}
+                    height="100%"
+                    query={query as Query | undefined}
+                    filters={filters}
+                  />
+                </div>
+              </EuiThemeProvider>
+            </CoreProviders>
+          );
         },
       };
     },
