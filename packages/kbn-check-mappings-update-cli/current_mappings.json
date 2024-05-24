@@ -3054,6 +3054,9 @@
   "space": {
     "dynamic": false,
     "properties": {
+      "disabledFeatures": {
+        "type": "keyword"
+      },
       "name": {
         "fields": {
           "keyword": {
