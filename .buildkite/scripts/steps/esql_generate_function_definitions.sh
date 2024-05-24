@@ -13,7 +13,7 @@ main () {
   rm -rf elasticsearch
   git clone https://github.com/elastic/elasticsearch --depth 1
 
-  report_main_step "Bootstraping Kibana"
+  report_main_step "Bootstrapping Kibana"
 
   cd "$KIBANA_DIR"
 
