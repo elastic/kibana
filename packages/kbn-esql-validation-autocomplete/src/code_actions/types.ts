@@ -12,14 +12,12 @@ type GetSourceFn = () => Promise<string[]>;
 type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<string[]>;
 type GetPoliciesFn = () => Promise<string[]>;
 type GetPolicyFieldsFn = (name: string) => Promise<string[]>;
-type GetMetaFieldsFn = () => Promise<string[]>;
 
 export interface Callbacks {
   getSources: GetSourceFn;
   getFieldsByType: GetFieldsByTypeFn;
   getPolicies: GetPoliciesFn;
   getPolicyFields: GetPolicyFieldsFn;
-  getMetaFields: GetMetaFieldsFn;
 }
 
 export interface CodeAction {
