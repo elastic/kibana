@@ -32,6 +32,7 @@ import {
   SavedDashboardInput,
 } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
+import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
 
 export const serializeControlGroupInput = (
   controlGroupInput: SavedDashboardInput['controlGroupInput']
@@ -92,7 +93,6 @@ export const saveDashboardState = async ({
     filters,
     timeRestore,
     description,
-    panels,
 
     // Dashboard options
     useMargins,
@@ -102,8 +102,15 @@ export const saveDashboardState = async ({
     hidePanelTitles,
   } = currentState;
 
-  let { controlGroupInput } = currentState;
+  let { panels, controlGroupInput } = currentState;
+  let prefixedPanelReferences = panelReferences;
   if (saveOptions.saveAsCopy) {
+    const { panels: newPanels, references: newPanelReferences } = generateNewPanelIds(
+      panels,
+      panelReferences
+    );
+    panels = newPanels;
+    prefixedPanelReferences = newPanelReferences;
     controlGroupInput = generateNewControlIds(controlGroupInput);
   }
 
@@ -179,7 +186,7 @@ export const saveDashboardState = async ({
     ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
 
-  const allReferences = [...references, ...(panelReferences ?? [])];
+  const allReferences = [...references, ...(prefixedPanelReferences ?? [])];
 
   /**
    * Save the saved object using the content management
