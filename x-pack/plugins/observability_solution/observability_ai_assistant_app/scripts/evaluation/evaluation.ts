@@ -295,7 +295,7 @@ function runEvaluations() {
                 },
                 result
               ) => {
-                const scenario = result.name.trim().split(' ')[0];
+                const scenario = result.suite;
                 if (!acc[scenario]) {
                   acc[scenario] = { score: 0, total: 0 };
                 }
