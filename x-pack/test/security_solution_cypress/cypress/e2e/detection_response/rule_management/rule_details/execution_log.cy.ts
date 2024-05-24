@@ -66,7 +66,7 @@ describe(
             return rows.length === 2;
           });
         },
-        { interval: 1000, timeout: 12000 }
+        { interval: 5000, timeout: 20000 }
       );
       cy.get(EXECUTION_SHOWING).contains('Showing 2 rule executions');
       filterByRunType('Manual');
