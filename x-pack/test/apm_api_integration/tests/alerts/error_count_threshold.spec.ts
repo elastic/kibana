@@ -31,7 +31,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const es = getService('es');
   const logger = getService('log');
   const apmApiClient = getService('apmApiClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   registry.when('error count threshold alert', { config: 'basic', archives: [] }, () => {
     const javaErrorMessage = 'a java error';
@@ -96,10 +96,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           ];
         });
 
-      return Promise.all([synthtraceEsClient.index(events), synthtraceEsClient.index(phpEvents)]);
+      return Promise.all([
+        apmSynthtraceEsClient.index(events),
+        apmSynthtraceEsClient.index(phpEvents),
+      ]);
     });
 
-    after(() => synthtraceEsClient.clean());
+    after(() => apmSynthtraceEsClient.clean());
 
     // FLAKY: https://github.com/elastic/kibana/issues/176948
     describe('create rule without kql filter', () => {

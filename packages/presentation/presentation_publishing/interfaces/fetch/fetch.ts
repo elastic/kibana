@@ -83,19 +83,19 @@ function getBatchedObservables(api: unknown): Array<Observable<unknown>> {
         filter(() => !hasSearchSession(api))
       )
     );
+  }
 
-    if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
-      const timeObservables: Array<Observable<unknown>> = [api.parentApi.timeRange$];
-      if (api.parentApi.timeslice$) {
-        timeObservables.push(api.parentApi.timeslice$);
-      }
-      observables.push(
-        combineLatest(timeObservables).pipe(
-          skip(1),
-          filter(() => !hasSearchSession(api) && !hasLocalTimeRange(api))
-        )
-      );
+  if (apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)) {
+    const timeObservables: Array<Observable<unknown>> = [api.parentApi.timeRange$];
+    if (api.parentApi.timeslice$) {
+      timeObservables.push(api.parentApi.timeslice$);
     }
+    observables.push(
+      combineLatest(timeObservables).pipe(
+        skip(1),
+        filter(() => !hasSearchSession(api) && !hasLocalTimeRange(api))
+      )
+    );
   }
 
   return observables;

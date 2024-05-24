@@ -37,8 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.common.navigateToApp('triggersActions');
       await pageObjects.header.waitUntilLoadingHasFinished();
       await rules.common.clickCreateAlertButton();
-      await testSubjects.setValue('ruleNameInput', ruleName);
       await testSubjects.click(`.es-query-SelectOption`);
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.setValue('ruleNameInput', ruleName);
       await testSubjects.click('queryFormType_esQuery');
       const indexSelector = await testSubjects.find('selectIndexExpression');
       await indexSelector.click();
@@ -129,6 +130,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+
+      /* Add a cases action */
+      await testSubjects.click('.cases-alerting-ActionTypeSelectOption');
+      await testSubjects.scrollIntoView('addAlertActionButton');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot('cases-action', screenshotDirectories, 1400, 1024);
+
       const cancelEditButton = await testSubjects.find('cancelSaveEditedRuleButton');
       await cancelEditButton.click();
       const confirmCancelButton = await testSubjects.find('confirmModalConfirmButton');

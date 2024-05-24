@@ -29,7 +29,7 @@ import { useMetricsDataViewContext } from './use_metrics_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL, TABLE_CONTENT_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
-import { buildCombinedHostsFilter } from '../../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 
 /**
  * Columns and items types
@@ -151,7 +151,7 @@ export const useHostsTable = () => {
       return [];
     }
     const selectedHostNames = selectedItems.map(({ name }) => name);
-    const newFilter = buildCombinedHostsFilter({
+    const newFilter = buildCombinedAssetFilter({
       field: 'host.name',
       values: selectedHostNames,
       dataView,
@@ -203,7 +203,7 @@ export const useHostsTable = () => {
     return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
   }, [items, pagination, sorting]);
 
-  const metricColumnsWidth = displayAlerts ? '11%' : '15%';
+  const metricColumnsWidth = displayAlerts ? '12%' : '16%';
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -360,7 +360,7 @@ export const useHostsTable = () => {
             formula={formulas?.rx.value}
           />
         ),
-        width: '10%',
+        width: '12%',
         field: 'rx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-rx',
@@ -375,7 +375,7 @@ export const useHostsTable = () => {
             formula={formulas?.tx.value}
           />
         ),
-        width: '10%',
+        width: '12%',
         field: 'tx',
         sortable: true,
         'data-test-subj': 'hostsView-tableRow-tx',

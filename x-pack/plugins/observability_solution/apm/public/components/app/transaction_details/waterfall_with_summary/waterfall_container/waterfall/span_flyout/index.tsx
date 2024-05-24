@@ -139,10 +139,9 @@ export function SpanFlyout({
             <EuiFlexItem grow={false}>
               <EuiTitle>
                 <h2>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
-                    { defaultMessage: 'Span details' }
-                  )}
+                  {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
+                    defaultMessage: 'Span details',
+                  })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -239,20 +238,14 @@ function SpanFlyoutBody({
           {
             id: 'stack-trace',
             'data-test-subj': 'spanStacktraceTab',
-            name: i18n.translate(
-              'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
-              {
-                defaultMessage: 'Stack Trace',
-              }
-            ),
+            name: i18n.translate('xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel', {
+              defaultMessage: 'Stack Trace',
+            }),
             content: (
               <Fragment>
                 <EuiSpacer size="l" />
                 {stackframes ? (
-                  <Stacktrace
-                    stackframes={stackframes}
-                    codeLanguage={codeLanguage}
-                  />
+                  <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
                 ) : (
                   <PlaintextStacktrace
                     stacktrace={plaintextStacktrace}
@@ -297,29 +290,26 @@ function SpanFlyoutBody({
               />
             )}
             <EuiToolTip
-              content={i18n.translate(
-                'xpack.apm.transactionDetails.spanFlyout.spanType',
-                { defaultMessage: 'Type' }
-              )}
+              content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanType', {
+                defaultMessage: 'Type',
+              })}
             >
               <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
             </EuiToolTip>
             {spanTypes.spanSubtype && (
               <EuiToolTip
-                content={i18n.translate(
-                  'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
-                  { defaultMessage: 'Subtype' }
-                )}
+                content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanSubtype', {
+                  defaultMessage: 'Subtype',
+                })}
               >
                 <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
               </EuiToolTip>
             )}
             {spanTypes.spanAction && (
               <EuiToolTip
-                content={i18n.translate(
-                  'xpack.apm.transactionDetails.spanFlyout.spanAction',
-                  { defaultMessage: 'Action' }
-                )}
+                content={i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanAction', {
+                  defaultMessage: 'Action',
+                })}
               >
                 <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>
               </EuiToolTip>

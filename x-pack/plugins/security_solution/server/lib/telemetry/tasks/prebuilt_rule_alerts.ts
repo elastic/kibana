@@ -62,7 +62,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
 
         if (index === undefined) {
           log.l(`alerts index is not ready yet, skipping telemetry task`);
-          taskMetricsService.end(trace);
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -71,7 +71,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           taskExecutionPeriod.current
         )) {
           if (alerts.length === 0) {
-            taskMetricsService.end(trace);
+            await taskMetricsService.end(trace);
             return 0;
           }
 
@@ -100,17 +100,17 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
           const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
 
           const promises = batches.map(async (batch) => {
-            sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
+            await sender.sendOnDemand(TELEMETRY_CHANNEL_DETECTION_ALERTS, batch);
           });
 
           await Promise.all(promises);
         }
 
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
         return 0;
       } catch (err) {
         logger.error('could not complete prebuilt alerts telemetry task');
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

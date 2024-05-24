@@ -8,8 +8,6 @@
 
 import { buildNode, KQL_NODE_TYPE_LITERAL, toElasticsearchQuery, toKqlExpression } from './literal';
 
-jest.mock('../grammar');
-
 describe('kuery node types', () => {
   describe('literal', () => {
     describe('buildNode', () => {

@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ConfigSchema, configSchema } from '../config';
 import type { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
@@ -54,12 +53,7 @@ import {
 } from '../common';
 import { configDeprecationProvider } from './config_deprecations';
 
-export type {
-  ParsedInterval,
-  ISearchOptions,
-  IEsSearchRequest,
-  IEsSearchResponse,
-} from '../common';
+export type { ParsedInterval } from '../common';
 export { METRIC_TYPES, ES_SEARCH_STRATEGY } from '../common';
 
 export type {

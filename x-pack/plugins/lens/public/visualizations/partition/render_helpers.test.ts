@@ -7,9 +7,10 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/public';
 
-import { checkTableForContainsSmallValues, shouldShowValuesInLegend } from './render_helpers';
+import { checkTableForContainsSmallValues, getLegendStats } from './render_helpers';
 import { PieLayerState } from '../../../common/types';
 import { PieChartTypes } from '../../../common/constants';
+import { PartitionLegendValue } from '@kbn/visualizations-plugin/common/constants';
 
 describe('render helpers', () => {
   describe('#checkTableForContainsSmallValues', () => {
@@ -68,39 +69,33 @@ describe('render helpers', () => {
     });
   });
 
-  describe('#shouldShowValuesInLegend', () => {
+  describe('#getLegendStats', () => {
     it('should firstly read the state value', () => {
       expect(
-        shouldShowValuesInLegend(
-          { showValuesInLegend: true } as PieLayerState,
+        getLegendStats(
+          { legendStats: [PartitionLegendValue.Value] } as PieLayerState,
           PieChartTypes.WAFFLE
         )
-      ).toBeTruthy();
+      ).toEqual([PartitionLegendValue.Value]);
 
       expect(
-        shouldShowValuesInLegend(
-          { showValuesInLegend: false } as PieLayerState,
+        getLegendStats(
+          { legendStats: [] as PartitionLegendValue[] } as PieLayerState,
           PieChartTypes.WAFFLE
         )
-      ).toBeFalsy();
+      ).toEqual([]);
     });
 
     it('should read value from meta in case of value in state is undefined', () => {
-      expect(
-        shouldShowValuesInLegend(
-          { showValuesInLegend: undefined } as PieLayerState,
-          PieChartTypes.WAFFLE
-        )
-      ).toBeTruthy();
-
-      expect(shouldShowValuesInLegend({} as PieLayerState, PieChartTypes.WAFFLE)).toBeTruthy();
+      expect(getLegendStats({} as PieLayerState, PieChartTypes.WAFFLE)).toEqual([
+        PartitionLegendValue.Value,
+      ]);
 
       expect(
-        shouldShowValuesInLegend(
-          { showValuesInLegend: undefined } as PieLayerState,
-          PieChartTypes.PIE
-        )
-      ).toBeFalsy();
+        getLegendStats({ legendStats: undefined } as PieLayerState, PieChartTypes.WAFFLE)
+      ).toEqual([PartitionLegendValue.Value]);
+
+      expect(getLegendStats({} as PieLayerState, PieChartTypes.PIE)).toEqual(undefined);
     });
   });
 });

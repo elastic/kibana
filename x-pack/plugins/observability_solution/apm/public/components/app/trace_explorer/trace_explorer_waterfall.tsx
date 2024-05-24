@@ -76,10 +76,7 @@ export function TraceExplorerWaterfall() {
       }}
       detailTab={detailTab}
       waterfallItemId={waterfallItemId}
-      serviceName={
-        waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service
-          .name
-      }
+      serviceName={waterfallFetchResult.waterfall.entryWaterfallTransaction?.doc.service.name}
       showCriticalPath={showCriticalPath}
       onShowCriticalPathChange={(nextShowCriticalPath) => {
         push(history, {

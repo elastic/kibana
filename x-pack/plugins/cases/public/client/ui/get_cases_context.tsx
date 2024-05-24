@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { ReactNode } from 'react';
+import type { ReactNode, PropsWithChildren } from 'react';
 import React, { lazy, Suspense } from 'react';
 import type { CasesContextProps } from '../../components/cases_context';
 
@@ -18,9 +18,10 @@ export type GetCasesContextProps = Omit<
   | 'getFilesClient'
 >;
 
-const CasesProviderLazy: React.FC<{ value: GetCasesContextPropsInternal }> = lazy(
-  () => import('../../components/cases_context')
-);
+const CasesProviderLazy: React.FC<{
+  children: React.ReactNode;
+  value: GetCasesContextPropsInternal;
+}> = lazy(() => import('../../components/cases_context'));
 
 const CasesProviderLazyWrapper = ({
   externalReferenceAttachmentTypeRegistry,
@@ -60,8 +61,8 @@ export const getCasesContextLazy = ({
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
->): (() => React.FC<GetCasesContextProps>) => {
-  const CasesProviderLazyWrapperWithRegistry: React.FC<GetCasesContextProps> = ({
+>): (() => React.FC<PropsWithChildren<GetCasesContextProps>>) => {
+  const CasesProviderLazyWrapperWithRegistry: React.FC<PropsWithChildren<GetCasesContextProps>> = ({
     children,
     ...props
   }) => (

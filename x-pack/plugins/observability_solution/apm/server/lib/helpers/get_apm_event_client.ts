@@ -13,21 +13,18 @@ import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/registe
 export async function getApmEventClient({
   context,
   params,
-  config,
   getApmIndices,
   request,
 }: Pick<
   MinimalAPMRouteHandlerResources,
-  'context' | 'params' | 'config' | 'getApmIndices' | 'request'
+  'context' | 'params' | 'getApmIndices' | 'request'
 >): Promise<APMEventClient> {
   return withApmSpan('get_apm_event_client', async () => {
     const coreContext = await context.core;
     const [indices, includeFrozen] = await Promise.all([
       getApmIndices(),
       withApmSpan('get_ui_settings', () =>
-        coreContext.uiSettings.client.get<boolean>(
-          UI_SETTINGS.SEARCH_INCLUDE_FROZEN
-        )
+        coreContext.uiSettings.client.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN)
       ),
     ]);
 
@@ -38,7 +35,6 @@ export async function getApmEventClient({
       indices,
       options: {
         includeFrozen,
-        forceSyntheticSource: config.forceSyntheticSource,
       },
     });
   });

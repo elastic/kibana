@@ -29,6 +29,18 @@ export class SpaceSelectorPageObject extends FtrService {
     });
   }
 
+  async getSpaceCardAnchor(spaceId: string) {
+    return await this.retry.try(async () => {
+      this.log.info(`SpaceSelectorPage:getSpaceCardAnchor(${spaceId})`);
+      const testSubjId = `space-card-${spaceId}`;
+      const anchorElement = await this.find.byCssSelector(
+        `[data-test-subj="${testSubjId}"] .euiCard__titleAnchor`
+      );
+
+      return anchorElement;
+    });
+  }
+
   async expectHomePage(spaceId: string) {
     return await this.expectRoute(spaceId, `/app/home#/`);
   }

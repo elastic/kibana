@@ -359,7 +359,7 @@
                 "section": "def-common.AnonymousAccessServiceContract",
                 "text": "AnonymousAccessServiceContract"
               },
-              ") => void; isNewVersion: () => boolean; }"
+              ") => void; }"
             ],
             "path": "src/plugins/console/public/types/plugin_dependencies.ts",
             "deprecated": false,
@@ -524,38 +524,6 @@
               "string | undefined"
             ],
             "path": "src/plugins/console/public/types/locator.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "console",
-        "id": "def-public.EmbeddableConsoleProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "EmbeddableConsoleProps",
-        "description": [
-          "\nEmbeddableConsoleProps are optional props used when rendering the embeddable developer console."
-        ],
-        "path": "src/plugins/console/public/types/embeddable_console.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "console",
-            "id": "def-public.EmbeddableConsoleProps.size",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "size",
-            "description": [
-              "\nThe default height of the content area."
-            ],
-            "signature": [
-              "\"m\" | \"s\" | \"l\" | undefined"
-            ],
-            "path": "src/plugins/console/public/types/embeddable_console.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -803,15 +771,7 @@
             "\nEmbeddableConsole is a functional component used to render a portable version of the dev tools console on any page in Kibana"
           ],
           "signature": [
-            "React.FC<",
-            {
-              "pluginId": "console",
-              "scope": "public",
-              "docId": "kibConsolePluginApi",
-              "section": "def-public.EmbeddableConsoleProps",
-              "text": "EmbeddableConsoleProps"
-            },
-            "> | undefined"
+            "React.FC<{}> | undefined"
           ],
           "path": "src/plugins/console/public/types/plugin_dependencies.ts",
           "deprecated": false,

@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInQA import_rules with rule overwrite set to "true"', () => {
+  describe('@ess @serverless @skipInServerlessMKI import_rules with rule overwrite set to "true"', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
     });

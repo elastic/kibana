@@ -12,8 +12,10 @@ import {
   ApiConfig,
   Replacements,
   API_VERSIONS,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import { Conversation, ClientMessage } from '../../../assistant_context/types';
+import { FetchConversationsResponse } from './use_fetch_current_user_conversations';
 
 export interface GetConversationByIdParams {
   http: HttpSetup;
@@ -42,7 +44,7 @@ export const getConversationById = async ({
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'GET',
-      version: API_VERSIONS.public.v1,
+      version: API_VERSIONS.internal.v1,
       signal,
     });
 
@@ -52,6 +54,44 @@ export const getConversationById = async ({
       title: i18n.translate('xpack.elasticAssistant.conversations.getConversationError', {
         defaultMessage: 'Error fetching conversation by id {id}',
         values: { id },
+      }),
+    });
+    throw error;
+  }
+};
+
+/**
+ * API call for getting all user conversations.
+ *
+ * @param {Object} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {IToasts} [options.toasts] - IToasts
+ * @param {AbortSignal} [options.signal] - AbortSignal
+ *
+ * @returns {Promise<FetchConversationsResponse>}
+ */
+export const getUserConversations = async ({
+  http,
+  signal,
+  toasts,
+}: {
+  http: HttpSetup;
+  toasts?: IToasts;
+  signal?: AbortSignal | undefined;
+}) => {
+  try {
+    return await http.fetch<FetchConversationsResponse>(
+      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+      {
+        method: 'GET',
+        version: API_VERSIONS.internal.v1,
+        signal,
+      }
+    );
+  } catch (error) {
+    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+      title: i18n.translate('xpack.elasticAssistant.conversations.getUserConversationsError', {
+        defaultMessage: 'Error fetching conversations',
       }),
     });
     throw error;
@@ -85,7 +125,7 @@ export const createConversation = async ({
   try {
     const response = await http.post(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL, {
       body: JSON.stringify(conversation),
-      version: API_VERSIONS.public.v1,
+      version: API_VERSIONS.internal.v1,
       signal,
     });
 
@@ -128,7 +168,7 @@ export const deleteConversation = async ({
   try {
     const response = await http.fetch(`${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${id}`, {
       method: 'DELETE',
-      version: API_VERSIONS.public.v1,
+      version: API_VERSIONS.internal.v1,
       signal,
     });
 
@@ -197,7 +237,7 @@ export const updateConversation = async ({
         headers: {
           'Content-Type': 'application/json',
         },
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         signal,
       }
     );

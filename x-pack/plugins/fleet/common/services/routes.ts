@@ -236,6 +236,8 @@ export const agentRouteService = {
       '{fileName}',
       fileName
     ),
+  getAgentFileDeletePath: (fileId: string) =>
+    AGENT_API_ROUTES.DELETE_UPLOAD_FILE_PATTERN.replace('{fileId}', fileId),
   getAgentsByActionsPath: () => AGENT_API_ROUTES.LIST_PATTERN,
 };
 
@@ -271,11 +273,13 @@ export const fleetServerHostsRoutesService = {
   getDeletePath: (itemId: string) =>
     FLEET_SERVER_HOST_API_ROUTES.DELETE_PATTERN.replace('{itemId}', itemId),
   getCreatePath: () => FLEET_SERVER_HOST_API_ROUTES.CREATE_PATTERN,
+  getPolicyStatusPath: () => FLEET_SERVER_HOST_API_ROUTES.POLICY_STATUS_PATTERN,
 };
 
 export const settingsRoutesService = {
   getInfoPath: () => SETTINGS_API_ROUTES.INFO_PATTERN,
   getUpdatePath: () => SETTINGS_API_ROUTES.UPDATE_PATTERN,
+  getEnrollmentInfoPath: () => SETTINGS_API_ROUTES.ENROLLMENT_INFO_PATTERN,
 };
 
 export const appRoutesService = {

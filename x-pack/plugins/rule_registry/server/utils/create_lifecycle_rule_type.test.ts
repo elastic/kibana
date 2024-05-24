@@ -146,6 +146,7 @@ function createRule(shouldWriteAlerts: boolean = true) {
         },
         spaceId: 'spaceId',
         startedAt,
+        startedAtOverridden: false,
         state,
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
         getTimeRange: () => {

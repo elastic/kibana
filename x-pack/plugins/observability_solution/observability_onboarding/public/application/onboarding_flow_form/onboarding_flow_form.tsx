@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FunctionComponent } from 'react';
 import {
@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiTitle,
   useGeneratedHtmlId,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { useSearchParams } from 'react-router-dom-v5-compat';
@@ -26,6 +27,7 @@ import { OnboardingFlowPackageList } from '../packages_list';
 import { useCustomMargin } from '../shared/use_custom_margin';
 import { Category } from './types';
 import { useCustomCardsForCategory } from './use_custom_cards_for_category';
+import { useVirtualSearchResults } from './use_virtual_search_results';
 
 interface UseCaseOption {
   id: Category;
@@ -39,13 +41,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       id: 'logs',
       label: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.collectAndAnalyzeMyLabel',
-        { defaultMessage: 'Collect and analyze my logs' }
+        { defaultMessage: 'Collect and analyze logs' }
       ),
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.detectPatternsAndOutliersLabel',
         {
           defaultMessage:
-            'Detect patterns, troubleshoot in real time, gain insights from logs.',
+            'Detect patterns, gain insights from logs, get alerted when surpassing error thresholds',
         }
       ),
     },
@@ -59,7 +61,7 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         'xpack.observability_onboarding.onboardingFlowForm.captureAndAnalyzeDistributedLabel',
         {
           defaultMessage:
-            'Collect distributed traces and catch application performance problems.',
+            'Catch application problems, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
         }
       ),
     },
@@ -67,13 +69,13 @@ export const OnboardingFlowForm: FunctionComponent = () => {
       id: 'infra',
       label: i18n.translate(
         'xpack.observability_onboarding.experimentalOnboardingFlow.euiCheckableCard.monitorMyInfrastructureLabel',
-        { defaultMessage: 'Monitor my infrastructure' }
+        { defaultMessage: 'Monitor infrastructure' }
       ),
       description: i18n.translate(
         'xpack.observability_onboarding.onboardingFlowForm.builtOnPowerfulElasticsearchLabel',
         {
           defaultMessage:
-            'Stream infrastructure metrics and accelerate root cause detection by breaking down silos.',
+            'Check my system’s health, get alerted on performance issues or SLO breaches, expedite root cause analysis and remediation',
         }
       ),
     },
@@ -83,30 +85,49 @@ export const OnboardingFlowForm: FunctionComponent = () => {
   const radioGroupId = useGeneratedHtmlId({ prefix: 'onboardingCategory' });
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const packageListSearchBarRef = React.useRef<null | HTMLInputElement>(null);
-  const [integrationSearch, setIntegrationSearch] = useState('');
+
+  const suggestedPackagesRef = useRef<HTMLDivElement | null>(null);
+  const searchResultsRef = useRef<HTMLDivElement | null>(null);
+  const [integrationSearch, setIntegrationSearch] = useState(searchParams.get('search') ?? '');
+  const { euiTheme } = useEuiTheme();
+
+  useEffect(() => {
+    const searchParam = searchParams.get('search') ?? '';
+    if (integrationSearch === searchParam) return;
+    const entries: Record<string, string> = Object.fromEntries(searchParams.entries());
+    if (integrationSearch) {
+      entries.search = integrationSearch;
+    } else {
+      delete entries.search;
+    }
+    setSearchParams(entries, { replace: true });
+  }, [integrationSearch, searchParams, setSearchParams]);
 
   const createCollectionCardHandler = useCallback(
     (query: string) => () => {
       setIntegrationSearch(query);
-      if (packageListSearchBarRef.current) {
-        packageListSearchBarRef.current.focus();
-        packageListSearchBarRef.current.scrollIntoView({
-          behavior: 'auto',
-          block: 'center',
-        });
+      if (searchResultsRef.current) {
+        setTimeout(
+          scrollIntoViewWithOffset,
+          40, // Adding slight delay to ensure DOM is updated before calculating scroll position
+          searchResultsRef.current,
+          parseInt(euiTheme.size.l, 10)
+        );
       }
     },
-    [setIntegrationSearch]
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const customCards = useCustomCardsForCategory(
     createCollectionCardHandler,
     searchParams.get('category') as Category | null
   );
+  const virtualSearchResults = useVirtualSearchResults();
+
+  let isSelectingCategoryWithKeyboard: boolean = false;
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel hasBorder paddingSize="xl">
       <TitleWithIcon
         iconType="indexRollupApp"
         title={i18n.translate(
@@ -118,9 +139,12 @@ export const OnboardingFlowForm: FunctionComponent = () => {
         )}
       />
       <EuiSpacer size="m" />
-      <EuiFlexGroup css={customMargin} gutterSize="m" direction="column">
+      <EuiFlexGroup css={{ ...customMargin, maxWidth: '560px' }} gutterSize="l" direction="column">
         {options.map((option) => (
-          <EuiFlexItem key={option.id}>
+          <EuiFlexItem
+            key={option.id}
+            data-test-subj={`observabilityOnboardingUseCaseCard-${option.id}`}
+          >
             <EuiCheckableCard
               id={`${radioGroupId}_${option.id}`}
               name={radioGroupId}
@@ -134,16 +158,38 @@ export const OnboardingFlowForm: FunctionComponent = () => {
                 </>
               }
               checked={option.id === searchParams.get('category')}
-              onChange={() =>
-                setSearchParams({ category: option.id }, { replace: true })
-              }
+              /**
+               * onKeyDown and onKeyUp handlers disable
+               * scrolling to the category items when user
+               * changes the selected category using keyboard,
+               * which prevents our custom scroll behavior
+               * from conflicting with browser's native one to
+               * put keyboard-focused item into the view.
+               */
+              onKeyDown={() => (isSelectingCategoryWithKeyboard = true)}
+              onKeyUp={() => (isSelectingCategoryWithKeyboard = false)}
+              onChange={() => {
+                setIntegrationSearch('');
+                setSearchParams({ category: option.id }, { replace: true });
+              }}
+              onClick={() => {
+                if (!isSelectingCategoryWithKeyboard && suggestedPackagesRef.current) {
+                  setTimeout(
+                    scrollIntoViewWithOffset,
+                    40, // Adding slight delay to ensure DOM is updated before calculating scroll position
+                    suggestedPackagesRef.current,
+                    parseInt(euiTheme.size.l, 10)
+                  );
+                }
+              }}
             />
           </EuiFlexItem>
         ))}
       </EuiFlexGroup>
-      {searchParams.get('category') && (
-        <>
-          <EuiSpacer />
+      {/* Hiding element instead of not rending these elements in order to preload available packages on page load */}
+      <div hidden={!searchParams.get('category') || !customCards}>
+        <EuiSpacer />
+        <div ref={suggestedPackagesRef}>
           <TitleWithIcon
             iconType="savedObjectsApp"
             title={i18n.translate(
@@ -153,12 +199,14 @@ export const OnboardingFlowForm: FunctionComponent = () => {
               }
             )}
           />
-          <EuiSpacer size="m" />
-
-          {Array.isArray(customCards) && (
-            <OnboardingFlowPackageList customCards={customCards} />
-          )}
-
+          <EuiSpacer size="s" />
+          <OnboardingFlowPackageList
+            customCards={customCards}
+            flowSearch={integrationSearch}
+            flowCategory={searchParams.get('category')}
+          />
+        </div>
+        <div ref={searchResultsRef}>
           <EuiText css={customMargin} size="s" color="subdued">
             <FormattedMessage
               id="xpack.observability_onboarding.experimentalOnboardingFlow.form.searchPromptText"
@@ -168,11 +216,19 @@ export const OnboardingFlowForm: FunctionComponent = () => {
           <OnboardingFlowPackageList
             showSearchBar={true}
             searchQuery={integrationSearch}
+            flowSearch={integrationSearch}
             setSearchQuery={setIntegrationSearch}
-            ref={packageListSearchBarRef}
+            flowCategory={searchParams.get('category')}
+            customCards={customCards
+              ?.filter(
+                // Filter out collection cards and regular integrations that show up via search anyway
+                (card) => card.type === 'virtual' && !card.isCollectionCard
+              )
+              .concat(virtualSearchResults)}
+            joinCardLists
           />
-        </>
-      )}
+        </div>
+      </div>
     </EuiPanel>
   );
 };
@@ -182,18 +238,43 @@ interface TitleWithIconProps {
   iconType: string;
 }
 
-const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({
-  title,
-  iconType,
-}) => (
+const TitleWithIcon: FunctionComponent<TitleWithIconProps> = ({ title, iconType }) => (
   <EuiFlexGroup responsive={false} gutterSize="m" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiAvatar size="l" name={title} iconType={iconType} color="subdued" />
+      <EuiAvatar
+        size="l"
+        name={title}
+        iconType={iconType}
+        iconSize="l"
+        color="subdued"
+        css={{
+          /**
+           * Nudges the icon a bit to the
+           * right because it's not symmetrical and
+           * look off-center by default. This makes
+           * it visually centered.
+           */
+          padding: '24px 22px 24px 26px',
+        }}
+      />
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiTitle size="xs">
+      <EuiTitle size="s">
         <strong>{title}</strong>
       </EuiTitle>
     </EuiFlexItem>
   </EuiFlexGroup>
 );
+
+function scrollIntoViewWithOffset(element: HTMLElement, offset = 0) {
+  // Fixed header in Kibana is different height between serverless and stateful so need to calculate dynamically.
+  const fixedHeaders = document.querySelectorAll('#globalHeaderBars [data-fixed-header=true]');
+  fixedHeaders.forEach((header) => {
+    offset += header.getBoundingClientRect().height;
+  });
+
+  window.scrollTo({
+    behavior: 'smooth',
+    top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - offset,
+  });
+}

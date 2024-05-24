@@ -245,16 +245,11 @@ export const schema: FormSchema<DefineStepRule> = {
     ],
   },
   relatedIntegrations: {
+    type: FIELD_TYPES.JSON,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
       {
         defaultMessage: 'Related integrations',
-      }
-    ),
-    helpText: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
-      {
-        defaultMessage: 'Integration related to this Rule.',
       }
     ),
   },
@@ -651,22 +646,6 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   groupByFields: {
     type: FIELD_TYPES.COMBO_BOX,
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabel',
-      {
-        defaultMessage: 'Suppress alerts by',
-      }
-    ),
-    labelAppend: (
-      <EuiText color="subdued" size="xs">
-        {i18n.translate(
-          'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.groupByFieldsLabelAppend',
-          {
-            defaultMessage: 'Optional (Technical Preview)',
-          }
-        )}
-      </EuiText>
-    ),
     helpText: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldGroupByFieldHelpText',
       {

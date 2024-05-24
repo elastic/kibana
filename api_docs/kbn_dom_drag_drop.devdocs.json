@@ -105,7 +105,7 @@
           "\nThis prevents the in-place droppable styles (under children) and allows to rather show an overlay with droppable styles (on top of children)"
         ],
         "signature": [
-          "({ isVisible, children, overlayProps, className, ...otherProps }: React.PropsWithChildren<",
+          "({ isVisible, children, overlayProps, className, ...otherProps }: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/dom-drag-drop",
             "scope": "common",
@@ -113,7 +113,7 @@
             "section": "def-common.DropOverlayWrapperProps",
             "text": "DropOverlayWrapperProps"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
         "deprecated": false,
@@ -127,7 +127,7 @@
             "label": "{\n  isVisible,\n  children,\n  overlayProps,\n  className,\n  ...otherProps\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/dom-drag-drop",
                 "scope": "common",
@@ -135,7 +135,7 @@
                 "section": "def-common.DropOverlayWrapperProps",
                 "text": "DropOverlayWrapperProps"
               },
-              ">"
+              ">>"
             ],
             "path": "packages/kbn-dom-drag-drop/src/drop_overlay_wrapper.tsx",
             "deprecated": false,

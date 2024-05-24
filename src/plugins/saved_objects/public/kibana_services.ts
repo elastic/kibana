@@ -13,5 +13,6 @@ export function setStartServices(core: CoreStart) {
   coreStart = core;
 }
 
+export const getAnalytics = () => coreStart.analytics;
 export const getI18n = () => coreStart.i18n;
 export const getTheme = () => coreStart.theme;

@@ -17,7 +17,7 @@ import { ExtraActionsButton } from './extra_actions_button';
 import { ACTIONS_AREA_LABEL, YOU_ARE_IN_A_DIALOG_CONTAINING_OPTIONS } from './translations';
 import { partitionActions } from '../hooks/actions';
 import { ExtraActionsPopOverWithAnchor } from './extra_actions_popover';
-import { CellActionExecutionContext } from '../types';
+import type { CellActionExecutionContext } from '../types';
 import { useLoadActionsFn } from '../hooks/use_load_actions';
 
 /** This class is added to the document body while dragging */
@@ -135,7 +135,7 @@ export const HoverActionsPopover: React.FC<Props> = ({
           panelPaddingSize="none"
           repositionOnScroll
           ownFocus={false}
-          data-test-subj={'hoverActionsPopover'}
+          panelProps={{ 'data-test-subj': 'hoverActionsPopover' }}
           aria-label={ACTIONS_AREA_LABEL}
         >
           {showHoverContent && (

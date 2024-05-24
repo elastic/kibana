@@ -13,8 +13,7 @@ import { CustomTooltip } from './custom_tooltip';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;
-type MainStatsServiceInstanceItem =
-  ServiceInstanceMainStatistics['currentPeriod'][0];
+type MainStatsServiceInstanceItem = ServiceInstanceMainStatistics['currentPeriod'][0];
 
 function getLatencyFormatter(props: TooltipInfo) {
   const maxLatency = Math.max(
@@ -32,9 +31,7 @@ export default {
 };
 
 export function Example(props: TooltipInfo) {
-  return (
-    <CustomTooltip {...props} latencyFormatter={getLatencyFormatter(props)} />
-  );
+  return <CustomTooltip {...props} latencyFormatter={getLatencyFormatter(props)} />;
 }
 Example.args = {
   header: {
@@ -54,8 +51,7 @@ Example.args = {
     isHighlighted: false,
     isVisible: true,
     datum: {
-      serviceNodeName:
-        '2f3221afa3f00d3bc07069d69efd5bd4c1607be6155a204551c8fe2e2b5dd750',
+      serviceNodeName: '2f3221afa3f00d3bc07069d69efd5bd4c1607be6155a204551c8fe2e2b5dd750',
       errorRate: 0.03496503496503497,
       latency: 1057231.4125874126,
       throughput: 9.473837632998105,
@@ -78,8 +74,7 @@ Example.args = {
       isHighlighted: true,
       isVisible: true,
       datum: {
-        serviceNodeName:
-          '2f3221afa3f00d3bc07069d69efd5bd4c1607be6155a204551c8fe2e2b5dd750',
+        serviceNodeName: '2f3221afa3f00d3bc07069d69efd5bd4c1607be6155a204551c8fe2e2b5dd750',
         errorRate: 0.03496503496503497,
         latency: 1057231.4125874126,
         throughput: 9.473837632998105,
@@ -91,9 +86,7 @@ Example.args = {
 } as TooltipInfo;
 
 export function MultipleInstances(props: TooltipInfo) {
-  return (
-    <CustomTooltip {...props} latencyFormatter={getLatencyFormatter(props)} />
-  );
+  return <CustomTooltip {...props} latencyFormatter={getLatencyFormatter(props)} />;
 }
 MultipleInstances.args = {
   header: {
@@ -113,8 +106,7 @@ MultipleInstances.args = {
     isHighlighted: false,
     isVisible: true,
     datum: {
-      serviceNodeName:
-        '3b50ad269c45be69088905c4b355cc75ab94aaac1b35432bb752050438f4216f',
+      serviceNodeName: '3b50ad269c45be69088905c4b355cc75ab94aaac1b35432bb752050438f4216f',
       errorRate: 0.006896551724137931,
       latency: 56465.53793103448,
       throughput: 9.606338858634443,
@@ -137,8 +129,7 @@ MultipleInstances.args = {
       isHighlighted: true,
       isVisible: true,
       datum: {
-        serviceNodeName:
-          '3b50ad269c45be69088905c4b355cc75ab94aaac1b35432bb752050438f4216f',
+        serviceNodeName: '3b50ad269c45be69088905c4b355cc75ab94aaac1b35432bb752050438f4216f',
         errorRate: 0.006896551724137931,
         latency: 56465.53793103448,
         throughput: 9.606338858634443,
@@ -160,8 +151,7 @@ MultipleInstances.args = {
       isHighlighted: true,
       isVisible: true,
       datum: {
-        serviceNodeName:
-          '3b50ad269c45be69088905c4b355cc75ab94aaac1b35432bb752050438f4216f (2)',
+        serviceNodeName: '3b50ad269c45be69088905c4b355cc75ab94aaac1b35432bb752050438f4216f (2)',
         errorRate: 0.006896551724137931,
         latency: 56465.53793103448,
         throughput: 9.606338858634443,

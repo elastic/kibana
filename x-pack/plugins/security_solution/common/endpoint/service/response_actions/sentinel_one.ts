@@ -6,6 +6,6 @@
  */
 
 /**
- * Index name where the SentinelOne activity log is written to by the SentinelOne integration
+ * Index pattern where the SentinelOne activity log is written to by the SentinelOne integration
  */
-export const SENTINEL_ONE_ACTIVITY_INDEX = 'logs-sentinel_one.activity-default';
+export const SENTINEL_ONE_ACTIVITY_INDEX_PATTERN = 'logs-sentinel_one.activity-*';

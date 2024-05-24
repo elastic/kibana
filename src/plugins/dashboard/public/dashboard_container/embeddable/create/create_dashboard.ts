@@ -39,13 +39,14 @@ import {
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   GLOBAL_STATE_STORAGE_KEY,
+  PanelPlacementStrategy,
 } from '../../../dashboard_constants';
 import {
   LoadDashboardReturn,
   SavedDashboardInput,
 } from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
-import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
+import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
 import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
 import { DashboardPublicState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
@@ -194,10 +195,17 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
+  const dashboardBackupState = dashboardBackup.getState(loadDashboardReturn.dashboardId);
   const sessionStorageInput = ((): Partial<SavedDashboardInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
+    return dashboardBackupState?.dashboardState;
   })();
+
+  if (useSessionStorageIntegration) {
+    untilDashboardReady().then((dashboardContainer) => {
+      dashboardContainer.restoredRuntimeState = dashboardBackupState?.panels;
+    });
+  }
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
@@ -353,12 +361,14 @@ export const initializeDashboard = async ({
           const { width, height } = incomingEmbeddable.size;
           const currentPanels = container.getInput().panels;
           const embeddableId = incomingEmbeddable.embeddableId ?? v4();
-          const { findTopLeftMostOpenSpace } = panelPlacementStrategies;
-          const { newPanelPlacement } = findTopLeftMostOpenSpace({
-            width: width ?? DEFAULT_PANEL_WIDTH,
-            height: height ?? DEFAULT_PANEL_HEIGHT,
-            currentPanels,
-          });
+          const { newPanelPlacement } = runPanelPlacementStrategy(
+            PanelPlacementStrategy.findTopLeftMostOpenSpace,
+            {
+              width: width ?? DEFAULT_PANEL_WIDTH,
+              height: height ?? DEFAULT_PANEL_HEIGHT,
+              currentPanels,
+            }
+          );
           const newPanelState: DashboardPanelState = {
             explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
             type: incomingEmbeddable.type,

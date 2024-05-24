@@ -37,6 +37,7 @@ import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-b
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-browser-internal';
 import { SecurityService } from '@kbn/core-security-browser-internal';
+import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
@@ -105,6 +106,7 @@ export class CoreSystem {
   private readonly executionContext: ExecutionContextService;
   private readonly customBranding: CustomBrandingService;
   private readonly security: SecurityService;
+  private readonly userProfile: UserProfileService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: CoreSystemParams) {
@@ -130,6 +132,7 @@ export class CoreSystem {
       this.stop();
     });
     this.security = new SecurityService(this.coreContext);
+    this.userProfile = new UserProfileService(this.coreContext);
     this.theme = new ThemeService();
     this.notifications = new NotificationsService();
     this.http = new HttpService();
@@ -238,6 +241,7 @@ export class CoreSystem {
         executionContext,
       });
       const security = this.security.setup();
+      const userProfile = this.userProfile.setup();
       this.chrome.setup({ analytics });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const settings = this.settings.setup({ http, injectedMetadata });
@@ -260,6 +264,7 @@ export class CoreSystem {
         executionContext,
         customBranding,
         security,
+        userProfile,
       };
 
       // Services that do not expose contracts at setup
@@ -285,14 +290,15 @@ export class CoreSystem {
     try {
       const analytics = this.analytics.start();
       const security = this.security.start();
-      const injectedMetadata = await this.injectedMetadata.start();
-      const uiSettings = await this.uiSettings.start();
-      const settings = await this.settings.start();
+      const userProfile = this.userProfile.start();
+      const injectedMetadata = this.injectedMetadata.start();
+      const uiSettings = this.uiSettings.start();
+      const settings = this.settings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
-      const http = await this.http.start();
+      const http = this.http.start();
       const savedObjects = await this.savedObjects.start({ http });
-      const i18n = await this.i18n.start();
-      const fatalErrors = await this.fatalErrors.start();
+      const i18n = this.i18n.start();
+      const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
       await this.integrations.start({ uiSettings });
 
@@ -339,7 +345,16 @@ export class CoreSystem {
       });
       const deprecations = this.deprecations.start({ http });
 
-      this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
+      this.coreApp.start({
+        application,
+        docLinks,
+        http,
+        notifications,
+        uiSettings,
+        analytics,
+        i18n,
+        theme,
+      });
 
       const core: InternalCoreStart = {
         analytics,
@@ -360,6 +375,7 @@ export class CoreSystem {
         deprecations,
         customBranding,
         security,
+        userProfile,
       };
 
       await this.plugins.start(core);
@@ -423,6 +439,7 @@ export class CoreSystem {
     this.theme.stop();
     this.analytics.stop();
     this.security.stop();
+    this.userProfile.stop();
     this.rootDomElement.textContent = '';
   }
 

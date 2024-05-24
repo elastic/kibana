@@ -88,6 +88,10 @@ export const flyoutIntegrationNameText = i18n.translate(
   }
 );
 
+export const flyoutSummaryText = i18n.translate('xpack.datasetQuality.flyoutSummaryTitle', {
+  defaultMessage: 'Summary',
+});
+
 export const flyoutDegradedDocsText = i18n.translate(
   'xpack.datasetQuality.flyout.degradedDocsTitle',
   {
@@ -109,6 +113,29 @@ export const flyoutDegradedDocsPercentageText = i18n.translate(
     description: 'Tooltip label for the percentage of degraded documents chart.',
   }
 );
+
+export const flyoutDocsCountTotalText = i18n.translate(
+  'xpack.datasetQuality.flyoutDocsCountTotal',
+  {
+    defaultMessage: 'Docs count (total)',
+  }
+);
+
+export const flyoutSizeText = i18n.translate('xpack.datasetQuality.flyoutSizeText', {
+  defaultMessage: 'Size',
+});
+
+export const flyoutServicesText = i18n.translate('xpack.datasetQuality.flyoutServicesText', {
+  defaultMessage: 'Services',
+});
+
+export const flyoutHostsText = i18n.translate('xpack.datasetQuality.flyoutHostsText', {
+  defaultMessage: 'Hosts',
+});
+
+export const flyoutShowAllText = i18n.translate('xpack.datasetQuality.flyoutShowAllText', {
+  defaultMessage: 'Show all',
+});
 
 /*
 Summary Panel
@@ -166,7 +193,7 @@ export const summaryPanelDatasetsActivityText = i18n.translate(
 export const summaryPanelDatasetsActivityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityTooltipText',
   {
-    defaultMessage: 'The number of datasets with activity in the last 24 hours.',
+    defaultMessage: 'The number of datasets with activity in the selected time range.',
   }
 );
 
@@ -180,7 +207,7 @@ export const summaryPanelEstimatedDataText = i18n.translate(
 export const summaryPanelEstimatedDataTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelEstimatedDataTooltipText',
   {
-    defaultMessage: 'The approximate amount of data stored in the last 24 hours.',
+    defaultMessage: 'The approximate amount of data stored in the selected time range.',
   }
 );
 

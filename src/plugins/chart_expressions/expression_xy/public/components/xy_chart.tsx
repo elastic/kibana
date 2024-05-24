@@ -50,6 +50,7 @@ import {
 import {
   DEFAULT_LEGEND_SIZE,
   LegendSizeToPixels,
+  XYLegendValue,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { getOverridesFor, ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -220,7 +221,6 @@ export function XYChart({
     emphasizeFitting,
     valueLabels,
     hideEndzones,
-    valuesInLegend,
     yAxisConfigs,
     xAxisConfig,
     splitColumnAccessor,
@@ -521,8 +521,8 @@ export function XYChart({
     let min: number = NaN;
     let max: number = NaN;
     if (extent.mode === 'custom') {
-      const { inclusiveZeroError, boundaryError } = validateExtent(hasBarOrArea, extent);
-      if ((!inclusiveZeroError && !boundaryError) || extent.enforce) {
+      const validExtent = validateExtent(hasBarOrArea, extent);
+      if (validExtent || extent.enforce) {
         min = extent.lowerBound ?? NaN;
         max = extent.upperBound ?? NaN;
       }
@@ -812,6 +812,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
+            pointerUpdateDebounce={0} // use the `handleCursorUpdate` debounce time
             onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },
@@ -869,7 +870,9 @@ export function XYChart({
                   )
                 : undefined
             }
-            showLegendExtra={isHistogramViz && valuesInLegend}
+            showLegendExtra={
+              isHistogramViz && legend.legendStats?.[0] === XYLegendValue.CurrentAndLastValue
+            }
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             orderOrdinalBinsBy={

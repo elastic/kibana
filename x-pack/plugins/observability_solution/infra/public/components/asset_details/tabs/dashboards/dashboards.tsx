@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,6 +25,16 @@ import {
 } from '@kbn/dashboard-plugin/public';
 
 import type { DashboardItem } from '@kbn/dashboard-plugin/common/content_management';
+import type { SerializableRecord } from '@kbn/utility-types';
+import {
+  ASSET_DETAILS_FLYOUT_LOCATOR_ID,
+  ASSET_DETAILS_LOCATOR_ID,
+} from '@kbn/observability-shared-plugin/public';
+import { useLocation } from 'react-router-dom';
+import { decode } from '@kbn/rison';
+import { isEqual } from 'lodash';
+import type { AssetDashboardLoadedParams } from '../../../../services/telemetry/types';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { buildAssetIdFilter } from '../../../../utils/filters/build';
 import type {
   InfraSavedCustomDashboard,
@@ -41,18 +51,45 @@ import { useDataViewsContext } from '../../hooks/use_data_views';
 import { DashboardSelector } from './dashboard_selector';
 import { ContextMenu } from './context_menu';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
+import { FilterExplanationCallout } from './filter_explanation_callout';
 
 export function Dashboards() {
   const { dateRange } = useDatePickerContext();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { asset, renderMode } = useAssetDetailsRenderPropsContext();
+  const location = useLocation();
+  const {
+    services: { share, telemetry },
+  } = useKibanaContextForPlugin();
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [customDashboards, setCustomDashboards] = useState<DashboardItemWithTitle[]>([]);
   const [currentDashboard, setCurrentDashboard] = useState<DashboardItemWithTitle>();
+  const [trackingEventProperties, setTrackingEventProperties] = useState({});
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
   const { metrics } = useDataViewsContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
+  const trackOnlyOnceTheSameDashboardFilters = React.useRef(false);
 
   const { dashboards, loading, reload } = useFetchCustomDashboards({ assetType: asset.type });
+
+  useEffect(() => {
+    trackOnlyOnceTheSameDashboardFilters.current = false;
+    if (currentDashboard) {
+      const currentEventTrackingProperties: AssetDashboardLoadedParams = {
+        assetType: asset.type,
+        state: currentDashboard.dashboardFilterAssetIdEnabled,
+        filtered_by: currentDashboard.dashboardFilterAssetIdEnabled ? ['assetId'] : [],
+      };
+      if (isEqual(trackingEventProperties, currentEventTrackingProperties)) {
+        trackOnlyOnceTheSameDashboardFilters.current = true;
+        return;
+      }
+
+      setTrackingEventProperties(currentEventTrackingProperties);
+      if (!trackOnlyOnceTheSameDashboardFilters.current) {
+        telemetry.reportAssetDashboardLoaded(currentEventTrackingProperties);
+      }
+    }
+  }, [asset.type, currentDashboard, telemetry, trackingEventProperties]);
 
   useEffect(() => {
     const allAvailableDashboardsMap = new Map<string, DashboardItem>();
@@ -86,9 +123,11 @@ export function Dashboards() {
     }
   }, [
     allAvailableDashboards,
+    asset.type,
     currentDashboard?.dashboardSavedObjectId,
     dashboards,
     setUrlState,
+    telemetry,
     urlState?.dashboardId,
   ]);
 
@@ -97,7 +136,10 @@ export function Dashboards() {
       viewMode: ViewMode.VIEW,
       timeRange: { from: dateRange.from, to: dateRange.to },
     });
-    return Promise.resolve<DashboardCreationOptions>({ getInitialInput });
+    return Promise.resolve<DashboardCreationOptions>({
+      getInitialInput,
+      useControlGroupIntegration: true,
+    });
   }, [dateRange.from, dateRange.to]);
 
   useEffect(() => {
@@ -118,6 +160,41 @@ export function Dashboards() {
     currentDashboard,
     asset.type,
   ]);
+
+  const getLocatorParams = useCallback(
+    (params, isFlyoutView) => {
+      const searchParams = new URLSearchParams(location.search);
+      const tableProperties = searchParams.get('tableProperties');
+      const flyoutParams =
+        isFlyoutView && tableProperties ? { tableProperties: decode(tableProperties) } : {};
+
+      return {
+        assetDetails: { ...urlState, dashboardId: params.dashboardId },
+        assetType: asset.type,
+        assetId: asset.id,
+        ...flyoutParams,
+      };
+    },
+    [asset.id, asset.type, location.search, urlState]
+  );
+
+  const locator = useMemo(() => {
+    const isFlyoutView = renderMode.mode === 'flyout';
+
+    const baseLocator = share.url.locators.get(
+      isFlyoutView ? ASSET_DETAILS_FLYOUT_LOCATOR_ID : ASSET_DETAILS_LOCATOR_ID
+    );
+
+    if (!baseLocator) return;
+
+    return {
+      ...baseLocator,
+      getRedirectUrl: (params: SerializableRecord) =>
+        baseLocator.getRedirectUrl(getLocatorParams(params, isFlyoutView)),
+      navigate: (params: SerializableRecord) =>
+        baseLocator.navigate(getLocatorParams(params, isFlyoutView)),
+    };
+  }, [renderMode.mode, share.url.locators, getLocatorParams]);
 
   if (loading || status === FETCH_STATUS.LOADING) {
     return (
@@ -182,6 +259,14 @@ export function Dashboards() {
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
+          {currentDashboard && (
+            <>
+              <EuiSpacer size="s" />
+              <FilterExplanationCallout
+                dashboardFilterAssetIdEnabled={currentDashboard.dashboardFilterAssetIdEnabled}
+              />
+            </>
+          )}
           <EuiFlexItem grow>
             <EuiSpacer size="l" />
             {urlState?.dashboardId && (
@@ -189,6 +274,7 @@ export function Dashboards() {
                 savedObjectId={urlState?.dashboardId}
                 getCreationOptions={getCreationOptions}
                 ref={setDashboard}
+                locator={locator}
               />
             )}
           </EuiFlexItem>

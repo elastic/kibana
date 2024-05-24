@@ -759,7 +759,7 @@
             "label": "alertStatus",
             "description": [],
             "signature": [
-              "\"active\" | \"recovered\" | \"untracked\""
+              "\"recovered\" | \"active\" | \"untracked\""
             ],
             "path": "packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx",
             "deprecated": false,
@@ -1497,9 +1497,21 @@
                 "text": "DataView"
               },
               ">; createSavedObject: (dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
               {
                 "pluginId": "dataViews",
@@ -2289,9 +2301,21 @@
                 "text": "DataView"
               },
               ">; createSavedObject: (dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
               {
                 "pluginId": "dataViews",

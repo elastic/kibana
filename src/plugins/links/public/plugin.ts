@@ -12,7 +12,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';

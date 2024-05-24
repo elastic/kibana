@@ -41,34 +41,28 @@ export function MobileTreemap({
     (callApmApi) => {
       const fieldName = ES_FIELD_MAPPING[selectedTreemap];
       if (fieldName) {
-        return callApmApi(
-          'GET /internal/apm/mobile-services/{serviceName}/terms',
-          {
-            params: {
-              path: {
-                serviceName,
-              },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                fieldName,
-                size: 500,
-              },
+        return callApmApi('GET /internal/apm/mobile-services/{serviceName}/terms', {
+          params: {
+            path: {
+              serviceName,
             },
-          }
-        );
+            query: {
+              environment,
+              kuery,
+              start,
+              end,
+              fieldName,
+              size: 500,
+            },
+          },
+        });
       }
     },
     [environment, kuery, serviceName, start, end, selectedTreemap]
   );
   return (
     <>
-      <TreemapSelect
-        selectedTreemap={selectedTreemap}
-        onChange={selectTreemap}
-      />
+      <TreemapSelect selectedTreemap={selectedTreemap} onChange={selectTreemap} />
       <EuiSpacer size="s" />
       <TreemapChart
         fetchStatus={status}

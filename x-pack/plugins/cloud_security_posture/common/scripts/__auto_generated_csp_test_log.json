@@ -2488,11 +2488,15 @@
       "  it('calls onAddColumn when a checkbox is checked')",
       "  it('calls onRemoveColumn when a checkbox is unchecked')",
       "  describe('View selected')",
-      "    it('should render \"view all\" option when filterSelected is not enabled')",
-      "    it('should render \"view selected\" option when filterSelected is not enabled')",
+      "    it('should show \"view all\" option by default')",
+      "    it('should render \"view selected\" option when previous selection was \"view selected\"')",
+      "    it('should show \"view all\" option after the \"view all\" is selected')",
+      "    it('should show only selected columns after the \"view selected\" option is selected')",
+      "    it('should show all columns available after the \"view all\" option is selected')",
       "    it('should open the view selector with button click')",
-      "    it('should callback when \"view all\" option is clicked')",
-      "    it('should callback when \"view selected\" option is clicked')"
+      "  describe('Searching columns')",
+      "    it('should find all columns match the search term')",
+      "    it('should find all columns match the search term and are selected')"
     ],
     "testSuits": [
       {
@@ -2546,20 +2550,50 @@
         "isTodo": false
       },
       {
-        "id": "should-render-\"view-all\"-option-when-filterselected-is-not-enabled",
-        "rawLine": "    it('should render \"view all\" option when filterSelected is not enabled', () => {",
-        "line": "    it('should render \"view all\" option when filterSelected is not enabled')",
-        "label": "should render \"view all\" option when filterSelected is not enabled",
+        "id": "should-show-\"view-all\"-option-by-default",
+        "rawLine": "    it('should show \"view all\" option by default', () => {",
+        "line": "    it('should show \"view all\" option by default')",
+        "label": "should show \"view all\" option by default",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
       {
-        "id": "should-render-\"view-selected\"-option-when-filterselected-is-not-enabled",
-        "rawLine": "    it('should render \"view selected\" option when filterSelected is not enabled', () => {",
-        "line": "    it('should render \"view selected\" option when filterSelected is not enabled')",
-        "label": "should render \"view selected\" option when filterSelected is not enabled",
+        "id": "should-render-\"view-selected\"-option-when-previous-selection-was-\"view-selected\"",
+        "rawLine": "    it('should render \"view selected\" option when previous selection was \"view selected\"', () => {",
+        "line": "    it('should render \"view selected\" option when previous selection was \"view selected\"')",
+        "label": "should render \"view selected\" option when previous selection was \"view selected\"",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-\"view-all\"-option-after-the-\"view-all\"-is-selected",
+        "rawLine": "    it('should show \"view all\" option after the \"view all\" is selected', async () => {",
+        "line": "    it('should show \"view all\" option after the \"view all\" is selected')",
+        "label": "should show \"view all\" option after the \"view all\" is selected",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-only-selected-columns-after-the-\"view-selected\"-option-is-selected",
+        "rawLine": "    it('should show only selected columns after the \"view selected\" option is selected', async () => {",
+        "line": "    it('should show only selected columns after the \"view selected\" option is selected')",
+        "label": "should show only selected columns after the \"view selected\" option is selected",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-show-all-columns-available-after-the-\"view-all\"-option-is-selected",
+        "rawLine": "    it('should show all columns available after the \"view all\" option is selected', async () => {",
+        "line": "    it('should show all columns available after the \"view all\" option is selected')",
+        "label": "should show all columns available after the \"view all\" option is selected",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -2576,20 +2610,30 @@
         "isTodo": false
       },
       {
-        "id": "should-callback-when-\"view-all\"-option-is-clicked",
-        "rawLine": "    it('should callback when \"view all\" option is clicked', async () => {",
-        "line": "    it('should callback when \"view all\" option is clicked')",
-        "label": "should callback when \"view all\" option is clicked",
+        "id": "searching-columns",
+        "rawLine": "  describe('Searching columns', () => {",
+        "line": "  describe('Searching columns')",
+        "label": "Searching columns",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-find-all-columns-match-the-search-term",
+        "rawLine": "    it('should find all columns match the search term', async () => {",
+        "line": "    it('should find all columns match the search term')",
+        "label": "should find all columns match the search term",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
         "isTodo": false
       },
       {
-        "id": "should-callback-when-\"view-selected\"-option-is-clicked",
-        "rawLine": "    it('should callback when \"view selected\" option is clicked', async () => {",
-        "line": "    it('should callback when \"view selected\" option is clicked')",
-        "label": "should callback when \"view selected\" option is clicked",
+        "id": "should-find-all-columns-match-the-search-term-and-are-selected",
+        "rawLine": "    it('should find all columns match the search term and are selected', async () => {",
+        "line": "    it('should find all columns match the search term and are selected')",
+        "label": "should find all columns match the search term and are selected",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -2648,20 +2692,50 @@
             "isTodo": false,
             "children": [
               {
-                "id": "should-render-\"view-all\"-option-when-filterselected-is-not-enabled",
-                "rawLine": "    it('should render \"view all\" option when filterSelected is not enabled', () => {",
-                "line": "    it('should render \"view all\" option when filterSelected is not enabled')",
-                "label": "should render \"view all\" option when filterSelected is not enabled",
+                "id": "should-show-\"view-all\"-option-by-default",
+                "rawLine": "    it('should show \"view all\" option by default', () => {",
+                "line": "    it('should show \"view all\" option by default')",
+                "label": "should show \"view all\" option by default",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
                 "isTodo": false
               },
               {
-                "id": "should-render-\"view-selected\"-option-when-filterselected-is-not-enabled",
-                "rawLine": "    it('should render \"view selected\" option when filterSelected is not enabled', () => {",
-                "line": "    it('should render \"view selected\" option when filterSelected is not enabled')",
-                "label": "should render \"view selected\" option when filterSelected is not enabled",
+                "id": "should-render-\"view-selected\"-option-when-previous-selection-was-\"view-selected\"",
+                "rawLine": "    it('should render \"view selected\" option when previous selection was \"view selected\"', () => {",
+                "line": "    it('should render \"view selected\" option when previous selection was \"view selected\"')",
+                "label": "should render \"view selected\" option when previous selection was \"view selected\"",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-show-\"view-all\"-option-after-the-\"view-all\"-is-selected",
+                "rawLine": "    it('should show \"view all\" option after the \"view all\" is selected', async () => {",
+                "line": "    it('should show \"view all\" option after the \"view all\" is selected')",
+                "label": "should show \"view all\" option after the \"view all\" is selected",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-show-only-selected-columns-after-the-\"view-selected\"-option-is-selected",
+                "rawLine": "    it('should show only selected columns after the \"view selected\" option is selected', async () => {",
+                "line": "    it('should show only selected columns after the \"view selected\" option is selected')",
+                "label": "should show only selected columns after the \"view selected\" option is selected",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-show-all-columns-available-after-the-\"view-all\"-option-is-selected",
+                "rawLine": "    it('should show all columns available after the \"view all\" option is selected', async () => {",
+                "line": "    it('should show all columns available after the \"view all\" option is selected')",
+                "label": "should show all columns available after the \"view all\" option is selected",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
@@ -2676,22 +2750,34 @@
                 "type": "it",
                 "isSkipped": false,
                 "isTodo": false
-              },
+              }
+            ]
+          },
+          {
+            "id": "searching-columns",
+            "rawLine": "  describe('Searching columns', () => {",
+            "line": "  describe('Searching columns')",
+            "label": "Searching columns",
+            "indent": 2,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
               {
-                "id": "should-callback-when-\"view-all\"-option-is-clicked",
-                "rawLine": "    it('should callback when \"view all\" option is clicked', async () => {",
-                "line": "    it('should callback when \"view all\" option is clicked')",
-                "label": "should callback when \"view all\" option is clicked",
+                "id": "should-find-all-columns-match-the-search-term",
+                "rawLine": "    it('should find all columns match the search term', async () => {",
+                "line": "    it('should find all columns match the search term')",
+                "label": "should find all columns match the search term",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
                 "isTodo": false
               },
               {
-                "id": "should-callback-when-\"view-selected\"-option-is-clicked",
-                "rawLine": "    it('should callback when \"view selected\" option is clicked', async () => {",
-                "line": "    it('should callback when \"view selected\" option is clicked')",
-                "label": "should callback when \"view selected\" option is clicked",
+                "id": "should-find-all-columns-match-the-search-term-and-are-selected",
+                "rawLine": "    it('should find all columns match the search term and are selected', async () => {",
+                "line": "    it('should find all columns match the search term and are selected')",
+                "label": "should find all columns match the search term and are selected",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
@@ -3059,10 +3145,12 @@
       "    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`)",
       "  describe('Agentless')",
       "    it('should render setup technology selector for AWS and allow to select agent-based')",
+      "    it('should render setup technology selector for GCP for organisation account type')",
+      "    it('should render setup technology selector for GCP for single-account')",
+      "    it('should render setup technology selector for Azure for Organisation type')",
+      "    it('should render setup technology selector for Azure for Single Subscription type')",
       "    it('should not render setup technology selector for KSPM')",
       "    it('should not render setup technology selector for CNVM')",
-      "    it('should not render setup technology selector for CSPM GCP')",
-      "    it('should not render setup technology selector for CSPM Azure')",
       "  it(`renders Service principal with Client Certificate fields`)",
       "  it(`updates Service principal with Client Certificate fields`)",
       "  it(`should not render Service principal with Client Username and Password option`)",
@@ -3252,7 +3340,7 @@
       },
       {
         "id": "renders-${cloudbeat_eks}-direct-access-keys-fields",
-        "rawLine": "    it(`renders ${CLOUDBEAT_EKS} Direct Access Keys fields`, () => {",
+        "rawLine": "    it(`renders ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {",
         "line": "    it(`renders ${CLOUDBEAT_EKS} Direct Access Keys fields`)",
         "label": "renders ${CLOUDBEAT_EKS} Direct Access Keys fields",
         "indent": 4,
@@ -3262,7 +3350,7 @@
       },
       {
         "id": "updates-${cloudbeat_eks}-direct-access-keys-fields",
-        "rawLine": "    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`, () => {",
+        "rawLine": "    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {",
         "line": "    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`)",
         "label": "updates ${CLOUDBEAT_EKS} Direct Access Keys fields",
         "indent": 4,
@@ -3272,7 +3360,7 @@
       },
       {
         "id": "renders-${cloudbeat_eks}-temporary-keys-fields",
-        "rawLine": "    it(`renders ${CLOUDBEAT_EKS} Temporary Keys fields`, () => {",
+        "rawLine": "    it(`renders ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {",
         "line": "    it(`renders ${CLOUDBEAT_EKS} Temporary Keys fields`)",
         "label": "renders ${CLOUDBEAT_EKS} Temporary Keys fields",
         "indent": 4,
@@ -3282,7 +3370,7 @@
       },
       {
         "id": "updates-${cloudbeat_eks}-temporary-keys-fields",
-        "rawLine": "    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`, () => {",
+        "rawLine": "    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {",
         "line": "    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`)",
         "label": "updates ${CLOUDBEAT_EKS} Temporary Keys fields",
         "indent": 4,
@@ -3402,7 +3490,7 @@
       },
       {
         "id": "renders-${cloudbeat_aws}-direct-access-keys-fields",
-        "rawLine": "    it(`renders ${CLOUDBEAT_AWS} Direct Access Keys fields`, () => {",
+        "rawLine": "    it(`renders ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {",
         "line": "    it(`renders ${CLOUDBEAT_AWS} Direct Access Keys fields`)",
         "label": "renders ${CLOUDBEAT_AWS} Direct Access Keys fields",
         "indent": 4,
@@ -3412,7 +3500,7 @@
       },
       {
         "id": "updates-${cloudbeat_aws}-direct-access-keys-fields",
-        "rawLine": "    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`, () => {",
+        "rawLine": "    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {",
         "line": "    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`)",
         "label": "updates ${CLOUDBEAT_AWS} Direct Access Keys fields",
         "indent": 4,
@@ -3422,7 +3510,7 @@
       },
       {
         "id": "renders-${cloudbeat_aws}-temporary-keys-fields",
-        "rawLine": "    it(`renders ${CLOUDBEAT_AWS} Temporary Keys fields`, () => {",
+        "rawLine": "    it(`renders ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {",
         "line": "    it(`renders ${CLOUDBEAT_AWS} Temporary Keys fields`)",
         "label": "renders ${CLOUDBEAT_AWS} Temporary Keys fields",
         "indent": 4,
@@ -3432,7 +3520,7 @@
       },
       {
         "id": "updates-${cloudbeat_aws}-temporary-keys-fields",
-        "rawLine": "    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`, () => {",
+        "rawLine": "    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {",
         "line": "    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`)",
         "label": "updates ${CLOUDBEAT_AWS} Temporary Keys fields",
         "indent": 4,
@@ -3662,7 +3750,7 @@
       },
       {
         "id": "renders-${cloudbeat_azure}-service-principal-with-client-secret-fields",
-        "rawLine": "    it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, () => {",
+        "rawLine": "    it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {",
         "line": "    it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`)",
         "label": "renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields",
         "indent": 4,
@@ -3672,7 +3760,7 @@
       },
       {
         "id": "updates-${cloudbeat_azure}-service-principal-with-client-secret-fields",
-        "rawLine": "    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, () => {",
+        "rawLine": "    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {",
         "line": "    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`)",
         "label": "updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields",
         "indent": 4,
@@ -3701,6 +3789,46 @@
         "isTodo": false
       },
       {
+        "id": "should-render-setup-technology-selector-for-gcp-for-organisation-account-type",
+        "rawLine": "    it('should render setup technology selector for GCP for organisation account type', async () => {",
+        "line": "    it('should render setup technology selector for GCP for organisation account type')",
+        "label": "should render setup technology selector for GCP for organisation account type",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-render-setup-technology-selector-for-gcp-for-single-account",
+        "rawLine": "    it('should render setup technology selector for GCP for single-account', async () => {",
+        "line": "    it('should render setup technology selector for GCP for single-account')",
+        "label": "should render setup technology selector for GCP for single-account",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-render-setup-technology-selector-for-azure-for-organisation-type",
+        "rawLine": "    it('should render setup technology selector for Azure for Organisation type', async () => {",
+        "line": "    it('should render setup technology selector for Azure for Organisation type')",
+        "label": "should render setup technology selector for Azure for Organisation type",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-render-setup-technology-selector-for-azure-for-single-subscription-type",
+        "rawLine": "    it('should render setup technology selector for Azure for Single Subscription type', async () => {",
+        "line": "    it('should render setup technology selector for Azure for Single Subscription type')",
+        "label": "should render setup technology selector for Azure for Single Subscription type",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
         "id": "should-not-render-setup-technology-selector-for-kspm",
         "rawLine": "    it('should not render setup technology selector for KSPM', () => {",
         "line": "    it('should not render setup technology selector for KSPM')",
@@ -3721,28 +3849,8 @@
         "isTodo": false
       },
       {
-        "id": "should-not-render-setup-technology-selector-for-cspm-gcp",
-        "rawLine": "    it('should not render setup technology selector for CSPM GCP', () => {",
-        "line": "    it('should not render setup technology selector for CSPM GCP')",
-        "label": "should not render setup technology selector for CSPM GCP",
-        "indent": 4,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
-        "id": "should-not-render-setup-technology-selector-for-cspm-azure",
-        "rawLine": "    it('should not render setup technology selector for CSPM Azure', () => {",
-        "line": "    it('should not render setup technology selector for CSPM Azure')",
-        "label": "should not render setup technology selector for CSPM Azure",
-        "indent": 4,
-        "type": "it",
-        "isSkipped": false,
-        "isTodo": false
-      },
-      {
         "id": "renders-service-principal-with-client-certificate-fields",
-        "rawLine": "  it(`renders Service principal with Client Certificate fields`, () => {",
+        "rawLine": "  it(`renders Service principal with Client Certificate fields`, async () => {",
         "line": "  it(`renders Service principal with Client Certificate fields`)",
         "label": "renders Service principal with Client Certificate fields",
         "indent": 2,
@@ -3752,7 +3860,7 @@
       },
       {
         "id": "updates-service-principal-with-client-certificate-fields",
-        "rawLine": "  it(`updates Service principal with Client Certificate fields`, () => {",
+        "rawLine": "  it(`updates Service principal with Client Certificate fields`, async () => {",
         "line": "  it(`updates Service principal with Client Certificate fields`)",
         "label": "updates Service principal with Client Certificate fields",
         "indent": 2,
@@ -3976,7 +4084,7 @@
               },
               {
                 "id": "renders-${cloudbeat_eks}-direct-access-keys-fields",
-                "rawLine": "    it(`renders ${CLOUDBEAT_EKS} Direct Access Keys fields`, () => {",
+                "rawLine": "    it(`renders ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {",
                 "line": "    it(`renders ${CLOUDBEAT_EKS} Direct Access Keys fields`)",
                 "label": "renders ${CLOUDBEAT_EKS} Direct Access Keys fields",
                 "indent": 4,
@@ -3986,7 +4094,7 @@
               },
               {
                 "id": "updates-${cloudbeat_eks}-direct-access-keys-fields",
-                "rawLine": "    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`, () => {",
+                "rawLine": "    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`, async () => {",
                 "line": "    it(`updates ${CLOUDBEAT_EKS} Direct Access Keys fields`)",
                 "label": "updates ${CLOUDBEAT_EKS} Direct Access Keys fields",
                 "indent": 4,
@@ -3996,7 +4104,7 @@
               },
               {
                 "id": "renders-${cloudbeat_eks}-temporary-keys-fields",
-                "rawLine": "    it(`renders ${CLOUDBEAT_EKS} Temporary Keys fields`, () => {",
+                "rawLine": "    it(`renders ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {",
                 "line": "    it(`renders ${CLOUDBEAT_EKS} Temporary Keys fields`)",
                 "label": "renders ${CLOUDBEAT_EKS} Temporary Keys fields",
                 "indent": 4,
@@ -4006,7 +4114,7 @@
               },
               {
                 "id": "updates-${cloudbeat_eks}-temporary-keys-fields",
-                "rawLine": "    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`, () => {",
+                "rawLine": "    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`, async () => {",
                 "line": "    it(`updates ${CLOUDBEAT_EKS} Temporary Keys fields`)",
                 "label": "updates ${CLOUDBEAT_EKS} Temporary Keys fields",
                 "indent": 4,
@@ -4128,7 +4236,7 @@
               },
               {
                 "id": "renders-${cloudbeat_aws}-direct-access-keys-fields",
-                "rawLine": "    it(`renders ${CLOUDBEAT_AWS} Direct Access Keys fields`, () => {",
+                "rawLine": "    it(`renders ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {",
                 "line": "    it(`renders ${CLOUDBEAT_AWS} Direct Access Keys fields`)",
                 "label": "renders ${CLOUDBEAT_AWS} Direct Access Keys fields",
                 "indent": 4,
@@ -4138,7 +4246,7 @@
               },
               {
                 "id": "updates-${cloudbeat_aws}-direct-access-keys-fields",
-                "rawLine": "    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`, () => {",
+                "rawLine": "    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`, async () => {",
                 "line": "    it(`updates ${CLOUDBEAT_AWS} Direct Access Keys fields`)",
                 "label": "updates ${CLOUDBEAT_AWS} Direct Access Keys fields",
                 "indent": 4,
@@ -4148,7 +4256,7 @@
               },
               {
                 "id": "renders-${cloudbeat_aws}-temporary-keys-fields",
-                "rawLine": "    it(`renders ${CLOUDBEAT_AWS} Temporary Keys fields`, () => {",
+                "rawLine": "    it(`renders ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {",
                 "line": "    it(`renders ${CLOUDBEAT_AWS} Temporary Keys fields`)",
                 "label": "renders ${CLOUDBEAT_AWS} Temporary Keys fields",
                 "indent": 4,
@@ -4158,7 +4266,7 @@
               },
               {
                 "id": "updates-${cloudbeat_aws}-temporary-keys-fields",
-                "rawLine": "    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`, () => {",
+                "rawLine": "    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`, async () => {",
                 "line": "    it(`updates ${CLOUDBEAT_AWS} Temporary Keys fields`)",
                 "label": "updates ${CLOUDBEAT_AWS} Temporary Keys fields",
                 "indent": 4,
@@ -4394,7 +4502,7 @@
               },
               {
                 "id": "renders-${cloudbeat_azure}-service-principal-with-client-secret-fields",
-                "rawLine": "    it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, () => {",
+                "rawLine": "    it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {",
                 "line": "    it(`renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`)",
                 "label": "renders ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields",
                 "indent": 4,
@@ -4404,7 +4512,7 @@
               },
               {
                 "id": "updates-${cloudbeat_azure}-service-principal-with-client-secret-fields",
-                "rawLine": "    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, () => {",
+                "rawLine": "    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`, async () => {",
                 "line": "    it(`updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields`)",
                 "label": "updates ${CLOUDBEAT_AZURE} Service Principal with Client Secret fields",
                 "indent": 4,
@@ -4435,6 +4543,46 @@
                 "isTodo": false
               },
               {
+                "id": "should-render-setup-technology-selector-for-gcp-for-organisation-account-type",
+                "rawLine": "    it('should render setup technology selector for GCP for organisation account type', async () => {",
+                "line": "    it('should render setup technology selector for GCP for organisation account type')",
+                "label": "should render setup technology selector for GCP for organisation account type",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-render-setup-technology-selector-for-gcp-for-single-account",
+                "rawLine": "    it('should render setup technology selector for GCP for single-account', async () => {",
+                "line": "    it('should render setup technology selector for GCP for single-account')",
+                "label": "should render setup technology selector for GCP for single-account",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-render-setup-technology-selector-for-azure-for-organisation-type",
+                "rawLine": "    it('should render setup technology selector for Azure for Organisation type', async () => {",
+                "line": "    it('should render setup technology selector for Azure for Organisation type')",
+                "label": "should render setup technology selector for Azure for Organisation type",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "should-render-setup-technology-selector-for-azure-for-single-subscription-type",
+                "rawLine": "    it('should render setup technology selector for Azure for Single Subscription type', async () => {",
+                "line": "    it('should render setup technology selector for Azure for Single Subscription type')",
+                "label": "should render setup technology selector for Azure for Single Subscription type",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
                 "id": "should-not-render-setup-technology-selector-for-kspm",
                 "rawLine": "    it('should not render setup technology selector for KSPM', () => {",
                 "line": "    it('should not render setup technology selector for KSPM')",
@@ -4453,32 +4601,12 @@
                 "type": "it",
                 "isSkipped": false,
                 "isTodo": false
-              },
-              {
-                "id": "should-not-render-setup-technology-selector-for-cspm-gcp",
-                "rawLine": "    it('should not render setup technology selector for CSPM GCP', () => {",
-                "line": "    it('should not render setup technology selector for CSPM GCP')",
-                "label": "should not render setup technology selector for CSPM GCP",
-                "indent": 4,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
-                "id": "should-not-render-setup-technology-selector-for-cspm-azure",
-                "rawLine": "    it('should not render setup technology selector for CSPM Azure', () => {",
-                "line": "    it('should not render setup technology selector for CSPM Azure')",
-                "label": "should not render setup technology selector for CSPM Azure",
-                "indent": 4,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
               }
             ]
           },
           {
             "id": "renders-service-principal-with-client-certificate-fields",
-            "rawLine": "  it(`renders Service principal with Client Certificate fields`, () => {",
+            "rawLine": "  it(`renders Service principal with Client Certificate fields`, async () => {",
             "line": "  it(`renders Service principal with Client Certificate fields`)",
             "label": "renders Service principal with Client Certificate fields",
             "indent": 2,
@@ -4488,7 +4616,7 @@
           },
           {
             "id": "updates-service-principal-with-client-certificate-fields",
-            "rawLine": "  it(`updates Service principal with Client Certificate fields`, () => {",
+            "rawLine": "  it(`updates Service principal with Client Certificate fields`, async () => {",
             "line": "  it(`updates Service principal with Client Certificate fields`)",
             "label": "updates Service principal with Client Certificate fields",
             "indent": 2,
@@ -4541,7 +4669,10 @@
       "describe('useSetupTechnology')",
       "  describe('create page flow')",
       "    it('initializes with AGENT_BASED technology')",
-      "    it('sets to AGENTLESS when agentless is available')",
+      "    it('sets to AGENTLESS when agentless is available and AWS cloud')",
+      "    it('sets to AGENTLESS when agentless is available and GCP cloud')",
+      "    it('sets to AGENTLESS when agentless is available and Azure cloud')",
+      "    it('sets to AGENT_BASED when agentless is available but input is not supported for agentless')",
       "    it('sets to AGENT_BASED when agentPolicyId differs from agentlessPolicyId')",
       "    it('calls handleSetupTechnologyChange when setupTechnology changes')",
       "  describe('edit page flow')",
@@ -4582,10 +4713,40 @@
         "isTodo": false
       },
       {
-        "id": "sets-to-agentless-when-agentless-is-available",
-        "rawLine": "    it('sets to AGENTLESS when agentless is available', () => {",
-        "line": "    it('sets to AGENTLESS when agentless is available')",
-        "label": "sets to AGENTLESS when agentless is available",
+        "id": "sets-to-agentless-when-agentless-is-available-and-aws-cloud",
+        "rawLine": "    it('sets to AGENTLESS when agentless is available and AWS cloud', () => {",
+        "line": "    it('sets to AGENTLESS when agentless is available and AWS cloud')",
+        "label": "sets to AGENTLESS when agentless is available and AWS cloud",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "sets-to-agentless-when-agentless-is-available-and-gcp-cloud",
+        "rawLine": "    it('sets to AGENTLESS when agentless is available and GCP cloud', () => {",
+        "line": "    it('sets to AGENTLESS when agentless is available and GCP cloud')",
+        "label": "sets to AGENTLESS when agentless is available and GCP cloud",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "sets-to-agentless-when-agentless-is-available-and-azure-cloud",
+        "rawLine": "    it('sets to AGENTLESS when agentless is available and Azure cloud', () => {",
+        "line": "    it('sets to AGENTLESS when agentless is available and Azure cloud')",
+        "label": "sets to AGENTLESS when agentless is available and Azure cloud",
+        "indent": 4,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "sets-to-agent_based-when-agentless-is-available-but-input-is-not-supported-for-agentless",
+        "rawLine": "    it('sets to AGENT_BASED when agentless is available but input is not supported for agentless', () => {",
+        "line": "    it('sets to AGENT_BASED when agentless is available but input is not supported for agentless')",
+        "label": "sets to AGENT_BASED when agentless is available but input is not supported for agentless",
         "indent": 4,
         "type": "it",
         "isSkipped": false,
@@ -4694,10 +4855,40 @@
                 "isTodo": false
               },
               {
-                "id": "sets-to-agentless-when-agentless-is-available",
-                "rawLine": "    it('sets to AGENTLESS when agentless is available', () => {",
-                "line": "    it('sets to AGENTLESS when agentless is available')",
-                "label": "sets to AGENTLESS when agentless is available",
+                "id": "sets-to-agentless-when-agentless-is-available-and-aws-cloud",
+                "rawLine": "    it('sets to AGENTLESS when agentless is available and AWS cloud', () => {",
+                "line": "    it('sets to AGENTLESS when agentless is available and AWS cloud')",
+                "label": "sets to AGENTLESS when agentless is available and AWS cloud",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "sets-to-agentless-when-agentless-is-available-and-gcp-cloud",
+                "rawLine": "    it('sets to AGENTLESS when agentless is available and GCP cloud', () => {",
+                "line": "    it('sets to AGENTLESS when agentless is available and GCP cloud')",
+                "label": "sets to AGENTLESS when agentless is available and GCP cloud",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "sets-to-agentless-when-agentless-is-available-and-azure-cloud",
+                "rawLine": "    it('sets to AGENTLESS when agentless is available and Azure cloud', () => {",
+                "line": "    it('sets to AGENTLESS when agentless is available and Azure cloud')",
+                "label": "sets to AGENTLESS when agentless is available and Azure cloud",
+                "indent": 4,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "sets-to-agent_based-when-agentless-is-available-but-input-is-not-supported-for-agentless",
+                "rawLine": "    it('sets to AGENT_BASED when agentless is available but input is not supported for agentless', () => {",
+                "line": "    it('sets to AGENT_BASED when agentless is available but input is not supported for agentless')",
+                "label": "sets to AGENT_BASED when agentless is available but input is not supported for agentless",
                 "indent": 4,
                 "type": "it",
                 "isSkipped": false,
@@ -4811,7 +5002,21 @@
       "describe('getDefaultAwsCredentialsType')",
       "  it('should return \"direct_access_key\" for agentless')",
       "  it('should return \"assume_role\" for agent-based, when cloudformation is not available')",
-      "  it('should return \"cloud_formation\" for agent-based, when cloudformation is available')"
+      "  it('should return \"cloud_formation\" for agent-based, when cloudformation is available')",
+      "describe('getDefaultAzureCredentialsType')",
+      "  it('should return \"service_principal_with_client_secret\" for agentless')",
+      "  it('shold return \"arm_template\" for agent-based, when arm_template is available')",
+      "  it('should return \"managed_identity\" for agent-based, when arm_template is not available')",
+      "describe('getDefaultGcpHiddenVars')",
+      "  it('should return manual credentials-json credentials type for agentless')",
+      "  it('should return google_cloud_shell setup access for agent-based if cloud_shell_url is available')",
+      "  it('should return manual setup access for agent-based if cloud_shell_url is not available')",
+      "describe('findVariableDef')",
+      "  it('Should return var item when key exist')",
+      "  it('Should return undefined when key is invalid')",
+      "  it('Should return undefined when datastream is undefined')",
+      "  it('Should return undefined when stream is undefined')",
+      "  it('Should return undefined when stream.var is invalid')"
     ],
     "testSuits": [
       {
@@ -5043,6 +5248,146 @@
         "type": "it",
         "isSkipped": false,
         "isTodo": false
+      },
+      {
+        "id": "getdefaultazurecredentialstype",
+        "rawLine": "describe('getDefaultAzureCredentialsType', () => {",
+        "line": "describe('getDefaultAzureCredentialsType')",
+        "label": "getDefaultAzureCredentialsType",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-\"service_principal_with_client_secret\"-for-agentless",
+        "rawLine": "  it('should return \"service_principal_with_client_secret\" for agentless', () => {",
+        "line": "  it('should return \"service_principal_with_client_secret\" for agentless')",
+        "label": "should return \"service_principal_with_client_secret\" for agentless",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "shold-return-\"arm_template\"-for-agent-based,-when-arm_template-is-available",
+        "rawLine": "  it('shold return \"arm_template\" for agent-based, when arm_template is available', () => {",
+        "line": "  it('shold return \"arm_template\" for agent-based, when arm_template is available')",
+        "label": "shold return \"arm_template\" for agent-based, when arm_template is available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-\"managed_identity\"-for-agent-based,-when-arm_template-is-not-available",
+        "rawLine": "  it('should return \"managed_identity\" for agent-based, when arm_template is not available', () => {",
+        "line": "  it('should return \"managed_identity\" for agent-based, when arm_template is not available')",
+        "label": "should return \"managed_identity\" for agent-based, when arm_template is not available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "getdefaultgcphiddenvars",
+        "rawLine": "describe('getDefaultGcpHiddenVars', () => {",
+        "line": "describe('getDefaultGcpHiddenVars')",
+        "label": "getDefaultGcpHiddenVars",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-manual-credentials-json-credentials-type-for-agentless",
+        "rawLine": "  it('should return manual credentials-json credentials type for agentless', () => {",
+        "line": "  it('should return manual credentials-json credentials type for agentless')",
+        "label": "should return manual credentials-json credentials type for agentless",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-google_cloud_shell-setup-access-for-agent-based-if-cloud_shell_url-is-available",
+        "rawLine": "  it('should return google_cloud_shell setup access for agent-based if cloud_shell_url is available', () => {",
+        "line": "  it('should return google_cloud_shell setup access for agent-based if cloud_shell_url is available')",
+        "label": "should return google_cloud_shell setup access for agent-based if cloud_shell_url is available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-manual-setup-access-for-agent-based-if-cloud_shell_url-is-not-available",
+        "rawLine": "  it('should return manual setup access for agent-based if cloud_shell_url is not available', () => {",
+        "line": "  it('should return manual setup access for agent-based if cloud_shell_url is not available')",
+        "label": "should return manual setup access for agent-based if cloud_shell_url is not available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "findvariabledef",
+        "rawLine": "describe('findVariableDef', () => {",
+        "line": "describe('findVariableDef')",
+        "label": "findVariableDef",
+        "indent": 0,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-var-item-when-key-exist",
+        "rawLine": "  it('Should return var item when key exist', () => {",
+        "line": "  it('Should return var item when key exist')",
+        "label": "Should return var item when key exist",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-undefined-when-key-is-invalid",
+        "rawLine": "  it('Should return undefined when key is invalid', () => {",
+        "line": "  it('Should return undefined when key is invalid')",
+        "label": "Should return undefined when key is invalid",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-undefined-when-datastream-is-undefined",
+        "rawLine": "  it('Should return undefined when datastream is undefined', () => {",
+        "line": "  it('Should return undefined when datastream is undefined')",
+        "label": "Should return undefined when datastream is undefined",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-undefined-when-stream-is-undefined",
+        "rawLine": "  it('Should return undefined when stream is undefined', () => {",
+        "line": "  it('Should return undefined when stream is undefined')",
+        "label": "Should return undefined when stream is undefined",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-undefined-when-stream.var-is-invalid",
+        "rawLine": "  it('Should return undefined when stream.var is invalid', () => {",
+        "line": "  it('Should return undefined when stream.var is invalid')",
+        "label": "Should return undefined when stream.var is invalid",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
       }
     ],
     "tree": [
@@ -5233,6 +5578,116 @@
         "rawLine": "  it('should return \"cloud_formation\" for agent-based, when cloudformation is available', () => {",
         "line": "  it('should return \"cloud_formation\" for agent-based, when cloudformation is available')",
         "label": "should return \"cloud_formation\" for agent-based, when cloudformation is available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-\"service_principal_with_client_secret\"-for-agentless",
+        "rawLine": "  it('should return \"service_principal_with_client_secret\" for agentless', () => {",
+        "line": "  it('should return \"service_principal_with_client_secret\" for agentless')",
+        "label": "should return \"service_principal_with_client_secret\" for agentless",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "shold-return-\"arm_template\"-for-agent-based,-when-arm_template-is-available",
+        "rawLine": "  it('shold return \"arm_template\" for agent-based, when arm_template is available', () => {",
+        "line": "  it('shold return \"arm_template\" for agent-based, when arm_template is available')",
+        "label": "shold return \"arm_template\" for agent-based, when arm_template is available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-\"managed_identity\"-for-agent-based,-when-arm_template-is-not-available",
+        "rawLine": "  it('should return \"managed_identity\" for agent-based, when arm_template is not available', () => {",
+        "line": "  it('should return \"managed_identity\" for agent-based, when arm_template is not available')",
+        "label": "should return \"managed_identity\" for agent-based, when arm_template is not available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-manual-credentials-json-credentials-type-for-agentless",
+        "rawLine": "  it('should return manual credentials-json credentials type for agentless', () => {",
+        "line": "  it('should return manual credentials-json credentials type for agentless')",
+        "label": "should return manual credentials-json credentials type for agentless",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-google_cloud_shell-setup-access-for-agent-based-if-cloud_shell_url-is-available",
+        "rawLine": "  it('should return google_cloud_shell setup access for agent-based if cloud_shell_url is available', () => {",
+        "line": "  it('should return google_cloud_shell setup access for agent-based if cloud_shell_url is available')",
+        "label": "should return google_cloud_shell setup access for agent-based if cloud_shell_url is available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-manual-setup-access-for-agent-based-if-cloud_shell_url-is-not-available",
+        "rawLine": "  it('should return manual setup access for agent-based if cloud_shell_url is not available', () => {",
+        "line": "  it('should return manual setup access for agent-based if cloud_shell_url is not available')",
+        "label": "should return manual setup access for agent-based if cloud_shell_url is not available",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-var-item-when-key-exist",
+        "rawLine": "  it('Should return var item when key exist', () => {",
+        "line": "  it('Should return var item when key exist')",
+        "label": "Should return var item when key exist",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-undefined-when-key-is-invalid",
+        "rawLine": "  it('Should return undefined when key is invalid', () => {",
+        "line": "  it('Should return undefined when key is invalid')",
+        "label": "Should return undefined when key is invalid",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-undefined-when-datastream-is-undefined",
+        "rawLine": "  it('Should return undefined when datastream is undefined', () => {",
+        "line": "  it('Should return undefined when datastream is undefined')",
+        "label": "Should return undefined when datastream is undefined",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-undefined-when-stream-is-undefined",
+        "rawLine": "  it('Should return undefined when stream is undefined', () => {",
+        "line": "  it('Should return undefined when stream is undefined')",
+        "label": "Should return undefined when stream is undefined",
+        "indent": 2,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "should-return-undefined-when-stream.var-is-invalid",
+        "rawLine": "  it('Should return undefined when stream.var is invalid', () => {",
+        "line": "  it('Should return undefined when stream.var is invalid')",
+        "label": "Should return undefined when stream.var is invalid",
         "indent": 2,
         "type": "it",
         "isSkipped": false,
@@ -10228,11 +10683,12 @@
     "tags": [
       "FTR",
       "SERVERLESS",
-      "API INTEGRATION"
+      "API INTEGRATION",
+      "HAS SKIP"
     ],
     "lines": [
       "  describe('GET /internal/cloud_security_posture/status')",
-      "    describe('STATUS = INDEXED TEST')",
+      "    describe.skip('STATUS = INDEXED TEST')",
       "      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`)",
       "      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`)",
       "      it(`Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents`)"
@@ -10250,12 +10706,12 @@
       },
       {
         "id": "status-=-indexed-test",
-        "rawLine": "    describe('STATUS = INDEXED TEST', () => {",
-        "line": "    describe('STATUS = INDEXED TEST')",
+        "rawLine": "    describe.skip('STATUS = INDEXED TEST', () => {",
+        "line": "    describe.skip('STATUS = INDEXED TEST')",
         "label": "STATUS = INDEXED TEST",
         "indent": 4,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -10302,12 +10758,12 @@
         "children": [
           {
             "id": "status-=-indexed-test",
-            "rawLine": "    describe('STATUS = INDEXED TEST', () => {",
-            "line": "    describe('STATUS = INDEXED TEST')",
+            "rawLine": "    describe.skip('STATUS = INDEXED TEST', () => {",
+            "line": "    describe.skip('STATUS = INDEXED TEST')",
             "label": "STATUS = INDEXED TEST",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -10317,7 +10773,7 @@
                 "label": "Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -10327,7 +10783,7 @@
                 "label": "Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -10337,7 +10793,7 @@
                 "label": "Return vuln status indexed when logs-cloud_security_posture.vulnerabilities_latest-default contains new documents",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -12382,10 +12838,11 @@
     "directory": "x-pack/test/cloud_security_posture_api",
     "tags": [
       "FTR",
-      "API INTEGRATION"
+      "API INTEGRATION",
+      "HAS SKIP"
     ],
     "lines": [
-      "  describe('GET /internal/cloud_security_posture/benchmarks')",
+      "  describe.skip('GET /internal/cloud_security_posture/benchmarks')",
       "    describe('Get Benchmark API')",
       "      it('Verify cspm benchmark score is updated when muting rules')",
       "      it('Verify kspm benchmark score is updated when muting rules')"
@@ -12393,12 +12850,12 @@
     "testSuits": [
       {
         "id": "get-/internal/cloud_security_posture/benchmarks",
-        "rawLine": "  describe('GET /internal/cloud_security_posture/benchmarks', () => {",
-        "line": "  describe('GET /internal/cloud_security_posture/benchmarks')",
+        "rawLine": "  describe.skip('GET /internal/cloud_security_posture/benchmarks', () => {",
+        "line": "  describe.skip('GET /internal/cloud_security_posture/benchmarks')",
         "label": "GET /internal/cloud_security_posture/benchmarks",
         "indent": 2,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -12435,12 +12892,12 @@
     "tree": [
       {
         "id": "get-/internal/cloud_security_posture/benchmarks",
-        "rawLine": "  describe('GET /internal/cloud_security_posture/benchmarks', () => {",
-        "line": "  describe('GET /internal/cloud_security_posture/benchmarks')",
+        "rawLine": "  describe.skip('GET /internal/cloud_security_posture/benchmarks', () => {",
+        "line": "  describe.skip('GET /internal/cloud_security_posture/benchmarks')",
         "label": "GET /internal/cloud_security_posture/benchmarks",
         "indent": 2,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false,
         "children": [
           {
@@ -12450,7 +12907,7 @@
             "label": "Get Benchmark API",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -12460,7 +12917,7 @@
                 "label": "Verify cspm benchmark score is updated when muting rules",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -12470,7 +12927,7 @@
                 "label": "Verify kspm benchmark score is updated when muting rules",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -13222,47 +13679,25 @@
     ]
   },
   {
-    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integration.ts",
-    "fileName": "cis_integration.ts",
+    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cnvm/cis_integration_cnvm.ts",
+    "fileName": "cis_integration_cnvm.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
       "FTR"
     ],
     "lines": [
-      "  describe('Test adding Cloud Security Posture Integrations')",
+      "  describe('Test adding Cloud Security Posture Integrations CNVM')",
       "    describe('CNVM AWS')",
       "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
       "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
-      "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
-      "    describe('CIS_AWS')",
-      "      it('Initial form state, AWS Org account, and CloudFormation should be selected by default')",
-      "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
-      "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
-      "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
-      "    describe('CIS_GCP Organization')",
-      "      it('Switch between Manual and Google cloud shell')",
-      "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID or Organization ID provided, it should use default value')",
-      "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value')",
-      "      it('Add Agent FLyout - Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value')",
-      "      it('Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up')",
-      "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
-      "      it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page')",
-      "    describe('CIS_GCP Single')",
-      "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value')",
-      "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID, it should use that value')",
-      "      it('Add Agent FLyout - Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up')",
-      "      it('On add agent modal, if user chose Google Cloud Shell as their setup access; a google cloud shell modal should show up and clicking on the launch button will redirect user to Google cloud shell page')",
-      "      it('Users are able to add CIS_GCP Integration with Manual settings using Credentials File')",
-      "      it('Users are able to switch credentials_type from/to Credential JSON fields ')",
-      "      it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON')",
-      "      it('Users are able to switch credentials_type from/to Credential File fields ')"
+      "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')"
     ],
     "testSuits": [
       {
-        "id": "test-adding-cloud-security-posture-integrations",
-        "rawLine": "  describe('Test adding Cloud Security Posture Integrations', function () {",
-        "line": "  describe('Test adding Cloud Security Posture Integrations')",
-        "label": "Test adding Cloud Security Posture Integrations",
+        "id": "test-adding-cloud-security-posture-integrations-cnvm",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CNVM', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CNVM')",
+        "label": "Test adding Cloud Security Posture Integrations CNVM",
         "indent": 2,
         "type": "describe",
         "isSkipped": false,
@@ -13307,12 +13742,114 @@
         "type": "it",
         "isSkipped": false,
         "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-cnvm",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CNVM', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CNVM')",
+        "label": "Test adding Cloud Security Posture Integrations CNVM",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "cnvm-aws",
+            "rawLine": "    describe('CNVM AWS', () => {",
+            "line": "    describe('CNVM AWS')",
+            "label": "CNVM AWS",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "hyperlink-on-postinstallation-modal-should-have-the-correct-url",
+                "rawLine": "      it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {",
+                "line": "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
+                "label": "Hyperlink on PostInstallation Modal should have the correct URL",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "on-add-agent-modal-there-should-be-modal-that-has-cloud-formation-details-as-well-as-button-that-redirects-user-to-cloud-formation-page-on-aws-upon-clicking-them-",
+                "rawLine": "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {",
+                "line": "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
+                "label": "On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "clicking-on-launch-cloudformation-on-post-intall-modal-should-lead-user-to-cloud-formation-page",
+                "rawLine": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {",
+                "line": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
+                "label": "Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_aws.ts",
+    "fileName": "cis_integration_aws.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Test adding Cloud Security Posture Integrations CSPM AWS')",
+      "    describe('CIS_AWS Organization Cloud Formation')",
+      "      it('Initial form state, AWS Org account, and CloudFormation should be selected by default')",
+      "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
+      "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
+      "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
+      "    describe('CIS_AWS Organization Manual Assume Role')",
+      "      it('CIS_AWS Organization Manual Assume Role Workflow')",
+      "    describe('CIS_AWS Organization Manual Direct Access')",
+      "      it('CIS_AWS Organization Manual Direct Access Workflow')",
+      "    describe('CIS_AWS Organization Manual Temporary Keys')",
+      "      it('CIS_AWS Organization Manual Temporary Keys Workflow')",
+      "    describe('CIS_AWS Organization Manual Shared Access')",
+      "      it('CIS_AWS Organization Manual Shared Access Workflow')",
+      "    describe('CIS_AWS Single Cloud Formation')",
+      "      it('CIS_AWS Single Cloud Formation workflow')",
+      "    describe('CIS_AWS Single Manual Assume Role')",
+      "      it('CIS_AWS Single Manual Assume Role Workflow')",
+      "    describe('CIS_AWS Single Manual Direct Access')",
+      "      it('CIS_AWS Single Manual Direct Access Workflow')",
+      "    describe('CIS_AWS Single Manual Temporary Keys')",
+      "      it('CIS_AWS Single Manual Temporary Keys Workflow')",
+      "    describe('CIS_AWS Single Manual Shared Access')",
+      "      it('CIS_AWS Single Manual Shared Access Workflow')"
+    ],
+    "testSuits": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-cspm-aws",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CSPM AWS')",
+        "label": "Test adding Cloud Security Posture Integrations CSPM AWS",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
       },
       {
-        "id": "cis_aws",
-        "rawLine": "    describe('CIS_AWS', () => {",
-        "line": "    describe('CIS_AWS')",
-        "label": "CIS_AWS",
+        "id": "cis_aws-organization-cloud-formation",
+        "rawLine": "    describe('CIS_AWS Organization Cloud Formation', () => {",
+        "line": "    describe('CIS_AWS Organization Cloud Formation')",
+        "label": "CIS_AWS Organization Cloud Formation",
         "indent": 4,
         "type": "describe",
         "isSkipped": false,
@@ -13355,6 +13892,883 @@
         "label": "Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page",
         "indent": 6,
         "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-organization-manual-assume-role",
+        "rawLine": "    describe('CIS_AWS Organization Manual Assume Role', () => {",
+        "line": "    describe('CIS_AWS Organization Manual Assume Role')",
+        "label": "CIS_AWS Organization Manual Assume Role",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-organization-manual-assume-role-workflow",
+        "rawLine": "      it('CIS_AWS Organization Manual Assume Role Workflow', async () => {",
+        "line": "      it('CIS_AWS Organization Manual Assume Role Workflow')",
+        "label": "CIS_AWS Organization Manual Assume Role Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-organization-manual-direct-access",
+        "rawLine": "    describe('CIS_AWS Organization Manual Direct Access', () => {",
+        "line": "    describe('CIS_AWS Organization Manual Direct Access')",
+        "label": "CIS_AWS Organization Manual Direct Access",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-organization-manual-direct-access-workflow",
+        "rawLine": "      it('CIS_AWS Organization Manual Direct Access Workflow', async () => {",
+        "line": "      it('CIS_AWS Organization Manual Direct Access Workflow')",
+        "label": "CIS_AWS Organization Manual Direct Access Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-organization-manual-temporary-keys",
+        "rawLine": "    describe('CIS_AWS Organization Manual Temporary Keys', () => {",
+        "line": "    describe('CIS_AWS Organization Manual Temporary Keys')",
+        "label": "CIS_AWS Organization Manual Temporary Keys",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-organization-manual-temporary-keys-workflow",
+        "rawLine": "      it('CIS_AWS Organization Manual Temporary Keys Workflow', async () => {",
+        "line": "      it('CIS_AWS Organization Manual Temporary Keys Workflow')",
+        "label": "CIS_AWS Organization Manual Temporary Keys Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-organization-manual-shared-access",
+        "rawLine": "    describe('CIS_AWS Organization Manual Shared Access', () => {",
+        "line": "    describe('CIS_AWS Organization Manual Shared Access')",
+        "label": "CIS_AWS Organization Manual Shared Access",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-organization-manual-shared-access-workflow",
+        "rawLine": "      it('CIS_AWS Organization Manual Shared Access Workflow', async () => {",
+        "line": "      it('CIS_AWS Organization Manual Shared Access Workflow')",
+        "label": "CIS_AWS Organization Manual Shared Access Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-cloud-formation",
+        "rawLine": "    describe('CIS_AWS Single Cloud Formation', () => {",
+        "line": "    describe('CIS_AWS Single Cloud Formation')",
+        "label": "CIS_AWS Single Cloud Formation",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-cloud-formation-workflow",
+        "rawLine": "      it('CIS_AWS Single Cloud Formation workflow', async () => {",
+        "line": "      it('CIS_AWS Single Cloud Formation workflow')",
+        "label": "CIS_AWS Single Cloud Formation workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-manual-assume-role",
+        "rawLine": "    describe('CIS_AWS Single Manual Assume Role', () => {",
+        "line": "    describe('CIS_AWS Single Manual Assume Role')",
+        "label": "CIS_AWS Single Manual Assume Role",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-manual-assume-role-workflow",
+        "rawLine": "      it('CIS_AWS Single Manual Assume Role Workflow', async () => {",
+        "line": "      it('CIS_AWS Single Manual Assume Role Workflow')",
+        "label": "CIS_AWS Single Manual Assume Role Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-manual-direct-access",
+        "rawLine": "    describe('CIS_AWS Single Manual Direct Access', () => {",
+        "line": "    describe('CIS_AWS Single Manual Direct Access')",
+        "label": "CIS_AWS Single Manual Direct Access",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-manual-direct-access-workflow",
+        "rawLine": "      it('CIS_AWS Single Manual Direct Access Workflow', async () => {",
+        "line": "      it('CIS_AWS Single Manual Direct Access Workflow')",
+        "label": "CIS_AWS Single Manual Direct Access Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-manual-temporary-keys",
+        "rawLine": "    describe('CIS_AWS Single Manual Temporary Keys', () => {",
+        "line": "    describe('CIS_AWS Single Manual Temporary Keys')",
+        "label": "CIS_AWS Single Manual Temporary Keys",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-manual-temporary-keys-workflow",
+        "rawLine": "      it('CIS_AWS Single Manual Temporary Keys Workflow', async () => {",
+        "line": "      it('CIS_AWS Single Manual Temporary Keys Workflow')",
+        "label": "CIS_AWS Single Manual Temporary Keys Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-manual-shared-access",
+        "rawLine": "    describe('CIS_AWS Single Manual Shared Access', () => {",
+        "line": "    describe('CIS_AWS Single Manual Shared Access')",
+        "label": "CIS_AWS Single Manual Shared Access",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_aws-single-manual-shared-access-workflow",
+        "rawLine": "      it('CIS_AWS Single Manual Shared Access Workflow', async () => {",
+        "line": "      it('CIS_AWS Single Manual Shared Access Workflow')",
+        "label": "CIS_AWS Single Manual Shared Access Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-cspm-aws",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CSPM AWS')",
+        "label": "Test adding Cloud Security Posture Integrations CSPM AWS",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "cis_aws-organization-cloud-formation",
+            "rawLine": "    describe('CIS_AWS Organization Cloud Formation', () => {",
+            "line": "    describe('CIS_AWS Organization Cloud Formation')",
+            "label": "CIS_AWS Organization Cloud Formation",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "initial-form-state,-aws-org-account,-and-cloudformation-should-be-selected-by-default",
+                "rawLine": "      it('Initial form state, AWS Org account, and CloudFormation should be selected by default', async () => {",
+                "line": "      it('Initial form state, AWS Org account, and CloudFormation should be selected by default')",
+                "label": "Initial form state, AWS Org account, and CloudFormation should be selected by default",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "hyperlink-on-postinstallation-modal-should-have-the-correct-url",
+                "rawLine": "      it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {",
+                "line": "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
+                "label": "Hyperlink on PostInstallation Modal should have the correct URL",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "on-add-agent-modal-there-should-be-modal-that-has-cloud-formation-details-as-well-as-button-that-redirects-user-to-cloud-formation-page-on-aws-upon-clicking-them-",
+                "rawLine": "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {",
+                "line": "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
+                "label": "On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              },
+              {
+                "id": "clicking-on-launch-cloudformation-on-post-intall-modal-should-lead-user-to-cloud-formation-page",
+                "rawLine": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {",
+                "line": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
+                "label": "Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-organization-manual-assume-role",
+            "rawLine": "    describe('CIS_AWS Organization Manual Assume Role', () => {",
+            "line": "    describe('CIS_AWS Organization Manual Assume Role')",
+            "label": "CIS_AWS Organization Manual Assume Role",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-organization-manual-assume-role-workflow",
+                "rawLine": "      it('CIS_AWS Organization Manual Assume Role Workflow', async () => {",
+                "line": "      it('CIS_AWS Organization Manual Assume Role Workflow')",
+                "label": "CIS_AWS Organization Manual Assume Role Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-organization-manual-direct-access",
+            "rawLine": "    describe('CIS_AWS Organization Manual Direct Access', () => {",
+            "line": "    describe('CIS_AWS Organization Manual Direct Access')",
+            "label": "CIS_AWS Organization Manual Direct Access",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-organization-manual-direct-access-workflow",
+                "rawLine": "      it('CIS_AWS Organization Manual Direct Access Workflow', async () => {",
+                "line": "      it('CIS_AWS Organization Manual Direct Access Workflow')",
+                "label": "CIS_AWS Organization Manual Direct Access Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-organization-manual-temporary-keys",
+            "rawLine": "    describe('CIS_AWS Organization Manual Temporary Keys', () => {",
+            "line": "    describe('CIS_AWS Organization Manual Temporary Keys')",
+            "label": "CIS_AWS Organization Manual Temporary Keys",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-organization-manual-temporary-keys-workflow",
+                "rawLine": "      it('CIS_AWS Organization Manual Temporary Keys Workflow', async () => {",
+                "line": "      it('CIS_AWS Organization Manual Temporary Keys Workflow')",
+                "label": "CIS_AWS Organization Manual Temporary Keys Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-organization-manual-shared-access",
+            "rawLine": "    describe('CIS_AWS Organization Manual Shared Access', () => {",
+            "line": "    describe('CIS_AWS Organization Manual Shared Access')",
+            "label": "CIS_AWS Organization Manual Shared Access",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-organization-manual-shared-access-workflow",
+                "rawLine": "      it('CIS_AWS Organization Manual Shared Access Workflow', async () => {",
+                "line": "      it('CIS_AWS Organization Manual Shared Access Workflow')",
+                "label": "CIS_AWS Organization Manual Shared Access Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-single-cloud-formation",
+            "rawLine": "    describe('CIS_AWS Single Cloud Formation', () => {",
+            "line": "    describe('CIS_AWS Single Cloud Formation')",
+            "label": "CIS_AWS Single Cloud Formation",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-single-cloud-formation-workflow",
+                "rawLine": "      it('CIS_AWS Single Cloud Formation workflow', async () => {",
+                "line": "      it('CIS_AWS Single Cloud Formation workflow')",
+                "label": "CIS_AWS Single Cloud Formation workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-single-manual-assume-role",
+            "rawLine": "    describe('CIS_AWS Single Manual Assume Role', () => {",
+            "line": "    describe('CIS_AWS Single Manual Assume Role')",
+            "label": "CIS_AWS Single Manual Assume Role",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-single-manual-assume-role-workflow",
+                "rawLine": "      it('CIS_AWS Single Manual Assume Role Workflow', async () => {",
+                "line": "      it('CIS_AWS Single Manual Assume Role Workflow')",
+                "label": "CIS_AWS Single Manual Assume Role Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-single-manual-direct-access",
+            "rawLine": "    describe('CIS_AWS Single Manual Direct Access', () => {",
+            "line": "    describe('CIS_AWS Single Manual Direct Access')",
+            "label": "CIS_AWS Single Manual Direct Access",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-single-manual-direct-access-workflow",
+                "rawLine": "      it('CIS_AWS Single Manual Direct Access Workflow', async () => {",
+                "line": "      it('CIS_AWS Single Manual Direct Access Workflow')",
+                "label": "CIS_AWS Single Manual Direct Access Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-single-manual-temporary-keys",
+            "rawLine": "    describe('CIS_AWS Single Manual Temporary Keys', () => {",
+            "line": "    describe('CIS_AWS Single Manual Temporary Keys')",
+            "label": "CIS_AWS Single Manual Temporary Keys",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-single-manual-temporary-keys-workflow",
+                "rawLine": "      it('CIS_AWS Single Manual Temporary Keys Workflow', async () => {",
+                "line": "      it('CIS_AWS Single Manual Temporary Keys Workflow')",
+                "label": "CIS_AWS Single Manual Temporary Keys Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_aws-single-manual-shared-access",
+            "rawLine": "    describe('CIS_AWS Single Manual Shared Access', () => {",
+            "line": "    describe('CIS_AWS Single Manual Shared Access')",
+            "label": "CIS_AWS Single Manual Shared Access",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_aws-single-manual-shared-access-workflow",
+                "rawLine": "      it('CIS_AWS Single Manual Shared Access Workflow', async () => {",
+                "line": "      it('CIS_AWS Single Manual Shared Access Workflow')",
+                "label": "CIS_AWS Single Manual Shared Access Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_azure.ts",
+    "fileName": "cis_integration_azure.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Test adding Cloud Security Posture Integrations CSPM AZURE')",
+      "    describe('Azure Organization ARM Template')",
+      "      it('Azure Organization ARM Template Workflow')",
+      "    describe('Azure Organization Manual Managed Identity')",
+      "      it('Azure Organization Manual Workflow')",
+      "    describe('Azure Organization Manual Service Principle with Client Secret')",
+      "      it('Azure Organization Manual Service Principle with Client Secret Workflow')",
+      "    describe('Azure Organization Manual Service Principle with Client Certificate')",
+      "      it('Azure Organization Manual Service Principle with Client Certificate Workflow')",
+      "    describe('Azure Single ARM Template')",
+      "      it('Azure Single ARM Template Workflow')",
+      "    describe('Azure Single Manual Managed Identity')",
+      "      it('Azure Single Manual Workflow')",
+      "    describe('Azure Single Manual Service Principle with Client Secret')",
+      "      it('Azure Single Manual Service Principle with Client Secret Workflow')",
+      "    describe('Azure Single Manual Service Principle with Client Certificate')",
+      "      it('Azure Single Manual Service Principle with Client Certificate Workflow')"
+    ],
+    "testSuits": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-cspm-azure",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CSPM AZURE')",
+        "label": "Test adding Cloud Security Posture Integrations CSPM AZURE",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-organization-arm-template",
+        "rawLine": "    describe('Azure Organization ARM Template', () => {",
+        "line": "    describe('Azure Organization ARM Template')",
+        "label": "Azure Organization ARM Template",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-organization-arm-template-workflow",
+        "rawLine": "      it('Azure Organization ARM Template Workflow', async () => {",
+        "line": "      it('Azure Organization ARM Template Workflow')",
+        "label": "Azure Organization ARM Template Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-organization-manual-managed-identity",
+        "rawLine": "    describe('Azure Organization Manual Managed Identity', () => {",
+        "line": "    describe('Azure Organization Manual Managed Identity')",
+        "label": "Azure Organization Manual Managed Identity",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-organization-manual-workflow",
+        "rawLine": "      it('Azure Organization Manual Workflow', async () => {",
+        "line": "      it('Azure Organization Manual Workflow')",
+        "label": "Azure Organization Manual Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-organization-manual-service-principle-with-client-secret",
+        "rawLine": "    describe('Azure Organization Manual Service Principle with Client Secret', () => {",
+        "line": "    describe('Azure Organization Manual Service Principle with Client Secret')",
+        "label": "Azure Organization Manual Service Principle with Client Secret",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-organization-manual-service-principle-with-client-secret-workflow",
+        "rawLine": "      it('Azure Organization Manual Service Principle with Client Secret Workflow', async () => {",
+        "line": "      it('Azure Organization Manual Service Principle with Client Secret Workflow')",
+        "label": "Azure Organization Manual Service Principle with Client Secret Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-organization-manual-service-principle-with-client-certificate",
+        "rawLine": "    describe('Azure Organization Manual Service Principle with Client Certificate', () => {",
+        "line": "    describe('Azure Organization Manual Service Principle with Client Certificate')",
+        "label": "Azure Organization Manual Service Principle with Client Certificate",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-organization-manual-service-principle-with-client-certificate-workflow",
+        "rawLine": "      it('Azure Organization Manual Service Principle with Client Certificate Workflow', async () => {",
+        "line": "      it('Azure Organization Manual Service Principle with Client Certificate Workflow')",
+        "label": "Azure Organization Manual Service Principle with Client Certificate Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-single-arm-template",
+        "rawLine": "    describe('Azure Single ARM Template', () => {",
+        "line": "    describe('Azure Single ARM Template')",
+        "label": "Azure Single ARM Template",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-single-arm-template-workflow",
+        "rawLine": "      it('Azure Single ARM Template Workflow', async () => {",
+        "line": "      it('Azure Single ARM Template Workflow')",
+        "label": "Azure Single ARM Template Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-single-manual-managed-identity",
+        "rawLine": "    describe('Azure Single Manual Managed Identity', () => {",
+        "line": "    describe('Azure Single Manual Managed Identity')",
+        "label": "Azure Single Manual Managed Identity",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-single-manual-workflow",
+        "rawLine": "      it('Azure Single Manual Workflow', async () => {",
+        "line": "      it('Azure Single Manual Workflow')",
+        "label": "Azure Single Manual Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-single-manual-service-principle-with-client-secret",
+        "rawLine": "    describe('Azure Single Manual Service Principle with Client Secret', () => {",
+        "line": "    describe('Azure Single Manual Service Principle with Client Secret')",
+        "label": "Azure Single Manual Service Principle with Client Secret",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-single-manual-service-principle-with-client-secret-workflow",
+        "rawLine": "      it('Azure Single Manual Service Principle with Client Secret Workflow', async () => {",
+        "line": "      it('Azure Single Manual Service Principle with Client Secret Workflow')",
+        "label": "Azure Single Manual Service Principle with Client Secret Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-single-manual-service-principle-with-client-certificate",
+        "rawLine": "    describe('Azure Single Manual Service Principle with Client Certificate', () => {",
+        "line": "    describe('Azure Single Manual Service Principle with Client Certificate')",
+        "label": "Azure Single Manual Service Principle with Client Certificate",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "azure-single-manual-service-principle-with-client-certificate-workflow",
+        "rawLine": "      it('Azure Single Manual Service Principle with Client Certificate Workflow', async () => {",
+        "line": "      it('Azure Single Manual Service Principle with Client Certificate Workflow')",
+        "label": "Azure Single Manual Service Principle with Client Certificate Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-cspm-azure",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CSPM AZURE', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CSPM AZURE')",
+        "label": "Test adding Cloud Security Posture Integrations CSPM AZURE",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "azure-organization-arm-template",
+            "rawLine": "    describe('Azure Organization ARM Template', () => {",
+            "line": "    describe('Azure Organization ARM Template')",
+            "label": "Azure Organization ARM Template",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "azure-organization-arm-template-workflow",
+                "rawLine": "      it('Azure Organization ARM Template Workflow', async () => {",
+                "line": "      it('Azure Organization ARM Template Workflow')",
+                "label": "Azure Organization ARM Template Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "azure-organization-manual-managed-identity",
+            "rawLine": "    describe('Azure Organization Manual Managed Identity', () => {",
+            "line": "    describe('Azure Organization Manual Managed Identity')",
+            "label": "Azure Organization Manual Managed Identity",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "azure-organization-manual-workflow",
+                "rawLine": "      it('Azure Organization Manual Workflow', async () => {",
+                "line": "      it('Azure Organization Manual Workflow')",
+                "label": "Azure Organization Manual Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "azure-organization-manual-service-principle-with-client-secret",
+            "rawLine": "    describe('Azure Organization Manual Service Principle with Client Secret', () => {",
+            "line": "    describe('Azure Organization Manual Service Principle with Client Secret')",
+            "label": "Azure Organization Manual Service Principle with Client Secret",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "azure-organization-manual-service-principle-with-client-secret-workflow",
+                "rawLine": "      it('Azure Organization Manual Service Principle with Client Secret Workflow', async () => {",
+                "line": "      it('Azure Organization Manual Service Principle with Client Secret Workflow')",
+                "label": "Azure Organization Manual Service Principle with Client Secret Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "azure-organization-manual-service-principle-with-client-certificate",
+            "rawLine": "    describe('Azure Organization Manual Service Principle with Client Certificate', () => {",
+            "line": "    describe('Azure Organization Manual Service Principle with Client Certificate')",
+            "label": "Azure Organization Manual Service Principle with Client Certificate",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "azure-organization-manual-service-principle-with-client-certificate-workflow",
+                "rawLine": "      it('Azure Organization Manual Service Principle with Client Certificate Workflow', async () => {",
+                "line": "      it('Azure Organization Manual Service Principle with Client Certificate Workflow')",
+                "label": "Azure Organization Manual Service Principle with Client Certificate Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "azure-single-arm-template",
+            "rawLine": "    describe('Azure Single ARM Template', () => {",
+            "line": "    describe('Azure Single ARM Template')",
+            "label": "Azure Single ARM Template",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "azure-single-arm-template-workflow",
+                "rawLine": "      it('Azure Single ARM Template Workflow', async () => {",
+                "line": "      it('Azure Single ARM Template Workflow')",
+                "label": "Azure Single ARM Template Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "azure-single-manual-managed-identity",
+            "rawLine": "    describe('Azure Single Manual Managed Identity', () => {",
+            "line": "    describe('Azure Single Manual Managed Identity')",
+            "label": "Azure Single Manual Managed Identity",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "azure-single-manual-workflow",
+                "rawLine": "      it('Azure Single Manual Workflow', async () => {",
+                "line": "      it('Azure Single Manual Workflow')",
+                "label": "Azure Single Manual Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "azure-single-manual-service-principle-with-client-secret",
+            "rawLine": "    describe('Azure Single Manual Service Principle with Client Secret', () => {",
+            "line": "    describe('Azure Single Manual Service Principle with Client Secret')",
+            "label": "Azure Single Manual Service Principle with Client Secret",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "azure-single-manual-service-principle-with-client-secret-workflow",
+                "rawLine": "      it('Azure Single Manual Service Principle with Client Secret Workflow', async () => {",
+                "line": "      it('Azure Single Manual Service Principle with Client Secret Workflow')",
+                "label": "Azure Single Manual Service Principle with Client Secret Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "azure-single-manual-service-principle-with-client-certificate",
+            "rawLine": "    describe('Azure Single Manual Service Principle with Client Certificate', () => {",
+            "line": "    describe('Azure Single Manual Service Principle with Client Certificate')",
+            "label": "Azure Single Manual Service Principle with Client Certificate",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "azure-single-manual-service-principle-with-client-certificate-workflow",
+                "rawLine": "      it('Azure Single Manual Service Principle with Client Certificate Workflow', async () => {",
+                "line": "      it('Azure Single Manual Service Principle with Client Certificate Workflow')",
+                "label": "Azure Single Manual Service Principle with Client Certificate Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/cspm/cis_integration_gcp.ts",
+    "fileName": "cis_integration_gcp.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Test adding Cloud Security Posture Integrations CSPM GCP')",
+      "    describe('CIS_GCP Organization')",
+      "      it('Switch between Manual and Google cloud shell')",
+      "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID or Organization ID provided, it should use default value')",
+      "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value')",
+      "      it('Add Agent FLyout - Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID or Organization ID provided, it should use that value')",
+      "      it('Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up')",
+      "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
+      "      it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page')",
+      "    describe('CIS_GCP Organization Credentials File')",
+      "      it('CIS_GCP Organization Credentials File workflow')",
+      "    describe('CIS_GCP Organization Credentials JSON')",
+      "      it('CIS_GCP Organization Credentials JSON workflow')",
+      "    describe('CIS_GCP Single')",
+      "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value')",
+      "      it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are Project ID, it should use that value')",
+      "      it('Add Agent FLyout - Organization ID field on cloud shell command should only be shown if user chose Google Cloud Shell, if user chose Single Account it shouldn not show up')",
+      "      it('On add agent modal, if user chose Google Cloud Shell as their setup access; a google cloud shell modal should show up and clicking on the launch button will redirect user to Google cloud shell page')",
+      "      it('Users are able to add CIS_GCP Integration with Manual settings using Credentials File')",
+      "      it('Users are able to switch credentials_type from/to Credential JSON fields ')",
+      "      it('Users are able to add CIS_GCP Integration with Manual settings using Credentials JSON')",
+      "      it('Users are able to switch credentials_type from/to Credential File fields ')"
+    ],
+    "testSuits": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-cspm-gcp",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CSPM GCP')",
+        "label": "Test adding Cloud Security Posture Integrations CSPM GCP",
+        "indent": 2,
+        "type": "describe",
         "isSkipped": false,
         "isTodo": false
       },
@@ -13433,6 +14847,46 @@
         "rawLine": "      it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page', async () => {",
         "line": "      it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page')",
         "label": "Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_gcp-organization-credentials-file",
+        "rawLine": "    describe('CIS_GCP Organization Credentials File', () => {",
+        "line": "    describe('CIS_GCP Organization Credentials File')",
+        "label": "CIS_GCP Organization Credentials File",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_gcp-organization-credentials-file-workflow",
+        "rawLine": "      it('CIS_GCP Organization Credentials File workflow', async () => {",
+        "line": "      it('CIS_GCP Organization Credentials File workflow')",
+        "label": "CIS_GCP Organization Credentials File workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_gcp-organization-credentials-json",
+        "rawLine": "    describe('CIS_GCP Organization Credentials JSON', () => {",
+        "line": "    describe('CIS_GCP Organization Credentials JSON')",
+        "label": "CIS_GCP Organization Credentials JSON",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "cis_gcp-organization-credentials-json-workflow",
+        "rawLine": "      it('CIS_GCP Organization Credentials JSON workflow', async () => {",
+        "line": "      it('CIS_GCP Organization Credentials JSON workflow')",
+        "label": "CIS_GCP Organization Credentials JSON workflow",
         "indent": 6,
         "type": "it",
         "isSkipped": false,
@@ -13531,109 +14985,15 @@
     ],
     "tree": [
       {
-        "id": "test-adding-cloud-security-posture-integrations",
-        "rawLine": "  describe('Test adding Cloud Security Posture Integrations', function () {",
-        "line": "  describe('Test adding Cloud Security Posture Integrations')",
-        "label": "Test adding Cloud Security Posture Integrations",
+        "id": "test-adding-cloud-security-posture-integrations-cspm-gcp",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations CSPM GCP', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations CSPM GCP')",
+        "label": "Test adding Cloud Security Posture Integrations CSPM GCP",
         "indent": 2,
         "type": "describe",
         "isSkipped": false,
         "isTodo": false,
         "children": [
-          {
-            "id": "cnvm-aws",
-            "rawLine": "    describe('CNVM AWS', () => {",
-            "line": "    describe('CNVM AWS')",
-            "label": "CNVM AWS",
-            "indent": 4,
-            "type": "describe",
-            "isSkipped": false,
-            "isTodo": false,
-            "children": [
-              {
-                "id": "hyperlink-on-postinstallation-modal-should-have-the-correct-url",
-                "rawLine": "      it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {",
-                "line": "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
-                "label": "Hyperlink on PostInstallation Modal should have the correct URL",
-                "indent": 6,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
-                "id": "on-add-agent-modal-there-should-be-modal-that-has-cloud-formation-details-as-well-as-button-that-redirects-user-to-cloud-formation-page-on-aws-upon-clicking-them-",
-                "rawLine": "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {",
-                "line": "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
-                "label": "On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ",
-                "indent": 6,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
-                "id": "clicking-on-launch-cloudformation-on-post-intall-modal-should-lead-user-to-cloud-formation-page",
-                "rawLine": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {",
-                "line": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
-                "label": "Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page",
-                "indent": 6,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              }
-            ]
-          },
-          {
-            "id": "cis_aws",
-            "rawLine": "    describe('CIS_AWS', () => {",
-            "line": "    describe('CIS_AWS')",
-            "label": "CIS_AWS",
-            "indent": 4,
-            "type": "describe",
-            "isSkipped": false,
-            "isTodo": false,
-            "children": [
-              {
-                "id": "initial-form-state,-aws-org-account,-and-cloudformation-should-be-selected-by-default",
-                "rawLine": "      it('Initial form state, AWS Org account, and CloudFormation should be selected by default', async () => {",
-                "line": "      it('Initial form state, AWS Org account, and CloudFormation should be selected by default')",
-                "label": "Initial form state, AWS Org account, and CloudFormation should be selected by default",
-                "indent": 6,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
-                "id": "hyperlink-on-postinstallation-modal-should-have-the-correct-url",
-                "rawLine": "      it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {",
-                "line": "      it('Hyperlink on PostInstallation Modal should have the correct URL')",
-                "label": "Hyperlink on PostInstallation Modal should have the correct URL",
-                "indent": 6,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
-                "id": "on-add-agent-modal-there-should-be-modal-that-has-cloud-formation-details-as-well-as-button-that-redirects-user-to-cloud-formation-page-on-aws-upon-clicking-them-",
-                "rawLine": "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {",
-                "line": "      it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ')",
-                "label": "On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ",
-                "indent": 6,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              },
-              {
-                "id": "clicking-on-launch-cloudformation-on-post-intall-modal-should-lead-user-to-cloud-formation-page",
-                "rawLine": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {",
-                "line": "      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page')",
-                "label": "Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page",
-                "indent": 6,
-                "type": "it",
-                "isSkipped": false,
-                "isTodo": false
-              }
-            ]
-          },
           {
             "id": "cis_gcp-organization",
             "rawLine": "    describe('CIS_GCP Organization', () => {",
@@ -13709,6 +15069,50 @@
                 "rawLine": "      it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page', async () => {",
                 "line": "      it('Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page')",
                 "label": "Clicking on Launch CloudShell on post intall modal should lead user to CloudShell page",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_gcp-organization-credentials-file",
+            "rawLine": "    describe('CIS_GCP Organization Credentials File', () => {",
+            "line": "    describe('CIS_GCP Organization Credentials File')",
+            "label": "CIS_GCP Organization Credentials File",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_gcp-organization-credentials-file-workflow",
+                "rawLine": "      it('CIS_GCP Organization Credentials File workflow', async () => {",
+                "line": "      it('CIS_GCP Organization Credentials File workflow')",
+                "label": "CIS_GCP Organization Credentials File workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "cis_gcp-organization-credentials-json",
+            "rawLine": "    describe('CIS_GCP Organization Credentials JSON', () => {",
+            "line": "    describe('CIS_GCP Organization Credentials JSON')",
+            "label": "CIS_GCP Organization Credentials JSON",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "cis_gcp-organization-credentials-json-workflow",
+                "rawLine": "      it('CIS_GCP Organization Credentials JSON workflow', async () => {",
+                "line": "      it('CIS_GCP Organization Credentials JSON workflow')",
+                "label": "CIS_GCP Organization Credentials JSON workflow",
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
@@ -13801,6 +15205,300 @@
                 "rawLine": "      it('Users are able to switch credentials_type from/to Credential File fields ', async () => {",
                 "line": "      it('Users are able to switch credentials_type from/to Credential File fields ')",
                 "label": "Users are able to switch credentials_type from/to Credential File fields ",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_eks.ts",
+    "fileName": "cis_integration_eks.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Test adding Cloud Security Posture Integrations KSPM EKS')",
+      "    describe('KSPM EKS Assume Role')",
+      "      it('KSPM EKS Assume Role workflow')",
+      "    describe('KSPM EKS Direct Access')",
+      "      it('KSPM EKS Direct Access Workflow')",
+      "    describe('KSPM EKS Temporary Keys')",
+      "      it('KSPM EKS Temporary Keys Workflow')",
+      "    describe('KSPM EKS Shared Credentials')",
+      "      it('KSPM EKS Shared Credentials Workflow')"
+    ],
+    "testSuits": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-kspm-eks",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations KSPM EKS', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations KSPM EKS')",
+        "label": "Test adding Cloud Security Posture Integrations KSPM EKS",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-eks-assume-role",
+        "rawLine": "    describe('KSPM EKS Assume Role', async () => {",
+        "line": "    describe('KSPM EKS Assume Role')",
+        "label": "KSPM EKS Assume Role",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-eks-assume-role-workflow",
+        "rawLine": "      it('KSPM EKS Assume Role workflow', async () => {",
+        "line": "      it('KSPM EKS Assume Role workflow')",
+        "label": "KSPM EKS Assume Role workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-eks-direct-access",
+        "rawLine": "    describe('KSPM EKS Direct Access', async () => {",
+        "line": "    describe('KSPM EKS Direct Access')",
+        "label": "KSPM EKS Direct Access",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-eks-direct-access-workflow",
+        "rawLine": "      it('KSPM EKS Direct Access Workflow', async () => {",
+        "line": "      it('KSPM EKS Direct Access Workflow')",
+        "label": "KSPM EKS Direct Access Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-eks-temporary-keys",
+        "rawLine": "    describe('KSPM EKS Temporary Keys', () => {",
+        "line": "    describe('KSPM EKS Temporary Keys')",
+        "label": "KSPM EKS Temporary Keys",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-eks-temporary-keys-workflow",
+        "rawLine": "      it('KSPM EKS Temporary Keys Workflow', async () => {",
+        "line": "      it('KSPM EKS Temporary Keys Workflow')",
+        "label": "KSPM EKS Temporary Keys Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-eks-shared-credentials",
+        "rawLine": "    describe('KSPM EKS Shared Credentials', () => {",
+        "line": "    describe('KSPM EKS Shared Credentials')",
+        "label": "KSPM EKS Shared Credentials",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-eks-shared-credentials-workflow",
+        "rawLine": "      it('KSPM EKS Shared Credentials Workflow', async () => {",
+        "line": "      it('KSPM EKS Shared Credentials Workflow')",
+        "label": "KSPM EKS Shared Credentials Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-kspm-eks",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations KSPM EKS', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations KSPM EKS')",
+        "label": "Test adding Cloud Security Posture Integrations KSPM EKS",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "kspm-eks-assume-role",
+            "rawLine": "    describe('KSPM EKS Assume Role', async () => {",
+            "line": "    describe('KSPM EKS Assume Role')",
+            "label": "KSPM EKS Assume Role",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "kspm-eks-assume-role-workflow",
+                "rawLine": "      it('KSPM EKS Assume Role workflow', async () => {",
+                "line": "      it('KSPM EKS Assume Role workflow')",
+                "label": "KSPM EKS Assume Role workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "kspm-eks-direct-access",
+            "rawLine": "    describe('KSPM EKS Direct Access', async () => {",
+            "line": "    describe('KSPM EKS Direct Access')",
+            "label": "KSPM EKS Direct Access",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "kspm-eks-direct-access-workflow",
+                "rawLine": "      it('KSPM EKS Direct Access Workflow', async () => {",
+                "line": "      it('KSPM EKS Direct Access Workflow')",
+                "label": "KSPM EKS Direct Access Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "kspm-eks-temporary-keys",
+            "rawLine": "    describe('KSPM EKS Temporary Keys', () => {",
+            "line": "    describe('KSPM EKS Temporary Keys')",
+            "label": "KSPM EKS Temporary Keys",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "kspm-eks-temporary-keys-workflow",
+                "rawLine": "      it('KSPM EKS Temporary Keys Workflow', async () => {",
+                "line": "      it('KSPM EKS Temporary Keys Workflow')",
+                "label": "KSPM EKS Temporary Keys Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          },
+          {
+            "id": "kspm-eks-shared-credentials",
+            "rawLine": "    describe('KSPM EKS Shared Credentials', () => {",
+            "line": "    describe('KSPM EKS Shared Credentials')",
+            "label": "KSPM EKS Shared Credentials",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "kspm-eks-shared-credentials-workflow",
+                "rawLine": "      it('KSPM EKS Shared Credentials Workflow', async () => {",
+                "line": "      it('KSPM EKS Shared Credentials Workflow')",
+                "label": "KSPM EKS Shared Credentials Workflow",
+                "indent": 6,
+                "type": "it",
+                "isSkipped": false,
+                "isTodo": false
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "filePath": "x-pack/test/cloud_security_posture_functional/pages/cis_integrations/kspm/cis_integration_k8s.ts",
+    "fileName": "cis_integration_k8s.ts",
+    "directory": "x-pack/test/cloud_security_posture_functional",
+    "tags": [
+      "FTR"
+    ],
+    "lines": [
+      "  describe('Test adding Cloud Security Posture Integrations KSPM K8S')",
+      "    describe('KSPM K8S')",
+      "      it('KSPM K8S Workflow')"
+    ],
+    "testSuits": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-kspm-k8s",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations KSPM K8S', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations KSPM K8S')",
+        "label": "Test adding Cloud Security Posture Integrations KSPM K8S",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-k8s",
+        "rawLine": "    describe('KSPM K8S', () => {",
+        "line": "    describe('KSPM K8S')",
+        "label": "KSPM K8S",
+        "indent": 4,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false
+      },
+      {
+        "id": "kspm-k8s-workflow",
+        "rawLine": "      it('KSPM K8S Workflow', async () => {",
+        "line": "      it('KSPM K8S Workflow')",
+        "label": "KSPM K8S Workflow",
+        "indent": 6,
+        "type": "it",
+        "isSkipped": false,
+        "isTodo": false
+      }
+    ],
+    "tree": [
+      {
+        "id": "test-adding-cloud-security-posture-integrations-kspm-k8s",
+        "rawLine": "  describe('Test adding Cloud Security Posture Integrations KSPM K8S', function () {",
+        "line": "  describe('Test adding Cloud Security Posture Integrations KSPM K8S')",
+        "label": "Test adding Cloud Security Posture Integrations KSPM K8S",
+        "indent": 2,
+        "type": "describe",
+        "isSkipped": false,
+        "isTodo": false,
+        "children": [
+          {
+            "id": "kspm-k8s",
+            "rawLine": "    describe('KSPM K8S', () => {",
+            "line": "    describe('KSPM K8S')",
+            "label": "KSPM K8S",
+            "indent": 4,
+            "type": "describe",
+            "isSkipped": false,
+            "isTodo": false,
+            "children": [
+              {
+                "id": "kspm-k8s-workflow",
+                "rawLine": "      it('KSPM K8S Workflow', async () => {",
+                "line": "      it('KSPM K8S Workflow')",
+                "label": "KSPM K8S Workflow",
                 "indent": 6,
                 "type": "it",
                 "isSkipped": false,
@@ -13943,11 +15641,12 @@
     "fileName": "findings_alerts.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
-      "FTR"
+      "FTR",
+      "HAS SKIP"
     ],
     "lines": [
       "  describe('Findings Page - Alerts')",
-      "    describe('Create detection rule')",
+      "    describe.skip('Create detection rule')",
       "      it('Creates a detection rule from the Take Action button and navigates to rule page')",
       "      it('Creates a detection rule from the Alerts section and navigates to rule page')",
       "    describe('Rule details')",
@@ -13969,12 +15668,12 @@
       },
       {
         "id": "create-detection-rule",
-        "rawLine": "    describe('Create detection rule', () => {",
-        "line": "    describe('Create detection rule')",
+        "rawLine": "    describe.skip('Create detection rule', () => {",
+        "line": "    describe.skip('Create detection rule')",
         "label": "Create detection rule",
         "indent": 4,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -14061,12 +15760,12 @@
         "children": [
           {
             "id": "create-detection-rule",
-            "rawLine": "    describe('Create detection rule', () => {",
-            "line": "    describe('Create detection rule')",
+            "rawLine": "    describe.skip('Create detection rule', () => {",
+            "line": "    describe.skip('Create detection rule')",
             "label": "Create detection rule",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -14076,7 +15775,7 @@
                 "label": "Creates a detection rule from the Take Action button and navigates to rule page",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -14086,7 +15785,7 @@
                 "label": "Creates a detection rule from the Alerts section and navigates to rule page",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -15095,10 +16794,11 @@
     "fileName": "rules.ts",
     "directory": "x-pack/test/cloud_security_posture_functional",
     "tags": [
-      "FTR"
+      "FTR",
+      "HAS SKIP"
     ],
     "lines": [
-      "  describe('Cloud Posture Rules Page')",
+      "  describe.skip('Cloud Posture Rules Page')",
       "    describe('Rules Page - Rules Counters')",
       "      it('Shows posture score when there are findings')",
       "      it('Clicking the posture score button leads to the dashboard')",
@@ -15130,12 +16830,12 @@
     "testSuits": [
       {
         "id": "cloud-posture-rules-page",
-        "rawLine": "  describe('Cloud Posture Rules Page', function () {",
-        "line": "  describe('Cloud Posture Rules Page')",
+        "rawLine": "  describe.skip('Cloud Posture Rules Page', function () {",
+        "line": "  describe.skip('Cloud Posture Rules Page')",
         "label": "Cloud Posture Rules Page",
         "indent": 2,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false
       },
       {
@@ -15412,12 +17112,12 @@
     "tree": [
       {
         "id": "cloud-posture-rules-page",
-        "rawLine": "  describe('Cloud Posture Rules Page', function () {",
-        "line": "  describe('Cloud Posture Rules Page')",
+        "rawLine": "  describe.skip('Cloud Posture Rules Page', function () {",
+        "line": "  describe.skip('Cloud Posture Rules Page')",
         "label": "Cloud Posture Rules Page",
         "indent": 2,
         "type": "describe",
-        "isSkipped": false,
+        "isSkipped": true,
         "isTodo": false,
         "children": [
           {
@@ -15427,7 +17127,7 @@
             "label": "Rules Page - Rules Counters",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -15437,7 +17137,7 @@
                 "label": "Shows posture score when there are findings",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15447,7 +17147,7 @@
                 "label": "Clicking the posture score button leads to the dashboard",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15457,7 +17157,7 @@
                 "label": "Shows integrations count when there are findings",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15467,7 +17167,7 @@
                 "label": "Clicking the integrations counter button leads to the integration page",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15477,7 +17177,7 @@
                 "label": "Shows the failed findings counter when there are findings",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15487,7 +17187,7 @@
                 "label": "Clicking the failed findings button leads to the findings page",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15497,7 +17197,7 @@
                 "label": "Shows the disabled rules count",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15507,7 +17207,7 @@
                 "label": "Clicking the disabled rules button shows enables the disabled filter",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15517,7 +17217,7 @@
                 "label": "Shows empty state when there are no findings",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -15529,7 +17229,7 @@
             "label": "Rules Page - Bulk Action buttons",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -15539,7 +17239,7 @@
                 "label": "It should disable Enable option when there are all rules selected are already enabled ",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15549,7 +17249,7 @@
                 "label": "It should disable both Enable and Disable options when there are no rules selected",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15559,7 +17259,7 @@
                 "label": "It should disable Disable option when there are all rules selected are already Disabled",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15569,7 +17269,7 @@
                 "label": "Both option should not be disabled if selected rules contains both enabled and disabled rules",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -15581,7 +17281,7 @@
             "label": "Rules Page - Enable Rules and Disabled Rules Filter Toggle",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -15591,7 +17291,7 @@
                 "label": "Should only display Enabled rules when Enabled Rules filter is ON",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15601,7 +17301,7 @@
                 "label": "Should only display Disabled rules when Disabled Rules filter is ON",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -15613,7 +17313,7 @@
             "label": "Rules Page - CIS Section & Rule Number filters",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -15623,7 +17323,7 @@
                 "label": "Table should only show result that has the same section as in the Section filter",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15633,7 +17333,7 @@
                 "label": "Table should only show result that has the same section as in the Rule number filter",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15643,7 +17343,7 @@
                 "label": "Table should only show result that passes both Section and Rule number filter",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]
@@ -15655,7 +17355,7 @@
             "label": "Rules Page - Flyout",
             "indent": 4,
             "type": "describe",
-            "isSkipped": false,
+            "isSkipped": true,
             "isTodo": false,
             "children": [
               {
@@ -15665,7 +17365,7 @@
                 "label": "Users are able to Enable/Disable Rule from Switch on Rule Flyout",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15675,7 +17375,7 @@
                 "label": "Alerts section of Rules Flyout shows Disabled text when Rules are disabled",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15685,7 +17385,7 @@
                 "label": "Users are able to Enable/Disable Rule from Take Action on Rule Flyout",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               },
               {
@@ -15695,7 +17395,7 @@
                 "label": "Alerts section of Rules Flyout shows Detection Rule Counter component when Rules are enabled",
                 "indent": 6,
                 "type": "it",
-                "isSkipped": false,
+                "isSkipped": true,
                 "isTodo": false
               }
             ]

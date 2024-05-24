@@ -71,32 +71,41 @@ export class TransformServerPlugin implements Plugin<{}, void, any, any> {
       ],
     });
 
-    getStartServices().then(([coreStart, { dataViews, security: securityStart }]) => {
-      const license = new License({
-        pluginId: PLUGIN.id,
-        minimumLicenseType: PLUGIN.minimumLicenseType,
-        defaultErrorMessage: i18n.translate('xpack.transform.licenseCheckErrorMessage', {
-          defaultMessage: 'License check failed',
-        }),
-        licensing,
-        logger: this.logger,
-        coreStart,
-      });
-
-      registerRoutes({
-        router: http.createRouter(),
-        license,
-        dataViews,
-        coreStart,
-        security: securityStart,
-      });
-
-      const alertIndex = coreStart.savedObjects.getIndexForType('alert');
-
-      if (usageCollection) {
-        registerCollector(usageCollection, alertIndex);
-      }
+    registerRoutes({
+      router: http.createRouter(),
+      getLicense: async () => {
+        const [coreStart] = await getStartServices();
+        return new License({
+          pluginId: PLUGIN.id,
+          minimumLicenseType: PLUGIN.minimumLicenseType,
+          defaultErrorMessage: i18n.translate('xpack.transform.licenseCheckErrorMessage', {
+            defaultMessage: 'License check failed',
+          }),
+          licensing,
+          logger: this.logger,
+          coreStart,
+        });
+      },
+      getDataViewsStart: async () => {
+        const [, { dataViews }] = await getStartServices();
+        return dataViews;
+      },
+      getCoreStart: async () => {
+        const [coreStart] = await getStartServices();
+        return coreStart;
+      },
+      getSecurity: async () => {
+        const [, { security }] = await getStartServices();
+        return security;
+      },
     });
+
+    if (usageCollection) {
+      registerCollector(usageCollection, async () => {
+        const [coreStart] = await getStartServices();
+        return coreStart.savedObjects.getIndexForType('alert');
+      });
+    }
 
     if (alerting) {
       registerTransformHealthRuleType({

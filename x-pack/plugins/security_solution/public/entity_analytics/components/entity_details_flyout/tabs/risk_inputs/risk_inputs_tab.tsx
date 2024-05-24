@@ -14,6 +14,9 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 
 import { get } from 'lodash/fp';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../../../common/components/page/manage_query';
+import { formatRiskScore } from '../../../../common';
 import type {
   InputAlert,
   UseRiskContributingAlertsResult,
@@ -44,7 +47,10 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
+export const RISK_INPUTS_TAB_QUERY_ID = 'RiskInputsTabQuery';
+
 export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
+  const { setQuery, deleteQuery } = useGlobalTime();
   const [selectedItems, setSelectedItems] = useState<InputAlert[]>([]);
 
   const nameFilterQuery = useMemo(() => {
@@ -59,12 +65,23 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     data: riskScoreData,
     error: riskScoreError,
     loading: loadingRiskScore,
+    inspect: inspectRiskScore,
+    refetch,
   } = useRiskScore({
     riskEntity: entityType,
     filterQuery: nameFilterQuery,
     onlyLatest: false,
     pagination: FIRST_RECORD_PAGINATION,
     skip: nameFilterQuery === undefined,
+  });
+
+  useQueryInspector({
+    deleteQuery,
+    inspect: inspectRiskScore,
+    loading: loadingRiskScore,
+    queryId: RISK_INPUTS_TAB_QUERY_ID,
+    refetch,
+    setQuery,
   });
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
@@ -133,7 +150,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         mobileOptions: { show: true },
         sortable: true,
         align: 'right',
-        render: (contribution: number) => contribution.toFixed(2),
+        render: formatContribution,
       },
     ],
     []
@@ -176,13 +193,12 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <EuiSpacer size="xs" />
       <RiskInputsUtilityBar riskInputs={selectedItems} />
       <EuiInMemoryTable
-        compressed={true}
+        compressed
         loading={loadingRiskScore || alerts.loading}
         items={alerts.data || []}
         columns={inputColumns}
         sorting
         selection={euiTableSelectionProps}
-        isSelectable
         itemId="_id"
       />
       <EuiSpacer size="s" />
@@ -243,6 +259,7 @@ const ContextsSection: React.FC<{
       <EuiInMemoryTable
         compressed={true}
         loading={loading}
+        data-test-subj="risk-input-contexts-table"
         columns={contextColumns}
         items={[
           {
@@ -258,7 +275,7 @@ const ContextsSection: React.FC<{
                 dataTestSubj="risk-inputs-asset-criticality-badge"
               />
             ),
-            contribution: (criticality.contribution || 0).toFixed(2),
+            contribution: formatContribution(criticality.contribution || 0),
           },
         ]}
       />
@@ -338,11 +355,26 @@ const ExtraAlertsMessage: React.FC<ExtraAlertsMessageProps> = ({ riskScore, aler
           defaultMessage="{count} more alerts contributed {score} to the calculated risk score"
           values={{
             count: totals.count - displayed.count,
-            score: (totals.score - displayed.score).toFixed(2),
+            score: formatContribution(totals.score - displayed.score),
           }}
         />
       }
       iconType="annotation"
     />
   );
+};
+
+const formatContribution = (value: number): string => {
+  const fixedValue = formatRiskScore(value);
+
+  // prevent +0.00 for values like 0.0001
+  if (fixedValue === '0.00') {
+    return fixedValue;
+  }
+
+  if (value > 0) {
+    return `+${fixedValue}`;
+  }
+
+  return fixedValue;
 };

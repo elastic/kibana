@@ -17,15 +17,11 @@ import { FetcherResult, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 
-export const TimeRangeMetadataContext = createContext<
-  FetcherResult<TimeRangeMetadata> | undefined
->(undefined);
+export const TimeRangeMetadataContext = createContext<FetcherResult<TimeRangeMetadata> | undefined>(
+  undefined
+);
 
-export function ApmTimeRangeMetadataContextProvider({
-  children,
-}: {
-  children?: React.ReactNode;
-}) {
+export function ApmTimeRangeMetadataContextProvider({ children }: { children?: React.ReactNode }) {
   const {
     core: { uiSettings },
   } = useApmPluginContext();
@@ -79,15 +75,9 @@ export function TimeRangeMetadataContextProvider({
   end: string;
   kuery: string;
 }) {
-  const enableServiceTransactionMetrics = uiSettings.get<boolean>(
-    apmEnableServiceMetrics,
-    true
-  );
+  const enableServiceTransactionMetrics = uiSettings.get<boolean>(apmEnableServiceMetrics, true);
 
-  const enableContinuousRollups = uiSettings.get<boolean>(
-    apmEnableContinuousRollups,
-    true
-  );
+  const enableContinuousRollups = uiSettings.get<boolean>(apmEnableContinuousRollups, true);
 
   const fetcherResult = useFetcher(
     (callApmApi) => {
@@ -104,14 +94,7 @@ export function TimeRangeMetadataContextProvider({
         },
       });
     },
-    [
-      start,
-      end,
-      kuery,
-      useSpanName,
-      enableServiceTransactionMetrics,
-      enableContinuousRollups,
-    ]
+    [start, end, kuery, useSpanName, enableServiceTransactionMetrics, enableContinuousRollups]
   );
 
   return (

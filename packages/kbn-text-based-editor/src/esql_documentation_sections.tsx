@@ -106,16 +106,6 @@ Also, similar to the index fields, once an aggregation is performed, a metadata 
 FROM employees [METADATA _index, _id]
 | STATS max = MAX(emp_no) BY _index
 \`\`\`
-
-The \`OPTIONS\` directive of the FROM command allows you to configure the way ES|QL accesses the data to be queried. The argument passed to this directive is a comma-separated list of option name-value pairs, with the option name and the corresponding value double-quoted.
-
-For example:
-
-\`\`\`
-FROM index_pattern [OPTIONS "option1"="value1"[,...[,"optionN"="valueN"]]]
-\`\`\`
-
-Learn more about the \`OPTIONS\` directive in the [main documentation page](https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-index-options.html#esql-index-options).
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -868,82 +858,6 @@ The angle between the positive x-axis and the ray from the origin to the point (
 ROW y=12.9, x=.6
 | EVAL atan2=ATAN2(y, x)
 \`\`\`
-              `,
-              description:
-                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            }
-          )}
-        />
-      ),
-    },
-    {
-      label: i18n.translate(
-        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction',
-        {
-          defaultMessage: 'BUCKET',
-        }
-      ),
-      description: (
-        <Markdown
-          readOnly
-          markdownContent={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
-            {
-              defaultMessage: `### BUCKET
-Creates human-friendly buckets and returns a \`datetime\` value for each row that corresponds to the resulting bucket the row falls into. Combine \`BUCKET\`with \`STATS ... BY\` to create a date histogram.
-
-You provide a target number of buckets, a start date, and an end date, and it picks an appropriate bucket size to generate the target number of buckets or fewer. For example, this asks for at most 20 buckets over a whole year, which picks monthly buckets:
-
-\`\`\`
-ROW date=TO_DATETIME("1985-07-09T00:00:00.000Z")
-| EVAL bucket=BUCKET(date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-\`\`\`
-
-Returning:
-\`\`\`
-1985-07-09T00:00:00.000Z | 1985-07-01T00:00:00.000Z
-\`\`\`
-
-The goal isn't to provide *exactly* the target number of buckets, it's to pick a
-range that people are comfortable with that provides at most the target number of
-buckets.
-
-If you ask for more buckets then \`BUCKET\` can pick a smaller range. For example,
-asking for at most 100 buckets in a year will get you week long buckets:
-
-\`\`\`
-ROW date=TO_DATETIME("1985-07-09T00:00:00.000Z")
-| EVAL bucket=BUCKET(date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-\`\`\`
-
-Returning:
-\`\`\`
-1985-07-09T00:00:00.000Z | 1985-07-08T00:00:00.000Z
-\`\`\`
-
-\`BUCKET\` does not filter any rows. It only uses the provided time range to pick a good bucket size. For rows with a date outside of the range, it returns a datetime that corresponds to a bucket outside the range. Combine \`BUCKET\` with \`WHERE\` to filter rows.
-
-A more complete example might look like:
-
-\`\`\`
-FROM employees
-| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| EVAL bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
-| STATS AVG(salary) BY bucket
-| SORT bucket
-\`\`\`
-
-Returning:
-\`\`\`
-46305.0 | 1985-02-01T00:00:00.000Z
-44817.0 | 1985-05-01T00:00:00.000Z
-62405.0 | 1985-07-01T00:00:00.000Z
-49095.0 | 1985-09-01T00:00:00.000Z
-51532.0 | 1985-10-01T00:00:00.000Z
-54539.75 | 1985-11-01T00:00:00.000
-\`\`\`
-
-NOTE: \`BUCKET\` does not create buckets that don’t match any documents. That’s why the example above is missing 1985-03-01 and other dates.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -3733,6 +3647,143 @@ Example:
   ],
 };
 
+export const groupingFunctions = {
+  label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.groupingFunctions', {
+    defaultMessage: 'Grouping functions',
+  }),
+  description: i18n.translate(
+    'textBasedEditor.query.textBasedLanguagesEditor.groupingFunctionsDocumentationESQLDescription',
+    {
+      defaultMessage: `These grouping functions can be used with \`STATS...BY\`:`,
+    }
+  ),
+  items: [
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction',
+        {
+          defaultMessage: 'BUCKET',
+        }
+      ),
+      description: (
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
+            {
+              defaultMessage: `### BUCKET
+Creates groups of values - buckets - out of a datetime or numeric input. The size of the buckets can either be provided directly, or chosen based on a recommended count and values range.
+
+\`BUCKET\` works in two modes: 
+
+1. Where the size of the bucket is computed based on a buckets count recommendation (four parameters) and a range.
+2. Where the bucket size is provided directly (two parameters).
+
+Using a target number of buckets, a start of a range, and an end of a range, \`BUCKET\` picks an appropriate bucket size to generate the target number of buckets or fewer.
+
+For example, requesting up to 20 buckets for a year will organize data into monthly intervals:
+
+\`\`\`
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS hire_date = MV_SORT(VALUES(hire_date)) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT hire_date
+\`\`\`
+
+**NOTE**: The goal isn’t to provide the exact target number of buckets, it’s to pick a range that provides _at most_ the target number of buckets.
+
+You can combine \`BUCKET\` with an aggregation to create a histogram:
+
+\`\`\`
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS hires_per_month = COUNT(*) BY month = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT month
+\`\`\`
+
+**NOTE**: \`BUCKET\` does not create buckets that match zero documents. That’s why the previous example is missing \`1985-03-01\` and other dates.
+
+Asking for more buckets can result in a smaller range. For example, requesting at most 100 buckets in a year results in weekly buckets:
+
+\`\`\`
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 100, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT week
+\`\`\`
+
+**NOTE**: \`BUCKET\` does not filter any rows. It only uses the provided range to pick a good bucket size. For rows with a value outside of the range, it returns a bucket value that corresponds to a bucket outside the range. Combine \`BUCKET\` with \`WHERE\` to filter rows.
+
+If the desired bucket size is known in advance, simply provide it as the second argument, leaving the range out:
+
+\`\`\`
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS hires_per_week = COUNT(*) BY week = BUCKET(hire_date, 1 week)
+| SORT week
+\`\`\`
+
+**NOTE**: When providing the bucket size as the second parameter, it must be a time duration or date period.
+
+\`BUCKET\` can also operate on numeric fields. For example, to create a salary histogram:
+
+\`\`\`
+FROM employees
+| STATS COUNT(*) by bs = BUCKET(salary, 20, 25324, 74999)
+| SORT bs
+\`\`\`
+
+Unlike the earlier example that intentionally filters on a date range, you rarely want to filter on a numeric range. You have to find the min and max separately. ES|QL doesn’t yet have an easy way to do that automatically.
+
+The range can be omitted if the desired bucket size is known in advance. Simply provide it as the second argument:
+
+\`\`\`
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS c = COUNT(1) BY b = BUCKET(salary, 5000.)
+| SORT b
+\`\`\`
+
+**NOTE**: When providing the bucket size as the second parameter, it must be of a **floating point type**.
+
+Here's an example to create hourly buckets for the last 24 hours, and calculate the number of events per hour:
+
+\`\`\`
+FROM sample_data
+| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
+| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())
+\`\`\`
+
+Here's an example  to create monthly buckets for the year 1985, and calculate the average salary by hiring month:
+
+\`\`\`
+FROM employees
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS AVG(salary) BY bucket = BUCKET(hire_date, 20, "1985-01-01T00:00:00Z", "1986-01-01T00:00:00Z")
+| SORT bucket
+\`\`\`
+
+\`BUCKET\` may be used in both the aggregating and grouping part of the \`STATS …​ BY …\`​ command, provided that in the aggregating part the function is **referenced by an alias defined in the grouping part**, or that it is invoked with the exact same expression.
+
+For example:
+
+\`\`\`
+FROM employees
+| STATS s1 = b1 + 1, s2 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)
+| SORT b1, b2
+| KEEP s1, b1, s2, b2
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+  ],
+};
+
 export const spatialFunctions = {
   label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.spatialFunctions', {
     defaultMessage: 'Spatial functions',
@@ -3779,7 +3830,6 @@ FROM airport_city_boundaries
         />
       ),
     },
-    // ST_DISJOINT
     {
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stdisjointFunction',

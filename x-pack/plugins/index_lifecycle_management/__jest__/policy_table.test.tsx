@@ -307,11 +307,11 @@ describe('policy table', () => {
     const policyName = findTestSubject(firstRow, 'policyTablePolicyNameLink').text();
     expect(policyName).toBe(`${testPolicy.name}`);
     const policyIndexTemplates = findTestSubject(firstRow, 'policy-indexTemplates').text();
-    expect(policyIndexTemplates).toBe(`Linked index templates${testPolicy.indexTemplates.length}`);
+    expect(policyIndexTemplates).toBe(`${testPolicy.indexTemplates.length}`);
     const policyIndices = findTestSubject(firstRow, 'policy-indices').text();
-    expect(policyIndices).toBe(`Linked indices${testPolicy.indices.length}`);
+    expect(policyIndices).toBe(`${testPolicy.indices.length}`);
     const policyModifiedDate = findTestSubject(firstRow, 'policy-modifiedDate').text();
-    expect(policyModifiedDate).toBe(`Modified date${testDateFormatted}`);
+    expect(policyModifiedDate).toBe(`${testDateFormatted}`);
   });
   test('opens a flyout with index templates', () => {
     const rendered = mountWithIntl(component);

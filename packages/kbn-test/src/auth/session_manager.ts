@@ -35,18 +35,23 @@ export interface SamlSessionManagerOptions {
  * Manages cookies associated with user roles
  */
 export class SamlSessionManager {
+  private readonly DEFAULT_ROLES_FILE_NAME: string = 'role_users.json';
   private readonly isCloud: boolean;
   private readonly kbnHost: string;
   private readonly kbnClient: KbnClient;
   private readonly log: ToolingLog;
   private readonly roleToUserMap: Map<Role, User>;
   private readonly sessionCache: Map<Role, Session>;
-  private readonly userRoleFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
   private readonly supportedRoles: string[];
+  private readonly userRoleFilePath: string;
 
-  constructor(options: SamlSessionManagerOptions) {
+  constructor(options: SamlSessionManagerOptions, rolesFilename?: string) {
     this.isCloud = options.isCloud;
     this.log = options.log;
+    // if the rolesFilename is provided, respect it. Otherwise use DEFAULT_ROLES_FILE_NAME.
+    const rolesFile = rolesFilename ? rolesFilename : this.DEFAULT_ROLES_FILE_NAME;
+    this.log.info(`Using the file ${rolesFile} for the role users`);
+    this.userRoleFilePath = resolve(REPO_ROOT, '.ftr', rolesFile);
     const hostOptionsWithoutAuth = {
       protocol: options.hostOptions.protocol,
       hostname: options.hostOptions.hostname,

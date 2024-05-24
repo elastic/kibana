@@ -13,17 +13,55 @@ import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
+import type { Props as EditRolePageProps } from './edit_role/edit_role_page';
+import type { Props as RolesGridPageProps } from './roles_grid/roles_grid_page';
 import { rolesManagementApp } from './roles_management_app';
 import { licenseMock } from '../../../common/licensing/index.mock';
 
 jest.mock('./roles_grid', () => ({
-  RolesGridPage: (props: any) => `Roles Page: ${JSON.stringify(props)}`,
+  RolesGridPage: ({
+    // props object is too big to include into test snapshot, so we just check for existence of fields we care about
+    buildFlavor,
+    cloudOrgUrl,
+    readOnly,
+    rolesAPIClient,
+  }: RolesGridPageProps) =>
+    `Roles Page: ${JSON.stringify(
+      {
+        buildFlavor,
+        cloudOrgUrl,
+        readOnly,
+        rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
+      },
+      null,
+      '  '
+    )}`,
 }));
 
 jest.mock('./edit_role', () => ({
-  // `docLinks` object is too big to include into test snapshot, so we just check its existence.
-  EditRolePage: (props: any) =>
-    `Role Edit Page: ${JSON.stringify({ ...props, docLinks: props.docLinks ? {} : undefined })}`,
+  EditRolePage: ({
+    // props object is too big to include into test snapshot, so we just check for existence of fields we care about
+    buildFlavor,
+    cloudOrgUrl,
+    roleName,
+    indicesAPIClient,
+    privilegesAPIClient,
+    rolesAPIClient,
+    userAPIClient,
+  }: EditRolePageProps) =>
+    `Role Edit Page: ${JSON.stringify(
+      {
+        buildFlavor,
+        cloudOrgUrl,
+        roleName,
+        indicesAPIClient: indicesAPIClient ? 'indicesAPIClient' : undefined,
+        privilegesAPIClient: privilegesAPIClient ? 'privilegesAPIClient' : undefined,
+        rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
+        userAPIClient: userAPIClient ? 'userAPIClient' : undefined,
+      },
+      null,
+      '  '
+    )}`,
 }));
 
 async function mountApp(basePath: string, pathname: string, buildFlavor?: BuildFlavor) {
@@ -94,7 +132,11 @@ describe('rolesManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Roles Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"readOnly":false,"buildFlavor":"traditional","i18nStart":{},"theme":{"theme$":{}}}
+        Roles Page: {
+        "buildFlavor": "traditional",
+        "readOnly": false,
+        "rolesAPIClient": "rolesAPIClient"
+      }
       </div>
     `);
 
@@ -116,7 +158,13 @@ describe('rolesManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}},"buildFlavor":"traditional","i18nStart":{},"theme":{"theme$":{}}}
+        Role Edit Page: {
+        "buildFlavor": "traditional",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 
@@ -143,7 +191,14 @@ describe('rolesManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","roleName":"role@name","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@name","search":"","hash":""}},"buildFlavor":"traditional","i18nStart":{},"theme":{"theme$":{}}}
+        Role Edit Page: {
+        "buildFlavor": "traditional",
+        "roleName": "role@name",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 
@@ -170,7 +225,14 @@ describe('rolesManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"clone","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/clone/someRoleName","search":"","hash":""}},"buildFlavor":"traditional","i18nStart":{},"theme":{"theme$":{}}}
+        Role Edit Page: {
+        "buildFlavor": "traditional",
+        "roleName": "someRoleName",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 
@@ -228,7 +290,11 @@ describe('rolesManagementApp - serverless', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Roles Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"readOnly":false,"buildFlavor":"serverless","i18nStart":{},"theme":{"theme$":{}}}
+        Roles Page: {
+        "buildFlavor": "serverless",
+        "readOnly": false,
+        "rolesAPIClient": "rolesAPIClient"
+      }
       </div>
     `);
 
@@ -257,7 +323,13 @@ describe('rolesManagementApp - serverless', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}},"buildFlavor":"serverless","i18nStart":{},"theme":{"theme$":{}}}
+        Role Edit Page: {
+        "buildFlavor": "serverless",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 
@@ -288,7 +360,14 @@ describe('rolesManagementApp - serverless', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"edit","roleName":"role@name","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@name","search":"","hash":""}},"buildFlavor":"serverless","i18nStart":{},"theme":{"theme$":{}}}
+        Role Edit Page: {
+        "buildFlavor": "serverless",
+        "roleName": "role@name",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 
@@ -319,7 +398,14 @@ describe('rolesManagementApp - serverless', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Edit Page: {"action":"clone","roleName":"someRoleName","rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"userAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"indicesAPIClient":{"fieldCache":{},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"privilegesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}},"notifications":{"toasts":{}},"fatalErrors":{},"license":{"features$":{}},"docLinks":{},"uiCapabilities":{"catalogue":{},"management":{},"navLinks":{},"roles":{"save":true}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/clone/someRoleName","search":"","hash":""}},"buildFlavor":"serverless","i18nStart":{},"theme":{"theme$":{}}}
+        Role Edit Page: {
+        "buildFlavor": "serverless",
+        "roleName": "someRoleName",
+        "indicesAPIClient": "indicesAPIClient",
+        "privilegesAPIClient": "privilegesAPIClient",
+        "rolesAPIClient": "rolesAPIClient",
+        "userAPIClient": "userAPIClient"
+      }
       </div>
     `);
 

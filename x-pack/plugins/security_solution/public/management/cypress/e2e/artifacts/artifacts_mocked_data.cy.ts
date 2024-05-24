@@ -31,7 +31,7 @@ const loginWithoutAccess = (url: string) => {
   loadPage(url);
 };
 
-describe('Artifacts pages', { tags: ['@ess', '@serverless'] }, () => {
+describe('Artifacts pages', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   before(() => {
@@ -50,7 +50,10 @@ describe('Artifacts pages', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   for (const testData of getArtifactsListTestsData()) {
-    describe(`When on the ${testData.title} entries list`, () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183718
+    // FLAKY: https://github.com/elastic/kibana/issues/183719
+    // FLAKY: https://github.com/elastic/kibana/issues/183720
+    describe.skip(`When on the ${testData.title} entries list`, () => {
       it(`no access - should show no privileges callout`, () => {
         loginWithoutAccess(`/app/security/administration/${testData.urlPath}`);
         cy.getByTestSubj('noPrivilegesPage').should('exist');

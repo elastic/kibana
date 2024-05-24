@@ -12,17 +12,19 @@ import { ToolInterface } from '@langchain/core/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RetrievalQAChain } from 'langchain/chains';
-import { ActionsClientChatOpenAI, ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/llm';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
+import {
+  getDefaultArguments,
+  ActionsClientChatOpenAI,
+  ActionsClientSimpleChatModel,
+} from '@kbn/langchain/server';
 import { AgentExecutor } from '../executors/types';
-import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
+import { withAssistantSpan } from '../tracers/with_assistant_span';
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
 /**
- * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientLlm,
+ * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientSimpleChatModel,
  * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
  *
  */
@@ -34,9 +36,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
-  elserId,
   esClient,
-  kbResource,
+  esStore,
   langChainMessages,
   llmType,
   logger,
@@ -46,12 +47,10 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   replacements,
   request,
   size,
-  telemetry,
   traceOptions,
 }) => {
-  // TODO implement llmClass for bedrock streaming
-  // tracked here: https://github.com/elastic/security-team/issues/7363
-  const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
+  const isOpenAI = llmType === 'openai';
+  const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
   const llm = new llmClass({
     actions,
@@ -59,7 +58,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
+    // possible client model override,
+    // let this be undefined otherwise so the connector handles the model
     model: request.body.model,
+    // ensure this is defined because we default to it in the language_models
+    // This is where the LangSmith logs (Metadata > Invocation Params) are set
+    temperature: getDefaultArguments(llmType).temperature,
     signal: abortSignal,
     streaming: isStream,
     // prevents the agent from retrying on failure
@@ -77,16 +81,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     outputKey: 'output',
     returnMessages: true,
   });
-
-  // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(
-    esClient,
-    KNOWLEDGE_BASE_INDEX_PATTERN,
-    logger,
-    telemetry,
-    elserId,
-    kbResource
-  );
 
   const modelExists = await esStore.isModelInstalled();
 
@@ -107,23 +101,32 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     size,
   };
+
   const tools: ToolInterface[] = assistantTools.flatMap(
     (tool) => tool.getTool(assistantToolParams) ?? []
   );
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
-  // isStream check is not on agentType alone because typescript doesn't like
-  const executor = isStream
+  const executorArgs = {
+    memory,
+    verbose: false,
+    handleParsingErrors: 'Try again, paying close attention to the allowed tool input',
+  };
+  // isOpenAI check is not on agentType alone because typescript doesn't like
+  const executor = isOpenAI
     ? await initializeAgentExecutorWithOptions(tools, llm, {
         agentType: 'openai-functions',
-        memory,
-        verbose: false,
+        ...executorArgs,
       })
     : await initializeAgentExecutorWithOptions(tools, llm, {
-        agentType: 'chat-conversational-react-description',
-        memory,
-        verbose: false,
+        agentType: 'structured-chat-zero-shot-react-description',
+        ...executorArgs,
+        returnIntermediateSteps: false,
+        agentArgs: {
+          // this is important to help LangChain correctly format tool input
+          humanMessageTemplate: `Question: {input}\n\n{agent_scratchpad}`,
+        },
       });
 
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
@@ -153,7 +156,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
             traceId: streamingSpan?.ids?.['trace.id'],
           },
           isError
-        );
+        ).catch(() => {});
       }
       streamEnd();
       didEnd = true;
@@ -164,6 +167,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     };
 
     let message = '';
+    let tokenParentRunId = '';
 
     executor
       .invoke(
@@ -175,8 +179,14 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         {
           callbacks: [
             {
-              handleLLMNewToken(payload) {
-                if (payload.length && !didEnd) {
+              handleLLMNewToken(payload, _idx, _runId, parentRunId) {
+                if (tokenParentRunId.length === 0 && !!parentRunId) {
+                  // set the parent run id as the parentRunId of the first token
+                  // this is used to ensure that all tokens in the stream are from the same run
+                  // filtering out runs that are inside e.g. tool calls
+                  tokenParentRunId = parentRunId;
+                }
+                if (payload.length && !didEnd && tokenParentRunId === parentRunId) {
                   push({ payload, type: 'content' });
                   // store message in case of error
                   message += payload;

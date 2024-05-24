@@ -9,7 +9,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
-  const svlObltOnboardingPage = getPageObject('svlObltOnboardingPage');
   const svlObltNavigation = getService('svlObltNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -32,7 +31,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check serverless search side nav exists
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.breadcrumbs.expectExists();
-      await svlObltOnboardingPage.assertQuickstartBadgeExists();
 
       // check side nav links
       await svlCommonNavigation.sidenav.expectSectionOpen('observability_project_nav');
@@ -53,8 +51,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
       // check the aiops subsection
       await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops'); // open ai ops subsection
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'ml:anomalyDetection' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'ml:anomalyDetection' });
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'ml:anomalyDetection' });
+      await svlCommonNavigation.sidenav.expectLinkActive({ navId: 'ml:anomalyDetection' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AIOps' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'ml:anomalyDetection',

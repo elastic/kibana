@@ -17,6 +17,7 @@ const SecurityManagementCards = new Map<string, CardNavExtensionDefinition['cate
   [ExternalPageName.visualize, 'content'],
   [ExternalPageName.maps, 'content'],
   [SecurityPageName.entityAnalyticsManagement, 'alerts'],
+  [SecurityPageName.entityAnalyticsAssetClassification, 'alerts'],
 ]);
 export const enableManagementCardsLanding = (services: Services) => {
   const { securitySolution, management, application, navigation } = services;

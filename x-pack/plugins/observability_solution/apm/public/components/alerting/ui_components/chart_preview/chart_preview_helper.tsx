@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -27,9 +27,7 @@ export const TIME_LABELS = {
   }),
 };
 
-export const getDomain = (
-  series: Array<{ name?: string; data: Coordinate[] }>
-) => {
+export const getDomain = (series: Array<{ name?: string; data: Coordinate[] }>) => {
   const xValues = series.flatMap((item) => item.data.map((d) => d.x));
   const yValues = series.flatMap((item) => item.data.map((d) => d.y || 0));
   return {
@@ -40,7 +38,7 @@ export const getDomain = (
   };
 };
 
-const EmptyContainer: React.FC = ({ children }) => (
+const EmptyContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <div
     style={{
       width: '100%',

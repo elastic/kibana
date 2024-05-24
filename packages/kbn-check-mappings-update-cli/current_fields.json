@@ -4,6 +4,15 @@
     "name"
   ],
   "action_task_params": [],
+  "ad_hoc_run_params": [
+    "apiKeyId",
+    "createdAt",
+    "end",
+    "rule",
+    "rule.alertTypeId",
+    "rule.consumer",
+    "start"
+  ],
   "alert": [
     "actions",
     "actions.actionRef",
@@ -271,6 +280,11 @@
     "title",
     "version"
   ],
+  "endpoint:unified-user-artifact-manifest": [
+    "artifactIds",
+    "policyId",
+    "semanticVersion"
+  ],
   "endpoint:user-artifact-manifest": [
     "artifacts",
     "schemaVersion"
@@ -501,6 +515,7 @@
     "revision",
     "schema_version",
     "status",
+    "supports_agentless",
     "unenroll_timeout",
     "updated_at",
     "updated_by"
@@ -584,8 +599,10 @@
     "is_managed",
     "name",
     "namespace",
+    "overrides",
     "package",
     "package.name",
+    "package.requires_root",
     "package.title",
     "package.version",
     "policy_id",

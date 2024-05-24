@@ -11,13 +11,14 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { RangeFilterParams } from '@kbn/es-query';
-import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaExecutionContext } from '@kbn/core/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
-import { getUsageCollection } from './helpers/plugin_services';
+import { getCoreStart, getUsageCollection } from './helpers/plugin_services';
 
 const LazyTimelionVisComponent = lazy(() =>
   import('./async_services').then(({ TimelionVisComponent }) => ({ default: TimelionVisComponent }))
@@ -43,7 +44,7 @@ export const getTimelionVisRenderer: (
   name: 'timelion_vis',
   displayName: 'Timelion visualization',
   reuseDomNode: true,
-  render: (domNode, { visData, visParams, syncTooltips, syncCursor }, handlers) => {
+  render: async (domNode, { visData, visParams, syncTooltips, syncCursor }, handlers) => {
     handlers.onDestroy(() => {
       unmountComponentAtNode(domNode);
     });
@@ -84,12 +85,12 @@ export const getTimelionVisRenderer: (
     };
 
     render(
-      <VisualizationContainer
-        renderComplete={renderComplete}
-        handlers={handlers}
-        showNoResult={showNoResult}
-      >
-        <KibanaThemeProvider theme$={deps.theme.theme$}>
+      <KibanaRenderContextProvider {...getCoreStart()}>
+        <VisualizationContainer
+          renderComplete={renderComplete}
+          handlers={handlers}
+          showNoResult={showNoResult}
+        >
           <KibanaContextProvider services={{ ...deps }}>
             {seriesList && (
               <LazyTimelionVisComponent
@@ -103,8 +104,9 @@ export const getTimelionVisRenderer: (
               />
             )}
           </KibanaContextProvider>
-        </KibanaThemeProvider>
-      </VisualizationContainer>,
+        </VisualizationContainer>
+      </KibanaRenderContextProvider>,
+
       domNode
     );
   },

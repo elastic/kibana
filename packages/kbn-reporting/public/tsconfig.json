@@ -31,5 +31,8 @@
     "@kbn/i18n-react",
     "@kbn/test-jest-helpers",
     "@kbn/react-kibana-mount",
+    "@kbn/home-plugin",
+    "@kbn/management-plugin",
+    "@kbn/ui-actions-plugin",
   ]
 }

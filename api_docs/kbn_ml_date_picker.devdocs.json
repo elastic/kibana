@@ -31,7 +31,7 @@
           "\nReact Component that acts as a wrapper for DatePickerContext.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: React.PropsWithChildren<React.PropsWithChildren<",
           {
             "pluginId": "@kbn/ml-date-picker",
             "scope": "common",
@@ -39,7 +39,7 @@
             "section": "def-common.DatePickerDependencies",
             "text": "DatePickerDependencies"
           },
-          ">) => JSX.Element"
+          ">>) => JSX.Element"
         ],
         "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
         "deprecated": false,
@@ -55,7 +55,7 @@
               "- The component props"
             ],
             "signature": [
-              "React.PropsWithChildren<",
+              "React.PropsWithChildren<React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-date-picker",
                 "scope": "common",
@@ -63,7 +63,7 @@
                 "section": "def-common.DatePickerDependencies",
                 "text": "DatePickerDependencies"
               },
-              ">"
+              ">>"
             ],
             "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
@@ -171,6 +171,53 @@
         ],
         "returnComment": [
           "The FullTimeRangeSelector component."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-picker",
+        "id": "def-common.getTimeFieldRange",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeFieldRange",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "(options: GetTimeFieldRangeOptions) => Promise<",
+          {
+            "pluginId": "@kbn/ml-date-picker",
+            "scope": "common",
+            "docId": "kibKbnMlDatePickerPluginApi",
+            "section": "def-common.GetTimeFieldRangeResponse",
+            "text": "GetTimeFieldRangeResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/packages/ml/date_picker/src/services/time_field_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-common.getTimeFieldRange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- GetTimeFieldRangeOptions"
+            ],
+            "signature": [
+              "GetTimeFieldRangeOptions"
+            ],
+            "path": "x-pack/packages/ml/date_picker/src/services/time_field_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "GetTimeFieldRangeResponse"
         ],
         "initialIsOpen": false
       },

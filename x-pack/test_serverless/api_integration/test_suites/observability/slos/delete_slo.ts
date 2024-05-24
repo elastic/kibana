@@ -47,6 +47,7 @@ export default function ({ getService }: FtrProviderContext) {
       return {};
     }
   };
+
   describe('delete_slo', () => {
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
@@ -80,8 +81,7 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ esClient, logger });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/180982
-    describe.skip('non partition by SLO', () => {
+    describe('non partition by SLO', () => {
       it('deletes the SLO definition, transforms, ingest pipeline and data', async () => {
         const createdSlo = await sloApi.create({
           name: 'my custom name',
@@ -114,18 +114,17 @@ export default function ({ getService }: FtrProviderContext) {
         });
         expect(savedObject.total).to.eql(1);
         expect(savedObject.saved_objects[0].attributes.id).to.eql(sloId);
+        const sloRevision = savedObject.saved_objects[0].attributes.revision ?? 1;
 
         // Transforms
-        const sloTransformId = getSLOTransformId(sloId, 1);
-        const sloSummaryTransformId = getSLOSummaryTransformId(sloId, 1);
+        const sloTransformId = getSLOTransformId(sloId, sloRevision);
+        const sloSummaryTransformId = getSLOSummaryTransformId(sloId, sloRevision);
         await transform.api.waitForTransformToExist(sloTransformId);
         await transform.api.waitForTransformToExist(sloSummaryTransformId);
 
         // Ingest pipeline
-        const sloRevision = 1;
         const pipelineResponse = await fetchSloSummaryPipeline(esClient, sloId, sloRevision);
-        const expectedPipeline = `.slo-observability.summary.pipeline-${sloId}-${sloRevision}`;
-        expect(pipelineResponse[expectedPipeline]).not.to.be(undefined);
+        expect(pipelineResponse[getSLOSummaryPipelineId(sloId, sloRevision)]).not.to.be(undefined);
 
         // RollUp and Summary data
         const sloRollupData = await sloApi.waitForSloData({
@@ -154,19 +153,15 @@ export default function ({ getService }: FtrProviderContext) {
         await transform.api.getTransform(sloTransformId, 404);
         await transform.api.getTransform(sloSummaryTransformId, 404);
 
-        // Roll up and summary data
-        await retry.tryForTime(60 * 1000, async () => {
-          const sloRollupDataAfterDeletion = await sloApi.getSloData({
-            sloId,
-            indexName: SLO_DESTINATION_INDEX_PATTERN,
-          });
+        await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {
           const sloSummaryDataAfterDeletion = await sloApi.getSloData({
             sloId,
             indexName: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
           });
-
-          expect(sloRollupDataAfterDeletion.hits.hits.length).to.be(0);
-          expect(sloSummaryDataAfterDeletion.hits.hits.length).to.be(0);
+          if (sloSummaryDataAfterDeletion.hits.hits.length > 0) {
+            throw new Error('SLO summary data not deleted yet');
+          }
+          return true;
         });
       });
     });

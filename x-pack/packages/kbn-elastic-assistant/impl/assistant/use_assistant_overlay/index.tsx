@@ -11,9 +11,15 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
+import { useConversation } from '../use_conversation';
+import { getDefaultConnector, mergeBaseWithPersistedConversations } from '../helpers';
+import { getGenAiConfig } from '../../connectorland/helpers';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../api';
+import { Conversation } from '../../assistant_context/types';
 
 interface UseAssistantOverlay {
-  showAssistantOverlay: (show: boolean) => void;
+  showAssistantOverlay: (show: boolean, silent?: boolean) => void;
   promptContextId: string;
 }
 
@@ -68,11 +74,34 @@ export const useAssistantOverlay = (
    */
   tooltip: PromptContext['tooltip'],
 
+  /** Required to identify the availability of the Assistant for the current license level */
+  isAssistantEnabled: boolean,
+
   /**
-   * Optionally provide a map of replacements associated with the context, i.e. replacements for an insight that's provided as context
+   * Optionally provide a map of replacements associated with the context, i.e. replacements for an attack discovery that's provided as context
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {
+  const { http } = useAssistantContext();
+  const { data: connectors } = useLoadConnectors({
+    http,
+  });
+  const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
+  const apiConfig = useMemo(() => getGenAiConfig(defaultConnector), [defaultConnector]);
+
+  const { createConversation } = useConversation();
+
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
+      mergeBaseWithPersistedConversations({}, conversationsData),
+    []
+  );
+  const { data: conversations, isLoading } = useFetchCurrentUserConversations({
+    http,
+    onFetch: onFetchedConversations,
+    isAssistantEnabled,
+  });
+
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
   const _description: PromptContext['description'] = useMemo(() => description, [description]);
@@ -99,8 +128,32 @@ export const useAssistantOverlay = (
   } = useAssistantContext();
 
   // proxy show / hide calls to assistant context, using our internal prompt context id:
+  // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    (showOverlay: boolean) => {
+    async (showOverlay: boolean, silent?: boolean) => {
+      let conversation;
+      if (!isLoading) {
+        conversation = conversationTitle
+          ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
+          : undefined;
+      }
+
+      if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
+        try {
+          conversation = await createConversation({
+            apiConfig: {
+              ...apiConfig,
+              actionTypeId: defaultConnector?.actionTypeId,
+              connectorId: defaultConnector?.id,
+            },
+            category: 'assistant',
+            title: conversationTitle ?? '',
+          });
+        } catch (e) {
+          /* empty */
+        }
+      }
+
       if (promptContextId != null) {
         assistantContextShowOverlay({
           showOverlay,
@@ -109,7 +162,17 @@ export const useAssistantOverlay = (
         });
       }
     },
-    [assistantContextShowOverlay, conversationTitle, promptContextId]
+    [
+      apiConfig,
+      assistantContextShowOverlay,
+      conversationTitle,
+      conversations,
+      createConversation,
+      defaultConnector,
+      isAssistantEnabled,
+      isLoading,
+      promptContextId,
+    ]
   );
 
   useEffect(() => {

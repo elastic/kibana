@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -29,13 +23,12 @@ export function ErrorGroupOverview() {
     query: { environment, kuery, comparisonEnabled },
   } = useApmParams('/services/{serviceName}/errors');
 
-  const { errorDistributionData, errorDistributionStatus } =
-    useErrorGroupDistributionFetcher({
-      serviceName,
-      groupId: undefined,
-      environment,
-      kuery,
-    });
+  const { errorDistributionData, errorDistributionStatus } = useErrorGroupDistributionFetcher({
+    serviceName,
+    groupId: undefined,
+    environment,
+    kuery,
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -65,10 +58,9 @@ export function ErrorGroupOverview() {
         <EuiPanel hasBorder={true}>
           <EuiTitle size="xs">
             <h3>
-              {i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorsList.title',
-                { defaultMessage: 'Errors' }
-              )}
+              {i18n.translate('xpack.apm.serviceDetails.metrics.errorsList.title', {
+                defaultMessage: 'Errors',
+              })}
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />

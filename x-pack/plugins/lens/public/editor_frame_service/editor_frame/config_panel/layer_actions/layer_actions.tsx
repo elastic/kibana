@@ -59,7 +59,7 @@ export const getSharedActions = ({
   isTextBasedLanguage?: boolean;
   hasLayerSettings: boolean;
   openLayerSettings: () => void;
-  core: Pick<CoreStart, 'overlays' | 'theme'>;
+  core: Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>;
   customRemoveModalText?: { title?: string; description?: string };
 }) => [
   getOpenLayerSettingsAction({

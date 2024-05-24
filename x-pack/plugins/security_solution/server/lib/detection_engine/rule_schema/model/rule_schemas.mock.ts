@@ -12,6 +12,7 @@ import type {
   BaseRuleParams,
   CompleteRule,
   EqlRuleParams,
+  EsqlRuleParams,
   MachineLearningRuleParams,
   NewTermsRuleParams,
   QueryRuleParams,
@@ -23,7 +24,7 @@ import type {
 import type { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import { sampleRuleGuid } from '../../rule_types/__mocks__/es_results';
 
-const getBaseRuleParams = (): BaseRuleParams => {
+export const getBaseRuleParams = (): BaseRuleParams => {
   return {
     author: ['Elastic'],
     buildingBlockType: 'default',
@@ -99,6 +100,16 @@ export const getEqlRuleParams = (rewrites?: Partial<EqlRuleParams>): EqlRulePara
     eventCategoryOverride: undefined,
     dataViewId: undefined,
     tiebreakerField: undefined,
+    ...rewrites,
+  };
+};
+
+export const getEsqlRuleParams = (rewrites?: Partial<EsqlRuleParams>): EsqlRuleParams => {
+  return {
+    ...getBaseRuleParams(),
+    type: 'esql',
+    language: 'esql',
+    query: 'from auditbeat* metadata _id',
     ...rewrites,
   };
 };

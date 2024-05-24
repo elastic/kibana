@@ -51,6 +51,6 @@ export const useIsFirstTimeAgentUserQuery = (): UseIsFirstTimeAgentUserResponse 
 
   return {
     isLoading: authz.fleet.readAgentPolicies && (areAgentPoliciesLoading || areAgentsLoading),
-    isFirstTimeAgentUser: !authz.fleet.readAgentPolicies && agents?.data?.total === 0,
+    isFirstTimeAgentUser: authz.fleet.readAgentPolicies && agents?.data?.total === 0,
   };
 };

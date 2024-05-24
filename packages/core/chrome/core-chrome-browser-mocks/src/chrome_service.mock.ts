@@ -68,6 +68,7 @@ const createStartContractMock = () => {
     getBodyClasses$: jest.fn(),
     getChromeStyle$: jest.fn(),
     setChromeStyle: jest.fn(),
+    getActiveSolutionNavId$: jest.fn(),
     project: {
       setHome: jest.fn(),
       setCloudUrls: jest.fn(),

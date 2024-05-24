@@ -31,10 +31,7 @@ import { StepModal } from '../shared/step_panel';
 import { TroubleshootingLink } from '../shared/troubleshooting_link';
 import { WindowsInstallStep } from '../shared/windows_install_step';
 import { ApiKeyBanner } from '../custom_logs/api_key_banner';
-import {
-  SystemIntegrationBanner,
-  SystemIntegrationBannerState,
-} from './system_integration_banner';
+import { SystemIntegrationBanner, SystemIntegrationBannerState } from './system_integration_banner';
 import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 
 export function InstallElasticAgent() {
@@ -43,12 +40,9 @@ export function InstallElasticAgent() {
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
 
   const singleDatasetLocator =
-    share.url.locators.get<SingleDatasetLocatorParams>(
-      SINGLE_DATASET_LOCATOR_ID
-    );
-  const allDataSetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
-    ALL_DATASETS_LOCATOR_ID
-  );
+    share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
+  const allDataSetsLocator =
+    share.url.locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
 
   const { getState, setState } = useWizard();
   const wizardState = getState();
@@ -57,12 +51,9 @@ export function InstallElasticAgent() {
   const [systemIntegrationStatus, setSystemIntegrationStatus] =
     useState<SystemIntegrationBannerState>('pending');
 
-  const onIntegrationStatusChange = useCallback(
-    (status: SystemIntegrationBannerState) => {
-      setSystemIntegrationStatus(status);
-    },
-    []
-  );
+  const onIntegrationStatusChange = useCallback((status: SystemIntegrationBannerState) => {
+    setSystemIntegrationStatus(status);
+  }, []);
 
   const datasetName = 'system-logs';
 
@@ -88,19 +79,12 @@ export function InstallElasticAgent() {
     }));
   }
 
-  const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
-    (callApi) => {
-      return callApi(
-        'GET /internal/observability_onboarding/logs/setup/privileges'
-      );
-    },
-    []
-  );
+  const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher((callApi) => {
+    return callApi('GET /internal/observability_onboarding/logs/setup/privileges');
+  }, []);
 
   const { data: setup } = useFetcher((callApi) => {
-    return callApi(
-      'GET /internal/observability_onboarding/logs/setup/environment'
-    );
+    return callApi('GET /internal/observability_onboarding/logs/setup/environment');
   }, []);
 
   const {
@@ -128,20 +112,13 @@ export function InstallElasticAgent() {
   const { data: yamlConfig = '', status: yamlConfigStatus } = useFetcher(
     (callApi) => {
       if (apiKeyEncoded && onboardingId) {
-        return callApi(
-          'GET /internal/observability_onboarding/elastic_agent/config',
-          {
-            headers: { authorization: `ApiKey ${apiKeyEncoded}` },
-            params: { query: { onboardingId } },
-          }
-        );
+        return callApi('GET /internal/observability_onboarding/elastic_agent/config', {
+          headers: { authorization: `ApiKey ${apiKeyEncoded}` },
+          params: { query: { onboardingId } },
+        });
       }
     },
-    [
-      apiKeyEncoded,
-      onboardingId,
-      installShipperSetupStatus === FETCH_STATUS.SUCCESS,
-    ]
+    [apiKeyEncoded, onboardingId, installShipperSetupStatus === FETCH_STATUS.SUCCESS]
   );
 
   useEffect(() => {
@@ -156,10 +133,9 @@ export function InstallElasticAgent() {
   } = useFetcher(
     (callApi) => {
       if (onboardingId) {
-        return callApi(
-          'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
-          { params: { path: { onboardingId } } }
-        );
+        return callApi('GET /internal/observability_onboarding/flow/{onboardingId}/progress', {
+          params: { path: { onboardingId } },
+        });
       }
     },
     [onboardingId]
@@ -200,10 +176,8 @@ export function InstallElasticAgent() {
   }, [progressData?.progress]);
 
   const isInstallStarted = progressData?.progress['ea-download'] !== undefined;
-  const isInstallCompleted =
-    progressData?.progress?.['ea-status']?.status === 'complete';
-  const autoDownloadConfigStatus = progressData?.progress?.['ea-config']
-    ?.status as EuiStepStatus;
+  const isInstallCompleted = progressData?.progress?.['ea-status']?.status === 'complete';
+  const autoDownloadConfigStatus = progressData?.progress?.['ea-config']?.status as EuiStepStatus;
 
   return (
     <StepModal
@@ -318,9 +292,7 @@ export function InstallElasticAgent() {
           >
         }
         configureAgentStatus={
-          yamlConfigStatus === FETCH_STATUS.LOADING
-            ? 'loading'
-            : autoDownloadConfigStatus
+          yamlConfigStatus === FETCH_STATUS.LOADING ? 'loading' : autoDownloadConfigStatus
         }
         configureAgentYaml={yamlConfig}
         appendedSteps={[getCheckLogsStep()]}

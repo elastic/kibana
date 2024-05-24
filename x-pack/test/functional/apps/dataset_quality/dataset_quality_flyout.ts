@@ -28,7 +28,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const browser = getService('browser');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality flyout', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/182154
+  describe.skip('Dataset quality flyout', () => {
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.datasetQuality.navigateTo();
@@ -76,6 +77,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         lastActivityText,
         `[data-test-subj=${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutFieldValue}]`
       );
+
       expect(lastActivityTextExists).to.eql(true);
     });
 
@@ -126,6 +128,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         apacheIntegrationId
       );
 
+      await PageObjects.datasetQuality.closeFlyout();
+
       expect(integrationNameElements.length).to.eql(1);
     });
 
@@ -139,6 +143,140 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const datasetSelectorText =
         await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
       expect(datasetSelectorText).to.eql(testDatasetName);
+    });
+
+    it('shows summary KPIs', async () => {
+      await PageObjects.datasetQuality.navigateTo();
+
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+
+      const summary = await PageObjects.datasetQuality.parseFlyoutKpis();
+      expect(summary).to.eql({
+        docsCountTotal: '0',
+        size: '0.0 B',
+        services: '0',
+        hosts: '0',
+        degradedDocs: '0',
+      });
+    });
+
+    it('shows the updated KPIs', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+
+      const summaryBefore = await PageObjects.datasetQuality.parseFlyoutKpis();
+
+      // Set time range to 3 days ago
+      const flyoutBodyContainer = await testSubjects.find(
+        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutBody
+      );
+      await PageObjects.datasetQuality.setDatePickerLastXUnits(flyoutBodyContainer, 3, 'd');
+
+      // Index 2 doc 2 days ago
+      const time2DaysAgo = Date.now() - 2 * 24 * 60 * 60 * 1000;
+      await synthtrace.index(
+        getLogsForDataset({
+          to: time2DaysAgo,
+          count: 2,
+          dataset: apacheAccessDatasetName,
+          isMalformed: false,
+        })
+      );
+
+      // Index 5 degraded docs 2 days ago
+      await synthtrace.index(
+        getLogsForDataset({
+          to: time2DaysAgo,
+          count: 5,
+          dataset: apacheAccessDatasetName,
+          isMalformed: true,
+        })
+      );
+
+      await PageObjects.datasetQuality.refreshFlyout();
+      const summaryAfter = await PageObjects.datasetQuality.parseFlyoutKpis();
+
+      expect(parseInt(summaryAfter.docsCountTotal, 10)).to.be.greaterThan(
+        parseInt(summaryBefore.docsCountTotal, 10)
+      );
+
+      expect(parseInt(summaryAfter.degradedDocs, 10)).to.be.greaterThan(
+        parseInt(summaryBefore.degradedDocs, 10)
+      );
+
+      expect(parseInt(summaryAfter.size, 10)).to.be.greaterThan(parseInt(summaryBefore.size, 10));
+      expect(parseInt(summaryAfter.services, 10)).to.be.greaterThan(
+        parseInt(summaryBefore.services, 10)
+      );
+      expect(parseInt(summaryAfter.hosts, 10)).to.be.greaterThan(parseInt(summaryBefore.hosts, 10));
+    });
+
+    it('shows the right number of services', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+
+      const summaryBefore = await PageObjects.datasetQuality.parseFlyoutKpis();
+      const testServices = ['test-srv-1', 'test-srv-2'];
+
+      // Index 2 docs with different services
+      const timeNow = Date.now();
+      await synthtrace.index(
+        getLogsForDataset({
+          to: timeNow,
+          count: 2,
+          dataset: apacheAccessDatasetName,
+          isMalformed: false,
+          services: testServices,
+        })
+      );
+
+      await PageObjects.datasetQuality.refreshFlyout();
+      const summaryAfter = await PageObjects.datasetQuality.parseFlyoutKpis();
+
+      expect(parseInt(summaryAfter.services, 10)).to.eql(
+        parseInt(summaryBefore.services, 10) + testServices.length
+      );
+    });
+
+    it('goes to log explorer for degraded docs when show all is clicked', async () => {
+      const apacheAccessDatasetName = 'apache.access';
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+
+      const degradedDocsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.degradedDocs}`;
+      await testSubjects.click(degradedDocsShowAllSelector);
+      await browser.switchTab(1);
+
+      // Confirm dataset selector text in observability logs explorer
+      const datasetSelectorText =
+        await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
+      expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+
+      await browser.closeCurrentWindow();
+      await browser.switchTab(0);
+    });
+
+    // Blocked by https://github.com/elastic/kibana/issues/181705
+    it.skip('goes to infra hosts for hosts when show all is clicked', async () => {
+      const apacheAccessDatasetHumanName = 'Apache access logs';
+      await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
+
+      const hostsShowAllSelector = `${PageObjects.datasetQuality.testSubjectSelectors.datasetQualityFlyoutKpiLink}-${PageObjects.datasetQuality.texts.hosts}`;
+      await testSubjects.click(hostsShowAllSelector);
+      await browser.switchTab(1);
+
+      // Confirm url contains metrics/hosts
+      await retry.tryForTime(5000, async () => {
+        const currentUrl = await browser.getCurrentUrl();
+        const parsedUrl = new URL(currentUrl);
+        expect(parsedUrl.pathname).to.contain('/app/metrics/hosts');
+      });
+
+      await browser.closeCurrentWindow();
+      await browser.switchTab(0);
     });
 
     it('Integration actions menu is present with correct actions', async () => {
@@ -249,13 +387,13 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.openDatasetFlyout(apacheAccessDatasetHumanName);
       await PageObjects.datasetQuality.openIntegrationActionsMenu();
 
-      const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
-        integrationActions.template
-      );
-
-      await action.click();
-
       await retry.tryForTime(5000, async () => {
+        const action = await PageObjects.datasetQuality.getIntegrationActionButtonByAction(
+          integrationActions.template
+        );
+
+        await action.click();
+
         const currentUrl = await browser.getCurrentUrl();
         const parsedUrl = new URL(currentUrl);
         expect(parsedUrl.pathname).to.contain(

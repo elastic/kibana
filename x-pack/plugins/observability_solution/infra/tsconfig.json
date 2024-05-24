@@ -96,7 +96,12 @@
     "@kbn/elastic-agent-utils",
     "@kbn/dashboard-plugin",
     "@kbn/shared-svg",
-    "@kbn/aiops-log-rate-analysis"
+    "@kbn/aiops-log-rate-analysis",
+    "@kbn/react-hooks",
+    "@kbn/search-types",
+    "@kbn/router-utils",
+    "@kbn/react-kibana-context-render",
+    "@kbn/react-kibana-context-theme"
   ],
   "exclude": [
     "target/**/*"

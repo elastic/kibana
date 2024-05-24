@@ -13,8 +13,8 @@ const getPreviewDataParamsSchema = t.type({
     t.type({
       indicator: indicatorSchema,
       range: t.type({
-        start: t.number,
-        end: t.number,
+        from: dateType,
+        to: dateType,
       }),
     }),
     t.partial({
@@ -31,7 +31,7 @@ const getPreviewDataResponseSchema = t.array(
   t.intersection([
     t.type({
       date: dateType,
-      sliValue: t.number,
+      sliValue: t.union([t.number, t.null]),
     }),
     t.partial({
       events: t.type({

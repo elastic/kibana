@@ -7,8 +7,11 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { RiskEngineSettingsResponse } from '../../../../../common/api/entity_analytics/risk_engine';
 import { RISK_ENGINE_SETTINGS_URL, APP_ID } from '../../../../../common/constants';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { RiskEngineAuditActions } from '../audit';
 
 export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['router']) => {
   router.versioned
@@ -27,13 +30,24 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
 
       try {
         const result = await riskEngineClient.getConfiguration();
+        securitySolution.getAuditLogger()?.log({
+          message: 'User accessed risk engine configuration information',
+          event: {
+            action: RiskEngineAuditActions.RISK_ENGINE_CONFIGURATION_GET,
+            category: AUDIT_CATEGORY.DATABASE,
+            type: AUDIT_TYPE.ACCESS,
+            outcome: AUDIT_OUTCOME.SUCCESS,
+          },
+        });
+
         if (!result) {
           throw new Error('Unable to get risk engine configuration');
         }
+        const body: RiskEngineSettingsResponse = {
+          range: result.range,
+        };
         return response.ok({
-          body: {
-            range: result.range,
-          },
+          body,
         });
       } catch (e) {
         const error = transformError(e);

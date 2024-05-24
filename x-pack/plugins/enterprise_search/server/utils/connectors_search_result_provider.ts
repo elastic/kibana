@@ -26,7 +26,7 @@ export function getConnectorsSearchResultProvider(
 ): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, client, maxResults }) => {
-      if (!client || !term || tags || (types && !types.includes('connectors'))) {
+      if (!client || !term || tags || (types && !types.includes('connector'))) {
         return from([[]]);
       }
       const getConnectorData = async (): Promise<GlobalSearchProviderResult[]> => {
@@ -54,7 +54,7 @@ export function getConnectorsSearchResultProvider(
       };
       return from(getConnectorData()).pipe(takeUntil(aborted$));
     },
-    getSearchableTypes: () => ['connectors'],
+    getSearchableTypes: () => ['connector'],
     id: 'enterpriseSearchConnectors',
   };
 }

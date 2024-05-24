@@ -22,9 +22,7 @@ const apiRequestsToIntercept = [
   },
 ];
 
-const aliasNames = apiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
-);
+const aliasNames = apiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
 const apmMobileServiceOverview = url.format({
   pathname: 'app/apm/mobile-services/synth-android',

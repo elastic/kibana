@@ -14,11 +14,7 @@ import {
 } from '../../../../../common/service_health_status';
 import { useTheme } from '../../../../hooks/use_theme';
 
-export function HealthBadge({
-  healthStatus,
-}: {
-  healthStatus: ServiceHealthStatus;
-}) {
+export function HealthBadge({ healthStatus }: { healthStatus: ServiceHealthStatus }) {
   const theme = useTheme();
 
   return (

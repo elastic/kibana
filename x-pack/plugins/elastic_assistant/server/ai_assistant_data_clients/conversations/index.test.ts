@@ -33,7 +33,7 @@ describe('AIAssistantConversationsDataClient', () => {
       logger,
       elasticsearchClientPromise: Promise.resolve(clusterClient),
       spaceId: 'default',
-      indexPatternsResorceName: '',
+      indexPatternsResourceName: '',
       currentUser: mockUser1,
       kibanaVersion: '8.8.0',
     };

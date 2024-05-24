@@ -9,6 +9,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
+import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
@@ -16,17 +17,12 @@ import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
+import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import {
-  ESQL_ASYNC_SEARCH_STRATEGY,
-  IKibanaSearchRequest,
-  ISearchGeneric,
-  KibanaContext,
-} from '..';
-import { IKibanaSearchResponse } from '../types';
+import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext } from '..';
 import { UiSettingsCommon } from '../..';
 
 type Input = KibanaContext | null;
@@ -79,6 +75,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
     name: 'esql',
     type: 'datatable',
     inputTypes: ['kibana_context', 'null'],
+    allowCache: true,
     help: i18n.translate('data.search.esql.help', {
       defaultMessage: 'Queries Elasticsearch using ES|QL.',
     }),

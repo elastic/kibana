@@ -25,6 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const security = getService('security');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const log = getService('log');
+  const retry = getService('retry');
 
   describe('Stack alerts page', function () {
     describe('Loads the page with limited privileges', () => {
@@ -53,13 +54,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             shouldUseHashForSubUrl: false,
           }
         );
-        await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
-        const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
-        const solutionFilters = getSolutionNamesFromFilters(quickFilters);
-        expect(solutionFilters).to.have.length(2);
-        expect(solutionFilters[0]).to.equal('Stack management');
-        // Observability is included because of multi-consumer rules
-        expect(solutionFilters[1]).to.equal('Observability');
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          if (!(await testSubjects.exists('queryBarMenuPanel'))) {
+            await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
+          }
+          const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
+          const solutionFilters = getSolutionNamesFromFilters(quickFilters);
+          expect(solutionFilters).to.have.length(2);
+          expect(solutionFilters[0]).to.equal('Stack management');
+          // Observability is included because of multi-consumer rules
+          expect(solutionFilters[1]).to.equal('Observability');
+        });
       });
     });
 

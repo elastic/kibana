@@ -53,7 +53,6 @@ describe('AppContextService', () => {
     it('should return default registered features when stopped ', () => {
       appContextService.start(mockAppContext);
       appContextService.registerFeatures('super', {
-        assistantAlertsInsights: false,
         assistantModelEvaluation: true,
       });
       appContextService.stop();
@@ -103,7 +102,7 @@ describe('AppContextService', () => {
     it('should register and get features for a single plugin', () => {
       const pluginName = 'pluginName';
       const features: AssistantFeatures = {
-        assistantAlertsInsights: false,
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
       };
 
@@ -118,12 +117,12 @@ describe('AppContextService', () => {
     it('should register and get features for multiple plugins', () => {
       const pluginOne = 'plugin1';
       const featuresOne: AssistantFeatures = {
-        assistantAlertsInsights: false,
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
       };
       const pluginTwo = 'plugin2';
       const featuresTwo: AssistantFeatures = {
-        assistantAlertsInsights: false,
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
       };
 
@@ -138,11 +137,11 @@ describe('AppContextService', () => {
     it('should update features if registered again', () => {
       const pluginName = 'pluginName';
       const featuresOne: AssistantFeatures = {
-        assistantAlertsInsights: false,
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: true,
       };
       const featuresTwo: AssistantFeatures = {
-        assistantAlertsInsights: false,
+        ...defaultAssistantFeatures,
         assistantModelEvaluation: false,
       };
 

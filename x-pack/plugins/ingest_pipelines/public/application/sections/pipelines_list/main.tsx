@@ -26,14 +26,13 @@ import {
 import { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
-import { getEditPath, getClonePath, getListPath } from '../../services/navigation';
+import { getEditPath, getClonePath } from '../../services/navigation';
 
 import { EmptyList } from './empty_list';
 import { PipelineTable } from './table';
 import { PipelineDetailsFlyout } from './details_flyout';
 import { PipelineNotFoundFlyout } from './not_found_flyout';
 import { PipelineDeleteModal } from './delete_modal';
-import { useRedirectToPathOrRedirectPath } from '../../hooks';
 
 const getPipelineNameFromLocation = (location: Location) => {
   const { pipeline } = parse(location.search.substring(1));
@@ -54,7 +53,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   const [pipelinesToDelete, setPipelinesToDelete] = useState<string[]>([]);
 
   const { data, isLoading, error, resendRequest } = services.api.useLoadPipelines();
-  const redirectToPathOrRedirectPath = useRedirectToPathOrRedirectPath(history);
 
   // Track component loaded
   useEffect(() => {
@@ -82,7 +80,17 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
 
   const goHome = () => {
     setShowFlyout(false);
-    redirectToPathOrRedirectPath(getListPath());
+
+    // When redirecting the user to the list of pipelines, we want to only clean
+    // up the pipeline query param as there might be other query params (for example:
+    // search or filters) that we want to keep.
+    const params = new URLSearchParams(history.location.search);
+    params.delete('pipeline');
+
+    history.push({
+      pathname: '',
+      search: params.toString(),
+    });
   };
 
   if (error) {
@@ -263,6 +271,9 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           }}
           pipelinesToDelete={pipelinesToDelete}
         />
+      ) : null}
+      {services.consolePlugin?.EmbeddableConsole ? (
+        <services.consolePlugin.EmbeddableConsole />
       ) : null}
     </>
   );

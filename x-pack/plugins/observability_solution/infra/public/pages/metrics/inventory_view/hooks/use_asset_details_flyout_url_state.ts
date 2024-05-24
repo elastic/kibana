@@ -13,6 +13,7 @@ import { useUrlState } from '../../../../utils/use_url_state';
 
 export const GET_DEFAULT_PROPERTIES: AssetDetailsFlyoutProperties = {
   detailsItemId: null,
+  assetType: null,
 };
 
 const ASSET_DETAILS_FLYOUT_URL_STATE_KEY = 'assetDetailsFlyout';
@@ -35,6 +36,7 @@ export const useAssetDetailsFlyoutState = (): [
 
 const AssetDetailsFlyoutStateRT = rt.type({
   detailsItemId: rt.union([rt.string, rt.null]),
+  assetType: rt.union([rt.string, rt.null]),
 });
 
 export type AssetDetailsFlyoutState = rt.TypeOf<typeof AssetDetailsFlyoutStateRT>;

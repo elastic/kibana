@@ -23,8 +23,7 @@ export function getAgentAuthorizationSettings(): SettingsRow[] {
       helpText: i18n.translate(
         'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyAuthenticationHelpText',
         {
-          defaultMessage:
-            'Enable API Key auth between APM Server and APM Agents.',
+          defaultMessage: 'Enable API Key auth between APM Server and APM Agents.',
         }
       ),
       settings: [
@@ -43,8 +42,7 @@ export function getAgentAuthorizationSettings(): SettingsRow[] {
           rowTitle: i18n.translate(
             'xpack.apm.fleet_integration.settings.agentAuthorization.apiKeyLimitTitle',
             {
-              defaultMessage:
-                'Maximum number of API keys of Agent authentication',
+              defaultMessage: 'Maximum number of API keys of Agent authentication',
             }
           ),
           rowDescription: i18n.translate(
@@ -77,8 +75,7 @@ export function getAgentAuthorizationSettings(): SettingsRow[] {
       helpText: i18n.translate(
         'xpack.apm.fleet_integration.settings.agentAuthorization.anonymousEnabledHelpText',
         {
-          defaultMessage:
-            'Enable anonymous access to APM Server for select APM Agents.',
+          defaultMessage: 'Enable anonymous access to APM Server for select APM Agents.',
         }
       ),
       rowDescription: i18n.translate(
@@ -149,8 +146,7 @@ export function getAgentAuthorizationSettings(): SettingsRow[] {
           helpText: i18n.translate(
             'xpack.apm.fleet_integration.settings.agentAuthorization.anonymousRateLimitEventLimitHelpText',
             {
-              defaultMessage:
-                'Maximum number of events per client IP per second.',
+              defaultMessage: 'Maximum number of events per client IP per second.',
             }
           ),
           validation: getIntegerRt({ min: 1 }),

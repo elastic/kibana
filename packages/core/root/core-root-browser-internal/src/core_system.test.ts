@@ -46,6 +46,8 @@ import {
   CustomBrandingServiceConstructor,
   MockSecurityService,
   SecurityServiceConstructor,
+  MockUserProfileService,
+  UserProfileServiceConstructor,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
@@ -153,6 +155,7 @@ describe('constructor', () => {
     expect(LoggingSystemConstructor).toHaveBeenCalledTimes(1);
     expect(CustomBrandingServiceConstructor).toHaveBeenCalledTimes(1);
     expect(SecurityServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(UserProfileServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -316,6 +319,11 @@ describe('#setup()', () => {
   it('calls security#setup()', async () => {
     await setupCore();
     expect(MockSecurityService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls userProfile#setup()', async () => {
+    await setupCore();
+    expect(MockUserProfileService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -507,6 +515,11 @@ describe('#start()', () => {
   it('calls security#start()', async () => {
     await startCore();
     expect(MockSecurityService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls userProfile#start()', async () => {
+    await startCore();
+    expect(MockUserProfileService.start).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -7,9 +7,13 @@
 
 import type { CoreStart } from '@kbn/core/public';
 
+type StartServices = Pick<CoreStart, 'analytics' | 'i18n' | 'theme'>;
+
 let coreStart: CoreStart;
 export function setStartServices(core: CoreStart) {
   coreStart = core;
 }
+
+export const getStartServices = (): StartServices => coreStart;
 
 export const getDocLinks = () => coreStart?.docLinks;

@@ -71,10 +71,7 @@ export async function getDependencyLatencyDistribution({
       ...commonParams,
       query: {
         bool: {
-          filter: [
-            commonQuery,
-            ...termQuery(EVENT_OUTCOME, EventOutcome.failure),
-          ],
+          filter: [commonQuery, ...termQuery(EVENT_OUTCOME, EventOutcome.failure)],
         },
       },
     }),

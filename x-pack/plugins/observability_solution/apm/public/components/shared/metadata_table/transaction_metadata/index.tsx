@@ -19,21 +19,18 @@ interface Props {
 export function TransactionMetadata({ transaction }: Props) {
   const { data: transactionEvent, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/event_metadata/{processorEvent}/{id}',
-        {
-          params: {
-            path: {
-              processorEvent: ProcessorEvent.transaction,
-              id: transaction.transaction.id,
-            },
-            query: {
-              start: transaction['@timestamp'],
-              end: transaction['@timestamp'],
-            },
+      return callApmApi('GET /internal/apm/event_metadata/{processorEvent}/{id}', {
+        params: {
+          path: {
+            processorEvent: ProcessorEvent.transaction,
+            id: transaction.transaction.id,
           },
-        }
-      );
+          query: {
+            start: transaction['@timestamp'],
+            end: transaction['@timestamp'],
+          },
+        },
+      });
     },
     [transaction]
   );
@@ -42,10 +39,5 @@ export function TransactionMetadata({ transaction }: Props) {
     () => getSectionsFromFields(transactionEvent?.metadata || {}),
     [transactionEvent?.metadata]
   );
-  return (
-    <MetadataTable
-      sections={sections}
-      isLoading={status === FETCH_STATUS.LOADING}
-    />
-  );
+  return <MetadataTable sections={sections} isLoading={status === FETCH_STATUS.LOADING} />;
 }
