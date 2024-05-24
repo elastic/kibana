@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 import { useCallback } from 'react';
 import { findBackfillsForRules } from '../api';
 
@@ -21,25 +23,29 @@ export const useInvalidateFindBackfillQuery = () => {
   }, [queryClient]);
 };
 
-export const useFindBackfillsForRules = ({
-  ruleIds,
-  page,
-  perPage,
-}: {
-  ruleIds: string[];
-  page: number;
-  perPage: number;
-}) => {
-  return useQuery(
+export const useFindBackfillsForRules = (
+  {
+    ruleIds,
+    page,
+    perPage,
+  }: {
+    ruleIds: string[];
+    page: number;
+    perPage: number;
+  },
+  options?: UseQueryOptions<FindBackfillResponseBody>
+) => {
+  return useQuery<FindBackfillResponseBody>(
     [FIND_BACKFILLS_FOR_RULES, ...ruleIds, page, perPage],
     async ({ signal }) => {
       const response = await findBackfillsForRules({ signal, ruleIds, page, perPage });
 
-      return { rules: response.data, total: response.total };
+      return response;
     },
     {
       retry: 0,
       keepPreviousData: true,
+      ...options,
     }
   );
 };

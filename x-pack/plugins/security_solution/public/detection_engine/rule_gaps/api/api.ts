@@ -23,11 +23,15 @@ export const findBackfillsForRules = async ({
   page,
   perPage,
   signal,
+  sortField = 'createdAt',
+  sortOrder = 'desc',
 }: {
   ruleIds: string[];
   page: number;
   perPage: number;
   signal?: AbortSignal;
+  sortField?: string;
+  sortOrder?: string;
 }): Promise<FindBackfillResponseBody> =>
   KibanaServices.get().http.fetch<FindBackfillResponseBody>(
     INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
@@ -37,6 +41,8 @@ export const findBackfillsForRules = async ({
         rule_ids: ruleIds.join(','),
         page,
         per_page: perPage,
+        sort_field: sortField,
+        sort_order: sortOrder,
       },
       signal,
     }

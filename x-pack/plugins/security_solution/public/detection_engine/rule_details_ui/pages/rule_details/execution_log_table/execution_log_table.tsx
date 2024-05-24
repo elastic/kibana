@@ -446,8 +446,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         <EuiFlexItem grow={true}>
           <HeaderSection title={i18n.TABLE_TITLE} subtitle={i18n.TABLE_SUBTITLE} />
         </EuiFlexItem>
-
-        
         <EuiFlexItem grow={false}>
           <ExecutionLogSearchBar
             onlyShowFilters={true}
@@ -472,8 +470,6 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         </DatePickerEuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-      <RuleBackfillsInfo ruleId={ruleId} />
       <EuiSpacer size="s" />
 
       {/* Utility bar */}
@@ -530,6 +526,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         itemId={getItemId}
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
       />
+
+      <EuiSpacer size="xl" />
+      <RuleBackfillsInfo ruleId={ruleId} />
     </EuiPanel>
   );
 };

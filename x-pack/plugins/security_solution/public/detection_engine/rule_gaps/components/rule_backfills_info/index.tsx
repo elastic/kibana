@@ -6,53 +6,61 @@
  */
 
 import React, { useState } from 'react';
-import { EuiBasicTable } from '@elastic/eui';
-import type { EuiBasicTableColumn, CriteriaWithPagination } from '@elastic/eui';
+import { EuiAutoRefresh, EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type {
+  EuiBasicTableColumn,
+  CriteriaWithPagination,
+  OnRefreshChangeProps,
+} from '@elastic/eui';
 import { useFindBackfillsForRules } from '../../api/hooks/use_find_backfills_for_rules';
 import { StopBackfill } from './stop_backfill';
 import { BackfillStatusInfo } from './backfill_status';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import type { BackfillRow } from '../../types';
+import type { BackfillRow, BackfillStatus } from '../../types';
 import * as i18n from '../../translations';
+import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
+import { useUserData } from '../../../../detections/components/user_info';
+import { getBackfillRowsFromResponse } from './utils';
+import { HeaderSection } from '../../../../common/components/header_section';
 
 export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState(3000);
+  const [isAutoRefresh, setIsAutoRefresh] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const [{ canUserCRUD }] = useUserData();
+  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
 
-  const { data, isLoading, isError } = useFindBackfillsForRules({
-    ruleIds: [ruleId],
-    page: pageIndex + 1,
-    perPage: pageSize,
-  });
-
-  const backfills: BackfillRow[] =
-    data?.rules
-      ?.filter?.((r) => r.rule.id === ruleId)
-      ?.map((backfill) => ({
-        ...backfill,
-        total: backfill?.schedule?.length ?? 0,
-        completed: backfill?.schedule?.filter((s) => s.status === 'complete').length ?? 0,
-        error: backfill?.schedule?.filter((s) => s.status === 'error').length ?? 0,
-      })) ?? [];
-
-  const onTableChange: (params: CriteriaWithPagination<BackfillRow>) => void = ({ page, sort }) => {
-    if (page) {
-      setPageIndex(page.index);
-      setPageSize(page.size);
+  const { data, isLoading, isError } = useFindBackfillsForRules(
+    {
+      ruleIds: [ruleId],
+      page: pageIndex + 1,
+      perPage: pageSize,
+    },
+    {
+      refetchInterval: isAutoRefresh ? autoRefreshInterval : false,
     }
+  );
+
+  const backfills: BackfillRow[] = getBackfillRowsFromResponse(data?.data ?? []);
+
+  const stopAction = {
+    render: (item: BackfillRow) => <StopBackfill id={item.id} />,
+    width: '10%',
   };
 
   const columns: Array<EuiBasicTableColumn<BackfillRow>> = [
     {
       field: 'status',
       name: i18n.BACKFILLS_TABLE_COLUMN_STATUS,
-      render: (value) => <BackfillStatusInfo status={value} />,
+      render: (value: BackfillStatus) => <BackfillStatusInfo status={value} />,
+      width: '10%',
     },
     {
       field: 'created_at',
       name: i18n.BACKFILLS_TABLE_COLUMN_CREATED_AT,
       render: (value: 'string') => <FormattedDate value={value} fieldName={'created_at'} />,
-      width: '15%',
+      width: '20%',
     },
     {
       name: i18n.BACKFILLS_TABLE_COLUMN_SOURCE_TIME_RANCE,
@@ -63,24 +71,38 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
           <FormattedDate value={value.end} fieldName={'end'} />
         </>
       ),
-      width: '50%',
+      width: '30%',
     },
     {
       field: 'error',
+      align: 'right',
       name: i18n.BACKFILLS_TABLE_COLUMN_ERROR,
     },
     {
-      field: 'completed',
+      field: 'pending',
+      align: 'right',
+      name: i18n.BACKFILLS_TABLE_COLUMN_PENDING,
+    },
+    {
+      field: 'running',
+      align: 'right',
+      name: i18n.BACKFILLS_TABLE_COLUMN_RUNNING,
+    },
+    {
+      field: 'complete',
+      align: 'right',
       name: i18n.BACKFILLS_TABLE_COLUMN_COMPLETED,
     },
     {
       field: 'total',
+      align: 'right',
       name: i18n.BACKFILLS_TABLE_COLUMN_TOTAL,
     },
-    {
-      render: (item: BackfillRow) => <StopBackfill id={item.id} />,
-    },
   ];
+
+  if (hasCRUDPermissions) {
+    columns.push(stopAction);
+  }
 
   const pagination = {
     pageIndex,
@@ -91,14 +113,40 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
 
   if (data?.total === 0) return null;
 
+  const onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
+    setIsAutoRefresh(!isPaused);
+    setAutoRefreshInterval(refreshInterval);
+  };
+
+  const onTableChange: (params: CriteriaWithPagination<BackfillRow>) => void = ({ page, sort }) => {
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
+  };
+
   return (
     <div>
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={true}>
+          <HeaderSection
+            title={i18n.BACKFILL_TABLE_TITLE}
+            subtitle={i18n.BACKFILL_TABLE_SUBTITLE}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiAutoRefresh
+            isPaused={!isAutoRefresh}
+            refreshInterval={autoRefreshInterval}
+            onRefreshChange={onRefreshChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiBasicTable
         data-test-subj="rule-backfills-table"
         items={backfills}
         columns={columns}
         pagination={pagination}
-        // sorting={sorting}
         error={isError ? 'error' : undefined}
         loading={isLoading}
         onChange={onTableChange}

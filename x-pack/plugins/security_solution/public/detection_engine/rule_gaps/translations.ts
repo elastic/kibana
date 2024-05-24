@@ -42,6 +42,20 @@ export const BACKFILLS_TABLE_COLUMN_COMPLETED = i18n.translate(
   }
 );
 
+export const BACKFILLS_TABLE_COLUMN_RUNNING = i18n.translate(
+  'xpack.securitySolution.rule_gaps.backfillsTable.column.running',
+  {
+    defaultMessage: 'Running',
+  }
+);
+
+export const BACKFILLS_TABLE_COLUMN_PENDING = i18n.translate(
+  'xpack.securitySolution.rule_gaps.backfillsTable.column.pedning',
+  {
+    defaultMessage: 'Pending',
+  }
+);
+
 export const BACKFILLS_TABLE_COLUMN_TOTAL = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillsTable.column.error',
   {
@@ -95,5 +109,19 @@ export const BACKFILLS_TABLE_STOP_CONFIRMATION_ERROR = i18n.translate(
   'xpack.securitySolution.rule_gaps.backfillsTable.stop.confirmationError',
   {
     defaultMessage: 'Error stopping run',
+  }
+);
+
+export const BACKFILL_TABLE_TITLE = i18n.translate(
+  'xpack.securitySolution.rule_gaps.backfillTable.title',
+  {
+    defaultMessage: 'Backfill runs',
+  }
+);
+
+export const BACKFILL_TABLE_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.rule_gaps.backfillTable.subtitle',
+  {
+    defaultMessage: 'View and manage backfill runs',
   }
 );
