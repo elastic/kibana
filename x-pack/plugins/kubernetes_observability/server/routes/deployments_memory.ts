@@ -34,13 +34,28 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
         },
       },
       async (context, request, response) => {
-        var namespace = checkDefaultNamespace(request.query.namespace);
         var period = checkDefaultPeriod(request.query.period);
         var deployNames = new Array();
         var deployments = new Array();
-
+        var musts = new Array();
         const client = (await context.core).elasticsearch.client.asCurrentUser;
+        if (request.query.namespace !== undefined) {
+          musts.push(
+             {
+              term: {
+                'resource.attributes.k8s.namespace.name': request.query.namespace,
+              },
+            }
+          )
+        }
         if (request.query.name === undefined) {
+          musts.push(
+            {
+             exists: {
+              field: 'resource.attributes.k8s.deployment.name'
+             },
+           }
+         )
           const dslDeploys: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
             _source: false,
@@ -49,7 +64,7 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
             ],
             query: {
               bool: {
-                must: [{ exists: { field: 'resource.attributes.k8s.deployment.name' } }]
+                must: musts
               },
             },
             aggs: {
