@@ -364,7 +364,6 @@ import type { FunctionDefinition } from './types';
   );
 
   const evalFunctionDefinitions: FunctionDefinition[] = [];
-  // const aggFunctionDefinitions = [];
   for (const ESDefinition of ESFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
