@@ -41,7 +41,7 @@ export interface CrossClusterApiKey extends BaseApiKey {
  *
  * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
  */
-interface BaseApiKey extends estypes.SecurityApiKey {
+export interface BaseApiKey extends estypes.SecurityApiKey {
   username: Required<estypes.SecurityApiKey>['username'];
   realm: Required<estypes.SecurityApiKey>['realm'];
   creation: Required<estypes.SecurityApiKey>['creation'];
@@ -76,4 +76,42 @@ export type ApiKeyRoleDescriptors = Record<string, estypes.SecurityRoleDescripto
 export interface ApiKeyToInvalidate {
   id: string;
   name: string;
+}
+
+export interface ApiKeyAggregations {
+  usernames?: estypes.AggregationsStringTermsAggregate;
+  types?: estypes.AggregationsStringTermsAggregate;
+  expired?: estypes.AggregationsFilterAggregateKeys;
+  managed?: {
+    buckets: {
+      metadataBased: estypes.AggregationsFilterAggregateKeys;
+      namePrefixBased: estypes.AggregationsFilterAggregateKeys;
+    };
+  };
+}
+
+/**
+ * Response of Kibana Query API keys endpoint.
+ */
+export type QueryApiKeyResult = SuccessQueryApiKeyResult | ErrorQueryApiKeyResult;
+
+interface SuccessQueryApiKeyResult extends BaseQueryApiKeyResult {
+  apiKeys: ApiKey[];
+  count: number;
+  total: number;
+  queryError: never;
+}
+
+interface ErrorQueryApiKeyResult extends BaseQueryApiKeyResult {
+  queryError: { name: string; message: string };
+  apiKeys: never;
+  total: never;
+}
+
+interface BaseQueryApiKeyResult {
+  canManageCrossClusterApiKeys: boolean;
+  canManageApiKeys: boolean;
+  canManageOwnApiKeys: boolean;
+  aggregationTotal: number;
+  aggregations: Record<string, estypes.SecurityQueryApiKeysAPIKeyAggregate> | undefined;
 }
