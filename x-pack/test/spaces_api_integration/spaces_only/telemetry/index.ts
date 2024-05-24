@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { createTestConfig } from '../common/config';
+import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default createTestConfig('spaces_only', {
-  disabledPlugins: ['security'],
-  license: 'basic',
-  testFiles: [require.resolve('./telemetry'), require.resolve('./apis')],
-});
+export default function spacesOnlyTestSuite({ loadTestFile }: FtrProviderContext) {
+  describe('spaces telemetry data', function () {
+    loadTestFile(require.resolve('./telemetry'));
+  });
+}
