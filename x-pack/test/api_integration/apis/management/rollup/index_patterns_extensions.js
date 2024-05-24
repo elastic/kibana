@@ -17,7 +17,8 @@ export default function ({ getService }) {
   const { createIndexWithMappings, getJobPayload, createJob, cleanUp } =
     registerHelpers(getService);
 
-  describe('index patterns extension', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/184227
+  describe.skip('index patterns extension', () => {
     describe('Fields for wildcards', () => {
       const BASE_URI = `${INDEX_PATTERNS_EXTENSION_BASE_PATH}/_fields_for_wildcard`;
 
