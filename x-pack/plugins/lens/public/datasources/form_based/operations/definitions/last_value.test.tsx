@@ -914,10 +914,10 @@ describe('last_value', () => {
         indexPatternId: '',
       };
     });
-    it('returns undefined if sourceField exists and sortField is of type date ', () => {
+    it('returns empty array if sourceField exists and sortField is of type date ', () => {
       expect(
         lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
-      ).toEqual(undefined);
+      ).toHaveLength(0);
     });
     it('shows error message if the sourceField does not exist in index pattern', () => {
       errorLayer = {
@@ -1045,9 +1045,9 @@ describe('last_value', () => {
           } as LastValueIndexPatternColumn,
         },
       };
-      expect(lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern)).toEqual([
-        'Field start_date is of the wrong type',
-      ]);
+      expect(
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', indexPattern).map((e) => e.message)
+      ).toEqual(['Field start_date is of the wrong type']);
     });
     it('shows error message if the sortField is not date', () => {
       errorLayer = {
@@ -1063,7 +1063,9 @@ describe('last_value', () => {
         },
       };
       expect(
-        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern())
+        lastValueOperation.getErrorMessage!(errorLayer, 'col1', createMockedIndexPattern()).map(
+          (e) => e.message
+        )
       ).toEqual(['Field bytes is not a date field and cannot be used for sorting']);
     });
   });

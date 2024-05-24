@@ -231,7 +231,36 @@ describe('xy_visualization', () => {
                 "colorMode": Object {
                   "type": "categorical",
                 },
-                "paletteId": "`);
+                "paletteId": "eui_amsterdam_color_blind",
+                "specialAssignments": Array [
+                  Object {
+                    "color": Object {
+                      "type": "loop",
+                    },
+                    "rule": Object {
+                      "type": "other",
+                    },
+                    "touched": false,
+                  },
+                ],
+              },
+              "layerId": "l1",
+              "layerType": "data",
+              "palette": undefined,
+              "position": "top",
+              "seriesType": "bar_stacked",
+              "showGridlines": false,
+            },
+          ],
+          "legend": Object {
+            "isVisible": true,
+            "position": "right",
+          },
+          "preferredSeriesType": "bar_stacked",
+          "title": "Empty XY chart",
+          "valueLabels": "hide",
+        }
+      `);
     });
 
     it('loads from persisted state', () => {

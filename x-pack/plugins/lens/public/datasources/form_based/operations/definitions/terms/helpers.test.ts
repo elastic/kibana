@@ -107,9 +107,11 @@ describe('getMultiTermsScriptedFieldErrorMessage()', () => {
 
   it('should return an error message for a scripted field when there are multiple fields', () => {
     const col = getStringBasedOperationColumn('scripted', { secondaryFields: ['bytes'] });
-    expect(getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern)).toBe(
-      'Scripted fields are not supported when using multiple fields, found scripted'
-    );
+    expect(
+      getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern).map(
+        (e) => e.message
+      )
+    ).toEqual(['Scripted fields are not supported when using multiple fields, found scripted']);
   });
 
   it('should return no error message for multiple "native" fields', () => {
@@ -123,22 +125,26 @@ describe('getMultiTermsScriptedFieldErrorMessage()', () => {
     const col = getStringBasedOperationColumn('scripted', {
       secondaryFields: ['scripted', 'scripted', 'scripted'],
     });
-    expect(getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern)).toBe(
-      'Scripted fields are not supported when using multiple fields, found scripted, scripted, scripted, scripted'
-    );
+    expect(
+      getMultiTermsScriptedFieldErrorMessage(getLayer(col), 'col1', indexPattern).map(
+        (e) => e.message
+      )
+    ).toEqual([
+      'Scripted fields are not supported when using multiple fields, found scripted, scripted, scripted, scripted',
+    ]);
   });
 });
 
 describe('getDisallowedTermsMessage()', () => {
   it('should return no error if no shifted dimensions are defined', () => {
-    expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toBeUndefined();
+    expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toHaveLength(0);
     expect(
       getDisallowedTermsMessage(
         getLayer(getStringBasedOperationColumn(), [getCountOperationColumn()]),
         'col1',
         indexPattern
       )
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return no error for a single dimension shifted', () => {
@@ -148,7 +154,7 @@ describe('getDisallowedTermsMessage()', () => {
         'col1',
         indexPattern
       )
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return no error for a single dimension shifted which is wrapped in a referencing column', () => {
@@ -174,18 +180,18 @@ describe('getDisallowedTermsMessage()', () => {
         'col1',
         indexPattern
       )
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return no for multiple fields with no shifted dimensions', () => {
-    expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toBeUndefined();
+    expect(getDisallowedTermsMessage(getLayer(), 'col1', indexPattern)).toHaveLength(0);
     expect(
       getDisallowedTermsMessage(
         getLayer(getStringBasedOperationColumn(), [getCountOperationColumn()]),
         'col1',
         indexPattern
       )
-    ).toBeUndefined();
+    ).toHaveLength(0);
   });
 
   it('should return an error for multiple dimensions shifted for a single term', () => {
@@ -197,7 +203,7 @@ describe('getDisallowedTermsMessage()', () => {
         ]),
         'col1',
         indexPattern
-      )
+      )[0]
     ).toEqual(
       expect.objectContaining({
         message:
@@ -216,7 +222,7 @@ describe('getDisallowedTermsMessage()', () => {
         ]),
         'col1',
         indexPattern
-      )
+      )[0]
     ).toEqual(
       expect.objectContaining({
         message:

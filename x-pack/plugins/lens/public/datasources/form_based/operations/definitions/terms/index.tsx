@@ -573,9 +573,8 @@ export const termsOperation: OperationDefinition<
       return <FieldInputBase {...props} />;
     }
 
-    const showScriptedFieldError = Boolean(
-      getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern)
-    );
+    const showScriptedFieldError =
+      getMultiTermsScriptedFieldErrorMessage(layer, columnId, indexPattern).length > 0;
     const { invalidFields } = getFieldsByValidationState(indexPattern, selectedColumn);
 
     return (

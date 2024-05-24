@@ -170,7 +170,7 @@ export const getQueryValidationError = (
   { value: query, name: language, text }: TinymathNamedArgument,
   indexPattern: IndexPattern
 ): string | undefined => {
-  if (language !== 'kql' || language !== 'kql') {
+  if (language !== 'kql' && language !== 'lucene') {
     return;
   }
   // check if the raw argument has the minimal requirements
@@ -502,12 +502,12 @@ export function tryToParse(
     // * if the formula contains no existing ES operation, assume it's a plain parse failure
     // * if the formula contains at least one existing operation, check for query problems
     // TODO: not sure why we just consider the first error here
-    const maybeQueryProblems = getRawQueryValidationError(formula, operations)[0];
-    if (maybeQueryProblems) {
+    const maybeQueryProblems = getRawQueryValidationError(formula, operations);
+    if (maybeQueryProblems.length > 0) {
       return {
         root: null,
         error: {
-          ...maybeQueryProblems,
+          ...maybeQueryProblems[0],
           locations: [],
         },
       };
@@ -668,8 +668,8 @@ function validateFiltersArguments(
     | OperationDefinition<GenericIndexPatternColumn, 'fullReference'>,
   namedArguments: TinymathNamedArgument[] | undefined,
   globalFilters?: Query
-) {
-  const errors = [];
+): ErrorWrapper[] {
+  const errors: ErrorWrapper[] = [];
   const { conflicts, innerType, outerType } = hasFiltersConflicts(
     nodeOperation,
     namedArguments,
@@ -703,8 +703,8 @@ function validateNameArguments(
   namedArguments: TinymathNamedArgument[] | undefined,
   indexPattern: IndexPattern,
   dateRange: DateRange | undefined
-) {
-  const errors = [];
+): ErrorWrapper[] {
+  const errors: ErrorWrapper[] = [];
   const missingParams = getMissingParams(nodeOperation, namedArguments);
   if (missingParams.length) {
     errors.push(
@@ -751,9 +751,8 @@ function validateNameArguments(
     );
   }
   const queryValidationErrors = getQueryValidationErrors(namedArguments, indexPattern, dateRange);
-  if (queryValidationErrors.length) {
-    errors.push(...queryValidationErrors);
-  }
+  errors.push(...queryValidationErrors);
+
   const hasTooManyQueries = checkSingleQuery(namedArguments);
   if (hasTooManyQueries) {
     errors.push(getMessageFromId({ id: 'tooManyQueries', meta: {} }, getNodeLocation(node)));

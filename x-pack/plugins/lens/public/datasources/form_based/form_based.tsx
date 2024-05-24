@@ -768,7 +768,7 @@ export function getFormBasedDatasource({
             framePublicAPI.dateRange,
             uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
-          console.log(`${columnId} is column valid: ${!invalidColumn}`, layer);
+          console.log(`${columnId} is column invalidColumn: ${invalidColumn}`, layer);
           return !invalidColumn;
         }
       );
