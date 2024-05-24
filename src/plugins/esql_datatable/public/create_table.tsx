@@ -44,6 +44,7 @@ type DataTableColumnsMeta = Record<
 Remaining tasks:
 - Is it a good idea to render the flyout from the Discover plugin? Maybe is smarter to move it on another package.
 - Keep the selected columns in LLM
+- check the css and why the comparison mode is not working
 **/
 
 export const ESQLTable = (props: ESQLDatatableProps) => {
