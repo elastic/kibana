@@ -45,7 +45,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useAgentlessPolicy } from './setup_technology';
+import { useAgentless } from './setup_technology';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -131,7 +131,8 @@ export function useOnSubmit({
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const { isAgentlessPolicyId } = useAgentlessPolicy();
+  const { isAgentlessIntegration, isAgentlessAgentPolicy, isAgentlessPackagePolicy } =
+    useAgentless();
 
   // Update agent policy method
   const updateAgentPolicy = useCallback(
@@ -258,11 +259,7 @@ export function useOnSubmit({
         setFormState('INVALID');
         return;
       }
-      if (
-        agentCount !== 0 &&
-        !isAgentlessPolicyId(packagePolicy?.policy_id) &&
-        formState !== 'CONFIRM'
-      ) {
+      if (agentCount !== 0 && !isAgentlessIntegration(packageInfo) && formState !== 'CONFIRM') {
         setFormState('CONFIRM');
         return;
       }
@@ -307,7 +304,12 @@ export function useOnSubmit({
       }
 
       const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
-      const shouldForceInstallOnAgentless = isAgentlessPolicyId(agentPolicyIdToSave);
+
+      const shouldForceInstallOnAgentless =
+        isAgentlessAgentPolicy(createdPolicy) ||
+        isAgentlessIntegration(packageInfo) ||
+        isAgentlessPackagePolicy(packagePolicy);
+
       const forceInstall = force || shouldForceInstallOnAgentless;
 
       setFormState('LOADING');
@@ -411,18 +413,20 @@ export function useOnSubmit({
       formState,
       hasErrors,
       agentCount,
-      packagePolicy,
+      isAgentlessIntegration,
+      packageInfo,
       selectedPolicyTab,
-      isAgentlessPolicyId,
+      packagePolicy,
+      isAgentlessAgentPolicy,
+      isAgentlessPackagePolicy,
+      hasFleetAddAgentsPrivileges,
       withSysMonitoring,
       newAgentPolicy,
       updatePackagePolicy,
-      packageInfo,
       notifications.toasts,
       agentPolicy,
       onSaveNavigate,
       confirmForceInstall,
-      hasFleetAddAgentsPrivileges,
     ]
   );
 
