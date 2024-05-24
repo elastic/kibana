@@ -6,74 +6,23 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks';
-import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
-import { useKibana } from '../../../common/lib/kibana';
-import CasesProvider from '..';
 import { useCasesAddToExistingCaseModal } from '../../all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { allCasesPermissions } from '../../../common/mock';
-import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
-import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { createAppMockRenderer } from '../../../common/mock';
 import { useIsAddToCaseOpen } from './use_is_add_to_case_open';
-import { useApplication } from '../../../common/lib/kibana/use_application';
-import { of } from 'rxjs';
 import { useCasesToast } from '../../../common/use_cases_toast';
-import type { PublicAppInfo } from '@kbn/core/public';
+import { useCasesAddToNewCaseFlyout } from '../../create/flyout/use_cases_add_to_new_case_flyout';
 
 jest.mock('../../../common/use_cases_toast');
-jest.mock('../../../common/lib/kibana');
-jest.mock('../../../common/lib/kibana/use_application');
-jest.mock('../../../common/use_cases_toast');
-jest.mock('../../all_cases/selector_modal/all_cases_selector_modal', () => {
-  return {
-    AllCasesSelectorModal: jest.fn(),
-  };
+const useCasesToastMock = useCasesToast as jest.Mock;
+useCasesToastMock.mockReturnValue({
+  showInfoToast: jest.fn(),
 });
 
-const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
-const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const useApplicationMock = useApplication as jest.Mock;
-const useCasesToastMock = useCasesToast as jest.Mock;
-const mockedToastInfo = jest.fn();
+const { AppWrapper } = createAppMockRenderer();
 
 describe('use is add to existing case modal open hook', () => {
-  let wrapper: FC<PropsWithChildren<unknown>>;
   beforeEach(() => {
     jest.clearAllMocks();
-
-    useKibanaMock().services.application = {
-      ...useKibanaMock().services.application,
-      currentAppId$: of('securitySolutionUI'),
-      applications$: of(
-        new Map([
-          ['securitySolutionUI', { category: { label: 'Test' } } as unknown as PublicAppInfo],
-        ])
-      ),
-    };
-    useApplicationMock.mockReturnValue({ appId: 'testAppId' });
-    useCasesToastMock.mockReturnValue({
-      showInfoToast: mockedToastInfo,
-    });
-
-    wrapper = ({ children }) => {
-      return (
-        <CasesProvider
-          value={{
-            externalReferenceAttachmentTypeRegistry,
-            persistableStateAttachmentTypeRegistry,
-            owner: ['cases'],
-            permissions: allCasesPermissions(),
-            basePath: '/jest',
-            features: { alerts: { sync: true, enabled: true, isExperimental: false }, metrics: [] },
-            releasePhase: 'ga',
-            getFilesClient: jest.fn(),
-          }}
-        >
-          {children}
-        </CasesProvider>
-      );
-    };
   });
 
   it('should throw if called outside of a cases context', () => {
@@ -83,7 +32,12 @@ describe('use is add to existing case modal open hook', () => {
     );
   });
 
-  it('should return open modal status', async () => {
+  it('should return false when the add to case modal and flyout are not open', async () => {
+    const { result } = renderHook(useIsAddToCaseOpen, { wrapper: AppWrapper });
+    expect(result.current).toEqual(false);
+  });
+
+  it('should return true when the add to existing case modal opens', async () => {
     const { result, rerender } = renderHook(
       () => {
         return {
@@ -91,13 +45,31 @@ describe('use is add to existing case modal open hook', () => {
           isOpen: useIsAddToCaseOpen(),
         };
       },
-      { wrapper }
+      { wrapper: AppWrapper }
     );
 
     expect(result.current.isOpen).toEqual(false);
-
     act(() => {
       result.current.modal.open();
+    });
+    rerender();
+    expect(result.current.isOpen).toEqual(true);
+  });
+
+  it('should return true when the add to new case flyout opens', async () => {
+    const { result, rerender } = renderHook(
+      () => {
+        return {
+          flyout: useCasesAddToNewCaseFlyout(),
+          isOpen: useIsAddToCaseOpen(),
+        };
+      },
+      { wrapper: AppWrapper }
+    );
+
+    expect(result.current.isOpen).toEqual(false);
+    act(() => {
+      result.current.flyout.open();
     });
     rerender();
     expect(result.current.isOpen).toEqual(true);
