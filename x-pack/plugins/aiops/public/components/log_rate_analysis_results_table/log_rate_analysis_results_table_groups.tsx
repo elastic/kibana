@@ -366,9 +366,8 @@ export const LogRateAnalysisResultsGroupsTable: FC<LogRateAnalysisResultsTablePr
         for (const itemId in itemIdToExpandedRowMapValues) {
           if (itemIdToExpandedRowMapValues.hasOwnProperty(itemId)) {
             const component = itemIdToExpandedRowMapValues[itemId];
-            const Component = itemIdToExpandedRowMapValues[itemId].type.name;
             itemIdToExpandedRowMapValues[itemId] = (
-              <Component {...component.props} skippedColumns={skippedColumns} />
+              <LogRateAnalysisResultsTable {...component.props} skippedColumns={skippedColumns} />
             );
           }
         }
