@@ -28,6 +28,7 @@ export const entityDefinitionSchema = z.object({
   metadata: z.optional(z.array(metadataSchema)),
   metrics: z.optional(z.array(keyMetricSchema)),
   staticFields: z.optional(z.record(z.string(), z.string())),
+  managed: z.optional(z.boolean()).default(false),
   history: z.object({
     timestampField: z.string(),
     interval: durationSchema.refine((val) => val.asMinutes() >= 1, {
