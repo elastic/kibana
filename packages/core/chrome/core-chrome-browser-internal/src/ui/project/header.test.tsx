@@ -33,6 +33,7 @@ describe('Header', () => {
     navControlsLeft$: Rx.of([]),
     navControlsCenter$: Rx.of([]),
     navControlsRight$: Rx.of([]),
+    customBranding$: Rx.of({}),
     prependBasePath: (str) => `hello/world/${str}`,
     toggleSideNav: jest.fn(),
   };
@@ -46,5 +47,16 @@ describe('Header', () => {
 
     expect(await screen.findByTestId('euiCollapsibleNavButton')).toBeVisible();
     expect(await screen.findByText('Hello, world!')).toBeVisible();
+    expect(screen.queryByTestId(/customLogo/)).toBeNull();
+  });
+
+  it('renders custom branding logo', async () => {
+    const { queryByTestId } = render(
+      <ProjectHeader {...mockProps} customBranding$={Rx.of({ logo: 'foo.jpg' })}>
+        <EuiHeader>Hello, world!</EuiHeader>
+      </ProjectHeader>
+    );
+
+    expect(queryByTestId(/customLogo/)).not.toBeNull();
   });
 });
