@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
   EuiToolTip,
   EuiHighlight,
-  EuiIconTip,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -58,15 +58,7 @@ export function FieldName({
       <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center" direction="row" wrap>
         {isPinned && (
           <EuiFlexItem grow={false} className="kbnDocViewer__fieldPinned">
-            <EuiIconTip
-              type="pinFilled"
-              content={
-                <FormattedMessage
-                  id="unifiedDocViewer.fieldChooser.discoverField.pinnedFieldTooltipContent"
-                  defaultMessage="Pinned field"
-                />
-              }
-            />
+            <EuiIcon type="pinFilled" />
           </EuiFlexItem>
         )}
         <EuiFlexItem

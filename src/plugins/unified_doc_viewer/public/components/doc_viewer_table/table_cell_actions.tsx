@@ -96,6 +96,7 @@ export const FilterIn: React.FC<TableActionsProps> = ({ Component, row }) => {
       iconType="plusInCircle"
       disabled={isFilterInOutPairDisabled(row)}
       title={filterAddLabel}
+      flush="left"
       onClick={() => onFilter(fieldMapping, flattenedField, '+')}
     >
       {filterAddLabel}
@@ -131,6 +132,7 @@ export const FilterOut: React.FC<TableActionsProps> = ({ Component, row }) => {
       iconType="minusInCircle"
       disabled={isFilterInOutPairDisabled(row)}
       title={filterOutLabel}
+      flush="left"
       onClick={() => onFilter(fieldMapping, flattenedField, '-')}
     >
       {filterOutLabel}
@@ -194,6 +196,7 @@ export const FilterExist: React.FC<TableActionsProps> = ({ Component, row }) => 
       iconType="filter"
       disabled={isFilterExistsDisabled(row)}
       title={filterExistsLabel}
+      flush="left"
       onClick={() => onFilter('_exists_', field, '+')}
     >
       {filterExistsLabel}
@@ -225,6 +228,7 @@ export const PinToggle: React.FC<TableActionsProps> = ({ Component, row }) => {
       data-test-subj={`togglePinFilterButton-${field}`}
       iconType={pinnedIconType}
       title={pinnedLabel}
+      flush="left"
       onClick={() => onTogglePinned(field)}
     >
       {pinnedLabel}
@@ -262,6 +266,7 @@ export const ToggleColumn: React.FC<TableActionsProps> = ({ Component, row }) =>
       data-test-subj={`toggleColumnButton-${field}`}
       iconType={isAdded ? 'list' : 'listAdd'}
       title={toggleColumnsLabel}
+      flush="left"
       onClick={() => onToggleColumn(field)}
     >
       {toggleColumnsLabel}
