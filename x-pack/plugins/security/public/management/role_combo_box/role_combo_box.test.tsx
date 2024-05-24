@@ -42,6 +42,7 @@ describe('RoleComboBox', () => {
           },
           {
             name: 'deprecated_role',
+            description: 'Deprecated role description',
             elasticsearch: { cluster: [], indices: [], run_as: [] },
             kibana: [],
             metadata: { _reserved: true, _deprecated: true },
@@ -72,6 +73,7 @@ describe('RoleComboBox', () => {
                   "label": "custom_role",
                   "value": Object {
                     "deprecatedReason": undefined,
+                    "description": undefined,
                     "isAdmin": false,
                     "isDeprecated": false,
                     "isReserved": false,
@@ -89,6 +91,7 @@ describe('RoleComboBox', () => {
                   "label": "reserved_role",
                   "value": Object {
                     "deprecatedReason": undefined,
+                    "description": undefined,
                     "isAdmin": false,
                     "isDeprecated": false,
                     "isReserved": true,
@@ -106,6 +109,7 @@ describe('RoleComboBox', () => {
                   "label": "some_admin",
                   "value": Object {
                     "deprecatedReason": undefined,
+                    "description": undefined,
                     "isAdmin": true,
                     "isDeprecated": false,
                     "isReserved": true,
@@ -123,6 +127,7 @@ describe('RoleComboBox', () => {
                   "label": "some_system",
                   "value": Object {
                     "deprecatedReason": undefined,
+                    "description": undefined,
                     "isAdmin": false,
                     "isDeprecated": false,
                     "isReserved": true,
@@ -140,6 +145,7 @@ describe('RoleComboBox', () => {
                   "label": "deprecated_role",
                   "value": Object {
                     "deprecatedReason": undefined,
+                    "description": "Deprecated role description",
                     "isAdmin": false,
                     "isDeprecated": true,
                     "isReserved": true,

@@ -14,7 +14,7 @@ export function cliOptionsToPartialConfig(options: CliOptions) {
   const schedule: Schedule = {
     template: options.eventTemplate,
     start: options.lookback,
-    end: false,
+    end: options.scheduleEnd ?? false,
   };
 
   const decodedDataset = DatasetRT.decode(options.dataset);

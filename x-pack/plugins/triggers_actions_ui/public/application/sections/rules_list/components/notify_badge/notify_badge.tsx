@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import moment from 'moment';
 import {
   EuiButton,
@@ -90,6 +90,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     () => (isSnoozedUntil ? getTimeRemaining(isSnoozedUntil) : undefined),
     [isSnoozedUntil]
   );
+
+  const focusTrapButtonRef = useRef<HTMLButtonElement>(null);
 
   const {
     notifications: { toasts },
@@ -192,6 +194,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         iconType="bellSlash"
         color="accent"
         onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
@@ -210,6 +213,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         color="text"
         aria-label={OPEN_SNOOZE_PANEL_ARIA_LABEL}
         onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
@@ -232,6 +236,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         className={isPopoverOpen || isLoading ? '' : showOnHoverClass}
         iconType="bell"
         onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       />
     );
   }, [isPopoverOpen, isLoading, isDisabled, showOnHover, openPopover]);
@@ -248,6 +253,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         iconType="bellSlash"
         color="accent"
         onClick={openPopover}
+        buttonRef={focusTrapButtonRef}
       />
     );
   }, [isLoading, isDisabled, openPopover]);
@@ -311,9 +317,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
         setRequestInFlightLoading(false);
+        requestAnimationFrame(() => focusTrapButtonRef.current?.focus());
       }
     },
-    [setRequestInFlightLoading, snoozeRule, onRuleChanged, toasts, closePopover]
+    [closePopover, snoozeRule, onRuleChanged, toasts]
   );
 
   const onApplyUnsnooze = useCallback(
@@ -328,9 +335,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         toasts.addDanger(SNOOZE_FAILED_MESSAGE);
       } finally {
         setRequestInFlightLoading(false);
+        requestAnimationFrame(() => focusTrapButtonRef.current?.focus());
       }
     },
-    [setRequestInFlightLoading, unsnoozeRule, onRuleChanged, toasts, closePopover]
+    [closePopover, unsnoozeRule, onRuleChanged, toasts]
   );
 
   const popover = (

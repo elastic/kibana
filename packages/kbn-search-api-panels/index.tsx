@@ -13,6 +13,7 @@ import { AuthenticatedUser } from '@kbn/security-plugin/common';
 
 export * from './components/cloud_details';
 export * from './components/code_box';
+export * from './components/ingest_pipelines/ingest_pipeline_panel';
 export * from './components/github_link';
 export * from './components/ingest_data';
 export * from './components/ingestions_panel';

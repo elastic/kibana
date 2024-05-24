@@ -173,6 +173,8 @@ export interface ExpressionExecutionParams {
    * @deafult 0
    */
   throttle?: number;
+
+  allowCache?: boolean;
 }
 
 /**
