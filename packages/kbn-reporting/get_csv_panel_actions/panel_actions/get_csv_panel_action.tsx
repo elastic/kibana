@@ -138,14 +138,6 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
       return false;
     }
 
-    const savedSearch = embeddable.getSavedSearch();
-    const query = savedSearch?.searchSource.getField('query');
-
-    // using isOfAggregateQueryType(query) added increased the bundle size over the configured limit of 55.7KB
-    if (query && Boolean(query && 'sql' in query)) {
-      // hide exporting CSV for SQL
-      return false;
-    }
     return embeddable.getInput().viewMode !== ViewMode.EDIT;
   };
 

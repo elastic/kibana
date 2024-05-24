@@ -112,7 +112,7 @@ const visConfig = {
       categoryDisplay: 'default',
       legendDisplay: 'hide',
       numberDisplay: 'percent',
-      showValuesInLegend: true,
+      legendStats: ['value'],
       nestedLegend: false,
       layerType: 'data',
     },

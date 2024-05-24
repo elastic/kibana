@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { twoMinute } from '../fixtures/duration';
 import {
   createKQLCustomIndicator,
   createSLO,
@@ -47,6 +48,21 @@ describe('KQL Custom Transform Generator', () => {
     const anSLO = createSLOWithTimeslicesBudgetingMethod({
       id: 'irrelevant',
       indicator: createKQLCustomIndicator(),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform).toMatchSnapshot();
+  });
+
+  it('returns the expected transform params for timeslices slo using timesliceTarget = 0', async () => {
+    const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      id: 'irrelevant',
+      indicator: createKQLCustomIndicator(),
+      objective: {
+        target: 0.98,
+        timesliceTarget: 0,
+        timesliceWindow: twoMinute(),
+      },
     });
     const transform = generator.getTransformParams(anSLO);
 

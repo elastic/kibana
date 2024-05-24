@@ -9,6 +9,8 @@ import { PARAMETERS_DEFINITION } from './constants';
 import {
   getAllChildFields,
   getFieldMeta,
+  getFieldsFromState,
+  getFieldsMatchingFilterFromState,
   getMaxNestedDepth,
   getUniqueId,
   normalize,
@@ -204,6 +206,11 @@ export const reducer = (state: State, action: Action): State => {
         search: {
           term: '',
           result: [],
+        },
+        filter: {
+          filteredFields: action.value.filter.filteredFields,
+          selectedOptions: action.value.filter.selectedOptions,
+          selectedDataTypes: action.value.filter.selectedDataTypes,
         },
       };
     }
@@ -604,7 +611,12 @@ export const reducer = (state: State, action: Action): State => {
         ...state,
         search: {
           term: action.value,
-          result: searchFields(action.value, state.fields.byId),
+          result: searchFields(
+            action.value,
+            state.filter.selectedDataTypes.length > 0
+              ? getFieldsMatchingFilterFromState(state, state.filter.selectedDataTypes)
+              : state.fields.byId
+          ),
         },
       };
     }
@@ -612,6 +624,22 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         isValid: action.value,
+      };
+    }
+    case 'filter:update': {
+      const selectedDataTypes: string[] = action.value.selectedOptions
+        .filter((option) => option.checked === 'on')
+        .map((option) => option.label);
+      return {
+        ...state,
+        filter: {
+          filteredFields: getFieldsFromState(
+            state.fields,
+            selectedDataTypes.length > 0 ? selectedDataTypes : undefined
+          ),
+          selectedOptions: action.value.selectedOptions,
+          selectedDataTypes,
+        },
       };
     }
     case 'inferenceToModelIdMap.update': {

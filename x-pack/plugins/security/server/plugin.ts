@@ -298,6 +298,7 @@ export class SecurityPlugin
     core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
+        audit: this.auditSetup,
       })
     );
     core.userProfile.registerUserProfileDelegate(

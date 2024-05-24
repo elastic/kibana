@@ -46,14 +46,22 @@ async function main() {
 
 async function headAssetUrl(assetPath: string) {
   const testUrl = `${CDN_URL_PREFIX}/${assetPath}`;
-  const response = await axios.head(testUrl, {
-    timeout: 1000,
-  });
-  return {
-    status: response.status,
-    testUrl,
-    assetPath,
-  };
+  try {
+    const response = await axios.head(testUrl, {
+      timeout: 1000,
+    });
+    return {
+      status: response.status,
+      testUrl,
+      assetPath,
+    };
+  } catch (error) {
+    return {
+      status: error.response?.status || 0,
+      testUrl,
+      assetPath,
+    };
+  }
 }
 
 async function headAssetUrlWithRetry(

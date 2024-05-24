@@ -133,9 +133,15 @@ describe('Mappings editor: core', () => {
       dynamic_templates: [{ before: 'foo' }],
     };
 
+    const ctx = {
+      config: {
+        enableMappingsSourceFieldSection: true,
+      },
+    };
+
     beforeEach(async () => {
       await act(async () => {
-        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+        testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
       });
       testBed.component.update();
     });
@@ -248,10 +254,13 @@ describe('Mappings editor: core', () => {
 
     test('should keep default dynamic templates value when switching tabs', async () => {
       await act(async () => {
-        testBed = setup({
-          value: { ...defaultMappings, dynamic_templates: [] }, // by default, the UI will provide an empty array for dynamic templates
-          onChange: onChangeHandler,
-        });
+        testBed = setup(
+          {
+            value: { ...defaultMappings, dynamic_templates: [] }, // by default, the UI will provide an empty array for dynamic templates
+            onChange: onChangeHandler,
+          },
+          ctx
+        );
       });
       testBed.component.update();
 
@@ -281,6 +290,12 @@ describe('Mappings editor: core', () => {
      * The test that covers it is in the "text_datatype.test.tsx": "analyzer parameter: custom analyzer (from index settings)"
      */
     let defaultMappings: any;
+
+    const ctx = {
+      config: {
+        enableMappingsSourceFieldSection: true,
+      },
+    };
 
     beforeEach(async () => {
       defaultMappings = {
@@ -312,7 +327,7 @@ describe('Mappings editor: core', () => {
       };
 
       await act(async () => {
-        testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+        testBed = setup({ value: defaultMappings, onChange: onChangeHandler }, ctx);
       });
       testBed.component.update();
     });

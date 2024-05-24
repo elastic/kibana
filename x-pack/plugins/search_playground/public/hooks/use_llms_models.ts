@@ -19,9 +19,25 @@ const mapLlmToModels: Record<
     getModels: (
       connectorName: string,
       includeName: boolean
-    ) => Array<{ label: string; value?: string }>;
+    ) => Array<{ label: string; value?: string; promptTokenLimit?: number }>;
   }
 > = {
+  [LLMs.openai]: {
+    icon: OpenAILogo,
+    getModels: (connectorName, includeName) =>
+      [
+        {
+          model: 'gpt-3.5-turbo',
+          limit: 16385,
+        },
+        { model: 'gpt-4o', limit: 128000 },
+        { model: 'gpt-4-turbo', limit: 128000 },
+      ].map((model) => ({
+        label: `${model.model} ${includeName ? `(${connectorName})` : ''}`,
+        value: model.model,
+        promptTokenLimit: model.limit,
+      })),
+  },
   [LLMs.openai_azure]: {
     icon: OpenAILogo,
     getModels: (connectorName, includeName) => [
@@ -33,24 +49,18 @@ const mapLlmToModels: Record<
       },
     ],
   },
-  [LLMs.openai]: {
-    icon: OpenAILogo,
-    getModels: (connectorName, includeName) =>
-      ['gpt-3.5-turbo', 'gpt-4'].map((model) => ({
-        label: `${model} ${includeName ? `(${connectorName})` : ''}`,
-        value: model,
-      })),
-  },
   [LLMs.bedrock]: {
     icon: BedrockLogo,
     getModels: () => [
       {
         label: 'Claude 3 Haiku',
         value: 'anthropic.claude-3-haiku-20240307-v1:0',
+        promptTokenLimit: 200000,
       },
       {
         label: 'Claude 3 Sonnet',
         value: 'anthropic.claude-3-haiku-20240307-v1:0',
+        promptTokenLimit: 200000,
       },
     ],
   },
@@ -84,16 +94,20 @@ export const useLLMsModels = (): LLMModel[] => {
 
         return [
           ...result,
-          ...llmParams.getModels(connector.name, false).map(({ label, value }) => ({
-            id: connector?.id + label,
-            name: label,
-            value,
-            connectorName: connector.name,
-            showConnectorName,
-            icon: llmParams.icon,
-            disabled: !connector,
-            connectorId: connector.id,
-          })),
+          ...llmParams
+            .getModels(connector.name, false)
+            .map(({ label, value, promptTokenLimit }) => ({
+              id: connector?.id + label,
+              name: label,
+              value,
+              connectorType: connector.type,
+              connectorName: connector.name,
+              showConnectorName,
+              icon: llmParams.icon,
+              disabled: !connector,
+              connectorId: connector.id,
+              promptTokenLimit,
+            })),
         ];
       }, []) || [],
     [connectors, mapConnectorTypeToCount]

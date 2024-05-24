@@ -48,21 +48,29 @@ export const Overview = () => {
   return (
     <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
       <EuiFlexItem grow={false}>
-        <KPIGrid assetId={asset.id} dateRange={state.dateRange} dataView={metrics.dataView} />
-        <CpuProfilingPrompt />
+        <KPIGrid
+          assetId={asset.id}
+          assetType={asset.type}
+          dateRange={state.dateRange}
+          dataView={metrics.dataView}
+        />
+        {asset.type === 'host' ? <CpuProfilingPrompt /> : null}
       </EuiFlexItem>
+
       <EuiFlexItem grow={false}>
         {fetchMetadataError && !metadataLoading ? <MetadataErrorCallout /> : metadataSummarySection}
         <SectionSeparator />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <AlertsSummaryContent
-          assetId={asset.id}
-          assetType={asset.type}
-          dateRange={state.dateRange}
-        />
-        <SectionSeparator />
-      </EuiFlexItem>
+      {asset.type === 'host' ? (
+        <EuiFlexItem grow={false}>
+          <AlertsSummaryContent
+            assetId={asset.id}
+            assetType={asset.type}
+            dateRange={state.dateRange}
+          />
+          <SectionSeparator />
+        </EuiFlexItem>
+      ) : null}
       {asset.type === 'host' ? (
         <EuiFlexItem grow={false}>
           <ServicesContent hostName={asset.id} dateRange={state.dateRange} />

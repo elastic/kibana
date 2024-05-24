@@ -691,7 +691,7 @@
         "label": "DeleteSLOInstancesInput",
         "description": [],
         "signature": [
-          "{ list: { sloId: string; instanceId: string; }[]; }"
+          "{ list: ({ sloId: string; instanceId: string; } & { excludeRollup?: boolean | undefined; })[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -706,7 +706,7 @@
         "label": "DeleteSLOInstancesParams",
         "description": [],
         "signature": [
-          "{ list: { sloId: string; instanceId: string; }[]; }"
+          "{ list: ({ sloId: string; instanceId: string; } & { excludeRollup?: boolean | undefined; })[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -745,7 +745,7 @@
             "section": "def-common.Duration",
             "text": "Duration"
           },
-          " | undefined; }; groupBy: string | string[]; revision: number; } & { remoteName?: string | undefined; })[]; }"
+          " | undefined; }; groupBy: string | string[]; revision: number; } & { remoteName?: string | undefined; range?: { from: Date; to: Date; } | undefined; })[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
         "deprecated": false,
@@ -760,9 +760,54 @@
         "label": "FetchHistoricalSummaryResponse",
         "description": [],
         "signature": [
-          "{ sloId: string; instanceId: string; data: ({ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; })[]; }[]"
+          "{ sloId: string; instanceId: string; data: ({ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; } & { summaryUpdatedAt?: string | null | undefined; })[]; }[]"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.FetchSLOHealthParams",
+        "type": "Type",
+        "tags": [],
+        "label": "FetchSLOHealthParams",
+        "description": [],
+        "signature": [
+          "{ list: { sloId: string; sloInstanceId: string; }[]; }"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.FetchSLOHealthResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "FetchSLOHealthResponse",
+        "description": [],
+        "signature": [
+          "{ sloId: string; sloInstanceId: string; sloRevision: number; state: \"running\" | \"indexing\" | \"no_data\" | \"stale\"; health: { overall: \"healthy\" | \"unhealthy\"; rollup: \"healthy\" | \"unhealthy\"; summary: \"healthy\" | \"unhealthy\"; }; }[]"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.FiltersSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "FiltersSchema",
+        "description": [],
+        "signature": [
+          "{ meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -820,7 +865,7 @@
         "label": "FindSLOGroupsResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: { group: string; groupBy: string; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }"
+          "{ page: number; perPage: number; total: number; results: { group: string; groupBy: \"status\" | \"_index\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\"; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/find_group.ts",
         "deprecated": false,
@@ -835,7 +880,7 @@
         "label": "FindSLOParams",
         "description": [],
         "signature": [
-          "{ filters?: string | undefined; kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; }"
+          "{ filters?: string | undefined; kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; hideStale?: boolean | undefined; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/find.ts",
         "deprecated": false,
@@ -850,7 +895,7 @@
         "label": "FindSLOResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; total: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"last_value\" | \"cardinality\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; groupings: { [x: string]: string | number; }; } & { instanceId?: string | undefined; meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; })[]; }"
+          "{ page: number; perPage: number; total: number; results: ({ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; total: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"last_value\" | \"cardinality\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; } & { summaryUpdatedAt?: string | null | undefined; }; groupings: { [x: string]: string | number; }; } & { instanceId?: string | undefined; meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; })[]; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/find.ts",
         "deprecated": false,
@@ -865,7 +910,7 @@
         "label": "GetPreviewDataParams",
         "description": [],
         "signature": [
-          "{ indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; total: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"last_value\" | \"cardinality\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; }; range: { start: number; end: number; }; } & { objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
+          "{ indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; total: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"last_value\" | \"cardinality\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; }; range: { from: Date; to: Date; }; } & { objective?: ({ target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: ",
           {
             "pluginId": "@kbn/slo-schema",
             "scope": "common",
@@ -948,7 +993,7 @@
         "label": "GetSLOResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; total: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"last_value\" | \"cardinality\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; groupings: { [x: string]: string | number; }; } & { instanceId?: string | undefined; meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; total: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"last_value\" | \"cardinality\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; } & { summaryUpdatedAt?: string | null | undefined; }; groupings: { [x: string]: string | number; }; } & { instanceId?: string | undefined; meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get.ts",
         "deprecated": false,
@@ -963,7 +1008,7 @@
         "label": "GetSLOSettingsResponse",
         "description": [],
         "signature": [
-          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; }"
+          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "deprecated": false,
@@ -1038,7 +1083,7 @@
         "label": "HistoricalSummaryResponse",
         "description": [],
         "signature": [
-          "{ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }"
+          "{ date: string; } & { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; } & { summaryUpdatedAt?: string | null | undefined; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
         "deprecated": false,
@@ -1158,7 +1203,7 @@
         "label": "PutSLOSettingsParams",
         "description": [],
         "signature": [
-          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; }"
+          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "deprecated": false,
@@ -1173,7 +1218,7 @@
         "label": "PutSLOSettingsResponse",
         "description": [],
         "signature": [
-          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; }"
+          "{ useAllRemoteClusters: boolean; selectedRemoteClusters: string[]; staleThresholdInHours: number; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "deprecated": false,
@@ -1248,7 +1293,7 @@
         "label": "SLOWithSummaryResponse",
         "description": [],
         "signature": [
-          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; total: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"last_value\" | \"cardinality\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; }; groupings: { [x: string]: string | number; }; } & { instanceId?: string | undefined; meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; }"
+          "{ id: string; name: string; description: string; indicator: { type: \"sli.apm.transactionDuration\"; params: { environment: string; service: string; transactionType: string; transactionName: string; threshold: number; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.apm.transactionErrorRate\"; params: { environment: string; service: string; transactionType: string; transactionName: string; index: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.synthetics.availability\"; params: { monitorIds: { value: string; label: string; }[]; index: string; } & { tags?: { value: string; label: string; }[] | undefined; projects?: { value: string; label: string; }[] | undefined; filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.kql.custom\"; params: { index: string; good: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; total: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.custom\"; params: { index: string; good: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; total: { metrics: (({ name: string; aggregation: \"sum\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.metric.timeslice\"; params: { index: string; metric: { metrics: (({ name: string; aggregation: \"min\" | \"max\" | \"sum\" | \"avg\" | \"last_value\" | \"cardinality\" | \"std_deviation\"; field: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"doc_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ name: string; aggregation: \"percentile\"; field: string; percentile: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }))[]; equation: string; threshold: number; comparator: \"GT\" | \"GTE\" | \"LT\" | \"LTE\"; }; timestampField: string; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; } | { type: \"sli.histogram.custom\"; params: { index: string; timestampField: string; good: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); total: ({ field: string; aggregation: \"value_count\"; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }) | ({ field: string; aggregation: \"range\"; from: number; to: number; } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }); } & { filter?: string | { kqlQuery: string; filters: { meta: { alias?: string | null | undefined; disabled?: boolean | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; group?: string | undefined; index?: string | undefined; isMultiIndex?: boolean | undefined; type?: string | undefined; key?: string | undefined; params?: any; value?: string | undefined; }; query: { [x: string]: any; }; }[]; } | undefined; }; }; timeWindow: { duration: string; type: \"rolling\"; } | { duration: string; type: \"calendarAligned\"; }; budgetingMethod: \"occurrences\" | \"timeslices\"; objective: { target: number; } & { timesliceTarget?: number | undefined; timesliceWindow?: string | undefined; }; settings: { syncDelay: string; frequency: string; }; revision: number; enabled: boolean; tags: string[]; createdAt: string; updatedAt: string; groupBy: string | string[]; version: number; } & { summary: { status: \"HEALTHY\" | \"NO_DATA\" | \"DEGRADING\" | \"VIOLATED\"; sliValue: number; errorBudget: { initial: number; consumed: number; remaining: number; isEstimated: boolean; }; } & { summaryUpdatedAt?: string | null | undefined; }; groupings: { [x: string]: string | number; }; } & { instanceId?: string | undefined; meta?: { synthetics?: { monitorId: string; locationId: string; configId: string; } | undefined; } | undefined; remote?: { remoteName: string; kibanaUrl: string; } | undefined; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -3236,12 +3281,18 @@
           "<{ list: ",
           "ArrayC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ sloId: ",
           "StringC",
           "; instanceId: ",
           "StringC",
-          "; }>>; }>; }>"
+          "; }>, ",
+          "PartialC",
+          "<{ excludeRollup: ",
+          "BooleanC",
+          "; }>]>>; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/delete_instance.ts",
         "deprecated": false,
@@ -3413,7 +3464,13 @@
           "PartialC",
           "<{ remoteName: ",
           "StringC",
-          "; }>]>>; }>; }>"
+          "; range: ",
+          "TypeC",
+          "<{ from: ",
+          "Type",
+          "<Date, string, unknown>; to: ",
+          "Type",
+          "<Date, string, unknown>; }>; }>]>>; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
         "deprecated": false,
@@ -3448,6 +3505,8 @@
           "<{ date: ",
           "Type",
           "<Date, string, unknown>; }>, ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ status: ",
           "UnionC",
@@ -3471,9 +3530,157 @@
           "NumberC",
           "; isEstimated: ",
           "BooleanC",
-          "; }>; }>]>>; }>>"
+          "; }>; }>, ",
+          "PartialC",
+          "<{ summaryUpdatedAt: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
+          "]>; }>]>]>>; }>>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.fetchSLOHealthParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "fetchSLOHealthParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ list: ",
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; sloInstanceId: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; }>>; }>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.fetchSLOHealthResponseSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "fetchSLOHealthResponseSchema",
+        "description": [],
+        "signature": [
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ sloId: ",
+          "StringC",
+          "; sloInstanceId: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"*\">, ",
+          "StringC",
+          "]>; sloRevision: ",
+          "NumberC",
+          "; state: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"no_data\">, ",
+          "LiteralC",
+          "<\"indexing\">, ",
+          "LiteralC",
+          "<\"running\">, ",
+          "LiteralC",
+          "<\"stale\">]>; health: ",
+          "TypeC",
+          "<{ overall: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>; rollup: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>; summary: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>; }>; }>>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/get_slo_health.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.filtersSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "filtersSchema",
+        "description": [],
+        "signature": [
+          "ArrayC",
+          "<",
+          "TypeC",
+          "<{ meta: ",
+          "PartialC",
+          "<{ alias: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
+          "]>; disabled: ",
+          "BooleanC",
+          "; negate: ",
+          "BooleanC",
+          "; controlledBy: ",
+          "StringC",
+          "; group: ",
+          "StringC",
+          "; index: ",
+          "StringC",
+          "; isMultiIndex: ",
+          "BooleanC",
+          "; type: ",
+          "StringC",
+          "; key: ",
+          "StringC",
+          "; params: ",
+          "AnyC",
+          "; value: ",
+          "StringC",
+          "; }>; query: ",
+          "RecordC",
+          "<",
+          "StringC",
+          ", ",
+          "AnyC",
+          ">; }>>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4982,8 +5189,18 @@
           "<{ group: ",
           "StringC",
           "; groupBy: ",
-          "StringC",
-          "; summary: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ungrouped\">, ",
+          "LiteralC",
+          "<\"slo.tags\">, ",
+          "LiteralC",
+          "<\"status\">, ",
+          "LiteralC",
+          "<\"slo.indicator.type\">, ",
+          "LiteralC",
+          "<\"_index\">]>; summary: ",
           "TypeC",
           "<{ total: ",
           "NumberC",
@@ -5051,7 +5268,9 @@
           "LiteralC",
           "<\"asc\">, ",
           "LiteralC",
-          "<\"desc\">]>; }>; }>"
+          "<\"desc\">]>; hideStale: ",
+          "Type",
+          "<boolean, boolean, unknown>; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/find.ts",
         "deprecated": false,
@@ -6466,6 +6685,8 @@
           "; }>, ",
           "TypeC",
           "<{ summary: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ status: ",
           "UnionC",
@@ -6489,7 +6710,15 @@
           "NumberC",
           "; isEstimated: ",
           "BooleanC",
-          "; }>; }>; groupings: ",
+          "; }>; }>, ",
+          "PartialC",
+          "<{ summaryUpdatedAt: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
+          "]>; }>]>; groupings: ",
           "RecordC",
           "<",
           "StringC",
@@ -7817,11 +8046,11 @@
           "AnyC",
           ">; }>>; }>]>; }>]>; }>]>; range: ",
           "TypeC",
-          "<{ start: ",
-          "NumberC",
-          "; end: ",
-          "NumberC",
-          "; }>; }>, ",
+          "<{ from: ",
+          "Type",
+          "<Date, string, unknown>; to: ",
+          "Type",
+          "<Date, string, unknown>; }>; }>, ",
           "PartialC",
           "<{ objective: ",
           "IntersectionC",
@@ -9456,6 +9685,8 @@
           "; }>, ",
           "TypeC",
           "<{ summary: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ status: ",
           "UnionC",
@@ -9479,7 +9710,15 @@
           "NumberC",
           "; isEstimated: ",
           "BooleanC",
-          "; }>; }>; groupings: ",
+          "; }>; }>, ",
+          "PartialC",
+          "<{ summaryUpdatedAt: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
+          "]>; }>]>; groupings: ",
           "RecordC",
           "<",
           "StringC",
@@ -9634,6 +9873,26 @@
           "; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.healthStatusSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "healthStatusSchema",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"healthy\">, ",
+          "LiteralC",
+          "<\"unhealthy\">]>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/health.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -9978,6 +10237,8 @@
           "<{ date: ",
           "Type",
           "<Date, string, unknown>; }>, ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ status: ",
           "UnionC",
@@ -10001,35 +10262,17 @@
           "NumberC",
           "; isEstimated: ",
           "BooleanC",
-          "; }>; }>]>"
+          "; }>; }>, ",
+          "PartialC",
+          "<{ summaryUpdatedAt: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
+          "]>; }>]>]>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/fetch_historical_summary.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/slo-schema",
-        "id": "def-common.indicatorDataSchema",
-        "type": "Object",
-        "tags": [],
-        "label": "indicatorDataSchema",
-        "description": [],
-        "signature": [
-          "TypeC",
-          "<{ dateRange: ",
-          "TypeC",
-          "<{ from: ",
-          "Type",
-          "<Date, string, unknown>; to: ",
-          "Type",
-          "<Date, string, unknown>; }>; good: ",
-          "NumberC",
-          "; total: ",
-          "NumberC",
-          "; }>"
-        ],
-        "path": "x-pack/packages/kbn-slo-schema/src/schema/indicators.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12227,6 +12470,26 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.putSLOServerlessSettingsParamsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "putSLOServerlessSettingsParamsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ staleThresholdInHours: ",
+          "NumberC",
+          "; }>; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.putSLOSettingsParamsSchema",
         "type": "Object",
         "tags": [],
@@ -12242,7 +12505,9 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>; }>"
+          ">; staleThresholdInHours: ",
+          "NumberC",
+          "; }>; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "deprecated": false,
@@ -12264,7 +12529,9 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>"
+          ">; staleThresholdInHours: ",
+          "NumberC",
+          "; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/routes/put_settings.ts",
         "deprecated": false,
@@ -15263,8 +15530,18 @@
           "<{ group: ",
           "StringC",
           "; groupBy: ",
-          "StringC",
-          "; summary: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ungrouped\">, ",
+          "LiteralC",
+          "<\"slo.tags\">, ",
+          "LiteralC",
+          "<\"status\">, ",
+          "LiteralC",
+          "<\"slo.indicator.type\">, ",
+          "LiteralC",
+          "<\"_index\">]>; summary: ",
           "TypeC",
           "<{ total: ",
           "NumberC",
@@ -15314,6 +15591,24 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.sloServerlessSettingsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "sloServerlessSettingsSchema",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ staleThresholdInHours: ",
+          "NumberC",
+          "; }>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/settings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.sloSettingsSchema",
         "type": "Object",
         "tags": [],
@@ -15327,7 +15622,9 @@
           "ArrayC",
           "<",
           "StringC",
-          ">; }>"
+          ">; staleThresholdInHours: ",
+          "NumberC",
+          "; }>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/settings.ts",
         "deprecated": false,
@@ -16732,6 +17029,8 @@
           "; }>, ",
           "TypeC",
           "<{ summary: ",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ status: ",
           "UnionC",
@@ -16755,7 +17054,15 @@
           "NumberC",
           "; isEstimated: ",
           "BooleanC",
-          "; }>; }>; groupings: ",
+          "; }>; }>, ",
+          "PartialC",
+          "<{ summaryUpdatedAt: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
+          "]>; }>]>; groupings: ",
           "RecordC",
           "<",
           "StringC",
@@ -16798,6 +17105,30 @@
       },
       {
         "parentPluginId": "@kbn/slo-schema",
+        "id": "def-common.stateSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "stateSchema",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"no_data\">, ",
+          "LiteralC",
+          "<\"indexing\">, ",
+          "LiteralC",
+          "<\"running\">, ",
+          "LiteralC",
+          "<\"stale\">]>"
+        ],
+        "path": "x-pack/packages/kbn-slo-schema/src/schema/health.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/slo-schema",
         "id": "def-common.statusSchema",
         "type": "Object",
         "tags": [],
@@ -16828,6 +17159,8 @@
         "label": "summarySchema",
         "description": [],
         "signature": [
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ status: ",
           "UnionC",
@@ -16851,7 +17184,15 @@
           "NumberC",
           "; isEstimated: ",
           "BooleanC",
-          "; }>; }>"
+          "; }>; }>, ",
+          "PartialC",
+          "<{ summaryUpdatedAt: ",
+          "UnionC",
+          "<[",
+          "StringC",
+          ", ",
+          "NullC",
+          "]>; }>]>"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/schema/common.ts",
         "deprecated": false,

@@ -9,14 +9,34 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
+import { TimeRangeExtendingStatus } from './use_fetch_occurances_range';
 
-export const NoResultsSuggestionWhenTimeRange: React.FC = () => {
+export const NoResultsSuggestionWhenTimeRange: React.FC<{
+  timeRangeExtendingStatus?: TimeRangeExtendingStatus;
+}> = ({ timeRangeExtendingStatus }) => {
+  const message = (
+    <FormattedMessage
+      id="discover.noResults.suggestion.expandTimeRangeText"
+      defaultMessage="Expand the time range"
+    />
+  );
   return (
     <EuiText data-test-subj="discoverNoResultsTimefilter">
-      <FormattedMessage
-        id="discover.noResults.suggestion.expandTimeRangeText"
-        defaultMessage="Expand the time range"
-      />
+      {timeRangeExtendingStatus === TimeRangeExtendingStatus.succeedWithoutResults ? (
+        <>
+          <s>{message}</s>
+          <span data-test-subj="discoverSearchAllMatchesGivesNoResults">
+            {' ('}
+            <FormattedMessage
+              id="discover.noResults.suggestion.expandTimeRangeGivesNoResultsText"
+              defaultMessage="No results"
+            />
+            {')'}
+          </span>
+        </>
+      ) : (
+        message
+      )}
     </EuiText>
   );
 };

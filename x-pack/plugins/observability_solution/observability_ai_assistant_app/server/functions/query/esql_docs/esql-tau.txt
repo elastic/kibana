@@ -1,8 +1,8 @@
 TAU
 
 Syntax
-DescriptionReturns the ratio of a circle’s circumference
-to its radius.Example
+ParametersDescriptionReturns the ratio of a circle’s circumference to its radius.Supported types
+Example
 ```esql
 ROW TAU()
 ```

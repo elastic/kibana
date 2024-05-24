@@ -6,16 +6,18 @@
  */
 
 import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { ENDPOINT_HEARTBEAT_INDEX } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type { EndpointHeartbeat } from '@kbn/security-solution-plugin/common/endpoint/types';
 
 import { ProductLine, ProductTier } from '../../../common/product';
 
-import type { UsageRecord, MeteringCallbackInput } from '../../types';
+import type { UsageRecord, MeteringCallbackInput, MeteringCallBackResponse } from '../../types';
 import type { ServerlessSecurityConfig } from '../../config';
 
 import { METERING_TASK } from '../constants/metering';
+
+const BATCH_SIZE = 1000;
 
 export class EndpointMeteringService {
   private type: ProductLine.endpoint | `${ProductLine.cloud}_${ProductLine.endpoint}` | undefined;
@@ -29,10 +31,10 @@ export class EndpointMeteringService {
     lastSuccessfulReport,
     config,
     logger,
-  }: MeteringCallbackInput): Promise<UsageRecord[]> => {
+  }: MeteringCallbackInput): Promise<MeteringCallBackResponse> => {
     this.setType(config);
     if (!this.type) {
-      return [];
+      return { records: [] };
     }
 
     this.setTier(config);
@@ -43,44 +45,52 @@ export class EndpointMeteringService {
       lastSuccessfulReport
     );
 
-    if (!heartbeatsResponse?.hits?.hits) {
-      return [];
+    if (!heartbeatsResponse?.hits?.hits?.length) {
+      return { records: [] };
     }
 
-    return heartbeatsResponse.hits.hits.reduce((acc, { _source }) => {
+    const projectId = cloudSetup?.serverless?.projectId;
+    if (!projectId) {
+      logger.warn(
+        `project id missing for records starting from ${lastSuccessfulReport.toISOString()}`
+      );
+    }
+
+    const records = heartbeatsResponse.hits.hits.reduce((acc, { _source }) => {
       if (!_source) {
         return acc;
       }
 
       const { agent, event } = _source;
       const record = this.buildMeteringRecord({
-        logger,
         agentId: agent.id,
         timestampStr: event.ingested,
         taskId,
-        projectId: cloudSetup?.serverless?.projectId,
+        projectId,
       });
 
       return [...acc, record];
     }, [] as UsageRecord[]);
+
+    const latestTimestamp = new Date(records[records.length - 1].usage_timestamp);
+    const shouldRunAgain = heartbeatsResponse.hits.hits.length === BATCH_SIZE;
+    return { latestTimestamp, records, shouldRunAgain };
   };
 
   private async getHeartbeatsSince(
     esClient: ElasticsearchClient,
     abortController: AbortController,
-    since?: Date
+    since: Date
   ): Promise<SearchResponse<EndpointHeartbeat, Record<string, AggregationsAggregate>>> {
-    const thresholdDate = new Date(Date.now() - METERING_TASK.THRESHOLD_MINUTES * 60 * 1000);
-    const searchFrom = since && since > thresholdDate ? since : thresholdDate;
-
     return esClient.search<EndpointHeartbeat>(
       {
         index: ENDPOINT_HEARTBEAT_INDEX,
         sort: 'event.ingested',
+        size: BATCH_SIZE,
         query: {
           range: {
             'event.ingested': {
-              gt: searchFrom.toISOString(),
+              gt: since.toISOString(),
             },
           },
         },
@@ -90,13 +100,11 @@ export class EndpointMeteringService {
   }
 
   private buildMeteringRecord({
-    logger,
     agentId,
     timestampStr,
     taskId,
     projectId,
   }: {
-    logger: Logger;
     agentId: string;
     timestampStr: string;
     taskId: string;
@@ -127,10 +135,6 @@ export class EndpointMeteringService {
         },
       },
     };
-
-    if (!projectId) {
-      logger.error(`project id missing for record: ${JSON.stringify(usageRecord)}`);
-    }
 
     return usageRecord;
   }

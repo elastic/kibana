@@ -846,6 +846,7 @@ describe('xy_visualization', () => {
           },
         },
         dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+        absDateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 
@@ -3836,23 +3837,6 @@ describe('xy_visualization', () => {
           ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
         },
       ]);
-    });
-
-    it('should transform legendStats to valuesInLegend', () => {
-      const state = exampleState();
-      const { state: noLegendStatsState } = xyVisualization.getPersistableState!(state);
-      expect(noLegendStatsState.legend.legendStats).not.toBeDefined();
-      expect(noLegendStatsState.valuesInLegend).not.toBeDefined();
-
-      state.legend.legendStats = [XYLegendValue.CurrentAndLastValue];
-      const { state: legendStatsState } = xyVisualization.getPersistableState!(state);
-      expect(legendStatsState.legend.legendStats).not.toBeDefined();
-      expect(legendStatsState.valuesInLegend).toEqual(true);
-
-      state.legend.legendStats = [];
-      const { state: legendStatsStateFalsy } = xyVisualization.getPersistableState!(state);
-      expect(legendStatsStateFalsy.legend.legendStats).not.toBeDefined();
-      expect(legendStatsStateFalsy.valuesInLegend).toEqual(false);
     });
   });
 

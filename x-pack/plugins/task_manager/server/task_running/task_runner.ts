@@ -696,6 +696,8 @@ export class TaskManagerRunner implements TaskRunner {
   ): Promise<Result<SuccessfulRunResult, FailedRunResult>> {
     const { task } = this.instance;
 
+    const debugLogger = this.logger.get(`metrics-debugger`);
+
     const taskHasExpired = this.isExpired;
 
     await eitherAsync(
@@ -714,8 +716,10 @@ export class TaskManagerRunner implements TaskRunner {
         // when the alerting task fails, so we check for this condition in order
         // to emit the correct task run event for metrics collection
         // taskRunError contains the "source" (TaskErrorSource) data
-        const taskRunEvent = !!taskRunError
-          ? asTaskRunEvent(
+        if (!!taskRunError) {
+          debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
+          this.onTaskEvent(
+            asTaskRunEvent(
               this.id,
               asErr({
                 ...processedResult,
@@ -724,14 +728,19 @@ export class TaskManagerRunner implements TaskRunner {
               }),
               taskTiming
             )
-          : asTaskRunEvent(
+          );
+        } else {
+          this.onTaskEvent(
+            asTaskRunEvent(
               this.id,
               asOk({ ...processedResult, isExpired: taskHasExpired }),
               taskTiming
-            );
-        this.onTaskEvent(taskRunEvent);
+            )
+          );
+        }
       },
       async ({ error }: FailedRunResult) => {
+        debugLogger.debug(`Emitting task run failed event for task ${this.taskType}`);
         this.onTaskEvent(
           asTaskRunEvent(
             this.id,

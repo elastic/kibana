@@ -589,7 +589,7 @@
         "label": "PublicUiSettingsParams",
         "description": [],
         "signature": [
-          "{ type?: ",
+          "{ value?: unknown; type?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",
@@ -597,7 +597,7 @@
             "section": "def-common.UiSettingsType",
             "text": "UiSettingsType"
           },
-          " | undefined; value?: unknown; options?: string[] | number[] | undefined; scope?: ",
+          " | undefined; options?: string[] | number[] | undefined; scope?: ",
           {
             "pluginId": "@kbn/core-ui-settings-common",
             "scope": "common",

@@ -18,6 +18,8 @@ import {
   getDefaultSourceFields,
   IndexFields,
 } from '../utils/create_query';
+import { useUsageTracker } from './use_usage_tracker';
+import { AnalyticsEvents } from '../analytics/constants';
 
 export const getIndicesWithNoSourceFields = (
   defaultSourceFields: IndexFields
@@ -33,6 +35,7 @@ export const getIndicesWithNoSourceFields = (
 };
 
 export const useSourceIndicesFields = () => {
+  const usageTracker = useUsageTracker();
   const { services } = useKibana();
   const [loading, setLoading] = useState<boolean>(false);
   const [noFieldsIndicesWarning, setNoFieldsIndicesWarning] = useState<string | null>(null);
@@ -88,6 +91,10 @@ export const useSourceIndicesFields = () => {
 
       onElasticsearchQueryChange(createQuery(defaultFields, fields));
       onSourceFieldsChange(defaultSourceFields);
+      usageTracker?.count(
+        AnalyticsEvents.sourceFieldsLoaded,
+        Object.values(fields)?.flat()?.length
+      );
     } else {
       setNoFieldsIndicesWarning(null);
     }
@@ -99,12 +106,14 @@ export const useSourceIndicesFields = () => {
     const newIndices = [...selectedIndices, newIndex];
     setLoading(true);
     onIndicesChange(newIndices);
+    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
   };
 
   const removeIndex = (index: IndexName) => {
     const newIndices = selectedIndices.filter((indexName: string) => indexName !== index);
     setLoading(true);
     onIndicesChange(newIndices);
+    usageTracker?.count(AnalyticsEvents.sourceIndexUpdated, newIndices.length);
   };
 
   return {

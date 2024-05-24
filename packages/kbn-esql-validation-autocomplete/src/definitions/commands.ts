@@ -134,6 +134,8 @@ export const commandDefinitions: CommandDefinition[] = [
         }
 
         function checkAggExistence(arg: ESQLFunction): boolean {
+          // TODO the grouping function check may not
+          // hold true for all future cases
           if (isAggFunction(arg)) {
             return true;
           }
@@ -172,6 +174,8 @@ export const commandDefinitions: CommandDefinition[] = [
           // * or if it's a builtin function, then all operands are agg functions or literals
           // * or if it's a eval function then all arguments are agg functions or literals
           function checkFunctionContent(arg: ESQLFunction) {
+            // TODO the grouping function check may not
+            // hold true for all future cases
             if (isAggFunction(arg)) {
               return true;
             }
@@ -330,13 +334,14 @@ export const commandDefinitions: CommandDefinition[] = [
       '… | sort a desc, b nulls last, c asc nulls first',
       '… | sort b nulls last',
       '… | sort c asc nulls first',
+      '… | sort a - abs(b)',
     ],
     options: [],
     modes: [],
     signature: {
       multipleParams: true,
       params: [
-        { name: 'column', type: 'column' },
+        { name: 'expression', type: 'any' },
         { name: 'direction', type: 'string', optional: true, values: ['asc', 'desc'] },
         { name: 'nulls', type: 'string', optional: true, values: ['nulls first', 'nulls last'] },
       ],

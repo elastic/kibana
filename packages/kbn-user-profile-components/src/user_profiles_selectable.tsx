@@ -340,12 +340,17 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
               gutterSize="s"
               responsive={false}
             >
-              <EuiFlexItem>
-                <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              <EuiFlexItem css={{ maxWidth: '100%' }}>
+                <EuiHighlight className="eui-textTruncate" search={searchValue}>
+                  {option.label}
+                </EuiHighlight>
               </EuiFlexItem>
               {option.user.email && option.user.email !== option.label ? (
-                <EuiFlexItem grow={false}>
-                  <EuiTextColor color={option.disabled ? 'disabled' : 'subdued'}>
+                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                  <EuiTextColor
+                    color={option.disabled ? 'disabled' : 'subdued'}
+                    className="eui-textTruncate"
+                  >
                     {searchValue ? (
                       <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
                     ) : (

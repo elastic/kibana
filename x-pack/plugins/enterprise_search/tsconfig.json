@@ -73,6 +73,11 @@
     "@kbn/utility-types",
     "@kbn/index-management",
     "@kbn/deeplinks-search",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/search-types",
+    "@kbn/cloud",
+    "@kbn/try-in-console",
+    "@kbn/core-chrome-browser",
+    "@kbn/navigation-plugin"
   ]
 }

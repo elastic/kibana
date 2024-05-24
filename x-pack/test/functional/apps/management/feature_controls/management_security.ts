@@ -78,6 +78,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           sectionLinks: [
             'dataViews',
             'filesManagement',
+            'aiAssistantManagementSelection',
             'objects',
             'tags',
             'search_sessions',

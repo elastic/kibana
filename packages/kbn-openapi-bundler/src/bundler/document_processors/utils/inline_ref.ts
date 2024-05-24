@@ -6,15 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep } from 'lodash';
 import { DocumentNode, ResolvedRef } from '../../types';
 import { InlinableRefNode } from '../types';
 
 export function inlineRef(node: DocumentNode, resolvedRef: ResolvedRef): void {
-  // Make sure unwanted side effects don't happen when child nodes are processed
-  const deepClone = cloneDeep(resolvedRef.refNode);
-
-  Object.assign(node, deepClone);
+  Object.assign(node, resolvedRef.refNode);
 
   delete (node as InlinableRefNode).$ref;
 }

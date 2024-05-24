@@ -249,6 +249,7 @@ export const orphanedSyncJob: ConnectorSyncJob = {
   trigger_method: TriggerMethod.ON_DEMAND,
   connector: {
     id: '3',
+    service_type: 'github',
     configuration: {
       use_text_extraction_service: {
         value: false,
@@ -581,6 +582,7 @@ export const expectedMysqlConnectorStats: ConnectorStats = {
 export const expectedDeletedConnectorStats: ConnectorStats = {
   id: orphanedSyncJob.connector.id,
   isDeleted: true,
+  serviceType: 'github',
   syncJobs: {
     overall: {
       total: 1,

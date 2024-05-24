@@ -42,6 +42,7 @@ export type {
   ErrorHttpResponseOptions,
   FileHttpResponseOptions,
 } from './response';
+export { isKibanaResponse } from './response';
 export type {
   RouteConfigOptions,
   RouteMethod,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { merge } from 'lodash';
+import deepMerge from 'deepmerge';
 
 import { isPackageLimited } from '../../../common/services';
 import type {
@@ -71,7 +72,6 @@ export const storedPackagePolicyToAgentInputs = (
         return acc;
       }, {} as Record<string, unknown>)
     );
-
     if (packagePolicy.package) {
       fullInput.meta = {
         package: {
@@ -80,9 +80,27 @@ export const storedPackagePolicyToAgentInputs = (
         },
       };
     }
-    fullInputs.push(fullInput);
+
+    const fullInputWithOverrides = mergeInputsOverrides(packagePolicy, fullInput);
+    fullInputs.push(fullInputWithOverrides);
   });
   return fullInputs;
+};
+
+export const mergeInputsOverrides = (
+  packagePolicy: PackagePolicy,
+  fullInput: FullAgentPolicyInput
+) => {
+  // check if there are inputs overrides and merge them
+  if (packagePolicy?.overrides?.inputs) {
+    const overrideInputs = packagePolicy.overrides.inputs;
+    const keys = Object.keys(overrideInputs);
+
+    if (keys.length > 0 && fullInput.id === keys[0]) {
+      return deepMerge<FullAgentPolicyInput>(fullInput, overrideInputs[keys[0]]);
+    }
+  }
+  return fullInput;
 };
 
 export const getFullInputStreams = (

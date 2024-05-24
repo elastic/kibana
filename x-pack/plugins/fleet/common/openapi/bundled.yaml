@@ -1581,7 +1581,7 @@ paths:
       operationId: agent-action-cancel
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /agents/files@{fileId}@{fileName}:
+  /agents/files/{fileId}/{fileName}:
     parameters:
       - schema:
           type: string
@@ -1616,6 +1616,35 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: get-agent-upload-file
+  /agents/files/{fileId}:
+    parameters:
+      - schema:
+          type: string
+        name: fileId
+        in: path
+        required: true
+    delete:
+      summary: Delete file uploaded by agent
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      deleted:
+                        type: boolean
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: delete-agent-upload-file
   /agents/{agentId}/reassign:
     parameters:
       - schema:
@@ -3971,26 +4000,26 @@ components:
       type: object
       deprecated: true
       properties:
-        response:
+        items:
           type: array
           items:
-            type: array
-            items:
-              type: object
-              properties:
-                id:
-                  type: string
-                type:
-                  $ref: '#/components/schemas/saved_object_type'
-                updatedAt:
-                  type: string
-                attributes:
-                  type: object
-                  properties:
-                    title:
-                      type: string
-                    description:
-                      type: string
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                $ref: '#/components/schemas/saved_object_type'
+              updatedAt:
+                type: string
+              attributes:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  description:
+                    type: string
+              appLink:
+                type: string
       required:
         - items
     get_categories_response:
@@ -4674,6 +4703,7 @@ components:
               properties:
                 log_level:
                   type: string
+                  nullable: true
                   enum:
                     - debug
                     - info
@@ -4746,6 +4776,8 @@ components:
               type: string
             title:
               type: string
+            requires_root:
+              type: boolean
           required:
             - name
             - version
@@ -4783,6 +4815,8 @@ components:
           type: string
         description:
           type: string
+        overrides:
+          type: object
       required:
         - inputs
         - name
@@ -4862,6 +4896,8 @@ components:
           type: number
         agents:
           type: number
+        unprivileged_agents:
+          type: number
         agent_features:
           type: array
           items:
@@ -4892,6 +4928,11 @@ components:
             Advanced settings stored in the agent policy, e.g.
             agent_limits_go_max_procs
           nullable: true
+        supports_agentless:
+          type: boolean
+          description: >-
+            Indicates whether the agent policy supports agentless integrations.
+            Only allowed in a serverless environment.
       required:
         - id
         - status
@@ -5287,6 +5328,16 @@ components:
                       description: >-
                         Stream level variable (see integration documentation for
                         more information)
+        overrides:
+          type: object
+          properties:
+            inputs:
+              type: object
+          description: >-
+            Override settings that are defined in the package policy. The
+            override option should be used only in unusual circumstances and not
+            as a routine procedure.
+          nullable: true
         force:
           type: boolean
           description: >-

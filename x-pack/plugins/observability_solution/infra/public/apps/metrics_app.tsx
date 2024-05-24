@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import React from 'react';
@@ -99,12 +99,14 @@ const MetricsApp: React.FC<{
         <SourceProvider sourceId="default">
           <PluginConfigProvider value={pluginConfig}>
             <Router history={history}>
-              <Routes>
-                <Route path="/link-to" component={LinkToMetricsPage} />
-                {uiCapabilities?.infrastructure?.show && (
-                  <Route path="/" component={InfrastructurePage} />
-                )}
-              </Routes>
+              <PerformanceContextProvider>
+                <Routes>
+                  <Route path="/link-to" component={LinkToMetricsPage} />
+                  {uiCapabilities?.infrastructure?.show && (
+                    <Route path="/" component={InfrastructurePage} />
+                  )}
+                </Routes>
+              </PerformanceContextProvider>
             </Router>
           </PluginConfigProvider>
         </SourceProvider>

@@ -21,7 +21,7 @@ import {
   EuiSkeletonTitle,
   DraggableProvidedDragHandleProps,
 } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { LinkInfo } from '../../embeddable/types';
 import { validateUrl } from '../external_link/external_link_tools';

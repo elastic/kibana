@@ -33,7 +33,6 @@
     "@kbn/content-management-table-list-view-common",
     "@kbn/user-profile-components",
     "@kbn/core-user-profile-browser",
-    "@kbn/core-user-profile-common",
     "@kbn/react-kibana-mount"
   ],
   "exclude": [

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { PublishesDataViews, SerializedTitles } from '@kbn/presentation-publishing';
 import { PublishesSelectedFields } from './publishes_selected_fields';
 
@@ -16,3 +20,10 @@ export type FieldListSerializedStateState = SerializedTitles & {
 };
 
 export type FieldListApi = DefaultEmbeddableApi & PublishesSelectedFields & PublishesDataViews;
+
+export interface Services {
+  dataViews: DataViewsPublicPluginStart;
+  data: DataPublicPluginStart;
+  charts: ChartsPluginStart;
+  fieldFormats: FieldFormatsStart;
+}

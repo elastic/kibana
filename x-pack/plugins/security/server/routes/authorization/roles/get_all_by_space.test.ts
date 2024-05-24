@@ -171,6 +171,7 @@ describe('GET all roles by space id', () => {
     getRolesTest(`returns roles for matching space`, {
       apiResponse: () => ({
         first_role: {
+          description: 'first role description',
           cluster: [],
           indices: [],
           applications: [
@@ -218,6 +219,7 @@ describe('GET all roles by space id', () => {
         result: [
           {
             name: 'first_role',
+            description: 'first role description',
             metadata: {
               _reserved: true,
             },
@@ -251,6 +253,7 @@ describe('GET all roles by space id', () => {
     getRolesTest(`returns roles with access to all spaces`, {
       apiResponse: () => ({
         first_role: {
+          description: 'first role description',
           cluster: [],
           indices: [],
           applications: [
@@ -292,6 +295,7 @@ describe('GET all roles by space id', () => {
         result: [
           {
             name: 'first_role',
+            description: 'first role description',
             metadata: {
               _reserved: true,
             },

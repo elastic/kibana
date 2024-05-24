@@ -17,11 +17,8 @@ import type { DecoratorFn } from '@storybook/react';
 import { useParameter } from '@storybook/addons';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type {
-  IKibanaSearchRequest,
-  ISearchOptions,
-  SearchSessionState,
-} from '@kbn/data-plugin/public';
+import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
+import type { SearchSessionState } from '@kbn/data-plugin/public';
 import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
 import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
 import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
@@ -155,6 +152,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     telemetry: {
       reportAssetDetailsFlyoutViewed: () => {},
       reportAssetDetailsPageViewed: () => {},
+      reportAssetDashboardLoaded: () => {},
     },
   };
 

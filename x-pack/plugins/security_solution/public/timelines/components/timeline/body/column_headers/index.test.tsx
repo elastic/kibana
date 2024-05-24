@@ -96,6 +96,11 @@ describe('ColumnHeaders', () => {
     });
 
     test('it renders the field browser', () => {
+      const mockCloseEditor = jest.fn();
+      mockUseFieldBrowserOptions.mockImplementation(({ editorActionsRef }) => {
+        editorActionsRef.current = { closeEditor: mockCloseEditor };
+        return {};
+      });
       const wrapper = mount(
         <TestProviders>
           <ColumnHeadersComponent {...defaultProps} />

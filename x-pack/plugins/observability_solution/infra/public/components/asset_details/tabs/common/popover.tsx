@@ -8,7 +8,7 @@
 import { EuiPopover, EuiIcon, type IconType, type IconColor, type IconSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { useBoolean } from '../../../../hooks/use_boolean';
+import { useBoolean } from '@kbn/react-hooks';
 
 export const Popover = ({
   children,

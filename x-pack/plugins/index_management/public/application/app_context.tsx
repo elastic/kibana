@@ -62,6 +62,7 @@ export interface AppDependencies {
     enableIndexStats: boolean;
     editableIndexSettings: 'all' | 'limited';
     enableDataStreamsStorageColumn: boolean;
+    enableMappingsSourceFieldSection: boolean;
     enableTogglingDataRetention: boolean;
   };
   history: ScopedHistory;

@@ -22,20 +22,16 @@ import {
 } from '@elastic/eui';
 
 import { AssetTitleMap } from '../../../constants';
+import type { DisplayedAssetTypes, GetBulkAssetsResponse } from '../../../../../../../../common';
+import { useStartServices } from '../../../../../hooks';
+import { KibanaAssetType } from '../../../../../types';
 
-import type { SimpleSOAssetType, AllowedAssetTypes } from '../../../../../../../../common';
+export type DisplayedAssetType = DisplayedAssetTypes[number] | 'view';
 
-import { getHrefToObjectInKibanaApp, useStartServices } from '../../../../../hooks';
-
-import { ElasticsearchAssetType, KibanaAssetType } from '../../../../../types';
-
-export type AllowedAssetType = AllowedAssetTypes[number] | 'view';
-interface Props {
-  type: AllowedAssetType;
-  savedObjects: SimpleSOAssetType[];
-}
-
-export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }) => {
+export const AssetsAccordion: FunctionComponent<{
+  type: DisplayedAssetType;
+  savedObjects: GetBulkAssetsResponse['items'];
+}> = ({ savedObjects, type }) => {
   const { http } = useStartServices();
 
   const isDashboard = type === KibanaAssetType.dashboard;
@@ -62,25 +58,21 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
       <>
         <EuiSpacer size="m" />
         <EuiSplitPanel.Outer hasBorder hasShadow={false}>
-          {savedObjects.map(({ id, attributes: { title: soTitle, description } }, idx) => {
+          {savedObjects.map(({ id, attributes, appLink }, idx) => {
+            const { title: soTitle, description } = attributes || {};
             // Ignore custom asset views or if not a Kibana asset
             if (type === 'view') {
               return;
             }
 
-            const pathToObjectInApp = getHrefToObjectInKibanaApp({
-              http,
-              id,
-              type: type === ElasticsearchAssetType.transform ? undefined : type,
-            });
             const title = soTitle ?? id;
             return (
               <Fragment key={id}>
                 <EuiSplitPanel.Inner grow={false} key={idx}>
                   <EuiText size="m">
                     <p>
-                      {pathToObjectInApp ? (
-                        <EuiLink href={pathToObjectInApp}>{title}</EuiLink>
+                      {appLink ? (
+                        <EuiLink href={http.basePath.prepend(appLink)}>{title}</EuiLink>
                       ) : (
                         title
                       )}

@@ -10,14 +10,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import {
-  TableListViewKibanaProvider,
-  TableListViewKibanaDependencies,
-} from '@kbn/content-management-table-list-view-table';
+import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { StartDependencies } from './types';
 import { App } from './app';
@@ -35,28 +32,26 @@ export const mountManagementSection = (
   } = startDeps;
 
   ReactDOM.render(
-    <I18nProvider>
-      <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-        <QueryClientProvider client={queryClient}>
-          <TableListViewKibanaProvider
-            {...{
-              core: coreStart as unknown as TableListViewKibanaDependencies['core'],
-              FormattedRelative,
-            }}
+    <KibanaRenderContextProvider {...coreStart}>
+      <QueryClientProvider client={queryClient}>
+        <TableListViewKibanaProvider
+          {...{
+            core: coreStart,
+            FormattedRelative,
+          }}
+        >
+          <FilesManagementAppContextProvider
+            filesClient={filesClientFactory.asUnscoped()}
+            getFileKindDefinition={getFileKindDefinition}
+            getAllFindKindDefinitions={getAllFindKindDefinitions}
           >
-            <FilesManagementAppContextProvider
-              filesClient={filesClientFactory.asUnscoped()}
-              getFileKindDefinition={getFileKindDefinition}
-              getAllFindKindDefinitions={getAllFindKindDefinitions}
-            >
-              <Router history={history}>
-                <Route path="/" component={App} />
-              </Router>
-            </FilesManagementAppContextProvider>
-          </TableListViewKibanaProvider>
-        </QueryClientProvider>
-      </KibanaThemeProvider>
-    </I18nProvider>,
+            <Router history={history}>
+              <Route path="/" component={App} />
+            </Router>
+          </FilesManagementAppContextProvider>
+        </TableListViewKibanaProvider>
+      </QueryClientProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

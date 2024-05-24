@@ -516,14 +516,46 @@
             "parentPluginId": "@kbn/core-logging-server",
             "id": "def-common.NumericRollingStrategyConfig.max",
             "type": "number",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "max",
             "description": [
-              "\nThe maximum number of files to keep. Once this number is reached, oldest\nfiles will be deleted. Defaults to `7`"
+              "\nThe maximum number of files to keep. Once this number is reached, oldest\nfiles will be deleted. Defaults to `7`\n"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "@kbn/core-logging-server-internal",
+                "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/strategies/index.ts"
+              },
+              {
+                "plugin": "@kbn/core-logging-server-internal",
+                "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/retention/create_retention_policy.ts"
+              },
+              {
+                "plugin": "security",
+                "path": "x-pack/plugins/security/server/config.ts"
+              },
+              {
+                "plugin": "@kbn/core-logging-server-internal",
+                "path": "packages/core/logging/core-logging-server-internal/src/appenders/appenders.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-logging-server-internal",
+                "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/rolling_file_appender.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-logging-server-internal",
+                "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/retention/create_retention_policy.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-logging-server-internal",
+                "path": "packages/core/logging/core-logging-server-internal/src/appenders/rolling_file/strategies/numeric/numeric_strategy.test.ts"
+              }
+            ]
           }
         ],
         "initialIsOpen": false
@@ -580,6 +612,69 @@
               "string | undefined"
             ],
             "path": "packages/core/logging/core-logging-server/src/layout.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-logging-server",
+        "id": "def-common.RetentionPolicyConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "RetentionPolicyConfig",
+        "description": [],
+        "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-common.RetentionPolicyConfig.maxFiles",
+            "type": "number",
+            "tags": [],
+            "label": "maxFiles",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-common.RetentionPolicyConfig.maxAccumulatedFileSize",
+            "type": "Object",
+            "tags": [],
+            "label": "maxAccumulatedFileSize",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/config-schema",
+                "scope": "common",
+                "docId": "kibKbnConfigSchemaPluginApi",
+                "section": "def-common.ByteSizeValue",
+                "text": "ByteSizeValue"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-common.RetentionPolicyConfig.removeOlderThan",
+            "type": "Object",
+            "tags": [],
+            "label": "removeOlderThan",
+            "description": [],
+            "signature": [
+              "moment.Duration | undefined"
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -771,6 +866,29 @@
                 "section": "def-common.NumericRollingStrategyConfig",
                 "text": "NumericRollingStrategyConfig"
               }
+            ],
+            "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-logging-server",
+            "id": "def-common.RollingFileAppenderConfig.retention",
+            "type": "Object",
+            "tags": [],
+            "label": "retention",
+            "description": [
+              "\nThe {@link RetentionPolicy | retention strategy} to use to know which files to keep."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-logging-server",
+                "scope": "common",
+                "docId": "kibKbnCoreLoggingServerPluginApi",
+                "section": "def-common.RetentionPolicyConfig",
+                "text": "RetentionPolicyConfig"
+              },
+              " | undefined"
             ],
             "path": "packages/core/logging/core-logging-server/src/appenders/rolling_file.ts",
             "deprecated": false,

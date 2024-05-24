@@ -97,7 +97,7 @@ export function Table<T extends UserContentCommonSchema>({
   clearTagSelection,
   createdByEnabled,
 }: Props<T>) {
-  const { getTagList } = useServices();
+  const { getTagList, isTaggingEnabled } = useServices();
 
   const renderToolsLeft = useCallback(() => {
     if (!deleteItems || selectedIds.length === 0) {
@@ -181,7 +181,9 @@ export function Table<T extends UserContentCommonSchema>({
     };
   }, [hasUpdatedAtMetadata, onSortChange, tableSort]);
 
-  const tagFilterPanel = useMemo<SearchFilterConfig>(() => {
+  const tagFilterPanel = useMemo<SearchFilterConfig | null>(() => {
+    if (!isTaggingEnabled()) return null;
+
     return {
       type: 'custom_component',
       component: () => {
@@ -202,6 +204,7 @@ export function Table<T extends UserContentCommonSchema>({
   }, [
     isPopoverOpen,
     isInUse,
+    isTaggingEnabled,
     closePopover,
     options,
     totalActiveFilters,

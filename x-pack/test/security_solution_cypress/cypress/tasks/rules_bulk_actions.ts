@@ -21,6 +21,7 @@ import {
 import { EUI_SELECTABLE_LIST_ITEM, TIMELINE_SEARCHBOX } from '../screens/common/controls';
 import {
   ADD_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  ADD_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
   ADD_RULE_ACTIONS_MENU_ITEM,
   ADD_TAGS_RULE_BULK_MENU_ITEM,
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
@@ -28,18 +29,22 @@ import {
   BULK_ACTIONS_PROGRESS_BTN,
   BULK_EXPORT_ACTION_BTN,
   DELETE_INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  DELETE_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
   DELETE_RULE_BULK_BTN,
   DELETE_TAGS_RULE_BULK_MENU_ITEM,
   DISABLE_RULE_BULK_BTN,
   DUPLICATE_RULE_BULK_BTN,
   ENABLE_RULE_BULK_BTN,
   INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
+  INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM,
   RULES_BULK_EDIT_FORM_CONFIRM_BTN,
   RULES_BULK_EDIT_FORM_TITLE,
   RULES_BULK_EDIT_INDEX_PATTERNS,
+  RULES_BULK_EDIT_INVESTIGATION_FIELDS,
   RULES_BULK_EDIT_OVERWRITE_ACTIONS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_INDEX_PATTERNS_CHECKBOX,
+  RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX,
   RULES_BULK_EDIT_OVERWRITE_TAGS_CHECKBOX,
   RULES_BULK_EDIT_SCHEDULES_WARNING,
   RULES_BULK_EDIT_TAGS,
@@ -230,6 +235,46 @@ export const checkTagsInTagsFilter = (tags: string[], srOnlyText: string = '') =
     .each(($el, index) => {
       cy.wrap($el).should('have.text', `${tags[index]}${srOnlyText}`);
     });
+};
+
+// EDIT-INVESTIGATION FIELDS
+const clickInvestigationFieldsMenuItem = () => {
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
+};
+
+export const clickAddInvestigationFieldsMenuItem = () => {
+  clickInvestigationFieldsMenuItem();
+  cy.get(ADD_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
+};
+
+export const openBulkEditAddInvestigationFieldsForm = () => {
+  clickAddInvestigationFieldsMenuItem();
+
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Add custom highlighted fields');
+};
+
+export const openBulkEditDeleteInvestigationFieldsForm = () => {
+  clickInvestigationFieldsMenuItem();
+  cy.get(DELETE_INVESTIGATION_FIELDS_RULE_BULK_MENU_ITEM).click();
+
+  cy.get(RULES_BULK_EDIT_FORM_TITLE).should('have.text', 'Delete custom highlighted fields');
+};
+
+export const typeInvestigationFields = (fields: string[]) => {
+  cy.get(RULES_BULK_EDIT_INVESTIGATION_FIELDS)
+    .find('input')
+    .type(fields.join('{enter}') + '{enter}');
+};
+
+export const checkOverwriteInvestigationFieldsCheckbox = () => {
+  cy.get(RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX)
+    .should('have.text', "Overwrite all selected rules' custom highlighted fields")
+    .click();
+  cy.get(RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX)
+    .should('have.text', "Overwrite all selected rules' custom highlighted fields")
+    .get('input')
+    .should('be.checked');
 };
 
 // EDIT-SCHEDULE

@@ -22,7 +22,7 @@ import { getRiskEngineMetricsFromBody } from './get_risk_engine_metrics_from_bod
  * @returns The detection metrics
  */
 export const getRiskEngineStats = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<RiskEngineMetrics> => {
   const response = await supertest

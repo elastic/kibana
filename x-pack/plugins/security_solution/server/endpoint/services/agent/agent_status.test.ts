@@ -6,7 +6,7 @@
  */
 
 import type { GetAgentStatusOptions } from './agent_status';
-import { getAgentStatus, SENTINEL_ONE_NETWORK_STATUS } from './agent_status';
+import { getSentinelOneAgentStatus, SENTINEL_ONE_NETWORK_STATUS } from './agent_status';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { sentinelOneMock } from '../actions/clients/sentinelone/mocks';
 import { responseActionsClientMock } from '../actions/clients/mocks';
@@ -18,7 +18,7 @@ describe('Endpoint Get Agent Status service', () => {
     agentStatusOptions = {
       agentType: 'sentinel_one',
       agentIds: ['1', '2'],
-      logger: loggingSystemMock.create().get('getAgentStatus'),
+      logger: loggingSystemMock.create().get('getSentinelOneAgentStatus'),
       connectorActionsClient: sentinelOneMock.createConnectorActionsClient(),
     };
   });
@@ -27,7 +27,7 @@ describe('Endpoint Get Agent Status service', () => {
     (agentStatusOptions.connectorActionsClient.getAll as jest.Mock).mockImplementation(async () => {
       throw new Error('boom');
     });
-    const getStatusResponsePromise = getAgentStatus(agentStatusOptions);
+    const getStatusResponsePromise = getSentinelOneAgentStatus(agentStatusOptions);
 
     await expect(getStatusResponsePromise).rejects.toHaveProperty(
       'message',
@@ -38,7 +38,7 @@ describe('Endpoint Get Agent Status service', () => {
 
   it('should throw error if no SentinelOne connector is registered', async () => {
     (agentStatusOptions.connectorActionsClient.getAll as jest.Mock).mockResolvedValue([]);
-    const getStatusResponsePromise = getAgentStatus(agentStatusOptions);
+    const getStatusResponsePromise = getSentinelOneAgentStatus(agentStatusOptions);
 
     await expect(getStatusResponsePromise).rejects.toHaveProperty(
       'message',
@@ -48,7 +48,7 @@ describe('Endpoint Get Agent Status service', () => {
   });
 
   it('should send api request to SentinelOne', async () => {
-    await getAgentStatus(agentStatusOptions);
+    await getSentinelOneAgentStatus(agentStatusOptions);
 
     expect(agentStatusOptions.connectorActionsClient.execute).toHaveBeenCalledWith({
       actionId: 's1-connector-instance-id',
@@ -68,7 +68,7 @@ describe('Endpoint Get Agent Status service', () => {
         serviceMessage: 'boom',
       })
     );
-    const getStatusResponsePromise = getAgentStatus(agentStatusOptions);
+    const getStatusResponsePromise = getSentinelOneAgentStatus(agentStatusOptions);
 
     await expect(getStatusResponsePromise).rejects.toHaveProperty(
       'message',
@@ -98,7 +98,7 @@ describe('Endpoint Get Agent Status service', () => {
       })
     );
 
-    await expect(getAgentStatus(agentStatusOptions)).resolves.toEqual({
+    await expect(getSentinelOneAgentStatus(agentStatusOptions)).resolves.toEqual({
       aaa: {
         agentType: 'sentinel_one',
         found: true,

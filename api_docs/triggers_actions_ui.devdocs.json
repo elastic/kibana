@@ -6474,7 +6474,7 @@
         "label": "RuleCreationValidConsumer",
         "description": [],
         "signature": [
-          "\"alerts\" | \"observability\" | \"stackAlerts\" | \"logs\" | \"infrastructure\""
+          "\"observability\" | \"stackAlerts\" | \"alerts\" | \"logs\" | \"infrastructure\""
         ],
         "path": "packages/kbn-rule-data-utils/src/rule_types/index.ts",
         "deprecated": false,

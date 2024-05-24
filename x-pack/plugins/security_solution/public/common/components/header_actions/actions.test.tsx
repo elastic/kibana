@@ -156,6 +156,7 @@ describe('Actions', () => {
   describe('Guided Onboarding Step', () => {
     const incrementStepMock = jest.fn();
     beforeEach(() => {
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
       (useTourContext as jest.Mock).mockReturnValue({
         activeStep: 2,
         incrementStep: incrementStepMock,

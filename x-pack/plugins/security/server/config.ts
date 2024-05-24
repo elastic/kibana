@@ -294,9 +294,10 @@ export const ConfigSchema = schema.object({
         schema.object({
           actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
           spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          users: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
         })
       )
     ),
