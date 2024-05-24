@@ -238,10 +238,10 @@ export class SpacesGridPage extends Component<Props, State> {
         field: 'initials',
         name: '',
         width: '50px',
-        render: (value: string, record: Space) => {
+        render: (_value: string, record: Space) => {
           return (
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
+              <EuiLink {...reactRouterNavigate(this.props.history, this.getViewSpacePath(record))}>
                 <LazySpaceAvatar space={record} size="s" />
               </EuiLink>
             </Suspense>
@@ -255,7 +255,7 @@ export class SpacesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         render: (value: string, record: Space) => (
-          <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
+          <EuiLink {...reactRouterNavigate(this.props.history, this.getViewSpacePath(record))}>
             {value}
           </EuiLink>
         ),
@@ -275,7 +275,7 @@ export class SpacesGridPage extends Component<Props, State> {
         sortable: (space: Space) => {
           return getEnabledFeatures(this.state.features, space).length;
         },
-        render: (disabledFeatures: string[], record: Space) => {
+        render: (_disabledFeatures: string[], record: Space) => {
           const enabledFeatureCount = getEnabledFeatures(this.state.features, record).length;
           if (enabledFeatureCount === this.state.features.length) {
             return (
@@ -364,6 +364,8 @@ export class SpacesGridPage extends Component<Props, State> {
       },
     ];
   }
+
+  private getViewSpacePath = (space: Space) => `view/${encodeURIComponent(space.id)}`;
 
   private getEditSpacePath = (space: Space) => `edit/${encodeURIComponent(space.id)}`;
 

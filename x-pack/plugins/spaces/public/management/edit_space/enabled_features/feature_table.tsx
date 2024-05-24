@@ -33,14 +33,17 @@ import { getEnabledFeatures } from '../../lib/feature_utils';
 interface Props {
   space: Partial<Space>;
   features: KibanaFeatureConfig[];
-  onChange: (space: Partial<Space>) => void;
+  onChange?: (space: Partial<Space>) => void;
 }
 
 export class FeatureTable extends Component<Props, {}> {
   private featureCategories: Map<string, KibanaFeatureConfig[]> = new Map();
+  private isReadOnly: boolean;
 
   constructor(props: Props) {
     super(props);
+    this.isReadOnly = props.onChange == null;
+
     // features are static for the lifetime of the page, so this is safe to do here in a non-reactive manner
     props.features.forEach((feature) => {
       if (!this.featureCategories.has(feature.category.id)) {
@@ -66,6 +69,8 @@ export class FeatureTable extends Component<Props, {}> {
         id: `featureCategoryCheckbox_${category.id}`,
         indeterminate: enabledCount > 0 && enabledCount < featureCount,
         checked: featureCount === enabledCount,
+        readOnly: this.isReadOnly,
+        disabled: this.isReadOnly,
         ['aria-label']: i18n.translate(
           'xpack.spaces.management.enabledFeatures.featureCategoryButtonLabel',
           { defaultMessage: 'Category toggle' }
@@ -162,6 +167,8 @@ export class FeatureTable extends Component<Props, {}> {
                         id={`featureCheckbox_${feature.id}`}
                         data-test-subj={`featureCheckbox_${feature.id}`}
                         checked={featureChecked}
+                        readOnly={this.isReadOnly}
+                        disabled={this.isReadOnly}
                         onChange={this.onChange(feature.id) as any}
                         label={feature.name}
                       />
@@ -254,7 +261,9 @@ export class FeatureTable extends Component<Props, {}> {
     }
 
     updatedSpace.disabledFeatures = disabledFeatures;
-    this.props.onChange(updatedSpace);
+    if (this.props.onChange) {
+      this.props.onChange(updatedSpace);
+    }
   };
 
   private getAllFeatureIds = () =>
@@ -283,7 +292,9 @@ export class FeatureTable extends Component<Props, {}> {
       );
     }
 
-    this.props.onChange(updatedSpace);
+    if (this.props.onChange) {
+      this.props.onChange(updatedSpace);
+    }
   };
 
   private getCategoryHelpText = (category: AppCategory) => {

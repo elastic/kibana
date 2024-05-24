@@ -21,7 +21,7 @@ import { SectionPanel } from '../section_panel';
 interface Props {
   space: Partial<Space>;
   features: KibanaFeatureConfig[];
-  onChange: (space: Partial<Space>) => void;
+  onChange?: (space: Partial<Space>) => void;
 }
 
 export const EnabledFeatures: FunctionComponent<Props> = (props) => {
