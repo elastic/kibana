@@ -83,12 +83,7 @@ export function getAlertsForNotification<
             context
           );
           activeAlerts[id] = newAlert;
-
-          // rule with "on status change" or rule with at least one
-          // action with "on status change" should return notifications
-          if (notifyOnActionGroupChange) {
-            currentActiveAlerts[id] = newAlert;
-          }
+          currentActiveAlerts[id] = newAlert;
 
           // remove from recovered alerts
           delete recoveredAlerts[id];
