@@ -100,7 +100,6 @@ export const initializeReactEmbeddableState = async <
         )
         .subscribe(([latest, last]) => {
           const changes = runComparators(comparators, comparatorKeys, last, latest);
-          console.log('UNSAVED CHANGES', changes);
           unsavedChanges.next(changes);
         })
     );

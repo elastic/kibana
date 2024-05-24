@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+import classNames from 'classnames';
+import React, { useMemo, useState } from 'react';
+
 import {
   EuiFlexItem,
   EuiFormControlLayout,
@@ -15,7 +18,6 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-// import { ControlError } from '@kbn/controls-plugin/public/control_group/component/control_error_component';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -25,21 +27,22 @@ import {
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+
 import { ControlError } from './control_error_component';
 import { ControlPanelProps, DefaultControlApi } from './types';
 
 /**
  * TODO: Handle dragging
  */
-const DragHandle = ({ isEditable }: { isEditable: boolean }) =>
+const DragHandle = ({ isEditable, controlTitle }: { isEditable: boolean; controlTitle?: string }) =>
   isEditable ? (
     <button
-      // aria-label={`${ControlGroupStrings.ariaActions.getMoveControlButtonAction(title)}`}
+      aria-label={i18n.translate('controls.controlGroup.ariaActions.moveControlButtonAction', {
+        defaultMessage: 'Move control {controlTitle}',
+        values: { controlTitle: controlTitle ?? '' },
+      })}
       className="controlFrame__dragHandle"
     >
-      /
       <EuiIcon type="grabHorizontal" />
     </button>
   ) : null;
@@ -48,7 +51,6 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
   Component,
 }: ControlPanelProps<ApiType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
-  const headerId = useMemo(() => htmlIdGenerator()(), []);
 
   const viewModeSubject = (() => {
     if (
@@ -138,11 +140,18 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                 api?.getCustomPrepend ? (
                   <>{api.getCustomPrepend()}</>
                 ) : usingTwoLineLayout ? (
-                  <DragHandle isEditable={isEditable} />
+                  <DragHandle
+                    isEditable={isEditable}
+                    controlTitle={panelTitle || defaultPanelTitle}
+                  />
                 ) : (
                   <>
-                    <DragHandle isEditable={isEditable} />{' '}
+                    <DragHandle
+                      isEditable={isEditable}
+                      controlTitle={panelTitle || defaultPanelTitle}
+                    />{' '}
                     <EuiFormLabel
+                      // TODO: Convert this to a class
                       css={css`
                         background-color: transparent !important;
                       `}
@@ -154,8 +163,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
               }
             >
               <Component
+                // TODO: Convert this to a class
                 css={css`
-                  height: 38px;
+                  height: calc(${euiThemeVars.euiButtonHeight} - 2px);
                   box-shadow: none !important;
                   ${!isEditable && usingTwoLineLayout
                     ? `border-radius: ${euiThemeVars.euiBorderRadius} !important`

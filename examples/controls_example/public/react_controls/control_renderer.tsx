@@ -6,27 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { v4 as generateId } from 'uuid';
-// import { ControlPanel } from './control_panel';
-// import { getReactEmbeddableFactory } from './react_embeddable_registry';
-// import { startTrackingEmbeddableUnsavedChanges } from './react_embeddable_unsaved_changes';
-import { CoreStart, OverlayStart } from '@kbn/core/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { StateComparators } from '@kbn/presentation-publishing';
+import React, { useImperativeHandle, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { v4 as generateId } from 'uuid';
+
+import { SerializedStyles } from '@emotion/react';
+import { StateComparators } from '@kbn/presentation-publishing';
+
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './control_panel';
-import {
-  ControlApiRegistration,
-  ControlPanelProps,
-  DefaultControlApi,
-  DefaultControlState,
-} from './types';
-import { css, SerializedStyles } from '@emotion/react';
-
-const ON_STATE_CHANGE_DEBOUNCE = 100;
+import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
 
 /**
  * Renders a component from the control registry into a Control Panel
@@ -42,12 +32,9 @@ export const ControlRenderer = <
 }: {
   maybeId?: string;
   type: string;
-  // parentApi: ControlGroupApi;
   getParentApi: () => ControlGroupApi;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
-  // const cleanupFunction = useRef<(() => void) | null>(null);
-
   const component = useMemo(
     () =>
       (() => {
@@ -57,24 +44,8 @@ export const ControlRenderer = <
 
         const buildApi = (
           apiRegistration: ControlApiRegistration<ApiType>,
-          comparators: StateComparators<StateType>
+          comparators: StateComparators<StateType> // TODO: Use these to calculate unsaved changes
         ): ApiType => {
-          // const { unsavedChanges, resetUnsavedChanges, cleanup } =
-          //   startTrackingEmbeddableUnsavedChanges<StateType>(
-          //     uuid,
-          //     parentApi,
-          //     comparators,
-          //     (serializedState: SerializedPanelState<StateType>) => serializedState.rawState
-          //   );
-
-          // const snapshotRuntimeState = () => {
-          //   const comparatorKeys = Object.keys(embeddable.comparators) as Array<keyof RuntimeState>;
-          //   return comparatorKeys.reduce((acc, key) => {
-          //     acc[key] = comparators[key][0].value as RuntimeState[typeof key];
-          //     return acc;
-          //   }, {} as RuntimeState);
-          // };
-
           const fullApi = {
             ...apiRegistration,
             uuid,
@@ -82,12 +53,8 @@ export const ControlRenderer = <
             unsavedChanges: new BehaviorSubject<Partial<StateType> | undefined>(undefined),
             resetUnsavedChanges: () => {},
             type: factory.type,
-            // defaultPanelTitle,
-            // grow,
-            // width,
           } as unknown as ApiType;
 
-          // cleanupFunction.current = () => cleanup();
           onApiAvailable?.(fullApi);
           return fullApi;
         };
@@ -95,8 +62,6 @@ export const ControlRenderer = <
         const initialState = parentApi.getChildState<StateType>(uuid);
 
         const { api, Component } = factory.buildControl(initialState, buildApi, uuid, parentApi);
-
-        console.log('api', api, 'Component', Component);
 
         return React.forwardRef<typeof api, { css: SerializedStyles }>((props, ref) => {
           // expose the api into the imperative handle
@@ -111,12 +76,6 @@ export const ControlRenderer = <
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [type]
   );
-
-  // useEffect(() => {
-  //   return () => {
-  //     cleanupFunction.current?.();
-  //   };
-  // }, []);
 
   return <ControlPanel<ApiType> Component={component} />;
 };
