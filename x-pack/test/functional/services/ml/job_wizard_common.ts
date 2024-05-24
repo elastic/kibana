@@ -654,6 +654,7 @@ export function MachineLearningJobWizardCommonProvider(
       await retry.tryForTime(60_000, async () => {
         await testSubjects.existOrFail('mlJobWizardValidationStep');
         await testSubjects.click('mlJobWizardValidationStep');
+        await this.assertValidationSectionExists();
       });
     },
 
