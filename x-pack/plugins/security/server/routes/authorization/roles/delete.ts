@@ -15,6 +15,10 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
   router.delete(
     {
       path: '/api/security/role/{name}',
+      options: {
+        access: 'public',
+        description: `Delete a role`,
+      },
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1 }) }),
       },
