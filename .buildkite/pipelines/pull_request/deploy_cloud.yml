@@ -7,6 +7,7 @@ steps:
       provider: gcp
       machineType: c3-standard-4
       preemptible: true
+      spotZones: 'us-central1-a,us-central1-b,us-central1-c,us-central1-f'
     depends_on:
       - build
       - quick_checks
