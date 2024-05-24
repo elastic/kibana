@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import { RoutingExamplePlugin } from './plugin';
+import { IntegrationAssistantPlugin } from './plugin';
 
-export const plugin: PluginInitializer<{}, {}> = () => new RoutingExamplePlugin();
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new IntegrationAssistantPlugin();
+}
+export type { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';

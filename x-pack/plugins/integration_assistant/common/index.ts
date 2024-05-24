@@ -14,3 +14,62 @@ export const CATEGORZATION_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/cate
 export const RELATED_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/related`;
 
 export const INTEGRATION_BUILDER_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/build`;
+
+export interface BuildIntegrationAPIRequest {
+  packageName: string;
+  packageTitle: string;
+  packageVersion: string;
+  dataStreamName: string;
+  inputTypes: string[];
+  formSamples: string[];
+  ingestPipeline: object;
+  docs: object[];
+}
+
+export interface EcsMappingAPIRequest {
+  packageName: string;
+  dataStreamName: string;
+  formSamples: string[];
+}
+
+export interface EcsMappingNewPipelineAPIRequest {
+  packageName: string;
+  dataStreamName: string;
+  formSamples: string[];
+  mapping: object;
+}
+
+export interface CategorizationAPIRequest {
+  packageName: string;
+  dataStreamName: string;
+  formSamples: string[];
+  ingestPipeline: object;
+}
+
+export interface RelatedAPIRequest {
+  packageName: string;
+  dataStreamName: string;
+  formSamples: string[];
+  ingestPipeline: object;
+}
+
+export interface CategorizationApiResponse {
+  results: {
+    pipeline: object;
+    docs: object[];
+  };
+}
+
+export interface RelatedApiResponse {
+  results: {
+    pipeline: object;
+    docs: object[];
+  };
+}
+
+export interface EcsMappingApiResponse {
+  results: {
+    mapping: object;
+    current_pipeline: object;
+  };
+}

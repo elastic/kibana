@@ -7,11 +7,23 @@
 
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 export interface IntegrationAssistantPluginSetup {
-  getGreeting: () => string;
+  runEcsGraph: () => string;
+  runRelatedGraph: () => string;
+  runCategorizationGraph: () => string;
+  runIntegrationBuilder: () => string;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IntegrationAssistantPluginStart {}
 
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
+}
+
+export interface EcsMappingTableItem {
+  sourceField: string;
+  destinationField: string;
+  isEcs: boolean;
+  description: string;
+  id: string;
+  exampleValue: any;
 }

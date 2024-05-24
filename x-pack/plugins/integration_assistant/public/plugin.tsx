@@ -24,12 +24,25 @@ export class IntegrationAssistantPlugin
         return renderApp(startServices, params.element);
       },
     });
-    return {};
+    return {
+      runEcsGraph() {
+        return 'test';
+      },
+      runCategorizationGraph() {
+        return 'test';
+      },
+      runRelatedGraph() {
+        return 'test';
+      },
+      runIntegrationBuilder() {
+        return 'test';
+      },
+    };
   }
 
   public start(core: CoreStart) {
     return {};
   }
 
-  public stop() { }
+  public stop() {}
 }
