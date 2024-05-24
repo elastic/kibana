@@ -23,5 +23,6 @@
     "@kbn/developer-examples-plugin",
     "@kbn/es-query",
     "@kbn/shared-ux-router",
+    "@kbn/react-kibana-context-render",
   ]
 }
