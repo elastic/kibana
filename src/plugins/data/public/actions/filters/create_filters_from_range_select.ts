@@ -67,7 +67,7 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
     return [];
   }
 
-  const params = await getParameters(event);
+  const { field, indexPattern } = await getParameters(event);
 
   if (!params.field || event.range.length <= 1) {
     return [];
