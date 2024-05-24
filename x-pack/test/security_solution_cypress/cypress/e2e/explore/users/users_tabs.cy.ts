@@ -68,6 +68,7 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EVENTS_TAB_CONTENT).should('exist');
     });
 
+    // https://github.com/elastic/kibana/issues/184201
     it(`renders users risk tab`, { tags: ['@skipInServerless'] }, () => {
       waitForTabToBeLoaded(RISK_SCORE_TAB);
 
