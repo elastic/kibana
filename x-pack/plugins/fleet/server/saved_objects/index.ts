@@ -621,7 +621,7 @@ export const getSavedObjectTypes = (
       name: PACKAGES_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },
@@ -714,7 +714,7 @@ export const getSavedObjectTypes = (
       name: ASSETS_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
-      namespaceType: useSpaceAwareness ? 'single' : 'agnostic',
+      namespaceType: 'agnostic',
       management: {
         importableAndExportable: false,
       },

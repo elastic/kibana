@@ -117,6 +117,7 @@ export const guideCards: GuideCardConstants[] = [
     }),
     navigateTo: {
       appId: 'observabilityOnboarding',
+      path: '/?category=logs',
     },
     telemetryId: 'onboarding--observability--logs',
     order: 2,
@@ -147,8 +148,8 @@ export const guideCards: GuideCardConstants[] = [
       defaultMessage: 'Monitor my host metrics',
     }),
     navigateTo: {
-      appId: 'integrations',
-      path: '/browse/os_system',
+      appId: 'observabilityOnboarding',
+      path: '/?category=infra',
     },
     telemetryId: 'onboarding--observability--hosts',
     order: 8,

@@ -20,6 +20,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   showUnprivilegedAgentsCallout?: boolean;
   unprivilegedAgentsCount?: number;
+  dataStreams?: Array<{ name: string; title: string }>;
 }> = ({
   onConfirm,
   onCancel,
@@ -27,6 +28,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
   agentPolicy,
   showUnprivilegedAgentsCallout = false,
   unprivilegedAgentsCount = 0,
+  dataStreams,
 }) => {
   return (
     <EuiConfirmModal
@@ -80,6 +82,7 @@ export const ConfirmDeployAgentPolicyModal: React.FunctionComponent<{
           <UnprivilegedAgentsCallout
             agentPolicyName={agentPolicy.name}
             unprivilegedAgentsCount={unprivilegedAgentsCount}
+            dataStreams={dataStreams ?? []}
           />
         </>
       )}
