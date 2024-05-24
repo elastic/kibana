@@ -14,6 +14,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import type { AiopsApiLicense } from '../../types';
 
+import { aiopsLogRateAnalysisSchema } from './schema';
 import { routeHandlerFactory } from './route_handler_factory';
 
 /**
@@ -31,8 +32,12 @@ export const defineRoute = (
 ) => {
   router.post(
     {
-      path: '/api/aiops/log_rate_analysis',
-      validate: false,
+      path: '/internal/aiops/simple_log_rate_analysis',
+      validate: {
+        request: {
+          body: aiopsLogRateAnalysisSchema,
+        },
+      },
     },
     routeHandlerFactory('1', license, logger, coreStart, usageCounter)
   );
