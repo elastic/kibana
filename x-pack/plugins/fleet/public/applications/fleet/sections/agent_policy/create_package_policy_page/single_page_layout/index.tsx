@@ -34,7 +34,11 @@ import {
 
 import { useCancelAddPackagePolicy } from '../hooks';
 
-import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
+import {
+  getRootPrivilegedDataStreams,
+  isRootPrivilegesRequired,
+  splitPkgKey,
+} from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
 import {
@@ -325,6 +329,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       updateNewAgentPolicy,
       updateAgentPolicy,
       setSelectedPolicyTab,
+      packageInfo,
     });
 
   const replaceStepConfigurePackagePolicy =
@@ -438,6 +443,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
+  const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
+
   return (
     <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
       <EuiErrorBoundary>
@@ -453,6 +460,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                 (agentPolicy?.unprivileged_agents ?? 0) > 0
             )}
             unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
+            dataStreams={rootPrivilegedDataStreams}
           />
         )}
         {formState === 'CONFIRM_UNPRIVILEGED' && agentPolicy ? (
@@ -461,6 +469,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onConfirm={onSubmit}
             unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
             agentPolicyName={agentPolicy?.name ?? ''}
+            dataStreams={rootPrivilegedDataStreams}
           />
         ) : null}
         {formState === 'SUBMITTED_NO_AGENTS' &&

@@ -83,4 +83,5 @@ export interface ActionResultsStrategyResponse
 export interface ActionResultsRequestOptions extends RequestOptionsPaginated {
   actionId: string;
   startDate?: string;
+  useNewDataStream?: boolean;
 }

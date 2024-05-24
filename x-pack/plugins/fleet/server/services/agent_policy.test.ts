@@ -278,7 +278,7 @@ describe('Agent policy', () => {
       );
     });
 
-    it('should not throw error if support_agentless is set if agentless feature flag is set in serverless', async () => {
+    it('should create a policy with is_managed true if agentless feature flag is set and in serverless env', async () => {
       jest
         .spyOn(appContextService, 'getExperimentalFeatures')
         .mockReturnValue({ agentless: true } as any);
@@ -289,13 +289,31 @@ describe('Agent policy', () => {
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      await expect(
-        agentPolicyService.create(soClient, esClient, {
-          name: 'test',
-          namespace: 'default',
-          supports_agentless: true,
-        })
-      ).resolves.not.toThrow();
+      soClient.find.mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        per_page: 0,
+        page: 1,
+      });
+
+      const res = await agentPolicyService.create(soClient, esClient, {
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+      });
+      expect(res).toEqual({
+        id: 'mocked',
+        name: 'test',
+        namespace: 'default',
+        supports_agentless: true,
+        status: 'active',
+        is_managed: true,
+        revision: 1,
+        updated_at: expect.anything(),
+        updated_by: 'system',
+        schema_version: '1.1.1',
+        is_protected: false,
+      });
     });
   });
 
