@@ -19,7 +19,7 @@ import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import { dataTableSelectors, tableDefaults, TableId } from '@kbn/securitysolution-data-table';
 import type { NarrowDateRange } from '../../../../common/components/ml/types';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
 import {
@@ -47,8 +47,8 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import {
-  HostOverview,
   HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
+  HostOverview,
 } from '../../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -79,7 +79,6 @@ import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { AlertCountByRuleByStatus } from '../../../../common/components/alert_count_by_status';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../detections/components/endpoint_responder/responder_action_button';
-import { useHasSecurityCapability } from '../../../../helper_hooks';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 
 const ES_HOST_FIELD = 'host.name';
@@ -168,8 +167,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     dispatch(setHostDetailsTablesActivePageToZero());
   }, [dispatch, detailName]);
 
-  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasKibanaREAD && hasIndexRead;
 
@@ -231,6 +228,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id && (
                     <ResponderActionButton
                       endpointId={hostOverview.endpoint?.hostInfo?.metadata.elastic.agent.id}
+                      agentType="endpoint"
                     />
                   ),
                 ]}
@@ -297,7 +295,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
               <TabNavigation
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
-                  isRiskyHostsEnabled: hasEntityAnalyticsCapability,
                   hostName: detailName,
                   isEnterprise: isEnterprisePlus,
                 })}

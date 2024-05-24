@@ -23,7 +23,12 @@ export default function ({ getService, getPageObjects }) {
     remoteEs = getService('remoteEs');
   }
 
-  describe('rollup job', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/183925
+  // FLAKY: https://github.com/elastic/kibana/issues/183926
+  // FLAKY: https://github.com/elastic/kibana/issues/183927
+  // FLAKY: https://github.com/elastic/kibana/issues/183928
+  // FLAKY: https://github.com/elastic/kibana/issues/104569
+  describe.skip('rollup job', function () {
     // Since rollups can only be created once with the same name (even if you delete it),
     // we add the Date.now() to avoid name collision.
     const rollupJobName = 'rollup-to-be-' + Date.now();

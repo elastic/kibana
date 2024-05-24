@@ -6,16 +6,17 @@
  */
 
 import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import {
-  ActionsClientChatOpenAI,
-  ActionsClientLlm,
-} from '@kbn/elastic-assistant-common/impl/language_models';
 import { v4 as uuidv4 } from 'uuid';
 import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import {
+  ActionsClientChatOpenAI,
+  ActionsClientLlm,
+  getDefaultArguments,
+} from '@kbn/langchain/server';
 import { Prompt } from '../../common/prompt';
 
 export const getChatParams = async (
@@ -52,6 +53,7 @@ export const getChatParams = async (
         model,
         traceId: uuidv4(),
         signal: abortSignal,
+        temperature: getDefaultArguments().temperature,
         // prevents the agent from retrying on failure
         // failure could be due to bad connector, we should deliver that result to the client asap
         maxRetries: 0,
@@ -63,6 +65,7 @@ export const getChatParams = async (
       });
       break;
     case BEDROCK_CONNECTOR_ID:
+      const llmType = 'bedrock';
       chatModel = new ActionsClientLlm({
         actions,
         logger,
@@ -70,6 +73,8 @@ export const getChatParams = async (
         connectorId,
         model,
         traceId: uuidv4(),
+        llmType,
+        temperature: getDefaultArguments(llmType).temperature,
       });
       chatPrompt = Prompt(prompt, {
         citations,

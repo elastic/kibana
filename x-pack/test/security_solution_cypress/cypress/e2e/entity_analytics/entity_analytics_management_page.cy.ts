@@ -63,7 +63,8 @@ describe(
       cy.get(PAGE_TITLE).should('have.text', 'Entity Risk Score');
     });
 
-    describe('Risk preview', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/184133
+    describe.skip('Risk preview', () => {
       beforeEach(() => {
         visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
       });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { waitFor } from '@testing-library/react';
 import { last, merge, repeat } from 'lodash';
@@ -94,6 +94,10 @@ describe('Observability AI Assistant client', () => {
     get: jest.fn(),
   } as any;
 
+  const uiSettingsClientMock: DeeplyMockedKeys<IUiSettingsClient> = {
+    get: jest.fn(),
+  } as any;
+
   const internalUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
     search: jest.fn(),
     index: jest.fn(),
@@ -172,6 +176,7 @@ describe('Observability AI Assistant client', () => {
 
     return new ObservabilityAIAssistantClient({
       actionsClient: actionsClientMock,
+      uiSettingsClient: uiSettingsClientMock,
       esClient: {
         asInternalUser: internalUserEsClientMock,
         asCurrentUser: currentUserEsClientMock,
