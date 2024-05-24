@@ -11,13 +11,7 @@ import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type {
-  AppMountParameters,
-  ScopedHistory,
-  AnalyticsServiceStart,
-  I18nStart,
-  ThemeServiceStart,
-} from '@kbn/core/public';
+import { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
@@ -67,9 +61,3 @@ export type ObservabilityLogsExplorerHistory =
   ScopedHistory<ObservabilityLogsExplorerLocationState>;
 export type ObservabilityLogsExplorerAppMountParameters =
   AppMountParameters<ObservabilityLogsExplorerLocationState>;
-
-export interface ObservabilityLogsExplorerStartServices {
-  analytics: AnalyticsServiceStart;
-  i18n: I18nStart;
-  theme: ThemeServiceStart;
-}
