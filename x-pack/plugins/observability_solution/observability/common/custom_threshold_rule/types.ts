@@ -9,6 +9,7 @@ import * as rt from 'io-ts';
 import { DataViewSpec, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { Filter, Query } from '@kbn/es-query';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '../utils/convert_legacy_outside_comparator';
 import { TimeUnitChar } from '../utils/formatters/duration';
 
 export const ThresholdFormatterTypeRT = rt.keyof({
@@ -70,9 +71,7 @@ export interface BaseMetricExpressionParams {
   timeUnit: TimeUnitChar;
   sourceId?: string;
   threshold: number[];
-  comparator: COMPARATORS;
-  warningComparator?: COMPARATORS;
-  warningThreshold?: number[];
+  comparator: COMPARATORS | LEGACY_COMPARATORS;
 }
 
 export interface CustomThresholdExpressionMetric {
