@@ -10,7 +10,7 @@ import { appendHash, EntityDocument, Fields } from '@kbn/apm-synthtrace-client';
 import { Duplex, PassThrough } from 'stream';
 
 export function createEntitiesAggregatorFactory<TFields extends Fields>() {
-  return function <TAsset extends EntityDocument>(
+  return function <TEntity extends EntityDocument>(
     {
       filter,
       getAggregateKey,
@@ -18,13 +18,13 @@ export function createEntitiesAggregatorFactory<TFields extends Fields>() {
     }: {
       filter: (event: TFields) => boolean;
       getAggregateKey: (event: TFields) => string;
-      init: (event: TFields, firstSeen: string, lastSeen: string) => TAsset;
+      init: (event: TFields, firstSeen: string, lastSeen: string) => TEntity;
     },
-    reduce: (asset: TAsset, event: TFields) => void,
-    serialize: (asset: TAsset) => TAsset
+    reduce: (asset: TEntity, event: TFields) => void,
+    serialize: (asset: TEntity) => TEntity
   ) {
-    const entities: Map<string, TAsset> = new Map();
-    let toFlush: TAsset[] = [];
+    const entities: Map<string, TEntity> = new Map();
+    let toFlush: TEntity[] = [];
     let cb: (() => void) | undefined;
 
     function flush(stream: Duplex, includeCurrentAssets: boolean, callback?: () => void) {

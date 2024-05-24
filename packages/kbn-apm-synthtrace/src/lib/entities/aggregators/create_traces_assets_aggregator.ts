@@ -9,4 +9,4 @@
 import { ApmFields } from '@kbn/apm-synthtrace-client';
 import { createEntitiesAggregatorFactory } from '../../utils/create_entities_aggregator_factory';
 
-export const createTracesAssetsAggregator = createEntitiesAggregatorFactory<ApmFields>();
+export const createTracesEntitiesAggregator = createEntitiesAggregatorFactory<ApmFields>();

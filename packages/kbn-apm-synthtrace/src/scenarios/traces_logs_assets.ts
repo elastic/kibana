@@ -15,6 +15,7 @@ import {
   log,
   Serializable,
 } from '@kbn/apm-synthtrace-client';
+import { random } from 'lodash';
 import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
@@ -60,12 +61,12 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           .service({ name: serviceName, environment: ENVIRONMENT, agentName: 'nodejs' })
           .instance('instance')
       );
-      const instanceSpans = (instance: Instance) => {
+      const instanceSpans = (instance: Instance, index: number) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
           instance
             .transaction({ transactionName })
             .timestamp(timestamp)
-            .duration(500)
+            .duration(random(100, (index % 4) * 1000, false))
             .success()
             .children(
               instance
@@ -198,6 +199,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                   'cloud.project.id': generateShortId(),
                   'cloud.instance.id': generateShortId(),
                   'log.file.path': `/logs/${generateLongId()}/error.txt`,
+                  'log.level': 'error',
                 })
                 .timestamp(timestamp);
             });
@@ -211,7 +213,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       const logsGen = createGeneratorFromArray(logsValuesArray);
       const logsGenAssets = createGeneratorFromArray(logsValuesArray);
 
-      const traces = instances.flatMap((instance) => instanceSpans(instance));
+      const traces = instances.flatMap((instance, index) => instanceSpans(instance, index));
       const tracesGen = createGeneratorFromArray(traces);
       const tracesGenAssets = createGeneratorFromArray(traces);
 

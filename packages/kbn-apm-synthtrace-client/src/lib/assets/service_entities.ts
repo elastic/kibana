@@ -13,7 +13,7 @@ export interface ServiceEntityDocument extends EntityDocument {
   'entity.metric.throughput'?: number;
   'entity.metric.failedTransactionRate'?: number;
   'entity.metric.logRate'?: number;
-  'entity.metric.errorRate'?: number;
+  'entity.metric.logErrorRate'?: number;
 }
 
 export class ServiceEntity extends Entity<ServiceEntityDocument> {

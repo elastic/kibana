@@ -80,7 +80,7 @@ function getMergeEntitesTransform() {
   return new Transform({
     objectMode: true,
     transform(nextDocument: ESDocumentWithOperation<EntityDocument>, encoding, callback) {
-      const entityId = nextDocument['entity.identity.service.name'];
+      const entityId = nextDocument['entity.id'];
       if (!mergedDocuments[entityId]) {
         mergedDocuments[entityId] = { ...nextDocument };
       } else {

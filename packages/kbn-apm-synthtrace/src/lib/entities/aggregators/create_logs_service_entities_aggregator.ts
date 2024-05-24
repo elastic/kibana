@@ -9,6 +9,7 @@
 import { hashKeysOf, LogDocument } from '@kbn/apm-synthtrace-client';
 import { ServiceEntityDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_entities';
 import { identity, noop } from 'lodash';
+import { createPivotTransform } from '../../utils/create_pivot_transform';
 import { createLogsAssetsAggregator } from './create_logs_assets_aggregator';
 
 const KEY_FIELDS: Array<keyof LogDocument> = ['service.name'];
@@ -29,10 +30,31 @@ export function createLogsServiceEntitiesAggregator() {
           'entity.indexPatterns': ['logs-*'],
           'entity.data_stream.type': ['logs'],
           'entity.firstSeen': firstSeen,
+          'entity.metric.logErrorRate': createPivotTransform(),
+          'entity.metric.logRatePerMinute': createPivotTransform(),
         };
       },
     },
-    noop,
-    identity
+    (entity, event) => {
+      const entityId = entity['entity.id'];
+      const logLever = event['log.level']!;
+
+      // @ts-expect-error
+      entity['entity.metric.logErrorRate'].record({
+        groupBy: entityId,
+        value: logLever === 'error' ? 0 : 1,
+      });
+    },
+    (entity) => {
+      const entityId = entity['entity.id'];
+      // @ts-expect-error
+      const logErrorRate = entity['entity.metric.logErrorRate'].rate({
+        key: entityId,
+        type: 0,
+      });
+
+      entity['entity.metric.logErrorRate'] = logErrorRate.value;
+      return entity;
+    }
   );
 }
