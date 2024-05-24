@@ -43,6 +43,8 @@ import {
   ControlGroupSerializedState,
   ControlsPanels,
 } from './types';
+import classNames from 'classnames';
+import { EuiFlexGroup } from '@elastic/eui';
 
 export const getControlGroupEmbeddableFactory = (services: {
   core: CoreStart;
@@ -182,7 +184,7 @@ export const getControlGroupEmbeddableFactory = (services: {
 
       return {
         api,
-        Component: () => {
+        Component: (props, test) => {
           const panels = useStateFromPublishingSubject(panels$);
 
           useEffect(() => {
@@ -193,14 +195,12 @@ export const getControlGroupEmbeddableFactory = (services: {
           }, []);
 
           return (
-            <>
+            <EuiFlexGroup className={'controlGroup'} alignItems="center" gutterSize="s" wrap={true}>
               {Object.keys(panels).map((id) => (
                 <ControlRenderer
                   key={uuid}
                   maybeId={id}
                   type={panels[id].type}
-                  // state={panels[id]}
-                  // parentApi={api}
                   getParentApi={() => api}
                   onApiAvailable={(controlApi) => {
                     children$.next({
@@ -210,7 +210,7 @@ export const getControlGroupEmbeddableFactory = (services: {
                   }}
                 />
               ))}
-            </>
+            </EuiFlexGroup>
           );
         },
       };

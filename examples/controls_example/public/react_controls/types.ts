@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SerializedStyles } from '@emotion/react';
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
 import { Filter } from '@kbn/es-query';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
@@ -98,7 +99,7 @@ export type ControlStateManager<State extends object = object> = {
 
 export interface ControlPanelProps<
   ApiType extends DefaultControlApi = DefaultControlApi,
-  PropsType extends {} = {}
+  PropsType extends {} = { css: SerializedStyles }
 > {
   Component: PanelCompatibleComponent<ApiType, PropsType>;
 }

@@ -165,7 +165,11 @@ export const getSearchEmbeddableFactory = ({
 
       return {
         api,
-        Component: () => {
+        /**
+         * The `conrolStyleProps` prop is necessary because it contains the props from the generic
+         * ControlPanel that are necessary for styling
+         */
+        Component: (conrolStyleProps) => {
           const currentSearch = useStateFromPublishingSubject(searchString);
 
           useEffect(() => {
@@ -178,6 +182,7 @@ export const getSearchEmbeddableFactory = ({
 
           return (
             <EuiFieldSearch
+              {...conrolStyleProps}
               incremental={true}
               isClearable={false} // this will be handled by the clear floating action instead
               value={currentSearch ?? ''}
@@ -187,7 +192,6 @@ export const getSearchEmbeddableFactory = ({
               placeholder={i18n.translate('controls.searchControl.placeholder', {
                 defaultMessage: 'Search...',
               })}
-              className="euiFieldText--inGroup"
               id={uuid}
               fullWidth
             />

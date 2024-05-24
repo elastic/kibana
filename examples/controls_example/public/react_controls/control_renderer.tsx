@@ -18,7 +18,13 @@ import { BehaviorSubject } from 'rxjs';
 import { getControlFactory } from './control_factory_registry';
 import { ControlGroupApi } from './control_group/types';
 import { ControlPanel } from './control_panel';
-import { ControlApiRegistration, DefaultControlApi, DefaultControlState } from './types';
+import {
+  ControlApiRegistration,
+  ControlPanelProps,
+  DefaultControlApi,
+  DefaultControlState,
+} from './types';
+import { css, SerializedStyles } from '@emotion/react';
 
 const ON_STATE_CHANGE_DEBOUNCE = 100;
 
@@ -92,11 +98,10 @@ export const ControlRenderer = <
 
         console.log('api', api, 'Component', Component);
 
-        return React.forwardRef<typeof api>((_, ref) => {
+        return React.forwardRef<typeof api, { css: SerializedStyles }>((props, ref) => {
           // expose the api into the imperative handle
           useImperativeHandle(ref, () => api, []);
-          console.log('HERE!!!', api);
-          return <Component />;
+          return <Component {...props} />;
         });
       })(),
     /**
@@ -113,5 +118,5 @@ export const ControlRenderer = <
   //   };
   // }, []);
 
-  return <ControlPanel<StateType, ApiType> Component={component} />;
+  return <ControlPanel<ApiType> Component={component} />;
 };

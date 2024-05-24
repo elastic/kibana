@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiFormControlLayout, EuiFormLabel, htmlIdGenerator } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiFormControlLayout,
+  EuiFormLabel,
+  EuiFormRow,
+  EuiIcon,
+  htmlIdGenerator,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 // import { ControlError } from '@kbn/controls-plugin/public/control_group/component/control_error_component';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -16,22 +24,32 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { FloatingActions } from '@kbn/presentation-util-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
 import { ControlError } from './control_error_component';
 import { ControlPanelProps, DefaultControlApi } from './types';
 
-export const ControlPanel = <
-  State extends object,
-  ApiType extends DefaultControlApi = DefaultControlApi
->({
+/**
+ * TODO: Handle dragging
+ */
+const DragHandle = ({ isEditable }: { isEditable: boolean }) =>
+  isEditable ? (
+    <button
+      // aria-label={`${ControlGroupStrings.ariaActions.getMoveControlButtonAction(title)}`}
+      className="controlFrame__dragHandle"
+    >
+      /
+      <EuiIcon type="grabHorizontal" />
+    </button>
+  ) : null;
+
+export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlApi>({
   Component,
-}: ControlPanelProps<ApiType, {}>) => {
-  console.log('HERE!!!');
+}: ControlPanelProps<ApiType>) => {
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
-  console.log('Component', Component);
   const viewModeSubject = (() => {
     if (
       apiHasParentApi(api) && // api.parentApi => controGroupApi
@@ -48,7 +66,6 @@ export const ControlPanel = <
     defaultPanelTitle,
     grow,
     width,
-    // controlGroupSettings,
     controlStyle,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
@@ -61,68 +78,97 @@ export const ControlPanel = <
     api?.parentApi?.controlStyle,
     viewModeSubject
   );
-  console.log('controlStyle', controlStyle);
   const usingTwoLineLayout = controlStyle === 'twoLine';
-  const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
     setInitialLoadComplete(true);
   }
 
+  const viewMode = (rawViewMode ?? ViewMode.VIEW) as ViewMode;
+  const isEditable = viewMode === ViewMode.EDIT;
+
   return (
-    <FloatingActions
-      className={classNames({
-        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
-        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+    <EuiFlexItem
+      grow={grow}
+      data-control-id={api?.uuid}
+      data-test-subj={`control-frame`}
+      data-render-complete="true"
+      className={classNames('controlFrameWrapper', {
+        'controlFrameWrapper--grow': grow,
+        'controlFrameWrapper--small': width === 'small',
+        'controlFrameWrapper--medium': width === 'medium',
+        'controlFrameWrapper--large': width === 'large',
+        // 'controlFrameWrapper-isDragging': isDragging,
+        // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
+        // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
       })}
-      viewMode={viewMode}
-      embeddable={api}
-      disabledActions={[]}
-      isEnabled={true}
     >
-      {blockingError ? (
-        <EuiFormControlLayout>
-          <ControlError
-            error={
-              blockingError ??
-              i18n.translate('controls.blockingError', {
-                defaultMessage: 'There was an error loading this control.',
-              })
-            }
-          />
-        </EuiFormControlLayout>
-      ) : (
-        <EuiFormControlLayout
+      <FloatingActions
+        className={classNames({
+          'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+          'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+        })}
+        viewMode={viewMode}
+        embeddable={api}
+        disabledActions={[]}
+        isEnabled={true}
+      >
+        <EuiFormRow
+          data-test-subj="control-frame-title"
           fullWidth
-          className={classNames({
-            'controlFrame--twoLine': usingTwoLineLayout,
-            'controlFrame--oneLine': !usingTwoLineLayout,
-            'controlFrameWrapper--grow': grow,
-            // 'controlFrameWrapper-isDragging': isDragging,
-            // 'controlFrameWrapper-isEditable': isEditable,
-            'controlFrameWrapper--small': width === 'small',
-            'controlFrameWrapper--medium': width === 'medium',
-            'controlFrameWrapper--large': width === 'large',
-            // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
-            // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
-          })}
-          isLoading={Boolean(dataLoading)}
-          prepend={
-            api?.getCustomPrepend ? (
-              <>{api.getCustomPrepend()}</>
-            ) : (
-              <EuiFormLabel>{panelTitle || defaultPanelTitle}</EuiFormLabel>
-            )
-          }
+          label={usingTwoLineLayout ? panelTitle || defaultPanelTitle || '...' : undefined}
         >
-          <Component
-            ref={(newApi) => {
-              if (newApi && !api) setApi(newApi);
-            }}
-          />
-        </EuiFormControlLayout>
-      )}
-    </FloatingActions>
+          {blockingError ? (
+            <EuiFormControlLayout>
+              <ControlError
+                error={
+                  blockingError ??
+                  i18n.translate('controls.blockingError', {
+                    defaultMessage: 'There was an error loading this control.',
+                  })
+                }
+              />
+            </EuiFormControlLayout>
+          ) : (
+            <EuiFormControlLayout
+              fullWidth
+              isLoading={Boolean(dataLoading)}
+              prepend={
+                api?.getCustomPrepend ? (
+                  <>{api.getCustomPrepend()}</>
+                ) : usingTwoLineLayout ? (
+                  <DragHandle isEditable={isEditable} />
+                ) : (
+                  <>
+                    <DragHandle isEditable={isEditable} />{' '}
+                    <EuiFormLabel
+                      css={css`
+                        background-color: transparent !important;
+                      `}
+                    >
+                      {panelTitle || defaultPanelTitle}
+                    </EuiFormLabel>
+                  </>
+                )
+              }
+            >
+              <Component
+                css={css`
+                  height: 38px;
+                  box-shadow: none !important;
+                  ${!isEditable && usingTwoLineLayout
+                    ? `border-radius: ${euiThemeVars.euiBorderRadius} !important`
+                    : ''};
+                `}
+                ref={(newApi) => {
+                  if (newApi && !api) setApi(newApi);
+                }}
+              />
+            </EuiFormControlLayout>
+          )}
+        </EuiFormRow>
+      </FloatingActions>
+    </EuiFlexItem>
   );
 };
