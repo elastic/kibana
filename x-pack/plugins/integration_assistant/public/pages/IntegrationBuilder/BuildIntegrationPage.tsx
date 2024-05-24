@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
-import BuildIntegrationButtons from '../../components/BuildIntegration/BuildIntegrationButtons';
+import { BuildIntegrationButtons } from '../../components/BuildIntegration/BuildIntegrationButtons';
 
 export const BuildIntegration = () => {
   return (

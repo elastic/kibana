@@ -10,7 +10,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 
 import { buildIntegration, installIntegration } from '@api/services/integrationBuilderService';
-import RoutePaths from '../../constants/routePaths';
+import { RoutePaths } from '../../constants/routePaths';
 import ActionButton from '../Buttons/ActionButton';
 import GoBackButton from '../Buttons/GoBackButton';
 

@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
-import EcsFormStats from '../../components/Ecs/EcsFormStats';
-import EcsButtons from '../../components/Ecs/EcsButtons';
-import EcsForm from '../../components/Ecs/EcsForm';
-import EcsTable from '../../components/Ecs/EcsTable';
+import { EcsFormStats } from '../../components/Ecs/EcsFormStats';
+import { EcsButtons } from '../../components/Ecs/EcsButtons';
+import { EcsForm } from '../../components/Ecs/EcsForm';
+import { EcsTable } from '../../components/Ecs/EcsTable';
 
 export const EcsMapperPage = () => {
   const ecsMappingTableState = useGlobalStore((state) => state.ecsMappingTableState);

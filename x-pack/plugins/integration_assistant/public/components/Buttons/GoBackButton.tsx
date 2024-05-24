@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
-import RoutePaths from '../../constants/routePaths';
+import { RoutePaths } from '../../constants/routePaths';
 import { useNavigate } from 'react-router-dom';
 
 interface GoBackButtonProps {

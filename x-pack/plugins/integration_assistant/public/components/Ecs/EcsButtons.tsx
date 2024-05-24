@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 import { getEcsMapping, formatEcsResponse } from '@Api/services/ecsMappingService';
-import RoutePaths from '../../constants/routePaths';
+import { RoutePaths } from '../../constants/routePaths';
 import { ContinueButton } from '../Buttons/ContinueButton';
 import { ActionButton } from '../Buttons/ActionButton';
 import { ResetButton } from '../Buttons/ResetButton';

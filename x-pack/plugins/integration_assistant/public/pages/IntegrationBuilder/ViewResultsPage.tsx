@@ -8,11 +8,11 @@
 import React from 'react';
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
-import DocResults from '../../components/IntegrationResults/DocsResults';
-import PipelineResults from '../../components/IntegrationResults/PipelineResults';
-import EmptyPrompt from '../../components/EmptyPrompt/EmptyPrompt';
-import FinalResultsButtons from '../../components/ViewResults/ViewResultsButtons';
-import RoutePaths from '../../constants/routePaths';
+import { DocResults } from '../../components/IntegrationResults/DocsResults';
+import { PipelineResults } from '../../components/IntegrationResults/PipelineResults';
+import { EmptyPrompt } from '../../components/EmptyPrompt/EmptyPrompt';
+import { ViewResultsButtons } from '../../components/ViewResults/ViewResultsButtons';
+import { RoutePaths } from '../../constants/routePaths';
 
 export const ViewResultsPage = () => {
   const ingestPipeline = useGlobalStore((state) => state.ingestPipeline);
@@ -33,7 +33,7 @@ export const ViewResultsPage = () => {
       <EuiSpacer />
       <PipelineResults pipeline={ingestPipeline} />
       <EuiSpacer />
-      <FinalResultsButtons />
+      <ViewResultsButtons />
     </EuiPageTemplate.Section>
   );
 };

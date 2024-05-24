@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { GoBackButton } from '../Buttons/GoBackButton';
-import RoutePaths from '../../constants/routePaths';
+import { RoutePaths } from '../../constants/routePaths';
 
 interface EmptyPromptProps {
   title: string;

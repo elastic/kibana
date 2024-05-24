@@ -9,7 +9,7 @@ import React from 'react';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 import { EuiFlexGroup } from '@elastic/eui';
 import { getCategorization } from '@Api/services/categorizationService';
-import RoutePaths from '../../constants/routePaths';
+import { RoutePaths } from '../../constants/routePaths';
 
 import { ContinueButton } from '../Buttons/ContinueButton';
 import { ActionButton } from '../Buttons/ActionButton';

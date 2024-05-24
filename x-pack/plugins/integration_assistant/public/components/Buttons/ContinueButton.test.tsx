@@ -11,7 +11,7 @@ import { act, render, screen } from '@testing-library/react';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 import { userEvent } from '@testing-library/user-event';
 import ContinueButton from './ContinueButton';
-import RoutePaths from '../../constants/routePaths';
+import { RoutePaths } from '../../constants/routePaths';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 describe('ContinueButton Tests', () => {

@@ -9,9 +9,9 @@ import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { ContinueButton } from '../Buttons/ContinueButton';
 import { GoBackButton } from '../Buttons/GoBackButton';
-import RoutePaths from '../../constants/routePaths';
+import { RoutePaths } from '../../constants/routePaths';
 
-export const ViewResults = () => {
+export const ViewResultsButtons = () => {
   return (
     <EuiFlexGroup>
       <ContinueButton

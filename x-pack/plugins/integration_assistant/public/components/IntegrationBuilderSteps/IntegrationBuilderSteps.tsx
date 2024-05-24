@@ -10,7 +10,7 @@ import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
 import { useGlobalStore } from '@Stores/useGlobalStore';
 import { useNavigate } from 'react-router-dom';
 
-import RoutePaths from '../../constants/routePaths';
+import { RoutePaths } from '../../constants/routePaths';
 
 export const IntegrationBuilderSteps = () => {
   const step1 = useGlobalStore((state) => state.integrationBuilderStep1);

@@ -9,10 +9,10 @@ import React from 'react';
 import { EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { useGlobalStore } from '../../stores/useGlobalStore';
 
-import EmptyPrompt from '../../components/EmptyPrompt/EmptyPrompt';
-import CategorizationButtons from '../../components/Categorization/CategorizationButtons';
-import PipelineResults from '../../components/IntegrationResults/PipelineResults';
-import RoutePaths from '../../constants/routePaths';
+import { EmptyPrompt } from '../../components/EmptyPrompt/EmptyPrompt';
+import { CategorizationButtons } from '../../components/Categorization/CategorizationButtons';
+import { PipelineResults } from '../../components/IntegrationResults/PipelineResults';
+import { RoutePaths } from '../../constants/routePaths';
 
 export const CategorizationPage = () => {
   const ingestPipeline = useGlobalStore((state) => state.ingestPipeline);
