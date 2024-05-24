@@ -20,7 +20,7 @@ import type {
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
-import { evalFunctionsDefinitions } from '../definitions/functions';
+import { evalFunctionDefinitions } from '../definitions/functions';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
@@ -132,7 +132,7 @@ function buildFunctionLookup() {
   if (!fnLookups) {
     fnLookups = builtinFunctions
       .concat(
-        evalFunctionsDefinitions,
+        evalFunctionDefinitions,
         statsAggregationFunctionDefinitions,
         groupingFunctionDefinitions
       )
