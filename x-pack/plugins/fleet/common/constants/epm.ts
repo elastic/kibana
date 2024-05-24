@@ -41,6 +41,12 @@ export const GLOBAL_DATA_TAG_EXCLUDED_INPUTS = new Set<string>([
   FLEET_PF_HOST_AGENT_PACKAGE,
   FLEET_PF_ELASTIC_SYMBOLIZER_PACKAGE,
   FLEET_PF_ELASTIC_COLLECTOR_PACKAGE,
+  /* The package names and input types are not the same. For example package
+   * name for fleet server is "fleet_server" whereas the input type is "fleet-server".
+   * This is the same case for cloud defend. That's why we are replacing the
+   * underscores with dashes for the two of them. Global data tag functionality
+   * relies on input types.
+   */
   FLEET_SERVER_PACKAGE.replace(/_/g, '-'),
   FLEET_CLOUD_DEFEND_PACKAGE.replace(/_/g, '-'),
   FLEET_CLOUD_BEAT_PACKAGE,
