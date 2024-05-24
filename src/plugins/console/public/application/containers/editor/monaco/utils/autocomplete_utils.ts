@@ -349,6 +349,13 @@ const getInsertText = (
   } else if (value === '[') {
     insertText += '[]';
   }
+  // the string $0 is used to move the cursor between empty curly/square brackets
+  if (insertText.endsWith('{}')) {
+    insertText = insertText.substring(0, insertText.length - 2) + '{$0}';
+  }
+  if (insertText.endsWith('[]')) {
+    insertText = insertText.substring(0, insertText.length - 2) + '[$0]';
+  }
   return insertText;
 };
 
