@@ -1,6 +1,6 @@
 ## Telemetry data view generation script
 
-The purpose of the scripts is to map telemetry fields to runtime fields on the appropriate security solution ebt data views on the staging cluster. This can be used to automate the addition of new fields to the data views. 
+The purpose of the script is to map telemetry fields to runtime fields on the appropriate security solution ebt data views on the staging cluster. This can be used to automate the addition of new fields to the data views. 
 
 ### Events
 - The browser ebt events come from `telemetryEvents` imported from `x-pack/plugins/security_solution/public/common/lib/telemetry/events/telemetry_events`
