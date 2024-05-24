@@ -296,6 +296,12 @@ describe('validation logic', () => {
       },
     });
 
+    describe('ESQL query can be empty', () => {
+      testErrorsAndWarnings('', []);
+      testErrorsAndWarnings(' ', []);
+      testErrorsAndWarnings('     ', []);
+    });
+
     describe('ESQL query should start with a source command', () => {
       ['eval', 'stats', 'rename', 'limit', 'keep', 'drop', 'mv_expand', 'dissect', 'grok'].map(
         (command) =>
