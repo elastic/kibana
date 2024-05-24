@@ -13,8 +13,8 @@ import {
 import { getElasticsearchQueryOrThrow } from '../helpers/get_elasticsearch_query_or_throw';
 import { generateHistoryMetricAggregations } from './generate_metric_aggregations';
 import {
-  ENTITY_DEFAULT_FREQUENCY,
-  ENTITY_DEFAULT_SYNC_DELAY,
+  ENTITY_DEFAULT_HISTORY_FREQUENCY,
+  ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
   ENTITY_HISTORY_BASE_PREFIX,
 } from '../../../../common/constants_entities';
 import { generateHistoryMetadataAggregations } from './generate_metadata_aggregations';
@@ -56,11 +56,11 @@ export function generateHistoryTransform(
       index: `${ENTITY_HISTORY_BASE_PREFIX}.noop`,
       pipeline: generateHistoryIngestPipelineId(definition),
     },
-    frequency: definition.history.settings?.frequency || ENTITY_DEFAULT_FREQUENCY,
+    frequency: definition.history.settings?.frequency ?? ENTITY_DEFAULT_HISTORY_FREQUENCY,
     sync: {
       time: {
         field: definition.history.settings?.syncField ?? definition.history.timestampField,
-        delay: definition.history.settings?.syncDelay ?? ENTITY_DEFAULT_SYNC_DELAY,
+        delay: definition.history.settings?.syncDelay ?? ENTITY_DEFAULT_HISTORY_SYNC_DELAY,
       },
     },
     settings: {

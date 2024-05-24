@@ -7,7 +7,11 @@
 
 import { EntityDefinition } from '@kbn/entities-schema';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ENTITY_SUMMARY_BASE_PREFIX } from '../../../../common/constants_entities';
+import {
+  ENTITY_DEFAULT_SUMMARY_FREQUENCY,
+  ENTITY_DEFAULT_SUMMARY_SYNC_DELAY,
+  ENTITY_SUMMARY_BASE_PREFIX,
+} from '../../../../common/constants_entities';
 import { generateSummaryMetadataAggregations } from './generate_metadata_aggregations';
 import { generateSummaryIngestPipelineId } from '../ingest_pipeline/generate_summary_ingest_pipeline_id';
 import { generateSummaryTransformId } from './generate_summary_transform_id';
@@ -27,11 +31,11 @@ export function generateSummaryTransform(
       index: `${ENTITY_SUMMARY_BASE_PREFIX}.noop`,
       pipeline: generateSummaryIngestPipelineId(definition),
     },
-    frequency: definition.summary.settings?.frequency || '30s', // ENTITY_DEFAULT_FREQUENCY,
+    frequency: definition.summary.settings?.frequency ?? ENTITY_DEFAULT_SUMMARY_FREQUENCY,
     sync: {
       time: {
         field: definition.history.settings?.syncField ?? 'event.ingested',
-        delay: definition.history.settings?.syncDelay ?? '1s', // ENTITY_DEFAULT_SYNC_DELAY,
+        delay: definition.history.settings?.syncDelay ?? ENTITY_DEFAULT_SUMMARY_SYNC_DELAY,
       },
     },
     settings: {
