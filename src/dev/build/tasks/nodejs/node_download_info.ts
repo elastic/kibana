@@ -18,7 +18,8 @@ export function getNodeDownloadInfo(config: Config, platform: Platform) {
     ? 'win-x64/node.exe'
     : `node-v${version}-${arch}.tar.gz`;
 
-  const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-pointer-compression/dist/v${version}/${downloadName}`;
+  const pointerCompressionPath = platform.isLinux() ? 'node-pointer-compression/' : '';
+  const url = `https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${pointerCompressionPath}dist/v${version}/${downloadName}`;
   const downloadPath = config.resolveFromRepo('.node_binaries', version, basename(downloadName));
   const extractDir = config.resolveFromRepo('.node_binaries', version, arch);
 
