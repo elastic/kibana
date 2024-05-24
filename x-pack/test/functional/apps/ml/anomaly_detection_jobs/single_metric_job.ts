@@ -426,7 +426,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.clickNextButton();
       await ml.jobWizardCommon.assertJobIdInputExists();
       await ml.jobWizardCommon.setJobId(`${jobIdClone}-again`);
-      await ml.jobWizardCommon.clickNextButton();
+      await ml.jobWizardCommon.advanceToValidationSection();
       await ml.jobWizardCommon.assertValidationCallouts([
         'mlValidationCallout warning',
         'mlValidationCallout error',
