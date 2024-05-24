@@ -98,7 +98,6 @@ export const LatestFindingsContainer = () => {
         <LatestFindingsTable
           groupSelectorComponent={groupSelectorComponent}
           nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
-          height={DEFAULT_GROUPING_TABLE_HEIGHT}
           showDistributionBar={selectedGroupOptions.includes('none')}
         />
       );
