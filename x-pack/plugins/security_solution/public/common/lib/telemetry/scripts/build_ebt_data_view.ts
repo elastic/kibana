@@ -40,9 +40,10 @@ async function cli(): Promise<void> {
     api_key: apiKey,
     kibana_url: kibanaUrl,
     space_id: spaceId,
-    data_view_name: dataViewName,
     telemetry_type: telemetryType,
   } = namedArgs;
+  // writes to either the browser or server side security solution data view
+  const dataViewName = `security-solution-ebt-kibana-${telemetryType}`;
   logger.info(`API key: ${apiKey}`);
   logger.info(`Kibana URL: ${kibanaUrl}`);
   logger.info(`Space ID: ${spaceId}`);
@@ -52,7 +53,6 @@ async function cli(): Promise<void> {
     'kbn-xsrf': 'xxx',
     'Content-Type': 'application/json',
   };
-  logger.info(`requestHeaders ID: ${requestHeaders}`);
   const dataViewApiUrl = `${removeTrailingSlash(kibanaUrl)}/s/${spaceId}/api/data_views`;
 
   try {
@@ -111,19 +111,27 @@ async function cli(): Promise<void> {
 
     const runtimeFieldUrl = `${dataViewApiUrl}/data_view/${ourDataView.id}/runtime_field`;
     await upsertRuntimeFields(runtimeFields, runtimeFieldUrl, requestHeaders);
+    const manualFieldLength = Object.keys(manualRuntimeFields).length;
+    const runtimeFieldLength = Object.keys(runtimeFields).length;
+    if (runtimeFieldLength > 0) {
+      logger.info(
+        `Data view "${dataViewName}" has been updated with ${
+          Object.keys(runtimeFields).length
+        } runtime fields`
+      );
+    }
 
-    logger.info(
-      `Data view "${dataViewName}" has been updated with ${
-        Object.keys(runtimeFields).length
-      } runtime fields`
-    );
-    logger.info(
-      `The following ${
-        Object.keys(manualRuntimeFields).length
-      } runtime fields have non-standard types and will need to be manually updated: ${Object.entries(
-        manualRuntimeFields
-      ).join(', ')}`
-    );
+    if (manualFieldLength > 0) {
+      logger.info(
+        `The following ${
+          Object.keys(manualRuntimeFields).length
+        } fields have non-standard types and will need to be manually updated: ${JSON.stringify(
+          manualRuntimeFields,
+          null,
+          2
+        )}`
+      );
+    }
   } catch (e) {
     logger.error(`Error updating data view "${dataViewName}" - ${e}`);
     throw e;

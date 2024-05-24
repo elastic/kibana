@@ -8,10 +8,35 @@
 #
 
 # Set default values for optional arguments if not provided
-kibana_url="https://dac92c18e1014fc592c05bcabd0ad677.us-west1.gcp.cloud.es.io:9243"
 space_id="securitysolution"
-data_view_name="security-sample-dv"
 telemetry_type="browser"
+
+# Function to read from Vault and check for 403 errors
+vault_read() {
+  local secret_path=$1
+  local field=$2
+  output=$(vault read --field="$field" "$secret_path" 2>&1)
+  if echo "$output" | grep -q "permission denied"; then
+    echo "Error: Permission denied. Please log in to Vault and ensure you have siem-team access: https://github.com/elastic/infra/blob/master/docs/vault/README.md" >&2
+    exit 1
+  fi
+  echo "$output"
+}
+
+# Fetch values from Vault and check they are defined
+kibana_url=$(vault_read secret/siem-team/elastic-cloud/telemetry-v2-staging url)
+if [ -z "$kibana_url" ]; then
+  echo "Error: kibana_url is a mandatory argument." >&2
+  exit 1
+fi
+
+# Check if mandatory arguments are provided
+api_key=$(vault_read secret/siem-team/elastic-cloud/telemetry-v2-staging api_key)
+if [ -z "$api_key" ]; then
+  echo "Error: api_key is a mandatory argument." >&2
+  exit 1
+fi
+
 
 # Parse named arguments
 while [ "$#" -gt 0 ]; do
@@ -25,9 +50,6 @@ while [ "$#" -gt 0 ]; do
     --space_id=*)
       space_id="${1#*=}"
       ;;
-    --data_view_name=*)
-      data_view_name="${1#*=}"
-      ;;
     --telemetry_type=*)
       telemetry_type="${1#*=}"
       ;;
@@ -39,11 +61,6 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-# Check if mandatory arguments are provided
-if [ -z "$api_key" ]; then
-  echo "Error: api_key is a mandatory argument." >&2
-  exit 1
-fi
 
 # Validate telemetry_type
 if [ "$telemetry_type" != "browser" ] && [ "$telemetry_type" != "server" ]; then
@@ -55,5 +72,4 @@ npx ts-node "$(dirname "${0}")/build_ebt_data_view.ts" \
   --api_key="$api_key" \
   --kibana_url="$kibana_url" \
   --space_id="$space_id" \
-  --data_view_name="$data_view_name" \
   --telemetry_type="$telemetry_type"
