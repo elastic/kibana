@@ -263,7 +263,7 @@ function runEvaluations() {
               resolve();
             });
           }).finally(() => {
-            const score = results
+            const modelScore = results
               .flatMap((result) => result.scores)
               .reduce(
                 (prev, result) => {
@@ -275,7 +275,45 @@ function runEvaluations() {
               );
 
             log.write('-------------------------------------------');
-            log.write(`Scored ${score.score} out of ${score.total}`);
+            log.write(
+              `Model ${connector.id} scored ${modelScore.score} out of ${modelScore.total}`
+            );
+            log.write('-------------------------------------------');
+
+            const scoresByScenario: {
+              [key: string]: {
+                score: number;
+                total: number;
+              };
+            } = results.reduce(
+              (
+                acc: {
+                  [key: string]: {
+                    score: number;
+                    total: number;
+                  };
+                },
+                result
+              ) => {
+                const scenario = result.name.trim().split(' ')[0];
+                if (!acc[scenario]) {
+                  acc[scenario] = { score: 0, total: 0 };
+                }
+                result.scores.forEach((score) => {
+                  acc[scenario].score += score.score;
+                  acc[scenario].total += 1;
+                });
+                return acc;
+              },
+              {}
+            );
+
+            log.write('-------------------------------------------');
+            log.write(`Model ${connector.id} Scores per Scenario`);
+            Object.entries(scoresByScenario).forEach(([scenario, { score, total }]) => {
+              log.write('-------------------------');
+              log.write(`Scenario: ${scenario} - Scored ${score} out of ${total}`);
+            });
             log.write('-------------------------------------------');
           });
         },
