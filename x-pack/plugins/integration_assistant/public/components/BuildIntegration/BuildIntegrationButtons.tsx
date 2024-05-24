@@ -11,8 +11,8 @@ import { useGlobalStore } from '@Stores/useGlobalStore';
 
 import { buildIntegration, installIntegration } from '@api/services/integrationBuilderService';
 import { RoutePaths } from '../../constants/routePaths';
-import ActionButton from '../Buttons/ActionButton';
-import GoBackButton from '../Buttons/GoBackButton';
+import { ActionButton } from '../Buttons/ActionButton';
+import { GoBackButton } from '../Buttons/GoBackButton';
 
 export const BuildIntegrationButtons = () => {
   const integrationBuilderZipFile = useGlobalStore((state) => state.integrationBuilderZipFile);

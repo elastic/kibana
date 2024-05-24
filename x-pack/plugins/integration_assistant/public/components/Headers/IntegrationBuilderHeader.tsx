@@ -8,10 +8,10 @@
 import React from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
-import IntegrationBuilderSteps from '../IntegrationBuilderSteps/IntegrationBuilderSteps';
-import ProgressPortal from '../Portal/ProgressPortal';
+import { IntegrationBuilderSteps } from '../IntegrationBuilderSteps/IntegrationBuilderSteps';
+import { ProgressPortal } from '../Portal/ProgressPortal';
 import { useGlobalStore } from '@Stores/useGlobalStore';
-import HeaderTitles from '../../constants/headerTitles';
+import { HeaderTitles } from '../../constants/headerTitles';
 
 export const IntegrationBuilderHeader = () => {
   const location = useLocation();

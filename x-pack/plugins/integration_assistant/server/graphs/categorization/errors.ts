@@ -1,9 +1,15 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { CATEGORIZATION_ERROR_PROMPT } from './prompts';
 import { getModel } from '../../providers/bedrock';
 import { CategorizationState } from '../../types';
 import { combineProcessors } from '../../util/pipeline';
-import { Pipeline } from '../../../common/types';
+import { Pipeline } from '../../../common';
 
 export async function handleErrors(state: CategorizationState) {
   const categorizationErrorPrompt = CATEGORIZATION_ERROR_PROMPT;

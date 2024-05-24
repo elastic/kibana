@@ -12,7 +12,7 @@ import { useGlobalStore } from '../../stores/useGlobalStore';
 import { EmptyPrompt } from '../../components/EmptyPrompt/EmptyPrompt';
 import { CategorizationButtons } from '../../components/Categorization/CategorizationButtons';
 import { PipelineResults } from '../../components/IntegrationResults/PipelineResults';
-import { RoutePaths } from '../../constants/routePaths';
+import { ECS_GRAPH_PATH } from '../../../common';
 
 export const CategorizationPage = () => {
   const ingestPipeline = useGlobalStore((state) => state.ingestPipeline);
@@ -22,7 +22,7 @@ export const CategorizationPage = () => {
       <EmptyPrompt
         title={'Ingest Pipeline is missing'}
         description={'No existing Ingest Pipeline was found. Go back to the ECS Mapping step.'}
-        goBackPath={RoutePaths.ECS_MAPPING_PATH}
+        goBackPath={ECS_GRAPH_PATH}
       />
     );
   }

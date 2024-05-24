@@ -1,6 +1,12 @@
-import * as yaml from 'js-yaml';
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
-import * as path from 'path';
+import { join } from 'path';
 import { ECS_TYPES } from './constants';
 import { EcsMappingState } from '../../types';
 
@@ -152,7 +158,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors.filter((p: any) => p.convert).map((p: any) => p.convert.field);
 
-  const templatesPath = path.join(__dirname, '../../templates');
+  const templatesPath = join(__dirname, '../../templates');
   const mappedValues = {
     processors,
     ecs_version: state.ecsVersion,
@@ -170,7 +176,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     });
     const template = env.getTemplate('pipeline.yml.njk');
     const renderedTemplate = template.render(mappedValues);
-    const ingestPipeline = yaml.load(renderedTemplate) as IngestPipeline;
+    const ingestPipeline = load(renderedTemplate) as IngestPipeline;
     return ingestPipeline;
   } catch (error) {
     console.error('Error rendering template:', error);

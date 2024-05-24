@@ -5,71 +5,23 @@
  * 2.0.
  */
 
-export const INTEGRATION_ASSISTANT_BASE_PATH = '/api/integration_assistant';
+export type {
+  Pipeline,
+  BuildIntegrationAPIRequest,
+  EcsMappingAPIRequest,
+  EcsMappingNewPipelineAPIRequest,
+  CategorizationAPIRequest,
+  RelatedAPIRequest,
+} from './types';
 
-export const ECS_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/ecs`;
+export type { CategorizationApiResponse, RelatedApiResponse, EcsMappingApiResponse } from './types';
 
-export const CATEGORZATION_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/categorization`;
-
-export const RELATED_GRAPH_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/related`;
-
-export const INTEGRATION_BUILDER_PATH = `${INTEGRATION_ASSISTANT_BASE_PATH}/build`;
-
-export interface BuildIntegrationAPIRequest {
-  packageName: string;
-  packageTitle: string;
-  packageVersion: string;
-  dataStreamName: string;
-  inputTypes: string[];
-  formSamples: string[];
-  ingestPipeline: object;
-  docs: object[];
-}
-
-export interface EcsMappingAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-}
-
-export interface EcsMappingNewPipelineAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-  mapping: object;
-}
-
-export interface CategorizationAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-  ingestPipeline: object;
-}
-
-export interface RelatedAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-  ingestPipeline: object;
-}
-
-export interface CategorizationApiResponse {
-  results: {
-    pipeline: object;
-    docs: object[];
-  };
-}
-
-export interface RelatedApiResponse {
-  results: {
-    pipeline: object;
-    docs: object[];
-  };
-}
-
-export interface EcsMappingApiResponse {
-  results: {
-    mapping: object;
-    current_pipeline: object;
-  };
-}
+export {
+  PLUGIN_ID,
+  INTEGRATION_ASSISTANT_APP_ROUTE,
+  ECS_GRAPH_PATH,
+  CATEGORZATION_GRAPH_PATH,
+  RELATED_GRAPH_PATH,
+  INTEGRATION_BUILDER_PATH,
+  INTEGRATION_ASSISTANT_BASE_PATH,
+} from './constants';

@@ -10,65 +10,6 @@ export interface IntegrationAssistantPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IntegrationAssistantPluginStart {}
 
-export interface BuildIntegrationAPIRequest {
-  packageName: string;
-  packageTitle: string;
-  packageVersion: string;
-  dataStreamName: string;
-  inputTypes: string[];
-  formSamples: string[];
-  ingestPipeline: object;
-  docs: object[];
-}
-
-export interface EcsMappingAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-}
-
-export interface EcsMappingNewPipelineAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-  mapping: object;
-}
-
-export interface CategorizationAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-  ingestPipeline: object;
-}
-
-export interface RelatedAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-  ingestPipeline: object;
-}
-
-export interface CategorizationApiResponse {
-  results: {
-    pipeline: object;
-    docs: object[];
-  };
-}
-
-export interface RelatedApiResponse {
-  results: {
-    pipeline: object;
-    docs: object[];
-  };
-}
-
-export interface EcsMappingApiResponse {
-  results: {
-    mapping: object;
-    current_pipeline: object;
-  };
-}
-
 export interface CategorizationState {
   rawSamples: string[];
   samples: string[];
