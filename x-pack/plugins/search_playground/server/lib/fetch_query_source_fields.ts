@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchResponse, FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { IndicesQuerySourceFields } from '../types';
 
