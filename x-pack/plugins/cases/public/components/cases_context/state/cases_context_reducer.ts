@@ -6,7 +6,6 @@
  */
 
 import { assertNever } from '@kbn/std';
-import type { Dispatch } from 'react';
 import type { AllCasesSelectorModalProps } from '../../all_cases/selector_modal';
 import type { CreateCaseFlyoutProps } from '../../create/flyout';
 
@@ -49,8 +48,6 @@ export type CasesContextStoreAction =
       payload: AllCasesSelectorModalProps;
     }
   | { type: CasesContextStoreActionsList.CLOSE_ADD_TO_CASE_MODAL };
-
-export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export const casesContextReducer: React.Reducer<CasesContextState, CasesContextStoreAction> = (
   state: CasesContextState,
