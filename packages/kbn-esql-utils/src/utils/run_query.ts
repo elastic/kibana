@@ -109,7 +109,6 @@ export async function getESQLResults({
         params: {
           ...(filter ? { filter } : {}),
           query: esqlQuery,
-          version: ESQL_LATEST_VERSION,
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
         },
       },
