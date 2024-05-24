@@ -13,6 +13,8 @@ export const aiopsLogRateAnalysisSchema = schema.object({
   start: schema.string(),
   end: schema.string(),
   timefield: schema.string(),
+  keywordFieldCandidates: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  textFieldCandidates: schema.arrayOf(schema.string(), { defaultValue: [] }),
 });
 
 export type AiopsLogRateAnalysisSchema = TypeOf<typeof aiopsLogRateAnalysisSchema>;

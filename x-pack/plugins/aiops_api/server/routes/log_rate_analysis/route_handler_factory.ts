@@ -72,7 +72,8 @@ export function routeHandlerFactory(
       controller.abort();
     });
 
-    const { index, timefield, start, end } = request.body;
+    const { index, timefield, start, end, keywordFieldCandidates, textFieldCandidates } =
+      request.body;
 
     return await coreStart.executionContext.withContext(executionContext, async () => {
       const logRateAnalysis = await fetchSimpleLogRateAnalysis(
@@ -81,7 +82,9 @@ export function routeHandlerFactory(
         start,
         end,
         timefield,
-        abortSignal
+        abortSignal,
+        keywordFieldCandidates,
+        textFieldCandidates
       );
 
       return response.ok({
