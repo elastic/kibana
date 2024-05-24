@@ -398,6 +398,7 @@ export class ChromeService {
                 globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
                 breadcrumbs$={currentProjectBreadcrumbs$}
+                customBranding$={customBranding$}
                 helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
                 helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
                 helpMenuLinks$={helpMenuLinks$}

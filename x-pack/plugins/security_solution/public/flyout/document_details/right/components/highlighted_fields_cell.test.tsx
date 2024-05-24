@@ -116,7 +116,7 @@ describe('<HighlightedFieldsCell />', () => {
 
   // TODO: 8.15 simplify when `agentStatusClientEnabled` FF is enabled and removed
   it.each(Object.keys(hooksToMock))(
-    'should render SentinelOne agent status cell if field is agent.status and `origialField` is `observer.serial_number` with %s hook',
+    'should render SentinelOne agent status cell if field is agent.status and `originalField` is `observer.serial_number` with %s hook',
     (hookName) => {
       const hook = hooksToMock[hookName];
       useAgentStatusHookMock.mockImplementation(() => hook);
@@ -139,7 +139,30 @@ describe('<HighlightedFieldsCell />', () => {
       expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
     }
   );
+  it.each(Object.keys(hooksToMock))(
+    'should render Crowdstrike agent status cell if field is agent.status and `originalField` is `crowdstrike.event.DeviceId` with %s hook',
+    (hookName) => {
+      const hook = hooksToMock[hookName];
+      useAgentStatusHookMock.mockImplementation(() => hook);
 
+      (hook as jest.Mock).mockReturnValue({
+        isFetched: true,
+        isLoading: false,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <HighlightedFieldsCell
+            values={['value']}
+            field={'agent.status'}
+            originalField="crowdstrike.event.DeviceId"
+          />
+        </TestProviders>
+      );
+
+      expect(getByTestId(HIGHLIGHTED_FIELDS_AGENT_STATUS_CELL_TEST_ID)).toBeInTheDocument();
+    }
+  );
   it('should not render if values is null', () => {
     const { container } = render(
       <TestProviders>

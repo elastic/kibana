@@ -28,27 +28,33 @@ export type RandomSamplerProbability = number | null;
 
 export const RANDOM_SAMPLER_SELECT_OPTIONS: Array<{
   value: RandomSamplerOption;
-  text: string;
+  inputDisplay: string;
   'data-test-subj': string;
 }> = [
   {
     'data-test-subj': 'aiopsRandomSamplerOptionOnAutomatic',
     value: RANDOM_SAMPLER_OPTION.ON_AUTOMATIC,
-    text: i18n.translate('xpack.aiops.logCategorization.randomSamplerPreference.onAutomaticLabel', {
-      defaultMessage: 'On - automatic',
-    }),
+    inputDisplay: i18n.translate(
+      'xpack.aiops.logCategorization.randomSamplerPreference.onAutomaticLabel',
+      {
+        defaultMessage: 'On - automatic',
+      }
+    ),
   },
   {
     'data-test-subj': 'aiopsRandomSamplerOptionOnManual',
     value: RANDOM_SAMPLER_OPTION.ON_MANUAL,
-    text: i18n.translate('xpack.aiops.logCategorization.randomSamplerPreference.onManualLabel', {
-      defaultMessage: 'On - manual',
-    }),
+    inputDisplay: i18n.translate(
+      'xpack.aiops.logCategorization.randomSamplerPreference.onManualLabel',
+      {
+        defaultMessage: 'On - manual',
+      }
+    ),
   },
   {
     'data-test-subj': 'aiopsRandomSamplerOptionOff',
     value: RANDOM_SAMPLER_OPTION.OFF,
-    text: i18n.translate('xpack.aiops.logCategorization.randomSamplerPreference.offLabel', {
+    inputDisplay: i18n.translate('xpack.aiops.logCategorization.randomSamplerPreference.offLabel', {
       defaultMessage: 'Off',
     }),
   },
@@ -126,3 +132,58 @@ export class RandomSampler {
     return wrapper;
   }
 }
+
+export const randomSamplerText = (randomSamplerPreference: RandomSamplerOption) => {
+  switch (randomSamplerPreference) {
+    case RANDOM_SAMPLER_OPTION.OFF:
+      return {
+        calloutInfoMessage: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.message',
+          {
+            defaultMessage:
+              'Random sampling can be turned on to increase analysis speed. Accuracy will slightly decrease.',
+          }
+        ),
+        buttonText: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.offCallout.button',
+          {
+            defaultMessage: 'No sampling',
+          }
+        ),
+      };
+    case RANDOM_SAMPLER_OPTION.ON_AUTOMATIC:
+      return {
+        calloutInfoMessage: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.message',
+          {
+            defaultMessage:
+              'The pattern analysis will use random sampler aggregations. The probability is automatically set to balance accuracy and speed.',
+          }
+        ),
+        buttonText: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onAutomaticCallout.button',
+          {
+            defaultMessage: 'Auto sampling',
+          }
+        ),
+      };
+
+    case RANDOM_SAMPLER_OPTION.ON_MANUAL:
+    default:
+      return {
+        calloutInfoMessage: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.message',
+          {
+            defaultMessage:
+              'The pattern analysis will use random sampler aggregations. A lower percentage probability increases performance, but some accuracy is lost.',
+          }
+        ),
+        buttonText: i18n.translate(
+          'xpack.aiops.logCategorization.randomSamplerSettingsPopUp.onManualCallout.button',
+          {
+            defaultMessage: 'Manual sampling',
+          }
+        ),
+      };
+  }
+};
