@@ -1370,7 +1370,7 @@ export class Embeddable
       eventHandler = this.input.onTableRowClick;
     }
     const esqlQuery =
-      this.isTextBasedLanguage() && this.savedVis?.state.query
+      this.isTextBasedLanguage()
         ? this.savedVis?.state.query
         : undefined;
 
