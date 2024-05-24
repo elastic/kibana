@@ -33,8 +33,9 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
+import { EuiFlexGroup } from '@elastic/eui';
 import { ControlRenderer } from '../control_renderer';
-import { DefaultControlApi } from '../types';
+import { DefaultControlApi, DefaultControlState } from '../types';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
 import {
@@ -43,20 +44,20 @@ import {
   ControlGroupSerializedState,
   ControlsPanels,
 } from './types';
-import classNames from 'classnames';
-import { EuiFlexGroup } from '@elastic/eui';
 
-export const getControlGroupEmbeddableFactory = (services: {
+export const getControlGroupEmbeddableFactory = <
+  ChildControlState extends DefaultControlState = DefaultControlState
+>(services: {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
 }) => {
   const controlGroupEmbeddableFactory: ReactEmbeddableFactory<
     ControlGroupSerializedState,
-    ControlGroupApi,
-    ControlGroupRuntimeState
+    ControlGroupApi<ChildControlState>,
+    ControlGroupRuntimeState<ChildControlState>
   > = {
     type: CONTROL_GROUP_TYPE,
-    deserializeState: (state) => deserializeControlGroup(state),
+    deserializeState: (state) => deserializeControlGroup<ChildControlState>(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
       const grow = new BehaviorSubject<boolean>(initialState.defaultControlGrow);
@@ -64,7 +65,7 @@ export const getControlGroupEmbeddableFactory = (services: {
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-      const panels$ = new BehaviorSubject<ControlsPanels>(initialState.panels);
+      const panels$ = new BehaviorSubject<ControlsPanels<ChildControlState>>(initialState.panels);
       const controlStyle$ = new BehaviorSubject<ControlStyle>(
         initialState.controlStyle ?? DEFAULT_CONTROL_STYLE
       );
@@ -86,24 +87,25 @@ export const getControlGroupEmbeddableFactory = (services: {
       // control group listens to all of them
       // any time they change, it pops it into an object
 
-      const controlGroupComparators: StateComparators<ControlGroupRuntimeState> = {
-        chainingSystem: [chainingSystem$, (value) => chainingSystem$.next(value)],
-        defaultControlGrow: [grow, (value) => grow.next(value)],
-        defaultControlWidth: [width, (value) => width.next(value)],
-        controlStyle: [controlStyle$, (value) => controlStyle$.next(value)],
-        showApplySelections: [showApplySelections, (value) => showApplySelections.next(value)],
-        ignoreParentSettings: [ignoreParentSettings, (value) => ignoreParentSettings.next(value)],
-        panels: [
-          panels$,
-          (value) => panels$.next(value),
-          () => true, // each control will be responsible for handling its own unsaved changes
-        ],
-        anyChildHasUnsavedChanges: [
-          anyChildHasUnsavedChanges,
-          (value) => anyChildHasUnsavedChanges.next(value),
-          () => anyChildHasUnsavedChanges.getValue(),
-        ],
-      };
+      const controlGroupComparators: StateComparators<ControlGroupRuntimeState<ChildControlState>> =
+        {
+          chainingSystem: [chainingSystem$, (value) => chainingSystem$.next(value)],
+          defaultControlGrow: [grow, (value) => grow.next(value)],
+          defaultControlWidth: [width, (value) => width.next(value)],
+          controlStyle: [controlStyle$, (value) => controlStyle$.next(value)],
+          showApplySelections: [showApplySelections, (value) => showApplySelections.next(value)],
+          ignoreParentSettings: [ignoreParentSettings, (value) => ignoreParentSettings.next(value)],
+          panels: [
+            panels$,
+            (value) => panels$.next(value),
+            () => true, // each control will be responsible for handling its own unsaved changes
+          ],
+          anyChildHasUnsavedChanges: [
+            anyChildHasUnsavedChanges,
+            (value) => anyChildHasUnsavedChanges.next(value),
+            () => anyChildHasUnsavedChanges.getValue(),
+          ],
+        };
 
       const api = buildApi(
         {
@@ -113,7 +115,7 @@ export const getControlGroupEmbeddableFactory = (services: {
           }>,
           onEdit: async () => {
             // TODO: Clean up state manager to only editable state
-            openEditControlGroupFlyout(
+            openEditControlGroupFlyout<ChildControlState>(
               api,
               {
                 chainingSystem: chainingSystem$,
@@ -134,7 +136,6 @@ export const getControlGroupEmbeddableFactory = (services: {
               defaultMessage: 'Controls',
             }),
           getChildState: (childId) => {
-            // TODO: Fix type error
             return panels$.getValue()[childId];
           },
           serializeState: () => {

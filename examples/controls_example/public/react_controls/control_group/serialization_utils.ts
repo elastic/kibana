@@ -15,9 +15,11 @@ import { DefaultDataControlState } from '../data_controls/types';
 import { DefaultControlState } from '../types';
 import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
 
-export const deserializeControlGroup = (
+export const deserializeControlGroup = <
+  ChildControlState extends DefaultControlState = DefaultControlState
+>(
   state: SerializedPanelState<ControlGroupSerializedState>
-): ControlGroupRuntimeState => {
+): ControlGroupRuntimeState<ChildControlState> => {
   const panels = JSON.parse(state.rawState.panelsJSON);
   const ignoreParentSettings = JSON.parse(state.rawState.ignoreParentSettingsJSON);
 

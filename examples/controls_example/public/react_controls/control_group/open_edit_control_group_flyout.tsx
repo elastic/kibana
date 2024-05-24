@@ -15,14 +15,16 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { ControlStateManager } from '../types';
+import { ControlStateManager, DefaultControlState } from '../types';
 import { ControlGroupEditor } from './control_group_editor';
 import { ControlGroupEditorStrings } from './control_group_editor_constants';
 import { ControlGroupApi, ControlGroupRuntimeState } from './types';
 
-export const openEditControlGroupFlyout = (
+export const openEditControlGroupFlyout = <
+  ChildStateType extends DefaultControlState = DefaultControlState
+>(
   controlGroupApi: ControlGroupApi,
-  stateManager: ControlStateManager<ControlGroupRuntimeState>,
+  stateManager: ControlStateManager<ControlGroupRuntimeState<ChildStateType>>,
   services: {
     core: CoreStart;
   }
@@ -60,8 +62,7 @@ export const openEditControlGroupFlyout = (
       .then((confirmed) => {
         if (confirmed)
           Object.keys(editorStateManager.panels).forEach((panelId) => {
-            // this.removeEmbeddable(panelId)
-            console.log('panel id', panelId);
+            controlGroupApi.removePanel(panelId);
           });
         ref.close();
       });
@@ -74,12 +75,13 @@ export const openEditControlGroupFlyout = (
         stateManager={editorStateManager}
         onSave={() => {
           Object.keys(stateManager).forEach((key) => {
-            stateManager[key as keyof ControlGroupRuntimeState].next(
-              editorStateManager[key as keyof ControlGroupRuntimeState].getValue()
-            );
+            (
+              stateManager[key as keyof ControlGroupRuntimeState] as BehaviorSubject<
+                ControlGroupRuntimeState[keyof ControlGroupRuntimeState]
+              >
+            ).next(editorStateManager[key as keyof ControlGroupRuntimeState].getValue());
           });
           closeOverlay(overlay);
-          // resolve(undefined);
         }}
         onDeleteAll={() => onDeleteAll(overlay)}
         onCancel={() => closeOverlay(overlay)}

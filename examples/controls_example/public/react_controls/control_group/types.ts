@@ -30,29 +30,30 @@ export interface ControlsPanels<State extends DefaultControlState = DefaultContr
   [panelId: string]: State;
 }
 
-export type ControlGroupApi = PresentationContainer &
-  DefaultEmbeddableApi<ControlGroupSerializedState> &
-  HasSerializableState &
-  // HasSerializedChildState<DefaultControlState> &
-  PublishesFilters &
-  // PublishesSettings & // published so children can use it... Might be unnecessary?
-  PublishesDataViews &
-  HasEditCapabilities & // editing for control group settings - this will be a custom action
-  PublishesDataLoading & // loading = true if any children loading
-  // PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
-  PublishesControlGroupDisplaySettings &
-  Partial<HasParentApi<PublishesUnifiedSearch>> & {
-    getChildState: <ChildStateType extends DefaultControlState = DefaultControlState>(
-      uuid: string
-    ) => ChildStateType;
-  };
+export type ControlGroupApi<ChildStateType extends DefaultControlState = DefaultControlState> =
+  PresentationContainer &
+    DefaultEmbeddableApi<ControlGroupSerializedState> &
+    HasSerializableState &
+    // HasSerializedChildState<DefaultControlState> &
+    PublishesFilters &
+    // PublishesSettings & // published so children can use it... Might be unnecessary?
+    PublishesDataViews &
+    HasEditCapabilities & // editing for control group settings - this will be a custom action
+    PublishesDataLoading & // loading = true if any children loading
+    // PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
+    PublishesControlGroupDisplaySettings &
+    Partial<HasParentApi<PublishesUnifiedSearch>> & {
+      getChildState: (uuid: string) => ChildStateType;
+    };
 
-export interface ControlGroupRuntimeState {
+export interface ControlGroupRuntimeState<
+  ChildStateType extends DefaultControlState = DefaultControlState
+> {
   chainingSystem: ControlGroupChainingSystem;
   defaultControlGrow: boolean;
   defaultControlWidth: ControlWidth;
   controlStyle: ControlStyle;
-  panels: ControlsPanels;
+  panels: ControlsPanels<ChildStateType>;
   showApplySelections?: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 

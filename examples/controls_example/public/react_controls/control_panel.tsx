@@ -7,16 +7,9 @@
  */
 
 import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
-import {
-  EuiFlexItem,
-  EuiFormControlLayout,
-  EuiFormLabel,
-  EuiFormRow,
-  EuiIcon,
-  htmlIdGenerator,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFormControlLayout, EuiFormLabel, EuiFormRow, EuiIcon } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
