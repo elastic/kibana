@@ -114,6 +114,18 @@ describe('useEsqlMode', () => {
       viewMode: undefined,
     });
   });
+
+  test('should change viewMode to undefined (default) if it was PATTERN_LEVEL', async () => {
+    const { replaceUrlState } = renderHookWithContext(false, {
+      viewMode: VIEW_MODE.PATTERN_LEVEL,
+    });
+
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    expect(replaceUrlState).toHaveBeenCalledWith({
+      viewMode: undefined,
+    });
+  });
+
   test('changing an ES|QL query with different result columns should change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;

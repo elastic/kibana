@@ -15,7 +15,7 @@ import {
 import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
 import { useKibana } from './use_kibana';
-import { useLatestFindingsDataView } from '../api/use_latest_findings_data_view';
+import { useDataView } from '../api/use_data_view';
 
 interface NegatedValue {
   value: string | number;
@@ -77,17 +77,9 @@ const useNavigate = (pathname: string, dataViewId = SECURITY_DEFAULT_DATA_VIEW_I
 };
 
 export const useNavigateFindings = () => {
-  const { data } = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const { data } = useDataView(LATEST_FINDINGS_INDEX_PATTERN);
   return useNavigate(findingsNavigation.findings_default.path, data?.id);
-};
-
-export const useNavigateFindingsByResource = () => {
-  const { data } = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
-  return useNavigate(findingsNavigation.findings_by_resource.path, data?.id);
 };
 
 export const useNavigateVulnerabilities = () =>
   useNavigate(findingsNavigation.vulnerabilities.path);
-
-export const useNavigateVulnerabilitiesByResource = () =>
-  useNavigate(findingsNavigation.vulnerabilities_by_resource.path);

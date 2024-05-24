@@ -39,7 +39,7 @@ interface NativeConnectorConfigurationConfigProps {
 
 export const NativeConnectorConfigurationConfig: React.FC<
   NativeConnectorConfigurationConfigProps
-> = ({ connector, nativeConnector, status }) => {
+> = ({ connector, nativeConnector }) => {
   const { hasPlatinumLicense } = useValues(LicensingLogic);
   const { status: updateStatus } = useValues(ConnectorConfigurationApiLogic);
   const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
@@ -109,23 +109,6 @@ export const NativeConnectorConfigurationConfig: React.FC<
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-
-      {status === ConnectorStatus.CONNECTED && (
-        <>
-          <EuiSpacer />
-          <EuiCallOut
-            iconType="check"
-            color="success"
-            title={i18n.translate(
-              'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.connectorConnected',
-              {
-                defaultMessage: 'Your connector {name} has connected to Search successfully.',
-                values: { name: nativeConnector.name },
-              }
-            )}
-          />
-        </>
-      )}
 
       {connector.status && hasAdvancedFilteringFeature && !isAdvancedSnippetEmpty && (
         <>

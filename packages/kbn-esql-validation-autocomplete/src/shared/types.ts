@@ -13,7 +13,6 @@ type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | P
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, { name: string; hidden: boolean }>;
   getFieldsFor?: CallbackFn<{ query: string }, { name: string; type: string }>;
-  getMetaFields?: CallbackFn;
   getPolicies?: CallbackFn<
     {},
     { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[] }
