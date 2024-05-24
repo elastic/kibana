@@ -70,7 +70,7 @@ export function MachineLearningCasesProvider(
 
     async assertCaseWithAnomalyChartsAttachment(
       params: CaseParams,
-      attachment: { jobIds: string[]; maxSeriesToPlot: number },
+      attachment: { id?: string; jobIds: string[]; maxSeriesToPlot: number },
       expectedChartsCount: number
     ) {
       await this.assertBasicCaseProps(params);

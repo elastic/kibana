@@ -66,11 +66,6 @@ const AnomalyChartsCaseAttachment = ({
     []
   );
 
-  const timeRange$ = useMemo(
-    () => new BehaviorSubject(initialState.timeRange),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [initialState.timeRange?.from, initialState.timeRange?.to]
-  );
   return (
     <div css={css({ display: 'flex', width: '100%' })}>
       <KibanaRenderContextProvider {...coreStartServices}>
@@ -83,7 +78,6 @@ const AnomalyChartsCaseAttachment = ({
             onLoading={api.onLoading}
             onRenderComplete={api.onRenderComplete}
             onError={api.onError}
-            timeRange$={timeRange$}
           />
         </KibanaContextProvider>
       </KibanaRenderContextProvider>
