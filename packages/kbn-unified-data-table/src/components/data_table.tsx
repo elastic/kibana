@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { of } from 'rxjs';
@@ -84,6 +84,7 @@ import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
+import { useSelectedDocs } from '../hooks/use_selected_docs';
 
 export type SortOrder = [string, string];
 
@@ -448,39 +449,41 @@ export const UnifiedDataTable = ({
     services;
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
-  const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
-  const usedSelectedDocs = useMemo(() => {
-    if (!selectedDocs.length || !rows?.length) {
-      return [];
-    }
-    // filter out selected docs that are no longer part of the current data
-    const result = selectedDocs.filter((docId) => !!getDocById(docId));
-    if (result.length === 0 && isFilterActive) {
+  const selectedDocsState = useSelectedDocs(docMap);
+  const {
+    isDocSelected,
+    hasSelectedDocs,
+    usedSelectedDocs,
+    clearSelectedDocs,
+    replaceSelectedDocs,
+  } = selectedDocsState;
+
+  useEffect(() => {
+    if (!hasSelectedDocs && isFilterActive) {
       setIsFilterActive(false);
     }
-    return result;
-  }, [selectedDocs, rows?.length, isFilterActive, getDocById]);
+  }, [isFilterActive, hasSelectedDocs, setIsFilterActive]);
 
   const displayedRows = useMemo(() => {
     if (!rows) {
       return [];
     }
-    if (!isFilterActive || usedSelectedDocs.length === 0) {
+    if (!isFilterActive || !hasSelectedDocs) {
       return rows;
     }
-    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(row.id));
+    const rowsFiltered = rows.filter((row) => isDocSelected(row.id));
     if (!rowsFiltered.length) {
       // in case the selected docs are no longer part of the sample of 500, show all docs
       return rows;
     }
     return rowsFiltered;
-  }, [rows, usedSelectedDocs, isFilterActive]);
+  }, [rows, isFilterActive, hasSelectedDocs, isDocSelected]);
 
   const valueToStringConverter: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
@@ -504,13 +507,7 @@ export const UnifiedDataTable = ({
       onFilter,
       dataView,
       isDarkMode: darkMode,
-      selectedDocs: usedSelectedDocs,
-      setSelectedDocs: (newSelectedDocs: React.SetStateAction<string[]>) => {
-        setSelectedDocs(newSelectedDocs);
-        if (isFilterActive && newSelectedDocs.length === 0) {
-          setIsFilterActive(false);
-        }
-      },
+      selectedDocsState,
       valueToStringConverter,
       componentsTourSteps,
       isPlainRecord,
@@ -522,10 +519,9 @@ export const UnifiedDataTable = ({
       isPlainRecord,
       displayedRows,
       expandedDoc,
-      isFilterActive,
       onFilter,
       setExpandedDoc,
-      usedSelectedDocs,
+      selectedDocsState,
       valueToStringConverter,
     ]
   );
@@ -860,7 +856,7 @@ export const UnifiedDataTable = ({
                 isFilterActive={isFilterActive}
                 rows={rows!}
                 selectedDocs={usedSelectedDocs}
-                setSelectedDocs={setSelectedDocs}
+                clearSelectedDocs={clearSelectedDocs}
                 setIsFilterActive={setIsFilterActive}
               />
             </EuiFlexItem>
@@ -871,9 +867,11 @@ export const UnifiedDataTable = ({
     );
   }, [
     externalAdditionalControls,
+    clearSelectedDocs,
     usedSelectedDocs,
     isPlainRecord,
     isFilterActive,
+    setIsFilterActive,
     enableComparisonMode,
     rows,
   ]);
@@ -1030,13 +1028,13 @@ export const UnifiedDataTable = ({
               dataView={dataView}
               isPlainRecord={isPlainRecord}
               selectedFieldNames={visibleColumns}
-              selectedDocs={selectedDocs}
+              selectedDocs={usedSelectedDocs}
               schemaDetectors={schemaDetectors}
               forceShowAllFields={defaultColumns}
               showFullScreenButton={showFullScreenButton}
               fieldFormats={fieldFormats}
               getDocById={getDocById}
-              setSelectedDocs={setSelectedDocs}
+              setSelectedDocs={replaceSelectedDocs}
               setIsCompareActive={setIsCompareActive}
             />
           ) : (
@@ -1067,9 +1065,9 @@ export const UnifiedDataTable = ({
           )}
         </div>
         {loadingState !== DataLoadingState.loading &&
-          !usedSelectedDocs.length && // hide footer when showing selected documents
-          isPaginationEnabled &&
-          !isCompareActive && ( // we hide the footer for Surrounding Documents page
+          isPaginationEnabled && // we hide the footer for Surrounding Documents page
+          !isFilterActive && // hide footer when showing selected documents
+          !isCompareActive && (
             <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}
               rowCount={rowCount}
