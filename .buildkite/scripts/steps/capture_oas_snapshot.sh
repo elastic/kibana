@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-.buildkite/scripts/bootstrap.sh
-
 source .buildkite/scripts/common/util.sh
 
 echo --- Capture OAS snapshot
