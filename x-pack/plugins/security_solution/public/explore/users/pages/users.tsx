@@ -49,7 +49,6 @@ import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml
 import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_capabilities';
 import { EmptyPrompt } from '../../../common/components/empty_prompt';
 import { userNameExistsFilter } from './details/helpers';
-import { useHasSecurityCapability } from '../../../helper_hooks';
 
 const ID = 'UsersQueryId';
 
@@ -156,11 +155,7 @@ const UsersComponent = () => {
   );
 
   const capabilities = useMlCapabilities();
-  const hasEntityAnalyticsCapability = useHasSecurityCapability('entity-analytics');
-  const navTabs = useMemo(
-    () => navTabsUsers(hasMlUserPermissions(capabilities), hasEntityAnalyticsCapability),
-    [capabilities, hasEntityAnalyticsCapability]
-  );
+  const navTabs = useMemo(() => navTabsUsers(hasMlUserPermissions(capabilities)), [capabilities]);
 
   return (
     <>

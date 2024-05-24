@@ -13,7 +13,7 @@ import { z } from 'zod';
  *
  * info:
  *   title: Bulk Actions API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { NonEmptyString, User } from '../common_attributes.gen';

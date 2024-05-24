@@ -8,11 +8,11 @@
 import { EntityDefinition } from '@kbn/entities-schema';
 
 export class EntityIdConflict extends Error {
-  public defintion: EntityDefinition;
+  public definition: EntityDefinition;
 
   constructor(message: string, def: EntityDefinition) {
     super(message);
     this.name = 'EntityIdConflict';
-    this.defintion = def;
+    this.definition = def;
   }
 }
