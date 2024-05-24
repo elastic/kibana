@@ -87,6 +87,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   ]);
   const isEsqlMode = useIsEsqlMode();
   const viewMode: VIEW_MODE = useAppStateSelector((state) => {
+    if (state.viewMode === VIEW_MODE.DOCUMENT_LEVEL || state.viewMode === VIEW_MODE.PATTERN_LEVEL) {
+      return state.viewMode;
+    }
     if (uiSettings.get(SHOW_FIELD_STATISTICS) !== true || isEsqlMode)
       return VIEW_MODE.DOCUMENT_LEVEL;
     return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;

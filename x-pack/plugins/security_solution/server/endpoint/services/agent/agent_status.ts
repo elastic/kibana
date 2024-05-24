@@ -28,8 +28,7 @@ export interface GetAgentStatusOptions {
   connectorActionsClient: ActionsClient;
   logger: Logger;
 }
-
-export const getAgentStatus = async ({
+export const getSentinelOneAgentStatus = async ({
   agentType,
   agentIds,
   connectorActionsClient,
