@@ -1,4 +1,5 @@
 include::action-types/bedrock.asciidoc[leveloffset=+1]
+include::action-types/cases-action-type.asciidoc[leveloffset=+1]
 include::action-types/d3security.asciidoc[leveloffset=+1]
 include::action-types/email.asciidoc[leveloffset=+1]
 include::action-types/resilient.asciidoc[leveloffset=+1]
