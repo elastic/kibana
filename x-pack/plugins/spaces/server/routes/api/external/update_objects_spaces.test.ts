@@ -67,7 +67,7 @@ describe('update_objects_spaces', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
-      buildFlavor: 'traditional',
+      isServerless: false,
     });
 
     const [[updateObjectsSpaces, updateObjectsSpacesRouteHandler]] = router.post.mock.calls;

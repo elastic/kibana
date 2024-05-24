@@ -67,7 +67,7 @@ describe('PUT /api/spaces/space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
-      buildFlavor: 'traditional',
+      isServerless: false,
     });
 
     const [routeDefinition, routeHandler] = router.put.mock.calls[0];

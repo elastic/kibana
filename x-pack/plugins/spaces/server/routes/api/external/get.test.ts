@@ -66,7 +66,7 @@ describe('GET space', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
-      buildFlavor: 'traditional',
+      isServerless: false,
     });
 
     return {

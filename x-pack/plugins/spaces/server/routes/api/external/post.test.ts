@@ -67,7 +67,7 @@ describe('Spaces Public API', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
-      buildFlavor: 'traditional',
+      isServerless: false,
     });
 
     const [routeDefinition, routeHandler] = router.post.mock.calls[0];

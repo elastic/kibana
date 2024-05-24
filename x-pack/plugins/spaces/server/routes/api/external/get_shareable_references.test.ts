@@ -66,7 +66,7 @@ describe('get shareable references', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
-      buildFlavor: 'traditional',
+      isServerless: false,
     });
 
     const [[getShareableReferences, getShareableReferencesRouteHandler]] = router.post.mock.calls;

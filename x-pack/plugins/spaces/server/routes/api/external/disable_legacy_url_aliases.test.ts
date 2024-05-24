@@ -70,7 +70,7 @@ describe('_disable_legacy_url_aliases', () => {
       log,
       getSpacesService: () => spacesServiceStart,
       usageStatsServicePromise,
-      buildFlavor: 'traditional',
+      isServerless: false,
     });
 
     const [routeDefinition, routeHandler] = router.post.mock.calls[0];
