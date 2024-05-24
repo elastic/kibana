@@ -31,7 +31,7 @@ describe('validators', () => {
   });
 
   describe('validateKeysAllowed', () => {
-    it('returns undefined if the keys of the record are less than the maximum', () => {
+    it('returns undefined if the keys are allowed', () => {
       expect(
         validateKeysAllowed({
           key: 'foo',
@@ -41,7 +41,7 @@ describe('validators', () => {
       ).toBeUndefined();
     });
 
-    it('returns an error if the keys of the record are greater than the maximum', () => {
+    it('returns an error if the keys are not allowed', () => {
       expect(
         validateKeysAllowed({
           key: 'foo',

@@ -89,9 +89,7 @@ describe('jira action params validation', () => {
       errors: {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
-        'subActionParams.incident.otherFields': [
-          'Additional fields field must be a valid JSON object.',
-        ],
+        'subActionParams.incident.otherFields': ['Invalid JSON.'],
       },
     });
   });
@@ -142,7 +140,7 @@ describe('jira action params validation', () => {
         'subActionParams.incident.summary': [],
         'subActionParams.incident.labels': [],
         'subActionParams.incident.otherFields': [
-          `A maximum of ${MAX_OTHER_FIELDS_LENGTH} additional fields can be defined at a time.`,
+          `A maximum of ${MAX_OTHER_FIELDS_LENGTH} attributes can be defined at a time.`,
         ],
       },
     });

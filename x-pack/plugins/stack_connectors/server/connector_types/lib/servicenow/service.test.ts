@@ -101,7 +101,10 @@ const mockCorrelationIdIncidentResponse = () =>
     },
   }));
 
-const createIncident = async (service: ExternalService) => {
+const createIncident = async (
+  service: ExternalService,
+  incident?: Partial<ServiceNowITSMIncident>
+) => {
   // Get application version
   mockApplicationVersion();
   // Import set api response
@@ -110,11 +113,18 @@ const createIncident = async (service: ExternalService) => {
   mockIncidentResponse(false);
 
   return await service.createIncident({
-    incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+    incident: {
+      short_description: 'title',
+      description: 'desc',
+      ...incident,
+    } as ServiceNowITSMIncident,
   });
 };
 
-const updateIncident = async (service: ExternalService) => {
+const updateIncident = async (
+  service: ExternalService,
+  incident?: Partial<ServiceNowITSMIncident>
+) => {
   // Get application version
   mockApplicationVersion();
   // Import set api response
@@ -124,7 +134,11 @@ const updateIncident = async (service: ExternalService) => {
 
   return await service.updateIncident({
     incidentId: '1',
-    incident: { short_description: 'title', description: 'desc' } as ServiceNowITSMIncident,
+    incident: {
+      short_description: 'title',
+      description: 'desc',
+      ...incident,
+    } as ServiceNowITSMIncident,
   });
 };
 
@@ -682,6 +696,19 @@ describe('ServiceNow service', () => {
           '[Action][ServiceNow]: Unable to create incident. Error: An error has occurred while importing the incident Reason: unknown'
         );
       });
+
+      test('it should create an incident with additional fields correctly without prefixing them with u_', async () => {
+        await createIncident(service, { additional_fields: { foo: 'test' } });
+
+        expect(requestMock).toHaveBeenNthCalledWith(2, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/now/import/x_elas2_inc_int_elastic_incident',
+          method: 'post',
+          data: { u_short_description: 'title', u_description: 'desc', foo: 'test' },
+        });
+      });
     });
 
     // old connectors
@@ -754,6 +781,18 @@ describe('ServiceNow service', () => {
         });
 
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
+      });
+
+      test('it should throw if tries to update an incident with additional_fields', async () => {
+        await expect(
+          service.createIncident({
+            incident: {
+              additional_fields: {},
+            } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"[Action][ServiceNow]: Unable to create incident. Error: ServiceNow additional fields are not supported for deprecated connectors. Reason: unknown: errorResponse was null"`
+        );
       });
     });
   });
@@ -860,6 +899,24 @@ describe('ServiceNow service', () => {
           '[Action][ServiceNow]: Unable to update incident with id 1. Error: An error has occurred while importing the incident Reason: unknown'
         );
       });
+
+      test('it should update an incident with additional fields correctly without prefixing them with u_', async () => {
+        await updateIncident(service, { additional_fields: { foo: 'test' } });
+
+        expect(requestMock).toHaveBeenNthCalledWith(2, {
+          axios,
+          logger,
+          configurationUtilities,
+          url: 'https://example.com/api/now/import/x_elas2_inc_int_elastic_incident',
+          method: 'post',
+          data: {
+            u_short_description: 'title',
+            u_description: 'desc',
+            elastic_incident_id: '1',
+            foo: 'test',
+          },
+        });
+      });
     });
 
     // old connectors
@@ -934,6 +991,19 @@ describe('ServiceNow service', () => {
         });
 
         expect(res.url).toEqual('https://example.com/nav_to.do?uri=sn_si_incident.do?sys_id=1');
+      });
+
+      test('it should throw if tries to update an incident with additional_fields', async () => {
+        await expect(
+          service.updateIncident({
+            incidentId: '1',
+            incident: {
+              additional_fields: {},
+            } as ServiceNowITSMIncident,
+          })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"[Action][ServiceNow]: Unable to update incident with id 1. Error: ServiceNow additional fields are not supported for deprecated connectors. Reason: unknown: errorResponse was null"`
+        );
       });
     });
   });

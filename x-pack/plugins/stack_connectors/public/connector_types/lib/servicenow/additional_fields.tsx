@@ -9,13 +9,14 @@ import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import { ActionVariable } from '@kbn/alerting-types';
+import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 
 interface AdditionalFieldsProps {
   value?: string | null;
   errors?: string[];
   messageVariables?: ActionVariable[];
-  onChange: (value: string) => void;
+  onChange: (value: string | null) => void;
 }
 
 export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
@@ -31,6 +32,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
         paramsProperty={'additional_fields'}
         inputTargetValue={value}
         errors={errors}
+        dataTestSubj="additionalFields"
         label={
           <>
             {i18n.ADDITIONAL_FIELDS}
@@ -45,7 +47,7 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
             />
           </>
         }
-        onDocumentsChange={onChange}
+        onDocumentsChange={(json: string) => onChange(isEmpty(json) ? null : json)}
       />
     </EuiFormRow>
   );
