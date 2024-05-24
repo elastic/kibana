@@ -10,7 +10,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import {
   EuiButtonEmpty,
-  type EuiContextMenuPanelDescriptor,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -18,28 +17,28 @@ import {
   EuiFlyoutHeader,
   EuiForm,
   EuiFormRow,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiTitle,
   EuiFieldSearch,
-  EuiText,
   useEuiTheme,
   type EuiFlyoutProps,
+  EuiListGroup,
+  EuiListGroupItem,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pluginServices } from '../../services/plugin_services';
 import type { DashboardServices } from '../../services/types';
+import type { GroupedAddPanelActions } from './add_panel_action_menu_items';
 
 interface OpenDashboardPanelSelectionFlyoutArgs {
-  getPanels: (closePopover: () => void) => EuiContextMenuPanelDescriptor[];
-  flyoutPanelPaddingSize?: EuiFlyoutProps['paddingSize'];
+  getPanels: (closePopover: () => void) => GroupedAddPanelActions[];
+  flyoutPanelPaddingSize?: Exclude<EuiFlyoutProps['paddingSize'], 'none'>;
 }
 
 interface Props extends Pick<OpenDashboardPanelSelectionFlyoutArgs, 'getPanels'> {
   /** Handler to close flyout */
   close: () => void;
   /** Padding for flyout  */
-  paddingSize: NonNullable<OpenDashboardPanelSelectionFlyoutArgs['flyoutPanelPaddingSize']>;
+  paddingSize: Exclude<OpenDashboardPanelSelectionFlyoutArgs['flyoutPanelPaddingSize'], undefined>;
 }
 
 export function openDashboardPanelSelectionFlyout({
@@ -129,14 +128,14 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
             </EuiForm>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" css={{ overflowY: 'auto' }}>
+            <EuiFlexGroup direction="column">
               {Object.values(panelsSearchResult).map(({ id, title, items }) => (
                 <React.Fragment key={id}>
                   <EuiFlexItem>
-                    <EuiText size="xs">
-                      <h3>{title}</h3>
-                    </EuiText>
-                    <EuiListGroup>
+                    <EuiTitle size="xxs">
+                      {typeof title === 'string' ? <h3>{title}</h3> : title}
+                    </EuiTitle>
+                    <EuiListGroup size="s" gutterSize="none" maxWidth={false} flush>
                       {items?.map((item, idx) => {
                         return (
                           <EuiListGroupItem
@@ -159,7 +158,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty>
+            <EuiButtonEmpty onClick={close}>
               <FormattedMessage
                 id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
                 defaultMessage="Close"

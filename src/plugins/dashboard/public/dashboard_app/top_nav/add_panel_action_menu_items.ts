@@ -5,10 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
-import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import type { IconType, CommonProps } from '@elastic/eui';
+import React, { type MouseEventHandler, ReactElement } from 'react';
 import { addPanelMenuTrigger } from '../../triggers';
+
+export interface PanelSelectionMenuItem extends Pick<CommonProps, 'data-test-subj'> {
+  id: string;
+  name: string | ReactElement;
+  icon: IconType;
+  onClick: MouseEventHandler;
+  toolTipContent?: string;
+}
+
+export type GroupedAddPanelActions = Pick<PanelSelectionMenuItem, 'id'> & {
+  title: string;
+  items: PanelSelectionMenuItem[];
+};
 
 const onAddPanelActionClick =
   (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
@@ -27,15 +42,11 @@ const onAddPanelActionClick =
     } else action.execute(context);
   };
 
-export type GroupedAddPanelActions = EuiContextMenuPanelDescriptor & {
-  icon?: string;
-};
-
 export const getAddPanelActionMenuItemsGroup = (
   api: PresentationContainer,
   actions: Array<Action<object>> | undefined,
   closePopover: () => void
-): Record<string, GroupedAddPanelActions> => {
+) => {
   const grouped: Record<string, GroupedAddPanelActions> = {};
 
   const context = {
@@ -47,6 +58,7 @@ export const getAddPanelActionMenuItemsGroup = (
     const actionName = item.getDisplayName(context);
 
     return {
+      id: item.id,
       name: actionName,
       icon:
         (typeof item.getIconType === 'function' ? item.getIconType(context) : undefined) ?? 'empty',
@@ -62,18 +74,13 @@ export const getAddPanelActionMenuItemsGroup = (
         if (!grouped[group.id]) {
           grouped[group.id] = {
             id: group.id,
-            icon:
-              (typeof group.getIconType === 'function' ? group.getIconType(context) : undefined) ??
-              'empty',
-            title: group.getDisplayName ? group.getDisplayName(context) : undefined,
+            title: group.getDisplayName ? group.getDisplayName(context) : '',
             items: [],
           };
         }
 
         grouped[group.id]!.items!.push(getMenuItem(item));
       });
-    } else {
-      console.log('ungrouped action:: %o \n', getMenuItem(item));
     }
   });
 
