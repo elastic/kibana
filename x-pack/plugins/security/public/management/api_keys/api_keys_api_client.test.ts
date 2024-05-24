@@ -8,22 +8,9 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 import { APIKeysAPIClient } from './api_keys_api_client';
+import type { QueryApiKeyParams } from './api_keys_api_client';
 
 describe('APIKeysAPIClient', () => {
-  it('getApiKeys() queries correct endpoint', async () => {
-    const httpMock = httpServiceMock.createStartContract();
-
-    const mockResponse = Symbol('mockResponse');
-    httpMock.get.mockResolvedValue(mockResponse);
-
-    const apiClient = new APIKeysAPIClient(httpMock);
-
-    await expect(apiClient.getApiKeys()).resolves.toBe(mockResponse);
-    expect(httpMock.get).toHaveBeenCalledTimes(1);
-    expect(httpMock.get).toHaveBeenCalledWith('/internal/security/api_key');
-    httpMock.get.mockClear();
-  });
-
   it('invalidateApiKeys() queries correct endpoint', async () => {
     const httpMock = httpServiceMock.createStartContract();
 
@@ -86,6 +73,27 @@ describe('APIKeysAPIClient', () => {
     expect(httpMock.put).toHaveBeenCalledTimes(1);
     expect(httpMock.put).toHaveBeenCalledWith('/internal/security/api_key', {
       body: JSON.stringify(mockApiKeyUpdate),
+    });
+  });
+
+  it('queryApiKeys() queries correct endpoint', async () => {
+    const httpMock = httpServiceMock.createStartContract();
+
+    const mockResponse = Symbol('mockResponse');
+    httpMock.post.mockResolvedValue(mockResponse);
+
+    const apiClient = new APIKeysAPIClient(httpMock);
+    const mockQueryParams = {
+      query: {},
+      from: 0,
+      size: 10,
+      sort: { field: 'creation', direction: 'asc' },
+    } as QueryApiKeyParams;
+
+    await expect(apiClient.queryApiKeys(mockQueryParams)).resolves.toBe(mockResponse);
+    expect(httpMock.post).toHaveBeenCalledTimes(1);
+    expect(httpMock.post).toHaveBeenCalledWith('/internal/security/api_key/_query', {
+      body: JSON.stringify(mockQueryParams),
     });
   });
 });

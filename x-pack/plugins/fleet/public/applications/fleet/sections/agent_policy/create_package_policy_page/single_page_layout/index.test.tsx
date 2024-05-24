@@ -144,7 +144,10 @@ describe('when on the package policy create page', () => {
       </Route>
     ));
 
-  function getMockPackageInfo(requiresRoot?: boolean) {
+  function getMockPackageInfo(options?: {
+    requiresRoot?: boolean;
+    dataStreamRequiresRoot?: boolean;
+  }) {
     return {
       data: {
         item: {
@@ -173,6 +176,11 @@ describe('when on the package policy create page', () => {
               dataset: 'nginx.access',
               title: 'Nginx access logs',
               ingest_pipeline: 'default',
+              agent: {
+                privileges: {
+                  root: options?.dataStreamRequiresRoot,
+                },
+              },
               streams: [
                 {
                   input: 'logfile',
@@ -202,7 +210,7 @@ describe('when on the package policy create page', () => {
           status: 'not_installed',
           agent: {
             privileges: {
-              root: requiresRoot,
+              root: options?.requiresRoot,
             },
           },
         },
@@ -300,8 +308,14 @@ describe('when on the package policy create page', () => {
       vars: undefined,
     };
 
+    beforeEach(() => {
+      (sendCreatePackagePolicy as jest.MockedFunction<any>).mockClear();
+    });
+
     test('should show unprivileged warning modal on submit if conditions match', async () => {
-      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getMockPackageInfo(true));
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+        getMockPackageInfo({ requiresRoot: true })
+      );
       await act(async () => {
         render('agent-policy-1');
       });
@@ -338,7 +352,9 @@ describe('when on the package policy create page', () => {
     });
 
     test('should show unprivileged warning and agents modal on submit if conditions match', async () => {
-      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(getMockPackageInfo(true));
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+        getMockPackageInfo({ requiresRoot: true })
+      );
       (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
         data: { results: { total: 1 } },
       });
@@ -365,6 +381,48 @@ describe('when on the package policy create page', () => {
       });
 
       expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+    });
+
+    test('should show unprivileged warning modal with data streams on submit if conditions match', async () => {
+      (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+        getMockPackageInfo({ dataStreamRequiresRoot: true })
+      );
+      await act(async () => {
+        render('agent-policy-1');
+      });
+
+      let saveBtn: HTMLElement;
+
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Save and continue/).closest('button')!;
+        expect(saveBtn).not.toBeDisabled();
+      });
+
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      await waitFor(() => {
+        expect(
+          renderResult.getByText('Unprivileged agents enrolled to the selected policy')
+        ).toBeInTheDocument();
+        expect(renderResult.getByTestId('unprivilegedAgentsCallout').textContent).toContain(
+          'This integration has the following data streams that require Elastic Agents to have root privileges. There is 1 agent running in an unprivileged mode using Agent policy 1. To ensure that all data required by the integration can be collected, re-enroll the agent using an account with root privileges.'
+        );
+        expect(renderResult.getByTestId('unprivilegedAgentsCallout').textContent).toContain(
+          'Nginx access logs'
+        );
+      });
+
+      await waitFor(() => {
+        saveBtn = renderResult.getByText(/Add integration/).closest('button')!;
+      });
+
+      await act(async () => {
+        fireEvent.click(saveBtn);
+      });
+
+      expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalledTimes(1);
     });
 
     test('should create package policy on submit when query param agent policy id is set', async () => {
