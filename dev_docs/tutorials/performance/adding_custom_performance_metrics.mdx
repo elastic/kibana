@@ -198,7 +198,7 @@ The `PerformanceContextProvider` utilizes the [browser's Performance API](https:
 
 1. Upon each page change, a performance marker named `start::pageChange` is set.
 2. Once the `onPageReady` function is called and the browser has finished rendering, another marker named `end::pageReady` is established.
-3. The duration between these two markers is measured in milliseconds and reported as the `eventName: kibana:plugin_render_time`
+3. The duration between these two markers is measured in **milliseconds** and reported as the `eventName: kibana:plugin_render_time`
 4. Report the data using `reportPerformanceMetricEvent` API.
 
 ### Instrument your code to report `kibana:plugin_render_time` metric event
@@ -295,11 +295,23 @@ This event will be indexed with the following structure:
 }
 ```
 
+### Developement environment
+
+The metric will be delivered to the [Telemetry Staging](https://telemetry-v2-staging.elastic.dev/) cluster, alongside with the event's context.
+The data is updated periodically, so you might have to wait up to 30 minutes to see your data in the index.
+
+Once indexed, this metric will appear in `ebt-kibana` index. It is also mapped into an additional index, dedicated to performance metrics `ebt-kibana-browser-performance*`.
+
+[Dashboard](<https://telemetry-v2-staging.elastic.dev/s/apm/app/dashboards#/view/f240fff6-fac9-491b-81d1-ac39006c5c94?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15h,to:now))>)
+
+### Production environment
+
+All users who are opted in to report telemetry will start reporting event based telemetry as well.
+The data is available to be analyzed on the production telemetry cluster.
+
+[Dashboard](<https://stack-telemetry.elastic.dev/s/apm/app/dashboards#/view/f240fff6-fac9-491b-81d1-ac39006c5c94?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15h,to:now))>)
+
 # Analytics Client
 
 Holds the public APIs to report events, enrich the events' context and set up the transport mechanisms. Please checkout package documentation to get more information about
 [Analytics Client](https://github.com/elastic/kibana/blob/main/packages/analytics/README.md).
-
-```
-
-```
