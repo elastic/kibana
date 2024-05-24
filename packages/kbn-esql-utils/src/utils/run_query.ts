@@ -11,6 +11,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLColumn, ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { lastValueFrom } from 'rxjs';
+import { ESQL_LATEST_VERSION } from '../../constants';
 
 export function formatESQLColumns(columns: ESQLColumn[]): DatatableColumn[] {
   return columns.map(({ name, type }) => {
@@ -40,6 +41,7 @@ export async function getESQLQueryColumnsRaw({
         {
           params: {
             query: `${esqlQuery} | limit 0`,
+            version: ESQL_LATEST_VERSION,
           },
         },
         {
@@ -74,6 +76,7 @@ export async function getESQLQueryColumns({
   try {
     const rawColumns = await getESQLQueryColumnsRaw({ esqlQuery, search, signal });
     const columns = formatESQLColumns(rawColumns) ?? [];
+
     return columns;
   } catch (error) {
     throw new Error(
@@ -109,6 +112,7 @@ export async function getESQLResults({
         params: {
           ...(filter ? { filter } : {}),
           query: esqlQuery,
+          version: ESQL_LATEST_VERSION,
           ...(dropNullColumns ? { dropNullColumns: true } : {}),
         },
       },
