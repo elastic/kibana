@@ -6,6 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
+import { ENTITY_DEFAULT_METADATA_LIMIT } from '../../../../common/constants_entities';
 
 export function generateHistoryMetadataAggregations(definition: EntityDefinition) {
   if (!definition.metadata) {
@@ -17,7 +18,7 @@ export function generateHistoryMetadataAggregations(definition: EntityDefinition
       [`entity.metadata.${metadata.destination ?? metadata.source}`]: {
         terms: {
           field: metadata.source,
-          size: metadata.limit ?? 1000,
+          size: metadata.limit ?? ENTITY_DEFAULT_METADATA_LIMIT,
         },
       },
     }),
@@ -45,7 +46,7 @@ export function generateSummaryMetadataAggregations(definition: EntityDefinition
           data: {
             terms: {
               field: metadata.destination ?? metadata.source,
-              size: metadata.limit ?? 1000,
+              size: metadata.limit ?? ENTITY_DEFAULT_METADATA_LIMIT,
             },
           },
         },

@@ -13,4 +13,5 @@ export const ENTITY_HISTORY_TRANSFORM_PREFIX = `entity-history-${ENTITY_VERSION}
 export const ENTITY_SUMMARY_TRANSFORM_PREFIX = `entity-summary-${ENTITY_VERSION}`;
 export const ENTITY_DEFAULT_FREQUENCY = '1m';
 export const ENTITY_DEFAULT_SYNC_DELAY = '60s';
+export const ENTITY_DEFAULT_METADATA_LIMIT = 1000;
 export const ENTITY_API_PREFIX = '/api/entities';
