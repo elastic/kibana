@@ -23,7 +23,7 @@ export async function saveEntityDefinition(
 
   if (response.total === 1) {
     throw new EntityIdConflict(
-      `Entity defintion with [${definition.id}] already exists.`,
+      `Entity definition with [${definition.id}] already exists.`,
       definition
     );
   }

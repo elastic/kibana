@@ -135,6 +135,40 @@ describe('builds navigation tree', () => {
     }
   });
 
+  test('should allow custom onClick handler for links', async () => {
+    const navigateToUrl = jest.fn();
+    const onClick = jest.fn();
+
+    const node: ChromeProjectNavigationNode = {
+      id: 'group1',
+      title: 'Group 1',
+      path: 'group1',
+      defaultIsCollapsed: false,
+      children: [
+        {
+          id: 'item1',
+          title: 'Item 1',
+          href: 'https://foo',
+          path: 'group1.item1',
+          onClick,
+        },
+      ],
+    };
+
+    const { findByTestId } = renderNavigation({
+      navTreeDef: of({
+        body: [node],
+      }),
+      services: { navigateToUrl },
+    });
+
+    const navItem = await findByTestId(/nav-item-group1.item1\s/);
+    navItem.click();
+
+    expect(navigateToUrl).not.toHaveBeenCalled();
+    expect(onClick).toHaveBeenCalledWith(expect.objectContaining({ type: 'click' }));
+  });
+
   test('should not render the group if it does not have children', async () => {
     const navTree: NavigationTreeDefinitionUI = {
       body: [
