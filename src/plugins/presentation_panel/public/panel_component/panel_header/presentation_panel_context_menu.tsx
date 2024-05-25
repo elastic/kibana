@@ -177,7 +177,7 @@ export const PresentationPanelContextMenu = ({
       cancelled = true;
       subscriptions.unsubscribe();
     };
-  }, []);
+  }, [api, quickActionIds]);
 
   useEffect(() => {
     if (!api) return;
@@ -262,6 +262,8 @@ export const PresentationPanelContextMenu = ({
     () => contextMenuActions.some((action) => action.showNotification),
     [contextMenuActions]
   );
+
+  console.log({ quickActions, hoverActionPanels });
 
   const notificationElements = useMemo(() => {
     if (!showNotifications || !api) return [];
@@ -368,6 +370,14 @@ export const PresentationPanelContextMenu = ({
               </>
             ) : (
               <>
+                {/* <EuiIcon
+                  type="grabOmnidirectional"
+                  color="text"
+                  className={`${viewMode === 'edit' ? 'embPanel--dragHandle' : ''}`}
+                  aria-label={i18n.translate('presentationPanel.dragHandle', {
+                    defaultMessage: 'Move panel',
+                  })}
+                /> */}
                 {showNotifications && notificationElements}
                 {showDescription && (
                   <EuiIconTip
@@ -380,8 +390,9 @@ export const PresentationPanelContextMenu = ({
                     type="iInCircle"
                   />
                 )}
-                {hoverActionPanels[0]?.items?.map(
-                  ({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+                {hoverActionPanels[0]?.items
+                  ?.filter(({ isSeparator }) => !isSeparator)
+                  .map(({ icon, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
                     <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
                       <EuiButtonIcon
                         iconType={icon as IconType}
@@ -391,8 +402,7 @@ export const PresentationPanelContextMenu = ({
                         aria-label={name as string}
                       />
                     </EuiToolTip>
-                  )
-                )}
+                  ))}
                 {contextMenuPanels.length && (
                   <EuiPopover
                     repositionOnScroll
