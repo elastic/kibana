@@ -24,3 +24,5 @@ export {
   INTEGRATION_BUILDER_PATH,
   INTEGRATION_ASSISTANT_BASE_PATH,
 } from './constants';
+
+export { ECS_FULL } from './ecs';

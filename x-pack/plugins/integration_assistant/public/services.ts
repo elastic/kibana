@@ -7,7 +7,15 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { EcsMappingApiRequest, EcsMappingApiResponse } from '../common';
+import type {
+  EcsMappingApiRequest,
+  EcsMappingApiResponse,
+  CategorizationApiRequest,
+  CategorizationApiResponse,
+  RelatedApiRequest,
+  RelatedApiResponse,
+  BuildIntegrationApiRequest,
+} from '../common';
 import {
   ECS_GRAPH_PATH,
   CATEGORIZATION_GRAPH_PATH,
@@ -17,40 +25,45 @@ import {
 
 export interface Services {
   runEcsGraph: (req: EcsMappingApiRequest) => Promise<EcsMappingApiResponse | IHttpFetchError>;
-  runCategorizationGraph: () => Promise<string | IHttpFetchError>;
-  runRelatedGraph: () => Promise<string | IHttpFetchError>;
-  runIntegrationBuilder: () => Promise<string | IHttpFetchError>;
+  runCategorizationGraph: (
+    req: CategorizationApiRequest
+  ) => Promise<CategorizationApiResponse | IHttpFetchError>;
+  runRelatedGraph: (req: RelatedApiRequest) => Promise<RelatedApiResponse | IHttpFetchError>;
+  runIntegrationBuilder: (req: BuildIntegrationApiRequest) => Promise<File | IHttpFetchError>;
 }
 
 export function getServices(core: CoreStart): Services {
   return {
-    runEcsGraph: async (req: EcsMappingApiRequest) => {
+    runEcsGraph: async (req: EcsMappingApiRequest): Promise<EcsMappingApiResponse> => {
       try {
-        const response = await core.http.post(ECS_GRAPH_PATH, {});
+        const response = await core.http.post<EcsMappingApiResponse>(ECS_GRAPH_PATH, {
+          body: JSON.stringify({ ...req }),
+        });
+        console.log(response);
         return response;
       } catch (e) {
         return e;
       }
     },
-    runCategorizationGraph: async () => {
+    runCategorizationGraph: async (req: CategorizationApiRequest) => {
       try {
-        const response = await core.http.fetch<{}>(CATEGORIZATION_GRAPH_PATH);
+        const response = await core.http.post(CATEGORIZATION_GRAPH_PATH, {});
         return response;
       } catch (e) {
         return e;
       }
     },
-    runRelatedGraph: async () => {
+    runRelatedGraph: async (req: RelatedApiRequest) => {
       try {
-        const response = await core.http.fetch<{}>(RELATED_GRAPH_PATH);
+        const response = await core.http.post(RELATED_GRAPH_PATH, {});
         return response;
       } catch (e) {
         return e;
       }
     },
-    runIntegrationBuilder: async () => {
+    runIntegrationBuilder: async (req: BuildIntegrationApiRequest) => {
       try {
-        const response = await core.http.fetch<{}>(INTEGRATION_BUILDER_PATH);
+        const response = await core.http.post(INTEGRATION_BUILDER_PATH, {});
         return response;
       } catch (e) {
         return e;

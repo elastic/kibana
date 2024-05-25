@@ -1,7 +1,11 @@
-import { EcsMappingState } from "../types/EcsMapping";
-import { CategorizationState } from "../types/Categorization";
-import { RelatedState } from "../types/Related";
-import { Client } from "@elastic/elasticsearch";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { Client } from '@elastic/elasticsearch';
+import { EcsMappingState, CategorizationState, RelatedState } from '../types';
 
 interface DocTemplate {
   _index: string;
@@ -13,9 +17,9 @@ interface DocTemplate {
 
 function formatSample(sample: string): DocTemplate {
   const docsTemplate: DocTemplate = {
-    _index: "index",
-    _id: "id",
-    _source: { message: "" },
+    _index: 'index',
+    _id: 'id',
+    _source: { message: '' },
   };
   const formatted: DocTemplate = { ...docsTemplate };
   formatted._source.message = sample;
@@ -24,10 +28,10 @@ function formatSample(sample: string): DocTemplate {
 
 function newClient(): Client {
   const client = new Client({
-    node: "https://localhost:9200",
+    node: 'https://localhost:9200',
     auth: {
-      username: "elastic",
-      password: "changeme",
+      username: 'elastic',
+      password: 'changeme',
     },
     tls: {
       rejectUnauthorized: false,
@@ -36,10 +40,7 @@ function newClient(): Client {
   return client;
 }
 
-async function _testPipeline(
-  samples: string[],
-  pipeline: object
-): Promise<[any[], any[]]> {
+async function _testPipeline(samples: string[], pipeline: object): Promise<[any[], any[]]> {
   const docs = samples.map((sample) => formatSample(sample));
   const results: object[] = [];
   const errors: object[] = [];
@@ -63,21 +64,14 @@ async function _testPipeline(
 
 export async function handleValidatePipeline(
   state: EcsMappingState | CategorizationState | RelatedState
-): Promise<
-  | Partial<CategorizationState>
-  | Partial<RelatedState>
-  | Partial<EcsMappingState>
-> {
-  const [errors, results] = await _testPipeline(
-    state.rawSamples,
-    state.currentPipeline
-  );
-  console.log("testing validate pipeline");
-  console.log("errors", errors);
+): Promise<Partial<CategorizationState> | Partial<RelatedState> | Partial<EcsMappingState>> {
+  const [errors, results] = await _testPipeline(state.rawSamples, state.currentPipeline);
+  console.log('testing validate pipeline');
+  console.log('errors', errors);
   //console.log("results", results);
   return {
     errors,
     pipelineResults: results,
-    lastExecutedChain: "validate_pipeline",
+    lastExecutedChain: 'validate_pipeline',
   };
 }

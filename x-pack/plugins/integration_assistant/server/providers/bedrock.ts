@@ -6,6 +6,7 @@
  */
 import { BedrockChat } from '@langchain/community/chat_models/bedrock/web';
 
+// TODO: This function is here temporarily during development, it is supposed to be replaced with the same connector used by Security Assistant.
 export function getModel(): BedrockChat {
   const model = new BedrockChat({
     model: 'anthropic.claude-3-opus-20240229-v1:0',
