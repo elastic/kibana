@@ -455,7 +455,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         let res = await supertest.get(`/api/fleet/agent_policies/${createdPolicy.id}`).expect(200);
-        expect(res.body.item.global_data_tags).to.equal([
+        expect(res.body.item.global_data_tags).to.eql([
           { name: 'testName', value: 'testValue' },
           { name: 'testName2', value: 123 },
         ]);
@@ -465,7 +465,7 @@ export default function (providerContext: FtrProviderContext) {
           expect(input.processors).not.to.equal(undefined);
           expect(input.processors.length).to.equal(1);
           const addFields = input.processors[0].add_fields;
-          expect(addFields).to.equal({
+          expect(addFields).to.eql({
             fields: { testName: 'testValue', testName2: 123 },
             target: '',
           });
@@ -897,7 +897,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(newPolicy.global_data_tags).to.equal([{ name: 'testName', value: 'testValue' }]);
+        expect(newPolicy.global_data_tags).to.eql([{ name: 'testName', value: 'testValue' }]);
       });
     });
 
@@ -1220,7 +1220,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should overwrite data tags if provided with valid input', async () => {
+      it('should overwrite global data tags if provided with valid input', async () => {
         const {
           body: { item: originalPolicy },
         } = await supertest
@@ -1249,7 +1249,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
 
-        expect(updatedPolicy.global_data_tags).to.equal([{ name: 'newTag', value: 'newValue' }]);
+        expect(updatedPolicy.global_data_tags).to.eql([{ name: 'newTag', value: 'newValue' }]);
       });
     });
 
