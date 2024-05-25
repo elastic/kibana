@@ -15,12 +15,3 @@ export interface IntegrationAssistantPluginStart {}
 export interface AppPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
 }
-
-export interface EcsMappingTableItem {
-  sourceField: string;
-  destinationField: string;
-  isEcs: boolean;
-  description: string;
-  id: string;
-  exampleValue: any;
-}

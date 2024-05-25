@@ -10,22 +10,28 @@ import { schema } from '@kbn/config-schema';
 import { CATEGORIZATION_GRAPH_PATH } from '../../common';
 import { CategorizationApiRequest, CategorizationApiResponse } from '../../common/types';
 import { getCategorizationGraph } from '../graphs/categorization';
+import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 
 export function registerCategorizationRoutes(router: IRouter) {
   router.post(
     {
       path: `${CATEGORIZATION_GRAPH_PATH}`,
+      options: {
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
+      },
       validate: {
         body: schema.object({
           packageName: schema.string(),
           dataStreamName: schema.string(),
-          formSamples: schema.arrayOf(schema.string()),
-          ingestPipeline: schema.maybe(schema.any()),
+          rawSamples: schema.arrayOf(schema.string()),
+          currentPipeline: schema.any(),
         }),
       },
     },
     async (_, req, res) => {
-      const { packageName, dataStreamName, formSamples, ingestPipeline } =
+      const { packageName, dataStreamName, rawSamples, currentPipeline } =
         req.body as CategorizationApiRequest;
       const graph = await getCategorizationGraph();
       let results = { results: { docs: {}, pipeline: {} } };
@@ -33,8 +39,8 @@ export function registerCategorizationRoutes(router: IRouter) {
         results = (await graph.invoke({
           packageName,
           dataStreamName,
-          formSamples,
-          ingestPipeline,
+          rawSamples,
+          currentPipeline,
         })) as CategorizationApiResponse;
       } catch (e) {
         // TODO: Better error responses?

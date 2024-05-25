@@ -6,14 +6,20 @@
  */
 
 export type {
-  Pipeline,
   BuildIntegrationApiRequest,
   EcsMappingApiRequest,
   CategorizationApiRequest,
   RelatedApiRequest,
+  CategorizationApiResponse,
+  RelatedApiResponse,
+  EcsMappingApiResponse,
+  Pipeline,
+  ESProcessorItem,
+  ESProcessorOptions,
+  DataStream,
+  Integration,
+  InputTypes,
 } from './types';
-
-export type { CategorizationApiResponse, RelatedApiResponse, EcsMappingApiResponse } from './types';
 
 export {
   PLUGIN_ID,

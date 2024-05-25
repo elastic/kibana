@@ -5,58 +5,90 @@
  * 2.0.
  */
 
-export interface ProcessorObject {
-  on_failure?: ProcessorKey[];
+export interface ESProcessorOptions {
+  on_failure?: ESProcessorItem[];
   ignore_failure?: boolean;
   if?: string;
   tag?: string;
   [key: string]: any;
 }
 
-export interface ProcessorKey {
-  [processorName: string]: ProcessorObject;
+export interface ESProcessorItem {
+  [processorName: string]: ESProcessorOptions;
 }
 
 export interface Pipeline {
   name?: string;
   description?: string;
   version?: number;
-  processors: ProcessorKey[];
-  on_failure?: ProcessorKey[];
+  processors: ESProcessorItem[];
+  on_failure?: ESProcessorItem[];
+}
+
+export enum InputTypes {
+  Cloudwatch = 'aws-cloudwatch',
+  S3 = 'aws-s3',
+  AzureBlobStorage = 'azure-blob-storage',
+  EventHub = 'azure-eventhub',
+  Cloudfoundry = 'cloudfoundry',
+  FileStream = 'filestream',
+  PubSub = 'gcp-pubsub',
+  GoogleCloudStorage = 'gcs',
+  HTTPListener = 'http_endpoint',
+  Journald = 'journald',
+  Kafka = 'kafka',
+  TCP = 'tcp',
+  UDP = 'udp',
+}
+
+export interface DataStream {
+  name: string;
+  title: string;
+  description: string;
+  inputTypes: InputTypes[];
+  rawSamples: string[];
+  pipeline: Pipeline;
+  docs: object[];
+}
+
+export interface Integration {
+  name: string;
+  title: string;
+  description: string;
+  version: string;
+  dataStreams: DataStream[];
+  streamVersion?: string;
+  dockerComposeVersion?: string;
+  initialVersion: string;
+  formatVersion: string;
+  owner: string;
+  minKibanaVersion: string;
 }
 
 // Server Request Schemas
 export interface BuildIntegrationApiRequest {
-  packageName: string;
-  packageTitle: string;
-  packageVersion: string;
-  dataStreamName: string;
-  dataStreamTitle: string;
-  inputTypes: string[];
-  formSamples: string[];
-  ingestPipeline: object;
-  docs: object[];
+  integration: Integration;
 }
 
 export interface EcsMappingApiRequest {
   packageName: string;
   dataStreamName: string;
-  formSamples: string[];
+  rawSamples: string[];
   mapping?: object;
 }
 
 export interface CategorizationApiRequest {
   packageName: string;
   dataStreamName: string;
-  formSamples: string[];
-  ingestPipeline: object;
+  rawSamples: string[];
+  currentPipeline: object;
 }
 
 export interface RelatedApiRequest {
   packageName: string;
   dataStreamName: string;
-  formSamples: string[];
-  ingestPipeline: object;
+  rawSamples: string[];
+  currentPipeline: object;
 }
 
 // Server Response Schemas

@@ -44,7 +44,7 @@ function generateProcessor(
         field: currentPath,
         target_field: ecsField.target,
         formats: ecsField.date_formats,
-        if: currentPath.replace('.', '?.'),
+        if: currentPath.replace(/\./g, '?.'),
       },
     };
   }
@@ -133,7 +133,7 @@ function generateProcessors(ecsMapping: object, samples: object, basePath: strin
   for (const [key, value] of Object.entries(ecsMapping)) {
     const currentPath = basePath ? `${basePath}.${key}` : key;
 
-    if (typeof value === 'object' && value !== null) {
+    if (value !== null && typeof value === 'object' && value?.target !== null) {
       const valueKeys = new Set(Object.keys(value));
       if ([...valueFieldKeys].every((k) => valueKeys.has(k))) {
         const processor = generateProcessor(
@@ -157,7 +157,6 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   const processors = generateProcessors(state.currentMapping, samples);
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors.filter((p: any) => p.convert).map((p: any) => p.convert.field);
-
   const templatesPath = join(__dirname, '../../templates/pipeline');
   const mappedValues = {
     processors,

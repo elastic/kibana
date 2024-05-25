@@ -10,23 +10,29 @@ import { schema } from '@kbn/config-schema';
 import { RELATED_GRAPH_PATH } from '../../common';
 import { RelatedApiRequest, RelatedApiResponse } from '../../common/types';
 import { getRelatedGraph } from '../graphs/related';
+import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 
 export function registerRelatedRoutes(router: IRouter) {
   router.post(
     {
       path: `${RELATED_GRAPH_PATH}`,
+      options: {
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
+      },
       validate: {
         body: schema.object({
           packageName: schema.string(),
           dataStreamName: schema.string(),
-          formSamples: schema.arrayOf(schema.string()),
+          rawSamples: schema.arrayOf(schema.string()),
           // TODO: This is a single nested object of any key or shape, any better schema?
-          ingestPipeline: schema.maybe(schema.any()),
+          currentPipeline: schema.maybe(schema.any()),
         }),
       },
     },
     async (_, req, res) => {
-      const { packageName, dataStreamName, formSamples, ingestPipeline } =
+      const { packageName, dataStreamName, rawSamples, currentPipeline } =
         req.body as RelatedApiRequest;
       const graph = await getRelatedGraph();
       let results = { results: { docs: {}, pipeline: {} } };
@@ -34,8 +40,8 @@ export function registerRelatedRoutes(router: IRouter) {
         results = (await graph.invoke({
           packageName,
           dataStreamName,
-          formSamples,
-          ingestPipeline,
+          rawSamples,
+          currentPipeline,
         })) as RelatedApiResponse;
       } catch (e) {
         // TODO: Better error responses?

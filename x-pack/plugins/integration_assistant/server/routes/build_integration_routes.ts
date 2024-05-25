@@ -9,6 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { INTEGRATION_BUILDER_PATH } from '../../common';
 
+// TODO: Currently not implemented
 export function registerIntegrationBuilderRoutes(router: IRouter) {
   router.post(
     {
@@ -20,14 +21,15 @@ export function registerIntegrationBuilderRoutes(router: IRouter) {
           dataStreamName: schema.string(),
           dataStreamTitle: schema.string(),
           inputTypes: schema.arrayOf(schema.string()),
-          formSamples: schema.arrayOf(schema.string()),
+          rawSamples: schema.arrayOf(schema.string()),
           ingestPipeline: schema.any(),
           docs: schema.arrayOf(schema.any()),
         }),
       },
     },
     async (_, req, res) => {
-      return res.ok();
+      // TODO: Switch out if/when implemented
+      return res.custom({ statusCode: 501 });
     }
   );
 }

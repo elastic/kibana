@@ -10,24 +10,29 @@ import { schema } from '@kbn/config-schema';
 import { ECS_GRAPH_PATH } from '../../common';
 import { EcsMappingApiRequest, EcsMappingApiResponse } from '../../common/types';
 import { getEcsGraph } from '../graphs/ecs';
+import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 
 export function registerEcsRoutes(router: IRouter) {
   router.post(
     {
       path: `${ECS_GRAPH_PATH}`,
+      options: {
+        timeout: {
+          idleSocket: ROUTE_HANDLER_TIMEOUT,
+        },
+      },
       validate: {
         body: schema.object({
           packageName: schema.string(),
           dataStreamName: schema.string(),
-          formSamples: schema.arrayOf(schema.string()),
+          rawSamples: schema.arrayOf(schema.string()),
           // TODO: This is a single nested object of any key or shape, any better schema?
           mapping: schema.maybe(schema.any()),
         }),
       },
     },
     async (_, req, res) => {
-      const { packageName, dataStreamName, formSamples, mapping } =
-        req.body as EcsMappingApiRequest;
+      const { packageName, dataStreamName, rawSamples, mapping } = req.body as EcsMappingApiRequest;
       const graph = await getEcsGraph();
       let results = { results: { mapping: {}, pipeline: {} } };
       try {
@@ -35,14 +40,14 @@ export function registerEcsRoutes(router: IRouter) {
           results = (await graph.invoke({
             packageName,
             dataStreamName,
-            formSamples,
+            rawSamples,
             mapping,
           })) as EcsMappingApiResponse;
         } else
           results = (await graph.invoke({
             packageName,
             dataStreamName,
-            formSamples,
+            rawSamples,
           })) as EcsMappingApiResponse;
       } catch (e) {
         // TODO: Better error responses?

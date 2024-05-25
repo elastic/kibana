@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { modifySamples, mergeSamples } from '../../util/samples';
@@ -113,7 +114,6 @@ function modelOutput(state: EcsMappingState): Partial<EcsMappingState> {
 
 function inputRouter(state: EcsMappingState): string {
   if (Object.keys(state.currentMapping).length === 0) {
-    console.log('No current mapping found');
     return 'ecsMapping';
   }
   return 'modelOutput';

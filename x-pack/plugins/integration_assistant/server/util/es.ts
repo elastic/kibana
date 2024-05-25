@@ -28,7 +28,7 @@ function formatSample(sample: string): DocTemplate {
 
 function newClient(): Client {
   const client = new Client({
-    node: 'https://localhost:9200',
+    node: 'http://localhost:9200',
     auth: {
       username: 'elastic',
       password: 'changeme',
@@ -40,7 +40,7 @@ function newClient(): Client {
   return client;
 }
 
-async function _testPipeline(samples: string[], pipeline: object): Promise<[any[], any[]]> {
+async function testPipeline(samples: string[], pipeline: object): Promise<[any[], any[]]> {
   const docs = samples.map((sample) => formatSample(sample));
   const results: object[] = [];
   const errors: object[] = [];
@@ -65,7 +65,7 @@ async function _testPipeline(samples: string[], pipeline: object): Promise<[any[
 export async function handleValidatePipeline(
   state: EcsMappingState | CategorizationState | RelatedState
 ): Promise<Partial<CategorizationState> | Partial<RelatedState> | Partial<EcsMappingState>> {
-  const [errors, results] = await _testPipeline(state.rawSamples, state.currentPipeline);
+  const [errors, results] = await testPipeline(state.rawSamples, state.currentPipeline);
   console.log('testing validate pipeline');
   console.log('errors', errors);
   //console.log("results", results);

@@ -19,6 +19,7 @@ export function getModel(): BedrockChat {
     },
     modelKwargs: {
       top_k: 200,
+      temperature: 0.05,
       top_p: 0.4,
       stop_sequences: ['Human:'],
     },

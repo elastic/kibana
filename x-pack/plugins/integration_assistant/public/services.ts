@@ -39,31 +39,41 @@ export function getServices(core: CoreStart): Services {
         const response = await core.http.post<EcsMappingApiResponse>(ECS_GRAPH_PATH, {
           body: JSON.stringify({ ...req }),
         });
-        console.log(response);
         return response;
       } catch (e) {
         return e;
       }
     },
-    runCategorizationGraph: async (req: CategorizationApiRequest) => {
+    runCategorizationGraph: async (
+      req: CategorizationApiRequest
+    ): Promise<CategorizationApiResponse> => {
       try {
-        const response = await core.http.post(CATEGORIZATION_GRAPH_PATH, {});
+        const response = await core.http.post<CategorizationApiResponse>(
+          CATEGORIZATION_GRAPH_PATH,
+          {
+            body: JSON.stringify({ ...req }),
+          }
+        );
         return response;
       } catch (e) {
         return e;
       }
     },
-    runRelatedGraph: async (req: RelatedApiRequest) => {
+    runRelatedGraph: async (req: RelatedApiRequest): Promise<RelatedApiResponse> => {
       try {
-        const response = await core.http.post(RELATED_GRAPH_PATH, {});
+        const response = await core.http.post<RelatedApiResponse>(RELATED_GRAPH_PATH, {
+          body: JSON.stringify({ ...req }),
+        });
         return response;
       } catch (e) {
         return e;
       }
     },
-    runIntegrationBuilder: async (req: BuildIntegrationApiRequest) => {
+    runIntegrationBuilder: async (req: BuildIntegrationApiRequest): Promise<File> => {
       try {
-        const response = await core.http.post(INTEGRATION_BUILDER_PATH, {});
+        const response = await core.http.post<File>(INTEGRATION_BUILDER_PATH, {
+          body: JSON.stringify({ ...req }),
+        });
         return response;
       } catch (e) {
         return e;

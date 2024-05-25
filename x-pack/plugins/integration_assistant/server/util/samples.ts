@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as yaml from 'js-yaml';
 import { CategorizationState, EcsMappingState, RelatedState } from '../types';
 
 interface SampleObj {
@@ -14,6 +15,12 @@ interface NewObj {
   [key: string]: {
     [key: string]: SampleObj;
   };
+}
+
+interface Field {
+  name: string;
+  type: string;
+  fields?: Field[];
 }
 
 export function modifySamples(state: EcsMappingState | CategorizationState | RelatedState) {
@@ -91,4 +98,109 @@ export function formatSamples(samples: string[]): string {
   }
 
   return JSON.stringify(formattedSamples, null, 2);
+}
+
+function determineType(value: any): string {
+  if (typeof value === 'object' && value !== null) {
+    if (Array.isArray(value)) {
+      return 'group';
+    }
+    return 'group';
+  }
+  if (typeof value === 'string') {
+    return 'keyword';
+  }
+  if (typeof value === 'boolean') {
+    return 'boolean';
+  }
+  if (typeof value === 'number') {
+    return 'long';
+  }
+  return 'keyword'; // Default type for null or other undetermined types
+}
+
+function recursiveParse(obj: any, path: string[]): Field {
+  if (typeof obj === 'object' && obj !== null) {
+    if (Array.isArray(obj)) {
+      // Assume list elements are uniform and use the first element as representative
+      if (obj.length > 0) {
+        return recursiveParse(obj[0], path);
+      }
+      return { name: path[path.length - 1], type: 'group', fields: [] };
+    }
+    const fields: Field[] = [];
+    for (const [key, value] of Object.entries(obj)) {
+      fields.push(recursiveParse(value, path.concat(key)));
+    }
+    return { name: path[path.length - 1], type: 'group', fields };
+  }
+  return { name: path[path.length - 1], type: determineType(obj) };
+}
+
+export function generateFields(mergedDocs: string): string {
+  const ecsTopKeysSet: Set<string> = new Set([
+    '@timestamp',
+    'agent',
+    'as',
+    'base',
+    'client',
+    'cloud',
+    'code_signature',
+    'container',
+    'data_stream',
+    'destination',
+    'device',
+    'dll',
+    'dns',
+    'ecs',
+    'elf',
+    'email',
+    'error',
+    'event',
+    'faas',
+    'file',
+    'geo',
+    'group',
+    'hash',
+    'host',
+    'http',
+    'interface',
+    'labels',
+    'log',
+    'macho',
+    'message',
+    'network',
+    'observer',
+    'orchestrator',
+    'organization',
+    'os',
+    'package',
+    'pe',
+    'process',
+    'registry',
+    'related',
+    'risk',
+    'rule',
+    'server',
+    'service',
+    'source',
+    'tags',
+    'threat',
+    'tls',
+    'tracing',
+    'url',
+    'user',
+    'user_agent',
+    'vlan',
+    'volume',
+    'vulnerability',
+    'x509',
+  ]);
+
+  const doc: SampleObj = JSON.parse(mergedDocs);
+  const fieldsStructure: Field[] = Object.keys(doc)
+    .filter((key) => !ecsTopKeysSet.has(key))
+    .map((key) => recursiveParse(doc[key], [key]));
+
+  return yaml.dump(fieldsStructure, { sortKeys: false });
 }
