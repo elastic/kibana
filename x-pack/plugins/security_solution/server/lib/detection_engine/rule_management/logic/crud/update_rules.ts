@@ -14,6 +14,7 @@ import { transformRuleToAlertAction } from '../../../../../../common/detection_e
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
+import { addEcsToRequiredFields } from '../../utils/utils';
 
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
@@ -38,6 +39,7 @@ export const updateRules = async ({
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
+
   const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
     tags: ruleUpdate.tags ?? [],
@@ -58,7 +60,7 @@ export const updateRules = async ({
       meta: ruleUpdate.meta,
       maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
       relatedIntegrations: ruleUpdate.related_integrations ?? [],
-      requiredFields: existingRule.params.requiredFields,
+      requiredFields: addEcsToRequiredFields(ruleUpdate.required_fields),
       riskScore: ruleUpdate.risk_score,
       riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
       ruleNameOverride: ruleUpdate.rule_name_override,

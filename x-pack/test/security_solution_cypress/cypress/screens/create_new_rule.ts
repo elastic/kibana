@@ -115,6 +115,8 @@ export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
 
+export const EQL_QUERY_VALIDATION_LABEL = '.euiFormLabel-isInvalid';
+
 export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
 
 export const EQL_OPTIONS_POPOVER_TRIGGER = '[data-test-subj="eql-settings-trigger"]';
@@ -127,6 +129,9 @@ export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
 
 export const RELATED_INTEGRATION_COMBO_BOX_INPUT =
   '[data-test-subj="relatedIntegrationComboBox"] [data-test-subj="comboBoxSearchInput"]';
+
+export const REQUIRED_FIELD_COMBO_BOX_INPUT =
+  '[data-test-subj^="requiredFieldNameSelect"] [data-test-subj="comboBoxSearchInput"]';
 
 export const INDICATOR_MATCH_TYPE = '[data-test-subj="threatMatchRuleType"]';
 

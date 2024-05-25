@@ -19,6 +19,7 @@ export type PackagePolicyFormState =
   | 'VALID'
   | 'INVALID'
   | 'CONFIRM'
+  | 'CONFIRM_UNPRIVILEGED'
   | 'LOADING'
   | 'SUBMITTED'
   | 'SUBMITTED_NO_AGENTS'

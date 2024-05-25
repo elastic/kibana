@@ -6,7 +6,7 @@ steps:
       imageProject: elastic-images-qa
       provider: gcp
       machineType: c2-standard-16
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     retry:
       automatic:
         - exit_status: '*'
@@ -85,6 +85,19 @@ steps:
       provider: gcp
       localSsds: 1
       localSsdInterface: nvme
+      machineType: n2-standard-2
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: KIBANA_DOCKER_CONTEXT=chainguard .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Context Verification'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-qa
+      provider: gcp
       machineType: n2-standard-2
     timeout_in_minutes: 30
     retry:

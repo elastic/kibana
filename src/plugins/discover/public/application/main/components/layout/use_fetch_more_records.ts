@@ -9,13 +9,13 @@
 import { useMemo } from 'react';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
+import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 
 /**
  * Params for the hook
  */
 export interface UseFetchMoreRecordsParams {
-  isTextBasedQuery: boolean;
   stateContainer: DiscoverStateContainer;
 }
 
@@ -30,24 +30,23 @@ export interface UseFetchMoreRecordsResult {
 
 /**
  * Checks if more records can be loaded and returns a handler for it
- * @param isTextBasedQuery
  * @param stateContainer
  */
 export const useFetchMoreRecords = ({
-  isTextBasedQuery,
   stateContainer,
 }: UseFetchMoreRecordsParams): UseFetchMoreRecordsResult => {
   const documents$ = stateContainer.dataState.data$.documents$;
   const totalHits$ = stateContainer.dataState.data$.totalHits$;
   const documentState = useDataState(documents$);
   const totalHitsState = useDataState(totalHits$);
+  const isEsqlMode = useIsEsqlMode();
 
   const rows = documentState.result || [];
   const isMoreDataLoading = documentState.fetchStatus === FetchStatus.LOADING_MORE;
 
   const totalHits = totalHitsState.result || 0;
   const canFetchMoreRecords =
-    !isTextBasedQuery &&
+    !isEsqlMode &&
     rows.length > 0 &&
     totalHits > rows.length &&
     Boolean(rows[rows.length - 1].raw.sort?.length);

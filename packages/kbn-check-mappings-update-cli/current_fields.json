@@ -280,6 +280,11 @@
     "title",
     "version"
   ],
+  "endpoint:unified-user-artifact-manifest": [
+    "artifactIds",
+    "policyId",
+    "semanticVersion"
+  ],
   "endpoint:user-artifact-manifest": [
     "artifacts",
     "schemaVersion"
@@ -597,6 +602,7 @@
     "overrides",
     "package",
     "package.name",
+    "package.requires_root",
     "package.title",
     "package.version",
     "policy_id",

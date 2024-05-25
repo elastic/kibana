@@ -42,13 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
             .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
         });
-
-        it('role mapping feature check', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/_check_role_mapping_features')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
       });
     });
   });

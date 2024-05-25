@@ -11,13 +11,15 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 
 import {
   errorAction,
-  reducerStreamRequestBodySchema,
   updateProgressAction,
   addToEntityAction,
   deleteEntityAction,
   ReducerStreamApiAction,
-} from '../../common/api/reducer_stream';
+} from '../../common/api/reducer_stream/reducer_actions';
+import { reducerStreamRequestBodySchema } from '../../common/api/reducer_stream';
 import { RESPONSE_STREAM_API_ENDPOINT } from '../../common/api';
+
+import { entities, getActions } from './shared';
 
 export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -64,23 +66,7 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
           request.body.flushFix
         );
 
-        const entities = [
-          'kimchy',
-          's1monw',
-          'martijnvg',
-          'jasontedor',
-          'nik9000',
-          'javanna',
-          'rjernst',
-          'jrodewig',
-        ];
-
-        const actions = [...Array(19).fill('add'), 'delete'];
-
-        if (simulateError) {
-          actions.push('throw-error');
-          actions.push('emit-error');
-        }
+        const actions = getActions(simulateError);
 
         let progress = 0;
 
@@ -101,19 +87,28 @@ export const defineReducerStreamRoute = (router: IRouter, logger: Logger) => {
             const randomEntity = entities[Math.floor(Math.random() * entities.length)];
             const randomAction = actions[Math.floor(Math.random() * actions.length)];
 
-            if (randomAction === 'add') {
-              const randomCommits = Math.floor(Math.random() * 100);
-              push(addToEntityAction(randomEntity, randomCommits));
-            } else if (randomAction === 'delete') {
-              push(deleteEntityAction(randomEntity));
-            } else if (randomAction === 'throw-error') {
-              // Throw an error. It should not crash Kibana!
-              // It should be caught and logged to the Kibana server console.
-              throw new Error('There was a (simulated) server side error!');
-            } else if (randomAction === 'emit-error') {
-              // Emit an error as a stream action.
-              push(errorAction('(Simulated) error pushed to the stream'));
-              return;
+            switch (randomAction) {
+              case 'add':
+                const randomCommits = Math.floor(Math.random() * 100);
+                push(addToEntityAction(randomEntity, randomCommits));
+                break;
+
+              case 'delete':
+                push(deleteEntityAction(randomEntity));
+                break;
+
+              case 'throw-error':
+                // Throw an error. It should not crash Kibana!
+                // It should be caught and logged to the Kibana server console.
+                // The stream will just stop but the client will note receive an error!
+                // In practice this pattern should be avoided as it will just end
+                // the stream without an explanation.
+                throw new Error('There was a (simulated) server side error!');
+
+              case 'emit-error':
+                // Emit an error as a stream action.
+                push(errorAction('(Simulated) error pushed to the stream'));
+                return;
             }
 
             void pushStreamUpdate();

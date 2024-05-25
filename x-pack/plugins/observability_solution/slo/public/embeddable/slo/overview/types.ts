@@ -20,6 +20,7 @@ import {
 } from '@kbn/core/public';
 import { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 
 export type OverviewMode = 'single' | 'groups';
 export type GroupBy = 'slo.tags' | 'status' | 'slo.indicator.type';
@@ -77,6 +78,7 @@ export interface SloEmbeddableDeps {
   application: ApplicationStart;
   notifications: NotificationsStart;
   observability: ObservabilityPublicStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   uiActions: UiActionsStart;
 }
 

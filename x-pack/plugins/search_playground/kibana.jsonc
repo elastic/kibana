@@ -21,6 +21,7 @@
     ],
     "optionalPlugins": [
       "cloud",
+      "console",
       "usageCollection",
     ],
     "requiredBundles": [

@@ -13,8 +13,8 @@ const getPreviewDataParamsSchema = t.type({
     t.type({
       indicator: indicatorSchema,
       range: t.type({
-        start: t.number,
-        end: t.number,
+        from: dateType,
+        to: dateType,
       }),
     }),
     t.partial({

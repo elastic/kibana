@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { omit } from 'lodash';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
 import { showOpenSearchPanel } from './show_open_search_panel';
 import { getSharingData, showPublicUrlSwitch } from '../../../../utils/get_sharing_data';
@@ -27,7 +28,7 @@ export const getTopNavLinks = ({
   services,
   state,
   onOpenInspector,
-  isTextBased,
+  isEsqlMode,
   adHocDataViews,
   topNavCustomization,
 }: {
@@ -35,7 +36,7 @@ export const getTopNavLinks = ({
   services: DiscoverServices;
   state: DiscoverStateContainer;
   onOpenInspector: () => void;
-  isTextBased: boolean;
+  isEsqlMode: boolean;
   adHocDataViews: DataView[];
   topNavCustomization: TopNavCustomization | undefined;
 }): TopNavMenuData[] => {
@@ -53,7 +54,7 @@ export const getTopNavLinks = ({
         services,
         stateContainer: state,
         adHocDataViews,
-        isPlainRecord: isTextBased,
+        isEsqlMode,
       });
     },
     testId: 'discoverAlertsButton',
@@ -126,7 +127,7 @@ export const getTopNavLinks = ({
         savedSearch.searchSource,
         state.appState.getState(),
         services,
-        isTextBased
+        isEsqlMode
       );
 
       const { locator, notifications } = services;
@@ -138,7 +139,7 @@ export const getTopNavLinks = ({
 
       // Share -> Get links -> Snapshot
       const params: DiscoverAppLocatorParams = {
-        ...appState,
+        ...omit(appState, 'dataSource'),
         ...(savedSearch.id ? { savedSearchId: savedSearch.id } : {}),
         ...(dataView?.isPersisted()
           ? { dataViewId: dataView?.id }
@@ -182,8 +183,13 @@ export const getTopNavLinks = ({
         shareableUrlLocatorParams: { locator, params },
         objectId: savedSearch.id,
         objectType: 'search',
+        objectTypeMeta: {
+          title: i18n.translate('discover.share.shareModal.title', {
+            defaultMessage: 'Share this search',
+          }),
+        },
         sharingData: {
-          isTextBased,
+          isTextBased: isEsqlMode,
           locatorParams: [{ id: locator.id, params }],
           ...searchSourceSharingData,
           // CSV reports can be generated without a saved search so we provide a fallback title
