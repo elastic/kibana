@@ -27,9 +27,9 @@ export async function createMaintenanceWindow(
   params: CreateMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
   const { data } = params;
-  const { savedObjectsClient, getModificationMetadata, logger } = context;
+  const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
   const { title, duration, rRule, categoryIds, scopedQuery } = data;
-  const esQueryConfig = await getEsQueryConfig(context.uiSettings);
+  const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
     createMaintenanceWindowParamsSchema.validate(params);
