@@ -9,6 +9,7 @@ import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
   ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
+  ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
@@ -51,20 +52,6 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
       'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
   }),
   URL: '/app/enterprise_search/content',
-  LOGO: 'logoEnterpriseSearch',
-  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-};
-
-export const ENTERPRISE_SEARCH_RELEVANCE_PLUGIN = {
-  ID: ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
-  NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.relevance.navTitle', {
-    defaultMessage: 'Relevance',
-  }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.relevance.description', {
-    defaultMessage: 'View for managing inference endpoints.', // TODO: Make sure this content is correct.
-  }),
-  URL: '/app/enterprise_search/relevance',
   LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
@@ -189,6 +176,36 @@ export const VECTOR_SEARCH_PLUGIN = {
   }),
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
   URL: '/app/enterprise_search/vector_search',
+};
+
+export const ENTERPRISE_SEARCH_RELEVANCE_PLUGIN = {
+  ID: ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
+  NAME: SEARCH_PRODUCT_NAME,
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.relevance.navTitle', {
+    defaultMessage: 'Relevance',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.relevance.description', {
+    defaultMessage: 'View for managing inference endpoints.', // TODO: Make sure this content is correct.
+  }),
+  URL: '/app/enterprise_search/relevance',
+  LOGO: 'logoEnterpriseSearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
+};
+
+export const INFERENCE_ENDPOINTS_PLUGIN = {
+  ID: ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
+  NAME: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.productName', {
+    defaultMessage: 'Inference Endpoints',
+  }),
+  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.navTitle', {
+    defaultMessage: 'Inference Endpoints',
+  }),
+  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
+    defaultMessage: 'View for managing inference endpoints.', // TODO: Make sure this content is correct.
+  }),
+  URL: '/app/enterprise_search/relevance/inference_endpoints',
+  LOGO: 'logoEnterpriseSearch',
+  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
 export const LICENSED_SUPPORT_URL = 'https://support.elastic.co';

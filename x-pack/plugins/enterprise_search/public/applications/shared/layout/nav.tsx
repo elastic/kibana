@@ -112,25 +112,6 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       }),
     },
     {
-      id: 'relevance',
-      items: [
-        {
-          id: 'inference_endpoints',
-          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
-            defaultMessage: 'Inference Endpoints',
-          }),
-          ...generateNavLink({
-            shouldNotCreateHref: true,
-            shouldShowActiveForSubroutes: true,
-            to: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
-          }),
-        },
-      ],
-      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
-        defaultMessage: 'Relevance',
-      }),
-    },
-    {
       id: 'build',
       items: [
         {
@@ -167,6 +148,25 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       ],
       name: i18n.translate('xpack.enterpriseSearch.nav.applicationsTitle', {
         defaultMessage: 'Build',
+      }),
+    },
+    {
+      id: 'relevance',
+      items: [
+        {
+          id: 'inference_endpoints',
+          name: i18n.translate('xpack.enterpriseSearch.nav.inferenceEndpointsTitle', {
+            defaultMessage: 'Inference Endpoints',
+          }),
+          ...generateNavLink({
+            shouldNotCreateHref: true,
+            shouldShowActiveForSubroutes: true,
+            to: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
+          }),
+        },
+      ],
+      name: i18n.translate('xpack.enterpriseSearch.nav.relevanceTitle', {
+        defaultMessage: 'Relevance',
       }),
     },
     {
