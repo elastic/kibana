@@ -23,10 +23,6 @@
       "usageCollection",
       "console"
     ],
-    "requiredBundles": [
-      "esUiShared",
-      "kibanaReact"
-    ],
     "extraPublicDirs": [
       "common"
     ]

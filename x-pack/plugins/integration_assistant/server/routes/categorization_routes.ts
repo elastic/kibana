@@ -6,16 +6,42 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { CATEGORZATION_GRAPH_PATH } from '../../common';
+import { schema } from '@kbn/config-schema';
+import { CATEGORIZATION_GRAPH_PATH } from '../../common';
+import { CategorizationApiRequest, CategorizationApiResponse } from '../../common/types';
+import { getCategorizationGraph } from '../graphs/categorization';
 
 export function registerCategorizationRoutes(router: IRouter) {
   router.post(
     {
-      path: `${CATEGORZATION_GRAPH_PATH}`,
-      validate: false,
+      path: `${CATEGORIZATION_GRAPH_PATH}`,
+      validate: {
+        body: schema.object({
+          packageName: schema.string(),
+          dataStreamName: schema.string(),
+          formSamples: schema.arrayOf(schema.string()),
+          ingestPipeline: schema.maybe(schema.any()),
+        }),
+      },
     },
-    async (ctx, req, res) => {
-      return res.ok();
+    async (_, req, res) => {
+      const { packageName, dataStreamName, formSamples, ingestPipeline } =
+        req.body as CategorizationApiRequest;
+      const graph = await getCategorizationGraph();
+      let results = { results: { docs: {}, pipeline: {} } };
+      try {
+        results = (await graph.invoke({
+          packageName,
+          dataStreamName,
+          formSamples,
+          ingestPipeline,
+        })) as CategorizationApiResponse;
+      } catch (e) {
+        // TODO: Better error responses?
+        return e;
+      }
+
+      return res.ok({ body: results });
     }
   );
 }

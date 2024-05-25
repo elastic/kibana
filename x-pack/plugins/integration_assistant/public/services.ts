@@ -7,25 +7,26 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { EcsMappingApiRequest, EcsMappingApiResponse } from '../common';
 import {
   ECS_GRAPH_PATH,
-  CATEGORZATION_GRAPH_PATH,
+  CATEGORIZATION_GRAPH_PATH,
   RELATED_GRAPH_PATH,
   INTEGRATION_BUILDER_PATH,
 } from '../common';
 
 export interface Services {
-  runEcsGraph: () => Promise<number | IHttpFetchError>;
-  runCategorizationGraph: () => Promise<number | IHttpFetchError>;
-  runRelatedGraph: () => Promise<number | IHttpFetchError>;
-  runIntegrationBuilder: () => Promise<number | IHttpFetchError>;
+  runEcsGraph: (req: EcsMappingApiRequest) => Promise<EcsMappingApiResponse | IHttpFetchError>;
+  runCategorizationGraph: () => Promise<string | IHttpFetchError>;
+  runRelatedGraph: () => Promise<string | IHttpFetchError>;
+  runIntegrationBuilder: () => Promise<string | IHttpFetchError>;
 }
 
 export function getServices(core: CoreStart): Services {
   return {
-    runEcsGraph: async () => {
+    runEcsGraph: async (req: EcsMappingApiRequest) => {
       try {
-        const response = await core.http.fetch<{}>(ECS_GRAPH_PATH);
+        const response = await core.http.post(ECS_GRAPH_PATH, {});
         return response;
       } catch (e) {
         return e;
@@ -33,7 +34,7 @@ export function getServices(core: CoreStart): Services {
     },
     runCategorizationGraph: async () => {
       try {
-        const response = await core.http.fetch<{}>(CATEGORZATION_GRAPH_PATH);
+        const response = await core.http.fetch<{}>(CATEGORIZATION_GRAPH_PATH);
         return response;
       } catch (e) {
         return e;

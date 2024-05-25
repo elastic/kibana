@@ -32,23 +32,10 @@ export class IntegrationAssistantPlugin
         };
       },
     });
-    return {
-      runEcsGraph() {
-        return 'test';
-      },
-      runCategorizationGraph() {
-        return 'test';
-      },
-      runRelatedGraph() {
-        return 'test';
-      },
-      runIntegrationBuilder() {
-        return 'test';
-      },
-    };
+    return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart): IntegrationAssistantPluginStart {
     return {};
   }
 

@@ -7,11 +7,10 @@
 
 export type {
   Pipeline,
-  BuildIntegrationAPIRequest,
-  EcsMappingAPIRequest,
-  EcsMappingNewPipelineAPIRequest,
-  CategorizationAPIRequest,
-  RelatedAPIRequest,
+  BuildIntegrationApiRequest,
+  EcsMappingApiRequest,
+  CategorizationApiRequest,
+  RelatedApiRequest,
 } from './types';
 
 export type { CategorizationApiResponse, RelatedApiResponse, EcsMappingApiResponse } from './types';
@@ -20,7 +19,7 @@ export {
   PLUGIN_ID,
   INTEGRATION_ASSISTANT_APP_ROUTE,
   ECS_GRAPH_PATH,
-  CATEGORZATION_GRAPH_PATH,
+  CATEGORIZATION_GRAPH_PATH,
   RELATED_GRAPH_PATH,
   INTEGRATION_BUILDER_PATH,
   INTEGRATION_ASSISTANT_BASE_PATH,

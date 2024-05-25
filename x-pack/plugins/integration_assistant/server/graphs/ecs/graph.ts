@@ -106,7 +106,7 @@ function modelOutput(state: EcsMappingState): Partial<EcsMappingState> {
     lastExecutedChain: 'modelOutput',
     results: {
       mapping: state.currentMapping,
-      current_pipeline: currentPipeline,
+      pipeline: currentPipeline,
     },
   };
 }

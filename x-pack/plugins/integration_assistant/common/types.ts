@@ -5,43 +5,54 @@
  * 2.0.
  */
 
+export interface ProcessorObject {
+  on_failure?: ProcessorKey[];
+  ignore_failure?: boolean;
+  if?: string;
+  tag?: string;
+  [key: string]: any;
+}
+
+export interface ProcessorKey {
+  [processorName: string]: ProcessorObject;
+}
+
 export interface Pipeline {
-  processors: any[];
+  name?: string;
+  description?: string;
+  version?: number;
+  processors: ProcessorKey[];
+  on_failure?: ProcessorKey[];
 }
 
 // Server Request Schemas
-export interface BuildIntegrationAPIRequest {
+export interface BuildIntegrationApiRequest {
   packageName: string;
   packageTitle: string;
   packageVersion: string;
   dataStreamName: string;
+  dataStreamTitle: string;
   inputTypes: string[];
   formSamples: string[];
   ingestPipeline: object;
   docs: object[];
 }
 
-export interface EcsMappingAPIRequest {
+export interface EcsMappingApiRequest {
   packageName: string;
   dataStreamName: string;
   formSamples: string[];
+  mapping?: object;
 }
 
-export interface EcsMappingNewPipelineAPIRequest {
-  packageName: string;
-  dataStreamName: string;
-  formSamples: string[];
-  mapping: object;
-}
-
-export interface CategorizationAPIRequest {
+export interface CategorizationApiRequest {
   packageName: string;
   dataStreamName: string;
   formSamples: string[];
   ingestPipeline: object;
 }
 
-export interface RelatedAPIRequest {
+export interface RelatedApiRequest {
   packageName: string;
   dataStreamName: string;
   formSamples: string[];
@@ -66,6 +77,6 @@ export interface RelatedApiResponse {
 export interface EcsMappingApiResponse {
   results: {
     mapping: object;
-    current_pipeline: object;
+    pipeline: object;
   };
 }

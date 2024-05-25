@@ -1,0 +1,35 @@
+{{#if account_name}}
+account_name: {{account_name}}
+{{/if}}
+{{#if service_account_key}}
+auth.shared_credentials.account_key: {{service_account_key}}
+{{/if}}
+{{#if service_account_uri}}
+auth.connection_string.uri: {{service_account_uri}}
+{{/if}}
+{{#if storage_url}}
+storage_url: {{storage_url}}
+{{/if}}
+{{#if number_of_workers}}
+max_workers: {{number_of_workers}}
+{{/if}}
+{{#if poll}}
+poll: {{poll}}
+{{/if}}
+{{#if poll_interval}}
+poll_interval: {{poll_interval}}
+{{/if}}
+{{#if containers}}
+containers:
+{{containers}}
+{{/if}}
+{{#if file_selectors}}
+file_selectors:
+{{file_selectors}}
+{{/if}}
+{{#if timestamp_epoch}}
+timestamp_epoch: {{timestamp_epoch}}
+{{/if}}
+{{#if expand_event_list_from_field}}
+expand_event_list_from_field: {{expand_event_list_from_field}}
+{{/if}}

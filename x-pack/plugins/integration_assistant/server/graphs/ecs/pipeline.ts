@@ -158,7 +158,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors.filter((p: any) => p.convert).map((p: any) => p.convert.field);
 
-  const templatesPath = join(__dirname, '../../templates');
+  const templatesPath = join(__dirname, '../../templates/pipeline');
   const mappedValues = {
     processors,
     ecs_version: state.ecsVersion,

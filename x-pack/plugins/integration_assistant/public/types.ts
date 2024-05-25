@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-export interface IntegrationAssistantPluginSetup {
-  runEcsGraph: () => string;
-  runRelatedGraph: () => string;
-  runCategorizationGraph: () => string;
-  runIntegrationBuilder: () => string;
-}
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface IntegrationAssistantPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IntegrationAssistantPluginStart {}
 
