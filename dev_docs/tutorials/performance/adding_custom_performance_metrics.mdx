@@ -194,7 +194,7 @@ This metric helps assess the performance of web applications by indicating how q
 
 ### How it works
 
-The `PerformanceContextProvider` utilizes the [browser's Performance API](https://developer.mozilla.org/en-US/docs/Web/API/Performance) to track and analyze the performance of page transitions within the app.
+The `PerformanceContextProvider` utilizes the [browser's User Timing API](https://developer.mozilla.org/en-US/docs/Web/API/Performance_API/User_timing) to track and analyze the performance of page transitions within the app.
 
 1. Upon each page change, a performance marker named `start::pageChange` is set.
 2. Once the `onPageReady` function is called and the browser has finished rendering, another marker named `end::pageReady` is established.
