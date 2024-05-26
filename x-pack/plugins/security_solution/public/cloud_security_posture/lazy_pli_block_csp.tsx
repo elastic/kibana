@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type React from 'react';
+import { memo } from 'react';
 import { useUpsellingComponent } from '../common/hooks/use_upselling';
 
-export const LazyPliBlockCsp = (): React.ComponentType | null => {
-  console.log('C:asdfasdfasdf ');
-  const C = useUpsellingComponent('cloud_security_posture_integration_installation');
-  console.log('C: ', C);
+export const LazyPliBlockCsp = memo(() => {
   return useUpsellingComponent('cloud_security_posture_integration_installation');
-};
+});
+
+LazyPliBlockCsp.displayName = 'LazyPliBlockCsp';

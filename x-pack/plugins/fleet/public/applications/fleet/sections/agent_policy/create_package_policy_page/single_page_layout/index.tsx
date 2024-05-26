@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, Suspense } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -441,12 +441,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  if (activePliBlock) {
-    const C = activePliBlock.Component;
-    console.log('asdf', C);
+  console.log('test', activePliBlock?.Component?._payload?._status);
+  if (
+    activePliBlock?.Component?._payload?._status === '1' &&
+    typeof activePliBlock.Component === 'function'
+  ) {
     return (
       <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
-        <C />
+        <Suspense fallback={null}>
+          <activePliBlock.Component />
+        </Suspense>
       </CreatePackagePolicySinglePageLayout>
     );
   }
