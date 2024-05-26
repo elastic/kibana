@@ -197,7 +197,7 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   extract_binary_content: true,
   name: DEFAULT_PIPELINE_NAME,
   reduce_whitespace: true,
-  run_ml_inference: false,
+  run_ml_inference: true,
 };
 
 export interface DefaultConnectorsPipelineMeta {

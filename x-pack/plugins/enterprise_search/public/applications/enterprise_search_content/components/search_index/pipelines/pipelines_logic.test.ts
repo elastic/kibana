@@ -23,7 +23,7 @@ const DEFAULT_PIPELINE_VALUES = {
   extract_binary_content: true,
   name: 'ent-search-generic-ingestion',
   reduce_whitespace: true,
-  run_ml_inference: false,
+  run_ml_inference: true,
 };
 
 const DEFAULT_VALUES = {
@@ -104,6 +104,7 @@ describe('PipelinesLogic', () => {
       });
       expect(PipelinesLogic.values).toEqual({
         ...DEFAULT_VALUES,
+        canUseMlInferencePipeline: true,
         hasIndexIngestionPipeline: true,
         pipelineName: 'new_pipeline_name',
         pipelineState: { ...DEFAULT_PIPELINE_VALUES, name: 'new_pipeline_name' },
