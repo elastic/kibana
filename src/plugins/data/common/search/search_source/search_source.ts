@@ -808,7 +808,7 @@ export class SearchSource {
     if (filters) {
       const filtersArr = Array.isArray(filters) ? filters : [filters];
       for (const f of filtersArr) {
-        fields = fields.concat(f.meta.field);
+        fields = fields.concat(f.meta.key);
       }
     }
     fields = fields.filter((f) => Boolean(f));

@@ -6,6 +6,7 @@
  */
 
 import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../../common/endpoint/service/response_actions/constants';
 import React from 'react';
 import type { HostInfo } from '../../../../../common/endpoint/types';
 import { HostStatus } from '../../../../../common/endpoint/types';
@@ -60,14 +61,14 @@ describe('Responder offline callout', () => {
       jest.clearAllMocks();
     });
 
-    it.each(['endpoint', 'sentinel_one'] as ResponseActionAgentType[])(
+    it.each(RESPONSE_ACTION_AGENT_TYPE)(
       'should be visible when agent type is %s and host is offline',
       (agentType) => {
         if (agentType === 'endpoint') {
           getEndpointDetails.mockReturnValue({
             data: { ...endpointDetails, host_status: HostStatus.OFFLINE },
           });
-        } else if (agentType === 'sentinel_one') {
+        } else {
           mockHook.mockReturnValue({
             data: {
               '1234': {
@@ -82,14 +83,14 @@ describe('Responder offline callout', () => {
       }
     );
 
-    it.each(['endpoint', 'sentinel_one'] as ResponseActionAgentType[])(
+    it.each(RESPONSE_ACTION_AGENT_TYPE)(
       'should not be visible when agent type is %s and host is online',
       (agentType) => {
         if (agentType === 'endpoint') {
           getEndpointDetails.mockReturnValue({
             data: { ...endpointDetails, host_status: HostStatus.HEALTHY },
           });
-        } else if (agentType === 'sentinel_one') {
+        } else {
           mockHook.mockReturnValue({
             data: {
               '1234': {

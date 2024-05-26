@@ -9,7 +9,6 @@ import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { DeprecationsDetails, DocLinksServiceSetup } from '@kbn/core/server';
-import { checkIlmMigrationStatus } from './check_ilm_migration_status';
 
 function deprecationError(
   title: string,
@@ -83,7 +82,6 @@ function getDetailedErrorMessage(error: any): string {
 }
 
 export const deprecations = {
-  checkIlmMigrationStatus,
   deprecationError,
   getDetailedErrorMessage,
   getErrorStatusCode,
