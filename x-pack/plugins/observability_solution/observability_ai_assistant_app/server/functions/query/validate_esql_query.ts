@@ -8,6 +8,7 @@
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { ESQLSearchReponse } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType, type KBN_FIELD_TYPES } from '@kbn/field-types';
 import { splitIntoCommands } from './correct_common_esql_mistakes';
@@ -56,6 +57,7 @@ export async function validateEsqlQuery({
       path: '_query',
       body: {
         query: performantQuery,
+        version: ESQL_LATEST_VERSION,
       },
     })
     .then((res) => {
