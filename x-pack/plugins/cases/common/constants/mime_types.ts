@@ -8,7 +8,7 @@
 /**
  * These were retrieved from https://www.iana.org/assignments/media-types/media-types.xhtml#image
  */
-const imageMimeTypes = [
+export const imageMimeTypes = [
   'image/aces',
   'image/apng',
   'image/avci',

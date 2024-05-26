@@ -16,6 +16,7 @@ import { FilesUtilityBar } from './files_utility_bar';
 const defaultProps = {
   caseId: 'foobar',
   onSearch: jest.fn(),
+  onSearchType: jest.fn(),
 };
 
 describe('FilesUtilityBar', () => {
@@ -31,6 +32,7 @@ describe('FilesUtilityBar', () => {
 
     expect(await screen.findByTestId('cases-files-add')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-files-search')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-files-filter-type')).toBeInTheDocument();
   });
 
   it('search text passed correctly to callback', async () => {
@@ -38,5 +40,21 @@ describe('FilesUtilityBar', () => {
 
     await userEvent.type(screen.getByTestId('cases-files-search'), 'My search{enter}');
     expect(defaultProps.onSearch).toBeCalledWith('My search');
+  });
+
+  it('type filter passed correctly to callback', async () => {
+    appMockRender.render(<FilesUtilityBar {...defaultProps} />);
+
+    const typeFilterButton = screen.getByTestId('cases-files-filter-type');
+
+    userEvent.click(typeFilterButton);
+    expect(typeFilterButton).toBeInTheDocument();
+
+    const typePDF = await screen.findByTestId('cases-files-filter-type-PDF');
+    
+    typePDF.style.pointerEvents = 'auto';
+    userEvent.click(typePDF);
+
+    expect(defaultProps.onSearchType).toHaveBeenCalledWith(['application/pdf']);
   });
 });
