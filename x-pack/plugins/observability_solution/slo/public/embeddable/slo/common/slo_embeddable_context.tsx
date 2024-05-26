@@ -5,8 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import { Router } from '@kbn/shared-ux-router';
-import { createBrowserHistory } from 'history';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -25,19 +23,17 @@ export function SloEmbeddableContext({ deps, children }: SloEmbeddableContextPro
   const { navigation } = deps.observabilityShared;
 
   return (
-    <Router history={createBrowserHistory()}>
-      <EuiThemeProvider darkMode={true}>
-        <KibanaContextProvider services={deps}>
-          <PluginContext.Provider
-            value={{
-              observabilityRuleTypeRegistry,
-              ObservabilityPageTemplate: navigation.PageTemplate,
-            }}
-          >
-            <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-          </PluginContext.Provider>
-        </KibanaContextProvider>
-      </EuiThemeProvider>
-    </Router>
+    <EuiThemeProvider darkMode={true}>
+      <KibanaContextProvider services={deps}>
+        <PluginContext.Provider
+          value={{
+            observabilityRuleTypeRegistry,
+            ObservabilityPageTemplate: navigation.PageTemplate,
+          }}
+        >
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        </PluginContext.Provider>
+      </KibanaContextProvider>
+    </EuiThemeProvider>
   );
 }
