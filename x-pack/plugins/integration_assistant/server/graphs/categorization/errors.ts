@@ -14,7 +14,6 @@ import { Pipeline } from '../../../common';
 export async function handleErrors(state: CategorizationState) {
   const categorizationErrorPrompt = CATEGORIZATION_ERROR_PROMPT;
   const model = getModel();
-  console.log('testing cat error');
 
   const outputParser = new JsonOutputParser();
   const categorizationErrorGraph = categorizationErrorPrompt.pipe(model).pipe(outputParser);

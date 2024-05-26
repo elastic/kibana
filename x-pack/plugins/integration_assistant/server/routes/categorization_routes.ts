@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { CATEGORIZATION_GRAPH_PATH } from '../../common';
-import { CategorizationApiRequest, CategorizationApiResponse } from '../../common/types';
+import type { CategorizationApiRequest, CategorizationApiResponse } from '../../common';
 import { getCategorizationGraph } from '../graphs/categorization';
 import { ROUTE_HANDLER_TIMEOUT } from '../constants';
 

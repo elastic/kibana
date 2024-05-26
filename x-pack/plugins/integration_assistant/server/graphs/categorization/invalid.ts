@@ -15,7 +15,6 @@ import { Pipeline } from '../../../common';
 export async function handleInvalidCategorization(state: CategorizationState) {
   const categorizationInvalidPrompt = CATEGORIZATION_VALIDATION_PROMPT;
   const model = getModel();
-  console.log('testing cat invalid');
 
   const outputParser = new JsonOutputParser();
   const categorizationInvalidGraph = categorizationInvalidPrompt.pipe(model).pipe(outputParser);

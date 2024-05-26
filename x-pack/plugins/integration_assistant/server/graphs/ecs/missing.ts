@@ -12,7 +12,6 @@ import { EcsMappingState } from '../../types';
 export async function handleMissingKeys(state: EcsMappingState) {
   const ecsMissingPrompt = ECS_MISSING_KEYS_PROMPT;
   const model = getModel();
-  console.log('testing ecs missing');
 
   const outputParser = new JsonOutputParser();
   const ecsMissingGraph = ecsMissingPrompt.pipe(model).pipe(outputParser);

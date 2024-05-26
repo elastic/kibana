@@ -8,6 +8,8 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { INTEGRATION_BUILDER_PATH } from '../../common';
+import { buildPackage } from '../integration_builder';
+import type { BuildIntegrationApiRequest } from '../../common';
 
 // TODO: Currently not implemented
 export function registerIntegrationBuilderRoutes(router: IRouter) {
@@ -16,20 +18,53 @@ export function registerIntegrationBuilderRoutes(router: IRouter) {
       path: `${INTEGRATION_BUILDER_PATH}`,
       validate: {
         body: schema.object({
-          packageName: schema.string(),
-          packageTitle: schema.string(),
-          dataStreamName: schema.string(),
-          dataStreamTitle: schema.string(),
-          inputTypes: schema.arrayOf(schema.string()),
-          rawSamples: schema.arrayOf(schema.string()),
-          ingestPipeline: schema.any(),
-          docs: schema.arrayOf(schema.any()),
+          integration: schema.object({
+            name: schema.string(),
+            title: schema.string(),
+            description: schema.string(),
+            version: schema.string(),
+            dataStreams: schema.arrayOf(
+              schema.object({
+                name: schema.string(),
+                title: schema.string(),
+                description: schema.string(),
+                inputTypes: schema.arrayOf(schema.string()),
+                rawSamples: schema.arrayOf(schema.string()),
+                pipeline: schema.object({
+                  name: schema.maybe(schema.string()),
+                  description: schema.maybe(schema.string()),
+                  version: schema.maybe(schema.number()),
+                  processors: schema.arrayOf(
+                    schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }))
+                  ),
+                  on_failure: schema.maybe(
+                    schema.arrayOf(
+                      schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }))
+                    )
+                  ),
+                }),
+                docs: schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+              })
+            ),
+            streamVersion: schema.maybe(schema.string()),
+            dockerComposeVersion: schema.maybe(schema.string()),
+            initialVersion: schema.string(),
+            formatVersion: schema.string(),
+            owner: schema.string(),
+            minKibanaVersion: schema.string(),
+          }),
         }),
       },
     },
+    // TODO: This needs to implement CustomHttpResponseOptions
     async (_, req, res) => {
-      // TODO: Switch out if/when implemented
-      return res.custom({ statusCode: 501 });
+      const { integration } = req.body as BuildIntegrationApiRequest;
+      try {
+        const zippedIntegration = await buildPackage(integration);
+        return res.custom({ statusCode: 200, body: zippedIntegration });
+      } catch (e) {
+        return res.customError({ statusCode: 500, body: e });
+      }
     }
   );
 }

@@ -4,49 +4,44 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as fs from 'fs';
-import * as path from 'path';
+
 import nunjucks from 'nunjucks';
-import { mergeSamples } from '../util/samples';
-import { generateFields } from '../util/samples';
+
+import { generateFields, mergeSamples, asyncCreate } from '../util';
 
 interface Doc {
   [key: string]: any;
 }
 
-function createFieldMapping(
+export async function createFieldMapping(
   packageName: string,
   dataStreamName: string,
   specificDataStreamDir: string,
   docs: Doc[]
-): void {
-  const fieldsTemplatesDir = path.join(__dirname, '../templates/fields');
-
-  const env = nunjucks.configure(fieldsTemplatesDir, { autoescape: true });
-
-  createBaseFields(specificDataStreamDir, packageName, dataStreamName, env);
-  createCustomFields(specificDataStreamDir, docs);
+): Promise<void> {
+  await createBaseFields(specificDataStreamDir, packageName, dataStreamName);
+  await createCustomFields(specificDataStreamDir, docs);
 }
 
-function createBaseFields(
+async function createBaseFields(
   specificDataStreamDir: string,
   packageName: string,
-  dataStreamName: string,
-  env: nunjucks.Environment
-): void {
-  const baseFieldsTemplate = env.getTemplate('base-fields.yml.njk');
+  dataStreamName: string
+): Promise<void> {
   const datasetName = `${packageName}.${dataStreamName}`;
-  const baseFieldsResult = baseFieldsTemplate.render({ module: packageName, dataset: datasetName });
-
-  fs.writeFileSync(`${specificDataStreamDir}/fields/base-fields.yml`, baseFieldsResult, {
-    encoding: 'utf-8',
+  const baseFields = nunjucks.render('base-fields.yml.njk', {
+    module: packageName,
+    dataset: datasetName,
   });
+
+  await asyncCreate(`${specificDataStreamDir}/fields/base-fields.yml`, baseFields);
 }
 
-function createCustomFields(specificDataStreamDir: string, pipelineResults: Doc[]): void {
+async function createCustomFields(
+  specificDataStreamDir: string,
+  pipelineResults: Doc[]
+): Promise<void> {
   const mergedResults = mergeSamples(pipelineResults);
   const fieldKeys = generateFields(mergedResults);
-  fs.writeFileSync(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys, { encoding: 'utf-8' });
+  await asyncCreate(`${specificDataStreamDir}/fields/fields.yml`, fieldKeys);
 }
-
-export { createFieldMapping };

@@ -5,21 +5,19 @@
  * 2.0.
  */
 import { deepCopy } from './util';
-
-interface Pipeline {
-  processors: any[];
-}
+import type { Pipeline } from '../../common';
 
 export function combineProcessors(initialPipeline: Pipeline, processors: any[]): Pipeline {
   // Create a deep copy of the initialPipeline to avoid modifying the original input
   const currentPipeline = deepCopy(initialPipeline);
 
-  // Access and modify the processors list in the copied pipeline
+  // Add the new processors right before the last 2 removeprocessor in the initial pipeline.
+  // This is so all the processors if conditions are not accessing possibly removed fields.
   const currentProcessors = currentPipeline.processors;
   const combinedProcessors = [
-    ...currentProcessors.slice(0, -1),
+    ...currentProcessors.slice(0, -2),
     ...processors,
-    ...currentProcessors.slice(-1),
+    ...currentProcessors.slice(-2),
   ];
   currentPipeline.processors = combinedProcessors;
 

@@ -15,7 +15,6 @@ import { Pipeline } from '../../../common';
 export async function handleReview(state: CategorizationState) {
   const categorizationReviewPrompt = CATEGORIZATION_REVIEW_PROMPT;
   const model = getModel();
-  console.log('testing cat review');
 
   const outputParser = new JsonOutputParser();
   const categorizationReview = categorizationReviewPrompt.pipe(model).pipe(outputParser);

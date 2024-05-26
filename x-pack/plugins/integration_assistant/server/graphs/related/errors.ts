@@ -14,7 +14,6 @@ import { Pipeline } from '../../../common';
 export async function handleErrors(state: RelatedState) {
   const relatedErrorPrompt = RELATED_ERROR_PROMPT;
   const model = getModel();
-  console.log('testing related error');
 
   const outputParser = new JsonOutputParser();
   const relatedErrorGraph = relatedErrorPrompt.pipe(model).pipe(outputParser);

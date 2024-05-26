@@ -124,7 +124,6 @@ function modelOutput(state: CategorizationState): Partial<CategorizationState> {
 
 function validationRouter(state: CategorizationState): string {
   if (Object.keys(state.currentProcessors).length === 0) {
-    console.log('No current processors found');
     return 'categorization';
   }
   return 'validateCategorization';

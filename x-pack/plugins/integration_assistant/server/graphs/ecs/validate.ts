@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ECS_FULL } from '../../../common';
+import { ECS_FULL } from '../../../common/ecs';
 import { EcsMappingState } from '../../types';
 
 const valueFieldKeys = new Set(['target', 'confidence', 'date_formats', 'type']);

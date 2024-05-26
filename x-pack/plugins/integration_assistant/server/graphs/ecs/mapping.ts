@@ -12,7 +12,6 @@ import { EcsMappingState } from '../../types';
 export async function handleEcsMapping(state: EcsMappingState) {
   const ecsMainPrompt = ECS_MAIN_PROMPT;
   const model = getModel();
-  console.log('testing ecs mapping');
 
   const outputParser = new JsonOutputParser();
   const ecsMainGraph = ecsMainPrompt.pipe(model).pipe(outputParser);

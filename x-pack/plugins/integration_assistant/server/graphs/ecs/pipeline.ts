@@ -70,8 +70,7 @@ function getSampleValue(key: string, samples: Record<string, any>): any {
     }
     return value;
   } catch (e) {
-    console.log(e);
-    return null;
+    throw e;
   }
 }
 
@@ -177,8 +176,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     const renderedTemplate = template.render(mappedValues);
     const ingestPipeline = load(renderedTemplate) as IngestPipeline;
     return ingestPipeline;
-  } catch (error) {
-    console.error('Error rendering template:', error);
-    throw error;
+  } catch (e) {
+    throw e;
   }
 }

@@ -14,7 +14,6 @@ import { Pipeline } from '../../../common';
 export async function handleRelated(state: RelatedState) {
   const relatedMainPrompt = RELATED_MAIN_PROMPT;
   const model = getModel();
-  console.log('testing related main');
 
   const outputParser = new JsonOutputParser();
   const relatedMainGraph = relatedMainPrompt.pipe(model).pipe(outputParser);

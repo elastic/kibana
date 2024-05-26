@@ -14,7 +14,6 @@ import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 export async function handleCategorization(state: CategorizationState) {
   const categorizationMainPrompt = CATEGORIZATION_MAIN_PROMPT;
   const model = getModel();
-  console.log('testing cat main');
 
   const outputParser = new JsonOutputParser();
   const categorizationMainGraph = categorizationMainPrompt.pipe(model).pipe(outputParser);

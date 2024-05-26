@@ -14,7 +14,6 @@ import { Pipeline } from '../../../common';
 export async function handleReview(state: RelatedState) {
   const relatedReviewPrompt = RELATED_REVIEW_PROMPT;
   const model = getModel();
-  console.log('testing related review');
 
   const outputParser = new JsonOutputParser();
   const relatedReviewGraph = relatedReviewPrompt.pipe(model).pipe(outputParser);

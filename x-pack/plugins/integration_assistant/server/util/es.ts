@@ -26,6 +26,7 @@ function formatSample(sample: string): DocTemplate {
   return formatted;
 }
 
+// TODO: Replace with real client from route context.
 function newClient(): Client {
   const client = new Client({
     node: 'http://localhost:9200',
@@ -66,9 +67,6 @@ export async function handleValidatePipeline(
   state: EcsMappingState | CategorizationState | RelatedState
 ): Promise<Partial<CategorizationState> | Partial<RelatedState> | Partial<EcsMappingState>> {
   const [errors, results] = await testPipeline(state.rawSamples, state.currentPipeline);
-  console.log('testing validate pipeline');
-  console.log('errors', errors);
-  //console.log("results", results);
   return {
     errors,
     pipelineResults: results,

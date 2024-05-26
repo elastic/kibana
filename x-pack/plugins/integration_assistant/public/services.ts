@@ -29,7 +29,7 @@ export interface Services {
     req: CategorizationApiRequest
   ) => Promise<CategorizationApiResponse | IHttpFetchError>;
   runRelatedGraph: (req: RelatedApiRequest) => Promise<RelatedApiResponse | IHttpFetchError>;
-  runIntegrationBuilder: (req: BuildIntegrationApiRequest) => Promise<File | IHttpFetchError>;
+  runIntegrationBuilder: (req: BuildIntegrationApiRequest) => Promise<Buffer | IHttpFetchError>;
 }
 
 export function getServices(core: CoreStart): Services {
@@ -69,9 +69,9 @@ export function getServices(core: CoreStart): Services {
         return e;
       }
     },
-    runIntegrationBuilder: async (req: BuildIntegrationApiRequest): Promise<File> => {
+    runIntegrationBuilder: async (req: BuildIntegrationApiRequest): Promise<Buffer> => {
       try {
-        const response = await core.http.post<File>(INTEGRATION_BUILDER_PATH, {
+        const response = await core.http.post<Buffer>(INTEGRATION_BUILDER_PATH, {
           body: JSON.stringify({ ...req }),
         });
         return response;

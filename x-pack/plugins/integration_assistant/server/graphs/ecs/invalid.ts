@@ -12,7 +12,6 @@ import { EcsMappingState } from '../../types';
 export async function handleInvalidEcs(state: EcsMappingState) {
   const ecsInvalidEcsPrompt = ECS_INVALID_PROMPT;
   const model = getModel();
-  console.log('testing ecs invalid');
 
   const outputParser = new JsonOutputParser();
   const ecsInvalidEcsGraph = ecsInvalidEcsPrompt.pipe(model).pipe(outputParser);

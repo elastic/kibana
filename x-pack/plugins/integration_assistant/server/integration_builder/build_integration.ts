@@ -5,123 +5,139 @@
  * 2.0.
  */
 
-import { copyFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join as joinPath } from 'path';
 import { tmpdir } from 'os';
 import nunjucks from 'nunjucks';
-import yaml from 'js-yaml';
 import AdmZip from 'adm-zip';
 import { Integration, DataStream } from '../../common';
-import { ensureDir } from '../util/util';
-import { createPackageManifest } from './manifest';
 import { createPackageSystemTests } from './dev_folders';
 import { createDatastream } from './data_stream';
 import { createAgentInput } from './agent';
 import { createFieldMapping } from './fields';
-import { generateUniqueId } from '../util/util';
+import { createPipeline } from './pipeline';
+import { generateUniqueId, asyncEnsureDir, asyncCopy, asyncCreate } from '../util';
 
-export function buildPackage(integration: Integration): File {
+export async function buildPackage(integration: Integration): Promise<Buffer> {
+  const templateDir = joinPath(__dirname, '../templates');
+  const agentTemplates = joinPath(templateDir, 'agent');
+  const manifestTemplates = joinPath(templateDir, 'manifest');
+  const systemTestTemplates = joinPath(templateDir, 'system_tests');
+  // TODO: A bit unsure how we are going to translate this autoescape false or not, needs to be investigated before merging.
+  nunjucks.configure([templateDir, agentTemplates, manifestTemplates, systemTestTemplates], {
+    autoescape: false,
+  });
+
   const tmpDir = joinPath(tmpdir(), `integration-assistant-${generateUniqueId()}`);
-  const packageDir = createDirectories(tmpDir, integration);
+  const packageDir = await createDirectories(tmpDir, integration);
   const dataStreamsDir = joinPath(packageDir, 'data_stream');
 
   for (const dataStream of integration.dataStreams) {
     const dataStreamName = dataStream.name;
     const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
-    createDatastream(integration.name, specificDataStreamDir, dataStream);
-    createAgentInput(specificDataStreamDir, dataStream.inputTypes);
-    createPipeline(specificDataStreamDir, dataStream.pipeline);
-    createFieldMapping(integration.name, dataStreamName, specificDataStreamDir, dataStream.docs);
+    await createDatastream(integration.name, specificDataStreamDir, dataStream);
+    await createAgentInput(specificDataStreamDir, dataStream.inputTypes);
+    await createPipeline(specificDataStreamDir, dataStream.pipeline);
+    await createFieldMapping(
+      integration.name,
+      dataStreamName,
+      specificDataStreamDir,
+      dataStream.docs
+    );
   }
 
-  const packageTempPath = joinPath(
-    tmpDir,
-    tmpPackageDir,
-    `${integration.name}-${integration.initialVersion}`
-  );
-  const zipBuffer = createZipArchive(tmpDir, tmpPackageDir);
+  const tmpPackageDir = joinPath(tmpDir, `${integration.name}-${integration.initialVersion}`);
 
+  const zipBuffer = await createZipArchive(tmpPackageDir);
   return zipBuffer;
 }
 
-function createDirectories(tmpDir: string, integration: Integration) {
-  mkdirSync(tmpDir, { recursive: true });
-
+async function createDirectories(tmpDir: string, integration: Integration): Promise<string> {
   const packageDir = joinPath(tmpDir, `${integration.name}-${integration.initialVersion}`);
-
-  mkdirSync(packageDir, { recursive: true });
-
-  createPackage(packageDir, integration);
-
+  await asyncEnsureDir(tmpDir);
+  await asyncEnsureDir(packageDir);
+  await createPackage(packageDir, integration);
   return packageDir;
 }
 
-function createZipArchive(tmpDir: string, tmpPackageDir: string) {
-  const zip = new AdmZip();
-  const directoryPath = joinPath(tmpDir, tmpPackageDir);
-
-  zip.addLocalFolder(directoryPath);
-
-  return zip.toBuffer();
+async function createPackage(packageDir: string, integration: Integration): Promise<void> {
+  await createReadme(packageDir, integration);
+  await createChangelog(packageDir, integration);
+  await createBuildFile(packageDir);
+  await createPackageManifest(packageDir, integration);
+  await createPackageSystemTests(packageDir, integration);
+  await createDefaultLogo(packageDir);
 }
 
-export function createPackage(packageDir: string, integration: Integration) {
-  createReadme(packageDir, integration);
-  createChangelog(packageDir, integration);
-  createBuildFile(packageDir);
-  createPackageManifest(packageDir, integration);
-  createPackageSystemTests(packageDir, integration);
-  createDefaultLogo(packageDir);
-}
-
-function createDefaultLogo(packageDir: string) {
+async function createDefaultLogo(packageDir: string): Promise<void> {
   const logoDir = joinPath(packageDir, 'img');
-  ensureDir(logoDir);
-
   const imgTemplateDir = joinPath(__dirname, '../templates/img');
-  copyFileSync(joinPath(imgTemplateDir, 'logo.svg'), joinPath(logoDir, 'logo.svg'));
+
+  await asyncEnsureDir(logoDir);
+  await asyncCopy(joinPath(imgTemplateDir, 'logo.svg'), joinPath(logoDir, 'logo.svg'));
 }
 
-function createBuildFile(packageDir: string) {
-  const buildTemplateDir = joinPath(__dirname, '../templates/build');
-
-  nunjucks.configure(buildTemplateDir, { autoescape: true });
-  const buildFile = nunjucks.render('build.yml.j2', { ecs_version: '8.11.0' });
-
+async function createBuildFile(packageDir: string): Promise<void> {
+  const buildFile = nunjucks.render('build.yml.njk', { ecs_version: '8.11.0' });
   const buildDir = joinPath(packageDir, '_dev/build');
-  ensureDir(buildDir);
-  writeFileSync(joinPath(buildDir, 'build.yml'), buildFile, 'utf-8');
+
+  await asyncEnsureDir(buildDir);
+  await asyncCreate(joinPath(buildDir, 'build.yml'), buildFile);
 }
 
-function createChangelog(packageDir: string, integration: Integration): void {
-  const changelogTemplateDir = joinPath(__dirname, '../templates/img');
-  nunjucks.configure(changelogTemplateDir, { autoescape: true });
-
-  const changelogTemplate = nunjucks.render('changelog.yml.j2', {
+async function createChangelog(packageDir: string, integration: Integration): Promise<void> {
+  const changelogTemplate = nunjucks.render('changelog.yml.njk', {
     initial_version: integration.initialVersion,
   });
 
-  writeFileSync(joinPath(packageDir, 'changelog.yml'), changelogTemplate, 'utf-8');
+  await asyncCreate(joinPath(packageDir, 'changelog.yml'), changelogTemplate);
 }
 
-function createReadme(packageDir: string, integration: Integration) {
-  const readmeDir = joinPath(packageDir, '_dev/build/docs/');
-  mkdirSync(readmeDir, { recursive: true });
-
-  const readmeTemplatesDir = joinPath(__dirname, '../templates/readme');
-  nunjucks.configure(readmeTemplatesDir, { autoescape: true });
-
-  const readmeTemplate = nunjucks.render('README.md.j2', {
+async function createReadme(packageDir: string, integration: Integration) {
+  const readmeDirPath = joinPath(packageDir, '_dev/build/docs/');
+  await asyncEnsureDir(readmeDirPath);
+  const readmeTemplate = nunjucks.render('README.md.njk', {
     package_name: integration.name,
     data_streams: integration.dataStreams,
   });
 
-  writeFileSync(joinPath(readmeDir, 'README.md'), readmeTemplate, { encoding: 'utf-8' });
+  await asyncCreate(joinPath(readmeDirPath, 'README.md'), readmeTemplate);
 }
 
-export function createPipeline(specificDataStreamDir: string, pipeline: object) {
-  const filePath = joinPath(specificDataStreamDir, 'elasticsearch/ingest_pipeline/default.yml');
-  const yamlContent = '---\n' + yaml.dump(pipeline, { sortKeys: false });
-  writeFileSync(filePath, yamlContent, 'utf-8');
+async function createZipArchive(tmpPackageDir: string): Promise<Buffer> {
+  const zip = new AdmZip();
+  console.log('Zipping package', tmpPackageDir);
+  zip.addLocalFolder(tmpPackageDir);
+  return zip.toBuffer();
+}
+
+async function createPackageManifest(packageDir: string, integration: Integration): Promise<void> {
+  const uniqueInputs: { [key: string]: { type: string; title: string; description: string } } = {};
+
+  integration.dataStreams.forEach((dataStream: DataStream) => {
+    dataStream.inputTypes.forEach((inputType: string) => {
+      if (!uniqueInputs[inputType]) {
+        uniqueInputs[inputType] = {
+          type: inputType,
+          title: dataStream.title,
+          description: dataStream.description,
+        };
+      }
+    });
+  });
+
+  const uniqueInputsList = Object.values(uniqueInputs);
+
+  const packageManifest = nunjucks.render('package_manifest.yml.njk', {
+    format_version: integration.formatVersion,
+    package_title: integration.title,
+    package_name: integration.name,
+    package_version: integration.initialVersion,
+    package_description: integration.description,
+    package_owner: integration.owner,
+    min_version: integration.minKibanaVersion,
+    inputs: uniqueInputsList,
+  });
+
+  await asyncCreate(joinPath(packageDir, 'manifest.yml'), packageManifest);
 }

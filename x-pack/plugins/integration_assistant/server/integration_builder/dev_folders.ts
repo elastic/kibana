@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { join as joinPath } from 'path';
 import nunjucks from 'nunjucks';
 import { Integration } from '../../common';
-import { ensureDir } from '../util/util';
+import { asyncEnsureDir, asyncCreate } from '../util';
 
-export function createPackageSystemTests(integrationDir: string, integration: Integration) {
-  const systemTestsTemplatesDir = path.join(__dirname, '../templates/system_tests');
-  const systemTestsDockerDir = path.join(integrationDir, '_dev/deploy/docker/');
-  const systemTestsSamplesDir = path.join(systemTestsDockerDir, 'sample_logs');
-  ensureDir(systemTestsSamplesDir);
+export async function createPackageSystemTests(integrationDir: string, integration: Integration) {
+  const systemTestsDockerDir = joinPath(integrationDir, '_dev/deploy/docker/');
+  const systemTestsSamplesDir = joinPath(systemTestsDockerDir, 'sample_logs');
+  await asyncEnsureDir(systemTestsSamplesDir);
 
-  nunjucks.configure(systemTestsTemplatesDir, { autoescape: true });
-
-  const systemTestDockerTemplate = fs.readFileSync(
-    path.join(systemTestsTemplatesDir, 'docker-compose.yml.j2'),
-    'utf-8'
-  );
   const streamVersion = integration.streamVersion || '0.13.0';
   const dockerComposeVersion = integration.dockerComposeVersion || '2.3';
   const dockerServices: string[] = [];
@@ -30,33 +22,29 @@ export function createPackageSystemTests(integrationDir: string, integration: In
     const packageName = integration.name.replace(/_/g, '-');
     const dataStreamName = stream.name.replace(/_/g, '-');
 
-    const systemTestFileName = path.join(
+    const systemTestFileName = joinPath(
       systemTestsSamplesDir,
       `test-${packageName}-${dataStreamName}.log`
     );
     const rawSamplesContent = stream.rawSamples.join('\n');
-    fs.writeFileSync(systemTestFileName, rawSamplesContent, 'utf-8');
+    await asyncCreate(systemTestFileName, rawSamplesContent);
 
     for (const inputType of stream.inputTypes) {
-      const systemTestServiceTemplate = fs.readFileSync(
-        path.join(systemTestsTemplatesDir, `service-${inputType}.j2`),
-        'utf-8'
-      );
       const mappedValues = {
         package_name: packageName,
         data_stream_name: dataStreamName,
         stream_version: streamVersion,
       };
-      const renderedService = nunjucks.renderString(systemTestServiceTemplate, mappedValues);
+      const renderedService = nunjucks.render(`service-${inputType}.njk`, mappedValues);
       dockerServices.push(renderedService);
     }
   }
 
-  const renderedDockerCompose = nunjucks.renderString(systemTestDockerTemplate, {
+  const renderedDockerCompose = nunjucks.render('docker-compose.yml.njk', {
     services: dockerServices.join('\n'),
     docker_compose_version: dockerComposeVersion,
   });
 
-  const dockerComposeFileName = path.join(systemTestsDockerDir, 'docker-compose.yml');
-  fs.writeFileSync(dockerComposeFileName, renderedDockerCompose, 'utf-8');
+  const dockerComposeFileName = joinPath(systemTestsDockerDir, 'docker-compose.yml');
+  await asyncCreate(dockerComposeFileName, renderedDockerCompose);
 }

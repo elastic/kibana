@@ -113,7 +113,6 @@ function modelOutput(state: RelatedState): Partial<RelatedState> {
 
 function inputRouter(state: RelatedState): string {
   if (Object.keys(state.pipelineResults).length === 0) {
-    console.log('No pipeline results found');
     return 'validatePipeline';
   }
   return 'related';

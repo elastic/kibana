@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
+import { join as joinPath } from 'path';
+import { InputTypes } from '../../common';
+import { asyncEnsureDir, asyncCreate, asyncRead } from '../util';
 
-export function createAgentInput(specificDataStreamDir: string, inputTypes: string[]): void {
-  const agentDir = path.join(specificDataStreamDir, 'agent', 'stream');
-  const agentTemplatesDir = path.join(__dirname, '../templates/agent');
-  fs.mkdirSync(agentDir, { recursive: true });
+export async function createAgentInput(
+  specificDataStreamDir: string,
+  inputTypes: InputTypes[]
+): Promise<void> {
+  const agentDir = joinPath(specificDataStreamDir, 'agent', 'stream');
+  const agentTemplatesDir = joinPath(__dirname, '../templates/agent');
+  await asyncEnsureDir(agentDir);
 
   // Load common options that exists for all .yml.hbs files, to be merged with each specific input file
-  const commonFilePath = path.join(agentTemplatesDir, 'common.yml.hbs');
-  const commonFile = fs.readFileSync(commonFilePath, 'utf-8');
+  const commonFilePath = joinPath(agentTemplatesDir, 'common.yml.hbs');
+  const commonFile = await asyncRead(commonFilePath);
 
   for (const inputType of inputTypes) {
-    // TODO: Skip httpjson and cel input types for now, requires new prompts.
-    if (inputType === 'httpjson' || inputType === 'cel') {
-      continue;
-    }
-    const inputTypeFilePath = path.join(agentTemplatesDir, `${inputType}.yml.hbs`);
-    const inputTypeFile = fs.readFileSync(inputTypeFilePath, 'utf-8');
+    const inputTypeFilePath = joinPath(agentTemplatesDir, `${inputType}.yml.hbs`);
+    const inputTypeFile = await asyncRead(inputTypeFilePath);
 
     const combinedContents = `${inputTypeFile}\n${commonFile}`;
 
-    const destinationFilePath = path.join(agentDir, `${inputType}.yml.hbs`);
-    fs.writeFileSync(destinationFilePath, combinedContents, 'utf-8');
+    const destinationFilePath = joinPath(agentDir, `${inputType}.yml.hbs`);
+    await asyncCreate(destinationFilePath, combinedContents);
   }
 }

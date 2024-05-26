@@ -47,7 +47,8 @@ export interface DataStream {
   description: string;
   inputTypes: InputTypes[];
   rawSamples: string[];
-  pipeline: Pipeline;
+  // TODO: figure out why changing this to `Pipeline` makes the frontend test objects complain about types.
+  pipeline: object;
   docs: object[];
 }
 
@@ -59,8 +60,8 @@ export interface Integration {
   dataStreams: DataStream[];
   streamVersion?: string;
   dockerComposeVersion?: string;
-  initialVersion: string;
-  formatVersion: string;
+  initialVersion?: string;
+  formatVersion?: string;
   owner: string;
   minKibanaVersion: string;
 }

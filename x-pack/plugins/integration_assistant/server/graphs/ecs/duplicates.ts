@@ -12,7 +12,6 @@ import { EcsMappingState } from '../../types';
 export async function handleDuplicates(state: EcsMappingState) {
   const ecsDuplicatesPrompt = ECS_DUPLICATES_PROMPT;
   const model = getModel();
-  console.log('testing ecs duplicate');
 
   const outputParser = new JsonOutputParser();
   const ecsDuplicatesGraph = ecsDuplicatesPrompt.pipe(model).pipe(outputParser);
