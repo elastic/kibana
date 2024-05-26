@@ -7,7 +7,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import levenshtein from 'js-levenshtein';
-import type { AstProviderFn, ESQLAst, ESQLCommand, EditorError, ESQLMessage } from '@kbn/esql-ast';
+import type { AstProviderFn, ESQLAst, EditorError, ESQLMessage } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
   getFieldsByTypeHelper,
@@ -23,7 +23,7 @@ import {
 } from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
-import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
+import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX, METADATA_FIELDS } from '../shared/constants';
 import type { CodeAction, Callbacks, CodeActionOptions } from './types';
 import { getAstContext } from '../shared/context';
 import { wrapAsEditorMessage } from './utils';
@@ -59,19 +59,6 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
     const list = (await helper()) || [];
     // hide indexes that start with .
     return list.filter(({ hidden }) => !hidden).map(({ name }) => name);
-  };
-}
-
-export function getMetaFieldsRetriever(
-  queryString: string,
-  commands: ESQLCommand[],
-  callbacks?: ESQLCallbacks
-) {
-  return async () => {
-    if (!callbacks || !callbacks.getMetaFields) {
-      return [];
-    }
-    return await callbacks.getMetaFields();
   };
 }
 
@@ -315,14 +302,18 @@ async function getSpellingActionForMetadata(
   error: EditorError,
   queryString: string,
   ast: ESQLAst,
-  options: CodeActionOptions,
-  { getMetaFields }: Partial<Callbacks>
+  options: CodeActionOptions
 ) {
-  if (!getMetaFields) {
-    return [];
-  }
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
-  const possibleMetafields = await getSpellingPossibilities(getMetaFields, errorText);
+  const allSolutions = METADATA_FIELDS.reduce((solutions, item) => {
+    const distance = levenshtein(item, errorText);
+    if (distance < 3) {
+      solutions.push(item);
+    }
+    return solutions;
+  }, [] as string[]);
+  // filter duplicates
+  const possibleMetafields = Array.from(new Set(allSolutions));
   return wrapIntoSpellingChangeAction(error, possibleMetafields);
 }
 
@@ -409,14 +400,12 @@ export async function getActions(
   const { getFieldsByType } = getFieldsByTypeRetriever(queryForFields, resourceRetriever);
   const getSources = getSourcesRetriever(resourceRetriever);
   const { getPolicies, getPolicyFields } = getPolicyRetriever(resourceRetriever);
-  const getMetaFields = getMetaFieldsRetriever(innerText, ast, resourceRetriever);
 
   const callbacks = {
     getFieldsByType: resourceRetriever?.getFieldsFor ? getFieldsByType : undefined,
     getSources: resourceRetriever?.getSources ? getSources : undefined,
     getPolicies: resourceRetriever?.getPolicies ? getPolicies : undefined,
     getPolicyFields: resourceRetriever?.getPolicies ? getPolicyFields : undefined,
-    getMetaFields: resourceRetriever?.getMetaFields ? getMetaFields : undefined,
   };
 
   // Markers are sent only on hover and are limited to the hovered area
@@ -473,8 +462,7 @@ export async function getActions(
           error,
           innerText,
           ast,
-          options,
-          callbacks
+          options
         );
         actions.push(...metadataSpellChanges);
         break;
