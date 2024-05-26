@@ -9,7 +9,10 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, skipWhile } from 'rxjs';
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { SavedObjectsCollectMultiNamespaceReferencesResponse } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsCollectMultiNamespaceReferencesResponse,
+  SavedObjectsUpdateObjectsSpacesResponse,
+} from '@kbn/core-saved-objects-api-server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 
 import type { GetAllSpacesOptions, GetSpaceResult, Space } from '../../common';
@@ -170,7 +173,7 @@ export class SpacesManager {
     objects: SavedObjectTarget[],
     spacesToAdd: string[],
     spacesToRemove: string[]
-  ): Promise<void> {
+  ): Promise<SavedObjectsUpdateObjectsSpacesResponse> {
     return this.http.post(`/api/spaces/_update_objects_spaces`, {
       body: JSON.stringify({ objects, spacesToAdd, spacesToRemove }),
     });
