@@ -1344,13 +1344,13 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_CONTAINER_ASSET_VIEW_ID",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_ENABLE_CONTAINER_ASSET_VIEW_ID",
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
         "description": [],
         "signature": [
-          "\"observability:enableContainerAssetView\""
+          "\"observability:enableInfrastructureAssetCustomDashboards\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1359,13 +1359,13 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_ASSET_CUSTOM_DASHBOARDS_ID",
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_CONTAINER_ASSET_VIEW_ID",
         "description": [],
         "signature": [
-          "\"observability:enableInfrastructureAssetCustomDashboards\""
+          "\"observability:enableInfrastructureContainerAssetView\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
