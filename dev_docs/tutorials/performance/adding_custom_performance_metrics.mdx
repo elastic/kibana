@@ -190,7 +190,7 @@ The data is available to be analyzed on the production telemetry cluster.
 
 The metric `kibana:plugin_render_time` measures the time from the start of navigation to the point at which the most meaningful component appears on the screen.
 
-This metric helps assess the performance of web applications by indicating how quickly important content is rendered to the users . The definition of the "most meaningful component" varies across different pages, requiring custom instrumentation for each page to accurately measure it.
+This metric evaluates the loading performance of Kibana pages by measuring when the meaningful content becomes visible to users. The definition of meaningful content varies for different pages, necessitating custom instrumentation for each page to accurately measure this time.
 
 ### How it works
 
