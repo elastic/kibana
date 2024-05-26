@@ -144,6 +144,7 @@ export default ({ getService }: FtrProviderContext): void => {
       // create rule with connector/action
       const rule: ReturnType<typeof getSimpleRule> = {
         ...getSimpleRule('rule-1'),
+        interval: '5m',
         throttle: '1h', // <-- throttle makes this a scheduled action
         actions: [action],
       };
@@ -151,7 +152,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // query the single rule from _find
       const { body } = await securitySolutionApi.findRules({ query: {} }).expect(200);
-      const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+      const expectedRule = updateUsername(
+        { ...getSimpleRuleOutput(), interval: '5m' },
+        ELASTICSEARCH_USERNAME
+      );
 
       const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
         ...expectedRule,

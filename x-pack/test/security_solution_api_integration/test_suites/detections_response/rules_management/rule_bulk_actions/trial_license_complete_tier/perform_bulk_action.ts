@@ -1611,7 +1611,10 @@ export default ({ getService }: FtrProviderContext): void => {
         describe('set_rule_actions', () => {
           it('should set action correctly to existing empty actions list', async () => {
             const ruleId = 'ruleId';
-            const createdRule = await createRule(supertest, log, getSimpleRule(ruleId));
+            const createdRule = await createRule(supertest, log, {
+              ...getSimpleRule(ruleId),
+              interval: '5m',
+            });
 
             // create a new connector
             const webHookConnector = await createWebHookConnector();
