@@ -1988,7 +1988,9 @@ describe('registerRouterAfterListening', () => {
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
       isDev: false,
-      versionedRouteResolution: 'oldest',
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
@@ -2023,7 +2025,9 @@ describe('registerRouterAfterListening', () => {
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
       isDev: false,
-      versionedRouteResolution: 'oldest',
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });

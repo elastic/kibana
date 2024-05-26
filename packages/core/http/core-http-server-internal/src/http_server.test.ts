@@ -33,7 +33,10 @@ import { of, Observable, BehaviorSubject } from 'rxjs';
 
 const routerOptions: RouterOptions = {
   isDev: false,
-  versionedRouteResolution: 'oldest',
+  versionedRouterOptions: {
+    defaultHandlerResolutionStrategy: 'oldest',
+    useVersionResolutionStrategyForInternalPaths: [],
+  },
 };
 
 const cookieOptions = {

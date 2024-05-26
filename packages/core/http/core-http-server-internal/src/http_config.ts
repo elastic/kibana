@@ -199,6 +199,12 @@ const configSchema = schema.object(
        * same-build browsers can access the Kibana server.
        */
       strictClientVersionCheck: schema.boolean({ defaultValue: true }),
+
+      /** This should not be configurable in serverless */
+      useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
+        traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
+        serverless: schema.never(),
+      }),
     }),
   },
   {
@@ -275,6 +281,7 @@ export class HttpConfig implements IHttpConfig {
   public versioned: {
     versionResolution: HandlerResolutionStrategy;
     strictClientVersionCheck: boolean;
+    useVersionResolutionStrategyForInternalPaths: string[];
   };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;

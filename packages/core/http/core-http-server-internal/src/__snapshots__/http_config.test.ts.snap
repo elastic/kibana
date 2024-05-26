@@ -127,6 +127,7 @@ Object {
   },
   "versioned": Object {
     "strictClientVersionCheck": true,
+    "useVersionResolutionStrategyForInternalPaths": Array [],
     "versionResolution": "oldest",
   },
   "xsrf": Object {
