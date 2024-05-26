@@ -7,6 +7,7 @@
  */
 
 import { uniq } from 'lodash';
+import { EcsFlat } from '@elastic/ecs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
@@ -156,6 +157,12 @@ export function readFieldCapsResponse(
         timeSeriesMetric: timeSeriesMetricType,
         timeSeriesDimension: capsByType[types[0]].time_series_dimension,
       };
+      if (
+        capsByNameThenType['ecs.version'] &&
+        EcsFlat[fieldName as keyof typeof EcsFlat]?.description
+      ) {
+        field.ecsDescription = EcsFlat[fieldName as keyof typeof EcsFlat].description;
+      }
 
       if (defaultFormatter) {
         field.defaultFormatter = defaultFormatter;
