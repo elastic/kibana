@@ -26,3 +26,7 @@ export { CrowdstrikeLogo };
 
 export { BEDROCK_CONNECTOR_ID } from '../../common/bedrock/constants';
 export { BedrockLogo };
+
+export { getEmailConnectorType } from '../connector_types/email';
+export { getSlackWebhookConnectorType } from '../connector_types/slack';
+export { getIndexConnectorType } from '../connector_types/es_index';

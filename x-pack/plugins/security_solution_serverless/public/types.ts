@@ -14,6 +14,9 @@ import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverle
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DiscoverSetup } from '@kbn/discover-plugin/public';
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+
+import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { ServerlessSecurityConfigSchema } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -31,6 +34,8 @@ export interface SecuritySolutionServerlessPluginSetupDeps {
 }
 
 export interface SecuritySolutionServerlessPluginStartDeps {
+  actions: ActionsPublicPluginSetup;
+  triggersActionsUi: TriggersActionsStart;
   security: SecurityPluginStart;
   securitySolution: SecuritySolutionPluginStart;
   serverless: ServerlessPluginStart;

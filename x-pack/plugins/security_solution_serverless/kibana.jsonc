@@ -7,11 +7,10 @@
     "id": "securitySolutionServerless",
     "server": true,
     "browser": true,
-    "configPath": [
-      "xpack",
-      "securitySolutionServerless",
-    ],
+    "configPath": ["xpack", "securitySolutionServerless"],
     "requiredPlugins": [
+      "stackConnectors",
+      "triggersActionsUi",
       "kibanaReact",
       "management",
       "security",
@@ -23,8 +22,6 @@
       "actions",
       "discover"
     ],
-    "optionalPlugins": [
-      "securitySolutionEss"
-    ],
+    "optionalPlugins": ["securitySolutionEss"]
   }
 }
