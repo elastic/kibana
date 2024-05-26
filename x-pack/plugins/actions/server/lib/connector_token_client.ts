@@ -178,8 +178,8 @@ export class ConnectorTokenClient {
             perPage: MAX_TOKENS_RETURNED,
             type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
             filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
-            sortField: 'updatedAt',
-            sortOrder: 'desc',
+            // sortField: 'updatedAt',
+            // sortOrder: 'desc',
           })
         ).saved_objects
       );
@@ -189,6 +189,7 @@ export class ConnectorTokenClient {
           tokenType ?? 'access_token'
         }". Error: ${err.message}`
       );
+      console.log('Arr', connectorTokensResult);
       return { hasErrors: true, connectorToken: null };
     }
 

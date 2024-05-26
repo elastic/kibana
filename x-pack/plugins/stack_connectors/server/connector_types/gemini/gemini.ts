@@ -7,10 +7,14 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError, Method } from 'axios';
-import { GoogleAuth } from 'google-auth-library';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_access_token';
+import { Logger } from '@kbn/core/server';
+import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
+import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { RunActionParamsSchema, RunApiResponseSchema } from '../../../common/gemini/schema';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
+
 import {
   Config,
   Secrets,
@@ -22,13 +26,21 @@ import { SUB_ACTION, DEFAULT_TIMEOUT_MS } from '../../../common/gemini/constants
 import { DashboardActionParams, DashboardActionResponse } from '../../../common/gemini/types';
 import { DashboardActionParamsSchema } from '../../../common/gemini/schema';
 
+export interface GetAxiosInstanceOpts {
+  connectorId: string;
+  logger: Logger;
+  credentials: string;
+  snServiceUrl: string;
+  connectorTokenClient: ConnectorTokenClientContract;
+  configurationUtilities: ActionsConfigurationUtilities;
+}
+
 export class GeminiConnector extends SubActionConnector<Config, Secrets> {
-  private static token: string | null;
-  private static tokenExpiryTimeout: NodeJS.Timeout;
   private url;
   private model;
   private gcpRegion;
   private gcpProjectID;
+  private connectorTokenClient: ConnectorTokenClientContract;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
@@ -37,6 +49,9 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
     this.model = this.config.defaultModel;
     this.gcpRegion = this.config.gcpRegion;
     this.gcpProjectID = this.config.gcpProjectID;
+    this.logger = this.logger;
+    this.connectorID = this.connector.id;
+    this.connectorTokenClient = params.services.connectorTokenClient;
 
     this.registerSubActions();
   }
@@ -119,35 +134,16 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
   /** Retrieve access token based on the GCP service account credential json file */
   private async getAccessToken(): Promise<string | null> {
-    let credentials;
-
-    // Validate the service account credentials JSON file input
     try {
-      credentials = JSON.parse(this.secrets.credentialsJson);
-    } catch (error) {
-      return `Failed to parse credentials JSON file: Invalid JSON format: ${error.message ?? ''}`;
-    }
-
-    try {
-      const auth = new GoogleAuth({
-        credentials,
-        scopes: 'https://www.googleapis.com/auth/cloud-platform',
+      const accessToken = await getOAuthJwtAccessToken({
+        connectorId: this.connector.id,
+        logger: this.logger,
+        credentials: this.secrets.credentialsJson,
+        connectorTokenClient: this.connectorTokenClient,
       });
-
-      const token = await auth.getAccessToken();
-      if (token) {
-        GeminiConnector.token = token;
-        // Clear any existing timeout
-        clearTimeout(GeminiConnector.tokenExpiryTimeout);
-
-        // Set a timeout to reset the token after 55 minutes (it expires after 60 minutes)
-        GeminiConnector.tokenExpiryTimeout = setTimeout(() => {
-          GeminiConnector.token = null;
-        }, 55 * 60 * 1000);
-      }
-      return token || null;
+      return accessToken || null;
     } catch (error) {
-      return `Failed to get access token ${error.message ?? ''}`;
+      return `Failed to get access token ${error.message}`;
     }
   }
 
@@ -180,23 +176,11 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
       responseSchema: RunApiResponseSchema,
     } as SubActionRequestParams<RunApiResponse>;
 
-    try {
-      if (!GeminiConnector.token) {
-        GeminiConnector.token = (await this.getAccessToken()) as string;
-      }
+    const response = await this.request(requestArgs);
+    const candidate = response.data.candidates[0];
+    const usageMetadata = response.data.usageMetadata;
+    const completionText = candidate.content.parts[0].text;
 
-      const response = await this.request(requestArgs);
-      const candidate = response.data.candidates[0];
-      const usageMetadata = response.data.usageMetadata;
-      const completionText = candidate.content.parts[0].text;
-      return { completion: completionText, usageMetadata };
-    } catch (error) {
-      if (error.code === 401) {
-        GeminiConnector.token = null;
-        return this.runApi({ body, model: reqModel, signal, timeout });
-      }
-
-      return { completion: '' };
-    }
+    return { completion: completionText, usageMetadata };
   }
 }
