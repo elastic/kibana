@@ -58,10 +58,12 @@
  *    `appSearchSource`.
  */
 
+import { setWith } from '@kbn/safer-lodash-set';
 import {
   difference,
   isEqual,
   isFunction,
+  isObject,
   keyBy,
   pick,
   uniqueId,
@@ -78,7 +80,6 @@ import {
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
-  Query,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
@@ -646,12 +647,9 @@ export class SearchSource {
 
     switch (key) {
       case 'filter':
-        return addToRoot(
-          'filters',
-          (typeof data.filters === 'function' ? data.filters() : data.filters || []).concat(val)
-        );
+        return addToRoot('filters', (data.filters || []).concat(val));
       case 'query':
-        return addToRoot(key, (data.query || []).concat(val));
+        return addToRoot(key, (data[key] || []).concat(val));
       case 'fields':
         // This will pass the passed in parameters to the new fields API.
         // Also if will only return scripted fields that are part of the specified
@@ -662,7 +660,7 @@ export class SearchSource {
         return addToBody('fields', val);
       case 'fieldsFromSource':
         // preserves legacy behavior
-        const fields = [...new Set((data.fieldsFromSource || []).concat(val))];
+        const fields = [...new Set((data[key] || []).concat(val))];
         return addToRoot(key, fields);
       case 'index':
       case 'type':
@@ -713,9 +711,8 @@ export class SearchSource {
     return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
-  private readonly getFieldName = (
-    fld: SearchFieldValue | { field: string; format: string }
-  ): string => (typeof fld === 'string' ? fld : (fld.field as string));
+  private readonly getFieldName = (fld: SearchFieldValue): string =>
+    typeof fld === 'string' ? fld : (fld.field as string);
 
   private getFieldsWithoutSourceFilters(
     index: DataView | undefined,
@@ -783,7 +780,7 @@ export class SearchSource {
 
   private flatten() {
     const { getConfig } = this.dependencies;
-    const metaFields = getConfig<string[]>(UI_SETTINGS.META_FIELDS) ?? [];
+    const metaFields = getConfig(UI_SETTINGS.META_FIELDS) ?? [];
 
     const searchRequest = this.mergeProps();
     searchRequest.body = searchRequest.body || {};
@@ -806,8 +803,7 @@ export class SearchSource {
     // get filter if data view specified, otherwise null filter
     const filter = index
       ? this.getFieldFilter({ bodySourceExcludes: _source.excludes, metaFields })
-      : (fields: Array<SearchFieldValue | { field: string; format: string }>) =>
-          fields.map(this.getFieldName);
+      : (fields: any) => fields;
 
     const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
     // apply source filters from index pattern if specified by the user
@@ -868,7 +864,9 @@ export class SearchSource {
 
     // only include unique values
     if (sourceFieldsProvided && !isEqual(remainingFields, fieldsFromSource)) {
-      body._source = { includes: remainingFields };
+      setWith(body, '_source.includes', remainingFields, (nsValue) => {
+        return isObject(nsValue) ? {} : nsValue;
+      });
     }
 
     const builtQuery = this.getBuiltEsQuery({
@@ -898,7 +896,7 @@ export class SearchSource {
         fields,
         docvalueFields: body.docvalue_fields,
         fieldsFromSource,
-        filteredDocvalueFields: filteredDocvalueFields as Array<{ field: string; format: string }>,
+        filteredDocvalueFields,
         metaFields,
         fieldListProvided,
         sourceFieldsProvided,
@@ -918,20 +916,20 @@ export class SearchSource {
     bodySourceExcludes,
     metaFields,
   }: {
-    bodySourceExcludes: string[];
-    metaFields: string[];
+    bodySourceExcludes: any;
+    metaFields: any;
   }) {
     const filter = fieldWildcardFilter(bodySourceExcludes, metaFields);
-    return (fieldsToFilter: Array<SearchFieldValue | { field: string; format: string }>) =>
-      fieldsToFilter.filter((fld) => filter(this.getFieldName(fld)));
+    return (fieldsToFilter: any) =>
+      fieldsToFilter.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
   }
 
   private getUniqueFieldNames({
     fields,
     fieldsFromSource,
   }: {
-    fields: SearchFieldValue[];
-    fieldsFromSource: SearchFieldValue[];
+    fields: any;
+    fieldsFromSource: any;
   }) {
     const bodyFieldNames = fields.map((field: SearchFieldValue) => this.getFieldName(field));
     return [...new Set([...bodyFieldNames, ...fieldsFromSource])];
@@ -941,8 +939,8 @@ export class SearchSource {
     uniqFieldNames,
     scriptFields,
   }: {
-    uniqFieldNames: SearchFieldValue[];
-    scriptFields: Record<string, estypes.ScriptField>;
+    uniqFieldNames: any;
+    scriptFields: any;
   }) {
     return uniqFieldNames.includes('*')
       ? scriptFields
@@ -953,7 +951,19 @@ export class SearchSource {
         );
   }
 
-  private getBuiltEsQuery({ index, query = [], filters = [], getConfig, sort }: SearchRequest) {
+  private getBuiltEsQuery({
+    index,
+    query,
+    filters,
+    getConfig,
+    sort,
+  }: {
+    index: any;
+    query: any;
+    filters: any;
+    getConfig: (key: string) => any;
+    sort?: any;
+  }) {
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const filtersInMustClause = (sort ?? []).some((srt: EsQuerySortValue[]) =>
       srt.hasOwnProperty('_score')
@@ -962,12 +972,7 @@ export class SearchSource {
       ...getEsQueryConfig({ get: getConfig }),
       filtersInMustClause,
     };
-    return buildEsQuery(
-      index,
-      query,
-      typeof filters === 'function' ? filters() : filters,
-      esQueryConfigs
-    );
+    return buildEsQuery(index, query, filters, esQueryConfigs);
   }
 
   private getRemainingFields({
@@ -976,10 +981,10 @@ export class SearchSource {
     runtimeFields,
     _source,
   }: {
-    uniqFieldNames: SearchFieldValue[];
-    scriptFields: SearchFieldValue[];
-    runtimeFields: estypes.MappingRuntimeFields;
-    _source: { includes?: string[]; excludes?: string[] };
+    uniqFieldNames: any;
+    scriptFields: any;
+    runtimeFields: any;
+    _source: any;
   }) {
     return difference(uniqFieldNames, [
       ...Object.keys(scriptFields),
@@ -987,7 +992,7 @@ export class SearchSource {
     ]).filter((remainingField) => {
       if (!remainingField) return false;
       if (!_source || !_source.excludes) return true;
-      return !_source.excludes.includes(this.getFieldName(remainingField));
+      return !_source.excludes.includes(remainingField);
     });
   }
 
@@ -1002,11 +1007,11 @@ export class SearchSource {
     sourceFieldsProvided,
   }: {
     index?: DataView;
-    fields: SearchFieldValue[];
-    docvalueFields: Array<{ field: string; format: string }>;
-    fieldsFromSource: SearchFieldValue[];
-    filteredDocvalueFields: Array<{ field: string; format: string }>;
-    metaFields: string[];
+    fields: any;
+    docvalueFields: any;
+    fieldsFromSource: any;
+    filteredDocvalueFields: any;
+    metaFields: string;
     fieldListProvided: boolean;
     sourceFieldsProvided: boolean;
   }) {
@@ -1046,9 +1051,9 @@ export class SearchSource {
     filteredDocvalueFields,
   }: {
     index?: DataView;
-    fields: SearchFieldValue[];
-    metaFields: string[];
-    filteredDocvalueFields: Array<{ field: string; format: string }>;
+    fields: any;
+    metaFields: string;
+    filteredDocvalueFields: any;
   }) {
     const bodyFields = this.getFieldsWithoutSourceFilters(index, fields);
     // if items that are in the docvalueFields are provided, we should
@@ -1173,7 +1178,7 @@ export class SearchSource {
 
     const ast = buildExpression([
       buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
-        q: query?.map((q) => queryToAst(q as Query)),
+        q: query?.map(queryToAst),
         filters: filters && filtersToAst(filters),
       }),
     ]).toAst();
@@ -1199,7 +1204,6 @@ export class SearchSource {
         buildExpressionFunction<EsdslExpressionFunctionDefinition>('esdsl', {
           size: body?.size,
           dsl: JSON.stringify({}),
-          // @ts-ignore
           index: index?.id,
         }).toAst()
       );
