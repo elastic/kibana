@@ -47,7 +47,7 @@ function normalize(
     !indexPattern.getRuntimeField(sortField)
   ) {
     const indexField = indexPattern.getScriptedField(sortField);
-    if (indexField && indexField.scripted) {
+    if (indexField && indexField.scripted && indexField.type !== 'date') {
       return {
         _script: {
           script: {
