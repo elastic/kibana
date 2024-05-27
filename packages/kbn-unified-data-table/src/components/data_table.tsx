@@ -375,6 +375,9 @@ export interface UnifiedDataTableProps {
    * Optional extra props passed to the renderCellValue function/component.
    */
   cellContext?: EuiDataGridProps['cellContext'];
+
+  /* Optional props passed to Columns to display Provided Labels as Column name instead of field name */
+  columnHeaders?: Record<string, string>;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -443,6 +446,7 @@ export const UnifiedDataTable = ({
   customControlColumnsConfiguration,
   enableComparisonMode,
   cellContext,
+  columnHeaders,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -452,6 +456,7 @@ export const UnifiedDataTable = ({
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
+
   const defaultColumns = displayedColumns.includes('_source');
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
@@ -746,27 +751,29 @@ export const UnifiedDataTable = ({
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
+        columnHeaders,
       }),
     [
-      columnsMeta,
-      columnsCellActions,
-      customGridColumnsConfiguration,
-      dataView,
-      dataViewFieldEditor,
-      defaultColumns,
-      displayedRows.length,
-      editField,
-      headerRowHeightLines,
-      isPlainRecord,
-      isSortEnabled,
-      onFilter,
-      settings,
-      showColumnTokens,
-      toastNotifications,
-      uiSettings,
-      valueToStringConverter,
-      visibleCellActions,
       visibleColumns,
+      columnsCellActions,
+      displayedRows.length,
+      settings,
+      dataView,
+      defaultColumns,
+      isSortEnabled,
+      isPlainRecord,
+      uiSettings,
+      toastNotifications,
+      valueToStringConverter,
+      onFilter,
+      editField,
+      visibleCellActions,
+      columnsMeta,
+      showColumnTokens,
+      headerRowHeightLines,
+      customGridColumnsConfiguration,
+      columnHeaders,
+      dataViewFieldEditor.userPermissions,
     ]
   );
 

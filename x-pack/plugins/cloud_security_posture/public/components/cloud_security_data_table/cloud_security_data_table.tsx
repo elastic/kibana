@@ -77,6 +77,8 @@ export interface CloudSecurityDataTableProps {
    * Height override for the data grid.
    */
   height?: number | string;
+  /* Optional props passed to Columns to display Provided Labels as Column name instead of field name */
+  columnHeaders?: Record<string, string>;
 }
 
 export const CloudSecurityDataTable = ({
@@ -91,6 +93,7 @@ export const CloudSecurityDataTable = ({
   customCellRenderer,
   groupSelectorComponent,
   height,
+  columnHeaders,
   ...rest
 }: CloudSecurityDataTableProps) => {
   const {
@@ -285,6 +288,7 @@ export const CloudSecurityDataTable = ({
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
           onFieldEdited={dataViewRefetch}
+          columnHeaders={columnHeaders}
         />
       </div>
     </CellActionsProvider>

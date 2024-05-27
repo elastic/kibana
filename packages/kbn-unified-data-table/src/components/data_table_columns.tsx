@@ -97,6 +97,7 @@ function buildEuiGridColumn({
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
+  columnHeaders,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -117,6 +118,7 @@ function buildEuiGridColumn({
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  columnHeaders?: Record<string, string>;
 }) {
   const dataViewField = !isPlainRecord
     ? dataView.getFieldByName(columnName)
@@ -133,12 +135,15 @@ function buildEuiGridColumn({
     editField &&
     dataViewField &&
     buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
-  const columnDisplayName =
+
+  const columnNameWithoutLabel =
     columnName === '_source'
       ? i18n.translate('unifiedDataTable.grid.documentHeader', {
           defaultMessage: 'Document',
         })
       : dataViewField?.displayName || columnName;
+
+  const columnDisplayName = columnHeaders ? columnHeaders[columnName] : columnNameWithoutLabel;
 
   let cellActions: EuiDataGridColumnCellAction[];
 
@@ -212,6 +217,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         dataViewField={dataViewField}
         headerRowHeight={headerRowHeight}
+        columnLabel={columnHeaders[columnName]}
       />
     );
     if (numberOfColumns > 1) {
@@ -258,6 +264,7 @@ export function getEuiGridColumns({
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
+  columnHeaders,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -280,6 +287,7 @@ export function getEuiGridColumns({
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  columnHeaders?: Record<string, string>;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -306,6 +314,7 @@ export function getEuiGridColumns({
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
+      columnHeaders,
     })
   );
 }
