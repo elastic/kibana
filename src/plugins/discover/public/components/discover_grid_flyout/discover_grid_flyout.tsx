@@ -163,22 +163,19 @@ export function DiscoverGridFlyout({
     [onRemoveColumn, services.toastNotifications]
   );
 
-  const baseGetDocViewsRegistry = useCallback(
-    (registry: DocViewsRegistry) => {
-      return typeof flyoutCustomization?.docViewsRegistry === 'function'
-        ? flyoutCustomization.docViewsRegistry(registry)
-        : registry;
-    },
-    [flyoutCustomization]
-  );
-
-  const getDocViewsRegistry = useProfileAccessor('getDocViewsRegistry', baseGetDocViewsRegistry, {
+  const getDocViewsRegistryAccessor = useProfileAccessor('getDocViewsRegistry', {
     record: actualHit,
   });
-  const docViewsRegistry = useCallback(
-    (registry: DocViewsRegistry) => getDocViewsRegistry(registry),
-    [getDocViewsRegistry]
-  );
+
+  const docViewsRegistry = useMemo(() => {
+    const getDocViewsRegistry = getDocViewsRegistryAccessor((registry) =>
+      typeof flyoutCustomization?.docViewsRegistry === 'function'
+        ? flyoutCustomization.docViewsRegistry(registry)
+        : registry
+    );
+
+    return (registry: DocViewsRegistry) => getDocViewsRegistry(registry);
+  }, [flyoutCustomization, getDocViewsRegistryAccessor]);
 
   const renderDefaultContent = useCallback(
     () => (

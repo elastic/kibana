@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
+import { useCallback } from 'react';
 import { getMergedAccessor } from '../composable_profile';
-import { GetProfilesOptions } from '../profiles_manager';
+import type { GetProfilesOptions } from '../profiles_manager';
 import { useProfiles } from './use_profiles';
 import type { Profile } from '../types';
 
 export const useProfileAccessor = <TKey extends keyof Profile>(
   key: TKey,
-  baseImpl: Profile[TKey],
   options: GetProfilesOptions = {}
 ) => {
   const profiles = useProfiles(options);
-  return useMemo(() => getMergedAccessor(profiles, key, baseImpl), [baseImpl, key, profiles]);
+
+  return useCallback(
+    (baseImpl: Profile[TKey]) => getMergedAccessor(profiles, key, baseImpl),
+    [key, profiles]
+  );
 };
