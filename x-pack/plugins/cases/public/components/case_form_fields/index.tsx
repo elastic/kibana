@@ -33,29 +33,20 @@ const CaseFormFieldsComponent: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup data-test-subj="case-form-fields" direction="column">
-      <Title isLoading={isLoading} path="caseFields.title" />
-      {caseAssignmentAuthorized ? (
-        <Assignees isLoading={isLoading} path="caseFields.assignees" />
-      ) : null}
-      <Tags isLoading={isLoading} path="caseFields.tags" />
+      <Title isLoading={isLoading} />
+      {caseAssignmentAuthorized ? <Assignees isLoading={isLoading} /> : null}
+      <Tags isLoading={isLoading} />
 
-      <Category isLoading={isLoading} path="caseFields.category" />
+      <Category isLoading={isLoading} />
 
-      <Severity isLoading={isLoading} path="caseFields.severity" />
+      <Severity isLoading={isLoading} />
 
-      <Description
-        isLoading={isLoading}
-        path="caseFields.description"
-        draftStorageKey={draftStorageKey}
-      />
+      <Description isLoading={isLoading} draftStorageKey={draftStorageKey} />
 
-      {isSyncAlertsEnabled ? (
-        <SyncAlertsToggle isLoading={isLoading} path="caseFields.syncAlerts" />
-      ) : null}
+      {isSyncAlertsEnabled ? <SyncAlertsToggle isLoading={isLoading} /> : null}
 
       <CustomFields
         isLoading={isLoading}
-        path="caseFields.customFields"
         setAsOptional={true}
         configurationCustomFields={configurationCustomFields}
       />

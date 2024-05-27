@@ -21,10 +21,7 @@ import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
 
-const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
-  connector,
-  path = 'fields',
-}) => {
+const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const { http } = useKibana().services;
 
   const {
@@ -72,7 +69,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
 
   return (
     <span data-test-subj={'connector-fields-resilient'}>
-      <UseField<string[]> path={`${path}.incidentTypes`} config={{ defaultValue: [] }}>
+      <UseField<string[]> path="fields.incidentTypes" config={{ defaultValue: [] }}>
         {(field) => {
           const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
@@ -112,7 +109,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
       </UseField>
       <EuiSpacer size="m" />
       <UseField
-        path={`${path}.severityCode`}
+        path="fields.severityCode"
         component={SelectField}
         config={{
           label: i18n.SEVERITY_LABEL,

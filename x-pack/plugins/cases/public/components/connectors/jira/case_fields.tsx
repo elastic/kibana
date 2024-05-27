@@ -19,19 +19,16 @@ import type { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
+import { JiraFieldsType } from '@kbn/cases-plugin/common/types/domain';
 
 const { emptyField } = fieldValidators;
 
-const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
-  connector,
-  path = 'fields',
-}) => {
-  const [formData] = useFormData();
+const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
+  const [{ fields }] = useFormData<{ fields: JiraFieldsType }>();
 
   const { http } = useKibana().services;
 
-  const fieldsData = path === 'caseFields.fields' ? formData?.caseFields?.fields : formData?.fields;
-  const { issueType } = fieldsData ?? {};
+  const { issueType } = fields ?? {};
 
   const {
     isLoading: isLoadingIssueTypesData,
@@ -80,7 +77,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
   return (
     <div data-test-subj={'connector-fields-jira'}>
       <UseField
-        path={`${path}.issueType`}
+        path="fields.priority"
         component={SelectField}
         config={{
           label: i18n.ISSUE_TYPE,
@@ -111,7 +108,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
         <div style={{ display: hasParent ? 'block' : 'none' }}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <SearchIssues path={path} actionConnector={connector} />
+              <SearchIssues actionConnector={connector} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
@@ -120,7 +117,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <UseField
-                path={`${path}.priority`}
+                path="fields.priority"
                 component={SelectField}
                 config={{
                   label: i18n.PRIORITY,

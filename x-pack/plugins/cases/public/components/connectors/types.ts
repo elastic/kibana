@@ -37,7 +37,6 @@ export interface CaseConnectorsRegistry {
 
 export interface ConnectorFieldsProps {
   connector: CaseActionConnector;
-  path?: 'caseFields.fields' | 'fields';
 }
 
 export interface ConnectorFieldsPreviewProps<TFields> {

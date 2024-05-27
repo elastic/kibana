@@ -17,7 +17,7 @@ interface Props {
 
 const TitleComponent: React.FC<Props> = ({ isLoading, path }) => (
   <CommonUseField
-    path={path ?? 'title'}
+    path="title"
     componentProps={{
       idAria: 'caseTitle',
       'data-test-subj': 'caseTitle',

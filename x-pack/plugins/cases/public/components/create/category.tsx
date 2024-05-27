@@ -15,7 +15,7 @@ interface Props {
   path?: string;
 }
 
-const CategoryComponent: React.FC<Props> = ({ isLoading, path }) => {
+const CategoryComponent: React.FC<Props> = ({ isLoading }) => {
   const { isLoading: isLoadingCategories, data: categories = [] } = useGetCategories();
 
   return (
@@ -23,7 +23,6 @@ const CategoryComponent: React.FC<Props> = ({ isLoading, path }) => {
       isLoading={isLoading || isLoadingCategories}
       availableCategories={categories}
       formRowProps={{ labelAppend: OptionalFieldLabel }}
-      path={path}
     />
   );
 };

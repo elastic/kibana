@@ -20,10 +20,9 @@ import * as i18n from './translations';
 
 interface Props {
   actionConnector?: ActionConnector;
-  path?: string;
 }
 
-const SearchIssuesComponent: React.FC<Props> = ({ actionConnector, path }) => {
+const SearchIssuesComponent: React.FC<Props> = ({ actionConnector }) => {
   const [query, setQuery] = useState<string | null>(null);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
     []
@@ -41,7 +40,7 @@ const SearchIssuesComponent: React.FC<Props> = ({ actionConnector, path }) => {
   const options = issues.map((issue) => ({ label: issue.title, value: issue.key }));
 
   return (
-    <UseField path={`${path}.parent`}>
+    <UseField path="fields.parent">
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 

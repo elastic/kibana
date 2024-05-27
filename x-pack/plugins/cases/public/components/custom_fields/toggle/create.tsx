@@ -14,15 +14,12 @@ import type { CustomFieldType } from '../types';
 const CreateComponent: CustomFieldType<CaseCustomFieldToggle>['Create'] = ({
   customFieldConfiguration,
   isLoading,
-  path,
 }) => {
   const { key, label, defaultValue } = customFieldConfiguration;
 
-  const newPath = path ?? 'customFields';
-
   return (
     <UseField
-      path={`${newPath}.${key}`}
+      path={`customFields.${key}`}
       component={ToggleField}
       config={{ defaultValue: defaultValue ? defaultValue : false }}
       key={key}

@@ -16,7 +16,6 @@ import { OptionalFieldLabel } from '../../create/optional_field_label';
 const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
   customFieldConfiguration,
   isLoading,
-  path,
   setAsOptional,
 }) => {
   const { key, label, required, defaultValue } = customFieldConfiguration;
@@ -26,11 +25,9 @@ const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
     ...(defaultValue && { defaultValue: String(defaultValue) }),
   });
 
-  const newPath = path ?? 'customFields';
-
   return (
     <UseField
-      path={`${newPath}.${key}`}
+      path={`customFields.${key}`}
       config={config}
       component={TextField}
       label={label}

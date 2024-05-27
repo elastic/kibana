@@ -13,19 +13,18 @@ import { ID as LensPluginId } from '../markdown_editor/plugins/lens/constants';
 interface Props {
   isLoading: boolean;
   draftStorageKey: string;
-  path?: string;
 }
 
 export const fieldName = 'description';
 
-const DescriptionComponent: React.FC<Props> = ({ isLoading, draftStorageKey, path }) => {
+const DescriptionComponent: React.FC<Props> = ({ isLoading, draftStorageKey }) => {
   const [{ title, tags }] = useFormData({ watch: ['title', 'tags'] });
   const editorRef = useRef<Record<string, unknown>>();
   const disabledUiPlugins = [LensPluginId];
 
   return (
     <UseField
-      path={path ?? fieldName}
+      path={fieldName}
       component={MarkdownEditorForm}
       componentProps={{
         id: fieldName,

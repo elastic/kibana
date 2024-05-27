@@ -360,14 +360,18 @@ export const ConfigureCases: React.FC = React.memo(() => {
       }
 
       if (flyoutType === 'template') {
-        const { caseFields, ...rest } = data as TemplateFormProps;
         const {
           connectorId,
           fields,
           customFields: templateCustomFields,
           syncAlerts = false,
+          key,
+          name,
+          templateTags,
+          templateDescription,
           ...otherCaseFields
-        } = caseFields ?? {};
+        } = data as TemplateFormProps;
+
         const transformedCustomFields = templateCustomFields
           ? transformCustomFieldsData(templateCustomFields, customFields)
           : [];
@@ -378,7 +382,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
           : getNoneConnector();
 
         const transformedData: TemplateConfiguration = {
-          ...rest,
+          key,
+          name,
+          description: templateDescription,
+          tags: templateTags,
           caseFields: {
             ...otherCaseFields,
             connector: transformedConnector,
@@ -386,6 +393,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
             settings: { syncAlerts },
           },
         };
+
         const updatedTemplates = addOrReplaceField(templates, transformedData);
 
         persistCaseConfigure({

@@ -6,13 +6,14 @@
  */
 
 import { getConnectorsFormSerializer, isEmptyValue } from '../utils';
+import { ConnectorTypeFields } from '../../../common/types/domain';
 import type { TemplateFormProps } from './types';
 
 export const removeEmptyFields = (
-  fields: TemplateFormProps['caseFields'] | Record<string, string | boolean> | null | undefined
-): TemplateFormProps['caseFields'] => {
-  if (fields) {
-    return Object.entries(fields).reduce((acc, [key, value]) => {
+  data: Omit<TemplateFormProps, 'fields'> | Record<string, string | boolean> | null | undefined
+): Omit<TemplateFormProps, 'fields'> | Record<string, string | boolean> | null => {
+  if (data) {
+    return Object.entries(data).reduce((acc, [key, value]) => {
       let initialValue = {};
 
       if (key === 'customFields') {
@@ -38,17 +39,14 @@ export const removeEmptyFields = (
 };
 
 export const templateSerializer = <T extends TemplateFormProps | null>(data: T): T => {
-  if (data !== null && data.caseFields) {
-    const { fields, ...rest } = data.caseFields;
-    const connectorFields = getConnectorsFormSerializer({ fields: fields ?? null });
+  if (data !== null) {
+    const { fields, ...rest } = data;
     const serializedFields = removeEmptyFields(rest);
+    const connectorFields = getConnectorsFormSerializer({ fields: fields ?? null });
 
     return {
-      ...data,
-      caseFields: {
-        ...serializedFields,
-        fields: connectorFields.fields,
-      } as TemplateFormProps['caseFields'],
+      ...serializedFields,
+      fields: connectorFields.fields as ConnectorTypeFields['fields'],
     };
   }
 

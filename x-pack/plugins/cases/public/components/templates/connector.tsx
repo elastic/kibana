@@ -32,16 +32,15 @@ const ConnectorComponent: React.FC<Props> = ({
   path,
   configurationConnectorId,
 }) => {
-  const [{ caseFields }] = useFormData({ watch: ['caseFields.connectorId'] });
-  const connector = getConnectorById(caseFields?.connectorId, connectors) ?? null;
+  const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
+  const connector = getConnectorById(connectorId, connectors) ?? null;
 
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
   const hasReadPermissions = permissions.connectors && actions.read;
-  const connectorId = schema?.caseFields ? schema.caseFields.connectorId : '';
 
   const connectorIdConfig = getConnectorsFormValidators({
-    config: connectorId as FieldConfig,
+    config: schema.connectorId as FieldConfig,
     connectors,
   });
 
@@ -57,7 +56,7 @@ const ConnectorComponent: React.FC<Props> = ({
     <EuiFlexGroup>
       <EuiFlexItem>
         <UseField
-          path={path ?? 'connectorId'}
+          path="connectorId"
           config={connectorIdConfig}
           component={ConnectorSelector}
           defaultValue={configurationConnectorId}
@@ -71,7 +70,7 @@ const ConnectorComponent: React.FC<Props> = ({
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <ConnectorFieldsForm path={'caseFields.fields'} connector={connector} />
+        <ConnectorFieldsForm connector={connector} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

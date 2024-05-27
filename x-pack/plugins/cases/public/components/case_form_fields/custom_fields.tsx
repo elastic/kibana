@@ -43,7 +43,6 @@ const CustomFieldsComponent: React.FC<Props> = ({
           isLoading={isLoading}
           customFieldConfiguration={customField}
           key={customField.key}
-          path={path}
           setAsOptional={setAsOptional}
         />
       );

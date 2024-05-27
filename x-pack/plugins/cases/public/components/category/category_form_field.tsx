@@ -23,7 +23,6 @@ interface Props {
   isLoading: boolean;
   availableCategories: string[];
   formRowProps?: Partial<EuiFormRowProps>;
-  path?: string;
 }
 
 type CategoryField = CaseUI['category'] | undefined;
@@ -64,10 +63,9 @@ const CategoryFormFieldComponent: React.FC<Props> = ({
   isLoading,
   availableCategories,
   formRowProps,
-  path,
 }) => {
   return (
-    <UseField<CategoryField> path={path ?? 'category'} config={getCategoryConfig()}>
+    <UseField<CategoryField> path="category" config={getCategoryConfig()}>
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 

@@ -55,9 +55,9 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
               },
             }}
           />
-          <Tags isLoading={isSubmitting} path="tags" dataTestSubject="template-tags" />
+          <Tags isLoading={isSubmitting} path="templateTags" dataTestSubject="template-tags" />
           <UseField
-            path="description"
+            path="templateDescription"
             component={TextField}
             componentProps={{
               euiFieldProps: {
@@ -97,7 +97,7 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
             connectors={connectors}
             isLoading={isSubmitting}
             configurationConnectorId={configurationConnectorId}
-            path="caseFields.connectorId"
+            path="connectorId"
           />
         </div>
       ),

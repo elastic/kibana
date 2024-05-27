@@ -21,6 +21,8 @@ export type CaseFieldsProps = Omit<
   syncAlerts?: boolean;
 };
 
-export type TemplateFormProps = Omit<TemplateConfiguration, 'caseFields'> & {
-  caseFields: CaseFieldsProps | null;
-};
+export type TemplateFormProps = Pick<TemplateConfiguration, 'key' | 'name'> &
+  CaseFieldsProps & {
+    templateTags: string[];
+    templateDescription: string;
+  };

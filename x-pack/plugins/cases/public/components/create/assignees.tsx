@@ -246,7 +246,7 @@ const AssigneesComponent: React.FC<Props> = ({ isLoading: isLoadingForm, path })
 
   return (
     <UseField
-      path={path ?? 'assignees'}
+      path="assignees"
       config={getConfig()}
       component={AssigneesFieldComponent}
       componentProps={{

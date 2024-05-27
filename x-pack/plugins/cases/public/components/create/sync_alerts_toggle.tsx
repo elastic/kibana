@@ -16,16 +16,11 @@ interface Props {
 }
 
 const SyncAlertsToggleComponent: React.FC<Props> = ({ isLoading, path }) => {
-  const [formData] = useFormData();
-
-  const syncAlerts =
-    path && path === 'caseFields.syncAlerts'
-      ? Boolean(formData?.caseFields?.syncAlerts)
-      : Boolean(formData?.syncAlerts);
+  const [{ syncAlerts }] = useFormData({ watch: ['syncAlerts'] });
 
   return (
     <UseField
-      path={path ?? 'syncAlerts'}
+      path="syncAlerts"
       component={ToggleField}
       config={{ defaultValue: true }}
       componentProps={{
