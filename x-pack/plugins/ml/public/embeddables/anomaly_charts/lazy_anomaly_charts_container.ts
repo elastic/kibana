@@ -4,12 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { dynamic } from '@kbn/shared-ux-utility';
 
-import { MetricsSourceStatus } from '../../../common/metrics_sources';
-
-export interface DerivedIndexPattern {
-  fields: MetricsSourceStatus['indexFields'];
-  title: string;
-}
-
-export type CreateDerivedIndexPattern = () => DerivedIndexPattern;
+export const LazyAnomalyChartsContainer = dynamic(() => import('./anomaly_charts_react_container'));
