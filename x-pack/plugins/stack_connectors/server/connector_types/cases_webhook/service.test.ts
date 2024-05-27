@@ -19,7 +19,7 @@ import {
   WebhookMethods as CasesWebhookMethods,
   SSLCertType,
 } from '../../../common/auth/constants';
-import { CRT_FILE, KEY_FILE } from '@kbn/stack-connectors-plugin/common/auth/mocks';
+import { CRT_FILE, KEY_FILE } from '../../../common/auth/mocks';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -47,7 +47,7 @@ const config: CasesWebhookPublicConfigurationType = {
   createIncidentUrl: 'https://coolsite.net/issue',
   getIncidentResponseExternalTitleKey: 'key',
   hasAuth: true,
-  headers: { ['content-type']: 'application/json' },
+  headers: { ['content-type']: 'application/json', foo: 'bar' },
   viewIncidentUrl: 'https://coolsite.net/browse/{{{external.system.title}}}',
   getIncidentUrl: 'https://coolsite.net/issue/{{{external.system.id}}}',
   updateIncidentJson:
@@ -173,6 +173,7 @@ describe('Cases webhook service', () => {
         headers: {
           ...getBasicAuthHeader({ username: 'username', password: 'password' }),
           'content-type': 'application/json',
+          foo: 'bar',
         },
       });
     });
@@ -191,6 +192,7 @@ describe('Cases webhook service', () => {
       expect(axios.create).toHaveBeenCalledWith({
         headers: {
           'content-type': 'application/json',
+          foo: 'bar',
         },
       });
     });

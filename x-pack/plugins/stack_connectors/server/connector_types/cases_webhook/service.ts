@@ -12,11 +12,7 @@ import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mus
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
-import {
-  buildConnectorAuth,
-  isBasicAuth,
-  validateConnectorAuthConfiguration,
-} from '../../../common/auth/utils';
+import { buildConnectorAuth, validateConnectorAuthConfiguration } from '../../../common/auth/utils';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
   createServiceError,
@@ -85,13 +81,11 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const headersWithBasicAuth = isBasicAuth({ hasAuth, authType })
-    ? combineHeadersWithBasicAuthHeader({
-        username: basicAuth.auth?.username,
-        password: basicAuth.auth?.password,
-        headers,
-      })
-    : {};
+  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+    username: basicAuth.auth?.username,
+    password: basicAuth.auth?.password,
+    headers,
+  });
 
   const axiosInstance = axios.create({
     headers: {

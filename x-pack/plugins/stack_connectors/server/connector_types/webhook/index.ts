@@ -36,7 +36,7 @@ import type {
 import { getRetryAfterIntervalFromHeaders } from '../lib/http_response_retry_header';
 import { isOk, promiseResult, Result } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
-import { buildConnectorAuth, isBasicAuth } from '../../../common/auth/utils';
+import { buildConnectorAuth } from '../../../common/auth/utils';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';
 
 export const ConnectorTypeId = '.webhook';
@@ -143,13 +143,11 @@ export async function executor(
 
   const axiosInstance = axios.create();
 
-  const headersWithBasicAuth = isBasicAuth({ hasAuth, authType })
-    ? combineHeadersWithBasicAuthHeader({
-        username: basicAuth.auth?.username,
-        password: basicAuth.auth?.password,
-        headers,
-      })
-    : {};
+  const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
+    username: basicAuth.auth?.username,
+    password: basicAuth.auth?.password,
+    headers,
+  });
 
   const result: Result<AxiosResponse, AxiosError<{ message: string }>> = await promiseResult(
     request({

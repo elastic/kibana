@@ -46,6 +46,7 @@ export const buildConnectorAuth = ({
 }): { basicAuth: BasicAuthResponse; sslOverrides: SSLSettings } => {
   let basicAuth: BasicAuthResponse = {};
   let sslOverrides: SSLSettings = {};
+  let sslCertificate = {};
 
   if (isBasicAuth({ hasAuth, authType })) {
     basicAuth =
@@ -53,7 +54,7 @@ export const buildConnectorAuth = ({
         ? { auth: { username: secrets.user, password: secrets.password } }
         : {};
   } else if (hasAuth && authType === AuthType.SSL) {
-    const sslCertificate =
+    sslCertificate =
       (isString(secrets.crt) && isString(secrets.key)) || isString(secrets.pfx)
         ? isString(secrets.pfx)
           ? {
@@ -66,13 +67,13 @@ export const buildConnectorAuth = ({
               ...(isString(secrets.password) ? { passphrase: secrets.password } : {}),
             }
         : {};
-
-    sslOverrides = {
-      ...sslCertificate,
-      ...(verificationMode ? { verificationMode } : {}),
-      ...(ca ? { ca: Buffer.from(ca, 'base64') } : {}),
-    };
   }
+
+  sslOverrides = {
+    ...sslCertificate,
+    ...(verificationMode ? { verificationMode } : {}),
+    ...(ca ? { ca: Buffer.from(ca, 'base64') } : {}),
+  };
 
   return { basicAuth, sslOverrides };
 };
