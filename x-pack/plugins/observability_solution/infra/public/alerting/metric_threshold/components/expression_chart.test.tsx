@@ -8,7 +8,6 @@
 import React, { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 import { LineAnnotation, RectAnnotation } from '@elastic/charts';
-import { DataViewBase } from '@kbn/es-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 // We are using this inside a `jest.mock` call. Jest requires dynamic dependencies to be prefixed with `mock`
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
@@ -16,7 +15,19 @@ import { Aggregators } from '../../../../common/alerting/metrics';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression } from '../types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { ExpressionChart } from './expression_chart';
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { ResolvedDataView } from '../../../utils/data_view';
+
+const mockDataView = {
+  id: 'mock-id',
+  title: 'mock-title',
+  timeFieldName: TIMESTAMP_FIELD,
+  isPersisted: () => false,
+  getName: () => 'mock-data-view',
+  toSpec: () => ({}),
+} as jest.Mocked<DataView>;
 
 const mockStartServices = mockCoreMock.createStart();
 jest.mock('../../../hooks/use_kibana', () => ({
@@ -30,6 +41,23 @@ jest.mock('../../../hooks/use_kibana', () => ({
         },
       },
     },
+  }),
+}));
+
+jest.mock('../../../containers/metrics_source', () => ({
+  withSourceProvider: () => jest.fn,
+  useSourceContext: () => ({
+    source: { id: 'default' },
+  }),
+  useMetricsDataViewContext: () => ({
+    metricsView: {
+      indices: 'metricbeat-*',
+      timeFieldName: mockDataView.timeFieldName,
+      fields: mockDataView.fields,
+      dataViewReference: mockDataView,
+    } as ResolvedDataView,
+    loading: false,
+    error: undefined,
   }),
 }));
 
@@ -52,29 +80,9 @@ describe('ExpressionChart', () => {
     groupBy?: string,
     annotations?: Array<ReactElement<typeof RectAnnotation | typeof LineAnnotation>>
   ) {
-    const derivedIndexPattern: DataViewBase = {
-      title: 'metricbeat-*',
-      fields: [],
-    };
-
-    const source: MetricsSourceConfiguration = {
-      id: 'default',
-      origin: 'fallback',
-      configuration: {
-        name: 'default',
-        description: 'The default configuration',
-        metricAlias: 'metricbeat-*',
-        inventoryDefaultView: 'host',
-        metricsExplorerDefaultView: 'host',
-        anomalyThreshold: 20,
-      },
-    };
-
     const wrapper = mountWithIntl(
       <ExpressionChart
         expression={expression}
-        derivedIndexPattern={derivedIndexPattern}
-        source={source}
         filterQuery={filterQuery}
         groupBy={groupBy}
         annotations={annotations}
