@@ -13,7 +13,6 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { Aggregators } from '../../../../common/alerting/metrics';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { MetricExpression } from '../types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { ExpressionChart } from './expression_chart';
