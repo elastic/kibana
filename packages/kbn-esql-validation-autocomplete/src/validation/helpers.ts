@@ -7,6 +7,7 @@
  */
 
 import type { ESQLAst, ESQLAstItem, ESQLMessage, ESQLSingleAstItem } from '@kbn/esql-ast';
+import { FunctionDefinition } from '../definitions/types';
 import { getAllArrayTypes, getAllArrayValues } from '../shared/helpers';
 import { getMessageFromId } from './errors';
 import type { ESQLPolicy, ReferenceMaps } from './types';
@@ -36,6 +37,21 @@ export function buildQueryForFieldsForStringSources(queryString: string, ast: ES
     return customQuery.substring(0, customQuery.length - 1);
   }
   return customQuery;
+}
+
+/**
+ * Returns the maximum and minimum number of parameters allowed by a function
+ *
+ * Used for too-many, too-few arguments validation
+ */
+export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
+  let min = Infinity;
+  let max = 0;
+  definition.signatures.forEach(({ params, minParams }) => {
+    min = Math.min(min, params.filter(({ optional }) => !optional).length);
+    max = Math.max(max, minParams ? Infinity : params.length);
+  });
+  return { min, max };
 }
 
 /**

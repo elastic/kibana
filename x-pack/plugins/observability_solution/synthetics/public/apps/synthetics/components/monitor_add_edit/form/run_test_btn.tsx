@@ -18,8 +18,10 @@ import { runOnceMonitor } from '../../../state/manual_test_runs/api';
 
 export const RunTestButton = ({
   canUsePublicLocations = true,
+  isServiceAllowed,
 }: {
   canUsePublicLocations?: boolean;
+  isServiceAllowed?: boolean;
 }) => {
   const { formState, getValues, handleSubmit } = useFormContext();
 
@@ -60,7 +62,7 @@ export const RunTestButton = ({
         <EuiButton
           data-test-subj="syntheticsRunTestBtn"
           color="success"
-          disabled={isDisabled || !canUsePublicLocations}
+          disabled={isDisabled || !canUsePublicLocations || !isServiceAllowed}
           aria-label={TEST_NOW_ARIA_LABEL}
           iconType="play"
           onClick={handleSubmit(handleTestNow)}
