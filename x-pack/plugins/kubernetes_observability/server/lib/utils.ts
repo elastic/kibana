@@ -52,6 +52,9 @@ export type PodMem = {
     name: string;
     namespace: string;
     node: string;
+    node_memory_available:{
+        value: number | undefined;
+    }
     memory_available: {
         avg: number | undefined;
     }
@@ -59,6 +62,7 @@ export type PodMem = {
         min: number | undefined;
         max: number | undefined;
         avg: number | undefined;
+        memory_utilization: number | undefined;
         median_absolute_deviation: number | undefined;
     },
     reason: {

@@ -28,7 +28,7 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
         validate: {
           request: {
             query: schema.object({
-              name: schema.string(),
+              name: schema.maybe(schema.string()),
               namespace: schema.maybe(schema.string()),
               period: schema.maybe(schema.string())
             }),
@@ -36,75 +36,114 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
         },
       },
       async (context, request, response) => {
-        var namespace = checkDefaultNamespace(request.query.namespace);
-        var period =  checkDefaultPeriod(request.query.period);
+        var period = checkDefaultPeriod(request.query.period);
+        var daemonNames = new Array();
+        var daemonsets = new Array();
+        var musts = new Array();
         const client = (await context.core).elasticsearch.client.asCurrentUser;
-
-        const mustsPods = [
-          {
-            term: {
-              'resource.attributes.k8s.daemonset.name': request.query.name,
+        if (request.query.namespace !== undefined) {
+          musts.push(
+            {
+              term: {
+                'resource.attributes.k8s.namespace.name': request.query.namespace,
+              },
+            }
+          )
+        }
+        if (request.query.name === undefined) {
+          musts.push(
+            {
+              exists: {
+                field: 'resource.attributes.k8s.daemonset.name'
+              },
+            }
+          )
+          const dslDaemons: estypes.SearchRequest = {
+            index: ["metrics-otel.*"],
+            _source: false,
+            fields: [
+              'resource.attributes.k8s.daemonset.name',
+            ],
+            query: {
+              bool: {
+                must: musts
+              },
             },
-          },
-          {
-            term: {
-              'resource.attributes.k8s.namespace.name': namespace,
+            aggs: {
+              unique_values: {
+                terms: { field: 'resource.attributes.k8s.daemonset.name', size: 500 },
+              },
             },
-          },
-          { exists: { field: 'metrics.k8s.pod.phase' } }
-        ];
-        const dsl: estypes.SearchRequest = {
-          index: ["metrics-otel.*"],
-          sort: [{ '@timestamp': 'desc' }],
-          _source: false,
-          fields: [
-            '@timestamp',
-            'metrics.k8s.pod.phase',
-            'resource.attributes.k8s.*',
-          ],
-          query: {
-            bool: {
-              must: mustsPods,
+          };
+          const deployEsResponse = await client.search(dslDaemons);
+          const { after_key: _, buckets = [] } = (deployEsResponse.aggregations?.unique_values || {}) as any;
+          if (buckets.length > 0) {
+            buckets.map((bucket: any) => {
+              const daemonName = bucket.key;
+              daemonNames.push(daemonName);
+            });
+          }
+          console.log(daemonNames);
+
+        } else if (request.query.name !== undefined) {
+          daemonNames.push(request.query.name)
+        }
+        for (const name of daemonNames) {
+          const mustsPods = [
+            {
+              term: {
+                'resource.attributes.k8s.daemonset.name': name,
+              },
             },
-          },
-          aggs: {
-            unique_values: {
-              terms: { field: 'resource.attributes.k8s.pod.name' },
+            { exists: { field: 'metrics.k8s.pod.phase' } }
+          ];
+          const dslPods: estypes.SearchRequest = {
+            index: ["metrics-otel.*"],
+            sort: [{ '@timestamp': 'desc' }],
+            _source: false,
+            fields: [
+              '@timestamp',
+              'resource.attributes.k8s.*',
+            ],
+            query: {
+              bool: {
+                must: mustsPods,
+              },
             },
-          },
-        };
+            aggs: {
+              unique_values: {
+                terms: { field: 'resource.attributes.k8s.pod.name' },
+              },
+            },
+          };
+          // console.log(mustsPods);
+          // console.log(dslPods);
+          const esResponsePods = await client.search(dslPods);
+          //console.log(esResponsePods.hits);
+          if (esResponsePods.hits.hits.length > 0) {
+            var pod_reasons = new Array();
+            var pod_metrics = new Array();
+            var pods_cpu_medium = new Array();
+            var pods_cpu_high = new Array();
+            var pods_deviation_high = new Array();
+            var reasons = '';
+            var cpu = '';
+            var deviation_alarm = '';
 
-        //console.log(musts);
-        //console.log(dsl);
-        const esResponsePods = await client.search(dsl);
-        //console.log(esResponsePods.hits);
-        if (esResponsePods.hits.hits.length > 0) {
-
-          var pod_reasons = new Array();
-          var pod_metrics = new Array();
-          var pods_cpu_medium = new Array();
-          var pods_cpu_high = new Array();
-          var pods_deviation_high = new Array();
-          var reasons = '';
-          var cpu = '';
-          var deviation_alarm = '';
-
-          const hitsPods = esResponsePods.hits.hits[0];
-          const { fields = {} } = hitsPods;
-          const hitsPodsAggs = esResponsePods.aggregations.unique_values['buckets'];
-
-          const time = extractFieldValue(fields['@timestamp']);
-
-
-          for (const entries of hitsPodsAggs) {
-            const podName = entries.key;
-            console.log(podName);
-            const dslPods = defineQueryForAllPodsCpuUtilisation(podName, namespace, client, period);
-            const esResponsePods = await client.search(dslPods);
-            const [pod] = calulcatePodsCpuUtilisation(podName, namespace, esResponsePods);
-            pod_reasons.push(pod.reason);
-            pod_metrics.push(pod);
-
+            const hitsPods = esResponsePods.hits.hits[0];
+            const { fields = {} } = hitsPods;
+            var namespace1 = extractFieldValue(fields['resource.attributes.k8s.namespace.name'])
+            var time = extractFieldValue(fields['@timestamp']);
+            const { after_key2: _, buckets = [] } = (esResponsePods.aggregations?.unique_values || {}) as any;
+            for (const entries of buckets) {
+              const podName = entries.key;
+              console.log(podName);
+              const dslPods = defineQueryForAllPodsCpuUtilisation(podName, namespace1, client, period);
+              const esResponsePods = await client.search(dslPods);
+              const [pod] = calulcatePodsCpuUtilisation(podName, namespace1, esResponsePods);
+              pod_reasons.push(pod.reason);
+              pod_metrics.push(pod);
+            }
             //Create overall message for daemonset
             for (var pod_reason of pod_reasons) {
               //Check for cpu utlisation in pod_reason.reason[0]
@@ -136,32 +175,30 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
               deviation_alarm = "High";
             } else { deviation_alarm = "Low" }
             //End of Create overall message for deployment
+            var daemonsets_single = {
+              'name': name,
+              'pods': pod_metrics,
+              'message': `Daemonset has cpu utilization ${cpu} and deviation ${deviation_alarm}`,
+              'reason': reasons,
+            };
+            daemonsets.push(daemonsets_single);
+          } else {
+            const message = `Daemonset ${name} not found`
+            daemonsets_single = {
+              'name': name,
+              'pods': [],
+              'message': message,
+              'reason': "Not found",
+            }
+            daemonsets.push(daemonsets_single);
           }
-          return response.ok({
-            body: {
-              time: time,
-              name: request.query.name,
-              namespace: namespace,
-              pods: pod_metrics,
-              message: {
-                utilization: cpu,
-                deviation: deviation_alarm
-              },
-              reason: reasons,
-            },
-          });
-        } else {
-          const message = `Daemonset ${namespace}/${request.query.name} not found`
-          return response.ok({
-            body: {
-              time: '',
-              message: message,
-              name: request.query.name,
-              namespace: namespace,
-              reason: "Not found",
-            },
-          });
-        }
+        } return response.ok({
+          body: {
+            time: time,
+            namespace: namespace1,
+            daemonsets: daemonsets
+          },
+        });
       }
     );
 };

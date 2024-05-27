@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
-import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod } from '../lib/utils';
+import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod, toPct } from '../lib/utils';
 import { defineQueryForAllPodsMemoryUtilisation, calulcatePodsMemoryUtilisation } from '../lib/pods_memory_utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
@@ -142,6 +142,22 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
               //console.log(dslPodsMemory);
               const esResponsePods = await client.search(dslPodsMemory);
               const [pod] = calulcatePodsMemoryUtilisation(podName, namespace1, esResponsePods)
+              // Node memory available
+              const dslNode = calulcateNodesMemory(pod.node, client)
+              const esResponsedslNode = await client.search(dslNode);
+              console.table("node" + esResponsedslNode)
+              const hitsNodes = esResponsedslNode.hits.hits[0];
+              const { fields = {} } = hitsNodes;
+              var node_memory_available = extractFieldValue(fields['metrics.k8s.node.memory.available'])
+              // End of Node memory available
+              if (pod.memory_available.avg === null) {
+                console.table("node" + node_memory_available)
+                pod.node_memory_available.value = node_memory_available
+                pod.memory_usage.memory_utilization = (pod.memory_usage.avg / node_memory_available)
+                console.log("node" + pod.memory_usage.memory_utilization)
+                pod.message = pod.message + `and ${toPct(pod.memory_usage.memory_utilization)}% memory_utilisation based on node Limit`
+              }
+
               pod_reasons.push(pod.reason);
               pod_metrics.push(pod);
             }

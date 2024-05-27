@@ -198,6 +198,7 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
         return response.ok({
           body: {
             time: time,
+            namespace: namespace1,
             deployments: deployments
           },
         });

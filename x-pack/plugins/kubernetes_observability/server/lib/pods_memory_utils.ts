@@ -102,7 +102,7 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
                 'memory': 'Metric memory_available value is not defined',
                 'memory_usage_median_absolute_deviation': `Pod ${podName} has ${deviation_alarm} deviation from median value`
             };
-            message = `Pod ${podName} has ${memory_usage_avg} bytes memory usage, ${toPct(memory_utilization)}% memory_utilisation and ${memory_usage_median_absolute_deviation} bytes deviation from median value.`
+            message = `Pod ${podName} has ${memory_usage_avg} bytes memory usage and ${memory_usage_median_absolute_deviation} bytes deviation from median value.`
         } else {
             memory_utilization = round(memory_usage_avg / (memory_available_avg + memory_usage_avg), 3);
 
@@ -124,6 +124,9 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
             'name': podName,
             'namespace': namespace,
             'node': node,
+            'node_memory_available': {
+                'value': undefined,
+            },
             'memory_available': {
                 'avg': memory_available_avg,
             },
@@ -131,6 +134,7 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
                 'min': memory_usage_min,
                 'max': memory_usage_max,
                 'avg': memory_usage_avg,
+                'memory_utilization': memory_utilization,
                 'median_absolute_deviation': memory_usage_median_absolute_deviation,
             },
             'reason': reasons,
@@ -253,4 +257,34 @@ export function defineQueryGeneralMemoryUtilisation2(namespace: string, client: 
         }
     };
     return dslPodsCpu;
+}
+
+
+export function calulcateNodesMemory(node: string, client: ElasticsearchClient) {
+    const mustsPodsCpu = [
+        {
+            term: {
+                'resource.attributes.k8s.node.name': node,
+            },
+        },
+        { exists: { field: 'metrics.k8s.node.memory.available' } }
+    ];
+
+    const dslNode: estypes.SearchRequest = {
+        index: ["metrics-otel.*"],
+        _source: false,
+        sort: [{ '@timestamp': 'desc' }],
+        size: 1,
+        fields: [
+            '@timestamp',
+            'metrics.k8s.node.memory.*',
+            'resource.attributes.k8s.*',
+        ],
+        query: {
+            bool: {
+                must: mustsPodsCpu,
+            },
+        },
+    };
+    return dslNode;
 }
