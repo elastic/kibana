@@ -134,15 +134,13 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
             var namespace1 = extractFieldValue(fields['resource.attributes.k8s.namespace.name'])
             var time = extractFieldValue(fields['@timestamp']);
             const { after_key2: _, buckets = [] } = (esResponsePods.aggregations?.unique_values || {}) as any;
-            console.log("rs1"+hitsPods);
-            console.log("rs2"+buckets);
             for (var entries of buckets) {
               const podName = entries.key;
               console.log("pod"+podName);
               const dslPodsCpu = defineQueryForAllPodsCpuUtilisation(podName, namespace1, client, period);
               const esResponsePodsCpu = await client.search(dslPodsCpu);
               const [pod] = calulcatePodsCpuUtilisation(podName, namespace1, esResponsePodsCpu);
-              console.table(pod);
+              //console.table(pod);
               //For every pod we keep arrays for reason and metrics
               pod_reasons.push(pod.reason);
               pod_metrics.push(pod);

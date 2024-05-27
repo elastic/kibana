@@ -51,6 +51,7 @@ export type Daemonset = {
 export type PodMem = {
     name: string;
     namespace: string;
+    node: string;
     memory_available: {
         avg: number | undefined;
     }
@@ -70,6 +71,7 @@ export type PodMem = {
 export type PodCpu = {
     name: string;
     namespace: string;
+    node: string;
     cpu_utilization: {
         min: number | undefined;
         max: number | undefined

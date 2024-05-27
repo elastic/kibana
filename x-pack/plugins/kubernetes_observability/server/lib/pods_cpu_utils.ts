@@ -1,5 +1,5 @@
 import { estypes } from '@elastic/elasticsearch';
-import { Limits, PodCpu, toPct } from './utils';
+import { Limits, PodCpu, toPct, extractFieldValue } from './utils';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 // Define the global CPU limits to categorise cpu utilisation
@@ -66,7 +66,11 @@ export function defineQueryForAllPodsCpuUtilisation(podName: string, namespace: 
 export function calulcatePodsCpuUtilisation(podName: string, namespace: string, esResponsePods: estypes.SearchResponse<unknown, Record<string, estypes.AggregationsAggregate>>) {
     var alarm = '';
     var pod = {} as PodCpu;
-
+    if (esResponsePods.hits.hits.length > 0) {
+        const hitsPods = esResponsePods.hits.hits[0];
+        const { fields = {} } = hitsPods
+        var node = extractFieldValue(fields['resource.attributes.k8s.node.name'])
+    }
     if (Object.keys(esResponsePods.aggregations).length > 0) {
         const hitsall = esResponsePods.aggregations;
         //
@@ -96,6 +100,7 @@ export function calulcatePodsCpuUtilisation(podName: string, namespace: string, 
         pod = {
             'name': podName,
             'namespace': namespace,
+            'node': node,
             'cpu_utilization': {
                 'min': cpu_utilization_min,
                 'max': cpu_utilization_max,

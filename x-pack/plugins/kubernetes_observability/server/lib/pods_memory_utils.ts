@@ -1,5 +1,5 @@
 import { estypes } from '@elastic/elasticsearch';
-import { round, PodMem, Limits, toPct } from './utils';
+import { round, PodMem, Limits, toPct, extractFieldValue } from './utils';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 // Define the global CPU limits to categorise memory utilisation
@@ -72,7 +72,11 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
     var alarm = '';
     var memory_utilization = undefined;
     var pod = {} as PodMem;
-
+    if (esResponsePods.hits.hits.length > 0) {
+        const hitsPods = esResponsePods.hits.hits[0];
+        const { fields = {} } = hitsPods
+        var node = extractFieldValue(fields['resource.attributes.k8s.node.name'])
+    }
     //console.log("esResponsePods:"+ esResponsePods.aggregations?.memory_usage);
 
     if (Object.keys(esResponsePods.aggregations).length > 0) {
@@ -119,6 +123,7 @@ export function calulcatePodsMemoryUtilisation(podName: string, namespace: strin
         pod = {
             'name': podName,
             'namespace': namespace,
+            'node': node,
             'memory_available': {
                 'avg': memory_available_avg,
             },
