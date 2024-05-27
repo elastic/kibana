@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CustomCard } from '../packages_list/types';
 
-export function useVirtualSearchResults(): [CustomCard] {
+export function useVirtualSearchResults(): CustomCard[] {
   const {
     services: { application },
   } = useKibana();

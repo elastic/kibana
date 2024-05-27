@@ -449,7 +449,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        describe('source', () => {
+        // https://github.com/elastic/kibana/issues/183240
+        describe('@skipInServerlessMKI source', () => {
           it('returns response filtered by custom rules', async () => {
             await createPrebuiltRuleAssetSavedObjects(es, [
               createRuleAssetSavedObject({

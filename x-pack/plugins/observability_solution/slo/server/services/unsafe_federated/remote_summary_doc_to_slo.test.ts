@@ -28,6 +28,16 @@ describe('FromRemoteSummaryDocToSlo', () => {
             name: null,
             type: null,
           },
+          monitor: {
+            name: null,
+            config_id: null,
+          },
+          observer: {
+            name: null,
+            geo: {
+              name: null,
+            },
+          },
           slo: {
             indicator: {
               type: 'sli.kql.custom',
@@ -83,6 +93,16 @@ describe('FromRemoteSummaryDocToSlo', () => {
           transaction: {
             name: null,
             type: null,
+          },
+          monitor: {
+            name: null,
+            config_id: null,
+          },
+          observer: {
+            name: null,
+            geo: {
+              name: null,
+            },
           },
           slo: {
             indicator: {

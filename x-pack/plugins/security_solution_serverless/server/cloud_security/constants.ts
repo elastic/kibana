@@ -50,7 +50,7 @@ export const BILLABLE_ASSETS_CONFIG = {
     filter_attribute: 'resource.sub_type',
     values: [
       // 'aws-ebs', we can't include EBS volumes until https://github.com/elastic/security-team/issues/9283 is resolved
-      'aws-ec2',
+      // 'aws-ec2', we can't include EC2 instances until https://github.com/elastic/security-team/issues/9254 is resolved
       'aws-s3',
       'aws-rds',
       'azure-disk',
@@ -60,9 +60,9 @@ export const BILLABLE_ASSETS_CONFIG = {
       'azure-mysql-server-db',
       'azure-postgresql-server-db',
       'azure-sql-server',
+      'azure-storage-account',
       'azure-vm',
       'gcp-bigquery-dataset',
-      'gcp-bigquery-table',
       'gcp-compute-disk',
       'gcp-compute-instance',
       'gcp-sqladmin-instance',

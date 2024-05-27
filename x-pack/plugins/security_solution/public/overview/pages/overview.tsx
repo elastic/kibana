@@ -115,7 +115,6 @@ const OverviewComponent = () => {
                       filters={filters}
                       from={from}
                       indexPattern={indexPattern}
-                      indexNames={selectedPatterns}
                       query={query}
                       queryType="overview"
                       setQuery={setQuery}

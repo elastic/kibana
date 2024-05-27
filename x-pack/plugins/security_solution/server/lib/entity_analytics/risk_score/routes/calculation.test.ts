@@ -100,27 +100,21 @@ describe('risk score calculation route', () => {
         const request = buildRequest({ data_view_id: undefined });
         const result = await server.validate(request);
 
-        expect(result.badRequest).toHaveBeenCalledWith(
-          'Invalid value "undefined" supplied to "data_view_id"'
-        );
+        expect(result.badRequest).toHaveBeenCalledWith('data_view_id: Required');
       });
 
       it('requires a parameter for the date range', async () => {
         const request = buildRequest({ range: undefined });
         const result = await server.validate(request);
 
-        expect(result.badRequest).toHaveBeenCalledWith(
-          'Invalid value "undefined" supplied to "range"'
-        );
+        expect(result.badRequest).toHaveBeenCalledWith('range: Required');
       });
 
       it('requires a parameter for the identifier type', async () => {
         const request = buildRequest({ identifier_type: undefined });
         const result = await server.validate(request);
 
-        expect(result.badRequest).toHaveBeenCalledWith(
-          'Invalid value "undefined" supplied to "identifier_type"'
-        );
+        expect(result.badRequest).toHaveBeenCalledWith('identifier_type: Required');
       });
     });
 
@@ -143,9 +137,7 @@ describe('risk score calculation route', () => {
       const request = buildRequest({ range: 'bad range' });
       const result = await server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "bad range" supplied to "range"'
-      );
+      expect(result.badRequest).toHaveBeenCalledWith('range: Expected object, received string');
     });
   });
 });

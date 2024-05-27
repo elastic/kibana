@@ -46,7 +46,7 @@ export const ActionsPanel: FC<Props> = ({
     services: {
       data,
       application: { capabilities },
-      discover,
+      share: { url },
     },
   } = useDataVisualizerKibana();
 
@@ -58,12 +58,14 @@ export const ActionsPanel: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
-      if (!discover.locator) {
+      const discoverLocator = url?.locators.get('DISCOVER_APP_LOCATOR');
+
+      if (!discoverLocator) {
         // eslint-disable-next-line no-console
         console.error('Discover locator not available');
         return;
       }
-      const discoverUrl = await discover.locator.getUrl({
+      const discoverUrl = await discoverLocator.getUrl({
         indexPatternId: dataViewId,
         filters: data.query.filterManager.getFilters() ?? [],
         query:
@@ -113,7 +115,7 @@ export const ActionsPanel: FC<Props> = ({
     searchQueryLanguage,
     globalState,
     capabilities,
-    discover,
+    url,
     data.query,
     getAdditionalLinks,
   ]);

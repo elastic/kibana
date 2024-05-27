@@ -81,7 +81,7 @@
             "signature": [
               "(options: ",
               "InstallSourceOptions",
-              ") => Promise<{ installPath: string; }>"
+              ") => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
@@ -153,7 +153,7 @@
             "signature": [
               "(options: ",
               "InstallSnapshotOptions",
-              ") => Promise<{ installPath: string; }>"
+              ") => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,
@@ -189,7 +189,7 @@
             "signature": [
               "(archivePath: string, options?: ",
               "InstallArchiveOptions",
-              " | undefined) => Promise<{ installPath: string; }>"
+              " | undefined) => Promise<{ installPath: string; disableEsTmpDir: boolean; }>"
             ],
             "path": "packages/kbn-es/src/cluster.ts",
             "deprecated": false,

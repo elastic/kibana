@@ -10,7 +10,6 @@ import React from 'react';
 
 import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 
 describe('Embedded Map', () => {
   test('it renders', () => {
@@ -26,19 +25,13 @@ describe('Embedded Map', () => {
   });
 });
 
-const mockEmbeddable = embeddablePluginMock.createStartContract();
-
-mockEmbeddable.getEmbeddableFactory = jest.fn().mockImplementation(() => ({
-  create: () => ({
-    reload: jest.fn(),
-    setRenderTooltipContent: jest.fn(),
-    setLayerList: jest.fn(),
-  }),
-}));
+const mockMapsStartService = {
+  Map: jest.fn().mockImplementation(() => <div data-test-subj="mockMap" />),
+};
 
 const mockCore: () => any[] = () => {
   const core = {
-    embeddable: mockEmbeddable,
+    maps: mockMapsStartService,
   };
 
   return [core];

@@ -55,12 +55,14 @@ describe('generateDatasets', () => {
       dataset: 'logs-system.application-default',
       percentage: 0,
       count: 0,
+      docsCount: 0,
       quality: 'good' as const,
     },
     {
       dataset: 'logs-synth-default',
       percentage: 11.320754716981131,
       count: 6,
+      docsCount: 0,
       quality: 'poor' as const,
     },
   ];
@@ -81,6 +83,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
+          docsCount: degradedDocs[0].docsCount,
           quality: degradedDocs[0].quality,
         },
       },
@@ -94,6 +97,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           count: 0,
           percentage: 0,
+          docsCount: 0,
           quality: 'good',
         },
       },
@@ -118,6 +122,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
+          docsCount: degradedDocs[0].docsCount,
           quality: degradedDocs[0].quality,
         },
       },
@@ -134,6 +139,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[1].percentage,
           count: degradedDocs[1].count,
+          docsCount: degradedDocs[1].docsCount,
           quality: degradedDocs[1].quality,
         },
       },
@@ -156,6 +162,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[0].percentage,
           count: degradedDocs[0].count,
+          docsCount: degradedDocs[0].docsCount,
           quality: degradedDocs[0].quality,
         },
       },
@@ -169,6 +176,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           percentage: degradedDocs[1].percentage,
           count: degradedDocs[1].count,
+          docsCount: degradedDocs[1].docsCount,
           quality: degradedDocs[1].quality,
         },
       },
@@ -200,6 +208,7 @@ describe('generateDatasets', () => {
         degradedDocs: {
           count: 0,
           percentage: 0,
+          docsCount: 0,
           quality: 'good',
         },
       },

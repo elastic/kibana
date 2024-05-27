@@ -24,7 +24,7 @@ import moment from 'moment';
 import React, { useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { getBrushData } from '../../../utils/slo/duration';
+import { getBrushTimeBounds } from '../../../utils/slo/duration';
 import { TimeBounds } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
 import { ChartData } from '../../../typings';
@@ -84,7 +84,7 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed }: Prop
         pointerUpdateTrigger={'x'}
         locale={i18n.getLocale()}
         onBrushEnd={(brushArea) => {
-          onBrushed?.(getBrushData(brushArea));
+          onBrushed?.(getBrushTimeBounds(brushArea));
         }}
       />
       <Axis

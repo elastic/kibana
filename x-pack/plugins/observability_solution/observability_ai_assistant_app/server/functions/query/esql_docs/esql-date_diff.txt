@@ -3,15 +3,17 @@ DATE_DIFF
 Syntax
 Parameters
 unit
-Time difference unit.
+Time difference unit
 startTimestamp
-Start timestamp.
+A string representing a start timestamp
 endTimestamp
-End timestamp.
-DescriptionSubtracts the startTimestamp from the endTimestamp and returns the
-difference in multiples of unit. If startTimestamp is later than the
-endTimestamp, negative values are returned.
-Supported types
+A string representing an end timestamp
+DescriptionSubtracts the startTimestamp from the endTimestamp and returns the difference in multiples of unit. If startTimestamp is later than the endTimestamp, negative values are returned.
+Note that while there is an overlap between the function’s supported units and
+ES|QL’s supported time span literals, these sets are distinct and not
+interchangeable. Similarly, the supported abbreviations are conveniently shared
+with implementations of this function in other established products and not
+necessarily common with the date-time nomenclature used by Elasticsearch.Supported types
 Example
 ```esql
 ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")

@@ -9,7 +9,10 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { PutSLOSettingsParams, sloSettingsSchema } from '@kbn/slo-schema';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import {
+  DEFAULT_STALE_SLO_THRESHOLD_HOURS,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+} from '../../common/constants';
 import { getListOfSloSummaryIndices } from '../../common/summary_indices';
 import { StoredSLOSettings } from '../domain/models';
 import { sloSettingsObjectId, SO_SLO_SETTINGS_TYPE } from '../saved_objects/slo_settings';
@@ -20,12 +23,15 @@ export const getSloSettings = async (soClient: SavedObjectsClientContract) => {
       SO_SLO_SETTINGS_TYPE,
       sloSettingsObjectId(soClient.getCurrentNamespace())
     );
+    // set if it's not there
+    soObject.attributes.staleThresholdInHours = soObject.attributes.staleThresholdInHours ?? 2;
     return sloSettingsSchema.encode(soObject.attributes);
   } catch (e) {
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
       return {
         useAllRemoteClusters: false,
         selectedRemoteClusters: [],
+        staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
       };
     }
     throw e;
@@ -49,15 +55,12 @@ export const storeSloSettings = async (
 };
 
 export const getListOfSummaryIndices = async (
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  settings: StoredSLOSettings
 ) => {
-  const indices: string[] = [SLO_SUMMARY_DESTINATION_INDEX_PATTERN];
-
-  const settings = await getSloSettings(soClient);
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
-    return indices;
+    return { indices: [SLO_SUMMARY_DESTINATION_INDEX_PATTERN], settings };
   }
 
   const clustersByName = await esClient.cluster.remoteInfo();
@@ -67,5 +70,5 @@ export const getListOfSummaryIndices = async (
     isConnected: clustersByName[clusterName].connected,
   }));
 
-  return getListOfSloSummaryIndices(settings, clusterInfo);
+  return { indices: getListOfSloSummaryIndices(settings, clusterInfo) };
 };
