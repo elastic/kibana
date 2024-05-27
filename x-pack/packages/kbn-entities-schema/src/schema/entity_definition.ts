@@ -30,6 +30,7 @@ export const entityDefinitionSchema = z.object({
   staticFields: z.optional(z.record(z.string(), z.string())),
   lookback: durationSchema,
   timestampField: z.string(),
+  managed: z.optional(z.boolean()).default(false),
   settings: z.optional(
     z.object({
       syncField: z.optional(z.string()),
