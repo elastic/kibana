@@ -39,7 +39,7 @@ describe('config schema', () => {
       ConfigSchema.validate(
         {
           overrides: {
-            featureA: { name: 'new name', disabled: true },
+            featureA: { name: 'new name', hidden: true },
             featureB: {
               order: 100,
               category: 'management',
@@ -73,7 +73,7 @@ describe('config schema', () => {
       Object {
         "overrides": Object {
           "featureA": Object {
-            "disabled": true,
+            "hidden": true,
             "name": "new name",
           },
           "featureB": Object {

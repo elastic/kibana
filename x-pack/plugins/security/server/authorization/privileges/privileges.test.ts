@@ -328,10 +328,10 @@ describe('features', () => {
     });
   });
 
-  test('actions should respect `composedOf` specified at the privilege even if the referenced feature is disabled', () => {
+  test('actions should respect `composedOf` specified at the privilege even if the referenced feature is hidden', () => {
     const features: KibanaFeature[] = [
       new KibanaFeature({
-        disabled: true,
+        hidden: true,
         id: 'foo',
         name: 'Foo KibanaFeature',
         app: [],
@@ -491,10 +491,10 @@ describe('features', () => {
     expect(actual).not.toHaveProperty('features.foo');
   });
 
-  test(`disabled features aren't listed`, () => {
+  test(`hidden features aren't listed`, () => {
     const features: KibanaFeature[] = [
       new KibanaFeature({
-        disabled: true,
+        hidden: true,
         id: 'foo',
         name: 'Foo KibanaFeature',
         app: [],
@@ -713,14 +713,14 @@ describe('features', () => {
         ]);
       });
 
-      test('actions defined in any feature privilege of a disabled but referenced feature are included in `all`, ignoring the excludeFromBasePrivileges property', () => {
+      test('actions defined in any feature privilege of a hidden but referenced feature are included in `all`, ignoring the excludeFromBasePrivileges property', () => {
         const getFeatures = ({
           excludeFromBasePrivileges,
         }: {
           excludeFromBasePrivileges: boolean;
         }) => [
           new KibanaFeature({
-            disabled: true,
+            hidden: true,
             excludeFromBasePrivileges,
             id: 'foo',
             name: 'Foo KibanaFeature',
@@ -991,14 +991,14 @@ describe('features', () => {
         ]);
       });
 
-      test('actions defined in a feature privilege with name `read` of a disabled but referenced feature are included in `read`, ignoring the excludeFromBasePrivileges property', () => {
+      test('actions defined in a feature privilege with name `read` of a hidden but referenced feature are included in `read`, ignoring the excludeFromBasePrivileges property', () => {
         const getFeatures = ({
           excludeFromBasePrivileges,
         }: {
           excludeFromBasePrivileges: boolean;
         }) => [
           new KibanaFeature({
-            disabled: true,
+            hidden: true,
             excludeFromBasePrivileges,
             id: 'foo',
             name: 'Foo KibanaFeature',
@@ -1258,7 +1258,7 @@ describe('features', () => {
       test('actions defined via `composedOf` in a feature with excludeFromBasePrivileges are not included in `all` or `read', () => {
         const features: KibanaFeature[] = [
           new KibanaFeature({
-            disabled: true,
+            hidden: true,
             id: 'foo',
             name: 'Foo KibanaFeature',
             app: [],
@@ -1426,7 +1426,7 @@ describe('features', () => {
       test('actions defined via `composedOf` in an individual feature privilege with excludeFromBasePrivileges are not included in `all` or `read`', () => {
         const features: KibanaFeature[] = [
           new KibanaFeature({
-            disabled: true,
+            hidden: true,
             id: 'foo',
             name: 'Foo KibanaFeature',
             app: [],

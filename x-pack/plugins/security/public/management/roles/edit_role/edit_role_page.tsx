@@ -308,7 +308,7 @@ function useFeatures(
         fatalErrors.add(err);
       })
       .then((retrievedFeatures) => {
-        setFeatures(retrievedFeatures?.filter((feature) => !feature.disabled) ?? null);
+        setFeatures(retrievedFeatures?.filter((feature) => !feature.hidden) ?? null);
       });
   }, [fatalErrors, getFeatures]);
 

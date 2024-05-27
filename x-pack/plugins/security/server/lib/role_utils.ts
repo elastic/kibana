@@ -71,7 +71,7 @@ export const validateKibanaPrivileges = (
 
     return Object.entries(priv.feature ?? {}).flatMap(([featureId, featurePrivileges]) => {
       const errors: string[] = [];
-      const kibanaFeature = kibanaFeatures.find((f) => f.id === featureId && !f.disabled);
+      const kibanaFeature = kibanaFeatures.find((f) => f.id === featureId && !f.hidden);
       if (!kibanaFeature) return errors;
 
       if (featurePrivileges.includes('all')) {

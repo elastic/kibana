@@ -187,7 +187,7 @@ const kibanaSubFeatureSchema = schema.object({
   ),
 });
 
-// NOTE: This schema intentionally omits the `composedOf` and `disabled` properties to discourage consumers from using
+// NOTE: This schema intentionally omits the `composedOf` and `hidden` properties to discourage consumers from using
 // them during feature registration. This is because these properties should only be set via configuration overrides.
 const kibanaFeatureSchema = schema.object({
   id: schema.string({

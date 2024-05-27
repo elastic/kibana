@@ -45,7 +45,7 @@ export function privilegesFactory(
       const readActionsSet = new Set<string>();
 
       basePrivilegeFeatures.forEach((feature) => {
-        if (feature.disabled) {
+        if (feature.hidden) {
           return;
         }
 
@@ -88,7 +88,7 @@ export function privilegesFactory(
         }
       };
 
-      const disabledFeatures = new Set<string>();
+      const hiddenFeatures = new Set<string>();
       const featurePrivileges: Record<string, Record<string, string[]>> = {};
       for (const feature of features) {
         featurePrivileges[feature.id] = {};
@@ -133,13 +133,13 @@ export function privilegesFactory(
           }
         }
 
-        if (feature.disabled || Object.keys(featurePrivileges[feature.id]).length === 0) {
-          disabledFeatures.add(feature.id);
+        if (feature.hidden || Object.keys(featurePrivileges[feature.id]).length === 0) {
+          hiddenFeatures.add(feature.id);
         }
       }
 
       // Update composable feature privileges to include and deduplicate actions from the referenced privileges.
-      // Note that we should do it _before_ removing disabled features. Also, currently, feature privilege composition
+      // Note that we should do it _before_ removing hidden features. Also, currently, feature privilege composition
       // doesn't respect the minimum license level required by the feature whose privileges are being included in
       // another feature. This could potentially enable functionality in a license lower than originally intended. It
       // might or might not be desired, but we're accepting this for now, as every attempt to compose a feature
@@ -173,9 +173,9 @@ export function privilegesFactory(
         }
       }
 
-      // Remove disabled features to avoid registering standalone privileges for them.
-      for (const disabledFeatureId of disabledFeatures) {
-        delete featurePrivileges[disabledFeatureId];
+      // Remove hidden features to avoid registering standalone privileges for them.
+      for (const hiddenFeatureId of hiddenFeatures) {
+        delete featurePrivileges[hiddenFeatureId];
       }
 
       const allActions = [...allActionsSet];

@@ -146,9 +146,9 @@ export interface KibanaFeatureConfig {
   /**
    * Indicates whether the feature is available as a standalone feature. The feature can still be
    * referenced by other features, but it will not be displayed in any feature management UIs. By default, all features
-   * are enabled.
+   * are visible.
    */
-  disabled?: boolean;
+  hidden?: boolean;
 }
 
 export class KibanaFeature {
@@ -164,8 +164,8 @@ export class KibanaFeature {
     return this.config.id;
   }
 
-  public get disabled() {
-    return this.config.disabled;
+  public get hidden() {
+    return this.config.hidden;
   }
 
   public get name() {

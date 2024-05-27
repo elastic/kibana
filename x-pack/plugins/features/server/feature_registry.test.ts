@@ -2028,7 +2028,7 @@ describe('FeatureRegistry', () => {
       it('can override basic feature properties', () => {
         registry.applyOverrides({
           featureA: {
-            disabled: true,
+            hidden: true,
             name: 'Feature A New',
             category: 'management',
             order: 123,
@@ -2037,8 +2037,8 @@ describe('FeatureRegistry', () => {
         registry.lockRegistration();
 
         const [featureA, featureB] = registry.getAllKibanaFeatures();
-        expect(featureA.disabled).toBe(true);
-        expect(featureB.disabled).toBeUndefined();
+        expect(featureA.hidden).toBe(true);
+        expect(featureB.hidden).toBeUndefined();
 
         expect(featureA.name).toBe('Feature A New');
         expect(featureB.name).toBe('Feature B');

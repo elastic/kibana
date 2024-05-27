@@ -43,10 +43,10 @@ xpack.features.overrides:
       url_create:
         disabled: true
         includeIn: "read"
-  ### Shared images feature is disabled since it's not needed.
-  filesSharedImage.disabled: true
-  ### Maps feature is disabled since it's automatically granted by Dashboard feature.
-  maps.disabled: true
+  ### Shared images feature is hidden in Role management since it's not needed.
+  filesSharedImage.hidden: true
+  ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
+  maps.hidden: true
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
   reporting:
     privileges:
@@ -55,9 +55,9 @@ xpack.features.overrides:
           privileges: [ "download_csv_report" ]
         - feature: "discover"
           privileges: [ "generate_report" ]
-  ### Visualize feature is disabled since it's automatically granted by Dashboard feature.
+  ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
   visualize:
-    disabled: true
+    hidden: true
     ### The short URL sub-feature privilege should be always granted.
     subFeatures.privileges.url_create.includeIn: "read"
 

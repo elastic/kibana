@@ -32,7 +32,7 @@ export const ConfigSchema = schema.object({
       schema.recordOf(
         schema.string(),
         schema.object({
-          disabled: schema.maybe(schema.boolean()),
+          hidden: schema.maybe(schema.boolean()),
           name: schema.maybe(schema.string({ minLength: 1 })),
           category: schema.maybe(
             schema.string({

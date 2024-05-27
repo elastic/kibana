@@ -76,8 +76,8 @@ export class FeatureRegistry {
         );
       }
 
-      if (featureOverride.disabled) {
-        feature.disabled = featureOverride.disabled;
+      if (featureOverride.hidden) {
+        feature.hidden = featureOverride.hidden;
       }
 
       // Note that the name doesn't currently support localizable strings. We'll revisit this approach when i18n support
