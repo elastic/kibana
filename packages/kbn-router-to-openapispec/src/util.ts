@@ -89,11 +89,10 @@ export const prepareRoutes = <
   );
 };
 
-export const assignToPathsObject = (
-  paths: OpenAPIV3.PathsObject,
+export const assignToPaths = (
+  paths: Map<string, OpenAPIV3.PathItemObject>,
   path: string,
   pathObject: OpenAPIV3.PathItemObject
 ): void => {
-  const pathName = path.replace('?', '');
-  paths[pathName] = { ...paths[pathName], ...pathObject };
+  paths.set(path.replace('?', ''), pathObject);
 };
