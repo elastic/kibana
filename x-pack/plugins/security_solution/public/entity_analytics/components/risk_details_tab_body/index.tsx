@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { RISKY_HOSTS_DASHBOARD_TITLE, RISKY_USERS_DASHBOARD_TITLE } from '../risk_score/constants';
 import { EnableRiskScore } from '../enable_risk_score';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -129,6 +130,11 @@ const RiskDetailsTabBodyComponent: React.FC<
   );
 
   const privileges = useMissingRiskEnginePrivileges();
+
+  const RiskScoreUpsell = useUpsellingComponent('entity_analytics_panel');
+  if (RiskScoreUpsell) {
+    return <RiskScoreUpsell />;
+  }
 
   if (!privileges.isLoading && !privileges.hasAllRequiredPrivileges) {
     return (

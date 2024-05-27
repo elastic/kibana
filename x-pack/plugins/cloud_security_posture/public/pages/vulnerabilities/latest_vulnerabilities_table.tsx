@@ -93,8 +93,6 @@ export const LatestVulnerabilitiesTable = ({
       nonPersistedFilters,
     });
 
-  const { filters } = cloudPostureDataTable;
-
   return (
     <>
       {error ? (
@@ -115,7 +113,8 @@ export const LatestVulnerabilitiesTable = ({
           title={title}
           customCellRenderer={customCellRenderer}
           groupSelectorComponent={groupSelectorComponent}
-          height={height ?? `calc(100vh - ${filters?.length > 0 ? 404 : 364}px)`}
+          height={height}
+          hasDistributionBar={false}
         />
       )}
     </>
