@@ -19,7 +19,6 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getCloudProviderNameFromAbbreviation } from '../../../common/utils/helpers';
 import { VulnerabilitiesGroupingAggregation } from './hooks/use_grouped_vulnerabilities';
-import { GROUPING_OPTIONS } from './constants';
 import { VULNERABILITIES_GROUPING_COUNTER } from './test_subjects';
 import { NULL_GROUPING_MESSAGES, NULL_GROUPING_UNIT, VULNERABILITIES } from './translations';
 import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
@@ -30,6 +29,7 @@ import {
 } from '../../components/cloud_security_grouping';
 import { VulnerabilitySeverityMap } from '../../components/vulnerability_severity_map';
 import { CloudProviderIcon } from '../../components/cloud_provider_icon';
+import { VULNERABILITY_GROUPING_OPTIONS } from '../../common/constants';
 
 export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggregation> = (
   selectedGroup,
@@ -52,7 +52,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
     : '';
 
   switch (selectedGroup) {
-    case GROUPING_OPTIONS.RESOURCE_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.RESOURCE_NAME:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.RESOURCE_NAME)
       ) : (
@@ -80,7 +80,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case VULNERABILITY_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
       return nullGroupMessage ? (
         renderNullGroup(NULL_GROUPING_MESSAGES.CLOUD_ACCOUNT_NAME)
       ) : (

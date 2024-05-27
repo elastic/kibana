@@ -293,6 +293,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.editableIndexSettings (any)',
         'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.index_management.enableMappingsSourceFieldSection (any)',
+        'xpack.index_management.dev.enableSemanticText (boolean)',
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
