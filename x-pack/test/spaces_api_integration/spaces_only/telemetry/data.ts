@@ -46,8 +46,8 @@ export const data: MockTelemetryData = {
     },
     {
       space: {
-        name: 'space-1',
-        description: 'This is your space-1!',
+        name: 'space-2',
+        description: 'This is your space-2!',
         color: '#00bfb3',
         disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps'],
         _reserved: true,

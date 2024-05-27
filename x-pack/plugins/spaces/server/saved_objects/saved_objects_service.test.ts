@@ -29,6 +29,7 @@ describe('SpacesSavedObjectsService', () => {
             properties: expect.objectContaining({
               disabledFeatures: expect.any(Object),
               name: expect.any(Object),
+              solution: expect.any(Object),
             }),
           }),
           schemas: { '8.8.0': expect.any(Object) },
