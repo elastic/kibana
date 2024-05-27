@@ -54,7 +54,7 @@ function foldValue(input: number, value: any, key: string, seen: any[]) {
       return hash;
     }
     if (key === 'index' && value.value.id) {
-      return fold(hash, value.value.id);
+      return fold(hash, value.value?.id);
     }
     if (seen.indexOf(value) !== -1) {
       return fold(hash, '[Circular]' + key);
