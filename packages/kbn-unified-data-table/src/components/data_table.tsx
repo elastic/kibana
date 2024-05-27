@@ -773,7 +773,7 @@ export const UnifiedDataTable = ({
       headerRowHeightLines,
       customGridColumnsConfiguration,
       columnHeaders,
-      dataViewFieldEditor.userPermissions,
+      dataViewFieldEditor,
     ]
   );
 
