@@ -58,6 +58,7 @@ import {
   DEFAULT_SELECT_VALUE,
   useFleetServerHostsOptions,
 } from './hooks';
+import { GlobalDataTagsTable } from './global_data_tags_table';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -302,6 +303,18 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
           />
         </EuiFormRow>
+      </EuiDescribedFormGroup>
+      <EuiDescribedFormGroup
+        title={
+          <h3 data-test-subj="globalDataTagHeader">
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.globalDataTagHeader"
+              defaultMessage="Custom fields"
+            />
+          </h3>
+        }
+      >
+        {GlobalDataTagsTable()}
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={
