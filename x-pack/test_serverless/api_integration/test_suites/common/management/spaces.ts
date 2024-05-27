@@ -127,7 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .get('/api/spaces/space/default')
-            .set(internalRequestHeader)
+            .set(commonRequestHeader)
             .set(roleAuthc.apiKeyHeader));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
@@ -158,7 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .get('/api/spaces/space')
-            .set(internalRequestHeader)
+            .set(commonRequestHeader)
             .set(roleAuthc.apiKeyHeader));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({
@@ -191,7 +191,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           ({ body, status } = await supertestWithoutAuth
             .get('/internal/spaces/_active_space')
-            .set(internalRequestHeader)
+            .set(commonRequestHeader)
             .set(roleAuthc.apiKeyHeader));
           // expect a rejection because we're not using the internal header
           expect(body).toEqual({

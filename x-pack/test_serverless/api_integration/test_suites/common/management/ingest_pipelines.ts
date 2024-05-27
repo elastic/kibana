@@ -191,8 +191,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('should return an array of pipelines', async () => {
           const { body } = await supertestWithoutAuth
             .get(ingestPipelines.fixtures.apiBasePath)
-            .set('kbn-xsrf', 'xxx')
-            .set('x-elastic-internal-origin', 'xxx')
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
           expect(Array.isArray(body)).to.be(true);
@@ -214,8 +214,8 @@ export default function ({ getService }: FtrProviderContext) {
 
           const { body } = await supertestWithoutAuth
             .get(uri)
-            .set('kbn-xsrf', 'xxx')
-            .set('x-elastic-internal-origin', 'xxx')
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .expect(200);
 
           expect(body).to.eql({
