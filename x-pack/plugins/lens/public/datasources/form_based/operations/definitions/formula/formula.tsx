@@ -75,20 +75,13 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
       }
 
       const visibleOperationsMap = filterByVisibleOperation(operationDefinitionMap);
-      const { root, error } = tryToParse(column.params.formula, visibleOperationsMap);
-      if (error || !root) {
-        return error?.message
-          ? [
-              {
-                uniqueId: error.id,
-                message: error.message,
-              },
-            ]
-          : [];
+      const parseResponse = tryToParse(column.params.formula, visibleOperationsMap);
+      if ('error' in parseResponse) {
+        return [{ uniqueId: parseResponse.error.id, message: parseResponse.error.message }];
       }
 
       const errors = runASTValidation(
-        root,
+        parseResponse.root,
         layer,
         indexPattern,
         visibleOperationsMap,
@@ -113,19 +106,17 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
         ...managedColumns
           .flatMap(([id, col]) => {
             const def = visibleOperationsMap[col.operationType];
-            if (def?.getErrorMessage) {
-              // TOOD: it would be nice to have nicer column names here rather than `Part of <formula content>`
-              const messages = def.getErrorMessage(
+            // TOOD: it would be nice to have nicer column names here rather than `Part of <formula content>`
+            return (
+              def?.getErrorMessage?.(
                 layer,
                 id,
                 indexPattern,
                 dateRange,
                 visibleOperationsMap,
                 targetBars
-              );
-              return messages;
-            }
-            return [];
+              ) ?? []
+            );
           })
           // dedup messages with the same content
           .reduce((memo, message) => {

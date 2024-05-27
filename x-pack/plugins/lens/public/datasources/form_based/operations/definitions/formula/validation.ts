@@ -204,7 +204,7 @@ function getMessageFromId(
         // this is just a placeholder because the actual message comes from the query validator
         message: i18n.translate('xpack.lens.indexPattern.invalidQuery', {
           defaultMessage: 'Invalid {language} query, please check the syntax and retry',
-          values: { operation: meta.language },
+          values: { language: meta.language },
         }),
       };
     case 'wrongFirstArgument':
@@ -492,7 +492,7 @@ function getMessageFromId(
 export function tryToParse(
   formula: string,
   operations: Record<string, unknown>
-): { root: TinymathAST; error: null } | { root: null; error: ErrorWrapper } {
+): { root: TinymathAST } | { error: ErrorWrapper } {
   let root;
   try {
     root = parse(formula);
@@ -504,28 +504,13 @@ export function tryToParse(
     // TODO: not sure why we just consider the first error here
     const maybeQueryProblems = getRawQueryValidationError(formula, operations);
     if (maybeQueryProblems.length > 0) {
-      return {
-        root: null,
-        error: {
-          ...maybeQueryProblems[0],
-          locations: [],
-        },
-      };
+      return { error: { ...maybeQueryProblems[0], locations: [] } };
     }
     return {
-      root: null,
-      error: getMessageFromId(
-        {
-          id: 'failedParsing',
-          meta: {
-            expression: formula,
-          },
-        },
-        []
-      ),
+      error: getMessageFromId({ id: 'failedParsing', meta: { expression: formula } }, []),
     };
   }
-  return { root, error: null };
+  return { root };
 }
 
 export function runASTValidation(
@@ -768,15 +753,7 @@ function checkTopNodeReturnType(ast: TinymathAST): ErrorWrapper[] {
     (tinymathFunctions[ast.name]?.outputType || DEFAULT_RETURN_TYPE) !== DEFAULT_RETURN_TYPE
   ) {
     return [
-      getMessageFromId(
-        {
-          id: 'wrongReturnedType',
-          meta: {
-            text: ast.text,
-          },
-        },
-        getNodeLocation(ast)
-      ),
+      getMessageFromId({ id: 'wrongReturnedType', meta: { text: ast.text } }, getNodeLocation(ast)),
     ];
   }
   return [];
@@ -878,12 +855,7 @@ function runFullASTValidation(
         if (!canHaveParams(nodeOperation) && namedArguments.length) {
           errors.push(
             getMessageFromId(
-              {
-                id: 'cannotAcceptParameter',
-                meta: {
-                  operation: node.name,
-                },
-              },
+              { id: 'cannotAcceptParameter', meta: { operation: node.name } },
               getNodeLocation(node)
             )
           );
@@ -1151,12 +1123,7 @@ export function validateMathNodes(
     if (node.args.length > positionalArguments.length) {
       errors.push(
         getMessageFromId(
-          {
-            id: 'tooManyArguments',
-            meta: {
-              operation: node.name,
-            },
-          },
+          { id: 'tooManyArguments', meta: { operation: node.name } },
           getNodeLocation(node)
         )
       );
@@ -1172,12 +1139,7 @@ export function validateMathNodes(
     if (hasFieldAsArgument) {
       errors.push(
         getMessageFromId(
-          {
-            id: 'shouldNotHaveField',
-            meta: {
-              operation: node.name,
-            },
-          },
+          { id: 'shouldNotHaveField', meta: { operation: node.name } },
           getNodeLocation(node)
         )
       );

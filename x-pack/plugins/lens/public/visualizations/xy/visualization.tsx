@@ -802,31 +802,26 @@ export const getXyVisualization = ({
       });
     });
 
-    // Data error handling below here
-    const hasNoAccessors = ({ accessors }: XYDataLayerConfig) =>
-      accessors == null || accessors.length === 0;
-
-    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: XYDataLayerConfig) =>
-      seriesType.includes('percentage') && splitAccessor == null;
-
     // check if the layers in the state are compatible with this type of chart
     if (state && state.layers.length > 1) {
       // Order is important here: Y Axis is fundamental to exist to make it valid
-      const checks: Array<['Y' | 'Break down', (layer: XYDataLayerConfig) => boolean]> = [
-        ['Y', hasNoAccessors],
-        ['Break down', hasNoSplitAccessor],
-      ];
+      const yLayerValidation = validateLayersForDimension(
+        'y',
+        state.layers,
+        ({ accessors }) => accessors == null || accessors.length === 0 // has no accessor
+      );
+      if (!yLayerValidation.valid) {
+        errors.push(yLayerValidation.error);
+      }
 
-      for (const [dimension, criteria] of checks) {
-        const layerValidation = validateLayersForDimension(dimension, state.layers, criteria);
-        if (!layerValidation.valid) {
-          errors.push({
-            ...layerValidation.error,
-            severity: 'error',
-            fixableInEditor: true,
-            displayLocations: [{ id: 'visualization' }],
-          });
-        }
+      const breakDownLayerValidation = validateLayersForDimension(
+        'break_down',
+        state.layers,
+        ({ splitAccessor, seriesType }) =>
+          seriesType.includes('percentage') && splitAccessor == null // check if no split accessor
+      );
+      if (!breakDownLayerValidation.valid) {
+        errors.push(breakDownLayerValidation.error);
       }
     }
     // temporary fix for #87068
@@ -962,6 +957,7 @@ export const getXyVisualization = ({
           const { groupId } = axisGroup;
 
           warnings.push({
+            // TODO: can we push the group into the metadata and use a correct unique ID here?
             uniqueId: `${XY_MIXED_LOG_SCALE}${groupId}`,
             severity: 'warning',
             shortMessage: '',
@@ -991,6 +987,7 @@ export const getXyVisualization = ({
 
           axisGroup.mixedDomainSeries.forEach(({ accessor }) => {
             warnings.push({
+              // TODO: can we push the group into the metadata and use a correct unique ID here?
               uniqueId: `${XY_MIXED_LOG_SCALE_DIMENSION}${accessor}`,
               severity: 'warning',
               shortMessage: '',

@@ -761,14 +761,20 @@ export function getFormBasedDatasource({
         layerErrorMessages,
         (layerId, columnId) => {
           const layer = state.layers[layerId];
-          const invalidColumn = isColumnInvalid(
+          const column = layer.columns[columnId];
+          const indexPattern = framePublicAPI.dataViews.indexPatterns[layer.indexPatternId];
+          if (!column || !indexPattern) {
+            // this is a different issue that should be catched earlier
+            return false;
+          }
+          return isColumnInvalid(
             layer,
+            column,
             columnId,
-            framePublicAPI.dataViews.indexPatterns[layer.indexPatternId],
+            indexPattern,
             framePublicAPI.dateRange,
             uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET)
           );
-          return !invalidColumn;
         }
       );
 
@@ -1009,7 +1015,7 @@ function getLayerErrorMessages(
 function getInvalidDimensionErrorMessages(
   state: FormBasedPrivateState,
   currentErrorMessages: UserMessage[],
-  isValidColumn: (layerId: string, columnId: string) => boolean
+  isInvalidColumn: (layerId: string, columnId: string) => boolean
 ) {
   // generate messages for invalid columns
   const columnErrorMessages: UserMessage[] = Object.keys(state.layers)
@@ -1026,7 +1032,7 @@ function getInvalidDimensionErrorMessages(
           continue;
         }
 
-        if (!isValidColumn(layerId, columnId)) {
+        if (isInvalidColumn(layerId, columnId)) {
           messages.push({
             uniqueId: EDITOR_INVALID_DIMENSION,
             severity: 'error',

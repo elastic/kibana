@@ -1129,7 +1129,7 @@ invalid: "
       ).toHaveLength(0);
     });
 
-    it('returns return empty array if a fullReference operation is passed with the arguments', () => {
+    it('returns empty array if a fullReference operation is passed with the arguments', () => {
       expect(
         formulaOperation.getErrorMessage!(
           getNewLayerWithFormula('moving_average(average(bytes), window=7)'),

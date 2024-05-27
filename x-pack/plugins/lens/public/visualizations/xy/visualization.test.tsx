@@ -7,7 +7,6 @@
 
 import { type ExtraAppendLayerArg, getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
-import { EUIAmsterdamColorBlindPalette } from '@kbn/coloring';
 import {
   Operation,
   OperationDescriptor,

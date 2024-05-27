@@ -90,9 +90,11 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
       return true;
     },
     getErrorMessage: (layer: FormBasedLayer, columnId: string) => {
-      const errors: FieldBasedOperationErrorMessage[] = [
-        ...getErrorsForDateReference(layer, columnId, NORMALIZE_BY_UNIT_NAME),
-      ];
+      const errors: FieldBasedOperationErrorMessage[] = getErrorsForDateReference(
+        layer,
+        columnId,
+        NORMALIZE_BY_UNIT_NAME
+      );
 
       if (!(layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit) {
         errors.push({

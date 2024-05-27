@@ -259,14 +259,17 @@ export const supportedDataLayer = {
 
 // i18n ids cannot be dynamically generated, hence the function below
 function getMessageIdsForDimension(
-  dimension: 'Y' | 'Break down',
+  dimension: 'y' | 'break_down',
   layers: number[],
   isHorizontal: boolean
-): Pick<UserMessage, 'uniqueId' | 'shortMessage' | 'longMessage'> {
+): UserMessage {
   const layersList = layers.map((i: number) => i + 1).join(', ');
   switch (dimension) {
-    case 'Break down':
+    case 'break_down':
       return {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
         uniqueId: XY_BREAKDOWN_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
           defaultMessage: `Missing {axis}.`,
@@ -277,8 +280,11 @@ function getMessageIdsForDimension(
           values: { layers: layers.length, layersList, axis: 'Break down by axis' },
         }),
       };
-    case 'Y':
+    case 'y':
       return {
+        severity: 'error',
+        fixableInEditor: true,
+        displayLocations: [{ id: 'visualization' }],
         uniqueId: XY_Y_MISSING_AXIS,
         shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
           defaultMessage: `Missing {axis}.`,
@@ -371,14 +377,14 @@ export function getLayersByType(state: State, byType?: string) {
 }
 
 export function validateLayersForDimension(
-  dimension: 'Y' | 'Break down',
+  dimension: 'y' | 'break_down',
   allLayers: XYLayerConfig[],
   missingCriteria: (layer: XYDataLayerConfig) => boolean
 ):
   | { valid: true }
   | {
       valid: false;
-      error: Pick<UserMessage, 'uniqueId' | 'shortMessage' | 'longMessage'>;
+      error: UserMessage;
     } {
   const dataLayers = allLayers
     .map((layer, i) => ({ layer, originalIndex: i }))

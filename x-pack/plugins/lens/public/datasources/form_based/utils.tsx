@@ -113,14 +113,12 @@ export function getSamplingValue(layer: FormBasedLayer) {
 
 export function isColumnInvalid(
   layer: FormBasedLayer,
+  column: GenericIndexPatternColumn,
   columnId: string,
   indexPattern: IndexPattern,
-  dateRange: DateRange | undefined,
+  dateRange: DateRange,
   targetBars: number
 ): boolean {
-  const column: GenericIndexPatternColumn | undefined = layer.columns[columnId];
-  if (!column || !indexPattern) return false;
-
   // check also references for errors
   const referencesHaveErrors =
     'references' in column &&
@@ -148,7 +146,7 @@ function hasReferencesErrors(
   layer: FormBasedLayer,
   column: ReferenceBasedIndexPatternColumn,
   indexPattern: IndexPattern,
-  dateRange: DateRange | undefined,
+  dateRange: DateRange,
   targetBars: number
 ) {
   return column.references?.some((referenceId: string) => {
@@ -293,6 +291,7 @@ export function getSearchWarningMessages(
                 )
                 .map((col) => col.label)
             ).map((label) => ({
+              // TODO: we probably need to move label as part of the meta data
               uniqueId: `${UNSUPPORTED_DOWNSAMPLED_INDEX_AGG_PREFIX}--${label}`,
               severity: 'warning',
               fixableInEditor: true,
