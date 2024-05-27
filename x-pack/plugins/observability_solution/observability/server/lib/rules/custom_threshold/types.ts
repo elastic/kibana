@@ -78,6 +78,6 @@ export type CustomThresholdAlert = Omit<
 > & {
   // Defining a custom type for this because the schema generation script doesn't allow explicit null values
   [ALERT_EVALUATION_VALUES]?: Array<number | null>;
-  [ALERT_EVALUATION_THRESHOLD]?: Array<number | null>;
+  [ALERT_EVALUATION_THRESHOLD]?: Array<number[] | number | null>;
   [ALERT_GROUP]?: Group[];
 };

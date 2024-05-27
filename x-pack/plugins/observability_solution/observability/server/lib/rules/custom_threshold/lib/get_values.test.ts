@@ -23,7 +23,7 @@ describe('getValue helpers', () => {
     });
 
     test('should return undefined there is at least one multiple threshold comparator such as is between', () => {
-      expect(getThreshold(criteriaMultipleConditionsWithIsBetween)).toBeUndefined();
+      expect(getThreshold(criteriaMultipleConditionsWithIsBetween)).toEqual([[1, 2], 4]);
     });
   });
 

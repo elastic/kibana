@@ -20,20 +20,17 @@ export const getEvaluationValues = (
   }, []);
 };
 
-export const getThreshold = (criteria: CustomMetricExpressionParams[]): number[] | undefined => {
-  let hasMultipleThresholdComparator = false;
+export const getThreshold = (
+  criteria: CustomMetricExpressionParams[]
+): Array<number[] | number> | undefined => {
   const thresholds = criteria
     .map((c) => c.threshold)
-    .reduce((acc: number[], t) => {
+    .reduce((acc: Array<number[] | number>, t) => {
       if (t.length !== 1) {
-        hasMultipleThresholdComparator = true;
-        return acc;
+        return acc.concat([t]);
       }
-      return acc.concat(t[0]);
+      return acc.concat(t);
     }, []);
-
-  // We don't save threshold if at least one of the comparators is a multiple threshold one such as 'in between'
-  if (hasMultipleThresholdComparator) return undefined;
 
   return thresholds;
 };

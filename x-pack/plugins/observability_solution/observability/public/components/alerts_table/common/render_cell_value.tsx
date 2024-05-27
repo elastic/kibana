@@ -21,6 +21,7 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_START,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_EVALUATION_THRESHOLD,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
@@ -111,6 +112,9 @@ export const getRenderCellValue = ({
       });
       const values = getRenderValue(valuesField);
       return valuesField ? values : value;
+    case ALERT_EVALUATION_THRESHOLD:
+      // TODO: handle range threshold
+      return value;
     case ALERT_REASON:
       const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
       if (!observabilityRuleTypeRegistry) return <>{value}</>;
