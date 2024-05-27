@@ -15,13 +15,6 @@ import {
   ExternalIncidentServiceSecretConfigurationSchema,
 } from './schema';
 
-// config definition
-export enum CasesWebhookMethods {
-  PATCH = 'patch',
-  POST = 'post',
-  PUT = 'put',
-}
-
 // config
 export type CasesWebhookPublicConfigurationType = TypeOf<
   typeof ExternalIncidentServiceConfigurationSchema
