@@ -38,6 +38,7 @@ pageLoadAssetSize:
   discover: 99999
   discoverEnhanced: 42730
   discoverShared: 17111
+  esqlDatatable: 30000
   embeddable: 87309
   embeddableEnhanced: 22107
   enterpriseSearch: 50858
