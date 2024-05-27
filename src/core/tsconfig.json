@@ -106,7 +106,6 @@
     "@kbn/utils",
     "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/core-http-context-server-internal",
-    "@kbn/core-test-helpers-so-type-serializer",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/doc-links",
     "@kbn/core-status-server-internal",
