@@ -15,7 +15,7 @@
       "kibanaReact",
       "kibanaUtils",
       "dataViews",
-      "discover",
+      "unifiedDocViewer"
     ]
   }
 }

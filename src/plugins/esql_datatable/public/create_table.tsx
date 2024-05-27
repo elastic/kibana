@@ -12,7 +12,6 @@ import type { ESQLRow } from '@kbn/es-types';
 import type { AggregateQuery } from '@kbn/es-query';
 import useAsync from 'react-use/lib/useAsync';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import { DiscoverGridFlyout } from '@kbn/discover-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type {
   DatatableColumn,
@@ -24,6 +23,7 @@ import { DataLoadingState } from '@kbn/unified-data-table';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { untilPluginStartServicesReady } from './kibana_services';
+import { RowViewer } from './row_flyout_viewer';
 
 interface ESQLDatatableProps {
   rows: ESQLRow[];
@@ -71,8 +71,9 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
       displayedColumns: string[],
       customColumnsMeta?: DataTableColumnsMeta
     ) => (
-      <DiscoverGridFlyout
+      <RowViewer
         dataView={props.dataView}
+        toastNotifications={deps?.core.notifications}
         hit={hit}
         hits={displayedRows}
         columns={displayedColumns}
@@ -91,7 +92,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
         query={props.query}
       />
     ),
-    [activeColumns, props.dataView, props.query]
+    [activeColumns, deps?.core.notifications, props.dataView, props.query]
   );
 
   if (loading || !deps || !UnifiedDataTable) return <EuiLoadingSpinner />;

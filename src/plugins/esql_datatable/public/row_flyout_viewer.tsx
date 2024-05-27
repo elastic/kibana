@@ -19,7 +19,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiSpacer,
   EuiPortal,
   EuiPagination,
   keys,
@@ -33,19 +32,18 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableColumnsMeta } from '@kbn/unified-data-table';
 import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { useFlyoutActions } from './use_flyout_actions';
-import { useDiscoverCustomization } from '../../customizations';
-import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
 
-export interface DiscoverGridFlyoutProps {
+export interface RowViewerProps {
   savedSearchId?: string;
   filters?: Filter[];
+  toastNotifications?: NotificationsStart;
   query?: Query | AggregateQuery;
   columns: string[];
   columnsMeta?: DataTableColumnsMeta;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
+  flyoutType?: 'push' | 'overlay';
   dataView: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
@@ -60,31 +58,29 @@ function getIndexByDocId(hits: DataTableRecord[], id: string) {
   });
 }
 
-export const FLYOUT_WIDTH_KEY = 'discover:flyoutWidth';
+export const FLYOUT_WIDTH_KEY = 'esqlTable:flyoutWidth';
 /**
  * Flyout displaying an expanded Elasticsearch document
  */
-export function DiscoverGridFlyout({
+export function RowViewer({
   hit,
   hits,
   dataView,
   columns,
   columnsMeta,
-  savedSearchId,
-  filters,
+  toastNotifications,
   query,
+  flyoutType = 'push',
   onFilter,
   onClose,
   onRemoveColumn,
   onAddColumn,
   setExpandedDoc,
-}: DiscoverGridFlyoutProps) {
-  const services = useDiscoverServices();
-  const flyoutCustomization = useDiscoverCustomization('flyout');
+}: RowViewerProps) {
   const { euiTheme } = useEuiTheme();
   const isXlScreen = useIsWithinMinBreakpoint('xl');
   const DEFAULT_WIDTH = euiTheme.base * 34;
-  const defaultWidth = flyoutCustomization?.size ?? DEFAULT_WIDTH; // Give enough room to search bar to not wrap
+  const defaultWidth = DEFAULT_WIDTH; // Give enough room to search bar to not wrap
   const [flyoutWidth, setFlyoutWidth] = useLocalStorage(FLYOUT_WIDTH_KEY, defaultWidth);
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
@@ -125,40 +121,30 @@ export function DiscoverGridFlyout({
     [activePage, setPage]
   );
 
-  const { flyoutActions } = useFlyoutActions({
-    actions: flyoutCustomization?.actions,
-    dataView,
-    rowIndex: hit.raw._index,
-    rowId: hit.raw._id,
-    columns,
-    filters,
-    savedSearchId,
-  });
-
   const addColumn = useCallback(
     (columnName: string) => {
       onAddColumn(columnName);
-      services.toastNotifications.addSuccess(
-        i18n.translate('discover.grid.flyout.toastColumnAdded', {
+      toastNotifications?.toasts?.addSuccess?.(
+        i18n.translate('esqlDatatable.grid.flyout.toastColumnAdded', {
           defaultMessage: `Column '{columnName}' was added`,
           values: { columnName },
         })
       );
     },
-    [onAddColumn, services.toastNotifications]
+    [onAddColumn, toastNotifications]
   );
 
   const removeColumn = useCallback(
     (columnName: string) => {
       onRemoveColumn(columnName);
-      services.toastNotifications.addSuccess(
-        i18n.translate('discover.grid.flyout.toastColumnRemoved', {
+      toastNotifications?.toasts?.addSuccess?.(
+        i18n.translate('esqlDatatable.grid.flyout.toastColumnRemoved', {
           defaultMessage: `Column '{columnName}' was removed`,
           values: { columnName },
         })
       );
     },
-    [onRemoveColumn, services.toastNotifications]
+    [onRemoveColumn, toastNotifications]
   );
 
   const renderDefaultContent = useCallback(
@@ -172,7 +158,7 @@ export function DiscoverGridFlyout({
         onAddColumn={addColumn}
         onRemoveColumn={removeColumn}
         textBasedHits={isEsqlQuery ? hits : undefined}
-        docViewsRegistry={flyoutCustomization?.docViewsRegistry}
+        docViewsRegistry={undefined}
       />
     ),
     [
@@ -185,44 +171,26 @@ export function DiscoverGridFlyout({
       isEsqlQuery,
       onFilter,
       removeColumn,
-      flyoutCustomization?.docViewsRegistry,
     ]
   );
 
-  const contentActions = useMemo(
-    () => ({
-      filter: onFilter,
-      onAddColumn: addColumn,
-      onRemoveColumn: removeColumn,
-    }),
-    [onFilter, addColumn, removeColumn]
-  );
-
-  const bodyContent = flyoutCustomization?.Content ? (
-    <flyoutCustomization.Content
-      actions={contentActions}
-      doc={actualHit}
-      renderDefaultContent={renderDefaultContent}
-    />
-  ) : (
-    renderDefaultContent()
-  );
+  const bodyContent = renderDefaultContent();
 
   const defaultFlyoutTitle = isEsqlQuery
-    ? i18n.translate('discover.grid.tableRow.docViewerEsqlDetailHeading', {
+    ? i18n.translate('esqlDatatable.grid.tableRow.docViewerEsqlDetailHeading', {
         defaultMessage: 'Result',
       })
-    : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
+    : i18n.translate('esqlDatatable.grid.tableRow.docViewerDetailHeading', {
         defaultMessage: 'Document',
       });
-  const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
+  const flyoutTitle = defaultFlyoutTitle;
 
   return (
     <EuiPortal>
       <EuiFlyoutResizable
         className="DiscoverFlyout" // used to override the z-index of the flyout from SecuritySolution
         onClose={onClose}
-        type="push"
+        type={flyoutType}
         size={flyoutWidth}
         pushMinBreakpoint="xl"
         data-test-subj="docTableDetailsFlyout"
@@ -258,7 +226,7 @@ export function DiscoverGridFlyout({
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination
-                  aria-label={i18n.translate('discover.grid.flyout.documentNavigation', {
+                  aria-label={i18n.translate('esqlDatatable.grid.flyout.documentNavigation', {
                     defaultMessage: 'Document navigation',
                   })}
                   pageCount={pageCount}
@@ -270,17 +238,11 @@ export function DiscoverGridFlyout({
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          {isEsqlQuery || !flyoutActions.length ? null : (
-            <>
-              <EuiSpacer size="s" />
-              <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
-            </>
-          )}
         </EuiFlyoutHeader>
         <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
-            {i18n.translate('discover.grid.flyout.close', {
+            {i18n.translate('esqlDatatable.grid.flyout.close', {
               defaultMessage: 'Close',
             })}
           </EuiButtonEmpty>
@@ -291,4 +253,4 @@ export function DiscoverGridFlyout({
 }
 
 // eslint-disable-next-line import/no-default-export
-export default DiscoverGridFlyout;
+export default RowViewer;
