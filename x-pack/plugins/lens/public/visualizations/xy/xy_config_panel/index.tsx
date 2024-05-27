@@ -453,15 +453,17 @@ export const XyToolbar = memo(function XyToolbar(
               )?.name
             }
             legendTitle={state?.legend.title}
-            onLegendTitleChange={(legendTitle) => {
+            onLegendTitleChange={({ title, visible }) => {
               setState({
                 ...state,
                 legend: {
                   ...state.legend,
-                  title: legendTitle,
+                  title,
+                  isTitleVisible: visible,
                 },
               });
             }}
+            isTitleVisible={state?.legend.isTitleVisible}
             onDisplayChange={(optionId) => {
               const newMode = legendOptions.find(({ id }) => id === optionId)!.value;
               if (newMode === 'auto') {
@@ -623,7 +625,7 @@ export const XyToolbar = memo(function XyToolbar(
               }
               orientation={labelsOrientation.yLeft}
               setOrientation={onLabelsOrientationChange}
-              isAxisTitleVisible={axisTitlesVisibilitySettings.yLeft}
+              isTitleVisible={axisTitlesVisibilitySettings.yLeft}
               extent={state?.yLeftExtent || { mode: 'full' }}
               setExtent={setExtentFn('yLeftExtent')}
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
@@ -646,7 +648,7 @@ export const XyToolbar = memo(function XyToolbar(
             toggleGridlinesVisibility={onGridlinesVisibilitySettingsChange}
             orientation={labelsOrientation.x}
             setOrientation={onLabelsOrientationChange}
-            isAxisTitleVisible={axisTitlesVisibilitySettings.x}
+            isTitleVisible={axisTitlesVisibilitySettings.x}
             endzonesVisible={!state?.hideEndzones}
             setEndzoneVisibility={onChangeEndzoneVisiblity}
             currentTimeMarkerVisible={state?.showCurrentTimeMarker}
@@ -691,7 +693,7 @@ export const XyToolbar = memo(function XyToolbar(
               orientation={labelsOrientation.yRight}
               setOrientation={onLabelsOrientationChange}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'right', state)}
-              isAxisTitleVisible={axisTitlesVisibilitySettings.yRight}
+              isTitleVisible={axisTitlesVisibilitySettings.yRight}
               extent={state?.yRightExtent || { mode: 'full' }}
               setExtent={setExtentFn('yRightExtent')}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}

@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { AxisTitleSettings, AxisTitleSettingsProps } from './axis_title_settings';
+import { ToolbarTitleSettings, TitleSettingsProps } from './toolbar_title_settings';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-const renderAxisTicksSettings = (propsOverrides?: Partial<AxisTitleSettingsProps>) => {
+const renderAxisTicksSettings = (propsOverrides?: Partial<TitleSettingsProps>) => {
   const rtlRender = render(
-    <AxisTitleSettings
-      axisTitle="My custom X axis title"
-      axis="x"
-      isAxisTitleVisible={true}
+    <ToolbarTitleSettings
+      title="My custom X axis title"
+      settingId="x"
+      isTitleVisible={true}
       updateTitleState={jest.fn()}
       {...propsOverrides}
     />
@@ -35,33 +35,33 @@ describe('Axes Title settings', () => {
   });
 
   it('should set the mode to Auto if no title is passed over', () => {
-    const { getAxisTitleInput } = renderAxisTicksSettings({ axisTitle: undefined });
+    const { getAxisTitleInput } = renderAxisTicksSettings({ title: undefined });
     expect(getAxisTitleInput()).toHaveValue('');
   });
 
   it('should set the mode to Auto if empty title is passed over', () => {
-    const { getAxisTitleInput } = renderAxisTicksSettings({ axisTitle: '' });
+    const { getAxisTitleInput } = renderAxisTicksSettings({ title: '' });
     expect(getAxisTitleInput()).toHaveValue('');
   });
 
   it('should set the mode to None if empty title is passed over and the visibility is set to false', () => {
     const { getAxisTitleSelect } = renderAxisTicksSettings({
-      axisTitle: '',
-      isAxisTitleVisible: false,
+      title: '',
+      isTitleVisible: false,
     });
     expect(getAxisTitleSelect()).toHaveValue('none');
   });
 
   it('should disable the input text if the switch is off', () => {
     const { getAxisTitleInput } = renderAxisTicksSettings({
-      isAxisTitleVisible: false,
+      isTitleVisible: false,
     });
     expect(getAxisTitleInput()).toBeDisabled();
   });
 
   it('should allow custom mode on user input even with empty string', () => {
     const { getAxisTitleSelect, getAxisTitleInput } = renderAxisTicksSettings({
-      axisTitle: '',
+      title: '',
     });
     userEvent.selectOptions(getAxisTitleSelect(), 'custom');
     expect(getAxisTitleSelect()).toHaveValue('custom');
@@ -71,8 +71,8 @@ describe('Axes Title settings', () => {
   it('should reset the label when moving from custom to auto', async () => {
     const updateTitleStateSpy = jest.fn();
     const { getAxisTitleSelect, getAxisTitleInput } = renderAxisTicksSettings({
-      isAxisTitleVisible: true,
-      axisTitle: 'Custom title',
+      isTitleVisible: true,
+      title: 'Custom title',
       updateTitleState: updateTitleStateSpy,
     });
     userEvent.selectOptions(getAxisTitleSelect(), 'auto');

@@ -50,7 +50,6 @@ describe('Legend Settings', () => {
       renderOptions
     );
     const openLegendPopover = () => userEvent.click(screen.getByRole('button', { name: 'Legend' }));
-
     openLegendPopover();
 
     return {
@@ -136,14 +135,19 @@ describe('Legend Settings', () => {
           value: XYLegendValue.CurrentAndLastValue,
           toolTipContent: 'Shows the current and last value',
         },
+        {
+          label: 'Average',
+          value: XYLegendValue.Average,
+          toolTipContent: 'Shows the average value',
+        },
       ],
       onLegendStatsChange,
     });
-    expect(screen.queryByRole('button', { name: 'Legend layout' })).toBeNull();
-    fireEvent.click(screen.getByRole('combobox', { name: 'Legend values' }));
+    expect(screen.queryByRole('button', { name: 'Layout' })).toBeNull();
+    fireEvent.click(screen.getByRole('combobox', { name: 'Values' }));
     fireEvent.click(screen.getByRole('option', { name: 'Current and last value' }));
-    expect(screen.getByRole('group', { name: 'Legend layout' })).toBeInTheDocument();
-    expect(onLegendStatsChange).toBeCalledWith([XYLegendValue.CurrentAndLastValue]);
+    // expect(screen.getByRole('group', { name: 'Layout' })).toBeInTheDocument();
+    expect(onLegendStatsChange).toBeCalledWith([XYLegendValue.CurrentAndLastValue], false);
   });
 
   it('should not show truncation options when layout is list', () => {

@@ -831,7 +831,7 @@ export function XYChart({
             // TODO: use legendLayout when list is implemented
             // legendLayout={legend.layout}
             legendValues={legend.legendStats}
-            legendTitle={getLegendTitle(legend.title, dataLayers[0])}
+            legendTitle={getLegendTitle(legend.title, dataLayers[0], legend.isTitleVisible)}
             theme={[
               {
                 barSeriesStyle: {
@@ -1047,8 +1047,15 @@ const defaultLegendTitle = i18n.translate('expressionXY.xyChart.legendTitle', {
   defaultMessage: 'Legend',
 });
 
-function getLegendTitle(title: string | undefined, layer?: CommonXYDataLayerConfig) {
-  if (title) {
+function getLegendTitle(
+  title: string | undefined,
+  layer?: CommonXYDataLayerConfig,
+  isTitleVisible?: boolean
+) {
+  if (!isTitleVisible) {
+    return undefined;
+  }
+  if (typeof title === 'string') {
     return title;
   }
   if (!layer) {

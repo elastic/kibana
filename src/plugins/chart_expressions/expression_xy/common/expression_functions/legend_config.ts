@@ -112,6 +112,12 @@ export const legendConfigFunction: LegendConfigFn = {
         defaultMessage: 'Specifies the legend title.',
       }),
     },
+    isTitleVisible: {
+      types: ['boolean'],
+      help: i18n.translate('expressionXY.legendConfig.isTitleVisible.help', {
+        defaultMessage: 'Specifies if the legend title is visible.',
+      }),
+    },
     layout: {
       types: ['string'],
       help: i18n.translate('expressionXY.legendConfig.legendLayout.help', {

@@ -21,13 +21,12 @@ import { Position, VerticalAlignment, HorizontalAlignment } from '@elastic/chart
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { XYLegendValue, LegendLayout } from '@kbn/visualizations-plugin/common/constants';
-import { Stats } from '@kbn/usage-collection-plugin/common/types';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';
 import { ColumnsNumberSetting } from './layout/columns_number_setting';
 import { LegendSizeSettings } from './size/legend_size_settings';
 import { nonNullable } from '../../utils';
-import { LegendTitleSettings } from './title/legend_title_settings';
+import { ToolbarTitleSettings } from '../axis/title/toolbar_title_settings';
 
 export interface LegendSettingsPopoverProps<LegendStats extends string = XYLegendValue> {
   /**
@@ -150,7 +149,8 @@ export interface LegendSettingsPopoverProps<LegendStats extends string = XYLegen
   showAutoLegendSizeOption: boolean;
   titlePlaceholder?: string;
   legendTitle?: string;
-  onLegendTitleChange?: (title?: string) => void;
+  isTitleVisible?: boolean;
+  onLegendTitleChange?: (state: { title?: string; visible: boolean }) => void;
 }
 
 const DEFAULT_TRUNCATE_LINES = 1;
@@ -214,12 +214,26 @@ const PANEL_STYLE = {
 //   },
 // ];
 
+const legendTitleStrings = {
+  header: i18n.translate('xpack.lens.label.shared.legendHeader', {
+    defaultMessage: 'Title',
+  }),
+  label: i18n.translate('xpack.lens.shared.legendNameLabel', {
+    defaultMessage: 'Title',
+  }),
+  placeholder: i18n.translate('xpack.lens.shared.overwriteLegendTitle', {
+    defaultMessage: 'Overwrite title',
+  }),
+  getDataTestSubj: () => `lnsLegendTitle`,
+};
+
 export function LegendSettingsPopover<LegendStats extends string = XYLegendValue>({
   allowedLegendStats,
   legendOptions,
   mode,
   legendLayout,
   legendTitle,
+  isTitleVisible,
   onLegendTitleChange,
   onLegendLayoutChange = noop,
   onDisplayChange,
@@ -283,13 +297,13 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
         <EuiFormRow
           display="columnCompressed"
           label={i18n.translate('xpack.lens.shared.legendValues', {
-            defaultMessage: 'Legend values',
+            defaultMessage: 'Values',
           })}
           fullWidth
         >
           <EuiComboBox
             aria-label={i18n.translate('xpack.lens.shared.legendValues', {
-              defaultMessage: 'Legend values',
+              defaultMessage: 'Values',
             })}
             placeholder={i18n.translate('xpack.lens.shared.legendValuesPlaceholder', {
               defaultMessage: 'Select one or more values to display',
@@ -313,9 +327,12 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
         legendStats?.length &&
         onLegendTitleChange
       ) && (
-        <LegendTitleSettings
+        <ToolbarTitleSettings
+          settingId="legend"
           title={legendTitle}
+          isTitleVisible={!!isTitleVisible}
           updateTitleState={onLegendTitleChange}
+          strings={legendTitleStrings}
           placeholder={titlePlaceholder}
         />
       )}
