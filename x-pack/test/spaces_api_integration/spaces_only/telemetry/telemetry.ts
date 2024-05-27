@@ -11,42 +11,37 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { MockTelemetryFindings, data } from './data';
-
-const KIBANA_INDEX = '.kibana';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const es = getService('es');
   const supertest = getService('supertest');
-
-  const index = {
-    remove: () =>
-      es.deleteByQuery({
-        index: KIBANA_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-      }),
-
-    add: async (mockTelemetryFindings: MockTelemetryFindings[]) => {
-      const operations = mockTelemetryFindings.flatMap((doc) => [
-        { index: { _index: KIBANA_INDEX } },
-        doc,
-      ]);
-
-      const response = await es.bulk({ refresh: 'wait_for', index: KIBANA_INDEX, operations });
-      expect(response.errors).to.eql(false);
-    },
-  };
+  const spacesService = getService('spaces');
 
   describe('Verify disabledFeatures telemetry payloads', async () => {
+    beforeEach(async () => {
+      await spacesService.create({
+        id: 'space-1',
+        name: 'space-1',
+        description: 'This is your space-1!',
+        color: '#00bfb3',
+        disabledFeatures: ['canvas', 'maps'],
+      });
+
+      await spacesService.create({
+        id: 'space-2',
+        name: 'space-2',
+        description: 'This is your space-2!',
+        color: '#00bfb3',
+        disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps'],
+      });
+    });
+
     afterEach(async () => {
-      await index.remove();
+      await spacesService.delete('space-1');
+      await spacesService.delete('space-2');
     });
 
     it('includes only disabledFeatures findings', async () => {
-      await index.add(data.disabledFeaturesFindings);
-
       const {
         body: [{ stats: apiResponse }],
       } = await supertest
