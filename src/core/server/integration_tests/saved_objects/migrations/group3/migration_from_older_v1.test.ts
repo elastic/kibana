@@ -139,7 +139,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
             typeof modelVersions === 'function' ? modelVersions() : modelVersions ?? {};
 
           Object.entries(modelVersionCreateSchemas).forEach(([key, modelVersion]) => {
-            if (modelVersion.schemas?.create) {
+            if (modelVersion.schemas?.create || modelVersion.changes?.length) {
               migrationsKeys.push(modelVersionToVirtualVersion(key));
             }
           });
