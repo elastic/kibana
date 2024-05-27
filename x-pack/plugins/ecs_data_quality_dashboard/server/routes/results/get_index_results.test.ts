@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RESULTS_INDICES_PATTERN_ROUTE_PATH } from '../../../common/constants';
+import { GET_INDEX_RESULTS } from '../../../common/constants';
 import { serverMock } from '../../__mocks__/server';
 import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
@@ -15,7 +15,7 @@ import { resultDocument } from './results.mock';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ResultDocument } from '../../schemas/result';
 import type { CheckIndicesPrivilegesParam } from './privileges';
-import { getResultsIndicesPatternRoute, getQuery } from './get_results_indices_pattern';
+import { getIndexResultsRoute, getQuery } from './get_index_results';
 
 const searchResponse = {
   hits: { hits: [{ _source: resultDocument }] },
@@ -39,12 +39,12 @@ const createTestSetup = () => {
     [resultDocument.indexName]: {},
   });
   context.core.elasticsearch.client.asInternalUser.search.mockResolvedValue(searchResponse);
-  getResultsIndicesPatternRoute(server.router, logger);
+  getIndexResultsRoute(server.router, logger);
 
   return { server, context, logger };
 };
 
-describe('getResultsIndicesPatternRoute route', () => {
+describe('getIndexResultsRoute route', () => {
   beforeEach(() => jest.clearAllMocks());
   describe('when querying', () => {
     describe('when the request is successful', () => {
@@ -53,7 +53,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -77,7 +77,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -103,7 +103,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -123,7 +123,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
           query: { from: 10 },
         });
@@ -157,7 +157,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
           query: { limit: 5 },
         });
@@ -191,7 +191,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
           query: { outcome: 'pass' },
         });
@@ -229,7 +229,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
           query: { outcome: 'fail' },
         });
@@ -267,7 +267,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
           query: { startDate: '2023-01-01T00:00:00Z' },
         });
@@ -308,7 +308,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
           query: { endDate: '2023-12-31T23:59:59Z' },
         });
@@ -348,7 +348,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
           query: { startDate: '2023-01-01T00:00:00Z', endDate: '2023-12-31T23:59:59Z' },
         });
@@ -392,7 +392,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -416,7 +416,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -454,7 +454,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -475,7 +475,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -494,7 +494,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -514,7 +514,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
         });
 
@@ -535,7 +535,7 @@ describe('getResultsIndicesPatternRoute route', () => {
 
         const req = requestMock.create({
           method: 'get',
-          path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+          path: GET_INDEX_RESULTS,
           params: {},
         });
 

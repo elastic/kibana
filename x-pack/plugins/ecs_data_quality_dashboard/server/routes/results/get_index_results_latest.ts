@@ -7,7 +7,7 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import { INTERNAL_API_VERSION, RESULTS_INDICES_LATEST_ROUTE_PATH } from '../../../common/constants';
+import { INTERNAL_API_VERSION, GET_INDEX_RESULTS_LATEST } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { GetResultsIndicesLatestParams } from '../../schemas/result';
@@ -33,13 +33,13 @@ export interface LatestAggResponseBucket {
   latest_doc: { hits: { hits: Array<{ _source: ResultDocument }> } };
 }
 
-export const getResultsIndicesLatestRoute = (
+export const getIndexResultsLatestRoute = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,
   logger: Logger
 ) => {
   router.versioned
     .get({
-      path: RESULTS_INDICES_LATEST_ROUTE_PATH,
+      path: GET_INDEX_RESULTS_LATEST,
       access: 'internal',
       options: { tags: ['access:securitySolution'] },
     })

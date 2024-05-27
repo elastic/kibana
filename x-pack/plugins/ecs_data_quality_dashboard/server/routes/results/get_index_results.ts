@@ -8,10 +8,7 @@
 import type { IRouter, Logger } from '@kbn/core/server';
 
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import {
-  INTERNAL_API_VERSION,
-  RESULTS_INDICES_PATTERN_ROUTE_PATH,
-} from '../../../common/constants';
+import { INTERNAL_API_VERSION, GET_INDEX_RESULTS } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import type { ResultDocument } from '../../schemas/result';
@@ -104,13 +101,13 @@ export const getQuery = ({
   return result;
 };
 
-export const getResultsIndicesPatternRoute = (
+export const getIndexResultsRoute = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,
   logger: Logger
 ) => {
   router.versioned
     .get({
-      path: RESULTS_INDICES_PATTERN_ROUTE_PATH,
+      path: GET_INDEX_RESULTS,
       access: 'internal',
       options: { tags: ['access:securitySolution'] },
     })
