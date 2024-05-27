@@ -36,8 +36,11 @@ export const getOAuthJwtAccessToken = async ({
     const { connectorToken: token, hasErrors: errors } = await connectorTokenClient.get({
       connectorId,
     });
+
     connectorToken = token;
     hasErrors = errors;
+
+    console.log('TOKEN | hasErrors', connectorToken, hasErrors);
   }
 
   if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
