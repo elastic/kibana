@@ -92,7 +92,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
       await esTestIndexTool.setup();
     });
     afterEach(async () => {
-      objectRemover.removeAll();
+      await objectRemover.removeAll();
       await esTestIndexTool.destroy();
     });
     after(async () => {

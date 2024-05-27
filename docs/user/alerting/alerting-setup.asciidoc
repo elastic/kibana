@@ -54,6 +54,8 @@ To add rule actions and test connectors, you must also have `read` privileges fo
 To change rule settings, you must have `all` privileges for the *Rules Settings* privilege or `all` privileges for the appropriate sub-feature such as flapping detection.
 For more information on configuring roles that provide access to features, go to <<kibana-feature-privileges>>.
 
+preview:[] To create a rule that uses the <<cases-action-type,Cases connector>>, you must also have `all` privileges for the *Cases* feature.
+
 Each rule also has a rule visibility value (or `consumer` in the APIs), which affects the {kib} feature privileges that are required to access it.
 To view or edit a rule that has a `Stack Rules` rule visibility, for example, you must have the appropriate *Management > {stack-rules-feature}* feature privileges.
 

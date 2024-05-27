@@ -52,7 +52,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expectedHttpCode = 200,
       auth = { user: superUser, space: null },
     }: {
-      superTestService?: SuperTest.SuperTest<SuperTest.Test>;
+      superTestService?: SuperTest.Agent;
       data: object;
       expectedHttpCode?: number;
       auth?: { user: User; space: string | null };
