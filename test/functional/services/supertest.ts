@@ -8,11 +8,25 @@
 
 import { format as formatUrl } from 'url';
 
-import supertest from 'supertest';
+import supertest, { AgentOptions } from 'supertest';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
   const config = getService('config');
-  const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
-  return supertest(kibanaServerUrl);
+  const kibanaServerConfig = config.get('servers.kibana');
+  const kibanaServerUrl = formatUrl(kibanaServerConfig);
+
+  const options: AgentOptions = {};
+  if (kibanaServerConfig.certificateAuthorities) {
+    options.ca = kibanaServerConfig.certificateAuthorities;
+  }
+
+  // or add to server url in packages/kbn-test/src/functional_test_runner/lib/config/schema.ts maybe
+  const serverArgs = config.get('kbnTestServer.serverArgs', []) as string[];
+  const http2Enabled = serverArgs.includes('--server.protocol=http2');
+  if (http2Enabled) {
+    options.http2 = true;
+  }
+
+  return supertest(kibanaServerUrl, options);
 }

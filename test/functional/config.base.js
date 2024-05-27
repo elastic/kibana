@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { readFileSync } from 'fs';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 
@@ -16,7 +18,14 @@ export default async function ({ readConfigFile }) {
     pageObjects,
     services,
 
-    servers: commonConfig.get('servers'),
+    servers: {
+      ...commonConfig.get('servers'),
+      kibana: {
+        ...commonConfig.get('servers.kibana'),
+        protocol: 'https',
+        certificateAuthorities: [readFileSync(CA_CERT_PATH, 'utf-8')],
+      },
+    },
 
     esTestCluster: {
       ...commonConfig.get('esTestCluster'),
@@ -29,6 +38,14 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
+
+        // Enable HTTP2 and TLS
+        '--server.protocol=http2',
+        '--server.ssl.enabled=true',
+        `--server.ssl.key=${KBN_KEY_PATH}`,
+        `--server.ssl.certificate=${KBN_CERT_PATH}`,
+        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+
         // override default to not allow hiddenFromHttpApis saved object types access to the HTTP Apis. see https://github.com/elastic/dev/issues/2200
         '--savedObjects.allowHttpApiAccess=false',
 
@@ -107,6 +124,7 @@ export default async function ({ readConfigFile }) {
     },
     browser: {
       type: 'chrome',
+      acceptInsecureCerts: true,
     },
 
     security: {
