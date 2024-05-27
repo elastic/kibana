@@ -27,7 +27,11 @@ import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
 
-const getColumnDisplayName = (columnName, dataViewField, columnHeaders) => {
+const getColumnDisplayName = (
+  columnName: string,
+  dataViewField: any,
+  columnHeaders: Record<string, string>
+) => {
   if (columnHeaders?.[columnName]) {
     return columnHeaders[columnName];
   }
@@ -224,7 +228,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         dataViewField={dataViewField}
         headerRowHeight={headerRowHeight}
-        columnLabel={columnHeaders ? columnDisplayName : undefined}
+        columnLabel={columnHeaders?.[column.id]}
       />
     );
     if (numberOfColumns > 1) {
