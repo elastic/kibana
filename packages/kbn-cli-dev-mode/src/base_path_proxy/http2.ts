@@ -96,10 +96,13 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
 
   private async setupServer({ delayUntil }: Readonly<BasePathProxyServerOptions>) {
     const tlsOptions = getServerTLSOptions(this.httpConfig.ssl);
-    const server = http2.createSecureServer({
+    this.server = http2.createSecureServer({
       ...tlsOptions,
       rejectUnauthorized: false,
+      allowHTTP1: true,
     });
+
+    const server = this.server;
 
     const http2Agent = new Http2Agent();
 
