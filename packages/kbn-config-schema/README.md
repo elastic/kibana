@@ -468,9 +468,17 @@ __Notes:__
 
 Allows recursive runtime types to be defined.
 
-Takes a required generic type argument and a required string that represents the id of the schema that is tracked internally.
+Takes a required generic type argument and a required string that represents the id of the schema.
 
-Note: use of `meta.id` is required to associate the top-level schema with the ID used in the `schema.lazy()` call.
+It is recommended to pick a globally unique ID for your schema. Consider creating only IDs that are prefixed with your
+domain, e.g. `myPlugin_myRecursiveType`.
+
+IDs must be unique within a _schema ancestry_. You can use the same ID in multiple, separate schemas as long as they do not
+share a common ancestor object. However, if you want to generate OAS from your schema you must ensure a globally
+unique ID in order to avoid overriding schemas with the same ID.
+
+Note: use of `meta.id` is required to associate the schema with the ID used in the `schema.lazy()` call in order to
+create a recursive type (see usage).
 
 __Output type:__ `T`
 
@@ -481,7 +489,8 @@ interface RecursiveType {
   self: undefined | RecursiveType;
 }
 
-const id = 'recursive';
+// Do not assign this ID to any other schema to avoid collisions.
+const id = 'myPlugin_myRecursiveType';
 const object = schema.object(
   {
     name: schema.string(),
@@ -493,6 +502,7 @@ const object = schema.object(
 
 __Notes:__
 * Preferably use this sparingly and only to create recursive types.
+* Intended to be used only as properties within `schema.object()` types.
 
 ### References
 
