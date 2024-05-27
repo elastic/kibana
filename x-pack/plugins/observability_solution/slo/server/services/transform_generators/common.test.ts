@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fiveMinute, thirtyDays, twoMinute } from '../fixtures/duration';
+import { fiveMinute, twoMinute } from '../fixtures/duration';
 import { createSLO } from '../fixtures/slo';
 import { thirtyDaysRolling } from '../fixtures/time_window';
 import { getTimesliceTargetComparator, parseIndex, getFilterRange } from './common';
