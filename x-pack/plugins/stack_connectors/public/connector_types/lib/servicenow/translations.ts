@@ -459,7 +459,8 @@ export const ADDITIONAL_FIELDS_HELP = i18n.translate(
 export const ADDITIONAL_FIELDS_HELP_TEXT = i18n.translate(
   'xpack.stackConnectors.components.servicenow.additionalFieldsHelpTooltipText',
   {
-    defaultMessage: 'Add fields in JSON format',
+    defaultMessage:
+      'Additional fields in JSON format as defined in the Elastic ServiceNow application',
   }
 );
 
