@@ -15,7 +15,6 @@ export function calculateThroughputWithRange({
   value: number;
 }) {
   const durationAsMinutes = (end - start) / 1000 / 60;
-  console.log(durationAsMinutes);
   return value / durationAsMinutes;
 }
 

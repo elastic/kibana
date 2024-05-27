@@ -31,9 +31,11 @@ export function createTracesServiceEntitiesAggregator() {
           'entity.indexPatterns': ['metrics-*'],
           'entity.data_stream.type': ['metrics'],
           'entity.agent.name': event['agent.name'],
-          'entity.metric.latency': createPivotTransform(),
-          'entity.metric.failedTransactionRate': createPivotTransform(),
-          'entity.metric.throughput': createPivotTransform(),
+          'entity.metric': {
+            latency: createPivotTransform(),
+            failedTransactionRate: createPivotTransform(),
+            throughput: createPivotTransform(),
+          },
         };
       },
     },
@@ -42,31 +44,30 @@ export function createTracesServiceEntitiesAggregator() {
       const duration = event['transaction.duration.us']!;
       const outcome = event['event.outcome'];
 
+      console.log('w/ou', entity['entity.metric']);
+      console.log('w', entity['entity.metric'].latency);
       // @ts-expect-error
-      entity['entity.metric.latency'].record({ groupBy: entityId, value: duration });
+      entity['entity.metric'].latency.record({ groupBy: entityId, value: duration });
       // @ts-expect-error
-      entity['entity.metric.failedTransactionRate'].record({
+      entity['entity.metric'].failedTransactionRate.record({
         groupBy: entityId,
         value: outcome === 'failure' ? 0 : 1,
       });
-
-      // @ts-expect-error
-      entity['entity.metric.latency'].record({ groupBy: entityId, value: duration });
     },
     (entity) => {
       const entityId = entity['entity.id'];
       // @ts-expect-error
-      const latency = entity['entity.metric.latency'].avg({ key: entityId });
+      const latency = entity['entity.metric'].latency.avg({ key: entityId });
       // @ts-expect-error
-      const failedTransactionRate = entity['entity.metric.failedTransactionRate'].rate({
+      const failedTransactionRate = entity['entity.metric'].failedTransactionRate.rate({
         key: entityId,
         type: 0,
       });
 
-      entity['entity.metric.latency'] = latency.value;
-      entity['entity.metric.failedTransactionRate'] = failedTransactionRate.value;
-      console.log('latency', latency);
-      entity['entity.metric.throughput'] = latency.total / (5 / 1000 / 60);
+      entity['entity.metric'].latency = latency.value;
+      entity['entity.metric'].failedTransactionRate = failedTransactionRate.value;
+      // Hardcoded value for now to match the data trasform
+      entity['entity.metric'].throughput = latency.total / 5;
       return entity;
     }
   );

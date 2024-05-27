@@ -157,6 +157,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                   'cloud.provider': 'gcp',
                   'cloud.region': 'eu-central-1',
                   'cloud.availability_zone': 'eu-central-1a',
+                  'log.level': 'error',
                   'cloud.project.id': generateShortId(),
                   'cloud.instance.id': generateShortId(),
                   'log.file.path': `/logs/${generateLongId()}/error.txt`,

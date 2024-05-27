@@ -30,30 +30,34 @@ export function createLogsServiceEntitiesAggregator() {
           'entity.indexPatterns': ['logs-*'],
           'entity.data_stream.type': ['logs'],
           'entity.firstSeen': firstSeen,
-          'entity.metric.logErrorRate': createPivotTransform(),
-          'entity.metric.logRatePerMinute': createPivotTransform(),
+          'entity.metric': {
+            logRatePerMinute: createPivotTransform(),
+            logErrorRate: createPivotTransform(),
+          },
         };
       },
     },
     (entity, event) => {
       const entityId = entity['entity.id'];
-      const logLever = event['log.level']!;
+      const logLevel = event['log.level']!;
 
       // @ts-expect-error
-      entity['entity.metric.logErrorRate'].record({
+      entity['entity.metric'].logErrorRate.record({
         groupBy: entityId,
-        value: logLever === 'error' ? 0 : 1,
+        value: logLevel === 'error' ? 0 : 1,
       });
     },
     (entity) => {
       const entityId = entity['entity.id'];
       // @ts-expect-error
-      const logErrorRate = entity['entity.metric.logErrorRate'].rate({
+      const logErrorRate = entity['entity.metric'].logErrorRate.rate({
         key: entityId,
         type: 0,
       });
 
-      entity['entity.metric.logErrorRate'] = logErrorRate.value;
+      entity['entity.metric'].logErrorRate = logErrorRate.value;
+      // Hardcoded value for now to match the data trasform
+      entity['entity.metric'].logRatePerMinute = logErrorRate.total / 5;
       return entity;
     }
   );

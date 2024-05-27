@@ -7,6 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { merge } from 'lodash';
 import {
   ApmFields,
   EntityDocument,
@@ -30,7 +31,7 @@ export class EntitiesSynthtraceEsClient extends SynthtraceEsClient<EntityDocumen
       ...options,
       pipeline: entitiesPipeline(),
     });
-    this.indices = ['entities-synthtrace.summary'];
+    this.indices = ['.entities-synthtrace.summary'];
   }
 }
 
@@ -92,6 +93,11 @@ function getMergeEntitesTransform() {
             ...nextDocument['entity.data_stream.type'],
           ]),
         ];
+
+        mergedDocument['entity.metric'] = merge(
+          mergedDocument['entity.metric'],
+          nextDocument['entity.metric']
+        );
       }
       callback();
     },
