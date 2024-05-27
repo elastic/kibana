@@ -45,18 +45,21 @@ export const CreateIndexCallout: React.FC = () => {
         </p>
       </EuiText>
       <EuiSpacer size="l" />
-      <EuiButton
-        color="primary"
-        iconType="plusInCircle"
-        fill
-        size="s"
-        onClick={handleNavigateToIndex}
-      >
-        <FormattedMessage
-          id="xpack.searchPlayground.sources.createIndexCallout."
-          defaultMessage="Create an index"
-        />
-      </EuiButton>
+      {createIndexLocator && (
+        <EuiButton
+          color="primary"
+          iconType="plusInCircle"
+          fill
+          size="s"
+          onClick={handleNavigateToIndex}
+          data-test-subj="createIndexButton"
+        >
+          <FormattedMessage
+            id="xpack.searchPlayground.sources.createIndexCallout."
+            defaultMessage="Create an index"
+          />
+        </EuiButton>
+      )}
     </EuiCallOut>
   );
 };

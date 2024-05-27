@@ -9,7 +9,7 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { AssetDetails } from '../../../components/asset_details';
-import { commonFlyoutTabs } from '../../../common/asset_details_config/asset_details_tabs';
+import { getAssetDetailsTabs } from '../../../common/asset_details_config/asset_details_tabs';
 
 export const AssetDetailPage = () => {
   const {
@@ -20,7 +20,7 @@ export const AssetDetailPage = () => {
     <AssetDetails
       assetId={nodeId}
       assetType={nodeType}
-      tabs={commonFlyoutTabs}
+      tabs={getAssetDetailsTabs(nodeType)}
       renderMode={{
         mode: 'page',
       }}

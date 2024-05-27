@@ -11,7 +11,7 @@
  * NOTE:  not all properties are currently mapped below. Check the index definition if wanting to
  *        see what else is available and add it bellow if needed
  */
-export interface SentinelOneActivityEsDoc {
+export interface SentinelOneActivityEsDoc<TData = unknown> {
   sentinel_one: {
     activity: {
       agent: {
@@ -26,7 +26,47 @@ export interface SentinelOneActivityEsDoc {
       id: string;
       /** The activity type. Valid values can be retrieved from S1 via API: `/web/api/v2.1/activities/types` */
       type: number;
+      /** Activity specific data */
+      data: TData;
     };
+  };
+}
+
+/**
+ * Activity data for file uploaded to S1 by an Agent:
+ * ```
+ * {
+ *   "action": "Agent Uploaded Fetched Files",
+ *   "descriptionTemplate": "Agent {{ computer_name }} ({{ external_ip }}) successfully uploaded {{ filename }}.",
+ *   "id": 80
+ * },
+ * ```
+ */
+export interface SentinelOneActivityDataForType80 {
+  flattened: {
+    commandId: number;
+    commandBatchUuid: string;
+    filename: string;
+    sourceType: string;
+    uploadedFilename: string;
+  };
+  site: {
+    name: string;
+  };
+  group_name: string;
+  scope: {
+    level: string;
+    name: string;
+  };
+  fullscope: {
+    details: string;
+    details_path: string;
+  };
+  downloaded: {
+    url: string;
+  };
+  account: {
+    name: string;
   };
 }
 
@@ -62,4 +102,16 @@ export interface SentinelOneGetFileRequestMeta extends SentinelOneActionRequestC
    * is stored in the request to facilitate locating the response later by the background task
    */
   commandBatchUuid: string;
+}
+
+export interface SentinelOneGetFileResponseMeta {
+  /** The document ID in the Elasticsearch S1 activity index that was used to complete the response action */
+  elasticDocId: string;
+  /** The SentinelOne activity log entry ID */
+  activityLogEntryId: string;
+  /** The S1 download url (relative URI) for the file that was retrieved */
+  downloadUrl: string;
+  /** When the file was created/uploaded to SentinelOne */
+  createdAt: string;
+  filename: string;
 }

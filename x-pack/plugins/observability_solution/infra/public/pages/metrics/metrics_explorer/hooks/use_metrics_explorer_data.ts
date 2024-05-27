@@ -52,6 +52,7 @@ export function useMetricsExplorerData({
           dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
           metrics: options.aggregation === 'count' ? [{ aggregation: 'count' }] : options.metrics,
           groupBy: options.groupBy,
+          groupInstance: options.groupInstance,
           afterKey,
           limit: options.limit,
           indexPattern: metricsView.indices,

@@ -102,19 +102,16 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
 
   const nodeType = options.groupBy && fieldToNodeType(options.groupBy);
 
-  const nodeDetailLinkProps = useLinkProps({
-    app: 'metrics',
-    ...(nodeType
-      ? getNodeDetailUrl({
-          assetType: nodeType,
-          assetId: series.id,
-          search: {
-            from: dateMathExpressionToEpoch(timeRange.from),
-            to: dateMathExpressionToEpoch(timeRange.to, true),
-          },
-        })
-      : {}),
-  });
+  const nodeDetailLinkProps = nodeType
+    ? getNodeDetailUrl({
+        assetType: nodeType,
+        assetId: series.id,
+        search: {
+          from: dateMathExpressionToEpoch(timeRange.from),
+          to: dateMathExpressionToEpoch(timeRange.to, true),
+        },
+      })
+    : {};
   const tsvbLinkProps = useLinkProps({
     ...createTSVBLink(
       metricsView?.indices ?? TSVB_WORKAROUND_INDEX_PATTERN,

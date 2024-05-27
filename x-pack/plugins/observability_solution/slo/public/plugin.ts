@@ -88,7 +88,7 @@ export class SloPlugin
     registerBurnRateRuleType(pluginsSetup.observability.observabilityRuleTypeRegistry);
 
     const assertPlatinumLicense = async () => {
-      const licensing = await pluginsSetup.licensing;
+      const licensing = pluginsSetup.licensing;
       const license = await firstValueFrom(licensing.license$);
 
       const hasPlatinumLicense = license.hasAtLeast('platinum');

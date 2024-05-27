@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { TopAlert } from '../../..';
 import { CustomThresholdAlertFields, CustomThresholdRuleTypeParams } from '../types';
 

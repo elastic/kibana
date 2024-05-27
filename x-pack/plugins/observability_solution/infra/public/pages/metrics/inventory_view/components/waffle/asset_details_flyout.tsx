@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
-import { ContentTabIds } from '../../../../../components/asset_details/types';
 import { AssetDetails } from '../../../../../components/asset_details';
-import { commonFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
+import { getAssetDetailsFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 interface Props {
-  assetName: string;
+  assetName?: string;
+  assetId: string;
   assetType: InventoryItemType;
   closeFlyout: () => void;
   currentTime: number;
@@ -23,20 +22,11 @@ interface Props {
   refreshInterval?: number;
 }
 
-const flyoutTabs = [
-  ...commonFlyoutTabs,
-  {
-    id: ContentTabIds.LINK_TO_APM,
-    name: i18n.translate('xpack.infra.assetDetails.tabs.linkToApm', {
-      defaultMessage: 'APM',
-    }),
-  },
-];
-
 const ONE_HOUR = 60 * 60 * 1000;
 
 export const AssetDetailsFlyout = ({
   assetName,
+  assetId,
   assetType,
   closeFlyout,
   currentTime,
@@ -59,7 +49,7 @@ export const AssetDetailsFlyout = ({
 
   return (
     <AssetDetails
-      assetId={assetName}
+      assetId={assetId}
       assetName={assetName}
       assetType={assetType}
       overrides={{
@@ -70,7 +60,7 @@ export const AssetDetailsFlyout = ({
           options,
         },
       }}
-      tabs={flyoutTabs}
+      tabs={getAssetDetailsFlyoutTabs(assetType)}
       links={['nodeDetails']}
       renderMode={{
         mode: 'flyout',

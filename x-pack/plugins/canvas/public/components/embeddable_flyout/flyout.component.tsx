@@ -11,11 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { FinderAttributes } from '@kbn/saved-objects-finder-plugin/common';
-import {
-  EmbeddableFactory,
-  ReactEmbeddableSavedObject,
-  getReactEmbeddableSavedObjects,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, ReactEmbeddableSavedObject } from '@kbn/embeddable-plugin/public';
 import { useEmbeddablesService, usePlatformService } from '../../services';
 
 const strings = {
@@ -51,7 +47,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
 }) => {
   const embeddablesService = useEmbeddablesService();
   const platformService = usePlatformService();
-  const { getEmbeddableFactories } = embeddablesService;
+  const { getEmbeddableFactories, getReactEmbeddableSavedObjects } = embeddablesService;
   const { getContentManagement, getUISettings } = platformService;
 
   const legacyFactoriesBySavedObjectType: LegacyFactoryMap = useMemo(() => {
@@ -78,7 +74,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         };
         return acc;
       }, {} as FactoryMap);
-  }, []);
+  }, [getReactEmbeddableSavedObjects]);
 
   const metaData = useMemo(
     () =>

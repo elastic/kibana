@@ -15,6 +15,7 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateConfig,
@@ -507,6 +508,7 @@ export class ActionExecutor {
             rawResult.errorSource = TaskErrorSource.USER;
           }
         } catch (err) {
+          const errorSource = getErrorSource(err) || TaskErrorSource.FRAMEWORK;
           if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
           } else {
@@ -517,7 +519,7 @@ export class ActionExecutor {
               serviceMessage: err.message,
               error: err,
               retry: true,
-              errorSource: TaskErrorSource.FRAMEWORK,
+              errorSource,
             };
           }
         }

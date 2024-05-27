@@ -55,27 +55,33 @@ describe('dataset_name', () => {
   });
 
   describe('extractIndexNameFromBackingIndex', () => {
-    it('returns the correct index name if backing index provieded', () => {
+    it('returns the correct index name if backing index provided', () => {
       expect(
-        extractIndexNameFromBackingIndex(
-          '.ds-logs-apm.app.adservice-default-2024.04.29-000001',
-          'logs'
-        )
+        extractIndexNameFromBackingIndex('.ds-logs-apm.app.adservice-default-2024.04.29-000001')
       ).toEqual('logs-apm.app.adservice-default');
     });
 
     it('returns the correct index name if index name is passed', () => {
-      expect(extractIndexNameFromBackingIndex('logs-nginx.access-default', 'logs')).toEqual(
+      expect(extractIndexNameFromBackingIndex('logs-nginx.access-default')).toEqual(
         'logs-nginx.access-default'
       );
     });
 
+    it('returns the correct index name if backing index contains _', () => {
+      expect(
+        extractIndexNameFromBackingIndex('.ds-logs-elastic_agent-default-2024.04.29-000001')
+      ).toEqual('logs-elastic_agent-default');
+    });
+
+    it('returns the correct index name if backing index contains only -', () => {
+      expect(
+        extractIndexNameFromBackingIndex('.ds-logs-generic-pods-default-2024.04.29-000001')
+      ).toEqual('logs-generic-pods-default');
+    });
+
     it('handles different types', () => {
       expect(
-        extractIndexNameFromBackingIndex(
-          '.ds-metrics-apm.app.adservice-default-2024.04.29-000001',
-          'metrics'
-        )
+        extractIndexNameFromBackingIndex('.ds-metrics-apm.app.adservice-default-2024.04.29-000001')
       ).toEqual('metrics-apm.app.adservice-default');
     });
   });

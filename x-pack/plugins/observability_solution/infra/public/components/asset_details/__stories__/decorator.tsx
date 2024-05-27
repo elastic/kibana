@@ -164,6 +164,7 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     telemetry: {
       reportAssetDetailsFlyoutViewed: () => {},
       reportAssetDetailsPageViewed: () => {},
+      reportAssetDashboardLoaded: () => {},
     },
     observabilityShared: {
       navigation: { PageTemplate: ({ children }: { children?: any }) => <>{children}</> },

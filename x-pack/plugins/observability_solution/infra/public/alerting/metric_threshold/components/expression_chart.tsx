@@ -52,6 +52,7 @@ interface Props {
   chartType?: MetricsExplorerChartType;
   filterQuery?: string;
   groupBy?: string | string[];
+  groupInstance?: string | string[];
   hideTitle?: boolean;
   timeRange?: TimeRange;
 }
@@ -62,6 +63,7 @@ export const ExpressionChart: React.FC<Props> = ({
   chartType = MetricsExplorerChartType.bar,
   filterQuery,
   groupBy,
+  groupInstance,
   hideTitle = false,
   timeRange,
 }) => {
@@ -72,6 +74,7 @@ export const ExpressionChart: React.FC<Props> = ({
     expression,
     filterQuery,
     groupBy,
+    groupInstance,
     timeRange,
   });
 
@@ -192,6 +195,7 @@ export const ExpressionChart: React.FC<Props> = ({
             externalPointerEvents={{
               tooltip: { visible: true },
             }}
+            theme={{ chartMargins: { top: 10 } }}
             baseTheme={chartTheme.baseTheme}
             locale={i18n.getLocale()}
           />

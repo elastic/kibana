@@ -22,11 +22,13 @@ export const useMetricsExplorerChartData = ({
   expression,
   filterQuery,
   groupBy,
+  groupInstance,
   timeRange = DEFAULT_TIME_RANGE,
 }: {
   expression: MetricExpression;
   filterQuery?: string;
   groupBy?: string | string[];
+  groupInstance?: string | string[];
   timeRange?: TimeRange;
 }) => {
   const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
@@ -37,6 +39,7 @@ export const useMetricsExplorerChartData = ({
       forceInterval: true,
       dropLastBucket: false,
       groupBy,
+      groupInstance,
       filterQuery,
       metrics: [
         expression.aggType === 'custom'
@@ -58,6 +61,7 @@ export const useMetricsExplorerChartData = ({
       expression.customMetrics,
       filterQuery,
       groupBy,
+      groupInstance,
     ]
   );
   const timestamps: MetricsExplorerTimestamp = useMemo(() => {

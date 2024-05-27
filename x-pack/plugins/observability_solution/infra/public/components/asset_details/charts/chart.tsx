@@ -11,7 +11,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { resolveDataView } from '../../../utils/data_view';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { METRIC_CHART_HEIGHT } from '../../../common/visualizations/constants';
-import { buildCombinedHostsFilter } from '../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../utils/filters/build';
 import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../lens';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
@@ -39,7 +39,7 @@ export const Chart = ({ id, queryField, overrides, dateRange, assetId, ...props 
     });
 
     return [
-      buildCombinedHostsFilter({
+      buildCombinedAssetFilter({
         field: queryField,
         values: [assetId],
         dataView: resolvedDataView.dataViewReference,
