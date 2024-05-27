@@ -242,6 +242,7 @@ export const getNavigationTreeDefinition = ({
             },
           ],
           footer: [
+            { type: 'recentlyAccessed' },
             {
               breadcrumbStatus: 'hidden',
               children: [
