@@ -53,7 +53,6 @@ export function TimelineAxis({ plotValues, marks = [], topTraceDuration }: Timel
   return (
     <div
       style={{
-        borderBottom: `1px solid ${theme.eui.euiColorMediumShade}`,
         height: margins.top,
         width: '100%',
       }}

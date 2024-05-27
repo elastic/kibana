@@ -233,7 +233,7 @@ export function getOrderedWaterfallItems(
 
     item.parent = parentItem;
     // get offset from the beginning of trace
-    item.offset = Math.max(item.doc.timestamp.us - entryTimestamp, 0);
+    item.offset = item.doc.timestamp.us - entryTimestamp;
     // move the item to the right if it starts before its parent
     item.skew = getClockSkew(item, parentItem);
 
@@ -550,7 +550,9 @@ export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFl
 };
 
 export const updateTraceTreeNode = (root: IWaterfallNode, updatedNode: IWaterfallNodeFlatten) => {
-  if (!root) return;
+  if (!root) {
+    return;
+  }
 
   let tree = { ...root };
   const stack: Array<{ parent: IWaterfallNode | null; index: number; node: IWaterfallNode }> = [

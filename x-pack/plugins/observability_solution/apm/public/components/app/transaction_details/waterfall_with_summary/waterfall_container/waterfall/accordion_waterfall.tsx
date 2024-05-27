@@ -134,7 +134,7 @@ function WaterfallTree(props: WaterfallTreeProps) {
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
-            <div ref={registerChild}>
+            <div data-test-subj="waterfall" ref={registerChild}>
               <List
                 ref={listRef}
                 style={{ height: '100%' }}
@@ -223,7 +223,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
       marginLeftLevel={marginLeftLevel}
       buttonContentClassName="accordion__buttonContent"
       buttonContent={
-        <EuiFlexGroup gutterSize="none">
+        <EuiFlexGroup gutterSize="none" responsive={false}>
           <EuiFlexItem grow={false}>
             <ToggleAccordionButton
               show={hasToggle}
@@ -279,7 +279,7 @@ function ToggleAccordionButton({
         display: 'flex',
       }}
     >
-      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center">
+      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="center" responsive={false}>
         <EuiFlexItem grow={false}>
           {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
           <div

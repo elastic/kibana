@@ -65,7 +65,7 @@ function getWaterfallMaxLevel(waterfall: IWaterfall) {
   }
 
   let maxLevel = 1;
-  const visited: Set<string> = new Set();
+  const visited = new Set<string>();
   const queue: Array<{ id: string; level: number }> = [{ id: entryId, level: 1 }];
 
   while (queue.length > 0) {
@@ -137,14 +137,11 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
           top: var(--euiFixedHeadersOffset, 0);
           z-index: ${theme.eui.euiZLevel2};
           background-color: ${theme.eui.euiColorEmptyShade};
+          border-bottom: 1px solid ${theme.eui.euiColorMediumShade};
         `}
       >
         <EuiButtonEmpty
           data-test-subj="apmWaterfallButton"
-          css={css`
-            display: absolute;
-            z-index: ${theme.eui.euiZLevel3};
-          `}
           iconType={isAccordionOpen ? 'fold' : 'unfold'}
           onClick={() => {
             setIsAccordionOpen((isOpen) => !isOpen);

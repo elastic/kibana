@@ -22,17 +22,16 @@ export interface Margins {
   left: number;
 }
 
-interface TimelineProps {
+export interface TimelineProps {
   marks?: Mark[];
   xMin?: number;
   xMax?: number;
   margins: Margins;
-  width?: number;
 }
 
 export function TimelineAxisContainer({ xMax, xMin, margins, marks }: TimelineProps) {
   const [width, setWidth] = useState(0);
-  if (xMax == null) {
+  if (xMax === undefined) {
     return null;
   }
   const plotValues = getPlotValues({ width, xMin, xMax, margins });
