@@ -457,6 +457,14 @@ const ServiceNowParamsFields: React.FunctionComponent<
             inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
             label={i18n.COMMENTS_LABEL}
           />
+          {!isDeprecatedActionConnector && (
+            <AdditionalFields
+              value={actionParams.subActionParams?.incident.additional_fields}
+              messageVariables={messageVariables}
+              errors={errors['subActionParams.incident.additional_fields'] as string[]}
+              onChange={additionalFieldsOnChange}
+            />
+          )}
         </>
       )}
       {showOnlyCorrelationId && (
@@ -467,14 +475,6 @@ const ServiceNowParamsFields: React.FunctionComponent<
           editSubActionProperty={editSubActionProperty}
           isRequired={showOnlyCorrelationId}
           errors={errors}
-        />
-      )}
-      {!isDeprecatedActionConnector && (
-        <AdditionalFields
-          value={actionParams.subActionParams?.incident.additional_fields}
-          messageVariables={messageVariables}
-          errors={errors['subActionParams.incident.additional_fields'] as string[]}
-          onChange={additionalFieldsOnChange}
         />
       )}
     </>
