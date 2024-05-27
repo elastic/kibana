@@ -169,6 +169,7 @@ export default ({ getService }: FtrProviderContext) => {
         // create rule with connector/action
         const rule: ReturnType<typeof getSimpleRule> = {
           ...getSimpleRule('rule-1'),
+          interval: '5m',
           throttle: '1h', // <-- throttle makes this a scheduled action
           actions: [action],
         };
@@ -180,7 +181,10 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(
+          { ...getSimpleRuleOutput(), interval: '5m' },
+          ELASTICSEARCH_USERNAME
+        );
 
         const ruleWithActions: ReturnType<typeof getSimpleRuleOutput> = {
           ...expectedRule,

@@ -1674,6 +1674,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const ruleId = 'ruleId';
             const createdRule = await createRule(supertest, log, {
               ...getSimpleRule(ruleId),
+              interval: '5m',
               actions: [existingRuleAction],
             });
 
