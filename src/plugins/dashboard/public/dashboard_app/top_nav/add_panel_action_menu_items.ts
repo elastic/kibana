@@ -9,18 +9,20 @@
 import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import type { IconType, CommonProps } from '@elastic/eui';
-import React, { type MouseEventHandler, ReactElement } from 'react';
+import React, { type MouseEventHandler } from 'react';
 import { addPanelMenuTrigger } from '../../triggers';
 
 export interface PanelSelectionMenuItem extends Pick<CommonProps, 'data-test-subj'> {
   id: string;
-  name: string | ReactElement;
+  name: string;
   icon: IconType;
   onClick: MouseEventHandler;
   toolTipContent?: string;
+  isDisabled?: boolean;
+  isDeprecated?: boolean;
 }
 
-export type GroupedAddPanelActions = Pick<PanelSelectionMenuItem, 'id'> & {
+export type GroupedAddPanelActions = Pick<PanelSelectionMenuItem, 'id' | 'isDisabled'> & {
   title: string;
   items: PanelSelectionMenuItem[];
 };

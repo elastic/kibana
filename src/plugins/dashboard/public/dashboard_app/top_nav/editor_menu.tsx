@@ -9,7 +9,7 @@
 import './editor_menu.scss';
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, type IconType } from '@elastic/eui';
+import { type IconType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
@@ -234,20 +234,8 @@ export const EditorMenu = ({
     const { name, title, titleInWizard, description, icon = 'empty', isDeprecated } = visType;
     return {
       id: name,
-      name: !isDeprecated ? (
-        titleInWizard || title
-      ) : (
-        <EuiFlexGroup wrap responsive={false} gutterSize="s">
-          <EuiFlexItem grow={false}>{titleInWizard || title}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="warning">
-              {i18n.translate('dashboard.editorMenu.deprecatedTag', {
-                defaultMessage: 'Deprecated',
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
+      name: titleInWizard || title,
+      isDeprecated,
       icon,
       onClick: createNewVisType(visType),
       'data-test-subj': `visType-${name}`,

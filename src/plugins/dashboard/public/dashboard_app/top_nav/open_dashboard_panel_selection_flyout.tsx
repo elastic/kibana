@@ -16,6 +16,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiForm,
+  EuiBadge,
   EuiFormRow,
   EuiTitle,
   EuiFieldSearch,
@@ -27,7 +28,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pluginServices } from '../../services/plugin_services';
 import type { DashboardServices } from '../../services/types';
-import type { GroupedAddPanelActions } from './add_panel_action_menu_items';
+import type { GroupedAddPanelActions, PanelSelectionMenuItem } from './add_panel_action_menu_items';
 
 interface OpenDashboardPanelSelectionFlyoutArgs {
   getPanels: (closePopover: () => void) => GroupedAddPanelActions[];
@@ -90,7 +91,34 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
       return setPanelsSearchResult(panels.current);
     }
 
-    // TODO: handle search
+    const q = searchTerm.toLowerCase();
+
+    setPanelsSearchResult(
+      panels.current.map((panel) => {
+        const groupSearchMatch = panel.title.toLowerCase().includes(q);
+
+        const [groupSearchMatchAgg, items] = panel.items.reduce(
+          (acc, cur) => {
+            const searchMatch = cur.name.toLowerCase().includes(q);
+
+            acc[0] = acc[0] || searchMatch;
+            acc[1].push({
+              ...cur,
+              isDisabled: !(groupSearchMatch || searchMatch),
+            });
+
+            return acc;
+          },
+          [groupSearchMatch, [] as PanelSelectionMenuItem[]]
+        );
+
+        return {
+          ...panel,
+          isDisabled: !groupSearchMatchAgg,
+          items,
+        };
+      })
+    );
   }, [searchTerm]);
 
   return (
@@ -118,6 +146,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
             <EuiForm component="form" fullWidth>
               <EuiFormRow>
                 <EuiFieldSearch
+                  autoFocus
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -129,10 +158,13 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column">
-              {Object.values(panelsSearchResult).map(({ id, title, items }) => (
+              {Object.values(panelsSearchResult).map(({ id, title, items, isDisabled }) => (
                 <React.Fragment key={id}>
                   <EuiFlexItem>
-                    <EuiTitle size="xxs">
+                    <EuiTitle
+                      size="xxs"
+                      css={isDisabled ? { color: euiTheme.colors.disabled } : {}}
+                    >
                       {typeof title === 'string' ? <h3>{title}</h3> : title}
                     </EuiTitle>
                     <EuiListGroup size="s" gutterSize="none" maxWidth={false} flush>
@@ -140,10 +172,27 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
                         return (
                           <EuiListGroupItem
                             key={`${id}.${idx}`}
-                            label={item.name}
+                            label={
+                              !item.isDeprecated ? (
+                                item.name
+                              ) : (
+                                <EuiFlexGroup wrap responsive={false} gutterSize="s">
+                                  <EuiFlexItem grow={false}>{item.name}</EuiFlexItem>
+                                  <EuiFlexItem grow={false}>
+                                    <EuiBadge color="warning">
+                                      <FormattedMessage
+                                        id="dashboard.editorMenu.deprecatedTag"
+                                        defaultMessage="Deprecated"
+                                      />
+                                    </EuiBadge>
+                                  </EuiFlexItem>
+                                </EuiFlexGroup>
+                              )
+                            }
                             onClick={item?.onClick}
                             iconType={item.icon}
                             data-test-subj={item['data-test-subj']}
+                            isDisabled={item.isDisabled}
                           />
                         );
                       })}
