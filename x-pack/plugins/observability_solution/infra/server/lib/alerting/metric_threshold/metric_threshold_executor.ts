@@ -23,7 +23,10 @@ import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/aler
 import { TimeUnitChar, getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
+import {
+  convertToBuiltInComparators,
+  LEGACY_COMPARATORS,
+} from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, MetricExpressionParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
@@ -530,9 +533,9 @@ const formatAlertResult = <AlertResult>(
     metric: string;
     currentValue: number | null;
     threshold: number[];
-    comparator: COMPARATORS;
+    comparator: COMPARATORS | LEGACY_COMPARATORS;
     warningThreshold?: number[];
-    warningComparator?: COMPARATORS;
+    warningComparator?: COMPARATORS | LEGACY_COMPARATORS;
     timeSize: number;
     timeUnit: TimeUnitChar;
   } & AlertResult,
@@ -556,7 +559,7 @@ const formatAlertResult = <AlertResult>(
       threshold: Array.isArray(thresholdToFormat)
         ? thresholdToFormat.map((v: number) => formatter(v))
         : formatter(thresholdToFormat),
-      comparator: comparatorToUse,
+      comparator: convertToBuiltInComparators(comparatorToUse),
     };
   }
 

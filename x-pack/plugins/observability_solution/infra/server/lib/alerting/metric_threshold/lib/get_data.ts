@@ -10,6 +10,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import {
   AdditionalContext,
@@ -223,10 +224,16 @@ export const getData = async (
       // the value will end up being ZERO, for other metrics it will be null. In this case
       // we need to do the evaluation in Node.js
       if (aggs.all && params.aggType === Aggregators.COUNT && value === 0) {
-        const trigger = comparatorMap[params.comparator](value, params.threshold);
+        const trigger = comparatorMap[convertToBuiltInComparators(params.comparator)](
+          value,
+          params.threshold
+        );
         const warn =
           params.warningThreshold && params.warningComparator
-            ? comparatorMap[params.warningComparator](value, params.warningThreshold)
+            ? comparatorMap[convertToBuiltInComparators(params.warningComparator)](
+                value,
+                params.warningThreshold
+              )
             : false;
         return {
           [UNGROUPED_FACTORY_KEY]: {

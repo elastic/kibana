@@ -23,6 +23,7 @@ import { DataViewBase } from '@kbn/es-query';
 import { first, last } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { useTimelineChartTheme } from '../../../utils/use_timeline_chart_theme';
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
@@ -163,7 +164,7 @@ export const ExpressionChart: React.FC<Props> = ({
             stack={false}
           />
           <ThresholdAnnotations
-            comparator={expression.comparator}
+            comparator={convertToBuiltInComparators(expression.comparator)}
             threshold={expression.threshold}
             sortedThresholds={criticalThresholds}
             color={Color.color1}
@@ -174,7 +175,7 @@ export const ExpressionChart: React.FC<Props> = ({
           />
           {expression.warningComparator && expression.warningThreshold && (
             <ThresholdAnnotations
-              comparator={expression.warningComparator}
+              comparator={convertToBuiltInComparators(expression.comparator)}
               threshold={expression.warningThreshold}
               sortedThresholds={warningThresholds}
               color={Color.color5}
