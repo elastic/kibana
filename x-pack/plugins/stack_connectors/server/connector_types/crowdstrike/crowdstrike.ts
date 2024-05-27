@@ -9,6 +9,7 @@ import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { isArray } from 'lodash';
 import type {
   CrowdstrikeConfig,
   CrowdstrikeSecrets,
@@ -199,11 +200,23 @@ export class CrowdstrikeConnector extends SubActionConnector<
   }
 
   protected getResponseErrorMessage(
-    error: AxiosError<{ errors: [{ message: string; code: number }] }>
+    error: AxiosError<{ errors: Array<{ message: string; code: number }> }>
   ): string {
     const errorData = error.response?.data?.errors?.[0];
     if (errorData) {
       return errorData.message;
+    }
+
+    // @ts-expect-error Seems like AxiosError is not typed correctly
+    const cause = isArray(error.cause?.errors) ? error.cause.errors[0] : error.cause;
+
+    // ENOTFOUND is the error code for when the host is unreachable eg. api.crowdstrike.com1
+    if (cause?.code === 'ENOTFOUND') {
+      return `URL not found: ${JSON.stringify(cause ?? {})}`;
+    }
+    // ECONNREFUSED is the error code for when the host is unreachable eg. http://MacBook-Pro-Tomasz.local:55555
+    if (cause?.code === 'ECONNREFUSED') {
+      return `Connection Refused: ${JSON.stringify(cause ?? {})}`;
     }
 
     if (!error.response?.status) {
