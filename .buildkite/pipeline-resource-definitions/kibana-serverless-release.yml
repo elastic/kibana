@@ -25,7 +25,7 @@ spec:
       allow_rebuilds: false
       skip_intermediate_builds: false
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/serverless_deployment/run_serverless_release_assistant.yml
+      pipeline_file: .buildkite/pipelines/es_serverless/run_serverless_release_assistant.yml
       provider_settings:
         build_branches: false
         build_pull_requests: false
