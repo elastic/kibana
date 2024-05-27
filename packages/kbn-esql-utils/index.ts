@@ -22,4 +22,4 @@ export {
   TextBasedLanguages,
 } from './src';
 
-export { ENABLE_ESQL, ESQL_LATEST_VERSION } from './constants';
+export { ESQL_LATEST_VERSION, ENABLE_ESQL } from './constants';
