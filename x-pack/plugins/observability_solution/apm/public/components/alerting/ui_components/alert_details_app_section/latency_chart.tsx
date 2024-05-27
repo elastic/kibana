@@ -40,6 +40,7 @@ import { ApmDocumentType } from '../../../../../common/document_type';
 import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { DEFAULT_DATE_FORMAT } from './constants';
 import { TransactionTypeSelect } from './transaction_type_select';
+import { ViewInAPMButton } from './view_in_apm_button';
 
 function LatencyChart({
   alert,
@@ -228,6 +229,21 @@ function LatencyChart({
               />
             </EuiFlexItem>
           )}
+          <EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <ViewInAPMButton
+                  serviceName={serviceName}
+                  environment={environment}
+                  from={start}
+                  to={end}
+                  kuery={kuery}
+                  transactionName={transactionName}
+                  transactionType={transactionType}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
         <TimeseriesChart
           id="latencyChart"

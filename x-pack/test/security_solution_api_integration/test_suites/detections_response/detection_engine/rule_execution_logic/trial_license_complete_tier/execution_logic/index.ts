@@ -12,6 +12,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./eql'));
     loadTestFile(require.resolve('./eql_alert_suppression'));
     loadTestFile(require.resolve('./esql'));
+    loadTestFile(require.resolve('./esql_suppression'));
     loadTestFile(require.resolve('./machine_learning'));
     loadTestFile(require.resolve('./new_terms'));
     loadTestFile(require.resolve('./new_terms_alert_suppression'));
