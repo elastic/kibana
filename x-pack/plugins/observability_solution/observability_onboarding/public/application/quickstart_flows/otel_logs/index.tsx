@@ -136,7 +136,7 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
             </p>
           </EuiFlexItem>
           <EuiFlexItem>
-            <SystemIntegrationBanner />
+            <SystemIntegrationBanner onlyShowError />
           </EuiFlexItem>
           <EuiFlexItem>
             <ApiKeyBanner status={apiKeyStatus} payload={apiKeyData} error={error} />

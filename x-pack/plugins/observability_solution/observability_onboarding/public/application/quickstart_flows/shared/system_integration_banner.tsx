@@ -21,8 +21,10 @@ export type SystemIntegrationBannerState = 'pending' | 'resolved' | 'rejected';
 
 export function SystemIntegrationBanner({
   onStatusChange,
+  onlyShowError,
 }: {
   onStatusChange?: (status: SystemIntegrationBannerState) => void;
+  onlyShowError?: boolean;
 }) {
   const { navigateToAppUrl } = useKibanaNavigation();
   const [integrationVersion, setIntegrationVersion] = useState<string>();
@@ -57,7 +59,7 @@ export function SystemIntegrationBanner({
   const hasFailedInstallingIntegration = requestState.state === 'rejected';
   const hasInstalledIntegration = requestState.state === 'resolved';
 
-  if (isInstallingIntegration) {
+  if (isInstallingIntegration && !onlyShowError) {
     return (
       <EuiCallOut
         title={
@@ -93,7 +95,7 @@ export function SystemIntegrationBanner({
       </EuiFlexItem>
     );
   }
-  if (hasInstalledIntegration) {
+  if (hasInstalledIntegration && !onlyShowError) {
     return (
       <EuiFlexItem>
         <EuiCallOut
