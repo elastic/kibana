@@ -19,44 +19,32 @@ import type {
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { MissingHttpClientException } from './source_errors';
 import { useSourceNotifier } from './notifications';
+import { MetricsDataViewProvider } from './metrics_view';
 
-export const pickIndexPattern = (
-  source: MetricsSourceConfiguration | undefined,
-  type: 'metrics'
-) => {
-  if (!source) {
-    return 'unknown-index';
-  }
-  if (type === 'metrics') {
-    return source.configuration.metricAlias;
-  }
-  return `${source.configuration.metricAlias}`;
-};
+const API_URL = `/api/metrics/source`;
 
-export const useSource = ({ sourceId }: { sourceId: string }) => {
+export const useSourceFetcher = ({ sourceId }: { sourceId: string }) => {
+  const [source, setSource] = useState<MetricsSourceConfiguration | undefined>(undefined);
   const {
     services: { http, telemetry },
   } = useKibanaContextForPlugin();
-
   const notify = useSourceNotifier();
-
-  const fetchService = http;
-  const API_URL = `/api/metrics/source/${sourceId}`;
-
-  const [source, setSource] = useState<MetricsSourceConfiguration | undefined>(undefined);
 
   const [loadSourceRequest, loadSource] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        if (!fetchService) {
+        if (!http) {
           throw new MissingHttpClientException();
         }
 
         const start = performance.now();
-        const response = await fetchService.fetch<MetricsSourceConfigurationResponse>(API_URL, {
-          method: 'GET',
-        });
+        const response = await http.fetch<MetricsSourceConfigurationResponse>(
+          `${API_URL}/${sourceId}`,
+          {
+            method: 'GET',
+          }
+        );
         telemetry?.reportPerformanceMetricEvent(
           'infra_source_load',
           performance.now() - start,
@@ -71,17 +59,17 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
         }
       },
     },
-    [fetchService, sourceId]
+    [http, sourceId]
   );
 
-  const [createSourceConfigurationRequest, createSourceConfiguration] = useTrackedPromise(
+  const [persistSourceConfigurationRequest, persistSourceConfiguration] = useTrackedPromise(
     {
       createPromise: async (sourceProperties: PartialMetricsSourceConfigurationProperties) => {
-        if (!fetchService) {
+        if (!http) {
           throw new MissingHttpClientException();
         }
 
-        return await fetchService.patch<MetricsSourceConfigurationResponse>(API_URL, {
+        return await http.patch<MetricsSourceConfigurationResponse>(`${API_URL}/${sourceId}`, {
           method: 'PATCH',
           body: JSON.stringify(sourceProperties),
         });
@@ -96,60 +84,60 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
         notify.updateFailure((error as IHttpFetchError<{ message: string }>).body?.message);
       },
     },
-    [fetchService, sourceId]
+    [http, sourceId]
   );
 
   useEffect(() => {
     loadSource();
   }, [loadSource, sourceId]);
 
-  const createDerivedIndexPattern = () => {
-    return {
-      fields: source?.status ? source.status.indexFields : [],
-      title: pickIndexPattern(source, 'metrics'),
-    };
-  };
+  const error = loadSourceRequest.state === 'rejected' ? `${loadSourceRequest.value}` : undefined;
+  const isLoading =
+    loadSourceRequest.state === 'uninitialized' ||
+    loadSourceRequest.state === 'pending' ||
+    persistSourceConfigurationRequest.state === 'pending';
 
-  const hasFailedLoadingSource = loadSourceRequest.state === 'rejected';
-  const isUninitialized = loadSourceRequest.state === 'uninitialized';
-  const isLoadingSource = loadSourceRequest.state === 'pending';
-  const isLoading = isLoadingSource || createSourceConfigurationRequest.state === 'pending';
+  return {
+    error,
+    loadSource,
+    isLoading,
+    source,
+    persistSourceConfiguration,
+  };
+};
+
+export const useSource = ({ sourceId }: { sourceId: string }) => {
+  const { persistSourceConfiguration, source, error, isLoading, loadSource } = useSourceFetcher({
+    sourceId,
+  });
 
   const sourceExists = source ? !!source.version : undefined;
 
   const metricIndicesExist = Boolean(source?.status?.metricIndicesExist);
 
-  const version = source?.version;
-
   return {
-    createSourceConfiguration,
-    createDerivedIndexPattern,
     isLoading,
-    isLoadingSource,
-    isUninitialized,
-    hasFailedLoadingSource,
+    error,
     loadSource,
-    loadSourceRequest,
-    loadSourceFailureMessage: hasFailedLoadingSource ? `${loadSourceRequest.value}` : undefined,
     metricIndicesExist,
     source,
     sourceExists,
     sourceId,
-    updateSourceConfiguration: createSourceConfiguration,
-    version,
+    persistSourceConfiguration,
   };
 };
 
 export const [SourceProvider, useSourceContext] = createContainer(useSource);
 
 export const withSourceProvider =
-  <ComponentProps,>(Component: React.FunctionComponent<ComponentProps>) =>
+  <ComponentProps extends {}>(Component: React.FC<ComponentProps>) =>
   (sourceId = 'default') => {
     return function ComponentWithSourceProvider(props: ComponentProps) {
       return (
         <SourceProvider sourceId={sourceId}>
-          {/* @ts-expect-error upgrade typescript v4.9.5*/}
-          <Component {...props} />
+          <MetricsDataViewProvider>
+            <Component {...props} />
+          </MetricsDataViewProvider>
         </SourceProvider>
       );
     };
