@@ -931,9 +931,9 @@
   ],
   "slo-settings": [],
   "space": [
+    "disabledFeatures",
     "name",
-    "solution",
-    "disabledFeatures"
+    "solution"
   ],
   "spaces-usage-stats": [],
   "synthetics-monitor": [
