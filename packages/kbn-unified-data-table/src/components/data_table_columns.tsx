@@ -29,8 +29,8 @@ import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_c
 
 const getColumnDisplayName = (
   columnName: string,
-  dataViewField: any,
-  columnHeaders: Record<string, string>
+  dataViewFieldDisplayName: string | undefined,
+  columnHeaders: Record<string, string> | undefined
 ) => {
   if (columnHeaders?.[columnName]) {
     return columnHeaders[columnName];
@@ -42,7 +42,7 @@ const getColumnDisplayName = (
     });
   }
 
-  return dataViewField?.displayName || columnName;
+  return dataViewFieldDisplayName || columnName;
 };
 
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
@@ -154,7 +154,11 @@ function buildEuiGridColumn({
     dataViewField &&
     buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
 
-  const columnDisplayName = getColumnDisplayName(columnName, dataViewField, columnHeaders);
+  const columnDisplayName = getColumnDisplayName(
+    columnName,
+    dataViewField?.displayName,
+    columnHeaders
+  );
 
   let cellActions: EuiDataGridColumnCellAction[];
 
