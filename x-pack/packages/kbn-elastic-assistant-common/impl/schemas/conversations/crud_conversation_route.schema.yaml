@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: Create Conversation API endpoint
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/elastic_assistant/conversations:
+  /internal/elastic_assistant/conversations:
     post:
       operationId: CreateConversation
       x-codegen-enabled: true
@@ -38,7 +38,7 @@ paths:
                   message:
                     type: string
 
-  /api/elastic_assistant/conversations/{id}:
+  /internal/elastic_assistant/conversations/{id}:
     get:
       operationId: ReadConversation
       x-codegen-enabled: true
@@ -148,7 +148,7 @@ paths:
                   message:
                     type: string
 
-  /api/elastic_assistant/conversations/{id}/messages:
+  /internal/elastic_assistant/conversations/{id}/messages:
     post:
       operationId: AppendConversationMessage
       x-codegen-enabled: true
