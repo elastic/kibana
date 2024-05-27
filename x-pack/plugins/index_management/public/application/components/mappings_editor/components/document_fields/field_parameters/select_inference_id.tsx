@@ -46,6 +46,12 @@ import { useLoadInferenceModels } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
 
+const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
+  {
+    elser: ElasticsearchModelDefaultOptions.elser,
+    elasticsearch: ElasticsearchModelDefaultOptions.e5,
+  };
+
 interface Props {
   onChange(value: string): void;
   'data-test-subj'?: string;
@@ -144,18 +150,15 @@ export const SelectInferenceId = ({
         setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
         setIsCreateInferenceApiLoading(false);
         setInferenceAddError(undefined);
-        const getTrainedModelId = () => {
-          if (modelConfig.service === Service.elser) return ElasticsearchModelDefaultOptions.elser;
-          else if (modelConfig.service === Service.elasticsearch)
-            return ElasticsearchModelDefaultOptions.e5;
-          else return '';
-        };
+        const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
+        const defaultEndpointId =
+          inferenceServiceTypeElasticsearchModelMap[modelConfig.service] || '';
         const newModelId: InferenceToModelIdMap = {};
         newModelId[inferenceId] = {
-          trainedModelId: getTrainedModelId(),
+          trainedModelId: defaultEndpointId,
           isDeployable:
             modelConfig.service === Service.elser || modelConfig.service === Service.elasticsearch,
-          isDeployed: getTrainedModelStats()[getTrainedModelId()] === 'deployed',
+          isDeployed: getTrainedModelStats(trainedModelStats)[defaultEndpointId] === 'deployed',
           defaultInferenceEndpoint: false,
         };
         resendRequest();
