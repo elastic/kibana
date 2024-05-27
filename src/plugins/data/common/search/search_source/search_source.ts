@@ -58,10 +58,12 @@
  *    `appSearchSource`.
  */
 
+import { setWith } from '@kbn/safer-lodash-set';
 import {
   difference,
   isEqual,
   isFunction,
+  isObject,
   keyBy,
   pick,
   uniqueId,
@@ -861,9 +863,10 @@ export class SearchSource {
     body._source = _source;
 
     // only include unique values
-    // only include unique values
     if (sourceFieldsProvided && !isEqual(remainingFields, fieldsFromSource)) {
-      body._source = { includes: remainingFields };
+      setWith(body, '_source.includes', remainingFields, (nsValue) => {
+        return isObject(nsValue) ? {} : nsValue;
+      });
     }
 
     const builtQuery = this.getBuiltEsQuery({
