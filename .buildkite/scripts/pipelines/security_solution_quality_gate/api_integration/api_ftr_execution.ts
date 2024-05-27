@@ -100,7 +100,7 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
 
   let productTypes: ProductType[];
   if (filteredList.length == 1) {
-    const pTypes = filteredList[0].split('=')[1];
+    const pTypes = filteredList[0]?.split('=')[1];
     productTypes = JSON.parse(pTypes);
     return productTypes.length > 0 ? productTypes : undefined;
   } else {
