@@ -493,7 +493,7 @@ export function tryToParse(
   formula: string,
   operations: Record<string, unknown>
 ): { root: TinymathAST } | { error: ErrorWrapper } {
-  let root;
+  let root: TinymathAST;
   try {
     root = parse(formula);
   } catch (e) {

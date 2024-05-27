@@ -232,12 +232,12 @@ export function FormulaEditor({
 
       let errors: ErrorWrapper[] = [];
 
-      const { root, error } = tryToParse(text, visibleOperationsMap);
-      if (error) {
-        errors = [error];
-      } else if (root) {
+      const parseResponse = tryToParse(text, visibleOperationsMap);
+      if ('error' in parseResponse) {
+        errors = [parseResponse.error];
+      } else {
         const validationErrors = runASTValidation(
-          root,
+          parseResponse.root,
           layer,
           indexPattern,
           visibleOperationsMap,
