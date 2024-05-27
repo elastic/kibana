@@ -5,210 +5,22 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
-import {
-  FIELD_TYPES,
-  UseArray,
-  UseField,
-  useFormContext,
-  useFormData,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  Field,
-  TextField,
-  PasswordField,
-  CardRadioGroupField,
-  HiddenField,
-} from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { AuthType as CasesWebhookAuthType } from '../../../../common/auth/constants';
-import * as i18n from '../translations';
+import React, { FunctionComponent } from 'react';
 
-const { emptyField } = fieldValidators;
+import { EuiSpacer } from '@elastic/eui';
+
+import { AuthConfig } from '../../../common/auth/auth_config';
 
 interface Props {
   display: boolean;
   readOnly: boolean;
 }
 
-const basicAuthFields = (readOnly: boolean) => (
-  <EuiFlexGroup justifyContent="spaceBetween">
-    <EuiFlexItem>
-      <UseField
-        path="secrets.user"
-        config={{
-          label: i18n.USERNAME,
-          validations: [
-            {
-              validator: emptyField(i18n.USERNAME_REQUIRED),
-            },
-          ],
-        }}
-        component={Field}
-        componentProps={{
-          euiFieldProps: { readOnly, 'data-test-subj': 'webhookUserInput', fullWidth: true },
-        }}
-      />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <UseField
-        path="secrets.password"
-        config={{
-          label: i18n.PASSWORD,
-          validations: [
-            {
-              validator: emptyField(i18n.PASSWORD_REQUIRED),
-            },
-          ],
-        }}
-        component={PasswordField}
-        componentProps={{
-          euiFieldProps: { readOnly, 'data-test-subj': 'webhookPasswordInput' },
-        }}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
 export const AuthStep: FunctionComponent<Props> = ({ display, readOnly }) => {
-  const { setFieldValue, getFieldDefaultValue } = useFormContext();
-  const [{ config, __internal__ }] = useFormData({
-    watch: ['config.hasAuth', 'config.authType', '__internal__.hasHeaders'],
-  });
-
-  const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
-
-  const authTypeDefaultValue =
-    getFieldDefaultValue('config.hasAuth') === false
-      ? null
-      : getFieldDefaultValue('config.authType') ?? CasesWebhookAuthType.Basic;
-  const authType = config == null ? CasesWebhookAuthType.Basic : config.authType;
-  const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
-
-  useEffect(() => setFieldValue('config.hasAuth', Boolean(authType)), [authType, setFieldValue]);
-
   return (
     <span data-test-subj="authStep" style={{ display: display ? 'block' : 'none' }}>
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiTitle size="xxs">
-            <h4>{i18n.AUTH_TITLE}</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      {/* I wonder if this is necessary but I am leaving it for now because the Webhook connector does too.*/}
-      <UseField path="config.hasAuth" component={HiddenField} />
-      <UseField
-        path="config.authType"
-        defaultValue={authTypeDefaultValue}
-        component={CardRadioGroupField}
-        componentProps={{
-          options: [
-            {
-              value: null,
-              label: i18n.AUTHENTICATION_NONE,
-              'data-test-subj': 'authNone',
-            },
-            {
-              value: CasesWebhookAuthType.Basic,
-              label: i18n.AUTHENTICATION_BASIC,
-              children: authType === CasesWebhookAuthType.Basic && basicAuthFields(readOnly),
-              'data-test-subj': 'authBasic',
-            },
-          ],
-        }}
-      />
-      <EuiSpacer size="m" />
-      <UseField
-        path="__internal__.hasHeaders"
-        component={Field}
-        config={{
-          defaultValue: hasHeadersDefaultValue,
-          label: i18n.HEADERS_SWITCH,
-          type: FIELD_TYPES.TOGGLE,
-        }}
-        componentProps={{
-          euiFieldProps: {
-            disabled: readOnly,
-            'data-test-subj': 'webhookViewHeadersSwitch',
-          },
-        }}
-      />
-      <EuiSpacer size="m" />
-      {hasHeaders ? (
-        <UseArray path="config.headers" initialNumberOfItems={1}>
-          {({ items, addItem, removeItem }) => {
-            return (
-              <>
-                <EuiTitle size="xxs" data-test-subj="webhookHeaderText">
-                  <h5>{i18n.HEADERS_TITLE}</h5>
-                </EuiTitle>
-                <EuiSpacer size="s" />
-                {items.map((item) => (
-                  <EuiFlexGroup key={item.id}>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.key`}
-                        config={{
-                          label: i18n.KEY_LABEL,
-                        }}
-                        component={TextField}
-                        // This is needed because when you delete
-                        // a row and add a new one, the stale values will appear
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: { readOnly, ['data-test-subj']: 'webhookHeadersKeyInput' },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem>
-                      <UseField
-                        path={`${item.path}.value`}
-                        config={{ label: i18n.VALUE_LABEL }}
-                        component={TextField}
-                        readDefaultValueOnForm={!item.isNew}
-                        componentProps={{
-                          euiFieldProps: {
-                            readOnly,
-                            ['data-test-subj']: 'webhookHeadersValueInput',
-                          },
-                        }}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        color="danger"
-                        onClick={() => removeItem(item.id)}
-                        iconType="minusInCircle"
-                        aria-label={i18n.DELETE_BUTTON}
-                        style={{ marginTop: '28px' }}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ))}
-                <EuiSpacer size="m" />
-                <EuiButtonEmpty
-                  iconType="plusInCircle"
-                  onClick={addItem}
-                  data-test-subj="webhookAddHeaderButton"
-                >
-                  {i18n.ADD_BUTTON}
-                </EuiButtonEmpty>
-                <EuiSpacer />
-              </>
-            );
-          }}
-        </UseArray>
-      ) : null}
+      <AuthConfig readOnly={readOnly} />
+      <EuiSpacer size="s" />
     </span>
   );
 };

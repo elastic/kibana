@@ -14,7 +14,7 @@ import userEvent from '@testing-library/user-event';
 import { AuthType as WebhookAuthType, SSLCertType } from '../../../common/auth/constants';
 
 describe('WebhookActionConnectorFields renders', () => {
-  test('all connector fields is rendered', async () => {
+  it('renders all connector fields', async () => {
     const actionConnector = {
       actionTypeId: '.webhook',
       name: 'webhook',

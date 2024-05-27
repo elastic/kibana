@@ -361,6 +361,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
           data: {
             ...rest,
             __internal__: {
+              hasCA: false,
               hasHeaders: true,
             },
           },
@@ -401,6 +402,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
               authType: null,
             },
             __internal__: {
+              hasCA: false,
               hasHeaders: true,
             },
           },
@@ -438,6 +440,7 @@ describe('CasesWebhookActionConnectorFields renders', () => {
             ...rest,
             config: rest2,
             __internal__: {
+              hasCA: false,
               hasHeaders: false,
             },
           },
