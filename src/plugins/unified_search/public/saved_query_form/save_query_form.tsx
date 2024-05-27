@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, ChangeEventHandler } from 'react';
 import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
@@ -117,7 +117,7 @@ export function SaveQueryForm({
     shouldIncludeTimefilter,
   ]);
 
-  const onInputChange = useCallback((event) => {
+  const onInputChange = useCallback<ChangeEventHandler<HTMLInputElement>>((event) => {
     setFormErrors([]);
     setTitle(event.target.value);
   }, []);

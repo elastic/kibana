@@ -13,7 +13,7 @@ import type { HostsUncommonProcessesEdges } from '../../../../../common/search_s
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../../common/components/links';
-import type { Columns, ItemsPerRow } from '../../../components/paginated_table';
+import type { Columns, ItemsPerRow, SiemTables } from '../../../components/paginated_table';
 import { PaginatedTable } from '../../../components/paginated_table';
 import * as i18n from './translations';
 import { getRowItemsWithActions } from '../../../../common/components/tables/helpers';
@@ -84,7 +84,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
       getUncommonProcessesSelector(state, type)
     );
 
-    const updateLimitPagination = useCallback(
+    const updateLimitPagination = useCallback<SiemTables['updateLimitPagination']>(
       (newLimit) =>
         dispatch(
           hostsActions.updateTableLimit({
@@ -96,7 +96,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
       [type, dispatch]
     );
 
-    const updateActivePage = useCallback(
+    const updateActivePage = useCallback<SiemTables['updateActivePage']>(
       (newPage) =>
         dispatch(
           hostsActions.updateTableActivePage({

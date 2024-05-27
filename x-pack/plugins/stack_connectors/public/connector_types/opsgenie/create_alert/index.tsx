@@ -19,6 +19,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
 import type {
@@ -143,7 +144,7 @@ const CreateAlertComponent: React.FC<CreateAlertProps> = ({
   const [showJsonEditor, setShowJsonEditor] = useState<boolean>(false);
 
   const toggleShowJsonEditor = useCallback(
-    (event) => {
+    (event: EuiSwitchEvent) => {
       if (!event.target.checked) {
         // when the user switches back remove the json editor error if there was one
         // must mark as undefined to remove the field so it is not sent to the server side

@@ -10,7 +10,7 @@ import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
+import { NumberInputOption, NumberInputOptionProps } from '@kbn/vis-default-editor-plugin/public';
 
 import { Scale, ScaleType } from '../../../../types';
 import { SetScale } from './value_axis_options';
@@ -54,7 +54,7 @@ function YExtents({ scale, setScale, setMultipleValidity }: YExtentsProps) {
 
   const isValid = !errors.length;
 
-  const setExtents = useCallback(
+  const setExtents = useCallback<NumberInputOptionProps<'min' | 'max'>['setValue']>(
     (paramName, value) => {
       setScale(paramName, value === '' ? null : value);
     },

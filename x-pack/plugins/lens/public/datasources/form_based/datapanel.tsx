@@ -241,7 +241,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
     [layerFields]
   );
 
-  const onOverrideFieldGroupDetails = useCallback((groupName) => {
+  const onOverrideFieldGroupDetails = useCallback((groupName: string) => {
     if (groupName === FieldsGroupNames.AvailableFields) {
       return {
         helpText: i18n.translate('xpack.lens.indexPattern.allFieldsLabelHelp', {

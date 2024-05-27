@@ -24,6 +24,7 @@ import {
   EuiHorizontalRule,
   EuiProgress,
   PrettyDuration,
+  EuiSelectableProps,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
@@ -282,9 +283,17 @@ export const SavedQueryManagementList = ({
     }
   }, [onLoad, selectedSavedQuery, onClose]);
 
-  const handleSelect = useCallback((savedQueryToSelect) => {
-    setSelectedSavedQuery(savedQueryToSelect);
-  }, []);
+  const handleSelect = useCallback<NonNullable<EuiSelectableProps<SelectableProps>['onChange']>>(
+    (choices) => {
+      const choice = choices.find(({ checked }) => checked);
+      if (choice) {
+        setSelectedSavedQuery(
+          currentPageQueries.find((savedQuery) => savedQuery.id === choice.value)
+        );
+      }
+    },
+    [currentPageQueries]
+  );
 
   const handleDelete = useCallback((savedQueryToDelete: SavedQuery) => {
     setShowDeletionConfirmationModal(true);
@@ -439,14 +448,7 @@ export const SavedQueryManagementList = ({
                 {noSavedQueriesDescriptionText}
               </span>
             }
-            onChange={(choices) => {
-              const choice = choices.find(({ checked }) => checked);
-              if (choice) {
-                handleSelect(
-                  currentPageQueries.find((savedQuery) => savedQuery.id === choice.value)
-                );
-              }
-            }}
+            onChange={handleSelect}
             renderOption={renderOption}
             css={{
               '.euiSelectableList__list': {

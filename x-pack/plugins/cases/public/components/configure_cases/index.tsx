@@ -20,7 +20,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type {
+  ActionConnector,
+  ActionConnectorTableItem,
+  CreateConnectorFlyoutProps,
+  EditConnectorFlyoutProps,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
 import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type { CustomFieldConfiguration } from '../../../common/types/domain';
 import { useKibana } from '../../common/lib/kibana';
@@ -68,9 +73,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [connectorIsValid, setConnectorIsValid] = useState(true);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
-  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnectorTableItem | null>(
-    null
-  );
+  const [editedConnectorItem, setEditedConnectorItem] = useState<ActionConnector | null>(null);
   const [customFieldFlyoutVisible, setCustomFieldFlyoutVisibility] = useState<boolean>(false);
   const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
   const { euiTheme } = useEuiTheme();
@@ -107,8 +110,10 @@ export const ConfigureCases: React.FC = React.memo(() => {
     refetch: refetchActionTypes,
   } = useGetActionTypes();
 
-  const onConnectorUpdated = useCallback(
-    async (updatedConnector) => {
+  const onConnectorUpdated = useCallback<
+    NonNullable<EditConnectorFlyoutProps['onConnectorUpdated']>
+  >(
+    async (updatedConnector: ActionConnector) => {
       setEditedConnectorItem(updatedConnector);
       refetchConnectors();
       refetchActionTypes();
@@ -117,7 +122,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
   );
 
-  const onConnectorCreated = useCallback(
+  const onConnectorCreated = useCallback<
+    NonNullable<CreateConnectorFlyoutProps['onConnectorCreated']>
+  >(
     async (createdConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 

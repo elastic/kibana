@@ -24,6 +24,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { EuiSelectProps } from '@elastic/eui';
+import { EuiFieldTextProps } from '@elastic/eui';
 import { getCustomMetricLabel } from '../../../../common/formatters/get_custom_metric_label';
 import {
   SnapshotCustomAggregation,
@@ -114,7 +116,7 @@ export const MetricExpression = ({
   }, [customMetricTabOpen, metric, customMetric, firstFieldOption]);
 
   const onChangeTab = useCallback(
-    (id) => {
+    (id: any) => {
       if (id === 'metric-popover-custom') {
         setCustomMetricTabOpen(true);
         onChange('custom');
@@ -126,7 +128,7 @@ export const MetricExpression = ({
     [setCustomMetricTabOpen, onChange, selectedOption]
   );
 
-  const onAggregationChange = useCallback(
+  const onAggregationChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (e) => {
       const value = e.target.value;
       const aggValue: SnapshotCustomAggregation = SnapshotCustomAggregationRT.is(value)
@@ -153,7 +155,7 @@ export const MetricExpression = ({
   );
 
   const debouncedOnChangeCustom = debounce(onChangeCustom, 500);
-  const onLabelChange = useCallback(
+  const onLabelChange = useCallback<NonNullable<EuiFieldTextProps['onChange']>>(
     (e) => {
       setFieldDisplayedCustomLabel(e.target.value);
       const newCustomMetric = {
@@ -181,7 +183,7 @@ export const MetricExpression = ({
             }
           )}
           value={expressionDisplayValue}
-          isActive={Boolean(popoverOpen || (errors.metric && errors.metric.length > 0))}
+          isActive={Boolean(popoverOpen || (errors.metric && (errors.metric.length as number) > 0))}
           onClick={() => {
             setPopoverOpen(true);
           }}
@@ -256,7 +258,7 @@ export const MetricExpression = ({
                     options={fieldOptions}
                     onChange={onFieldChange}
                     isClearable={false}
-                    isInvalid={errors.metric.length > 0}
+                    isInvalid={(errors.metric.length as number) > 0}
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -292,7 +294,7 @@ export const MetricExpression = ({
                   fullWidth
                   singleSelection={{ asPlainText: true }}
                   data-test-subj="availablefieldsOptionsComboBox"
-                  isInvalid={errors.metric.length > 0}
+                  isInvalid={(errors.metric.length as number) > 0}
                   placeholder={firstFieldOption.text}
                   options={availablefieldsOptions}
                   noSuggestions={!availablefieldsOptions.length}

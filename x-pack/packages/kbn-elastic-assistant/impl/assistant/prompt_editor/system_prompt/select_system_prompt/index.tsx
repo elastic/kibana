@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSuperSelect,
+  EuiSuperSelectProps,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -116,7 +117,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
     [allSystemPrompts, showTitles, isFlyoutMode]
   );
 
-  const onChange = useCallback(
+  const onChange = useCallback<NonNullable<EuiSuperSelectProps['onChange']>>(
     (selectedSystemPromptId) => {
       if (selectedSystemPromptId === ADD_NEW_SYSTEM_PROMPT) {
         setIsSettingsModalVisible(true);

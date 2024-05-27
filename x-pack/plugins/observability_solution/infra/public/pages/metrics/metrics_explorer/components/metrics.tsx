@@ -42,7 +42,7 @@ export const MetricsExplorerMetrics = ({ options, onChange, fields, autoFocus = 
   );
 
   const handleChange = useCallback(
-    (selectedOptions) => {
+    (selectedOptions: any) => {
       onChange(
         selectedOptions.map((opt: SelectedOption, index: number) => ({
           aggregation: options.aggregation,

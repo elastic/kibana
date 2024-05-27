@@ -9,7 +9,7 @@ import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import moment from 'moment';
 import React, { useContext, useMemo, useCallback, useState } from 'react';
-import type { RemarkTokenizer } from '@elastic/eui';
+import type { RemarkTokenizer, EuiSelectProps } from '@elastic/eui';
 import {
   EuiLoadingSpinner,
   EuiIcon,
@@ -382,7 +382,7 @@ const InsightEditorComponent = ({
   const onChange = useCallback((filters: Filter[]) => {
     setProviders(filtersToInsightProviders(filters));
   }, []);
-  const selectOnChange = useCallback(
+  const selectOnChange = useCallback<NonNullable<EuiSelectProps['onChange']>>(
     (event) => {
       relativeTimerangeController.field.onChange(event.target.value);
     },

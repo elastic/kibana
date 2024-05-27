@@ -47,7 +47,7 @@ export const AnalyzeCategoryDatasetInMlAction: React.FunctionComponent<{
   );
 
   const handleClick = useCallback(
-    (e) => {
+    (e: React.MouseEvent) => {
       if (!viewAnomalyInMachineLearningLink || !shouldHandleLinkEvent(e)) return;
       application.navigateToUrl(viewAnomalyInMachineLearningLink);
     },

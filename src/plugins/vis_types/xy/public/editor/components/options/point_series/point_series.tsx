@@ -46,7 +46,10 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
 
   const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
-  const handleLegendSizeChange = useCallback((size) => setValue('legendSize', size), [setValue]);
+  const handleLegendSizeChange = useCallback(
+    (size?: LegendSize) => setValue('legendSize', size),
+    [setValue]
+  );
 
   return (
     <>

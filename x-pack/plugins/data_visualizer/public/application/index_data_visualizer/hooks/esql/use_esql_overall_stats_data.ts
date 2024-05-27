@@ -219,7 +219,7 @@ export const useESQLOverallStatsData = (
     getInitialProgress()
   );
   const onError = useCallback(
-    (error, title?: string) =>
+    (error: any, title?: string) =>
       toasts.addError(error, {
         title: title ?? fieldStatsErrorTitle,
       }),

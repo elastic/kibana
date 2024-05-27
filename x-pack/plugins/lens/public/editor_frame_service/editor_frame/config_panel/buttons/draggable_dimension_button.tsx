@@ -13,6 +13,7 @@ import {
   DropTargetSwapDuplicateCombine,
   Draggable,
   Droppable,
+  DroppableProps,
 } from '@kbn/dom-drag-drop';
 import { isDraggedField } from '../../../../utils';
 import {
@@ -125,11 +126,11 @@ export function DraggableDimensionButton({
   );
 
   const registerNewButtonRefMemoized = useCallback(
-    (el) => registerNewButtonRef(target.columnId, el),
+    (el: HTMLDivElement | null) => registerNewButtonRef(target.columnId, el),
     [registerNewButtonRef, target.columnId]
   );
 
-  const handleOnDrop = useCallback(
+  const handleOnDrop = useCallback<NonNullable<DroppableProps['onDrop']>>(
     (source, selectedDropType) => onDrop(source, value, selectedDropType),
     [value, onDrop]
   );

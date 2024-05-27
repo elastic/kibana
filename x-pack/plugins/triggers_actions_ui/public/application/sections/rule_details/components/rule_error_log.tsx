@@ -171,7 +171,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
   );
 
   const onSearchChange = useCallback(
-    (e) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       if (e.target.value === '') {
         setSearchText('');
       }
@@ -181,7 +181,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
   );
 
   const onKeyUp = useCallback(
-    (e) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === 'Enter') {
         setSearchText(search);
       }

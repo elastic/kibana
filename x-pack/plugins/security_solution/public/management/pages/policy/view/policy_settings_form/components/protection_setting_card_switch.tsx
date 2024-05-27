@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import type { EuiSwitchProps } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -51,7 +52,7 @@ export const ProtectionSettingCardSwitch = React.memo(
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEditMode = mode === 'edit';
 
-    const handleSwitchChange = useCallback(
+    const handleSwitchChange = useCallback<EuiSwitchProps['onChange']>(
       (event) => {
         const newPayload = cloneDeep(policy);
 

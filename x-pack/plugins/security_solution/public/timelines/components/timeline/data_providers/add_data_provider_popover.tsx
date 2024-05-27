@@ -28,6 +28,7 @@ import { addContentToTimeline, getDisplayValue } from './helpers';
 import { DataProviderType } from './data_provider';
 import { timelineSelectors } from '../../../store';
 import { ADD_FIELD_LABEL, ADD_TEMPLATE_FIELD_LABEL } from './translations';
+import type { OnDataProviderEdited } from '../events';
 
 interface AddDataProviderPopoverProps {
   browserFields: BrowserFields;
@@ -59,7 +60,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
     [setIsAddFilterPopoverOpen]
   );
 
-  const handleDataProviderEdited = useCallback(
+  const handleDataProviderEdited = useCallback<OnDataProviderEdited>(
     ({ andProviderId, excluded, field, id, operator, providerId, value, type }) => {
       addContentToTimeline({
         dataProviders,

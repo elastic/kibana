@@ -46,6 +46,10 @@ export {
   iconColumnId,
   useColumnWidths,
 } from './components/logging/log_text_stream/log_entry_column';
+export type {
+  UpdatedDateRange,
+  VisibleInterval,
+} from './components/logging/log_text_stream/scrollable_log_text_stream_view';
 export { LogEntryFlyout } from './components/logging/log_entry_flyout';
 export type { LogAIAssistantProps } from './components/log_ai_assistant/log_ai_assistant';
 export type { LogStreamProps } from './components/log_stream/log_stream';

@@ -9,7 +9,7 @@ import { EuiTitle, EuiText, EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elast
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { QualityWarning } from '../../../../../common/log_analysis';
+import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
 import { IndexSetupRow } from './index_setup_row';
 import { AvailableIndex, ValidationIndicesError } from './validation';
@@ -41,7 +41,7 @@ export const AnalysisSetupIndicesForm: React.FunctionComponent<{
   );
 
   const changeDatasetFilter = useCallback(
-    (indexName: string, datasetFilter) => {
+    (indexName: string, datasetFilter: DatasetFilter) => {
       onChangeSelectedIndices(
         indices.map((index) => {
           return index.name === indexName ? { ...index, datasetFilter } : index;

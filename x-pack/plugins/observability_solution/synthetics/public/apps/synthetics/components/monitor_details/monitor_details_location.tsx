@@ -38,7 +38,7 @@ export const MonitorDetailsLocation = ({ isDisabled }: { isDisabled?: boolean })
       configId={monitorId}
       selectedLocation={selectedLocation}
       onChange={useCallback(
-        (id, label) => {
+        (id: any, label: any) => {
           if (isErrorsTab) {
             services.application.navigateToApp(PLUGIN.SYNTHETICS_PLUGIN_ID, {
               path: `/monitor/${monitorId}/errors?locationId=${id}${params}`,

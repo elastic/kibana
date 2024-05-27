@@ -7,7 +7,7 @@
 
 import React, { type CSSProperties, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import type { CriteriaWithPagination } from '@elastic/eui';
+import type { CriteriaWithPagination, EuiSuperDatePickerProps } from '@elastic/eui';
 import {
   EuiBasicTable,
   type EuiBasicTableColumn,
@@ -489,7 +489,7 @@ export const EndpointList = () => {
     });
   }, [dispatch]);
 
-  const onRefreshChange = useCallback(
+  const onRefreshChange = useCallback<NonNullable<EuiSuperDatePickerProps['onRefreshChange']>>(
     (evt) => {
       dispatch({
         type: 'userUpdatedEndpointListRefreshOptions',
