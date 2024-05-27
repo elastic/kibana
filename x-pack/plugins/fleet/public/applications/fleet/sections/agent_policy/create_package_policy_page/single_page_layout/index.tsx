@@ -108,6 +108,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const [newAgentPolicy, setNewAgentPolicy] = useState<NewAgentPolicy>(
     generateNewAgentPolicyWithDefaults({ name: 'Agent policy 1' })
   );
+  const [pliAuthBlockComponent, setPliAuthBlockComponent] = useState<React.ComponentType | null>(
+    null
+  );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
   const validation = agentPolicyFormValidation(newAgentPolicy);
@@ -308,9 +311,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const extensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
-  const activePliBlock = useUIExtension(packagePolicy.package?.name ?? '', 'pli-auth-block');
-  console.log(packagePolicy.package?.name);
-  console.log('activePliBlock:', activePliBlock);
   const replaceDefineStepView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-replace-define-step'
@@ -345,6 +345,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             isEditPage={false}
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             agentlessPolicy={agentlessPolicy}
+            setPliAuthBlockComponent={setPliAuthBlockComponent}
           />
         </ExtensionWrapper>
       )
@@ -441,15 +442,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  console.log('test', activePliBlock?.Component?._payload?._status);
-  if (
-    activePliBlock?.Component?._payload?._status === '1' &&
-    typeof activePliBlock.Component === 'function'
-  ) {
+  if (!!pliAuthBlockComponent) {
+    const PliAuthBlock = pliAuthBlockComponent;
+
     return (
       <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
         <Suspense fallback={null}>
-          <activePliBlock.Component />
+          <PliAuthBlock />
         </Suspense>
       </CreatePackagePolicySinglePageLayout>
     );

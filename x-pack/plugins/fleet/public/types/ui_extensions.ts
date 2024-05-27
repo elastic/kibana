@@ -6,7 +6,7 @@
  */
 
 import type { EuiStepProps } from '@elastic/eui';
-import type { ComponentType, LazyExoticComponent } from 'react';
+import type { ComponentType, Dispatch, LazyExoticComponent, SetStateAction } from 'react';
 
 import type { FleetServerAgentComponentUnit } from '../../common/types/models/agent';
 
@@ -38,6 +38,7 @@ export type PackagePolicyReplaceDefineStepExtensionComponentProps = (
   packageInfo: PackageInfo;
   agentlessPolicy?: AgentPolicy;
   handleSetupTechnologyChange?: (setupTechnology: string) => void;
+  setPliAuthBlockComponent?: Dispatch<SetStateAction<ComponentType<{}> | null>>;
 };
 
 /**

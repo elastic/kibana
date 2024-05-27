@@ -546,11 +546,21 @@ export const CspPolicyTemplateForm = memo<
     handleSetupTechnologyChange,
     agentlessPolicy,
     pluginsOnStart,
+    setPliAuthBlockComponent,
   }) => {
     const { upsellingService, isServerless } = useServerlessServices(pluginsOnStart);
     const CspIntegrationInstallationUpsellingPliBlock = upsellingService?.sections.get(
       'cloud_security_posture_integration_installation'
     );
+    useEffect(() => {
+      if (
+        isServerless &&
+        !!CspIntegrationInstallationUpsellingPliBlock &&
+        setPliAuthBlockComponent
+      ) {
+        setPliAuthBlockComponent(CspIntegrationInstallationUpsellingPliBlock);
+      }
+    }, [isServerless, CspIntegrationInstallationUpsellingPliBlock, setPliAuthBlockComponent]);
 
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
@@ -558,13 +568,6 @@ export const CspPolicyTemplateForm = memo<
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-
-    useEffect(() => {
-      if (isServerless) {
-        // If the PLI block component is available, we want to disable the save button to prevent saving the policy
-        setIsValid(!CspIntegrationInstallationUpsellingPliBlock);
-      }
-    }, [CspIntegrationInstallationUpsellingPliBlock, isServerless]);
 
     const input = getSelectedOption(newPolicy.inputs, integration);
     const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
@@ -694,10 +697,6 @@ export const CspPolicyTemplateForm = memo<
         ),
       },
     ];
-
-    if (CspIntegrationInstallationUpsellingPliBlock) {
-      return <CspIntegrationInstallationUpsellingPliBlock />;
-    }
 
     return (
       <>
