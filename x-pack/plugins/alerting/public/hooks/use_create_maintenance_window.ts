@@ -10,8 +10,22 @@ import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
+import { isEmpty } from 'lodash';
 import { useKibana } from '../utils/kibana_react';
 import { createMaintenanceWindow, CreateParams } from '../services/maintenance_windows_api/create';
+
+const onErrorWithMessage = (message: string) =>
+  i18n.translate('xpack.alerting.maintenanceWindowsCreateFailureWithMessage', {
+    defaultMessage: 'Failed to create maintenance window: {message}',
+    values: { message },
+  });
+
+const onErrorWithoutMessage = i18n.translate(
+  'xpack.alerting.maintenanceWindowsCreateFailureWithoutMessage',
+  {
+    defaultMessage: 'Failed to create maintenance window',
+  }
+);
 
 interface UseCreateMaintenanceWindowProps {
   onError?: (error: IHttpFetchError<KibanaServerError>) => void;
@@ -41,14 +55,11 @@ export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowPro
       );
     },
     onError: (error: IHttpFetchError<KibanaServerError>) => {
-      const getDefaultErrorMessage = (message?: string) =>
-        i18n.translate('xpack.alerting.maintenanceWindowsCreateFailure', {
-          defaultMessage: 'Failed to create maintenance window{message}',
-          values: { message },
-        });
+      const getDefaultErrorMessage = (message?: string): string =>
+        message == null || isEmpty(message) ? onErrorWithoutMessage : onErrorWithMessage(message);
 
       toasts.addDanger(
-        getDefaultErrorMessage(error.body?.statusCode === 400 ? `: ${error.body?.message}` : '')
+        getDefaultErrorMessage(error.body?.statusCode === 400 ? error.body?.message : '')
       );
       onError?.(error);
     },
