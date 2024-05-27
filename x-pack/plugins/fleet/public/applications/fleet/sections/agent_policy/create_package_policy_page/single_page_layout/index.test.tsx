@@ -821,7 +821,6 @@ describe('When on the package policy create page', () => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/184191
       test('should not show confirmation modal', async () => {
         (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
           data: { results: { total: 1 } },
