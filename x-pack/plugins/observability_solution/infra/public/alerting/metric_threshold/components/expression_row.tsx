@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { omit } from 'lodash';
-import React, { useCallback, useMemo, useState, FC, PropsWithChildren } from 'react';
+import React, { PropsWithChildren, useCallback, useMemo, useState } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
@@ -27,11 +27,10 @@ import {
   ThresholdExpression,
   WhenExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
 import useToggle from 'react-use/lib/useToggle';
+import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
-import { DerivedIndexPattern } from '../../../containers/metrics_source';
 import { AGGREGATION_TYPES, MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION } from '../i18n_strings';
@@ -48,7 +47,6 @@ const customComparators = {
 };
 
 interface ExpressionRowProps {
-  fields: DerivedIndexPattern['fields'];
   expressionId: number;
   expression: MetricExpression;
   errors: IErrorObject;
@@ -56,7 +54,6 @@ interface ExpressionRowProps {
   addExpression(): void;
   remove(id: number): void;
   setRuleParams(id: number, params: MetricExpression): void;
-  dataView: DataViewBase;
 }
 
 const NegativeHorizontalMarginDiv = euiStyled.div`margin: 0 -4px;`;
@@ -69,20 +66,17 @@ const StyledHealth = euiStyled(EuiHealth)`
   margin-left: 4px;
 `;
 
-export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) => {
+export const ExpressionRow = ({
+  children,
+  setRuleParams,
+  expression,
+  errors,
+  expressionId,
+  remove,
+  canDelete,
+}: PropsWithChildren<ExpressionRowProps>) => {
   const [isExpanded, toggle] = useToggle(true);
-
-  const {
-    dataView,
-    children,
-    setRuleParams,
-    expression,
-    errors,
-    expressionId,
-    remove,
-    fields,
-    canDelete,
-  } = props;
+  const { metricsView } = useMetricsDataViewContext();
 
   const {
     aggType = AGGREGATION_TYPES.MAX,
@@ -209,7 +203,7 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
     />
   );
 
-  const normalizedFields = fields.map((f) => ({
+  const normalizedFields = (metricsView?.fields ?? []).map((f) => ({
     normalizedType: f.type,
     name: f.name,
   }));
@@ -341,7 +335,6 @@ export const ExpressionRow: FC<PropsWithChildren<ExpressionRowProps>> = (props) 
                   aggregationTypes={aggregationType}
                   onChange={handleCustomMetricChange}
                   errors={errors}
-                  dataView={dataView}
                 />
               </EuiFlexGroup>
               <EuiSpacer size={'s'} />
