@@ -89,6 +89,7 @@ Object {
           },
         },
         "summary": "",
+        "tags": Array [],
       },
     },
   },
@@ -213,6 +214,9 @@ Object {
           },
         },
         "summary": "versioned route",
+        "tags": Array [
+          "versioned",
+        ],
       },
     },
     "/foo/{id}": Object {
@@ -347,6 +351,9 @@ Object {
           },
         },
         "summary": "route",
+        "tags": Array [
+          "bar",
+        ],
       },
     },
   },
@@ -446,6 +453,7 @@ Object {
           },
         },
         "summary": "",
+        "tags": Array [],
       },
     },
   },
@@ -522,6 +530,7 @@ Object {
           },
         },
         "summary": "",
+        "tags": Array [],
       },
     },
     "/test": Object {
@@ -558,6 +567,7 @@ Object {
           },
         },
         "summary": "",
+        "tags": Array [],
       },
     },
   },
