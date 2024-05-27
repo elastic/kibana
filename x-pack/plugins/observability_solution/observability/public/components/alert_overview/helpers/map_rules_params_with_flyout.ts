@@ -20,7 +20,7 @@ import {
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { LEGACY_COMPARATORS } from '../../../../common/utils/convert_legacy_outside_comparator';
+import { convertToBuiltInComparators } from '../../../../target/types/common';
 import {
   ABOVE_OR_EQ_TEXT,
   ABOVE_TEXT,
@@ -45,7 +45,7 @@ export interface FlyoutThresholdData {
   pctAboveThreshold: string;
 }
 
-const getI18nComparator = (comparator?: COMPARATORS | LEGACY_COMPARATORS) => {
+const getI18nComparator = (comparator?: COMPARATORS) => {
   switch (comparator) {
     case COMPARATORS.GREATER_THAN:
       return ABOVE_TEXT;
@@ -60,9 +60,9 @@ const getI18nComparator = (comparator?: COMPARATORS | LEGACY_COMPARATORS) => {
   }
 };
 const getPctAboveThreshold = (
-  observedValue?: number,
-  threshold?: number[],
-  comparator?: COMPARATORS | LEGACY_COMPARATORS
+  threshold: number[],
+  comparator: COMPARATORS,
+  observedValue?: number
 ): string => {
   if (!observedValue || !threshold || threshold.length > 1 || threshold[0] <= 0) return '';
 
@@ -72,7 +72,7 @@ const getPctAboveThreshold = (
       pctValue: Math.abs(
         parseFloat((((observedValue - threshold[0]) * 100) / threshold[0]).toFixed(2))
       ),
-      comparator: getI18nComparator(comparator),
+      comparator: getI18nComparator(convertToBuiltInComparators(comparator)),
     },
   });
 };
@@ -108,7 +108,11 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold, comparator),
+          pctAboveThreshold: getPctAboveThreshold(
+            threshold,
+            convertToBuiltInComparators(comparator),
+            observedValue
+          ),
         } as unknown as FlyoutThresholdData;
       });
 
@@ -143,7 +147,11 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold, comparator),
+          pctAboveThreshold: getPctAboveThreshold(
+            threshold,
+            convertToBuiltInComparators(comparator),
+            observedValue
+          ),
         } as unknown as FlyoutThresholdData;
       });
 
@@ -196,7 +204,11 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: observedValueFormatted,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, thresholdFormatted, comparator),
+          pctAboveThreshold: getPctAboveThreshold(
+            thresholdFormatted,
+            convertToBuiltInComparators(comparator),
+            observedValue
+          ),
         } as unknown as FlyoutThresholdData;
       });
 
@@ -207,9 +219,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator,
         pctAboveThreshold: getPctAboveThreshold(
-          alert.fields[ALERT_EVALUATION_VALUE],
           [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
-          comparator
+          comparator,
+          alert.fields[ALERT_EVALUATION_VALUE]
         ),
       } as unknown as FlyoutThresholdData;
       return [flyoutMap];
@@ -220,9 +232,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: COMPARATORS.GREATER_THAN,
         pctAboveThreshold: getPctAboveThreshold(
-          alert.fields[ALERT_EVALUATION_VALUE],
           [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
-          COMPARATORS.GREATER_THAN
+          COMPARATORS.GREATER_THAN,
+          alert.fields[ALERT_EVALUATION_VALUE]
         ),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapErrorCount];
@@ -233,9 +245,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         threshold: [asPercent(alert.fields[ALERT_EVALUATION_THRESHOLD], 100)],
         comparator: COMPARATORS.GREATER_THAN,
         pctAboveThreshold: getPctAboveThreshold(
-          alert.fields[ALERT_EVALUATION_VALUE],
           [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
-          COMPARATORS.GREATER_THAN
+          COMPARATORS.GREATER_THAN,
+          alert.fields[ALERT_EVALUATION_VALUE]
         ),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapTransactionErrorRate];
@@ -246,9 +258,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         threshold: [asDuration(alert.fields[ALERT_EVALUATION_THRESHOLD])],
         comparator: COMPARATORS.GREATER_THAN,
         pctAboveThreshold: getPctAboveThreshold(
-          alert.fields[ALERT_EVALUATION_VALUE],
           [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
-          COMPARATORS.GREATER_THAN
+          COMPARATORS.GREATER_THAN,
+          alert.fields[ALERT_EVALUATION_VALUE]
         ),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapTransactionDuration];
@@ -260,9 +272,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         threshold: threshold.join(' AND '),
         comparator: thresholdComparator,
         pctAboveThreshold: getPctAboveThreshold(
-          alert.fields[ALERT_EVALUATION_VALUE],
           threshold,
-          thresholdComparator as COMPARATORS
+          thresholdComparator as COMPARATORS,
+          alert.fields[ALERT_EVALUATION_VALUE]
         ),
       } as unknown as FlyoutThresholdData;
       return [ESQueryFlyoutMap];
@@ -273,9 +285,9 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator: COMPARATORS.GREATER_THAN,
         pctAboveThreshold: getPctAboveThreshold(
-          alert.fields[ALERT_EVALUATION_VALUE],
           [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
-          COMPARATORS.GREATER_THAN
+          COMPARATORS.GREATER_THAN,
+          alert.fields[ALERT_EVALUATION_VALUE]
         ),
       } as unknown as FlyoutThresholdData;
       return [SLOBurnRateFlyoutMap];

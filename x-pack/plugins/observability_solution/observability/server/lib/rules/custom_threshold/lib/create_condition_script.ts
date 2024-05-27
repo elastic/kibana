@@ -6,14 +6,8 @@
  */
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { LEGACY_COMPARATORS } from '../../../../../common/utils/convert_legacy_outside_comparator';
 
-export const createConditionScript = (
-  threshold: number[],
-  comparator: COMPARATORS | LEGACY_COMPARATORS
-  // We don't need to handle the LEGACY_COMPARATORS
-  // as it's converted on-the-fly to NOT_BETWEEN in the entry point of the rule executor
-) => {
+export const createConditionScript = (threshold: number[], comparator: COMPARATORS) => {
   if (comparator === COMPARATORS.BETWEEN && threshold.length === 2) {
     return {
       source: `params.value > params.threshold0 && params.value < params.threshold1 ? 1 : 0`,

@@ -11,8 +11,6 @@ import {
   TimeUnitChar,
 } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
-import { convertToBuiltInComparators } from '@kbn/observability-plugin/target/types/common';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';
 
@@ -120,7 +118,7 @@ const formatGroup = (group: string) => (group === UNGROUPED_FACTORY_KEY ? '' : `
 export const buildFiredAlertReason: (alertResult: {
   group: string;
   metric: string;
-  comparator: COMPARATORS | LEGACY_COMPARATORS;
+  comparator: COMPARATORS;
   threshold: Array<number | string>;
   currentValue: number | string;
   timeSize: number;
@@ -132,7 +130,7 @@ export const buildFiredAlertReason: (alertResult: {
     values: {
       group: formatGroup(group),
       metric,
-      comparator: alertComparatorToI18n(convertToBuiltInComparators(comparator)),
+      comparator: alertComparatorToI18n(comparator),
       threshold: thresholdToI18n(threshold),
       currentValue,
       duration: formatDurationFromTimeUnitChar(timeSize, timeUnit),

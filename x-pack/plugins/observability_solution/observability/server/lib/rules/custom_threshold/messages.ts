@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { LEGACY_COMPARATORS } from '../../../../common/utils/convert_legacy_outside_comparator';
 import {
   ABOVE_TEXT,
   ABOVE_OR_EQ_TEXT,
@@ -16,7 +15,7 @@ import {
   BETWEEN_TEXT,
   NOT_BETWEEN_TEXT,
 } from '../../../../common/i18n';
-import { formatDurationFromTimeUnitChar } from '../../../../common';
+import { convertToBuiltInComparators, formatDurationFromTimeUnitChar } from '../../../../common';
 import { Evaluation } from './lib/evaluate_rule';
 import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
 import { CUSTOM_EQUATION_I18N } from './translations';
@@ -46,9 +45,7 @@ const recoveredComparatorToI18n = (
   }
 };
 
-const alertComparatorToI18n = (comparator: COMPARATORS | LEGACY_COMPARATORS) => {
-  // We don't need to handle the LEGACY_COMPARATORS
-  // as it's converted on-the-fly to NOT_BETWEEN in the entry point of the rule executor
+const alertComparatorToI18n = (comparator: COMPARATORS) => {
   switch (comparator) {
     case COMPARATORS.BETWEEN:
       return BETWEEN_TEXT;
@@ -127,7 +124,7 @@ const buildAggregationReason: (evaluation: FormattedEvaluation) => string = ({
     defaultMessage: '{label} is {currentValue}, {comparator} the threshold of {threshold}',
     values: {
       label,
-      comparator: alertComparatorToI18n(comparator),
+      comparator: alertComparatorToI18n(convertToBuiltInComparators(comparator)),
       threshold: thresholdToI18n(threshold),
       currentValue,
     },
