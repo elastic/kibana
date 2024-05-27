@@ -44,8 +44,6 @@ export function createTracesServiceEntitiesAggregator() {
       const duration = event['transaction.duration.us']!;
       const outcome = event['event.outcome'];
 
-      console.log('w/ou', entity['entity.metric']);
-      console.log('w', entity['entity.metric'].latency);
       // @ts-expect-error
       entity['entity.metric'].latency.record({ groupBy: entityId, value: duration });
       // @ts-expect-error
