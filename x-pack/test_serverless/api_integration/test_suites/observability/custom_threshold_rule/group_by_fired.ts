@@ -22,6 +22,7 @@ import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ActionDocument } from './typings';
+import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 export default function ({ getService }: FtrProviderContext) {
   const esClient = getService('es');
@@ -31,6 +32,11 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   let alertId: string;
+  const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('Custom Threshold rule - GROUP_BY - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -43,6 +49,8 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
+      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
       dataForgeConfig = {
         schedule: [
           {
@@ -96,16 +104,23 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
+      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
     });
 
     describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
         });
 
         const createdRule = await alertingApi.createRule({
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           tags: ['observability'],
           consumer: 'observability',
           name: 'Threshold rule',
@@ -163,6 +178,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should be active', async () => {
         const executionStatus = await alertingApi.waitForRuleStatus({
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
           ruleId,
           expectedStatus: 'active',
         });
@@ -170,7 +188,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findRule(ruleId);
+        const match = await alertingApi.findRule(
+          supertestWithoutAuth,
+          roleAuthc,
+          internalReqHeader,
+          ruleId
+        );
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be('observability');
       });

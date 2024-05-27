@@ -355,16 +355,20 @@ export async function updateEsQueryRule({
 }
 
 export async function runRule({
-  supertest,
+  supertestWithoutAuth,
+  roleAuthc,
+  internalReqHeader,
   ruleId,
 }: {
-  supertest: SuperTestAgent;
+  supertestWithoutAuth: SupertestWithoutAuthType;
+  roleAuthc: RoleCredentials;
+  internalReqHeader: InternalRequestHeader;
   ruleId: string;
 }) {
-  const response = await supertest
+  const response = await supertestWithoutAuth
     .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
-    .set('kbn-xsrf', 'foo')
-    .set('x-elastic-internal-origin', 'foo')
+    .set(internalReqHeader)
+    .set(roleAuthc.apiKeyHeader)
     .expect(204);
   return response;
 }

@@ -42,7 +42,7 @@ import {
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from './helpers/alerting_api_helper';
 import { waitForAlertInIndex, waitForNumRuleRuns } from './helpers/alerting_wait_for_helpers';
-import { add, removeAll, type ObjectToRemove } from '../../../../shared/lib';
+import { ObjectRemover } from '../../../../shared/lib';
 import { InternalRequestHeader, RoleCredentials } from '../../../../shared/services';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
@@ -53,10 +53,10 @@ export default function ({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
-  const log = getService('log');
+  const supertest = getService('supertest');
 
   const esClient = getService('es');
-  let objectsToRemove: ObjectToRemove[] = [];
+  const objectRemover = new ObjectRemover(supertest);
 
   describe('Alert documents', function () {
     // Timeout of 360000ms exceeded
@@ -71,17 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      objectsToRemove = await removeAll(
-        log.debug.bind(log),
-        internalReqHeader,
-        roleAuthc,
-        supertestWithoutAuth,
-        objectsToRemove
-      );
-    });
-
-    after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      objectRemover.removeAll();
     });
 
     it('should generate an alert document for an active alert', async () => {
@@ -104,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       ruleId = createdRule.id;
-      objectsToRemove = add('default', ruleId, 'rule', 'alerting')(objectsToRemove);
+      objectRemover.add('default', ruleId, 'rule', 'alerting');
 
       // get the first alert document written
       const testStart1 = new Date();
@@ -228,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
       ruleId = createdRule.id;
-      objectsToRemove = add('default', ruleId, 'rule', 'alerting')(objectsToRemove);
+      objectRemover.add('default', ruleId, 'rule', 'alerting');
 
       // get the first alert document written
       const testStart1 = new Date();

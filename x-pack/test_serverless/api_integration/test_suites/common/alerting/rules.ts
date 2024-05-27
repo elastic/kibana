@@ -270,7 +270,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await runRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         ruleId,
       });
 
@@ -411,7 +413,15 @@ export default function ({ getService }: FtrProviderContext) {
       ruleId = createdRule.id;
 
       // Wait until alerts ran at least 3 times before disabling the alert and waiting for tasks to finish
-      await waitForNumRuleRuns({ supertest, numOfRuns: 3, ruleId, esClient, testStart });
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
+        numOfRuns: 3,
+        ruleId,
+        esClient,
+        testStart,
+      });
 
       await disableRule({
         supertest,
@@ -494,7 +504,15 @@ export default function ({ getService }: FtrProviderContext) {
       ruleId = createdRule.id;
 
       // Wait until alerts ran at least 3 times before disabling the alert and waiting for tasks to finish
-      await waitForNumRuleRuns({ supertest, numOfRuns: 3, ruleId, esClient, testStart });
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
+        numOfRuns: 3,
+        ruleId,
+        esClient,
+        testStart,
+      });
 
       await disableRule({
         supertest,
@@ -634,7 +652,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await runRule({
-        supertest,
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
         ruleId,
       });
 
@@ -740,7 +760,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Wait until alerts schedule actions twice to ensure actions had a chance to skip
       // execution once before disabling the alert and waiting for tasks to finish
-      await waitForNumRuleRuns({ supertest, numOfRuns: 2, ruleId, esClient, testStart });
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
+        numOfRuns: 2,
+        ruleId,
+        esClient,
+        testStart,
+      });
 
       await disableRule({
         supertest,
@@ -836,7 +864,15 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Wait until alerts schedule actions twice to ensure actions had a chance to skip
       // execution once before disabling the alert and waiting for tasks to finish
-      await waitForNumRuleRuns({ supertest, numOfRuns: 2, ruleId, esClient, testStart });
+      await waitForNumRuleRuns({
+        supertestWithoutAuth,
+        roleAuthc,
+        internalReqHeader,
+        numOfRuns: 2,
+        ruleId,
+        esClient,
+        testStart,
+      });
 
       await disableRule({
         supertest,

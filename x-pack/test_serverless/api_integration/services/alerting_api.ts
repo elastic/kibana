@@ -12,7 +12,11 @@ import type {
 
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { RoleCredentials, InternalRequestHeader } from '../../shared/services';
+import {
+  RoleCredentials,
+  InternalRequestHeader,
+  SupertestWithoutAuthType,
+} from '../../shared/services';
 import { SloBurnRateRuleParams } from './slo_api';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -22,17 +26,18 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const requestTimeout = 30 * 1000;
   const retryTimeout = 120 * 1000;
   const logger = getService('log');
-  const svlCommonApi = getService('svlCommonApi');
-  const svlUserManager = getService('svlUserManager');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
-  let internalReqHeader: InternalRequestHeader;
 
   return {
     async waitForRuleStatus({
+      supertestWithoutAuth,
+      roleAuthc,
+      internalReqHeader,
       ruleId,
       expectedStatus,
     }: {
+      supertestWithoutAuth: SupertestWithoutAuthType;
+      roleAuthc: RoleCredentials;
+      internalReqHeader: InternalRequestHeader;
       ruleId: string;
       expectedStatus: string;
     }) {
@@ -102,7 +107,19 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async createIndexConnector({ name, indexName }: { name: string; indexName: string }) {
+    async createIndexConnector({
+      supertestWithoutAuth,
+      roleAuthc,
+      internalReqHeader,
+      name,
+      indexName,
+    }: {
+      supertestWithoutAuth: SupertestWithoutAuthType;
+      roleAuthc: RoleCredentials;
+      internalReqHeader: InternalRequestHeader;
+      name: string;
+      indexName: string;
+    }) {
       const { body } = await supertestWithoutAuth
         .post(`/api/actions/connector`)
         .set(internalReqHeader)
@@ -119,6 +136,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
     },
 
     async createRule({
+      supertestWithoutAuth,
+      roleAuthc,
+      internalReqHeader,
       name,
       ruleTypeId,
       params,
@@ -127,6 +147,9 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       schedule,
       consumer,
     }: {
+      supertestWithoutAuth: SupertestWithoutAuthType;
+      roleAuthc: RoleCredentials;
+      internalReqHeader: InternalRequestHeader;
       ruleTypeId: string;
       name: string;
       params: MetricThresholdParams | ThresholdParams | SloBurnRateRuleParams;
@@ -153,7 +176,12 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
-    async findRule(ruleId: string) {
+    async findRule(
+      supertestWithoutAuth: SupertestWithoutAuthType,
+      roleAuthc: RoleCredentials,
+      internalReqHeader: InternalRequestHeader,
+      ruleId: string
+    ) {
       if (!ruleId) {
         throw new Error(`'ruleId' is undefined`);
       }

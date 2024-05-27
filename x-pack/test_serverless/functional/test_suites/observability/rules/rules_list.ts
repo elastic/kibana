@@ -56,7 +56,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     numAttempts: number;
   }) {
     for (let i = 0; i < numAttempts; i++) {
-      await runRule({ supertest, ruleId });
+      await runRule({ supertestWithoutAuth, roleAuthc, internalReqHeader, ruleId });
       await new Promise((resolve) => setTimeout(resolve, intervalMilliseconds));
 
       await disableRule({ supertest, ruleId });
