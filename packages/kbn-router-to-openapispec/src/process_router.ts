@@ -12,8 +12,9 @@ import { ALLOWED_PUBLIC_VERSION as LATEST_SERVERLESS_VERSION } from '@kbn/core-h
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
 import {
-  assignToPathsObject,
+  assignToPaths,
   extractContentType,
+  extractTags,
   extractValidationSchemaFromRoute,
   getPathParameters,
   getVersionedContentTypeString,
@@ -33,7 +34,7 @@ export const processRouter = (
     pathStartsWith
   );
 
-  const paths: OpenAPIV3.PathsObject = {};
+  const paths = new Map<string, OpenAPIV3.PathItemObject>();
   for (const route of routes) {
     try {
       const pathParams = getPathParameters(route.path);
@@ -59,31 +60,34 @@ export const processRouter = (
         ];
       }
 
-      const path: OpenAPIV3.PathItemObject = {
-        [route.method]: {
-          summary: route.options.description ?? '',
-          requestBody: !!validationSchemas?.body
-            ? {
-                content: {
-                  [getVersionedContentTypeString(LATEST_SERVERLESS_VERSION, contentType)]: {
-                    schema: converter.convert(validationSchemas.body),
-                  },
+      const operation: OpenAPIV3.OperationObject = {
+        summary: route.options.description ?? '',
+        tags: route.options.tags ? extractTags(route.options.tags) : [],
+        requestBody: !!validationSchemas?.body
+          ? {
+              content: {
+                [getVersionedContentTypeString(LATEST_SERVERLESS_VERSION, contentType)]: {
+                  schema: converter.convert(validationSchemas.body),
                 },
-              }
-            : undefined,
-          responses: extractResponses(route, converter),
-          parameters,
-          operationId: getOpId(route.path),
-        },
+              },
+            }
+          : undefined,
+        responses: extractResponses(route, converter),
+        parameters,
+        operationId: getOpId(route.path),
       };
-      assignToPathsObject(paths, route.path, path);
+
+      const path: OpenAPIV3.PathItemObject = {
+        [route.method]: operation,
+      };
+      assignToPaths(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}': ${e.message}`;
       throw e;
     }
   }
-  return { paths };
+  return { paths: Object.fromEntries(paths.entries()) };
 };
 
 export type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
