@@ -29,14 +29,8 @@ describe('SearchSource#normalizeSortRequest', function () {
     name: 'script boolean',
     type: 'boolean',
   };
-  const murmurScriptedField = {
-    ...scriptedField,
-    sortable: false,
-    name: 'murmur script',
-    type: 'murmur3',
-  };
 
-  const fields = [scriptedField, stringScriptedField, booleanScriptedField, murmurScriptedField];
+  const fields = [scriptedField, stringScriptedField, booleanScriptedField];
 
   const indexPattern = {
     fields,
