@@ -10,8 +10,19 @@
   ],
   "kbn_references": [
     "@kbn/data-plugin",
-    "@kbn/i18n",
-    "@kbn/esql-utils"
+    "@kbn/es-types",
+    "@kbn/es-query",
+    "@kbn/discover-utils",
+    "@kbn/discover-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/cell-actions",
+    "@kbn/unified-data-table",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/core",
+    "@kbn/ui-actions-plugin",
+    "@kbn/field-formats-plugin"
   ],
   "exclude": [
     "target/**/*",
