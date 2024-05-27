@@ -15,6 +15,26 @@ import {
 } from '@kbn/core-http-server';
 import { KnownParameters } from './type';
 
+const tagPrefix = 'oas-tag:';
+const extractTag = (tag: string) => {
+  if (tag.startsWith(tagPrefix)) {
+    return tag.slice(tagPrefix.length);
+  }
+};
+/**
+ * Given an array of tags ([oas-tag:beep, oas-tag:boop]) will return a new array
+ * with the tag prefix removed.
+ */
+export const extractTags = (tags: readonly string[]) => {
+  return tags.flatMap((tag) => {
+    const value = extractTag(tag);
+    if (value) {
+      return value;
+    }
+    return [];
+  });
+};
+
 export const getPathParameters = (path: string): KnownParameters => {
   return Array.from(path.matchAll(/\{(.+?)\}/g)).reduce<KnownParameters>((acc, [_, key]) => {
     const optional = key.endsWith('?');
