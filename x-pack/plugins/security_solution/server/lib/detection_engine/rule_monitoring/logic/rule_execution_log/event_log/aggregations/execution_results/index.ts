@@ -78,7 +78,6 @@ export const getExecutionEventAggregation = ({
   page,
   perPage,
   sort,
-  runTypeFilters,
 }: ExecutionEventAggregationOptions): Record<string, estypes.AggregationsAggregationContainer> => {
   // Last stop validation for any other consumers so there's a friendly message instead of failed ES Query
   if (maxExecutions > MAX_EXECUTION_EVENTS_DISPLAYED) {

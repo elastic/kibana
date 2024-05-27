@@ -13,10 +13,12 @@ import type {
   RuleExecutionStatus,
   RuleRunType,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
+
 import {
-  RuleExecutionStatusEnum,
-  RuleRunTypeEnum,
-} from '../../../../../../common/api/detection_engine/rule_monitoring';
+  RUN_TYPE_FILTERS,
+  STATUS_FILTERS,
+} from '../../../../../../common/detection_engine/rule_management/execution_log';
+
 import { ExecutionStatusFilter, ExecutionRunTypeFilter } from '../../../../rule_monitoring';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import * as i18n from './translations';
@@ -42,14 +44,6 @@ export const replaceQueryTextAliases = (queryText: string): string => {
   );
 };
 
-// This only includes statuses which are or can be final
-const STATUS_FILTERS: RuleExecutionStatus[] = [
-  RuleExecutionStatusEnum.succeeded,
-  RuleExecutionStatusEnum.failed,
-  RuleExecutionStatusEnum['partial failure'],
-];
-
-const RUN_TYPE_FILTERS: RuleRunType[] = [RuleRunTypeEnum.standard, RuleRunTypeEnum.backfill];
 interface ExecutionLogTableSearchProps {
   onlyShowFilters: true;
   selectedStatuses: RuleExecutionStatus[];

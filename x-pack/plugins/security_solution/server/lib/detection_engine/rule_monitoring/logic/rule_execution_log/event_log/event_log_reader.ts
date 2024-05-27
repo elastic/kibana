@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEventLogClient, IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-
+import { EVENT_LOG_ACTIONS } from '@kbn/alerting-plugin/server/plugin';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -21,6 +21,11 @@ import {
   RuleExecutionEventType,
   RuleExecutionEventTypeEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import {
+  RUN_TYPE_FILTERS,
+  STATUS_FILTERS,
+} from '../../../../../../../common/detection_engine/rule_management/execution_log';
+
 import { prepareKQLStringParam } from '../../../../../../../common/utils/kql';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
@@ -116,21 +121,23 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       const soIds = [ruleId];
 
       let totalExecutions: number | undefined;
-      let idsFilter: string = '';
+      let executionIdsFilter: string = '';
 
       // Similar workaround to the above for status filters
       // First fetch execution uuid's by run type filter if provided
       // Then use those ID's to filter by status if provided
-      if (runTypeFilters.length > 0 && runTypeFilters.length < 2) {
+      const MAX_RUN_TYPE_FILTERS = RUN_TYPE_FILTERS.length;
+      const someRunTypeFiltersSelected =
+        runTypeFilters.length > 0 && runTypeFilters.length < MAX_RUN_TYPE_FILTERS;
+      if (someRunTypeFiltersSelected) {
         const ruleRunEventActions = runTypeFilters.map((runType) => {
-          if (runType === RuleRunTypeEnum.standard) {
-            return 'execute';
-          } else {
-            return 'execute-backfill';
-          }
+          return {
+            [RuleRunTypeEnum.standard]: EVENT_LOG_ACTIONS.execute,
+            [RuleRunTypeEnum.backfill]: EVENT_LOG_ACTIONS.executeBackfill,
+          }[runType];
         });
 
-        const { ids, total } = await getAggregetatedEventsWithFilter({
+        const { executionIds, total } = await findRuleExecutionIds({
           eventLog,
           soType,
           soIds,
@@ -141,14 +148,14 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
             .join(' OR ')}) `,
         });
 
-        if (ids.length === 0) {
+        if (executionIds.length === 0) {
           return {
             total: 0,
             events: [],
           };
         } else {
           totalExecutions = total;
-          idsFilter = `${f.RULE_EXECUTION_UUID}:(${ids.join(' OR ')})`;
+          executionIdsFilter = `${f.RULE_EXECUTION_UUID}:(${executionIds.join(' OR ')})`;
         }
       }
 
@@ -157,28 +164,31 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       // TODO: See: https://github.com/elastic/kibana/pull/127339/files#r825240516
       // First fetch execution uuid's by status filter if provided
       // If 0 or 3 statuses are selected we can search for all statuses and don't need this pre-filter by ID
-      if (statusFilters.length > 0 && statusFilters.length < 3) {
+      const MAX_STATUSES_FILTERS = STATUS_FILTERS.length;
+      const someStatusFiltersSelected =
+        statusFilters.length > 0 && statusFilters.length < MAX_STATUSES_FILTERS;
+      if (someStatusFiltersSelected) {
         const outcomes = mapRuleExecutionStatusToPlatformStatus(statusFilters);
         const outcomeFilter = outcomes.length ? `OR event.outcome:(${outcomes.join(' OR ')})` : '';
-        const { ids, total } = await getAggregetatedEventsWithFilter({
+        const { executionIds, total } = await findRuleExecutionIds({
           eventLog,
           soType,
           soIds,
           start,
           end,
           filter: `(${f.RULE_EXECUTION_STATUS}:(${statusFilters.join(' OR ')}) ${outcomeFilter}) ${
-            idsFilter ? `AND ${idsFilter}` : ''
+            executionIdsFilter ? `AND ${executionIdsFilter}` : ''
           }`,
         });
 
         // Early return if no results based on status filter
-        if (ids.length === 0) {
+        if (executionIds.length === 0) {
           return {
             total: 0,
             events: [],
           };
         } else {
-          idsFilter = `${f.RULE_EXECUTION_UUID}:(${ids.join(' OR ')})`;
+          executionIdsFilter = `${f.RULE_EXECUTION_UUID}:(${executionIds.join(' OR ')})`;
           totalExecutions = total;
         }
       }
@@ -187,7 +197,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       const results = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
         start,
         end,
-        filter: idsFilter,
+        filter: executionIdsFilter,
         aggs: getExecutionEventAggregation({
           maxExecutions: MAX_EXECUTION_EVENTS_DISPLAYED,
           page,
@@ -331,7 +341,7 @@ const buildEventLogKqlFilter = ({
   return kqlAnd(filters);
 };
 
-const getAggregetatedEventsWithFilter = async ({
+const findRuleExecutionIds = async ({
   eventLog,
   soType,
   soIds,
@@ -373,15 +383,15 @@ const getAggregetatedEventsWithFilter = async ({
     },
   });
 
-  const total = (
-    runTypesResponse.aggregations?.totalExecutions as estypes.AggregationsCardinalityAggregate
-  ).value;
+  const total =
+    (runTypesResponse.aggregations?.totalExecutions as estypes.AggregationsCardinalityAggregate)
+      ?.value ?? 0;
   const filteredExecutionUUIDs = runTypesResponse.aggregations
     ?.filteredExecutionUUIDs as ExecutionUuidAggResult;
-  const ids = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
+  const executionIds = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
 
   return {
-    ids,
+    executionIds,
     total,
   };
 };
