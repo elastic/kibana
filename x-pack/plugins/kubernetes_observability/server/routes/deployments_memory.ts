@@ -130,12 +130,12 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
 
             const hitsPods = esResponsePods.hits.hits[0];
             const { fields = {} } = hitsPods
-            var namespace1 = extractFieldValue(fields['resource.attributes.k8s.namespace.name'])
-            const hitsPodsAggs = esResponsePods.aggregations.unique_values["buckets"];
-            //console.log("hitspods:"+hitsPodsAggs);
             var time = extractFieldValue(fields['@timestamp']);
+            var namespace1 = extractFieldValue(fields['resource.attributes.k8s.namespace.name'])
             console.log("ns:"+namespace1)
-            for (var entries of hitsPodsAggs) {
+            const{ after_key2: _, buckets = []} = (esResponsePods.aggregations?.unique_values || {}) as any;
+            //console.log("hitspods:"+hitsPodsAggs);
+            for (var entries of buckets) {
               const podName = entries.key;
 
               const dslPodsMemory = defineQueryForAllPodsMemoryUtilisation(podName, namespace1, client, period)
