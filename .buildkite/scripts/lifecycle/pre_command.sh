@@ -13,7 +13,7 @@ else
   source .buildkite/scripts/common/setup_buildkite_deps.sh
 
   echo '--- Agent Debug/SSH Info'
-  tsx .buildkite/scripts/lifecycle/print_agent_links.ts || true
+  ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
 fi
 
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then

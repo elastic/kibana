@@ -10,7 +10,7 @@ if [[ "${SKIP_NODE_SETUP:-}" =~ ^(1|true)$ ]]; then
   echo '--- Skipping Agent Debug Info'
 else
   echo '--- Agent Debug Info'
-  tsx .buildkite/scripts/lifecycle/print_agent_links.ts || true
+  ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
 fi
 
 IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
@@ -53,6 +53,6 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
-    tsx .buildkite/scripts/lifecycle/annotate_test_failures.ts
+    ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
   fi
 fi

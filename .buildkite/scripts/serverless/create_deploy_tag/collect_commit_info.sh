@@ -6,7 +6,7 @@ set -euo pipefail
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Collecting commit info"
-tsx .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.ts
+ts-node .buildkite/scripts/serverless/create_deploy_tag/collect_commit_info.ts
 
 if [[ "$AUTO_SELECT_COMMIT" == "true" || "$AUTO_SELECT_COMMIT" == "1" ]]; then
   echo "--- Auto promoting to RC, skipping confirmation"

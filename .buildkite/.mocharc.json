@@ -1,5 +1,5 @@
 {
   "extension": ["ts"],
   "spec": "**/*.test.ts",
-  "node-option": ["import=tsx"]
+  "require": "ts-node/register"
 }

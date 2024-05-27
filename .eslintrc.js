@@ -1848,7 +1848,7 @@ module.exports = {
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with tsx. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
       files: '.buildkite/**/*.{js,ts}',
@@ -1859,7 +1859,7 @@ module.exports = {
     },
 
     /**
-     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with tsx. It needs a few tweaks because of this.
+     * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with ts-node. It needs a few tweaks because of this.
      */
     {
       files: [

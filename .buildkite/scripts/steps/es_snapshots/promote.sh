@@ -11,9 +11,9 @@ cat << EOF | buildkite-agent annotate --style "info"
   $ES_SNAPSHOT_MANIFEST
 EOF
 
-tsx "$(dirname "${0}")/promote_manifest.ts" "$ES_SNAPSHOT_MANIFEST"
+ts-node "$(dirname "${0}")/promote_manifest.ts" "$ES_SNAPSHOT_MANIFEST"
 
 if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   echo "--- Trigger agent packer cache pipeline"
-  tsx .buildkite/scripts/steps/trigger_pipeline.ts kibana-agent-packer-cache main
+  ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-agent-packer-cache main
 fi
