@@ -7,6 +7,8 @@
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
+import { DatasetQualityApiError } from '../../common/dataset_quality_api_supertest';
+import { expectToReject } from '../../utils';
 import { DatasetQualityApiClientKey } from '../../common/config';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
@@ -31,6 +33,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Degraded docs', { config: 'basic' }, () => {
+    describe('authorization', () => {
+      it('should return a 403 when the user does not have sufficient privileges', async () => {
+        const err = await expectToReject<DatasetQualityApiError>(() => callApiAs('noAccessUser'));
+        expect(err.res.status).to.be(403);
+      });
+    });
+
     describe('and there are log documents', () => {
       before(async () => {
         await synthtrace.index([

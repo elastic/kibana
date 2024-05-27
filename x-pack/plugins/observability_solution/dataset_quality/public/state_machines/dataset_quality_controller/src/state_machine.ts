@@ -97,13 +97,20 @@ export const createPureDatasetQualityControllerStateMachine = (
                   target: 'loaded',
                   actions: ['storeDegradedDocStats', 'storeDatasets'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchDegradedStatsFailed'],
-                },
+                onError: [
+                  {
+                    target: 'unauthorized',
+                    cond: 'checkIfActionForbidden',
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchDegradedStatsFailed'],
+                  },
+                ],
               },
             },
             loaded: {},
+            unauthorized: { type: 'final' },
           },
           on: {
             UPDATE_TIME_RANGE: {
@@ -187,13 +194,20 @@ export const createPureDatasetQualityControllerStateMachine = (
                   target: 'loaded',
                   actions: ['storeNonAggregatableDatasets'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchNonAggregatableDatasetsFailed'],
-                },
+                onError: [
+                  {
+                    target: 'unauthorized',
+                    cond: 'checkIfActionForbidden',
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchNonAggregatableDatasetsFailed'],
+                  },
+                ],
               },
             },
             loaded: {},
+            unauthorized: { type: 'final' },
           },
           on: {
             UPDATE_TIME_RANGE: {

@@ -16,6 +16,7 @@ export type DataStreamUserPrivileges = rt.TypeOf<typeof userPrivilegesRt>;
 const datasetUserPrivilegesRt = rt.intersection([
   userPrivilegesRt,
   rt.type({
+    canRead: rt.boolean,
     canViewIntegrations: rt.boolean,
   }),
 ]);

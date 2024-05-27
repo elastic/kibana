@@ -11,6 +11,11 @@ import { dataStreamService, datasetQualityPrivileges } from '../../../services';
 import { getDataStreams } from '.';
 
 const mockGetMockMatchingDataStreams = jest.fn().mockImplementation(() => MATCHING_DATA_STREAMS);
+const mockGetDatasetPrivileges = jest.fn().mockImplementation(() => ({
+  canRead: true,
+  canMonitor: true,
+  canViewIntegrations: true,
+}));
 const mockGetMockDataStreamPrivileges = jest.fn().mockImplementation(() => DATA_STREAMS_PRIVILEGES);
 
 describe('getDataStreams', () => {
@@ -19,6 +24,9 @@ describe('getDataStreams', () => {
     jest
       .spyOn(dataStreamService, 'getMatchingDataStreams')
       .mockImplementation(mockGetMockMatchingDataStreams);
+    jest
+      .spyOn(datasetQualityPrivileges, 'getDatasetPrivileges')
+      .mockImplementation(mockGetDatasetPrivileges);
     jest
       .spyOn(datasetQualityPrivileges, 'getHasIndexPrivileges')
       .mockImplementation(mockGetMockDataStreamPrivileges);
@@ -30,8 +38,10 @@ describe('getDataStreams', () => {
 
   it('Returns empty list when user doesnt have access to dataset', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    mockGetMockDataStreamPrivileges.mockImplementationOnce(() => ({
-      'logs-*nginx*': false,
+    mockGetDatasetPrivileges.mockImplementationOnce(() => ({
+      canRead: false,
+      canMonitor: false,
+      canViewIntegrations: false,
     }));
 
     const result = await getDataStreams({
@@ -64,9 +74,6 @@ describe('getDataStreams', () => {
 
   it('Formats the items correctly', async () => {
     const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    mockGetMockDataStreamPrivileges.mockImplementationOnce(() => ({
-      'logs-*': true,
-    }));
 
     const results = await getDataStreams({
       esClient: esClientMock,
@@ -224,11 +231,8 @@ const MATCHING_DATA_STREAMS = [
   },
 ];
 
-const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce(
-  (acc, stream) => {
-    acc[stream.name] = true;
+const DATA_STREAMS_PRIVILEGES = Object.values(MATCHING_DATA_STREAMS).reduce((acc, stream) => {
+  acc[stream.name] = true;
 
-    return acc;
-  },
-  { 'logs-*nginx*': true } as Record<string, boolean>
-);
+  return acc;
+}, {} as Record<string, boolean>);

@@ -23,6 +23,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         query: {
           type: 'logs',
+          datasetQuery: '-',
         },
       },
     });
@@ -57,6 +58,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns user authorization as false for noAccessUser', async () => {
         const resp = await callApiAs('noAccessUser');
 
+        expect(resp.body.datasetUserPrivileges.canRead).to.be(false);
         expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
         expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(false);
         expect(resp.body.dataStreamsStats).to.eql([]);
@@ -66,59 +68,22 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const resp = await callApiAs('adminUser');
 
         expect(resp.body.datasetUserPrivileges).to.eql({
+          canRead: true,
           canMonitor: true,
           canViewIntegrations: true,
         });
       });
 
-      it('get empty set of data streams for a readUser', async () => {
+      it('get empty stats for a readUser', async () => {
         const resp = await callApiAs('readUser');
 
-        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(true);
+        expect(resp.body.datasetUserPrivileges.canRead).to.be(true);
+        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
+        expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(true);
         expect(resp.body.dataStreamsStats).to.eql([]);
       });
 
-      it('get list of underprivileged data streams for readUser', async () => {
-        // Index only one document to logs-test-1-default data stream using synthtrace
-        await ingestDocuments({ dataset: 'test-1' });
-        await ingestDocuments({ dataset: 'test-2' });
-        const resp = await callApiAs('readUser');
-
-        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(true);
-        expect(
-          resp.body.dataStreamsStats.map(
-            ({ name, userPrivileges: { canMonitor: hasPrivilege } }) => ({
-              name,
-              hasPrivilege,
-            })
-          )
-        ).to.eql([
-          { name: 'logs-test-1-default', hasPrivilege: false },
-          { name: 'logs-test-2-default', hasPrivilege: false },
-        ]);
-      });
-
-      it('get list of privileged data streams for datasetQualityLogsUser', async () => {
-        // Index only one document to logs-test-1-default data stream using synthtrace
-        await ingestDocuments({ dataset: 'test-1' });
-        await ingestDocuments({ dataset: 'test-2' });
-        const resp = await callApiAs('datasetQualityLogsUser');
-
-        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(true);
-        expect(
-          resp.body.dataStreamsStats.map(
-            ({ name, userPrivileges: { canMonitor: hasPrivilege } }) => ({
-              name,
-              hasPrivilege,
-            })
-          )
-        ).to.eql([
-          { name: 'logs-test-1-default', hasPrivilege: true },
-          { name: 'logs-test-2-default', hasPrivilege: true },
-        ]);
-      });
-
-      it('returns non empty value for "lastActivity" and "size" for authorized user', async () => {
+      it('returns non empty stats for an authorized user', async () => {
         await ingestDocuments();
         const stats = await callApiAs('datasetQualityLogsUser');
 
@@ -127,13 +92,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         expect(stats.body.dataStreamsStats[0].lastActivity).greaterThan(0);
       });
 
-      it('returns non empty value for "lastActivity" and "size" for unauthorized user', async () => {
-        await ingestDocuments();
-        const stats = await callApiAs('readUser');
+      it('get list of privileged data streams for datasetQualityLogsUser', async () => {
+        // Index only one document to logs-test-1-default and logs-test-1-default data stream using synthtrace
+        await ingestDocuments({ dataset: 'test.1' });
+        await ingestDocuments({ dataset: 'test.2' });
+        const resp = await callApiAs('datasetQualityLogsUser');
 
-        expect(stats.body.dataStreamsStats[0].size).to.be(undefined);
-        expect(stats.body.dataStreamsStats[0].sizeBytes).to.be(undefined);
-        expect(stats.body.dataStreamsStats[0].lastActivity).to.be(undefined);
+        expect(resp.body.datasetUserPrivileges.canMonitor).to.be(true);
+        expect(
+          resp.body.dataStreamsStats
+            .map(({ name, userPrivileges: { canMonitor: hasPrivilege } }) => ({
+              name,
+              hasPrivilege,
+            }))
+            .filter(({ name }) => name.includes('test'))
+        ).to.eql([
+          { name: 'logs-test.1-default', hasPrivilege: true },
+          { name: 'logs-test.2-default', hasPrivilege: true },
+        ]);
       });
 
       after(async () => {

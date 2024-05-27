@@ -22,7 +22,7 @@ export const customRoles = {
       indices: [
         {
           names: ['logs-*-*'],
-          privileges: ['monitor'],
+          privileges: ['monitor', 'view_index_metadata'],
         },
       ],
     },

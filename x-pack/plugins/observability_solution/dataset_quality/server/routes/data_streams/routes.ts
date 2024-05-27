@@ -48,13 +48,13 @@ const statsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const dataStreamsInfo = await getDataStreams({
+    const { items, datasetUserPrivileges } = await getDataStreams({
       esClient,
       ...params.query,
       uncategorisedOnly: false,
     });
 
-    const privilegedDataStreams = dataStreamsInfo.items.filter((stream) => {
+    const privilegedDataStreams = items.filter((stream) => {
       return stream.userPrivileges.canMonitor;
     });
     const dataStreamsStats = await getDataStreamsStats({
@@ -64,13 +64,8 @@ const statsRoute = createDatasetQualityServerRoute({
     });
 
     return {
-      datasetUserPrivileges: {
-        ...dataStreamsInfo.datasetUserPrivileges,
-        canViewIntegrations: await datasetQualityPrivileges.getCanViewIntegrations(esClient), // TODO: Make space aware
-      },
-      dataStreamsStats: values(
-        merge(keyBy(dataStreamsInfo.items, 'name'), keyBy(dataStreamsStats.items, 'name'))
-      ),
+      datasetUserPrivileges,
+      dataStreamsStats: values(merge(keyBy(items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
     };
   },
 });
@@ -96,6 +91,12 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    await datasetQualityPrivileges.throwIfCannotReadDataset(
+      esClient,
+      params.query.type,
+      params.query.datasetQuery
+    );
 
     const degradedDocs = await getDegradedDocsPaginated({
       esClient,
@@ -127,6 +128,8 @@ const nonAggregatableDatasetsRoute = createDatasetQualityServerRoute({
     const coreContext = await context.core;
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    await datasetQualityPrivileges.throwIfCannotReadDataset(esClient, params.query.type);
 
     return await getNonAggregatableDataStreams({
       esClient,

@@ -23,18 +23,15 @@ export async function getDataStreams(options: {
     datasetPattern: datasetQuery ? `*${datasetQuery}*` : '*',
   });
 
-  const datasetUserPrivileges = await datasetQualityPrivileges.getHasIndexPrivileges(
+  const datasetUserPrivileges = await datasetQualityPrivileges.getDatasetPrivileges(
     esClient,
-    [datasetName],
-    ['read', 'view_index_metadata']
+    datasetName
   );
 
-  if (!datasetUserPrivileges[datasetName]) {
+  if (!datasetUserPrivileges.canMonitor) {
     return {
       items: [],
-      datasetUserPrivileges: {
-        canMonitor: false,
-      },
+      datasetUserPrivileges,
     };
   }
 
@@ -64,8 +61,6 @@ export async function getDataStreams(options: {
 
   return {
     items: mappedDataStreams,
-    datasetUserPrivileges: {
-      canMonitor: datasetUserPrivileges[datasetName],
-    },
+    datasetUserPrivileges,
   };
 }
