@@ -474,13 +474,19 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   };
 }
 
-export const buildTraceTree = (
-  waterfall: IWaterfall,
-  criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>,
-  showCriticalPath: boolean,
-  maxLevelOpen: number,
-  isOpen: boolean
-): IWaterfallNode | null => {
+export const buildTraceTree = ({
+  criticalPathSegmentsById,
+  isOpen,
+  maxLevelOpen,
+  showCriticalPath,
+  waterfall,
+}: {
+  waterfall: IWaterfall;
+  criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+  showCriticalPath: boolean;
+  maxLevelOpen: number;
+  isOpen: boolean;
+}): IWaterfallNode | null => {
   const entry = waterfall.entryWaterfallTransaction;
   if (!entry) {
     return null;
@@ -499,7 +505,7 @@ export const buildTraceTree = (
   while (queue.length > 0) {
     const node = queue.shift()!;
 
-    const children = waterfall.childrenByParentId[node.item.id] || [];
+    const children = waterfall.childrenByParentId[node.item.id] ?? [];
     const filteredChildren = showCriticalPath
       ? children.filter((child) => criticalPathSegmentsById[child.id]?.length)
       : children;
@@ -563,9 +569,10 @@ export const updateTraceTreeNode = (root: IWaterfallNode, updatedNode: IWaterfal
     const { parent, index, node } = stack.pop()!;
 
     if (node.id === updatedNode.id) {
+      const { childrenCount: _, ...restUpdatedNode } = updatedNode;
       const newNode = {
         ...node,
-        expanded: updatedNode.expanded,
+        ...restUpdatedNode,
       };
 
       if (parent) {
@@ -577,10 +584,8 @@ export const updateTraceTreeNode = (root: IWaterfallNode, updatedNode: IWaterfal
       break;
     }
 
-    if (node.children) {
-      for (let i = node.children.length - 1; i >= 0; i--) {
-        stack.push({ parent: node, index: i, node: node.children[i] });
-      }
+    for (let i = node.children.length - 1; i >= 0; i--) {
+      stack.push({ parent: node, index: i, node: node.children[i] });
     }
   }
 

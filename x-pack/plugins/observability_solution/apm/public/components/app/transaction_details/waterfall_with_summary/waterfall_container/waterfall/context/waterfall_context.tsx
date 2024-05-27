@@ -19,7 +19,7 @@ import {
   updateTraceTreeNode,
 } from '../waterfall_helpers/waterfall_helpers';
 
-interface WaterfallContextProps {
+export interface WaterfallContextProps {
   item: IWaterfallSpanOrTransaction;
   waterfall: IWaterfall;
   showCriticalPath: boolean;
@@ -84,7 +84,13 @@ export function WaterfallContextProvider({
   useEffect(() => {
     if (!tree) {
       setTree(
-        buildTraceTree(waterfall, criticalPathSegmentsById, showCriticalPath, maxLevelOpen, isOpen)
+        buildTraceTree({
+          waterfall,
+          criticalPathSegmentsById,
+          showCriticalPath,
+          maxLevelOpen,
+          isOpen,
+        })
       );
     }
   }, [criticalPathSegmentsById, maxLevelOpen, showCriticalPath, waterfall, tree, isOpen]);

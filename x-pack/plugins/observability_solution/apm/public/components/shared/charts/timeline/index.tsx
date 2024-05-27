@@ -34,40 +34,47 @@ export function TimelineAxisContainer({ xMax, xMin, margins, marks }: TimelinePr
   if (xMax === undefined) {
     return null;
   }
-  const plotValues = getPlotValues({ width, xMin, xMax, margins });
-  const topTraceDuration = xMax - (xMin ?? 0);
 
   return (
     <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
-      {(resizeRef) => (
-        <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
-          <TimelineAxis plotValues={plotValues} marks={marks} topTraceDuration={topTraceDuration} />
-        </div>
-      )}
+      {(resizeRef) => {
+        const plotValues = getPlotValues({ width, xMin, xMax, margins });
+        const topTraceDuration = xMax - (xMin ?? 0);
+        return (
+          <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
+            <TimelineAxis
+              plotValues={plotValues}
+              marks={marks}
+              topTraceDuration={topTraceDuration}
+            />
+          </div>
+        );
+      }}
     </EuiResizeObserver>
   );
 }
 
 export function VerticalLinesContainer({ xMax, xMin, margins, marks }: TimelineProps) {
   const [width, setWidth] = useState(0);
-
   if (xMax == null) {
     return null;
   }
-  const plotValues = getPlotValues({ width, xMin, xMax, margins });
-  const topTraceDuration = xMax - (xMin ?? 0);
 
   return (
     <EuiResizeObserver onResize={(size) => setWidth(size.width)}>
-      {(resizeRef) => (
-        <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
-          <VerticalLines
-            plotValues={plotValues}
-            marks={marks}
-            topTraceDuration={topTraceDuration}
-          />
-        </div>
-      )}
+      {(resizeRef) => {
+        const plotValues = getPlotValues({ width, xMin, xMax, margins });
+        const topTraceDuration = xMax - (xMin ?? 0);
+        return (
+          <div style={{ width: '100%', height: '100%' }} ref={resizeRef}>
+            <VerticalLines
+              plotValues={plotValues}
+              marks={marks}
+              topTraceDuration={topTraceDuration}
+            />
+          </div>
+        );
+      }}
     </EuiResizeObserver>
   );
 }

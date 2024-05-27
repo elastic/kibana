@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { transparentize } from 'polished';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
 import { areEqual, ListChildComponentProps, VariableSizeList as List } from 'react-window';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
@@ -113,24 +113,23 @@ function WaterfallTree(props: WaterfallTreeProps) {
   const rowSizeMapRef = useRef(new Map<number, number>());
   const { traceList } = useWaterfallContext();
 
-  const onRowLoad = useCallback((index, size) => {
+  const onRowLoad = (index: number, size: number) => {
     rowSizeMapRef.current.set(index, size);
+  };
+
+  const getRowSize = (index: number) => {
+    // adds 1px for the border top
+    return rowSizeMapRef?.current.get(index) || ACCORDION_HEIGHT + 1;
+  };
+
+  const onScroll = useCallback(({ scrollTop }: { scrollTop: number }) => {
+    if (listRef.current) {
+      listRef.current.scrollTo(scrollTop);
+    }
   }, []);
 
-  const getRowSize = useCallback(
-    // border top 1px
-    (index) => rowSizeMapRef?.current.get(index) || ACCORDION_HEIGHT + 1,
-    []
-  );
-
   return (
-    <WindowScroller
-      onScroll={({ scrollTop }) => {
-        if (listRef.current) {
-          listRef.current.scrollTo(scrollTop);
-        }
-      }}
-    >
+    <WindowScroller onScroll={onScroll}>
       {({ registerChild }) => (
         <AutoSizer disableHeight>
           {({ width }) => (
@@ -172,11 +171,9 @@ const VirtualRow = React.memo(
       onLoad(index, ref.current?.getBoundingClientRect().height ?? ACCORDION_HEIGHT);
     }, [index, onLoad]);
 
-    const node = useMemo(() => traceList[index], [traceList, index]);
-
     return (
       <div style={style} ref={ref}>
-        <WaterfallNode {...props} node={node} />
+        <WaterfallNode {...props} node={traceList[index]} />
       </div>
     );
   },
@@ -193,16 +190,13 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const marginLeftLevel = 8 * node.level;
   const hasToggle = !!node.childrenCount;
 
-  const toggleAccordion = useCallback(() => {
+  const toggleAccordion = () => {
     updateTreeNode({ ...node, expanded: !node.expanded });
-  }, [node, updateTreeNode]);
+  };
 
-  const onWaterfallItemClick = useCallback(
-    (flyoutDetailTab: string) => {
-      onClickWaterfallItem(node.item, flyoutDetailTab);
-    },
-    [node.item, onClickWaterfallItem]
-  );
+  const onWaterfallItemClick = (flyoutDetailTab: string) => {
+    onClickWaterfallItem(node.item, flyoutDetailTab);
+  };
 
   const segments = criticalPathSegmentsById[node.item.id]
     ?.filter((segment) => segment.self)

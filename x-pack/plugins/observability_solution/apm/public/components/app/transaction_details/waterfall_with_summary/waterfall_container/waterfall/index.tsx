@@ -142,6 +142,9 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
       >
         <EuiButtonEmpty
           data-test-subj="apmWaterfallButton"
+          css={css`
+            position: absolute;
+          `}
           iconType={isAccordionOpen ? 'fold' : 'unfold'}
           onClick={() => {
             setIsAccordionOpen((isOpen) => !isOpen);
