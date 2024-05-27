@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
+  let roleAdmin: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
   const supertest = getService('supertest');
 
@@ -66,7 +66,7 @@ export default function ({ getService }: FtrProviderContext) {
     let ruleId: string;
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
@@ -77,7 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should generate an alert document for an active alert', async () => {
       const createdRule = await createEsQueryRule({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart1 = new Date();
       await waitForNumRuleRuns({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         numOfRuns: 1,
         ruleId,
@@ -201,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('should update an alert document for an ongoing alert', async () => {
       const createdRule = await createEsQueryRule({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart1 = new Date();
       await waitForNumRuleRuns({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         numOfRuns: 1,
         ruleId,
@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart2 = new Date();
       await waitForNumRuleRuns({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         numOfRuns: 1,
         ruleId,
