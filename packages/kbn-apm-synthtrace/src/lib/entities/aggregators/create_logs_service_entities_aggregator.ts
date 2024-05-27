@@ -8,7 +8,6 @@
 
 import { hashKeysOf, LogDocument } from '@kbn/apm-synthtrace-client';
 import { ServiceEntityDocument } from '@kbn/apm-synthtrace-client/src/lib/assets/service_entities';
-import { identity, noop } from 'lodash';
 import { createPivotTransform } from '../../utils/create_pivot_transform';
 import { createLogsAssetsAggregator } from './create_logs_assets_aggregator';
 

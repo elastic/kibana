@@ -69,7 +69,7 @@ async function start() {
       apmEsClient,
       logsEsClient,
       infraEsClient,
-      entitiesEsClient: entitiesEsClient,
+      entitiesEsClient,
     });
   }
 
@@ -78,7 +78,7 @@ async function start() {
   const generatorsAndClients = logger.perf('generate_scenario', () =>
     generate({
       range: timerange(bucketFrom, bucketTo),
-      clients: { logsEsClient, apmEsClient, infraEsClient, entitiesEsClient: entitiesEsClient },
+      clients: { logsEsClient, apmEsClient, infraEsClient, entitiesEsClient },
     })
   );
 
