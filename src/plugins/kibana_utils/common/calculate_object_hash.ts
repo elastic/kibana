@@ -53,7 +53,7 @@ function foldValue(input: number, value: any, key: string, seen: any[]) {
     if (key === 'vis' && value.constructor.name === 'Vis') {
       return hash;
     }
-    if (key === 'index' && value?.value?.id) {
+    if (key === 'index' && value.value?.id) {
       return fold(hash, value.value.id);
     }
     if (seen.indexOf(value) !== -1) {
