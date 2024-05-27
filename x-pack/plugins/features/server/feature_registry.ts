@@ -126,12 +126,6 @@ export class FeatureRegistry {
                   `Cannot compose privilege "${privilegeId}" of feature "${featureId}" with privilege "${privilegeReference}" of feature "${featureReference.feature}" since such privilege is not registered.`
                 );
               }
-
-              if (referencedPrivilege.cases || referencedPrivilege.alerting) {
-                throw new Error(
-                  `Cannot compose privilege "${privilegeId}" of feature "${featureId}" with privilege "${privilegeReference}" of feature "${featureReference.feature}" since it requires custom RBAC.`
-                );
-              }
             }
           }
 

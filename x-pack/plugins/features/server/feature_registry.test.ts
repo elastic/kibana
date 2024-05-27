@@ -2086,20 +2086,6 @@ describe('FeatureRegistry', () => {
         );
       });
 
-      it('rejects overrides for `composedOf` referring to a feature that requires custom RBAC', () => {
-        expect(() =>
-          registry.applyOverrides({
-            featureA: {
-              privileges: {
-                all: { composedOf: [{ feature: 'featureE', privileges: ['all'] }] },
-              },
-            },
-          })
-        ).toThrowErrorMatchingInlineSnapshot(
-          `"Cannot compose privilege \\"all\\" of feature \\"featureA\\" with privilege \\"all\\" of feature \\"featureE\\" since it requires custom RBAC."`
-        );
-      });
-
       it('can override `composedOf` referring to both feature and sub-feature privileges', () => {
         registry.applyOverrides({
           featureA: {
@@ -2130,6 +2116,30 @@ describe('FeatureRegistry', () => {
             ui: [],
             savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url'] },
             composedOf: [{ feature: 'featureD', privileges: ['read'] }],
+          },
+        });
+      });
+
+      it('can override `composedOf` referring to a feature that requires custom RBAC', () => {
+        registry.applyOverrides({
+          featureA: {
+            privileges: {
+              all: { composedOf: [{ feature: 'featureE', privileges: ['all'] }] },
+            },
+          },
+        });
+        registry.lockRegistration();
+
+        const [featureA] = registry.getAllKibanaFeatures();
+        expect(featureA.privileges).toEqual({
+          all: {
+            ui: [],
+            savedObject: { all: ['telemetry'], read: ['config', 'config-global', 'url'] },
+            composedOf: [{ feature: 'featureE', privileges: ['all'] }],
+          },
+          read: {
+            ui: [],
+            savedObject: { all: [], read: ['config', 'config-global', 'telemetry', 'url'] },
           },
         });
       });
