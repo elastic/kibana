@@ -125,8 +125,10 @@ interface IWaterfallItemProps {
 function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
   switch (item.docType) {
     case 'span': {
+      const spanType = item.doc.span.type || '';
+
       // icon for database spans
-      const isDbType = item.doc.span.type.startsWith('db');
+      const isDbType = spanType.startsWith('db');
       if (isDbType) {
         return <EuiIcon type="database" />;
       }

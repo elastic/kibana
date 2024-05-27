@@ -11,6 +11,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useGetEndpointDetails } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { HOST_ENDPOINT_UNENROLLED_TOOLTIP } from './translations';
 
 jest.mock('../../../common/hooks/use_experimental_features');
 jest.mock('../../../management/hooks', () => ({
@@ -109,6 +110,17 @@ describe('#useResponderActionData', () => {
         })
       );
       expect(result.current.isDisabled).toEqual(true);
+    });
+
+    it('should return responder menu item `disabled` when agentType is `endpoint` but no endpoint id is provided', () => {
+      const { result } = renderHook(() =>
+        useResponderActionData({
+          endpointId: '',
+          agentType: 'endpoint',
+        })
+      );
+      expect(result.current.isDisabled).toEqual(true);
+      expect(result.current.tooltip).toEqual(HOST_ENDPOINT_UNENROLLED_TOOLTIP);
     });
   });
 

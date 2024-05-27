@@ -65,27 +65,27 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
       ...tempSourceFields,
       [index]: [field],
     });
-    usageTracker.click(AnalyticsEvents.editContextFieldToggled);
+    usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
   };
 
   const saveSourceFields = () => {
-    usageTracker.click(AnalyticsEvents.editContextSaved);
+    usageTracker?.click(AnalyticsEvents.editContextSaved);
     onChangeSourceFields(tempSourceFields);
     onChangeSize(docSize);
     onClose();
   };
 
   const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    usageTracker.click(AnalyticsEvents.editContextDocSizeChanged);
+    usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
     setDocSize(Number(e.target.value));
   };
 
   useEffect(() => {
-    usageTracker.load(AnalyticsEvents.editContextFlyoutOpened);
+    usageTracker?.load(AnalyticsEvents.editContextFlyoutOpened);
   }, [usageTracker]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="s">
+    <EuiFlyout ownFocus onClose={onClose} size="s" data-test-subj="editContextFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -103,7 +103,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
               defaultMessage="Context is the information you provide to the LLM, by selecting fields from your Elasticsearch documents. Optimize context for better results."
             />
             <EuiLink
-              href={docLinks.chatPlayground}
+              href={docLinks.context}
               target="_blank"
               data-test-subj="context-optimization-documentation-link"
             >
@@ -172,6 +172,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                           options={group.source_fields.map((field) => ({
                             value: field,
                             inputDisplay: field,
+                            'data-test-subj': 'contextField',
                           }))}
                           valueOfSelected={tempSourceFields[index]?.[0]}
                           onChange={(value) => updateSourceField(index, value)}

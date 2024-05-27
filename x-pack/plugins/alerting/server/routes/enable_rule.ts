@@ -22,6 +22,10 @@ export const enableRuleRoute = (
   router.post(
     {
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_enable`,
+      options: {
+        access: 'public',
+        description: `Enable a rule`,
+      },
       validate: {
         params: paramSchema,
       },

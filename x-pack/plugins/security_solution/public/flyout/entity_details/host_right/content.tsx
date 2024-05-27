@@ -26,16 +26,20 @@ interface HostPanelContentProps {
   isDraggable: boolean;
   openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
   hostName: string;
+  onAssetCriticalityChange: () => void;
+  recalculatingScore: boolean;
 }
 
 export const HostPanelContent = ({
   hostName,
   observedHost,
   riskScoreState,
+  recalculatingScore,
   contextID,
   scopeId,
   isDraggable,
   openDetailsPanel,
+  onAssetCriticalityChange,
 }: HostPanelContentProps) => {
   const observedFields = useObservedHostFields(observedHost);
 
@@ -45,13 +49,17 @@ export const HostPanelContent = ({
         <>
           <RiskSummary
             riskScoreData={riskScoreState}
+            recalculatingScore={recalculatingScore}
             queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
             openDetailsPanel={openDetailsPanel}
           />
           <EuiHorizontalRule />
         </>
       )}
-      <AssetCriticalityAccordion entity={{ name: hostName, type: 'host' }} />
+      <AssetCriticalityAccordion
+        entity={{ name: hostName, type: 'host' }}
+        onChange={onAssetCriticalityChange}
+      />
       <ObservedEntity
         observedData={observedHost}
         contextID={contextID}

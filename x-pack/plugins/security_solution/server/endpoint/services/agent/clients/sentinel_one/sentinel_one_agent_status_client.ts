@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary } from '../../..';
 import type { RawSentinelOneInfo } from './types';
@@ -54,7 +55,7 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
           {
             index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
             from: 0,
-            size: 10000,
+            size: DEFAULT_MAX_TABLE_QUERY_SIZE,
             query,
             collapse: {
               field: 'sentinel_one.agent.uuid',

@@ -17,6 +17,7 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import pMap from 'p-map';
+import moment from 'moment';
 import { registerCleanUpTask } from './private_location/clean_up_task';
 import { SyntheticsServerSetup } from '../types';
 import { syntheticsMonitorType, syntheticsParamType } from '../../common/types/saved_objects';
@@ -77,11 +78,12 @@ export class SyntheticsService {
     this.logger = server.logger;
     this.server = server;
     this.config = server.config.service ?? {};
-    this.isAllowed = false;
+
+    // set isAllowed to false if manifestUrl is not set
+    this.isAllowed = this.config.manifestUrl ? false : true;
     this.signupUrl = null;
 
     this.apiClient = new ServiceAPIClient(server.logger, this.config, this.server);
-
     this.esHosts = getEsHosts({ config: this.config, cloud: server.cloud });
 
     this.locations = [];
@@ -149,6 +151,9 @@ export class SyntheticsService {
       service.throttling = result.throttling;
       service.locations = result.locations;
       service.apiClient.locations = result.locations;
+      this.logger.debug(
+        `Fetched ${service.locations} Synthetics service locations from manifest: ${this.config.manifestUrl}`
+      );
     } catch (e) {
       this.logger.error(e);
     }
@@ -170,6 +175,8 @@ export class SyntheticsService {
             // Perform the work of the task. The return value should fit the TaskResult interface.
             async run() {
               const { state } = taskInstance;
+              service.logger.debug(`Running synthetics monitors sync task.`);
+              service.checkMissingSchedule(state);
               try {
                 await service.registerServiceLocations();
 
@@ -180,6 +187,12 @@ export class SyntheticsService {
                 if (service.isAllowed && service.config.manifestUrl) {
                   void service.setupIndexTemplates();
                   await service.pushConfigs();
+                } else {
+                  if (!service.isAllowed) {
+                    service.logger.error(
+                      'User is not allowed to access Synthetics service. Please contact support.'
+                    );
+                  }
                 }
               } catch (e) {
                 sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
@@ -330,7 +343,7 @@ export class SyntheticsService {
 
   async addConfigs(configs: ConfigData[]) {
     try {
-      if (configs.length === 0) {
+      if (configs.length === 0 || !this.isAllowed) {
         return;
       }
 
@@ -355,7 +368,7 @@ export class SyntheticsService {
 
   async editConfig(monitorConfig: ConfigData[], isEdit = true) {
     try {
-      if (monitorConfig.length === 0) {
+      if (monitorConfig.length === 0 || !this.isAllowed) {
         return;
       }
       const license = await this.getLicense();
@@ -455,6 +468,9 @@ export class SyntheticsService {
 
           await syncAllLocations(PER_PAGE);
         } catch (e) {
+          this.logger.error(`Failed to run Synthetics sync task with error: ${e.message}`);
+          this.logger.error(e);
+
           sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
             reason: 'Failed to push configs to service',
             message: e?.message,
@@ -463,7 +479,6 @@ export class SyntheticsService {
             status: e.status,
             stackVersion: service.server.stackVersion,
           });
-          this.logger.error(e);
         }
       }
     }
@@ -647,6 +662,35 @@ export class SyntheticsService {
     });
 
     return this.formatConfigs(configDataList) as MonitorFields[];
+  }
+  checkMissingSchedule(state: Record<string, string>) {
+    try {
+      const lastRunAt = state.lastRunAt;
+      const current = moment();
+
+      if (lastRunAt) {
+        // log if it has missed last schedule
+        const diff = moment(lastRunAt).diff(current, 'minutes');
+        const syncInterval = Number((this.config.syncInterval ?? '5m').split('m')[0]);
+        if (diff > syncInterval) {
+          const message = `Synthetics monitor sync task has missed its schedule, it last ran ${diff} ago.`;
+          this.logger.warn(message);
+          sendErrorTelemetryEvents(this.logger, this.server.telemetry, {
+            message,
+            reason: 'Failed to run synthetics sync task on schedule',
+            type: 'syncTaskMissedSchedule',
+            stackVersion: this.server.stackVersion,
+          });
+        } else {
+          this.logger.debug(
+            `Synthetics monitor sync task is running as expected, it last ran ${diff} minutes ago.`
+          );
+        }
+      }
+      state.lastRunAt = current.toISOString();
+    } catch (e) {
+      this.logger.error(e);
+    }
   }
 }
 

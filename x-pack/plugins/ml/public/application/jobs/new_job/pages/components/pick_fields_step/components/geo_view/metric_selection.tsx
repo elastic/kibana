@@ -29,7 +29,7 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
 
   const {
-    services: { data, notifications: toasts },
+    services: { notifications: toasts },
   } = useMlKibana();
   const { mapLoader } = useContext(JobCreatorContext);
 
@@ -72,14 +72,12 @@ export const GeoDetector: FC<Props> = ({ setIsValid }) => {
   useEffect(() => {
     async function getMapLayersForGeoJob() {
       if (jobCreator.geoField) {
-        const { filter, query } = jobCreator.savedSearchQuery ?? {};
-        const filters = [...data.query.filterManager.getFilters(), ...(filter ?? [])];
+        const { query } = jobCreator.savedSearchQuery ?? {};
 
         const layers = await mapLoader.getMapLayersForGeoJob(
           jobCreator.geoField,
           jobCreator.splitField,
           fieldValues,
-          filters,
           query
         );
         setLayerList(layers);

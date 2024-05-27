@@ -193,7 +193,7 @@ export const summaryPanelDatasetsActivityText = i18n.translate(
 export const summaryPanelDatasetsActivityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelDatasetsActivityTooltipText',
   {
-    defaultMessage: 'The number of datasets with activity in the last 24 hours.',
+    defaultMessage: 'The number of datasets with activity in the selected time range.',
   }
 );
 
@@ -207,7 +207,7 @@ export const summaryPanelEstimatedDataText = i18n.translate(
 export const summaryPanelEstimatedDataTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelEstimatedDataTooltipText',
   {
-    defaultMessage: 'The approximate amount of data stored in the last 24 hours.',
+    defaultMessage: 'The approximate amount of data stored in the selected time range.',
   }
 );
 

@@ -45,6 +45,110 @@ export const ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS = [
   },
 ];
 
+export const DENSE_INPUT_OUTPUT_ONE_INDEX = [
+  {
+    _index: 'index2',
+    _id: 'KQ6Wco8BO787m9kIp1Ug',
+    _score: 1,
+    _source: {
+      text_embedding: [0.03889123350381851],
+      text: 'hello there',
+      model_id: '.multilingual-e5-small',
+    },
+  },
+];
+
+export const SPARSE_INPUT_OUTPUT_ONE_INDEX = [
+  {
+    _index: 'index',
+    _id: 'Iw6Bco8BO787m9kIa1Wo',
+    _score: 1,
+    _source: {
+      text_embedding: {
+        interview: 0.42307013,
+      },
+      text: 'hello there',
+      model_id: '.elser_model_2',
+    },
+  },
+];
+
+export const SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS = {
+  indices: ['index'],
+  fields: {
+    text_embedding: {
+      sparse_vector: {
+        type: 'sparse_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    text: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    model_id: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'model_id.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  },
+};
+
+export const DENSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS = {
+  indices: ['index2'],
+  fields: {
+    text_embedding: {
+      dense_vector: {
+        type: 'dense_vector',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    text: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    model_id: {
+      text: {
+        type: 'text',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: false,
+      },
+    },
+    'model_id.keyword': {
+      keyword: {
+        type: 'keyword',
+        metadata_field: false,
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  },
+};
+
 export const DENSE_VECTOR_DOCUMENT_FIRST = [
   {
     _index: 'workplace_index_nested',

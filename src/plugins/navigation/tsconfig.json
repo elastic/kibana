@@ -24,7 +24,6 @@
     "@kbn/config-schema",
     "@kbn/core-plugins-server",
     "@kbn/i18n",
-    "@kbn/solution-nav-es",
     "@kbn/solution-nav-oblt",
     "@kbn/config",
     "@kbn/security-plugin",

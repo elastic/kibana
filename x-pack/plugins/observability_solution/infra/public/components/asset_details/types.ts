@@ -98,5 +98,12 @@ export interface RouteState {
 export type DataViewOrigin = 'logs' | 'metrics';
 
 export enum INTEGRATION_NAME {
-  kubernetes = 'kubernetes',
+  kubernetesNode = 'kubernetesNode',
+  kubernetesContainer = 'kubernetesContainer',
+  docker = 'docker',
+}
+
+export enum ASSET_DETAILS_ASSET_TYPE {
+  container = 'container',
+  host = 'host',
 }

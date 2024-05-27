@@ -1127,60 +1127,12 @@
               "\nFunction to add a filter in the grid cell or document flyout"
             ],
             "signature": [
-              "(mapping: string | ",
-              "FieldMapping",
-              " | undefined, value: unknown, mode: \"+\" | \"-\") => void"
+              "DocViewFilterFn",
+              " | undefined"
             ],
             "path": "packages/kbn-unified-data-table/src/components/data_table.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "@kbn/unified-data-table",
-                "id": "def-common.UnifiedDataTableProps.onFilter.$1",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "mapping",
-                "description": [],
-                "signature": [
-                  "string | ",
-                  "FieldMapping",
-                  " | undefined"
-                ],
-                "path": "packages/kbn-unified-doc-viewer/src/services/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/unified-data-table",
-                "id": "def-common.UnifiedDataTableProps.onFilter.$2",
-                "type": "Unknown",
-                "tags": [],
-                "label": "value",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "packages/kbn-unified-doc-viewer/src/services/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/unified-data-table",
-                "id": "def-common.UnifiedDataTableProps.onFilter.$3",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "mode",
-                "description": [],
-                "signature": [
-                  "\"+\" | \"-\""
-                ],
-                "path": "packages/kbn-unified-doc-viewer/src/services/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/unified-data-table",

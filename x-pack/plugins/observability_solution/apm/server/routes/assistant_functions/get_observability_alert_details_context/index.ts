@@ -12,6 +12,7 @@ import {
 } from '@kbn/observability-plugin/server/services';
 import moment from 'moment';
 import { isEmpty } from 'lodash';
+import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import { getApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../../lib/helpers/get_ml_client';
@@ -24,6 +25,7 @@ import { getServiceNameFromSignals } from './get_service_name_from_signals';
 import { getContainerIdFromSignals } from './get_container_id_from_signals';
 import { getExitSpanChangePoints, getServiceChangePoints } from '../get_changepoints';
 import { APMRouteHandlerResources } from '../../apm_routes/register_apm_server_routes';
+import { getApmErrors } from './get_apm_errors';
 
 export const getAlertDetailsContextHandler = (
   resourcePlugins: APMRouteHandlerResources['plugins'],
@@ -134,7 +136,7 @@ export const getAlertDetailsContextHandler = (
             arguments: {
               'service.name': serviceName,
               'service.environment': serviceEnvironment,
-              start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
+              start: moment(alertStartedAt).subtract(24, 'hours').toISOString(),
               end: alertStartedAt,
             },
           })
@@ -143,6 +145,7 @@ export const getAlertDetailsContextHandler = (
 
     const logCategoriesPromise = handleError(() =>
       getLogCategories({
+        apmEventClient,
         esClient,
         coreContext,
         arguments: {
@@ -155,6 +158,18 @@ export const getAlertDetailsContextHandler = (
         },
       })
     );
+
+    const apmErrorsPromise = serviceName
+      ? handleError(() =>
+          getApmErrors({
+            apmEventClient,
+            start: moment(alertStartedAt).subtract(15, 'minute').toISOString(),
+            end: alertStartedAt,
+            serviceName,
+            serviceEnvironment,
+          })
+        )
+      : undefined;
 
     const serviceChangePointsPromise = handleError(() =>
       getServiceChangePoints({
@@ -192,6 +207,7 @@ export const getAlertDetailsContextHandler = (
       serviceSummary,
       downstreamDependencies,
       logCategories,
+      apmErrors,
       serviceChangePoints,
       exitSpanChangePoints,
       anomalies,
@@ -199,6 +215,7 @@ export const getAlertDetailsContextHandler = (
       serviceSummaryPromise,
       downstreamDependenciesPromise,
       logCategoriesPromise,
+      apmErrorsPromise,
       serviceChangePointsPromise,
       exitSpanChangePointsPromise,
       anomaliesPromise,
@@ -207,7 +224,7 @@ export const getAlertDetailsContextHandler = (
     return [
       {
         key: 'serviceSummary',
-        description: 'Metadata for the service where the alert occurred',
+        description: `Metadata for the service "${serviceName}" that produced the alert. The alert might be caused by an issue in the service itself or one of its dependencies.`,
         data: serviceSummary,
       },
       {
@@ -227,14 +244,64 @@ export const getAlertDetailsContextHandler = (
       },
       {
         key: 'logCategories',
-        description: `Log events occurring around the time of the alert`,
-        data: logCategories,
+        description: `Related log events occurring shortly before the alert was triggered.`,
+        data: logCategoriesWithDownstreamServiceName(logCategories, downstreamDependencies),
+      },
+      {
+        key: 'apmErrors',
+        description: `Exceptions for the service "${serviceName}". If a downstream service name is included this could be a possible root cause. If relevant please describe what the error means and what it could be caused by.`,
+        data: apmErrorsWithDownstreamServiceName(apmErrors, downstreamDependencies),
       },
       {
         key: 'anomalies',
-        description: `Anomalies for services running in the environment "${serviceEnvironment}"`,
+        description: `Anomalies for services running in the environment "${serviceEnvironment}". Anomalies are detected using machine learning and can help you spot unusual patterns in your data.`,
         data: anomalies,
       },
     ].filter(({ data }) => !isEmpty(data));
   };
 };
+
+function apmErrorsWithDownstreamServiceName(
+  apmErrors?: Awaited<ReturnType<typeof getApmErrors>>,
+  downstreamDependencies?: Awaited<ReturnType<typeof getAssistantDownstreamDependencies>>
+) {
+  return apmErrors?.map(({ name, lastSeen, occurrences, downstreamServiceResource }) => {
+    const downstreamServiceName = downstreamDependencies?.find(
+      (dependency) => dependency['span.destination.service.resource'] === downstreamServiceResource
+    )?.['service.name'];
+
+    return {
+      message: name,
+      lastSeen: new Date(lastSeen).toISOString(),
+      occurrences,
+      downstream: {
+        [SPAN_DESTINATION_SERVICE_RESOURCE]: downstreamServiceResource,
+        [SERVICE_NAME]: downstreamServiceName,
+      },
+    };
+  });
+}
+
+function logCategoriesWithDownstreamServiceName(
+  logCategories?: Awaited<ReturnType<typeof getLogCategories>>,
+  downstreamDependencies?: Awaited<ReturnType<typeof getAssistantDownstreamDependencies>>
+) {
+  return logCategories?.map(
+    ({ errorCategory, docCount, sampleMessage, downstreamServiceResource }) => {
+      const downstreamServiceName = downstreamDependencies?.find(
+        (dependency) =>
+          dependency['span.destination.service.resource'] === downstreamServiceResource
+      )?.['service.name'];
+
+      return {
+        errorCategory,
+        docCount,
+        sampleMessage,
+        downstream: {
+          [SPAN_DESTINATION_SERVICE_RESOURCE]: downstreamServiceResource,
+          [SERVICE_NAME]: downstreamServiceName,
+        },
+      };
+    }
+  );
+}

@@ -41,7 +41,6 @@ interface Props {
   timelineId: string;
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) => void;
   refreshInterval: number;
-  setFilters: (filters: Filter[]) => void;
   setSavedQueryId: (savedQueryId: string | null) => void;
   filters: Filter[];
   savedQueryId: string | null;
@@ -79,7 +78,6 @@ export const SearchOrFilter = React.memo<Props>(
     timelineId,
     refreshInterval,
     savedQueryId,
-    setFilters,
     setSavedQueryId,
     to,
     toStr,
@@ -129,7 +127,6 @@ export const SearchOrFilter = React.memo<Props>(
                 isRefreshPaused={isRefreshPaused}
                 refreshInterval={refreshInterval}
                 savedQueryId={savedQueryId}
-                setFilters={setFilters}
                 setSavedQueryId={setSavedQueryId}
                 timelineId={timelineId}
                 to={to}

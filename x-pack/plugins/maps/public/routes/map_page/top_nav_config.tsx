@@ -21,7 +21,6 @@ import { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
-  getIsAllowByValueEmbeddables,
   getInspector,
   getCoreOverlays,
   getSavedObjectsTagging,
@@ -215,7 +214,7 @@ export function getTopNavConfig({
 
         let saveModal;
 
-        if (savedMap.hasOriginatingApp() || !getIsAllowByValueEmbeddables()) {
+        if (savedMap.hasOriginatingApp()) {
           saveModal = (
             <SavedObjectSaveModalOrigin
               {...saveModalProps}

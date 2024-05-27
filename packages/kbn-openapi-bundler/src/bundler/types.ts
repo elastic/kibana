@@ -94,41 +94,70 @@ export type TraverseDocumentEntryContext = TraverseDocumentContext & {
 };
 
 /**
- * Entry processor controls when a node should be omitted from the result document.
+ * Should remove processor controls whether a node and all its descendants
+ * should be omitted from the further processing and result document.
  *
- * When result is `true` - omit the node.
+ * When result is
+ *
+ * - `true` - omit the node
+ * - `false` - keep the node
+ *
  */
-export type EntryProcessorFn = (
+export type ShouldRemoveNodeProcessorFn = (
   node: Readonly<DocumentNode>,
   context: TraverseDocumentEntryContext
 ) => boolean;
 
-export type LeaveProcessorFn = (node: DocumentNode, context: TraverseDocumentContext) => void;
+export type OnNodeEntryProcessorFn = (
+  node: Readonly<DocumentNode>,
+  context: TraverseDocumentEntryContext
+) => void;
 
-export type RefProcessorFn = (
+export type OnNodeLeaveProcessorFn = (node: DocumentNode, context: TraverseDocumentContext) => void;
+
+export type OnRefNodeLeaveProcessorFn = (
   node: RefNode,
   resolvedRef: ResolvedRef,
   context: TraverseDocumentContext
 ) => void;
 
 /**
+ * OpenAPI tree is traversed in two phases
+ *
+ * 1. Diving from root to leaves.
+ *    Allows to analyze unprocessed nodes and calculate any metrics if necessary.
+ *
+ * 2. Post order traversal from leaves to root.
+ *    Mostly to transform the OpenAPI document.
+ *
  * Document or document node processor gives flexibility in modifying OpenAPI specs and/or collect some metrics.
- * For convenience it defined handlers invoked upon action or specific node type.
+ * For convenience there are following node processors supported
  *
- * Currently the following node types supported
+ * 1st phase
  *
- * - ref - Callback function is invoked upon leaving ref node (a node having `$ref` key)
+ * - `onNodeEnter` - Callback function is invoked at the first phase (diving from root to leaves) while
+ *             traversing the document. It can be considered in a similar way events dive in DOM during
+ *             capture phase. In the other words it means entering a subtree. It allows to analyze
+ *             unprocessed nodes.
  *
- * and the following actions
+ * - `shouldRemove` - Callback function is invoked at the first phase (diving from root to leaves) while
+ *             traversing the document. It controls whether the node will be excluded from further processing
+ *             and the result document eventually. Returning `true` excluded the node while returning `false`
+ *             passes the node untouched.
  *
- * - enter - Callback function is invoked upon entering any type of node element including ref nodes. It doesn't allow
- *           to modify node's content but provides an ability to remove the element by returning `true`.
+ * 2nd phase
  *
- * - leave - Callback function is invoked upon leaving any type of node.  It give an opportunity to modify the document like
- *           dereference refs or remove unwanted properties.
+ * - `onNodeLeave` - Callback function is invoked upon leaving any type of node. It give an opportunity to
+ *             modify the document like inline references or remove unwanted properties. It can be considered
+ *             in a similar way event bubble in DOM during bubble phase. In the other words it means leaving
+ *             a subtree.
+ *
+ * - `onRefNodeLeave` - Callback function is invoked upon leaving a reference node (a node having `$ref` key)
+ *
  */
 export interface DocumentNodeProcessor {
-  enter?: EntryProcessorFn;
-  leave?: LeaveProcessorFn;
-  ref?: RefProcessorFn;
+  shouldRemove?: ShouldRemoveNodeProcessorFn;
+  onNodeEnter?: OnNodeEntryProcessorFn;
+  onNodeLeave?: OnNodeLeaveProcessorFn;
+  onRefNodeLeave?: OnRefNodeLeaveProcessorFn;
 }

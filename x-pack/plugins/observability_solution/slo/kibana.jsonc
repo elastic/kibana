@@ -17,6 +17,7 @@
       "charts",
       "contentManagement",
       "controls",
+      "dashboard",
       "data",
       "dataViews",
       "lens",
@@ -49,8 +50,7 @@
       "kibanaUtils",
       "unifiedSearch",
       "embeddable",
-      "ingestPipelines",
-      "dashboard"
+      "ingestPipelines"
     ]
   }
 }

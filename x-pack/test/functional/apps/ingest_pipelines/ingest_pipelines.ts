@@ -26,6 +26,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
   const security = getService('security');
+  const browser = getService('browser');
+  const testSubjects = getService('testSubjects');
 
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
@@ -58,6 +60,61 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       after(async () => {
         // Delete the test pipeline
         await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+      });
+
+      it('adds pipeline query param when flyout is opened, and removes it when closed', async () => {
+        // Open the flyout for the first pipeline
+        await pageObjects.ingestPipelines.clickPipelineLink(0);
+
+        let url = await browser.getCurrentUrl();
+        const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
+
+        expect(url).to.contain(`pipeline=${pipelinesList[0]}`);
+
+        await testSubjects.click('closeDetailsFlyout');
+
+        url = await browser.getCurrentUrl();
+        expect(url).not.to.contain(`pipeline=${pipelinesList[0]}`);
+      });
+
+      it('sets query params for search and filters when changed', async () => {
+        // Set the search input with a test search
+        await testSubjects.setValue('pipelineTableSearch', 'test');
+
+        // The url should now contain the queryText from the search input
+        let url = await browser.getCurrentUrl();
+        expect(url).to.contain('queryText=test');
+
+        // Select a filter
+        await testSubjects.click('filtersDropdown');
+        await testSubjects.click('managedFilter');
+
+        // Read the url again
+        url = await browser.getCurrentUrl();
+
+        // The managed filter should be in the url
+        expect(url).to.contain('managed=on');
+      });
+
+      it('removes only pipeline query param and leaves other query params if any', async () => {
+        // Set the search input with a test search
+        await testSubjects.setValue('pipelineTableSearch', 'test');
+        // Open the flyout for the first pipeline
+        await pageObjects.ingestPipelines.clickPipelineLink(0);
+
+        let url = await browser.getCurrentUrl();
+        const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
+
+        // Url should contain both query params
+        expect(url).to.contain(`pipeline=${pipelinesList[0]}`);
+        expect(url).to.contain('queryText=test');
+
+        // Close the flyout
+        await testSubjects.click('closeDetailsFlyout');
+
+        // Url should now only have the query param for the search input
+        url = await browser.getCurrentUrl();
+        expect(url).to.contain('queryText=test');
       });
 
       it('Displays the test pipeline in the list of pipelines', async () => {

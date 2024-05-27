@@ -10,7 +10,7 @@ import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils
 import type { TimeRange } from '@kbn/es-query';
 import { useDataView } from '../../../hooks/use_data_view';
 import { METRIC_CHART_HEIGHT } from '../../../common/visualizations/constants';
-import { buildCombinedHostsFilter } from '../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../utils/filters/build';
 import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../lens';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
@@ -31,7 +31,7 @@ export const Chart = ({ id, queryField, overrides, dateRange, assetId, ...props 
 
   const filters = useMemo(() => {
     return [
-      buildCombinedHostsFilter({
+      buildCombinedAssetFilter({
         field: queryField,
         values: [assetId],
         dataView,

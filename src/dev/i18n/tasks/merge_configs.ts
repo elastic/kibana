@@ -7,7 +7,8 @@
  */
 
 import { resolve, join } from 'path';
-import { ErrorReporter, I18nConfig, assignConfigFromPath, arrayify } from '..';
+import { assignConfigFromPath, arrayify } from '..';
+import { I18nCheckTaskContext } from '../types';
 
 export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
@@ -17,7 +18,7 @@ export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   const configPaths = [kibanaRC, xpackRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
-    task: async (context: { reporter: ErrorReporter; config?: I18nConfig }) => {
+    task: async (context: I18nCheckTaskContext) => {
       try {
         context.config = await assignConfigFromPath(context.config, configPath);
       } catch (err) {

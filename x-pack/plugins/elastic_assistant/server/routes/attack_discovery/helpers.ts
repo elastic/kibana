@@ -12,11 +12,11 @@ import {
   ExecuteConnectorRequestBody,
   Replacements,
 } from '@kbn/elastic-assistant-common';
-import { ActionsClientLlm } from '@kbn/elastic-assistant-common/impl/language_models';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { v4 as uuidv4 } from 'uuid';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 
-import { AssistantToolParams, ElasticAssistantApiRequestHandlerContext } from '../../types';
+import { AssistantToolParams } from '../../types';
 
 export const REQUIRED_FOR_ATTACK_DISCOVERY: AnonymizationFieldResponse[] = [
   {
@@ -37,6 +37,7 @@ export const getAssistantToolParams = ({
   alertsIndexPattern,
   anonymizationFields,
   esClient,
+  langChainTimeout,
   latestReplacements,
   llm,
   onNewReplacements,
@@ -46,6 +47,7 @@ export const getAssistantToolParams = ({
   alertsIndexPattern: string;
   anonymizationFields?: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
+  langChainTimeout: number;
   latestReplacements: Replacements;
   llm: ActionsClientLlm;
   onNewReplacements: (newReplacements: Replacements) => void;
@@ -61,6 +63,7 @@ export const getAssistantToolParams = ({
   isEnabledKnowledgeBase: false, // not required for attack discovery
   chain: undefined, // not required for attack discovery
   esClient,
+  langChainTimeout,
   llm,
   modelExists: false, // not required for attack discovery
   onNewReplacements,
@@ -68,15 +71,3 @@ export const getAssistantToolParams = ({
   request,
   size,
 });
-
-export const isAttackDiscoveryFeatureEnabled = ({
-  assistantContext,
-  pluginName,
-}: {
-  assistantContext: ElasticAssistantApiRequestHandlerContext;
-  pluginName: string;
-}): boolean => {
-  const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
-
-  return registeredFeatures.attackDiscoveryEnabled === true;
-};
