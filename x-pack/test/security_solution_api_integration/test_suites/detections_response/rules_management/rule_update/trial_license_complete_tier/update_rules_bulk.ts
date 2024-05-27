@@ -725,7 +725,10 @@ export default ({ getService }: FtrProviderContext) => {
               const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
 
               // create simple rule
-              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+              const createdRule = await createRule(supertest, log, {
+                ...getSimpleRuleWithoutRuleId(),
+                interval: '5m',
+              });
 
               // update a simple rule's `throttle` and `actions`
               const updatedRule = await bulkUpdateSingleRule(
@@ -735,7 +738,7 @@ export default ({ getService }: FtrProviderContext) => {
               );
 
               const expectedRule = updateUsername(
-                getSimpleRuleOutputWithoutRuleId(),
+                { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' },
                 ELASTICSEARCH_USERNAME
               );
               expectedRule.revision = 1;
