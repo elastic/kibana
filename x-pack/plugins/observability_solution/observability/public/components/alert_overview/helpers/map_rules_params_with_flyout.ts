@@ -20,14 +20,14 @@ import {
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { convertToBuiltInComparators } from '../../../../target/types/common';
+
 import {
   ABOVE_OR_EQ_TEXT,
   ABOVE_TEXT,
   BELOW_OR_EQ_TEXT,
   BELOW_TEXT,
 } from '../../../../common/i18n';
-import { asDuration, asPercent } from '../../../../common';
+import { asDuration, asPercent, convertToBuiltInComparators } from '../../../../common';
 import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
 import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
 import { METRIC_FORMATTERS } from '../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
