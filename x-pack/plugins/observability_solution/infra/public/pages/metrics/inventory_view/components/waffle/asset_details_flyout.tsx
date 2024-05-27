@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { AssetDetails } from '../../../../../components/asset_details';
-import { useSourceContext } from '../../../../../containers/metrics_source';
 import { getAssetDetailsFlyoutTabs } from '../../../../../common/asset_details_config/asset_details_tabs';
 
 interface Props {
@@ -35,8 +34,6 @@ export const AssetDetailsFlyout = ({
   refreshInterval,
   isAutoReloading = false,
 }: Props) => {
-  const { source } = useSourceContext();
-
   const dateRange = useMemo(() => {
     // forces relative dates when auto-refresh is active
     return isAutoReloading
@@ -50,7 +47,7 @@ export const AssetDetailsFlyout = ({
         };
   }, [currentTime, isAutoReloading]);
 
-  return source ? (
+  return (
     <AssetDetails
       assetId={assetId}
       assetName={assetName}
@@ -69,12 +66,11 @@ export const AssetDetailsFlyout = ({
         mode: 'flyout',
         closeFlyout,
       }}
-      metricAlias={source.configuration.metricAlias}
       dateRange={dateRange}
       autoRefresh={{
         isPaused: !isAutoReloading,
         interval: refreshInterval,
       }}
     />
-  ) : null;
+  );
 };
