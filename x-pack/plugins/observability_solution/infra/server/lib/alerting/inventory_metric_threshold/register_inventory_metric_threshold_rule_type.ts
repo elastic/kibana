@@ -17,6 +17,7 @@ import {
   SnapshotMetricTypeKeys,
 } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import {
   SnapshotCustomAggregation,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
@@ -52,16 +53,15 @@ import {
 import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 
+const comparators = Object.values({ ...COMPARATORS, ...LEGACY_COMPARATORS });
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
-  comparator: oneOfLiterals(Object.values(COMPARATORS)) as Type<COMPARATORS>,
+  comparator: oneOfLiterals(comparators) as Type<COMPARATORS>,
   timeUnit: schema.string() as Type<TimeUnitChar>,
   timeSize: schema.number(),
   metric: oneOfLiterals(Object.keys(SnapshotMetricTypeKeys)) as Type<SnapshotMetricType>,
   warningThreshold: schema.maybe(schema.arrayOf(schema.number())),
-  warningComparator: schema.maybe(oneOfLiterals(Object.values(COMPARATORS))) as Type<
-    COMPARATORS | undefined
-  >,
+  warningComparator: schema.maybe(oneOfLiterals(comparators)) as Type<COMPARATORS | undefined>,
   customMetric: schema.maybe(
     schema.object({
       type: schema.literal('custom'),

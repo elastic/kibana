@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { createConditionScript } from './create_condition_script';
@@ -46,7 +45,7 @@ export const createBucketSelector = (
           },
           script: createConditionScript(
             condition.warningThreshold as number[],
-            condition.warningComparator as COMPARATORS
+            convertToBuiltInComparators(condition.warningComparator!)
           ),
         },
       }

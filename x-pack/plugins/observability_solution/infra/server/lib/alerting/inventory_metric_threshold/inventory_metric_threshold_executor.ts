@@ -128,7 +128,6 @@ export const createInventoryMetricThresholdExecutor =
         });
 
         const indexedStartedAt = start ?? startedAt.toISOString();
-
         alertsClient.setAlertData({
           id: UNGROUPED_FACTORY_KEY,
           payload: {
@@ -416,6 +415,7 @@ const mapToConditionsLookup = (
 ) =>
   list.map(mapFn).reduce<Record<string, any>>((result, value, i) => {
     result[`condition${i}`] = value;
+    console.log('result', result);
     return result;
   }, {});
 

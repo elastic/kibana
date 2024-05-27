@@ -53,6 +53,7 @@ import {
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
 import {
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
@@ -713,7 +714,7 @@ const ThresholdElement: React.FC<{
     <>
       <div css={StyledExpressionCss}>
         <ThresholdExpression
-          thresholdComparator={comparator || COMPARATORS.GREATER_THAN}
+          thresholdComparator={convertToBuiltInComparators(comparator) || COMPARATORS.GREATER_THAN}
           threshold={threshold}
           onChangeSelectedThresholdComparator={updateComparator}
           onChangeSelectedThreshold={updateThreshold}
