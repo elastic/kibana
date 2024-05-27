@@ -121,83 +121,6 @@ describe('generateOpenApiDocument', () => {
         )
       ).toMatchSnapshot();
     });
-
-    describe('tags', () => {
-      it('extracts tags when present', () => {
-        expect(
-          generateOpenApiDocument(
-            {
-              routers: [
-                createRouter({
-                  routes: [
-                    {
-                      isVersioned: false,
-                      path: '/recursive',
-                      method: 'get',
-                      validationSchemas: {
-                        request: {},
-                        response: {
-                          [200]: {
-                            body: () => schema.string({ maxLength: 10, minLength: 1 }),
-                          },
-                        },
-                      },
-                      options: {
-                        tags: ['oas-tag:1', 'oas-tag:2', 'foo'],
-                      },
-                      handler: jest.fn(),
-                    },
-                  ],
-                }),
-              ],
-              versionedRouters: [],
-            },
-            {
-              title: 'test',
-              baseUrl: 'https://test.oas',
-              version: '99.99.99',
-            }
-          )
-        ).toMatchSnapshot();
-      });
-      it('handles when tags are not present', () => {
-        expect(
-          generateOpenApiDocument(
-            {
-              routers: [
-                createRouter({
-                  routes: [
-                    {
-                      isVersioned: false,
-                      path: '/recursive',
-                      method: 'get',
-                      validationSchemas: {
-                        request: {},
-                        response: {
-                          [200]: {
-                            body: () => schema.string({ maxLength: 10, minLength: 1 }),
-                          },
-                        },
-                      },
-                      options: {
-                        /* Empty options */
-                      },
-                      handler: jest.fn(),
-                    },
-                  ],
-                }),
-              ],
-              versionedRouters: [],
-            },
-            {
-              title: 'test',
-              baseUrl: 'https://test.oas',
-              version: '99.99.99',
-            }
-          )
-        ).toMatchSnapshot();
-      });
-    });
   });
 
   describe('unknown schema/validation', () => {
@@ -260,6 +183,52 @@ describe('generateOpenApiDocument', () => {
           }
         )
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('tags', () => {
+    it('handles tags as expected', () => {
+      const [routers, versionedRouters] = createTestRouters({
+        routers: [
+          [
+            { path: '/1-1/{id}', options: { tags: ['oas-tag:1', 'oas-tag:2', 'foo'] } },
+            { path: '/1-2/{id}', options: { tags: ['oas-tag:1', 'foo'] } },
+          ],
+          [{ path: '/2-1/{id}', options: { tags: undefined } }],
+        ],
+        versionedRouters: [
+          [
+            { path: '/v1-1', options: { access: 'public', options: { tags: ['oas-tag:v1'] } } },
+            {
+              path: '/v1-2',
+              options: {
+                access: 'public',
+                options: { tags: ['foo', 'bar', 'oas-tag:v2', 'oas-tag:v3'] },
+              },
+            },
+          ],
+          [{ path: '/v2-1', options: { access: 'public', options: { tags: undefined } } }],
+        ],
+      });
+      const result = generateOpenApiDocument(
+        {
+          routers,
+          versionedRouters,
+        },
+        {
+          title: 'test',
+          baseUrl: 'https://test.oas',
+          version: '99.99.99',
+        }
+      );
+      // router paths
+      expect(result.paths['/1-1/{id}']!.get!.tags).toEqual(['1', '2']);
+      expect(result.paths['/1-2/{id}']!.get!.tags).toEqual(['1']);
+      expect(result.paths['/2-1/{id}']!.get!.tags).toEqual([]);
+      // versioned router paths
+      expect(result.paths['/v1-1']!.get!.tags).toEqual(['v1']);
+      expect(result.paths['/v1-2']!.get!.tags).toEqual(['v2', 'v3']);
+      expect(result.paths['/v2-1']!.get!.tags).toEqual([]);
     });
   });
 });

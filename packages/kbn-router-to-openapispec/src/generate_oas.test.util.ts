@@ -49,7 +49,7 @@ export const createVersionedRouter = (args: { routes: VersionedRouterMeta[] }) =
   } as unknown as CoreVersionedRouter;
 };
 
-const getRouterDefaults = () => ({
+export const getRouterDefaults = () => ({
   isVersioned: false,
   path: '/foo/{id}',
   method: 'get',
@@ -77,7 +77,7 @@ const getRouterDefaults = () => ({
   handler: jest.fn(),
 });
 
-const getVersionedRouterDefaults = () => ({
+export const getVersionedRouterDefaults = () => ({
   method: 'get',
   path: '/bar',
   options: {
