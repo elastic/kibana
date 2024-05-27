@@ -27,6 +27,20 @@ import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
 
+const getColumnDisplayName = (columnName, dataViewField, columnHeaders) => {
+  if (columnHeaders?.[columnName]) {
+    return columnHeaders[columnName];
+  }
+
+  if (columnName === '_source') {
+    return i18n.translate('unifiedDataTable.grid.documentHeader', {
+      defaultMessage: 'Document',
+    });
+  }
+
+  return dataViewField?.displayName || columnName;
+};
+
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 
@@ -136,14 +150,7 @@ function buildEuiGridColumn({
     dataViewField &&
     buildEditFieldButton({ hasEditDataViewPermission, dataView, field: dataViewField, editField });
 
-  const columnNameWithoutLabel =
-    columnName === '_source'
-      ? i18n.translate('unifiedDataTable.grid.documentHeader', {
-          defaultMessage: 'Document',
-        })
-      : dataViewField?.displayName || columnName;
-
-  const columnDisplayName = columnHeaders ? columnHeaders[columnName] : columnNameWithoutLabel;
+  const columnDisplayName = getColumnDisplayName(columnName, dataViewField, columnHeaders);
 
   let cellActions: EuiDataGridColumnCellAction[];
 

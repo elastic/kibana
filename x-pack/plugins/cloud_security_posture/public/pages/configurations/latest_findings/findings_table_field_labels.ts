@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const cloudSecurityFieldLabels: Record<string, string> = {
+export const findingsFieldLabels: Record<string, string> = {
   'result.evaluation': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
     { defaultMessage: 'Result' }
@@ -38,29 +38,5 @@ export const cloudSecurityFieldLabels: Record<string, string> = {
   '@timestamp': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.lastCheckedColumnLabel',
     { defaultMessage: 'Last Checked' }
-  ),
-  'vulnerability.id': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilityIdColumnLabel',
-    { defaultMessage: 'Vulnerability' }
-  ),
-  'vulnerability.score.base': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilityScoreColumnLabel',
-    { defaultMessage: 'CVSS' }
-  ),
-  'vulnerability.severity': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.vulnerabilitySeverityColumnLabel',
-    { defaultMessage: 'Severity' }
-  ),
-  'package.name': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.packageNameColumnLabel',
-    { defaultMessage: 'Package' }
-  ),
-  'package.version': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.packageVersionColumnLabel',
-    { defaultMessage: 'Version' }
-  ),
-  'package.fixed_version': i18n.translate(
-    'xpack.csp.findings.findingsTable.findingsTableColumn.packageFixedVersionColumnLabel',
-    { defaultMessage: 'Fix Version' }
   ),
 } as const;

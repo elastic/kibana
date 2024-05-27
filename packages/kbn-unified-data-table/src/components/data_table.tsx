@@ -376,7 +376,11 @@ export interface UnifiedDataTableProps {
    */
   cellContext?: EuiDataGridProps['cellContext'];
 
-  /* Optional props passed to Columns to display Provided Labels as Column name instead of field name */
+  /**
+  Optional props passed to Columns to display provided labels as column names instead of field names.
+  This object maps column field names to their corresponding display labels.
+  These labels will take precedence over the data view field names.
+  */
   columnHeaders?: Record<string, string>;
 }
 
@@ -456,7 +460,6 @@ export const UnifiedDataTable = ({
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
-
   const defaultColumns = displayedColumns.includes('_source');
   const docMap = useMemo(() => new Map(rows?.map((row) => [row.id, row]) ?? []), [rows]);
   const getDocById = useCallback((id: string) => docMap.get(id), [docMap]);
@@ -754,26 +757,26 @@ export const UnifiedDataTable = ({
         columnHeaders,
       }),
     [
-      visibleColumns,
-      columnsCellActions,
-      displayedRows.length,
-      settings,
-      dataView,
-      defaultColumns,
-      isSortEnabled,
-      isPlainRecord,
-      uiSettings,
-      toastNotifications,
-      valueToStringConverter,
-      onFilter,
-      editField,
-      visibleCellActions,
       columnsMeta,
-      showColumnTokens,
-      headerRowHeightLines,
+      columnsCellActions,
       customGridColumnsConfiguration,
-      columnHeaders,
+      dataView,
       dataViewFieldEditor,
+      defaultColumns,
+      displayedRows.length,
+      editField,
+      headerRowHeightLines,
+      isPlainRecord,
+      isSortEnabled,
+      onFilter,
+      settings,
+      showColumnTokens,
+      toastNotifications,
+      uiSettings,
+      valueToStringConverter,
+      visibleCellActions,
+      visibleColumns,
+      columnHeaders,
     ]
   );
 
