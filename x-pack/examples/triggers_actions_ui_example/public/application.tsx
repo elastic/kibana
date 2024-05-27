@@ -12,6 +12,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -157,23 +158,25 @@ export const renderApp = (
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
   ReactDOM.render(
-    <KibanaContextProvider
-      services={{
-        ...core,
-        ...deps,
-        ruleTypeRegistry,
-        actionTypeRegistry,
-      }}
-    >
-      <IntlProvider locale="en">
-        <TriggersActionsUiExampleApp
-          basename={appBasePath}
-          http={http}
-          triggersActionsUi={deps.triggersActionsUi}
-          data={deps.data}
-        />
-      </IntlProvider>
-    </KibanaContextProvider>,
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProvider
+        services={{
+          ...core,
+          ...deps,
+          ruleTypeRegistry,
+          actionTypeRegistry,
+        }}
+      >
+        <IntlProvider locale="en">
+          <TriggersActionsUiExampleApp
+            basename={appBasePath}
+            http={http}
+            triggersActionsUi={deps.triggersActionsUi}
+            data={deps.data}
+          />
+        </IntlProvider>
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

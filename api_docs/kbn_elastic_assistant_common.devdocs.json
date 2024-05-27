@@ -402,6 +402,74 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.parseBedrockBuffer",
+        "type": "Function",
+        "tags": [],
+        "label": "parseBedrockBuffer",
+        "description": [
+          "\nParses a Bedrock buffer from an array of chunks.\n"
+        ],
+        "signature": [
+          "(chunks: Uint8Array[], logger: ",
+          {
+            "pluginId": "@kbn/logging",
+            "scope": "common",
+            "docId": "kibKbnLoggingPluginApi",
+            "section": "def-common.Logger",
+            "text": "Logger"
+          },
+          ") => string"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.parseBedrockBuffer.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "chunks",
+            "description": [
+              "- Array of Uint8Array chunks to be parsed."
+            ],
+            "signature": [
+              "Uint8Array[]"
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.parseBedrockBuffer.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/packages/kbn-elastic-assistant-common/impl/utils/bedrock.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "- Parsed string from the Bedrock buffer."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.replaceAnonymizedValuesWithOriginalValues",
         "type": "Function",
         "tags": [],
