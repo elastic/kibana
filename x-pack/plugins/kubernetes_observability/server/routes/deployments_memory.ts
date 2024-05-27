@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod, toPct } from '../lib/utils';
-import { defineQueryForAllPodsMemoryUtilisation, calulcatePodsMemoryUtilisation } from '../lib/pods_memory_utils';
+import { defineQueryForAllPodsMemoryUtilisation, calulcatePodsMemoryUtilisation, calulcateNodesMemory } from '../lib/pods_memory_utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   DEPLOYMENT_MEMORY_ROUTE,
