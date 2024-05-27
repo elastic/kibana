@@ -19,7 +19,7 @@ export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
-  return signatures.map(({ params, returnType, minParams, examples }) => {
+  return signatures.map(({ params, returnType, minParams }) => {
     // for functions with a minimum number of args, repeat the last arg multiple times
     // just make sure to compute the right number of args to add
     const minParamsToAdd = Math.max((minParams || 0) - params.length, 0);
@@ -30,7 +30,6 @@ export function getFunctionSignatures(
         .join(', ')}${handleAdditionalArgs(minParamsToAdd > 0, extraArg, withTypes)})${
         withTypes ? `: ${returnType}` : ''
       }`,
-      examples,
     };
   });
 }
