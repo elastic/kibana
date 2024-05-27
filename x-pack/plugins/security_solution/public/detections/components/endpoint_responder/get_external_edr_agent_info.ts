@@ -13,7 +13,7 @@ import { getFieldValue } from '../host_isolation/helpers';
 import { getCrowdstrikeAgentId } from '../../../common/utils/crowdstrike_alert_check';
 
 export const getExternalEdrAgentInfo = (
-  eventData: TimelineEventsDetailsItem[] | null,
+  eventData: TimelineEventsDetailsItem[],
   agentType: ResponseActionAgentType
 ): ThirdPartyAgentInfo => {
   switch (agentType) {

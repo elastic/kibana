@@ -145,8 +145,8 @@ export const useResponderActionData = ({
   ]);
 
   const handleResponseActionsClick = useCallback(() => {
-    if (!isEndpointHost) {
-      const agentInfoFromAlert = getExternalEdrAgentInfo(eventData || null, agentType);
+    if (!isEndpointHost && eventData != null) {
+      const agentInfoFromAlert = getExternalEdrAgentInfo(eventData, agentType);
       showResponseActionsConsole({
         agentId: agentInfoFromAlert.agent.id,
         agentType,
