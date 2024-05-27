@@ -109,35 +109,6 @@ export default function ({ getService }: FtrProviderContext) {
           expect(status).toBe(200);
         });
 
-        it('get all', async () => {
-          let body: unknown;
-          let status: number;
-
-          ({ body, status } = await supertest
-            .get('/internal/security/api_key?isAdmin=true')
-            .set(svlCommonApi.getCommonRequestHeader()));
-          // expect a rejection because we're not using the internal header
-          expect(body).toEqual({
-            statusCode: 400,
-            error: 'Bad Request',
-            message: expect.stringContaining(
-              'method [get] exists but is not available with the current configuration'
-            ),
-          });
-          expect(status).toBe(400);
-
-          ({ body, status } = await supertest
-            .get('/internal/security/api_key?isAdmin=true')
-            .set(svlCommonApi.getInternalRequestHeader()));
-          // expect success because we're using the internal header
-          expect(body).toEqual(
-            expect.objectContaining({
-              apiKeys: expect.arrayContaining([expect.objectContaining({ id: roleMapping.id })]),
-            })
-          );
-          expect(status).toBe(200);
-        });
-
         it('get enabled', async () => {
           let body: unknown;
           let status: number;
@@ -205,6 +176,25 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           });
           expect(status).toBe(200);
+        });
+
+        it('query', async () => {
+          const requestBody = {
+            query: {
+              bool: { must: [{ match: { invalidated: { query: false, operator: 'and' } } }] },
+            },
+            sort: { field: 'creation', direction: 'desc' },
+            from: 0,
+            size: 1,
+          };
+
+          const { body } = await supertest
+            .post('/internal/security/api_key/_query')
+            .set(svlCommonApi.getInternalRequestHeader())
+            .send(requestBody)
+            .expect(200);
+
+          expect(body.apiKeys.length).toEqual(1);
         });
       });
     });

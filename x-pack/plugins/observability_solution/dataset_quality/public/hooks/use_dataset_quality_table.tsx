@@ -8,6 +8,7 @@
 import { useSelector } from '@xstate/react';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+import type { Primitive } from '@elastic/eui/src/services/sort/comparators';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD, NONE } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
@@ -20,9 +21,11 @@ import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactiv
 export type Direction = 'asc' | 'desc';
 export type SortField = keyof DataStreamStat;
 
-const sortingOverrides: Partial<{ [key in SortField]: SortField }> = {
+const sortingOverrides: Partial<{
+  [key in SortField]: SortField | ((item: DataStreamStat) => Primitive);
+}> = {
   ['title']: 'name',
-  ['size']: 'sizeBytes',
+  ['size']: DataStreamStat.calculateFilteredSize,
 };
 
 export const useDatasetQualityTable = () => {

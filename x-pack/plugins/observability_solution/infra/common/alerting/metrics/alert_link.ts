@@ -9,7 +9,7 @@ import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   fifteenMinutesInMilliseconds,
   HOST_FIELD,
@@ -59,37 +59,36 @@ export const getInventoryViewInAppUrl = (
   if (nodeType) {
     if (hostName) {
       return getLinkToHostDetails({ hostName, timestamp: inventoryFields[TIMESTAMP] });
-    } else {
-      const linkToParams = {
-        nodeType: inventoryFields[nodeTypeField][0],
-        timestamp: Date.parse(inventoryFields[TIMESTAMP]),
-        customMetric: '',
-        metric: '',
-      };
-
-      // We always pick the first criteria metric for the URL
-      const criteriaMetric = inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
-      if (criteriaMetric === 'custom') {
-        const criteriaCustomMetricId =
-          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
-        const criteriaCustomMetricAggregation =
-          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`][0];
-        const criteriaCustomMetricField =
-          inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`][0];
-
-        const customMetric = encode({
-          id: criteriaCustomMetricId,
-          type: 'custom',
-          field: criteriaCustomMetricField,
-          aggregation: criteriaCustomMetricAggregation,
-        });
-        linkToParams.customMetric = customMetric;
-        linkToParams.metric = customMetric;
-      } else {
-        linkToParams.metric = encode({ type: criteriaMetric });
-      }
-      return `${LINK_TO_INVENTORY}?${stringify(linkToParams)}`;
     }
+    const linkToParams = {
+      nodeType: inventoryFields[nodeTypeField][0],
+      timestamp: Date.parse(inventoryFields[TIMESTAMP]),
+      customMetric: '',
+      metric: '',
+    };
+
+    // We always pick the first criteria metric for the URL
+    const criteriaMetric = inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.metric`][0];
+    if (criteriaMetric === 'custom') {
+      const criteriaCustomMetricId =
+        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.id`][0];
+      const criteriaCustomMetricAggregation =
+        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.aggregation`][0];
+      const criteriaCustomMetricField =
+        inventoryFields[`${ALERT_RULE_PARAMETERS}.criteria.customMetric.field`][0];
+
+      const customMetric = encode({
+        id: criteriaCustomMetricId,
+        type: 'custom',
+        field: criteriaCustomMetricField,
+        aggregation: criteriaCustomMetricAggregation,
+      });
+      linkToParams.customMetric = customMetric;
+      linkToParams.metric = customMetric;
+    } else {
+      linkToParams.metric = encode({ type: criteriaMetric });
+    }
+    return `${LINK_TO_INVENTORY}?${stringify(linkToParams)}`;
   }
 
   return LINK_TO_INVENTORY;

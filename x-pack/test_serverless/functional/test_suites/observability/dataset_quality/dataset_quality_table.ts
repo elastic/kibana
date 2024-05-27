@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const to = '2024-01-01T12:00:00.000Z';
 
-  describe('Dataset quality table', () => {
+  describe('Dataset quality table', function () {
+    this.tags(['failsOnMKI']); // Failing https://github.com/elastic/kibana/issues/183495
+
     before(async () => {
       await synthtrace.index(getInitialTestLogs({ to, count: 4 }));
       await PageObjects.svlCommonPage.loginWithRole('admin');

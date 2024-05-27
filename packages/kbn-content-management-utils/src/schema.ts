@@ -111,6 +111,7 @@ export const updateOptionsSchema = {
   refresh: schema.maybe(schema.oneOf([schema.boolean(), schema.literal('wait_for')])),
   upsert: (attributesSchema: ObjectType<any>) => schema.maybe(savedObjectSchema(attributesSchema)),
   retryOnConflict: schema.maybe(schema.number()),
+  mergeAttributes: schema.maybe(schema.boolean()),
 };
 
 export const createResultSchema = (soSchema: ObjectType<any>) =>

@@ -6,11 +6,11 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { RiskScoresPreviewResponse } from '../../../../common/api/entity_analytics/risk_engine/preview_route.gen';
 import type {
   CalculateAndPersistScoresParams,
-  CalculateAndPersistScoresResponse,
   CalculateScoresParams,
-  CalculateScoresResponse,
   EntityAnalyticsConfig,
   RiskEngineConfiguration,
 } from '../types';
@@ -26,10 +26,10 @@ export type RiskEngineConfigurationWithDefaults = RiskEngineConfiguration & {
   alertSampleSizePerShard: number;
 };
 export interface RiskScoreService {
-  calculateScores: (params: CalculateScoresParams) => Promise<CalculateScoresResponse>;
+  calculateScores: (params: CalculateScoresParams) => Promise<RiskScoresPreviewResponse>;
   calculateAndPersistScores: (
     params: CalculateAndPersistScoresParams
-  ) => Promise<CalculateAndPersistScoresResponse>;
+  ) => Promise<RiskScoresCalculationResponse>;
   getConfigurationWithDefaults: (
     entityAnalyticsConfig: EntityAnalyticsConfig
   ) => Promise<RiskEngineConfigurationWithDefaults | null>;

@@ -70,6 +70,7 @@
     "@kbn/core-execution-context-server-mocks",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
+    "@kbn/core-security-server",
   ],
   "exclude": [
     "target/**/*"

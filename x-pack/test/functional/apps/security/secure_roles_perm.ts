@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.loadSavedSearch('A Saved Search');
       log.debug('click Top Nav Share button');
       await PageObjects.share.clickShareTopNavButton();
-      await testSubjects.existOrFail('sharePanel-CSVReports');
+      await testSubjects.existOrFail('export');
     });
 
     after(async function () {

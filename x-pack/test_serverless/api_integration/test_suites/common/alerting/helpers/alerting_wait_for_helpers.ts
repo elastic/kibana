@@ -6,7 +6,7 @@
  */
 
 import pRetry from 'p-retry';
-import type { SuperTest, Test } from 'supertest';
+import type { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   AggregationsAggregate,
@@ -372,7 +372,7 @@ export async function waitForNumRuleRuns({
   esClient,
   testStart,
 }: {
-  supertest: SuperTest<Test>;
+  supertest: SuperTestAgent;
   numOfRuns: number;
   ruleId: string;
   esClient: Client;

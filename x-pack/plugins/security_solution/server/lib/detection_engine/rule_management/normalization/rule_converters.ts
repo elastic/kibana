@@ -22,7 +22,6 @@ import {
 import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
   RelatedIntegrationArray,
-  RequiredFieldArray,
   RuleCreateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
@@ -78,6 +77,7 @@ import type {
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import {
+  addEcsToRequiredFields,
   convertAlertSuppressionToCamel,
   convertAlertSuppressionToSnake,
   migrateLegacyInvestigationFields,
@@ -121,6 +121,7 @@ export const typeSpecificSnakeToCamel = (
         type: params.type,
         language: params.language,
         query: params.query,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'threat_match': {
@@ -237,6 +238,8 @@ const patchEsqlParams = (
     type: existingRule.type,
     language: params.language ?? existingRule.language,
     query: params.query ?? existingRule.query,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -431,7 +434,6 @@ export const patchTypeSpecificSnakeToCamel = (
 export const convertPatchAPIToInternalSchema = (
   nextParams: PatchRuleRequestBody & {
     related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
   },
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
@@ -462,7 +464,7 @@ export const convertPatchAPIToInternalSchema = (
       meta: nextParams.meta ?? existingParams.meta,
       maxSignals: nextParams.max_signals ?? existingParams.maxSignals,
       relatedIntegrations: nextParams.related_integrations ?? existingParams.relatedIntegrations,
-      requiredFields: nextParams.required_fields ?? existingParams.requiredFields,
+      requiredFields: addEcsToRequiredFields(nextParams.required_fields),
       riskScore: nextParams.risk_score ?? existingParams.riskScore,
       riskScoreMapping: nextParams.risk_score_mapping ?? existingParams.riskScoreMapping,
       ruleNameOverride: nextParams.rule_name_override ?? existingParams.ruleNameOverride,
@@ -487,11 +489,9 @@ export const convertPatchAPIToInternalSchema = (
   };
 };
 
-// eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
   input: RuleCreateProps & {
     related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
   },
   immutable = false,
   defaultEnabled = true
@@ -537,7 +537,7 @@ export const convertCreateAPIToInternalSchema = (
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
       relatedIntegrations: input.related_integrations ?? [],
-      requiredFields: input.required_fields ?? [],
+      requiredFields: addEcsToRequiredFields(input.required_fields),
       setup: input.setup ?? '',
       ...typeSpecificParams,
     },
@@ -571,6 +571,7 @@ export const typeSpecificCamelToSnake = (
         type: params.type,
         language: params.language,
         query: params.query,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'threat_match': {
@@ -776,6 +777,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
   return RuleResponse.parse({
     ...prebuiltRuleAssetDefaults,
     ...prebuiltRuleAsset,
+    required_fields: addEcsToRequiredFields(prebuiltRuleAsset.required_fields),
     ...ruleResponseSpecificFields,
   });
 };

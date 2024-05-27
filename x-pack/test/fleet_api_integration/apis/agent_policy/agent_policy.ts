@@ -1356,8 +1356,12 @@ export default function (providerContext: FtrProviderContext) {
               created_at: ppcreatedAt,
               updated_at: ppupdatedAt,
               version,
+              package: { version: pkgVersion, ...pkgRest },
               ...ppRest
-            }: any) => ppRest
+            }: any) => ({
+              ...ppRest,
+              package: pkgRest,
+            })
           ),
         }).toMatch();
       });

@@ -195,10 +195,17 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
+  const dashboardBackupState = dashboardBackup.getState(loadDashboardReturn.dashboardId);
   const sessionStorageInput = ((): Partial<SavedDashboardInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
+    return dashboardBackupState?.dashboardState;
   })();
+
+  if (useSessionStorageIntegration) {
+    untilDashboardReady().then((dashboardContainer) => {
+      dashboardContainer.restoredRuntimeState = dashboardBackupState?.panels;
+    });
+  }
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.

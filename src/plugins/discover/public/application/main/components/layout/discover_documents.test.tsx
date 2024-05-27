@@ -25,6 +25,7 @@ import { DiscoverAppState } from '../../state_management/discover_app_state_cont
 import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
+import { createDataViewDataSource } from '../../../../../common/data_sources';
 
 const customisationService = createCustomizationService();
 
@@ -39,7 +40,9 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     result: hits.map((hit) => buildDataTableRecord(hit, dataViewMock)),
   }) as DataDocuments$;
   const stateContainer = getDiscoverStateMock({});
-  stateContainer.appState.update({ index: dataViewMock.id });
+  stateContainer.appState.update({
+    dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
+  });
   stateContainer.dataState.data$.documents$ = documents$;
 
   const props = {
@@ -106,17 +109,6 @@ describe('Discover documents layout', () => {
   });
 
   test('should render customisations', async () => {
-    const customCellRenderer = {
-      content: () => <span className="custom-renderer-test">Test</span>,
-    };
-
-    const customGridColumnsConfiguration = {
-      content: () => ({
-        id: 'content',
-        displayText: <span className="custom-column-test">Column</span>,
-      }),
-    };
-
     const customControlColumnsConfiguration = () => ({
       leadingControlColumns: [],
       trailingControlColumns: [],
@@ -124,8 +116,7 @@ describe('Discover documents layout', () => {
 
     const customization: DiscoverCustomization = {
       id: 'data_table',
-      customCellRenderer,
-      customGridColumnsConfiguration,
+      logsEnabled: true,
       customControlColumnsConfiguration,
     };
 
@@ -134,12 +125,10 @@ describe('Discover documents layout', () => {
     const discoverGridComponent = component.find(DiscoverGrid);
     expect(discoverGridComponent.exists()).toBeTruthy();
 
-    expect(discoverGridComponent.prop('externalCustomRenderers')).toEqual(customCellRenderer);
-    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toEqual(
-      customGridColumnsConfiguration
-    );
     expect(discoverGridComponent.prop('customControlColumnsConfiguration')).toEqual(
       customControlColumnsConfiguration
     );
+    expect(discoverGridComponent.prop('externalCustomRenderers')).toBeDefined();
+    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toBeDefined();
   });
 });
