@@ -23,7 +23,7 @@ import { MAX_NUMBER_OF_SERVICES } from './get_service_assets';
 export interface TraceMetrics {
   latency: number | null;
   throughput: number | null;
-  transactionErrorRate: number | null;
+  failedTransactionRate: number | null;
 }
 
 interface AssetServicesMetricsMap {

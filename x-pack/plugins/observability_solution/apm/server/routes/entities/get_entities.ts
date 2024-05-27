@@ -5,11 +5,9 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { termQuery, kqlQuery } from '@kbn/observability-plugin/server';
-import { ASSET_TYPE, FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/assets';
-import { AssetsESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
-
-type AssetType = 'service';
+import { kqlQuery } from '@kbn/observability-plugin/server';
+import { FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
+import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 
 export function assetsRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
   return [
@@ -30,36 +28,37 @@ export function assetsRangeQuery(start: number, end: number): QueryDslQueryConta
   ];
 }
 
-export async function getAssets({
+export async function getEntities({
   assetsESClient,
   start,
   end,
   kuery,
-  assetType,
   size,
 }: {
-  assetsESClient: AssetsESClient;
+  assetsESClient: EntitiesESClient;
   start: number;
   end: number;
   kuery: string;
-  assetType: AssetType;
   size: number;
 }) {
-  const response = await assetsESClient.search(`get_${assetType}_from_assets`, {
+  const response = await assetsESClient.search(`get_entities`, {
     body: {
       size,
       track_total_hits: false,
+      _source: ['agent.name', 'entity', 'data_stream'],
       query: {
         bool: {
           filter: [
-            ...termQuery(ASSET_TYPE, assetType),
             ...kqlQuery(kuery),
-            ...assetsRangeQuery(start, end),
+            // Not supported for now
+            //...assetsRangeQuery(start, end),
           ],
         },
       },
     },
   });
+
+  console.log(response);
 
   return response;
 }

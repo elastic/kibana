@@ -9,8 +9,8 @@ import { LogsRatesMetrics } from '@kbn/logs-data-access-plugin/server';
 import { TraceMetrics } from './get_services_transaction_stats';
 
 export enum SignalType {
-  ASSET_TRACES = 'asset.traces',
-  ASSET_LOGS = 'asset.logs',
+  APM = 'metrics',
+  LOGS = 'logs',
 }
 
 interface ServiceItem {

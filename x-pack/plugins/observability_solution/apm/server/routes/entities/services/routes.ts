@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import { createAssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { createEntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import {
@@ -15,11 +15,11 @@ import {
   rangeRt,
   serviceTransactionDataSourceRt,
 } from '../../default_api_types';
-import { getServiceAssets } from './get_service_assets';
+import { getServiceAssets as getServiceEntities } from './get_service_assets';
 import { EntityServicesResponse } from '../../../../common/assets/types';
 
-const servicesAssetsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/assets/services',
+const servicesEntitiesRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/entities/services',
   params: t.type({
     query: t.intersection([
       environmentRt,
@@ -38,14 +38,14 @@ const servicesAssetsRoute = createApmServerRoute({
       plugins.logsDataAccess.start(),
     ]);
 
-    const assetsESClient = await createAssetsESClient({
+    const assetsESClient = await createEntitiesESClient({
       request,
       esClient: coreContext.elasticsearch.client.asCurrentUser,
     });
 
     const { start, end, kuery, documentType, rollupInterval, useDurationSummary } = params.query;
 
-    const services = await getServiceAssets({
+    const services = await getServiceEntities({
       assetsESClient,
       start,
       end,
@@ -63,6 +63,6 @@ const servicesAssetsRoute = createApmServerRoute({
   },
 });
 
-export const servicesAssetsRoutesRepository = {
-  ...servicesAssetsRoute,
+export const servicesEntitiesRoutesRepository = {
+  ...servicesEntitiesRoute,
 };

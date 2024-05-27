@@ -11,12 +11,11 @@ import { WrappedElasticsearchClientError } from '@kbn/observability-plugin/serve
 import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { AssetsESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
+import { EntitiesESClient } from '../../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 import { withApmSpan } from '../../../utils/with_apm_span';
-import { getAssets } from '../get_assets';
+import { getEntities } from '../get_entities';
 import { getServiceNamesPerSignalType } from '../utils/get_service_names_per_signal_type';
 import { getServicesTransactionStats } from './get_services_transaction_stats';
-import { ServiceAssetDocument } from './types';
 
 export const MAX_NUMBER_OF_SERVICES = 1_000;
 
@@ -33,7 +32,7 @@ export async function getServiceAssets({
   rollupInterval,
   useDurationSummary,
 }: {
-  assetsESClient: AssetsESClient;
+  assetsESClient: EntitiesESClient;
   start: number;
   end: number;
   kuery: string;
@@ -47,62 +46,22 @@ export async function getServiceAssets({
 }) {
   return withApmSpan('get_service_assets', async () => {
     try {
-      const response = await getAssets({
+      const response = await getEntities({
         assetsESClient,
         start,
         end,
         kuery,
         size: MAX_NUMBER_OF_SERVICES,
-        assetType: 'service',
       });
 
       const services = response.hits.hits.map((hit) => {
-        const serviceAsset = hit._source as ServiceAssetDocument;
-
-        return {
-          asset: {
-            signalTypes: serviceAsset.asset.signalTypes,
-            identifyingMetadata: serviceAsset.asset.identifying_metadata,
-          },
-          service: {
-            name: serviceAsset.service.name,
-            environment: serviceAsset.service.environment,
-          },
-        };
+        return hit._source as ServiceAssetDocument;
       });
 
-      const { logsServiceNames, tracesServiceNames } = getServiceNamesPerSignalType(services);
-
-      const [traceMetrics = {}, logsMetrics = {}] = await Promise.all([
-        tracesServiceNames.length
-          ? getServicesTransactionStats({
-              apmEventClient,
-              start,
-              end,
-              kuery,
-              serviceNames: tracesServiceNames,
-              documentType,
-              rollupInterval,
-              useDurationSummary,
-            })
-          : undefined,
-        logsServiceNames.length
-          ? logsDataAccessStart.services.getLogsRatesService({
-              esClient,
-              identifyingMetadata: 'service.name',
-              timeFrom: start,
-              timeTo: end,
-              serviceNames: logsServiceNames,
-            })
-          : undefined,
-      ]);
-
       return services.map((item) => {
-        const serviceTraceMetrics = traceMetrics[item.service.name];
-        const serviceLogsMetrics = logsMetrics[item.service.name];
+        console.log('item', item);
         return {
           ...item,
-          metrics: { ...serviceTraceMetrics, ...serviceLogsMetrics },
         };
       });
     } catch (error) {
