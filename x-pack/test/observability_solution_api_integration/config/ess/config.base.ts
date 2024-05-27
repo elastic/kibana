@@ -19,18 +19,11 @@ export function createTestConfig(options: CreateTestConfigOptions) {
       require.resolve('../../../api_integration/config.ts')
     );
 
-    const svlSharedConfig = await readConfigFile(
-      require.resolve('../../../../test_serverless/shared/config.base.ts')
-    );
-    const svlSharedServices = svlSharedConfig.get('services');
-
     return {
       ...xPackApiIntegrationTestsConfig.getAll(),
       testFiles: options.testFiles,
       services: {
         ...services,
-        sloApi: svlSharedServices.sloApi,
-        alertingApi: svlSharedServices.alertingApi,
       },
       junit: {
         reportName: 'X-Pack Οbservability Solution API Integration Tests',
