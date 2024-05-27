@@ -15,4 +15,5 @@ export const GET_UNALLOWED_FIELD_VALUES = `${BASE_PATH}/unallowed_field_values`;
 export const GET_ILM_EXPLAIN = `${BASE_PATH}/ilm_explain/{pattern}`;
 export const RESULTS_ROUTE_PATH = `${BASE_PATH}/results`;
 export const RESULTS_INDICES_LATEST_ROUTE_PATH = `${BASE_PATH}/results/indices_latest/{pattern}`;
+export const RESULTS_INDICES_PATTERN_ROUTE_PATH = `${BASE_PATH}/results/indices/{pattern}`;
 export const INTERNAL_API_VERSION = '1';

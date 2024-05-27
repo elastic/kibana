@@ -10,6 +10,7 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import { postResultsRoute } from './post_results';
 import { getResultsIndicesLatestRoute } from './get_results_indices_latest';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
+import { getResultsIndicesPatternRoute } from './get_results_indices_pattern';
 
 export const resultsRoutes = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,
@@ -17,4 +18,5 @@ export const resultsRoutes = (
 ) => {
   postResultsRoute(router, logger);
   getResultsIndicesLatestRoute(router, logger);
+  getResultsIndicesPatternRoute(router, logger);
 };

@@ -39,5 +39,17 @@ export type ResultDocument = t.TypeOf<typeof ResultDocument>;
 
 export const PostResultBody = ResultDocument;
 
-export const GetResultParams = t.type({ pattern: t.string });
-export type GetResultParams = t.TypeOf<typeof GetResultParams>;
+export const GetResultsIndicesLatestParams = t.type({ pattern: t.string });
+export type GetResultsIndicesLatestParams = t.TypeOf<typeof GetResultsIndicesLatestParams>;
+
+export const GetResultsIndicesPatternParams = t.type({
+  pattern: t.string,
+});
+
+export const GetResultsIndicesPatternQuery = t.type({
+  limit: t.union([t.number, t.undefined]),
+  from: t.union([t.number, t.undefined]),
+  startDate: t.union([t.string, t.undefined]),
+  endDate: t.union([t.string, t.undefined]),
+  outcome: t.union([t.literal('pass'), t.literal('fail'), t.undefined]),
+});
