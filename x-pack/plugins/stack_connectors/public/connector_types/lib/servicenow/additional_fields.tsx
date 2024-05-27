@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import { ActionVariable } from '@kbn/alerting-types';
@@ -26,30 +26,28 @@ export const AdditionalFieldsComponent: React.FC<AdditionalFieldsProps> = ({
   onChange,
 }) => {
   return (
-    <EuiFormRow fullWidth error={errors} isInvalid={errors !== undefined && errors.length > 0}>
-      <JsonEditorWithMessageVariables
-        messageVariables={messageVariables}
-        paramsProperty={'additional_fields'}
-        inputTargetValue={value}
-        errors={errors}
-        dataTestSubj="additionalFields"
-        label={
-          <>
-            {i18n.ADDITIONAL_FIELDS}
-            <EuiIconTip
-              size="s"
-              color="subdued"
-              type="questionInCircle"
-              className="eui-alignTop"
-              data-test-subj="otherFieldsHelpTooltip"
-              aria-label={i18n.ADDITIONAL_FIELDS_HELP}
-              content={i18n.ADDITIONAL_FIELDS_HELP_TEXT}
-            />
-          </>
-        }
-        onDocumentsChange={(json: string) => onChange(isEmpty(json) ? null : json)}
-      />
-    </EuiFormRow>
+    <JsonEditorWithMessageVariables
+      messageVariables={messageVariables}
+      paramsProperty={'additional_fields'}
+      inputTargetValue={value}
+      errors={errors ?? []}
+      dataTestSubj="additionalFields"
+      label={
+        <>
+          {i18n.ADDITIONAL_FIELDS}
+          <EuiIconTip
+            size="s"
+            color="subdued"
+            type="questionInCircle"
+            className="eui-alignTop"
+            data-test-subj="otherFieldsHelpTooltip"
+            aria-label={i18n.ADDITIONAL_FIELDS_HELP}
+            content={i18n.ADDITIONAL_FIELDS_HELP_TEXT}
+          />
+        </>
+      }
+      onDocumentsChange={(json: string) => onChange(isEmpty(json) ? null : json)}
+    />
   );
 };
 
