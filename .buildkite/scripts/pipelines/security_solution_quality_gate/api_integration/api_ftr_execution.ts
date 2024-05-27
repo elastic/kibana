@@ -10,8 +10,14 @@ import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { exec } from 'child_process';
 import crypto from 'crypto';
-
-import type { ProjectHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
+import {
+  readConfigFile,
+  EsVersion,
+} from '../../../../../packages/kbn-test/src/functional_test_runner/lib';
+import type {
+  ProductType,
+  ProjectHandler,
+} from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
 import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
 import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';
 import {
@@ -20,6 +26,7 @@ import {
   waitForKibanaAvailable,
   waitForEsAccess,
 } from '@kbn/security-solution-plugin/scripts/run_cypress/parallel_serverless';
+import Path from 'path';
 
 const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
@@ -56,6 +63,51 @@ function executeCommand(command: string, envVars: any, workDir: string): Promise
   });
 }
 
+async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undefined> {
+  if (!process.env.TARGET_SCRIPT) {
+    log.error('TARGET_SCRIPT environment variable is not provided. Aborting...');
+    return process.exit(1);
+  }
+
+  const fs = require('fs');
+  const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
+
+  const scriptName: string = process.env.TARGET_SCRIPT;
+  if (packageJson.scripts && packageJson.scripts[scriptName]) {
+    console.log(`Script ${scriptName} was found. Proceeding.`);
+  } else {
+    console.log(`Script ${scriptName} not found in package.json`);
+  }
+
+  // Getting parent script, domain and project type defined in the script in package.json
+  const parentScript = packageJson.scripts[scriptName]?.split(' ')[2];
+  const domain = packageJson.scripts[scriptName].split(' ')[3];
+  const projectType = packageJson.scripts[scriptName].split(' ')[4];
+
+  // Getting area and license folder from parent script in package.json
+  const area = packageJson.scripts[parentScript].split(' ')[3];
+  const licenseFolder = packageJson.scripts[parentScript].split(' ')[4];
+
+  // Defining config path and then reading the configuration file
+  const configPath = `./test_suites/${area}/${domain}/${licenseFolder}/configs/${projectType}.config.ts`;
+  const config = await readConfigFile(log, EsVersion.getDefault(), Path.resolve(configPath));
+
+  // From the configuration file getting the kibana server args for product types
+  const kbnServerArgs = config.getAll().kbnTestServer.serverArgs;
+  const filteredList: string[] = kbnServerArgs.filter((str: string) =>
+    str.startsWith('--xpack.securitySolutionServerless.productTypes')
+  );
+
+  let productTypes: ProductType[];
+  if (filteredList.length == 1) {
+    const pTypes = filteredList[0].split('=')[1];
+    productTypes = JSON.parse(pTypes);
+    return productTypes.length > 0 ? productTypes : undefined;
+  } else {
+    return undefined;
+  }
+}
+
 export const cli = () => {
   run(
     async (context) => {
@@ -89,10 +141,10 @@ export const cli = () => {
 
       const id = crypto.randomBytes(8).toString('hex');
       const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
+      const productTypes = await parseProductTypes(log);
 
       // Creating project for the test to run
-      const project = await cloudHandler.createSecurityProject(PROJECT_NAME);
-      log.info(project);
+      const project = await cloudHandler.createSecurityProject(PROJECT_NAME, productTypes);
 
       if (!project) {
         log.error('Failed to create project.');
