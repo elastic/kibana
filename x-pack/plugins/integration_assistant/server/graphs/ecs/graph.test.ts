@@ -20,7 +20,6 @@ import { handleEcsMapping } from './mapping';
 import { handleDuplicates } from './duplicates';
 import { handleMissingKeys } from './missing';
 import { handleInvalidEcs } from './invalid';
-import { handleValidateMappings } from './validate';
 
 const mockLlm = new FakeListLLM({
   responses: ["I'll callback later.", "You 'console' them!"],
@@ -82,7 +81,6 @@ describe('runEcsGraph', () => {
 
     const ecsGraph = await getEcsGraph();
     const response = await ecsGraph.invoke(ecsMappingMockedRequest);
-    console.log(JSON.stringify(response.results, null, 2));
     expect(response.results).toStrictEqual(ecsMappingExpectedResults);
 
     // Check if the functions were called

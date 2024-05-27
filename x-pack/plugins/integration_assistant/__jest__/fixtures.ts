@@ -6,8 +6,8 @@
  */
 export const ecsMappingMockedRequest = {
   rawSamples: [
-    '{ "timestamp": "2020-10-19 19:31:31", "id": 0, "class": "general", "event": "status"}',
-    '{ "timestamp": "2020-10-19 19:32:10", "id": 0, "class": "connection", "event": "disconnect", "connection_id": 16, "account": { "user": "audit_test_user2", "host": "hades.home" }}',
+    '{ "timestamp": "2020-10-19 19:31:31", "cpu_usage": 0.1, "class": "general", "event": "status", "test_array": ["test1", "test2"]}',
+    '{ "timestamp": "2020-10-19 19:32:10", "cpu_usage": 0.2, "class": "connection", "event": "disconnect", "bytes": 16, "account": { "user": "audit_test_user2", "ip": "10.10.10.10" }}',
   ],
   packageName: 'mysql_enterprise',
   dataStreamName: 'audit',
@@ -17,6 +17,7 @@ export const ecsMappingExpectedResults = {
   mapping: {
     mysql_enterprise: {
       audit: {
+        test_array: null,
         timestamp: {
           target: '@timestamp',
           confidence: 0.99,
@@ -25,7 +26,18 @@ export const ecsMappingExpectedResults = {
         },
         id: null,
         class: null,
-        connection_id: null,
+        cpu_usage: {
+          target: 'host.cpu.usage',
+          confidence: 0.99,
+          type: 'number',
+          date_formats: [],
+        },
+        bytes: {
+          target: 'network.bytes',
+          confidence: 0.99,
+          type: 'number',
+          date_formats: [],
+        },
         account: {
           user: {
             target: 'user.name',
@@ -33,8 +45,8 @@ export const ecsMappingExpectedResults = {
             date_formats: [],
             confidence: 1,
           },
-          host: {
-            target: 'source.domain',
+          ip: {
+            target: 'source.ip',
             type: 'string',
             date_formats: [],
             confidence: 1,
@@ -93,16 +105,32 @@ export const ecsMappingExpectedResults = {
       },
       {
         rename: {
+          field: 'mysql_enterprise.audit.cpu_usage',
+          target_field: 'host.cpu.usage',
+          ignore_missing: true,
+        },
+      },
+      {
+        rename: {
+          field: 'mysql_enterprise.audit.bytes',
+          target_field: 'network.bytes',
+          ignore_missing: true,
+        },
+      },
+      {
+        rename: {
           field: 'mysql_enterprise.audit.account.user',
           target_field: 'user.name',
           ignore_missing: true,
         },
       },
       {
-        rename: {
-          field: 'mysql_enterprise.audit.account.host',
-          target_field: 'source.domain',
+        convert: {
+          field: 'mysql_enterprise.audit.account.ip',
+          target_field: 'source.ip',
           ignore_missing: true,
+          ignore_failure: true,
+          type: 'ip',
         },
       },
       {
@@ -191,7 +219,7 @@ export const ecsMappingExpectedResults = {
       },
       {
         remove: {
-          field: null,
+          field: ['mysql_enterprise.audit.account.ip'],
           ignore_missing: true,
           tag: 'remove_fields',
         },
@@ -227,15 +255,32 @@ export const ecsMappingExpectedResults = {
 export const ecsInitialMappingMockedResponse = {
   mysql_enterprise: {
     audit: {
+      test_array: null,
       timestamp: {
         target: 'event.action',
         confidence: 0.99,
         type: 'string',
         date_formats: ['yyyy-MM-dd HH:mm:ss'],
       },
-      id: null,
       class: null,
-      connection_id: null,
+      id: {
+        target: 'file.code_signature.trusted',
+        confidence: 0.99,
+        type: 'boolean',
+        date_formats: [],
+      },
+      cpu_usage: {
+        target: 'host.cpu.usage',
+        confidence: 0.99,
+        type: 'number',
+        date_formats: [],
+      },
+      bytes: {
+        target: 'network.bytes',
+        confidence: 0.99,
+        type: 'number',
+        date_formats: [],
+      },
       account: {
         user: {
           target: 'user.name',
@@ -243,8 +288,8 @@ export const ecsInitialMappingMockedResponse = {
           date_formats: [],
           confidence: 1.0,
         },
-        host: {
-          target: 'source.domain',
+        ip: {
+          target: 'source.ip',
           type: 'string',
           date_formats: [],
           confidence: 1.0,
@@ -263,6 +308,7 @@ export const ecsInitialMappingMockedResponse = {
 export const ecsDuplicateMockedResponse = {
   mysql_enterprise: {
     audit: {
+      test_array: null,
       timestamp: {
         target: '@timestamp',
         confidence: 0.99,
@@ -270,7 +316,12 @@ export const ecsDuplicateMockedResponse = {
         date_formats: ['yyyy-MM-dd HH:mm:ss'],
       },
       id: null,
-      connection_id: null,
+      bytes: {
+        target: 'network.bytes',
+        confidence: 0.99,
+        type: 'number',
+        date_formats: [],
+      },
       account: {
         user: {
           target: 'user.name',
@@ -278,18 +329,12 @@ export const ecsDuplicateMockedResponse = {
           date_formats: [],
           confidence: 1.0,
         },
-        host: {
-          target: 'source.domain',
+        ip: {
+          target: 'source.ip',
           type: 'string',
           date_formats: [],
           confidence: 1.0,
         },
-      },
-      event: {
-        target: 'event.action',
-        confidence: 0.8,
-        type: 'string',
-        date_formats: [],
       },
     },
   },
@@ -298,6 +343,7 @@ export const ecsDuplicateMockedResponse = {
 export const ecsMissingKeysMockedResponse = {
   mysql_enterprise: {
     audit: {
+      test_array: null,
       timestamp: {
         target: '@timestamp',
         confidence: 0.99,
@@ -306,7 +352,18 @@ export const ecsMissingKeysMockedResponse = {
       },
       id: null,
       class: null,
-      connection_id: null,
+      cpu_usage: {
+        target: 'host.cpu.usage',
+        confidence: 0.99,
+        type: 'number',
+        date_formats: [],
+      },
+      bytes: {
+        target: 'network.bytes',
+        confidence: 0.99,
+        type: 'number',
+        date_formats: [],
+      },
       account: {
         user: {
           target: 'user.name',
@@ -314,8 +371,8 @@ export const ecsMissingKeysMockedResponse = {
           date_formats: [],
           confidence: 1.0,
         },
-        host: {
-          target: 'source.domain',
+        ip: {
+          target: 'source.ip',
           type: 'string',
           date_formats: [],
           confidence: 1.0,
@@ -334,6 +391,7 @@ export const ecsMissingKeysMockedResponse = {
 export const ecsInvalidMappingMockedResponse = {
   mysql_enterprise: {
     audit: {
+      test_array: null,
       timestamp: {
         target: '@timestamp',
         confidence: 0.99,
@@ -342,7 +400,18 @@ export const ecsInvalidMappingMockedResponse = {
       },
       id: null,
       class: null,
-      connection_id: null,
+      cpu_usage: {
+        target: 'host.cpu.usage',
+        confidence: 0.99,
+        type: 'number',
+        date_formats: [],
+      },
+      bytes: {
+        target: 'network.bytes',
+        confidence: 0.99,
+        type: 'number',
+        date_formats: [],
+      },
       account: {
         user: {
           target: 'user.name',
@@ -350,8 +419,8 @@ export const ecsInvalidMappingMockedResponse = {
           date_formats: [],
           confidence: 1.0,
         },
-        host: {
-          target: 'source.domain',
+        ip: {
+          target: 'source.ip',
           type: 'string',
           date_formats: [],
           confidence: 1.0,
