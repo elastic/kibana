@@ -31,7 +31,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { ApiKeyBanner } from '../custom_logs/api_key_banner';
 import { useFetcher } from '../../../hooks/use_fetcher';
-import { SystemIntegrationBanner } from '../shared/system_integration_banner';
+import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 
 export const OtelLogsPanel: React.FC = () => {
   const {
@@ -57,16 +57,20 @@ export const OtelLogsPanel: React.FC = () => {
     {
       id: 'mac',
       name: 'Mac',
+      prompt: 'Run the following commands in your terminal to install the collector:',
       content: `curl --proto '=https' --tlsv1.2 -fOL https://snapshots.elastic.co/8.14.0-6b2f3648/downloads/beats/elastic-agent/elastic-agent-8.14.0-SNAPSHOT-darwin-x86_64.tar.gz
       tar -xvf elastic-agent-8.13.4-darwin-x86_64.tar.gz
       rm elastic-agent-8.13.4-darwin-x86_64/otel.yml && cp elastic-agent-8.13.4-darwin-x86_64/otel_templates/logs_hostmetrics.yaml elastic-agent-8.13.4-darwin-x86_64/otel.yml
       sed -i '' 's/<<ES_ENDPOINT>>/'${setup?.elasticsearchUrl}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml && sed -i '' 's/<<ES_API_KEY>>/'${apiKeyData?.apiKeyEncoded}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml
       
       elastic-agent-8.13.4-darwin-x86_64/elastic-agent otel`,
+      check: 'run_collector',
+      type: 'copy',
     },
     {
       id: 'linux',
       name: 'Linux',
+      prompt: 'Run the following commands in your terminal to install the collector:',
       content: `# not final
       curl --proto '=https' --tlsv1.2 -fOL https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.100.0/otelcol_0.100.0_linux_amd64.tar.gz
 tar -xvf otelcol_0.100.0_linux_amd64.tar.gz
@@ -74,10 +78,13 @@ curl --proto '=https' --tlsv1.2 -fOL https://github.com/elastic/observability/re
 # Use sed to add your API key and Elasticsearch endpoint
 sed -i '' 's/APIKEY/${apiKeyData?.apiKeyEncoded}/g' otel-collector-linux.yml
 sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel-collector-linux.yml`,
+      check: 'run_collector',
+      type: 'copy',
     },
     {
       id: 'windows',
       name: 'Windows',
+      prompt: 'Run the following commands in your terminal to install the collector:',
       content: `# not final
       curl --proto '=https' --tlsv1.2 -fOL https://snapshots.elastic.co/8.14.0-6b2f3648/downloads/beats/elastic-agent/elastic-agent-8.14.0-SNAPSHOT-darwin-x86_64.tar.gz
       tar -xvf elastic-agent-8.13.4-darwin-x86_64.tar.gz
@@ -85,10 +92,61 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
       sed -i '' 's/<<ES_ENDPOINT>>/'${setup?.elasticsearchUrl}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml && sed -i '' 's/<<ES_API_KEY>>/'${apiKeyData?.apiKeyEncoded}'/g' elastic-agent-8.13.4-darwin-x86_64/otel.yml
       
       elastic-agent-8.13.4-darwin-x86_64/elastic-agent otel`,
+      check: 'run_collector',
+      type: 'copy',
+    },
+    {
+      id: 'kubernetes',
+      name: 'Kubernetes',
+      prompt: 'Install the following via kubectl apply -f otel-collector-k8s.yml:',
+      content: `apiVersion: v1
+      kind: Service
+      metadata:
+        name: my-nginx-svc
+        labels:
+          app: nginx
+      spec:
+        type: LoadBalancer
+        ports:
+        - port: 80
+        selector:
+          app: nginx
+      ---
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: my-nginx
+        labels:
+          app: nginx
+        env:
+        - name: ELASTICSEARCH_URL
+          value: ${setup?.elasticsearchUrl}
+        - name: ELASTICSEARCH_API_KEY
+          value: ${apiKeyData?.apiKeyEncoded}
+      spec:
+        replicas: 3
+        selector:
+          matchLabels:
+            app: nginx
+        template:
+          metadata:
+            labels:
+              app: nginx
+          spec:
+            containers:
+            - name: nginx
+              image: nginx:1.14.2
+              ports:
+              - containerPort: 80`,
+      type: 'download',
+      check: 'kubectl get pods -l app=nginx',
+      fileName: 'otel-collector-k8s.yml',
     },
   ];
 
   const [selectedTab, setSelectedTab] = React.useState(installTabContents[0].id);
+
+  const selectedContent = installTabContents.find((tab) => tab.id === selectedTab)!;
 
   return (
     <EuiPanel hasBorder>
@@ -135,9 +193,7 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
               )}
             </p>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <SystemIntegrationBanner onlyShowError />
-          </EuiFlexItem>
+          <MultiIntegrationInstallBanner />
           <EuiFlexItem>
             <ApiKeyBanner status={apiKeyStatus} payload={apiKeyData} error={error} />
           </EuiFlexItem>
@@ -146,7 +202,7 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
               {
                 title: 'Install and run the collector',
                 children: (
-                  <>
+                  <EuiFlexGroup direction="column">
                     <EuiText>
                       <p>
                         {i18n.translate(
@@ -169,16 +225,45 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
                       ))}
                     </EuiTabs>
 
-                    <EuiCodeBlock language="sh" isCopyable>
-                      {installTabContents.find((tab) => tab.id === selectedTab)?.content}
-                    </EuiCodeBlock>
-                  </>
+                    <EuiFlexItem>
+                      <EuiText>
+                        <p>{selectedContent.prompt}</p>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiCodeBlock language="sh" isCopyable>
+                        {selectedContent.content}
+                      </EuiCodeBlock>
+                    </EuiFlexItem>
+                    {selectedContent.type === 'download' && (
+                      <EuiFlexItem align="left">
+                        <EuiFlexGroup>
+                          <EuiButton
+                            iconType="download"
+                            color="primary"
+                            href={`data:application/yaml;base64,${Buffer.from(
+                              selectedContent.content,
+                              'utf8'
+                            ).toString('base64')}`}
+                            download={selectedContent.fileName}
+                            target="_blank"
+                            data-test-subj="obltOnboardingOtelDownloadConfig"
+                          >
+                            {i18n.translate(
+                              'xpack.observability_onboarding.installOtelCollector.configStep.downloadConfigButton',
+                              { defaultMessage: 'Download config file' }
+                            )}
+                          </EuiButton>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
                 ),
               },
               {
                 title: 'Validate everything is running properly',
                 children: (
-                  <>
+                  <EuiFlexGroup direction="column">
                     <EuiText>
                       <p>
                         {i18n.translate(
@@ -191,13 +276,13 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
                       </p>
                     </EuiText>
                     <EuiCodeBlock language="yaml" isCopyable>
-                      {`run_collector`}
+                      {selectedContent.check}
                     </EuiCodeBlock>
-                  </>
+                  </EuiFlexGroup>
                 ),
               },
               {
-                title: 'Look at logs',
+                title: 'Look at your data',
                 children: (
                   <>
                     <EuiText>
