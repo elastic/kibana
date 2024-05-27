@@ -46,8 +46,8 @@ export const RuleExecutionResult = z.object({
    */
   backfill: z
     .object({
-      from: z.string().datetime().optional(),
-      to: z.string().datetime().optional(),
+      from: z.string().datetime(),
+      to: z.string().datetime(),
     })
     .optional(),
 });

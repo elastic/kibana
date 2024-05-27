@@ -61,7 +61,10 @@ components:
               format: date-time
             to:
               type: string     
-              format: date-time         
+              format: date-time     
+          required:
+            - from
+            - to    
       required:
         - execution_uuid
         - timestamp
