@@ -37,8 +37,6 @@ export const osquerySearchStrategyProvider = <T extends FactoryQueryTypes>(
       return forkJoin({
         actionsIndexExists: esClient.asInternalUser.indices.exists({
           index: `${ACTIONS_INDEX}*`,
-          allow_no_indices: false,
-          expand_wildcards: 'all',
         }),
         newDataStreamIndexExists: esClient.asInternalUser.indices.exists({
           index: `${ACTION_RESPONSES_DATA_STREAM_INDEX}*`,
