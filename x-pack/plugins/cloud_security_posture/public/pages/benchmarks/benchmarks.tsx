@@ -39,6 +39,7 @@ import { usePageSize } from '../../common/hooks/use_page_size';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { useCspSetupStatusApi } from '../../common/api/use_setup_status_api';
 import { NoFindingsStates } from '../../components/no_findings_states';
+import { useSecuritySolutionContext } from '../../application/security_solution_context';
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -149,7 +150,10 @@ export const Benchmarks = () => {
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });
-
+  const T = useSecuritySolutionContext()?.useUpsellingComponent(
+    'cloud_security_posture_integration_installation'
+  );
+  console.log(T);
   const queryResult = useCspBenchmarkIntegrationsV2();
   const lowerCaseQueryName = query.name.toLowerCase();
   const benchmarkResult =
