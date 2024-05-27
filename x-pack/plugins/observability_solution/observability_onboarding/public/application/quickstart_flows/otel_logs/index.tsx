@@ -156,7 +156,7 @@ sed -i '' 's/https:\/\/CHANGEME.elastic.cloud/${setup?.elasticsearchUrl}/g' otel
             <EuiFlexItem grow>
               {i18n.translate(
                 'xpack.observability_onboarding.otelLogsPanel.otelLogsModalHeaderTitleLabel',
-                { defaultMessage: 'OTel logs and host metrics' }
+                { defaultMessage: 'Elastic OpenTelemetry Collector' }
               )}
             </EuiFlexItem>
 
