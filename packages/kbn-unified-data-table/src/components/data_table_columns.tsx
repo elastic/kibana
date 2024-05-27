@@ -217,7 +217,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         dataViewField={dataViewField}
         headerRowHeight={headerRowHeight}
-        columnLabel={columnHeaders[columnName]}
+        columnLabel={columnDisplayName}
       />
     );
     if (numberOfColumns > 1) {
