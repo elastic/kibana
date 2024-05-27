@@ -184,7 +184,6 @@ export const cli = () => {
         const testCloud = 1;
         const testEsUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_ES_URL}`;
         const testKibanaUrl = `https://${credentials.username}:${credentials.password}@${FORMATTED_KB_URL}`;
-        const workDir = 'x-pack/test/security_solution_api_integration';
         const envVars = {
           ...process.env,
           TEST_CLOUD: testCloud.toString(),
@@ -192,7 +191,7 @@ export const cli = () => {
           TEST_KIBANA_URL: testKibanaUrl,
         };
 
-        statusCode = await executeCommand(command, envVars, workDir);
+        statusCode = await executeCommand(command, envVars);
       } catch (err) {
         log.error('An error occured when running the test script.');
         log.error(err.message);
