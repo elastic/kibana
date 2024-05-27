@@ -14,7 +14,8 @@ export const TEMPLATE_TITLE = i18n.translate('xpack.cases.templates.title', {
 });
 
 export const TEMPLATE_DESCRIPTION = i18n.translate('xpack.cases.templates.description', {
-  defaultMessage: 'Template description.',
+  defaultMessage:
+    'Add Case Templates to automatically define the case fields while creating a new case. A user can choose to create an empty case or based on a preset template. Templates allow to auto-populate values when creating new cases.',
 });
 
 export const NO_TEMPLATES = i18n.translate('xpack.cases.templates.noTemplates', {

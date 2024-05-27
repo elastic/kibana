@@ -35,12 +35,12 @@ const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
       component={TextField}
       label={label}
       componentProps={{
+        labelAppend: setAsOptional ? OptionalFieldLabel : null,
         euiFieldProps: {
           'data-test-subj': `${key}-text-create-custom-field`,
           fullWidth: true,
           disabled: isLoading,
           isLoading,
-          labelAppend: setAsOptional ? OptionalFieldLabel : null,
         },
       }}
     />

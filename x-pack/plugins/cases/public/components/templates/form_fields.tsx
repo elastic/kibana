@@ -81,10 +81,11 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
         <CaseFormFields
           configurationCustomFields={configurationCustomFields}
           draftStorageKey={draftStorageKey}
+          isLoading={isSubmitting}
         />
       ),
     }),
-    [configurationCustomFields, draftStorageKey]
+    [isSubmitting, configurationCustomFields, draftStorageKey]
   );
 
   const thirdStep = useMemo(

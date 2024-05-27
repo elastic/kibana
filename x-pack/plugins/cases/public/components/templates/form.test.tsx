@@ -16,6 +16,8 @@ import userEvent from '@testing-library/user-event';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
 import { MAX_TAGS_PER_TEMPLATE, MAX_TEMPLATE_TAG_LENGTH } from '../../../common/constants';
+import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { connect } from 'http2';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -105,6 +107,20 @@ describe('TemplateForm', () => {
         'euiMarkdownEditorTextArea'
       )
     ).toHaveValue('case description');
+  });
+
+  it('renders case fields as optional', async () => {
+    appMockRenderer.render(<TemplateForm {...defaultProps} />);
+
+    const title = await screen.findByTestId('caseTitle');
+    const tags = await screen.findByTestId('caseTags');
+    const category = await screen.findByTestId('caseCategory');
+    const description = await screen.findByTestId('caseDescription');
+
+    expect(await within(title).findByTestId('form-optional-field-label')).toBeInTheDocument();
+    expect(await within(tags).findByTestId('form-optional-field-label')).toBeInTheDocument();
+    expect(await within(category).findByTestId('form-optional-field-label')).toBeInTheDocument();
+    expect(await within(description).findByTestId('form-optional-field-label')).toBeInTheDocument();
   });
 
   it('serializes the template field data correctly', async () => {
@@ -219,6 +235,10 @@ describe('TemplateForm', () => {
       />
     );
 
+    const connectors = await screen.findByTestId('caseConnectors');
+
+    expect(await within(connectors).findByTestId('form-optional-field-label')).toBeInTheDocument();
+
     await waitFor(() => {
       expect(formState).not.toBeUndefined();
     });
@@ -287,6 +307,12 @@ describe('TemplateForm', () => {
       'this is a first template'
     );
 
+    const customFieldsEle = await screen.findByTestId('caseCustomFields');
+
+    expect(await within(customFieldsEle).findAllByTestId('form-optional-field-label')).toHaveLength(
+      customFieldsConfigurationMock.filter((field) => field.type === CustomFieldTypes.TEXT).length
+    );
+
     const textField = customFieldsConfigurationMock[0];
     const toggleField = customFieldsConfigurationMock[3];
 
@@ -295,6 +321,7 @@ describe('TemplateForm', () => {
     );
 
     userEvent.clear(textCustomField);
+
     userEvent.paste(textCustomField, 'My text test value 1');
 
     userEvent.click(

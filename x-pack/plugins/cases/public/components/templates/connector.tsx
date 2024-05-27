@@ -38,7 +38,7 @@ const ConnectorComponent: React.FC<Props> = ({
   const { actions } = useApplicationCapabilities();
   const { permissions } = useCasesContext();
   const hasReadPermissions = permissions.connectors && actions.read;
-  const connectorId = schema.caseFields?.connectorId ?? '';
+  const connectorId = schema?.caseFields ? schema.caseFields.connectorId : '';
 
   const connectorIdConfig = getConnectorsFormValidators({
     config: connectorId as FieldConfig,

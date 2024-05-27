@@ -11,13 +11,16 @@ import type {
   TemplateConfiguration,
 } from '../../../common/types/domain';
 
+export type CaseFieldsProps = Omit<
+  CaseBaseOptionalFields,
+  'customFields' | 'connector' | 'settings'
+> & {
+  customFields?: Record<string, string | boolean>;
+  connectorId?: string;
+  fields?: ConnectorTypeFields['fields'];
+  syncAlerts?: boolean;
+};
+
 export type TemplateFormProps = Omit<TemplateConfiguration, 'caseFields'> & {
-  caseFields:
-    | (Omit<CaseBaseOptionalFields, 'customFields' | 'connector' | 'settings'> & {
-        customFields?: Record<string, string | boolean>;
-        connectorId?: string;
-        fields?: ConnectorTypeFields['fields'];
-        syncAlerts?: boolean;
-      })
-    | null;
+  caseFields: CaseFieldsProps | null;
 };

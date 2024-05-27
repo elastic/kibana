@@ -17,6 +17,7 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 
 import { CaseFormFields } from '.';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 jest.mock('../../containers/user_profiles/api');
 
@@ -27,6 +28,7 @@ describe('CaseFormFields', () => {
   let appMock: AppMockRenderer;
   const onSubmit = jest.fn();
   const defaultProps = {
+    isLoading: false,
     configurationCustomFields: [],
     draftStorageKey: '',
   };
@@ -79,6 +81,7 @@ describe('CaseFormFields', () => {
     appMock.render(
       <FormTestComponent onSubmit={onSubmit}>
         <CaseFormFields
+          isLoading={false}
           configurationCustomFields={customFieldsConfigurationMock}
           draftStorageKey=""
         />
@@ -175,10 +178,6 @@ describe('CaseFormFields', () => {
       configurationCustomFields: customFieldsConfigurationMock,
     };
 
-    appMock = createAppMockRenderer({
-      features: { alerts: { sync: false, enabled: true } },
-    });
-
     appMock.render(
       <FormTestComponent onSubmit={onSubmit}>
         <CaseFormFields {...newProps} />
@@ -209,7 +208,7 @@ describe('CaseFormFields', () => {
           caseFields: {
             category: null,
             tags: [],
-
+            syncAlerts: true,
             customFields: {
               test_key_1: 'My text test value 1',
               test_key_2: false,
@@ -222,58 +221,41 @@ describe('CaseFormFields', () => {
     });
   });
 
-  describe('Assignees', () => {
-    beforeAll(() => {
-      jest.useFakeTimers();
+  it('calls onSubmit with assignees', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'platinum' },
     });
 
-    afterEach(() => {
-      jest.clearAllTimers();
-    });
+    appMock = createAppMockRenderer({ license });
 
-    afterAll(() => {
-      jest.useRealTimers();
-    });
+    appMock.render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <CaseFormFields {...defaultProps} />
+      </FormTestComponent>
+    );
 
-    it('calls onSubmit with assignees', async () => {
-      const license = licensingMock.createLicense({
-        license: { type: 'platinum' },
-      });
+    const assigneesComboBox = await screen.findByTestId('createCaseAssigneesComboBox');
 
-      appMock = createAppMockRenderer({ license });
+    userEvent.click(await within(assigneesComboBox).findByTestId('comboBoxToggleListButton'));
 
-      appMock.render(
-        <FormTestComponent onSubmit={onSubmit}>
-          <CaseFormFields {...defaultProps} />
-        </FormTestComponent>
-      );
+    await waitForEuiPopoverOpen();
 
-      const assigneesComboBox = await screen.findByTestId('createCaseAssigneesComboBox');
+    userEvent.click(screen.getByText(`${userProfiles[0].user.full_name}`));
 
-      userEvent.click(await within(assigneesComboBox).findByTestId('comboBoxToggleListButton'));
+    userEvent.click(screen.getByText('Submit'));
 
-      userEvent.paste(await within(assigneesComboBox).findByTestId('comboBoxSearchInput'), 'dr');
-
-      act(() => {
-        jest.advanceTimersByTime(1000);
-      });
-
-      userEvent.click(screen.getByText(`${userProfiles[0].user.full_name}`));
-
-      userEvent.click(screen.getByText('Submit'));
-
-      await waitFor(() => {
-        expect(onSubmit).toBeCalledWith(
-          {
-            caseFields: {
-              category: null,
-              tags: [],
-              assignees: [{ uid: userProfiles[0].uid }],
-            },
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith(
+        {
+          caseFields: {
+            category: null,
+            tags: [],
+            syncAlerts: true,
+            assignees: [{ uid: userProfiles[0].uid }],
           },
-          true
-        );
-      });
+        },
+        true
+      );
     });
   });
 });
