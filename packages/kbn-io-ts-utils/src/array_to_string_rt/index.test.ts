@@ -8,7 +8,7 @@
 
 import * as rt from 'io-ts';
 import { arrayToStringRt } from '.';
-import { isRight, Either, isLeft, fold } from 'fp-ts/lib/Either';
+import { isRight, Either, fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 
 function getValueOrThrow(either: Either<unknown, any>) {
@@ -22,8 +22,8 @@ describe('arrayToStringRt', () => {
     expect(isRight(arrayToStringRt.decode(''))).toBe(true);
     expect(isRight(arrayToStringRt.decode('message'))).toBe(true);
     expect(isRight(arrayToStringRt.decode('message,event.original'))).toBe(true);
-    expect(isLeft(arrayToStringRt.decode({}))).toBe(true);
-    expect(isLeft(arrayToStringRt.decode(true))).toBe(true);
+    expect(isRight(arrayToStringRt.decode({}))).toBe(false);
+    expect(isRight(arrayToStringRt.decode(true))).toBe(false);
   });
 
   it('should return array of strings when decoding', () => {
@@ -47,6 +47,6 @@ describe('arrayToStringRt', () => {
     expect(isRight(valid)).toBe(true);
     expect(getValueOrThrow(valid)).toEqual(validInput);
 
-    expect(isLeft(invalid)).toBe(true);
+    expect(isRight(invalid)).toBe(false);
   });
 });
