@@ -13,13 +13,13 @@ import supertest from 'supertest';
 import { getServerOptions, createServer, type IHttpConfig } from '@kbn/server-http-tools';
 import { ByteSizeValue } from '@kbn/config-schema';
 
-import { BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy_server';
+import { Http1BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy';
 import { DevConfig } from '../config/dev_config';
 import { TestLog } from '../log';
 
-describe('BasePathProxyServer', () => {
+describe('Http1BasePathProxyServer', () => {
   let server: Server;
-  let proxyServer: BasePathProxyServer;
+  let proxyServer: Http1BasePathProxyServer;
   let logger: TestLog;
   let config: IHttpConfig;
   let basePath: string;
@@ -52,7 +52,7 @@ describe('BasePathProxyServer', () => {
     // setup and start the proxy server
     const proxyConfig: IHttpConfig = { ...config, port: 10013 };
     const devConfig = new DevConfig({ basePathProxyTarget: config.port });
-    proxyServer = new BasePathProxyServer(logger, proxyConfig, devConfig);
+    proxyServer = new Http1BasePathProxyServer(logger, proxyConfig, devConfig);
     const options: BasePathProxyServerOptions = {
       shouldRedirectFromOldBasePath: () => true,
       delayUntil: () => EMPTY,
@@ -323,14 +323,18 @@ describe('BasePathProxyServer', () => {
   });
 
   describe('shouldRedirect', () => {
-    let proxyServerWithoutShouldRedirect: BasePathProxyServer;
+    let proxyServerWithoutShouldRedirect: Http1BasePathProxyServer;
     let proxyWithoutShouldRedirectSupertest: supertest.Agent;
 
     beforeEach(async () => {
       // setup and start a proxy server which does not use "shouldRedirectFromOldBasePath"
       const proxyConfig: IHttpConfig = { ...config, port: 10004 };
       const devConfig = new DevConfig({ basePathProxyTarget: config.port });
-      proxyServerWithoutShouldRedirect = new BasePathProxyServer(logger, proxyConfig, devConfig);
+      proxyServerWithoutShouldRedirect = new Http1BasePathProxyServer(
+        logger,
+        proxyConfig,
+        devConfig
+      );
       const options: Readonly<BasePathProxyServerOptions> = {
         shouldRedirectFromOldBasePath: () => false, // Return false to not redirect
         delayUntil: () => EMPTY,
@@ -366,14 +370,14 @@ describe('BasePathProxyServer', () => {
   });
 
   describe('constructor option for sending in a custom basePath', () => {
-    let proxyServerWithFooBasePath: BasePathProxyServer;
+    let proxyServerWithFooBasePath: Http1BasePathProxyServer;
     let proxyWithFooBasePath: supertest.Agent;
 
     beforeEach(async () => {
       // setup and start a proxy server which uses a basePath of "foo"
       const proxyConfig = { ...config, port: 10004, basePath: '/foo' }; // <-- "foo" here in basePath
       const devConfig = new DevConfig({ basePathProxyTarget: config.port });
-      proxyServerWithFooBasePath = new BasePathProxyServer(logger, proxyConfig, devConfig);
+      proxyServerWithFooBasePath = new Http1BasePathProxyServer(logger, proxyConfig, devConfig);
       const options: Readonly<BasePathProxyServerOptions> = {
         shouldRedirectFromOldBasePath: () => true,
         delayUntil: () => EMPTY,
