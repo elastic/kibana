@@ -95,7 +95,6 @@ describe('SearchSource', () => {
       search: mockSearchMethod,
       onResponse: jest.fn().mockImplementation((_, res) => res),
       scriptedFieldsEnabled: true,
-      // todo
       dataViews: {
         getMetaFields: jest.fn(),
         getShortDotsEnable: jest.fn(),
