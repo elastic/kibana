@@ -39,6 +39,10 @@ export const getContextFromPublicState = (
   flyout: {
     ...DEFAULT_CONTEXT.flyout,
     ...publicState.flyout,
+    degradedFields: {
+      table:
+        publicState.flyout?.degradedFields?.table ?? DEFAULT_CONTEXT.flyout.degradedFields.table,
+    },
   },
   filters: {
     ...DEFAULT_CONTEXT.filters,
