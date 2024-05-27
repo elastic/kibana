@@ -3131,7 +3131,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerts-grouping@link:packages/kbn-alerts-grouping":
+"@kbn/grouping@link:packages/kbn-grouping":
   version "0.0.0"
   uid ""
 
