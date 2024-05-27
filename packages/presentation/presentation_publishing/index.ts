@@ -93,12 +93,7 @@ export {
   apiPublishesDisabledActionIds,
   type PublishesDisabledActionIds,
 } from './interfaces/publishes_disabled_action_ids';
-export {
-  apiPublishesFilter,
-  apiPublishesFilters,
-  type PublishesFilter,
-  type PublishesFilters,
-} from './interfaces/publishes_filters';
+export { apiPublishesFilters, type PublishesFilters } from './interfaces/publishes_filters';
 export {
   apiPublishesPhaseEvents,
   type PhaseEvent,

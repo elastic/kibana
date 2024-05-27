@@ -12,11 +12,10 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
 import { DefaultDataControlState } from '../data_controls/types';
-import { DefaultControlState } from '../types';
-import { ControlGroupRuntimeState, ControlGroupSerializedState } from './types';
+import { ControlGroupRuntimeState, ControlGroupSerializedState, ControlPanelState } from './types';
 
 export const deserializeControlGroup = <
-  ChildControlState extends DefaultControlState = DefaultControlState
+  ChildControlState extends ControlPanelState = ControlPanelState
 >(
   state: SerializedPanelState<ControlGroupSerializedState>
 ): ControlGroupRuntimeState<ChildControlState> => {
@@ -68,7 +67,7 @@ export const serializeControlGroup = (
 
   /** Re-add the `explicitInput` layer on serialize so control group saved object retains shape */
   const explicitInputPanels = Object.keys(panels).reduce((prev, panelId) => {
-    const currentPanel: DefaultControlState | DefaultControlState = panels[panelId];
+    const currentPanel: ControlPanelState = panels[panelId];
     const { grow, order, type, width, ...rest } = currentPanel;
 
     if (isDataControl(currentPanel)) {

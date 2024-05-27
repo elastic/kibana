@@ -7,7 +7,6 @@
  */
 
 import { ControlWidth } from '@kbn/controls-plugin/common';
-import { Filter } from '@kbn/es-query';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from './control_group/types';
@@ -32,16 +31,13 @@ export const initializeDefaultControlApi = (
   const blockingError = new BehaviorSubject<Error | undefined>(undefined);
   const grow = new BehaviorSubject<boolean | undefined>(state.grow);
   const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
-  const filters = new BehaviorSubject<Filter[] | undefined>(undefined); // TODO: Move this to data control
+  const order = new BehaviorSubject<number | undefined>(state.order);
 
   const defaultControlApi: ControlApi = {
     grow,
     width,
     dataLoading,
     blockingError,
-    filters$: filters,
-    setOutputFilter: (newFilter: Filter | undefined) =>
-      filters.next(newFilter ? [newFilter] : undefined),
     setBlockingError: (error) => blockingError.next(error),
     setDataLoading: (loading) => dataLoading.next(loading),
   };
@@ -49,11 +45,13 @@ export const initializeDefaultControlApi = (
   const defaultControlStateManager: ControlStateManager<DefaultControlState> = {
     grow,
     width,
+    order,
   };
 
   const defaultControlComparators: StateComparators<DefaultControlState> = {
     grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],
     width: [width, (newWidth: ControlWidth | undefined) => width.next(newWidth)],
+    order: [order, (newOrder: number | undefined) => order.next(newOrder)],
   };
 
   return {

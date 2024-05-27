@@ -7,9 +7,11 @@
  */
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
 import {
   HasEditCapabilities,
   PublishesDataViews,
+  PublishesFilters,
   PublishesPanelTitle,
 } from '@kbn/presentation-publishing';
 import {
@@ -20,9 +22,12 @@ import {
 } from '../types';
 
 export type DataControlApi = DefaultControlApi &
-  Pick<PublishesPanelTitle, 'panelTitle' | 'defaultPanelTitle'> & // does not need to be writable because control group does not have control - internally writable but not externally
+  Omit<PublishesPanelTitle, 'hidePanelTitle'> & // we cannot hide control titles
   HasEditCapabilities &
-  PublishesDataViews;
+  PublishesDataViews &
+  PublishesFilters & {
+    setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter
+  };
 
 export interface DataControlFactory<
   State extends DefaultDataControlState = DefaultDataControlState,

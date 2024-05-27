@@ -13,6 +13,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { StateComparators } from '@kbn/presentation-publishing';
 
+import { Filter } from '@kbn/es-query';
 import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiRegistration, ControlStateManager } from '../types';
@@ -41,6 +42,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   const dataViewId = new BehaviorSubject<string>(state.dataViewId);
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
+  const filters = new BehaviorSubject<Filter[] | undefined>(undefined);
 
   const dataControlComparators: StateComparators<DefaultDataControlState> = {
     ...defaultControlComparators,
@@ -92,6 +94,9 @@ export const initializeDataControl = <EditorState extends object = {}>(
     onEdit,
     isEditingEnabled: () => true,
     getTypeDisplayName: () => 'Test', // TODO
+    filters$: filters,
+    setOutputFilter: (newFilter: Filter | undefined) =>
+      filters.next(newFilter ? [newFilter] : undefined),
   };
 
   return {

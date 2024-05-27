@@ -35,18 +35,19 @@ import {
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { ControlRenderer } from '../control_renderer';
-import { DefaultControlApi, DefaultControlState } from '../types';
+import { DefaultControlApi } from '../types';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
 import { deserializeControlGroup, serializeControlGroup } from './serialization_utils';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
+  ControlPanelState,
   ControlsPanels,
 } from './types';
 
 export const getControlGroupEmbeddableFactory = <
-  ChildControlState extends DefaultControlState = DefaultControlState
+  ChildControlState extends ControlPanelState = ControlPanelState
 >(services: {
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
@@ -60,8 +61,8 @@ export const getControlGroupEmbeddableFactory = <
     deserializeState: (state) => deserializeControlGroup<ChildControlState>(state),
     buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const grow = new BehaviorSubject<boolean>(initialState.defaultControlGrow);
-      const width = new BehaviorSubject<ControlWidth>(initialState.defaultControlWidth);
+      const grow = new BehaviorSubject<boolean | undefined>(initialState.defaultControlGrow);
+      const width = new BehaviorSubject<ControlWidth | undefined>(initialState.defaultControlWidth);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);

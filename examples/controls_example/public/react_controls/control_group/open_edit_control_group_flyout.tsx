@@ -15,13 +15,13 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { ControlStateManager, DefaultControlState } from '../types';
+import { ControlStateManager } from '../types';
 import { ControlGroupEditor } from './control_group_editor';
 import { ControlGroupEditorStrings } from './control_group_editor_constants';
-import { ControlGroupApi, ControlGroupRuntimeState } from './types';
+import { ControlGroupApi, ControlGroupRuntimeState, ControlPanelState } from './types';
 
 export const openEditControlGroupFlyout = <
-  ChildStateType extends DefaultControlState = DefaultControlState
+  ChildStateType extends ControlPanelState = ControlPanelState
 >(
   controlGroupApi: ControlGroupApi,
   stateManager: ControlStateManager<ControlGroupRuntimeState<ChildStateType>>,

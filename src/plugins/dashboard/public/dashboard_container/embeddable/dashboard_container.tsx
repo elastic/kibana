@@ -15,6 +15,7 @@ import {
   apiPublishesPanelTitle,
   apiPublishesUnsavedChanges,
   getPanelTitle,
+  PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -96,6 +97,7 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
+import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -134,7 +136,9 @@ export class DashboardContainer
     TrackContentfulRender,
     HasSaveNotification,
     HasRuntimeChildState,
-    HasSerializedChildState
+    HasSerializedChildState,
+    PublishesSettings,
+    Partial<PublishesViewMode>
 {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 

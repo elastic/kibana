@@ -30,10 +30,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import {
-  useBatchedOptionalPublishingSubjects,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import {
   LazyDataViewPicker,
   LazyFieldPicker,
@@ -51,12 +48,12 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 import { ControlGroupApi } from '../control_group/types';
+import { ControlStateManager } from '../types';
 import {
   getControlTypeErrorMessage,
   getDataControlFieldRegistry,
 } from './data_control_editor_utils';
 import { DataControlFactory, DefaultDataControlState, isDataControlFactory } from './types';
-import { ControlStateManager } from '../types';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -83,20 +80,24 @@ export const DataControlEditor = ({
   /** TODO: These should not be props */
   services: { dataViews: dataViewService },
 }: ControlEditorProps) => {
-  const [lastUsedDataViewId, defaultGrow, defaultWidth] = useBatchedOptionalPublishingSubjects(
-    controlGroup.lastUsedDataViewId,
+  const [
+    selectedDataViewId,
+    selectedFieldName,
+    currentTitle,
+    selectedGrow,
+    selectedWidth,
+    defaultGrow,
+    defaultWidth,
+  ] = useBatchedPublishingSubjects(
+    stateManager.dataViewId,
+    stateManager.fieldName,
+    stateManager.title,
+    stateManager.grow,
+    stateManager.width,
     controlGroup.grow,
     controlGroup.width
+    // controlGroup.lastUsedDataViewId, // TODO: Implement last used data view id
   );
-
-  const [selectedDataViewId, selectedFieldName, currentTitle, selectedGrow, selectedWidth] =
-    useBatchedPublishingSubjects(
-      stateManager.dataViewId,
-      stateManager.fieldName,
-      stateManager.title,
-      stateManager.grow,
-      stateManager.width
-    );
 
   const [selectedFieldDisplayName, setSelectedFieldDisplayName] = useState(selectedFieldName);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
+import { BehaviorSubject } from 'rxjs';
+
 import { SerializedStyles } from '@emotion/react';
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
-import { Filter } from '@kbn/es-query';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasParentApi,
@@ -17,19 +18,17 @@ import {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDisabledActionIds,
-  PublishesFilters,
   PublishesPanelTitle,
-  PublishesTimeslice,
   PublishesUnsavedChanges,
   PublishingSubject,
   StateComparators,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+
 import { ControlGroupApi } from './control_group/types';
 
 export interface PublishesControlDisplaySettings {
-  grow: PublishingSubject<boolean>;
-  width: PublishingSubject<ControlWidth>;
+  grow: PublishingSubject<boolean | undefined>;
+  width: PublishingSubject<ControlWidth | undefined>;
 }
 
 export interface HasCustomPrepend {
@@ -40,25 +39,16 @@ export interface HasCustomPrepend {
 export type DefaultControlApi = PublishesDataLoading &
   PublishesBlockingError &
   PublishesUnsavedChanges &
-  Partial<
-    PublishesPanelTitle &
-      PublishesDisabledActionIds &
-      PublishesControlDisplaySettings &
-      HasCustomPrepend &
-      // can publish either filters or timeslice
-      PublishesFilters &
-      PublishesTimeslice
-  > &
+  PublishesControlDisplaySettings &
+  Partial<PublishesPanelTitle & PublishesDisabledActionIds & HasCustomPrepend> &
   HasType &
   HasUniqueId &
   HasParentApi<ControlGroupApi> & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
-    setOutputFilter: (filter: Filter | undefined) => void; // a control should only ever output a **single** filter
   };
 
 export interface DefaultControlState {
-  type: string;
   grow?: boolean;
   width?: ControlWidth;
   order?: number;
@@ -66,12 +56,8 @@ export interface DefaultControlState {
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
-  'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' // | 'grow' | 'width'
+  'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'
 >;
-
-// export type ControlStateRegistration<
-//   ControlState extends DefaultControlState = DefaultControlState
-// > = Omit<ControlState, 'grow' | 'width'>;
 
 export interface ControlFactory<
   State extends DefaultControlState = DefaultControlState,
@@ -80,8 +66,6 @@ export interface ControlFactory<
   type: string;
   getIconType: () => string;
   getDisplayName: () => string;
-  // getSupportedFieldTypes: () => string[];
-  // isFieldCompatible?: (field: DataViewField) => boolean;
   buildControl: (
     initialState: State,
     buildApi: (

@@ -144,6 +144,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                       controlTitle={panelTitle || defaultPanelTitle}
                     />{' '}
                     <EuiFormLabel
+                      className="eui-textTruncate"
                       // TODO: Convert this to a class
                       css={css`
                         background-color: transparent !important;

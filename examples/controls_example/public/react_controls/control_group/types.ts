@@ -10,6 +10,7 @@ import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_
 import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import { Filter } from '@kbn/es-query';
 import { HasSerializableState, PresentationContainer } from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
@@ -17,6 +18,7 @@ import {
   PublishesDataLoading,
   PublishesFilters,
   PublishesUnifiedSearch,
+  PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
@@ -34,24 +36,28 @@ export type ControlGroupApi<ChildStateType extends DefaultControlState = Default
   PresentationContainer &
     DefaultEmbeddableApi<ControlGroupSerializedState> &
     HasSerializableState &
-    // HasSerializedChildState<DefaultControlState> &
     PublishesFilters &
-    // PublishesSettings & // published so children can use it... Might be unnecessary?
     PublishesDataViews &
     HasEditCapabilities & // editing for control group settings - this will be a custom action
     PublishesDataLoading & // loading = true if any children loading
-    // PublishesUnsavedChanges<PersistableControlGroupInput> & // unsaved changes = diff published filters + combine all children unsaved changes
+    PublishesUnsavedChanges<
+      Omit<ControlGroupRuntimeState, 'panels' | 'defaultControlGrow' | 'defaultControlWidth'> & {
+        filters: Filter[] | undefined;
+      }
+    > &
     PublishesControlGroupDisplaySettings &
     Partial<HasParentApi<PublishesUnifiedSearch>> & {
       getChildState: (uuid: string) => ChildStateType;
     };
 
+export type ControlPanelState = DefaultControlState & { type: string };
+
 export interface ControlGroupRuntimeState<
-  ChildStateType extends DefaultControlState = DefaultControlState
+  ChildStateType extends ControlPanelState = ControlPanelState
 > {
   chainingSystem: ControlGroupChainingSystem;
-  defaultControlGrow: boolean;
-  defaultControlWidth: ControlWidth;
+  defaultControlGrow?: boolean;
+  defaultControlWidth?: ControlWidth;
   controlStyle: ControlStyle;
   panels: ControlsPanels<ChildStateType>;
   showApplySelections?: boolean;

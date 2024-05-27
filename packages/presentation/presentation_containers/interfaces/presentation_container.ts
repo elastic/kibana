@@ -6,24 +6,16 @@
  * Side Public License, v 1.
  */
 
-import {
-  apiHasParentApi,
-  apiHasUniqueId,
-  PublishesViewMode,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiHasUniqueId, PublishingSubject } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, isObservable, map, Observable, of, switchMap } from 'rxjs';
 import { apiCanAddNewPanel, CanAddNewPanel } from './can_add_new_panel';
-import { PublishesSettings } from './publishes_settings';
 
 export interface PanelPackage<SerializedState extends object = object> {
   panelType: string;
   initialState?: SerializedState;
 }
 
-export interface PresentationContainer
-  // extends Partial<PublishesViewMode & PublishesSettings>,
-  extends CanAddNewPanel {
+export interface PresentationContainer extends CanAddNewPanel {
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
   replacePanel: <SerializedState extends object = object>(
