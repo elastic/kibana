@@ -20,5 +20,10 @@
     "@kbn/test",
     "@kbn/expect",
     "@kbn/data-forge",
+    "@kbn/observability-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/share-plugin",
+    "@kbn/es-query",
+    "@kbn/utility-types",
   ]
 }
