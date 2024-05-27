@@ -13,7 +13,7 @@ import crypto from 'crypto';
 import {
   readConfigFile,
   EsVersion,
-} from '../../../../../packages/kbn-test/src/functional_test_runner/lib';
+} from '../../../packages/kbn-test/src/functional_test_runner/lib';
 import type {
   ProductType,
   ProjectHandler,
@@ -32,9 +32,10 @@ const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
 
 // Function to execute a command and return a Promise with the status code
-function executeCommand(command: string, envVars: any, workDir: string): Promise<number> {
+function executeCommand(command: string, envVars: any, workDir?: string): Promise<number> {
   return new Promise((resolve, reject) => {
-    const childProcess = exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
+    // const childProcess = exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
+    const childProcess = exec(command, { env: envVars }, (error, stdout, stderr) => {
       if (error) {
         console.error(`exec error: ${error}`);
         process.exitCode = error.code;
