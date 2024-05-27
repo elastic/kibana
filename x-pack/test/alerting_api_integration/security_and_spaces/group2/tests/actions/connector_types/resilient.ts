@@ -253,7 +253,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 service_message: `Sub action "non-supported" is not registered. Connector id: ${resilientActionId}. Connector name: IBM Resilient. Connector type: .resilient`,
-                errorSource: TaskErrorSource.USER,
+                errorSource: TaskErrorSource.FRAMEWORK,
               });
             });
         });
