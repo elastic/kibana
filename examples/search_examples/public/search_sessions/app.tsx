@@ -30,6 +30,7 @@ import { catchError, map, tap } from 'rxjs';
 import { lastValueFrom, of } from 'rxjs';
 
 import { CoreStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { TimeRange } from '@kbn/es-query';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -51,6 +52,9 @@ import { getInitialStateFromUrl, SEARCH_SESSIONS_EXAMPLES_APP_LOCATOR } from './
 
 interface SearchSessionsExampleAppDeps {
   notifications: CoreStart['notifications'];
+  analytics: CoreStart['analytics'];
+  i18n: CoreStart['i18n'];
+  theme: CoreStart['theme'];
   navigation: NavigationPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -80,10 +84,10 @@ interface State extends QueryState {
 }
 
 export const SearchSessionsExampleApp = ({
-  notifications,
   navigation,
   data,
   unifiedSearch,
+  ...startServices
 }: SearchSessionsExampleAppDeps) => {
   const { IndexPatternSelect } = unifiedSearch.ui;
 
@@ -196,7 +200,7 @@ export const SearchSessionsExampleApp = ({
       if (!numericFieldName) return;
       setIsSearching(true);
       const requestId = ++nextRequestIdRef.current;
-      doSearch({ dataView, numericFieldName, restoreSearchSessionId }, { data, notifications })
+      doSearch({ dataView, numericFieldName, restoreSearchSessionId }, { data, ...startServices })
         .then(({ response: res, request: req, tookMs: _tookMs }) => {
           if (requestId !== nextRequestIdRef.current) return; // no longer interested in this result
           if (restoreSearchSessionId) {
@@ -214,7 +218,7 @@ export const SearchSessionsExampleApp = ({
           setIsSearching(false);
         });
     },
-    [data, notifications, dataView, numericFieldName]
+    [data, dataView, numericFieldName, startServices]
   );
 
   useEffect(() => {
@@ -662,7 +666,14 @@ function doSearch(
   {
     data,
     notifications,
-  }: { data: DataPublicPluginStart; notifications: CoreStart['notifications'] }
+    ...startServices
+  }: {
+    data: DataPublicPluginStart;
+    notifications: CoreStart['notifications'];
+    analytics: CoreStart['analytics'];
+    i18n: CoreStart['i18n'];
+    theme: CoreStart['theme'];
+  }
 ): Promise<{ request: IEsSearchRequest; response: IEsSearchResponse; tookMs?: number }> {
   if (!dataView) return Promise.reject('Select a data view');
   if (!numericFieldName) return Promise.reject('Select a field to aggregate on');
@@ -712,12 +723,14 @@ function doSearch(
               res.rawResponse.aggregations[1]?.value ?? res.rawResponse.aggregations[2]?.value
             : undefined;
           const message = (
-            <EuiText>
-              Searched {res.rawResponse.hits.total} documents. <br />
-              The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
-              .
-              <br />
-            </EuiText>
+            <KibanaRenderContextProvider {...startServices}>
+              <EuiText>
+                Searched {res.rawResponse.hits.total} documents. <br />
+                The average of {numericFieldName} is {avgResult ? Math.floor(avgResult) : 0}
+                .
+                <br />
+              </EuiText>
+            </KibanaRenderContextProvider>
           );
           notifications.toasts.addSuccess({
             title: 'Query result',
