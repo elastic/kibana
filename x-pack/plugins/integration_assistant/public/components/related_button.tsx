@@ -17,6 +17,8 @@ interface RelatedButtonProps {
   ) => Promise<RelatedApiResponse | IHttpFetchError<unknown>>;
   rawSamples: any[];
   currentPipeline: any;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
   setCurrentPipeline: (pipeline: any) => void;
   setLastResponse: (response: any) => void;
   setResultDocs: (docs: any) => void;
@@ -26,13 +28,14 @@ export const RelatedButton = ({
   runRelatedGraph,
   rawSamples,
   currentPipeline,
+  currentStep,
+  setCurrentStep,
   setCurrentPipeline,
   setLastResponse,
   setResultDocs,
   isFetchError,
 }: RelatedButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
   async function onRelatedButtonClick() {
     setIsLoading(true);
     const request = {
@@ -53,7 +56,7 @@ export const RelatedButton = ({
           console.log('finished related graph without errors, but no results');
         }
         setIsLoading(false);
-        setIsDisabled(true);
+        setCurrentStep(3);
       }
     } catch (e) {
       setIsLoading(false);
@@ -62,8 +65,9 @@ export const RelatedButton = ({
   }
   return (
     <EuiButton
-      fill={!isDisabled}
-      isDisabled={isDisabled}
+      fill={currentStep === 2}
+      color={currentStep === 2 ? 'success' : 'primary'}
+      isDisabled={isLoading || currentStep !== 2}
       isLoading={isLoading}
       aria-label="related-button"
       onClick={onRelatedButtonClick}

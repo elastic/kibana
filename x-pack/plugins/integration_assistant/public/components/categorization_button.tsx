@@ -16,6 +16,8 @@ interface CategorizationButtonProps {
   ) => Promise<CategorizationApiResponse | IHttpFetchError<unknown>>;
   rawSamples: any[];
   currentPipeline: any;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
   setCurrentPipeline: (pipeline: any) => void;
   setLastResponse: (response: any) => void;
   setResultDocs: (docs: any) => void;
@@ -25,13 +27,14 @@ export const CategorizationButton = ({
   runCategorizationGraph,
   rawSamples,
   currentPipeline,
+  currentStep,
+  setCurrentStep,
   setCurrentPipeline,
   setLastResponse,
   setResultDocs,
   isFetchError,
 }: CategorizationButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
   async function onCategorizationButtonClick() {
     setIsLoading(true);
     const request = {
@@ -52,7 +55,7 @@ export const CategorizationButton = ({
           console.log('finished categorization graph without errors, but no results');
         }
         setIsLoading(false);
-        setIsDisabled(true);
+        setCurrentStep(2);
       }
     } catch (e) {
       setIsLoading(false);
@@ -61,8 +64,9 @@ export const CategorizationButton = ({
   }
   return (
     <EuiButton
-      fill={!isDisabled}
-      isDisabled={isDisabled}
+      fill={currentStep === 1}
+      color={currentStep === 1 ? 'success' : 'primary'}
+      isDisabled={isLoading || currentStep !== 1}
       isLoading={isLoading}
       aria-label="categorization-button"
       onClick={onCategorizationButtonClick}

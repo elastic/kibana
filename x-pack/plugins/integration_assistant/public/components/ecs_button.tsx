@@ -15,6 +15,8 @@ interface EcsButtonProps {
     req: EcsMappingApiRequest
   ) => Promise<EcsMappingApiResponse | IHttpFetchError<unknown>>;
   rawSamples: any[];
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
   setCurrentPipeline: (pipeline: any) => void;
   setLastResponse: (response: any) => void;
   isFetchError: (response: any) => boolean;
@@ -22,12 +24,13 @@ interface EcsButtonProps {
 export const EcsButton = ({
   runEcsGraph,
   rawSamples,
+  currentStep,
+  setCurrentStep,
   setCurrentPipeline,
   setLastResponse,
   isFetchError,
 }: EcsButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
   async function onEcsButtonClick() {
     setIsLoading(true);
     const request = {
@@ -46,7 +49,7 @@ export const EcsButton = ({
           console.log('finished running ecs graph without errors, but no results');
         }
         setIsLoading(false);
-        setIsDisabled(true);
+        setCurrentStep(1);
       }
     } catch (e) {
       setIsLoading(false);
@@ -55,8 +58,9 @@ export const EcsButton = ({
   }
   return (
     <EuiButton
-      fill={!isDisabled}
-      isDisabled={isDisabled}
+      fill={currentStep === 0}
+      color={currentStep === 0 ? 'success' : 'primary'}
+      isDisabled={isLoading || currentStep !== 0}
       isLoading={isLoading}
       aria-label="ecs-button"
       onClick={onEcsButtonClick}

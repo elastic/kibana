@@ -15,15 +15,16 @@ interface BuildIntegrationButtonProps {
     req: BuildIntegrationApiRequest
   ) => Promise<Buffer | IHttpFetchError<unknown>>;
   rawSamples: any[];
-  isFetchError: (response: any) => boolean;
+  currentStep: number;
+  setCurrentStep: (step: number) => void;
 }
 export const BuildIntegrationButton = ({
   runIntegrationBuilder,
   rawSamples,
-  isFetchError,
+  currentStep,
+  setCurrentStep,
 }: BuildIntegrationButtonProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [isDisabled, setIsDisabled] = useState(false);
   const testdocs = [
     {
       ecs: {
@@ -93,6 +94,7 @@ export const BuildIntegrationButton = ({
     ],
   };
   async function onBuildIntegrationButtonClick() {
+    setIsLoading(true);
     const request = {
       integration: {
         name: 'teleport',
@@ -128,17 +130,28 @@ export const BuildIntegrationButton = ({
     } as BuildIntegrationApiRequest;
     try {
       const builIntegrationResponse = await runIntegrationBuilder(request);
-      if (!isFetchError(builIntegrationResponse)) {
-        console.log('finished building integration successfully');
-      }
+      const blob = new Blob([builIntegrationResponse]);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      document.body.appendChild(a);
+      a.style = 'display: none';
+      a.target = '_self';
+      a.href = url;
+      a.download = 'integration.zip';
+      a.click();
+      window.URL.revokeObjectURL(url);
+      setIsLoading(false);
+      setCurrentStep(4);
     } catch (e) {
+      setIsLoading(false);
       console.log(e);
     }
   }
   return (
     <EuiButton
-      fill={!isDisabled}
-      isDisabled={isDisabled}
+      fill={currentStep === 3}
+      color={currentStep === 3 ? 'success' : 'primary'}
+      isDisabled={isLoading || currentStep !== 3}
       isLoading={isLoading}
       aria-label="build-integration-button"
       onClick={onBuildIntegrationButtonClick}
