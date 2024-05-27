@@ -2090,6 +2090,180 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.useSearchApi",
+        "type": "Function",
+        "tags": [],
+        "label": "useSearchApi",
+        "description": [
+          "\nReact hook that converts search props into search observable API"
+        ],
+        "signature": [
+          "({\n  filters,\n  query,\n  timeRange,\n}: { filters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined; query?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; }) => { filters$: ",
+          "BehaviorSubject",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[] | undefined>; query$: ",
+          "BehaviorSubject",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined>; timeRange$: ",
+          "BehaviorSubject",
+          "<",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined>; }"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.useSearchApi.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  filters,\n  query,\n  timeRange,\n}",
+            "description": [],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.useSearchApi.$1.filters",
+                "type": "Array",
+                "tags": [],
+                "label": "filters",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Filter",
+                    "text": "Filter"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.useSearchApi.$1.query",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.Query",
+                    "text": "Query"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.AggregateQuery",
+                    "text": "AggregateQuery"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/presentation-publishing",
+                "id": "def-common.useSearchApi.$1.timeRange",
+                "type": "Object",
+                "tags": [],
+                "label": "timeRange",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/es-query",
+                    "scope": "common",
+                    "docId": "kibKbnEsQueryPluginApi",
+                    "section": "def-common.TimeRange",
+                    "text": "TimeRange"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/presentation/presentation_publishing/interfaces/fetch/publishes_unified_search.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.useStateFromPublishingSubject",
         "type": "Function",
         "tags": [],

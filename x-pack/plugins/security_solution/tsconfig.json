@@ -105,7 +105,6 @@
     "@kbn/react-field",
     "@kbn/field-types",
     "@kbn/securitysolution-rules",
-    "@kbn/core-mount-utils-browser-internal",
     "@kbn/cases-components",
     "@kbn/event-log-plugin",
     "@kbn/task-manager-plugin",
@@ -201,6 +200,11 @@
     "@kbn/deeplinks-security",
     "@kbn/react-kibana-context-render",
     "@kbn/search-types",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/langchain",
+    "@kbn/core-analytics-browser",
+    "@kbn/core-i18n-browser",
+    "@kbn/core-theme-browser"
   ]
 }

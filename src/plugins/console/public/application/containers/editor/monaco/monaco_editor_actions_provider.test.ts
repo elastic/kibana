@@ -69,6 +69,7 @@ describe('Editor actions provider', () => {
       getPosition: jest.fn(),
       getTopForLineNumber: jest.fn(),
       getScrollTop: jest.fn(),
+      executeEdits: jest.fn(),
       setPosition: jest.fn(),
     } as unknown as jest.Mocked<monaco.editor.IStandaloneCodeEditor>;
 
@@ -399,6 +400,162 @@ describe('Editor actions provider', () => {
         expect(editor.setPosition).toHaveBeenCalledTimes(1);
         expect(editor.setPosition).toHaveBeenCalledWith({ lineNumber: 7, column: 1 });
       });
+    });
+  });
+
+  describe('restoreRequestFromHistory', () => {
+    const testHistoryRequest = 'GET _alias';
+    beforeEach(() => {
+      /*
+       * The editor has the text
+       * "POST _search" on line 1
+       * { "test": "test" } on lines 2-4
+       *  and "GET _analyze" on line 5
+       */
+      mockGetParsedRequests.mockReturnValue([
+        {
+          startOffset: 0,
+          method: 'POST',
+          url: '_search',
+          endOffset: 35,
+          data: [
+            {
+              test: 'test',
+            },
+          ],
+        },
+        {
+          startOffset: 36,
+          method: 'GET',
+          url: '_analyze',
+          endOffset: 48,
+        },
+      ]);
+
+      editor.getModel.mockReturnValue({
+        getLineMaxColumn: (lineNumber: number) => {
+          // mock this function for line 4
+          return 2;
+        },
+        getPositionAt: (offset: number) => {
+          // mock this function for start offsets of the mocked requests
+          if (offset === 0) {
+            return { lineNumber: 1, column: 1 };
+          }
+          if (offset === 36) {
+            return { lineNumber: 5, column: 1 };
+          }
+          // mock this function for end offsets of the mocked requests
+          if (offset === 35) {
+            return { lineNumber: 4, column: 2 };
+          }
+          if (offset === 48) {
+            return { lineNumber: 5, column: 13 };
+          }
+        },
+        getLineContent: (lineNumber: number) => {
+          // mock this functions for line 1 and line 2
+          if (lineNumber === 1) {
+            return 'POST _search';
+          }
+          if (lineNumber === 2) {
+            return '{';
+          }
+          if (lineNumber === 3) {
+            return '  "test": "test"';
+          }
+          if (lineNumber === 4) {
+            return '}';
+          }
+          if (lineNumber === 5) {
+            return 'GET _analyze';
+          }
+        },
+      } as unknown as monaco.editor.ITextModel);
+    });
+
+    it('insert the request at the beginning of the selected request', async () => {
+      // the position of the cursor is in the middle of line 5
+      editor.getPosition.mockReturnValue({
+        lineNumber: 5,
+        column: 4,
+      } as monaco.Position);
+      editor.getSelection.mockReturnValue({
+        startLineNumber: 5,
+        endLineNumber: 5,
+      } as monaco.Selection);
+
+      await editorActionsProvider.restoreRequestFromHistory(testHistoryRequest);
+      const expectedRange = {
+        startLineNumber: 5,
+        startColumn: 1,
+        endLineNumber: 5,
+        endColumn: 1,
+      };
+      const expectedText = testHistoryRequest + '\n';
+      const expectedEdit = {
+        range: expectedRange,
+        text: expectedText,
+        forceMoveMarkers: true,
+      };
+      expect(editor.executeEdits).toHaveBeenCalledTimes(1);
+      expect(editor.executeEdits).toHaveBeenCalledWith('restoreFromHistory', [expectedEdit]);
+    });
+
+    it('insert the request at the end of the selected request', async () => {
+      // the position of the cursor is at the end of line 4
+      editor.getPosition.mockReturnValue({
+        lineNumber: 4,
+        column: 2,
+      } as monaco.Position);
+      editor.getSelection.mockReturnValue({
+        startLineNumber: 4,
+        endLineNumber: 4,
+      } as monaco.Selection);
+      await editorActionsProvider.restoreRequestFromHistory(testHistoryRequest);
+      const expectedRange = {
+        startLineNumber: 4,
+        startColumn: 2,
+        endLineNumber: 4,
+        endColumn: 2,
+      };
+      const expectedText = '\n' + testHistoryRequest;
+      const expectedEdit = {
+        range: expectedRange,
+        text: expectedText,
+        forceMoveMarkers: true,
+      };
+      expect(editor.executeEdits).toHaveBeenCalledTimes(1);
+      expect(editor.executeEdits).toHaveBeenCalledWith('restoreFromHistory', [expectedEdit]);
+    });
+
+    it('insert at the beginning of the line, if no selected request', async () => {
+      // mock no parsed requests
+      mockGetParsedRequests.mockReturnValue([]);
+      // the position of the cursor is at the end of line 4
+      editor.getPosition.mockReturnValue({
+        lineNumber: 4,
+        column: 2,
+      } as monaco.Position);
+      editor.getSelection.mockReturnValue({
+        startLineNumber: 4,
+        endLineNumber: 4,
+      } as monaco.Selection);
+      await editorActionsProvider.restoreRequestFromHistory(testHistoryRequest);
+      const expectedRange = {
+        startLineNumber: 4,
+        startColumn: 1,
+        endLineNumber: 4,
+        endColumn: 1,
+      };
+      const expectedText = testHistoryRequest + '\n';
+      const expectedEdit = {
+        range: expectedRange,
+        text: expectedText,
+        forceMoveMarkers: true,
+      };
+      expect(editor.executeEdits).toHaveBeenCalledTimes(1);
+      expect(editor.executeEdits).toHaveBeenCalledWith('restoreFromHistory', [expectedEdit]);
     });
   });
 });
