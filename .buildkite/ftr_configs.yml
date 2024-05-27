@@ -466,6 +466,7 @@ enabled:
   - x-pack/performance/journeys_e2e/login.ts
   - x-pack/performance/journeys_e2e/many_fields_discover.ts
   - x-pack/performance/journeys_e2e/many_fields_lens_editor.ts
+  - - x-pack/performance/journeys_e2e/many_fields_lens_editor_multi_step.ts
   - x-pack/performance/journeys_e2e/many_fields_transform.ts
   - x-pack/performance/journeys_e2e/tsdb_logs_data_visualizer.ts
   - x-pack/performance/journeys_e2e/promotion_tracking_dashboard.ts
