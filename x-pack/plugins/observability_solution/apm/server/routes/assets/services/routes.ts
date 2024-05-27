@@ -16,7 +16,7 @@ import {
   serviceTransactionDataSourceRt,
 } from '../../default_api_types';
 import { getServiceAssets } from './get_service_assets';
-import { AssetServicesResponse } from './types';
+import { EntityServicesResponse } from '../../../../common/assets/types';
 
 const servicesAssetsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/assets/services',
@@ -30,7 +30,7 @@ const servicesAssetsRoute = createApmServerRoute({
     ]),
   }),
   options: { tags: ['access:apm'] },
-  async handler(resources): Promise<AssetServicesResponse> {
+  async handler(resources): Promise<EntityServicesResponse> {
     const { context, params, request, plugins } = resources;
     const [coreContext, apmEventClient, logsDataAccessStart] = await Promise.all([
       context.core,

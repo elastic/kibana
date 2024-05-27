@@ -20,12 +20,12 @@ interface ServiceItem {
 
 type SignalTypes = Record<SignalType, boolean | undefined>;
 
-interface AssetItem {
+interface EntityItem {
   signalTypes: SignalTypes;
   identifyingMetadata: string[];
 }
 
-export interface ServiceAssetDocument {
+export interface ServiceEntityDocument {
   asset: {
     signalTypes: SignalTypes;
     identifying_metadata: string[];
@@ -33,12 +33,12 @@ export interface ServiceAssetDocument {
   service: ServiceItem;
 }
 
-export interface AssetServiceListItem {
-  asset: AssetItem;
+export interface EntityServiceListItem {
+  asset: EntityItem;
   service: ServiceItem;
   metrics: TraceMetrics & LogsRatesMetrics;
 }
 
-export interface AssetServicesResponse {
-  services: Array<AssetServiceListItem>;
+export interface EntityServicesResponse {
+  services: Array<EntityServiceListItem>;
 }

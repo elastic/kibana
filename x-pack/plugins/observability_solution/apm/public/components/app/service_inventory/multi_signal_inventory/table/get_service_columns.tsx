@@ -16,7 +16,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { AssetServiceListItem } from '../../../../../../common/assets/types';
+import { EntityServiceListItem } from '../../../../../../common/assets/types';
 import {
   asMillisecondDuration,
   asPercent,
@@ -49,7 +49,7 @@ export function getServiceColumns({
   query: TypeOf<ApmRoutes, '/services'>['query'];
   breakpoints: Breakpoints;
   link: any;
-}): Array<ITableColumn<AssetServiceListItem>> {
+}): Array<ITableColumn<EntityServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
 
   return [
