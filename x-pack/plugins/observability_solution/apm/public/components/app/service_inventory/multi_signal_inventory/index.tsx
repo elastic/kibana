@@ -54,7 +54,7 @@ function useServicesMainStatisticsFetcher() {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (preferred) {
-        return callApmApi('GET /internal/apm/assets/services', {
+        return callApmApi('GET /internal/apm/entities/services', {
           params: {
             query: {
               environment,

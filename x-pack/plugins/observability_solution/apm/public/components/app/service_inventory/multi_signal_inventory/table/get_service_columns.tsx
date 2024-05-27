@@ -32,7 +32,7 @@ import { ListMetric } from '../../../../shared/list_metric';
 import { ITableColumn, ManagedTable, SortFunction } from '../../../../shared/managed_table';
 
 export enum ServiceInventoryFieldName {
-  ServiceName = 'service.name',
+  ServiceName = 'identity.service.name',
   ServiceEnvironment = 'service.environment',
   Throughput = 'metrics.throughput',
   Latency = 'metrics.latency',
@@ -59,7 +59,13 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { service }) => <ServiceLink query={{ ...query }} serviceName={service.name} />,
+      render: (_, { entity, agent }) => (
+        <ServiceLink
+          query={{ ...query }}
+          agentName={agent.name[0]} // data transform returns agent name as arr
+          serviceName={entity.identity.service.name}
+        />
+      ),
     },
     {
       field: ServiceInventoryFieldName.ServiceEnvironment,
@@ -69,8 +75,12 @@ export function getServiceColumns({
       sortable: true,
       width: `${unit * 9}px`,
       dataType: 'number',
-      render: (_, { service }) => (
-        <EnvironmentBadge environments={service.environment ? [service.environment] : []} />
+      render: (_, { entity }) => (
+        <EnvironmentBadge
+          environments={
+            entity.identity.service.environment ? [entity.identity.service.environment] : []
+          }
+        />
       ),
       align: RIGHT_ALIGNMENT,
     },
@@ -82,12 +92,12 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { entity: { metric } }) => {
         return (
           <ListMetric
             isLoading={false}
             hideSeries={true}
-            valueLabel={asMillisecondDuration(metrics.latency)}
+            valueLabel={asMillisecondDuration(metric.latency)}
           />
         );
       },
@@ -100,12 +110,12 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { entity: { metric } }) => {
         return (
           <ListMetric
             isLoading={false}
             hideSeries={true}
-            valueLabel={asTransactionRate(metrics.throughput)}
+            valueLabel={asTransactionRate(metric.throughput)}
           />
         );
       },
@@ -118,12 +128,12 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { entity: { metric } }) => {
         return (
           <ListMetric
             isLoading={false}
             hideSeries={true}
-            valueLabel={asPercent(metrics.transactionErrorRate, 1)}
+            valueLabel={asPercent(metric.failedTransactionRate, 1)}
           />
         );
       },
@@ -136,9 +146,9 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { entity: { metric } }) => {
         return (
-          <ListMetric isLoading={false} hideSeries={true} valueLabel={metrics.logRatePerMinute} />
+          <ListMetric isLoading={false} hideSeries={true} valueLabel={metric.logRatePerMinute} />
         );
       },
     },
@@ -150,12 +160,12 @@ export function getServiceColumns({
       sortable: true,
       dataType: 'number',
       align: RIGHT_ALIGNMENT,
-      render: (_, { metrics }) => {
+      render: (_, { entity: { metric } }) => {
         return (
           <ListMetric
             isLoading={false}
             hideSeries={true}
-            valueLabel={asPercent(metrics.logErrorRate, 1)}
+            valueLabel={asPercent(metric.logErrorRate, 1)}
           />
         );
       },
