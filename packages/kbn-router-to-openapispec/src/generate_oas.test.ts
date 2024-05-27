@@ -121,6 +121,83 @@ describe('generateOpenApiDocument', () => {
         )
       ).toMatchSnapshot();
     });
+
+    describe('tags', () => {
+      it('extracts tags when present', () => {
+        expect(
+          generateOpenApiDocument(
+            {
+              routers: [
+                createRouter({
+                  routes: [
+                    {
+                      isVersioned: false,
+                      path: '/recursive',
+                      method: 'get',
+                      validationSchemas: {
+                        request: {},
+                        response: {
+                          [200]: {
+                            body: () => schema.string({ maxLength: 10, minLength: 1 }),
+                          },
+                        },
+                      },
+                      options: {
+                        tags: ['oas-tag:1', 'oas-tag:2', 'foo'],
+                      },
+                      handler: jest.fn(),
+                    },
+                  ],
+                }),
+              ],
+              versionedRouters: [],
+            },
+            {
+              title: 'test',
+              baseUrl: 'https://test.oas',
+              version: '99.99.99',
+            }
+          )
+        ).toMatchSnapshot();
+      });
+      it('handles when tags are not present', () => {
+        expect(
+          generateOpenApiDocument(
+            {
+              routers: [
+                createRouter({
+                  routes: [
+                    {
+                      isVersioned: false,
+                      path: '/recursive',
+                      method: 'get',
+                      validationSchemas: {
+                        request: {},
+                        response: {
+                          [200]: {
+                            body: () => schema.string({ maxLength: 10, minLength: 1 }),
+                          },
+                        },
+                      },
+                      options: {
+                        /* Empty options */
+                      },
+                      handler: jest.fn(),
+                    },
+                  ],
+                }),
+              ],
+              versionedRouters: [],
+            },
+            {
+              title: 'test',
+              baseUrl: 'https://test.oas',
+              version: '99.99.99',
+            }
+          )
+        ).toMatchSnapshot();
+      });
+    });
   });
 
   describe('unknown schema/validation', () => {
