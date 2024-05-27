@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -49,9 +49,10 @@ export const useDiscoverTopNav = ({
     stateContainer,
   });
 
-  const baseGetTopNavMenu = useCallback(
-    () =>
-      getTopNavLinks({
+  const getTopNavMenuAccessor = useProfileAccessor('getTopNavItems');
+  const topNavMenu = useMemo(() => {
+    const getTopNavMenu = getTopNavMenuAccessor(() => {
+      return getTopNavLinks({
         dataView,
         services,
         state: stateContainer,
@@ -59,20 +60,20 @@ export const useDiscoverTopNav = ({
         isEsqlMode,
         adHocDataViews,
         topNavCustomization,
-      }),
-    [
-      adHocDataViews,
-      dataView,
-      isEsqlMode,
-      onOpenInspector,
-      services,
-      stateContainer,
-      topNavCustomization,
-    ]
-  );
+      });
+    });
 
-  const getTopNavMenu = useProfileAccessor('getTopNavItems', baseGetTopNavMenu);
-  const topNavMenu = useMemo(() => getTopNavMenu(), [getTopNavMenu]);
+    return getTopNavMenu();
+  }, [
+    adHocDataViews,
+    dataView,
+    getTopNavMenuAccessor,
+    isEsqlMode,
+    onOpenInspector,
+    services,
+    stateContainer,
+    topNavCustomization,
+  ]);
 
   return {
     topNavMenu,
