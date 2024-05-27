@@ -3131,10 +3131,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/grouping@link:packages/kbn-grouping":
-  version "0.0.0"
-  uid ""
-
 "@kbn/alerts-restricted-fixtures-plugin@link:x-pack/test/alerting_api_integration/common/plugins/alerts_restricted":
   version "0.0.0"
   uid ""
@@ -4904,6 +4900,10 @@
   uid ""
 
 "@kbn/grokdebugger-plugin@link:x-pack/plugins/grokdebugger":
+  version "0.0.0"
+  uid ""
+
+"@kbn/grouping@link:packages/kbn-grouping":
   version "0.0.0"
   uid ""
 
