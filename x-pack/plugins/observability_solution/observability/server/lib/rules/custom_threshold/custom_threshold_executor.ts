@@ -17,7 +17,6 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import { convertToBuiltInComparators } from '../../../../common/utils/convert_legacy_outside_comparator';
 import { Group } from '../../../../common/custom_threshold_rule/types';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { AlertsLocatorParams, getAlertDetailsUrl } from '../../../../common';
@@ -88,11 +87,7 @@ export const createCustomThresholdExecutor = ({
     } = options;
 
     const { criteria } = params;
-    criteria.forEach((criteriaItem) => {
-      // For backwards-compatibility check if the rule had the legacy OUTSIDE_RANGE inside its params.
-      // Then, change it on-the-fly to NOT_BETWEEN
-      criteriaItem.comparator = convertToBuiltInComparators(criteriaItem.comparator);
-    });
+
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const thresholdLogger = createScopedLogger(logger, 'thresholdRule', {
       alertId: ruleId,

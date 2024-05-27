@@ -25,7 +25,7 @@ import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
-import { AlertStates, MetricExpressionParams } from '../../../../common/alerting/metrics';
+import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -123,17 +123,6 @@ export const createMetricThresholdExecutor =
     } = options;
 
     const { criteria } = params;
-    criteria.forEach((criteriaItem: MetricExpressionParams) => {
-      // For backwards-compatibility check if the rule had the legacy OUTSIDE_RANGE inside its params.
-      // Then, change it on-the-fly to NOT_BETWEEN
-      criteriaItem.comparator = convertToBuiltInComparators(criteriaItem.comparator);
-      if (criteriaItem.warningComparator) {
-        criteriaItem.warningComparator = convertToBuiltInComparators(
-          criteriaItem.warningComparator
-        );
-      }
-    });
-
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
     const logger = createScopedLogger(libs.logger, 'metricThresholdRule', {
