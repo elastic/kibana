@@ -8,13 +8,13 @@
 import { i18n } from '@kbn/i18n';
 
 export const FIELDS_MAX_LENGTH_ERROR = (length: number, fieldName: string) =>
-  i18n.translate('xpack.stackConnectors.jira.schema.otherFieldsLengthError', {
+  i18n.translate('xpack.stackConnectors.schema.otherFieldsLengthError', {
     values: { length, fieldName },
     defaultMessage: 'A maximum of {length} fields in {fieldName} can be defined at a time.',
   });
 
 export const FIELDS_KEY_NOT_ALLOWED_ERROR = (properties: string, fieldName: string) =>
-  i18n.translate('xpack.stackConnectors.jira.schema.otherFieldsPropertyError', {
+  i18n.translate('xpack.stackConnectors.schema.otherFieldsPropertyError', {
     values: { properties, fieldName },
     defaultMessage: 'The following properties cannot be defined inside {fieldName}: {properties}.',
   });
