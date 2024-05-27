@@ -6,7 +6,7 @@
  */
 import { load } from 'js-yaml';
 import { Environment, FileSystemLoader } from 'nunjucks';
-import { join } from 'path';
+import { join as joinPath } from 'path';
 import { ECS_TYPES } from './constants';
 import { EcsMappingState } from '../../types';
 
@@ -156,7 +156,6 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
   const processors = generateProcessors(state.currentMapping, samples);
   // Retrieve all source field names from convert processors to populate single remove processor:
   const fieldsToRemove = processors.filter((p: any) => p.convert).map((p: any) => p.convert.field);
-  const templatesPath = join(__dirname, '../../templates/pipeline');
   const mappedValues = {
     processors,
     ecs_version: state.ecsVersion,
@@ -166,6 +165,7 @@ export function createPipeline(state: EcsMappingState): IngestPipeline {
     fields_to_remove: fieldsToRemove,
   };
   try {
+    const templatesPath = joinPath(__dirname, '../../templates');
     const env = new Environment(new FileSystemLoader(templatesPath), {
       autoescape: false,
     });

@@ -22,7 +22,6 @@ export function registerIntegrationBuilderRoutes(router: IRouter) {
             name: schema.string(),
             title: schema.string(),
             description: schema.string(),
-            version: schema.string(),
             dataStreams: schema.arrayOf(
               schema.object({
                 name: schema.string(),

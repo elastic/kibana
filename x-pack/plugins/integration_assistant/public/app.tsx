@@ -41,6 +41,7 @@ function RoutingExplorer({
     return 'message' in response;
   };
 
+  // TODO: This is just a temp test UI. It will be removed once the actual UI is implemented
   return (
     <EuiPageTemplate>
       <EuiPageTemplate.Header>

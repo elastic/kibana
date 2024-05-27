@@ -106,7 +106,6 @@ async function createReadme(packageDir: string, integration: Integration) {
 
 async function createZipArchive(tmpPackageDir: string): Promise<Buffer> {
   const zip = new AdmZip();
-  console.log('Zipping package', tmpPackageDir);
   zip.addLocalFolder(tmpPackageDir);
   return zip.toBuffer();
 }

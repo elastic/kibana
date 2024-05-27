@@ -34,7 +34,7 @@ async function createBaseFields(
     dataset: datasetName,
   });
 
-  await asyncCreate(`${specificDataStreamDir}/fields/base-fields.yml`, baseFields);
+  await asyncCreate(`${specificDataStreamDir}/base-fields.yml`, baseFields);
 }
 
 async function createCustomFields(
