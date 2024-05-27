@@ -269,7 +269,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subAction]: expected value to equal [pushToService]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -315,7 +315,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -344,7 +344,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -372,7 +372,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.comments]: types that failed validation:\n- [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [subActionParams.comments.1]: expected value to equal [null]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
