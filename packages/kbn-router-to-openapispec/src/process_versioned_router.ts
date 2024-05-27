@@ -19,9 +19,10 @@ import {
   prepareRoutes,
   getPathParameters,
   extractContentType,
-  assignToPathsObject,
+  assignToPaths,
   getVersionedHeaderParam,
   getVersionedContentTypeString,
+  extractTags,
 } from './util';
 
 export const processVersionedRouter = (
@@ -31,7 +32,7 @@ export const processVersionedRouter = (
   pathStartsWith?: string
 ) => {
   const routes = prepareRoutes(appRouter.getRoutes(), pathStartsWith);
-  const paths: OpenAPIV3.PathsObject = {};
+  const paths = new Map<string, OpenAPIV3.PathItemObject>();
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);
     /**
@@ -67,28 +68,30 @@ export const processVersionedRouter = (
       const hasBody = Boolean(
         handler && extractValidationSchemaFromVersionedHandler(handler)?.request?.body
       );
+      const operation: OpenAPIV3.OperationObject = {
+        summary: route.options.description ?? '',
+        tags: route.options.options?.tags ? extractTags(route.options.options.tags) : [],
+        requestBody: hasBody
+          ? {
+              content: extractVersionedRequestBody(route, converter),
+            }
+          : undefined,
+        responses: extractVersionedResponses(route, converter),
+        parameters,
+        operationId: getOpId(route.path),
+      };
       const path: OpenAPIV3.PathItemObject = {
-        [route.method]: {
-          summary: route.options.description ?? '',
-          requestBody: hasBody
-            ? {
-                content: extractVersionedRequestBody(route, converter),
-              }
-            : undefined,
-          responses: extractVersionedResponses(route, converter),
-          parameters,
-          operationId: getOpId(route.path),
-        },
+        [route.method]: operation,
       };
 
-      assignToPathsObject(paths, route.path, path);
+      assignToPaths(paths, route.path, path);
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}' using newest version '${newestVersion}': ${e.message}`;
       throw e;
     }
   }
-  return { paths };
+  return { paths: Object.fromEntries(paths.entries()) };
 };
 
 export const extractVersionedRequestBody = (
