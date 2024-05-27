@@ -12,20 +12,19 @@ import type { Observable } from 'rxjs';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { throttle } from 'lodash';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import useObservable from 'react-use/lib/useObservable';
 import {
   type MlEntityField,
   type MlEntityFieldOperation,
   ML_ANOMALY_THRESHOLD,
 } from '@kbn/ml-anomaly-utils';
 import { TimeBuckets } from '@kbn/ml-time-buckets';
-import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
-import { useAnomalyChartsInputResolver } from './use_anomaly_charts_input_resolver';
-import type { IAnomalyChartsEmbeddable } from './anomaly_charts_embeddable';
+import useObservable from 'react-use/lib/useObservable';
+import type { TimeRange } from '@kbn/es-query';
 import type {
-  AnomalyChartsEmbeddableInput,
-  AnomalyChartsEmbeddableOutput,
+  AnomalyChartsEmbeddableOverridableState,
   AnomalyChartsEmbeddableServices,
+  AnomalyChartsApi,
+  AnomalyChartsAttachmentApi,
 } from '..';
 
 import { ExplorerAnomaliesContainer } from '../../application/explorer/explorer_charts/explorer_anomalies_container';
@@ -33,52 +32,43 @@ import { ML_APP_LOCATOR } from '../../../common/constants/locator';
 import { optionValueToThreshold } from '../../application/components/controls/select_severity/select_severity';
 import { EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER } from '../../ui_actions/triggers';
 import type { MlLocatorParams } from '../../../common/types/locator';
-import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '..';
+import { useAnomalyChartsData } from './use_anomaly_charts_data';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
 
-export interface EmbeddableAnomalyChartsContainerProps {
+export interface AnomalyChartsContainerProps
+  extends Partial<AnomalyChartsEmbeddableOverridableState> {
+  lastReloadRequestTime?: number;
+  api: AnomalyChartsApi | AnomalyChartsAttachmentApi;
   id: string;
-  embeddableContext: InstanceType<IAnomalyChartsEmbeddable>;
-  embeddableInput: Observable<AnomalyChartsEmbeddableInput>;
   services: AnomalyChartsEmbeddableServices;
-  refresh: Observable<any>;
-  onInputChange: (input: Partial<AnomalyChartsEmbeddableInput>) => void;
-  onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
+  timeRange$: Observable<TimeRange | undefined>;
   onRenderComplete: () => void;
-  onLoading: () => void;
+  onLoading: (v: boolean) => void;
   onError: (error: Error) => void;
 }
 
-export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContainerProps> = ({
+const AnomalyChartsContainer: FC<AnomalyChartsContainerProps> = ({
   id,
-  embeddableContext,
-  embeddableInput,
+  timeRange$,
+  severityThreshold,
   services,
-  refresh,
-  onInputChange,
-  onOutputChange,
   onRenderComplete,
   onError,
   onLoading,
+  api,
 }) => {
-  useEmbeddableExecutionContext<AnomalyChartsEmbeddableInput>(
-    services[0].executionContext,
-    embeddableInput,
-    ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
-    id
-  );
-
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [severity, setSeverity] = useState(
     optionValueToThreshold(
-      embeddableContext.getInput().severityThreshold ?? ML_ANOMALY_THRESHOLD.WARNING
+      severityThreshold !== undefined ? severityThreshold : ML_ANOMALY_THRESHOLD.WARNING
     )
   );
   const [selectedEntities, setSelectedEntities] = useState<MlEntityField[] | undefined>();
   const [{ uiSettings }, { data: dataServices, share, uiActions, charts: chartsService }] =
     services;
   const { timefilter } = dataServices.query.timefilter;
+  const timeRange = useObservable(timeRange$);
 
   const mlLocator = useMemo(
     () => share.url.locators.get<MlLocatorParams>(ML_APP_LOCATOR)!,
@@ -95,32 +85,28 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const input = useObservable(embeddableInput);
+  useEffect(() => {
+    if (api?.updateSeverityThreshold) {
+      api.updateSeverityThreshold(severity.val);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [severity.val, api?.updateSeverityThreshold]);
 
   useEffect(() => {
-    onInputChange({
-      severityThreshold: severity.val,
-    });
-    onOutputChange({
-      severity: severity.val,
-      entityFields: selectedEntities,
-    });
+    if (api?.updateSelectedEntities) {
+      api.updateSelectedEntities(selectedEntities);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [severity, selectedEntities]);
+  }, [selectedEntities, api?.updateSelectedEntities]);
 
+  const renderCallbacks = useMemo(() => {
+    return { onRenderComplete, onError, onLoading };
+  }, [onRenderComplete, onError, onLoading]);
   const {
     chartsData,
     isLoading: isExplorerLoading,
     error,
-  } = useAnomalyChartsInputResolver(
-    embeddableInput,
-    onInputChange,
-    refresh,
-    services,
-    chartWidth,
-    severity.val,
-    { onRenderComplete, onError, onLoading }
-  );
+  } = useAnomalyChartsData(api, services, chartWidth, severity.val, renderCallbacks);
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -176,7 +162,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
     const uniqueSelectedEntities = [entity];
     setSelectedEntities(uniqueSelectedEntities);
     uiActions.getTrigger(EXPLORER_ENTITY_FIELD_SELECTION_TRIGGER).exec({
-      embeddable: embeddableContext,
+      embeddable: api,
       data: uniqueSelectedEntities,
     });
   };
@@ -193,7 +179,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
             padding: '8px',
             height: containerHeight,
           }}
-          data-test-subj={`mlExplorerEmbeddable_${embeddableContext.id}`}
+          data-test-subj={`mlExplorerEmbeddable_${id}`}
           ref={resizeRef}
         >
           {isExplorerLoading && (
@@ -213,7 +199,7 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               />
             </EuiText>
           )}
-          {chartsData !== undefined && isExplorerLoading === false && (
+          {chartsData !== undefined && isExplorerLoading === false ? (
             <ExplorerAnomaliesContainer
               id={id}
               showCharts={true}
@@ -226,9 +212,9 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
               onSelectEntity={addEntityFieldFilter}
               showSelectedInterval={false}
               chartsService={chartsService}
-              timeRange={input?.timeRange}
+              timeRange={timeRange}
             />
-          )}
+          ) : null}
         </div>
       )}
     </EuiResizeObserver>
@@ -237,4 +223,4 @@ export const EmbeddableAnomalyChartsContainer: FC<EmbeddableAnomalyChartsContain
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
-export default EmbeddableAnomalyChartsContainer;
+export default AnomalyChartsContainer;
