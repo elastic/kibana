@@ -25,6 +25,10 @@ export type GroupedAddPanelActions = Pick<PanelSelectionMenuItem, 'id'> & {
   items: PanelSelectionMenuItem[];
 };
 
+export type GroupedAddPanelActionsIncPriority = GroupedAddPanelActions & {
+  placementPriority: number;
+};
+
 const onAddPanelActionClick =
   (action: Action, context: ActionExecutionContext<object>, closePopover: () => void) =>
   (event: React.MouseEvent) => {
@@ -47,7 +51,7 @@ export const getAddPanelActionMenuItemsGroup = (
   actions: Array<Action<object>> | undefined,
   closePopover: () => void
 ) => {
-  const grouped: Record<string, GroupedAddPanelActions> = {};
+  const grouped: Record<string, GroupedAddPanelActionsIncPriority> = {};
 
   const context = {
     embeddable: api,
@@ -75,6 +79,7 @@ export const getAddPanelActionMenuItemsGroup = (
           grouped[group.id] = {
             id: group.id,
             title: group.getDisplayName ? group.getDisplayName(context) : '',
+            placementPriority: group.placementPriority ?? 0,
             items: [],
           };
         }

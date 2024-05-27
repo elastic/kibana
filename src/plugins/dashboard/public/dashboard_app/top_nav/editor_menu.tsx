@@ -22,9 +22,10 @@ import {
   getAddPanelActionMenuItemsGroup,
   type GroupedAddPanelActions,
   type PanelSelectionMenuItem,
+  type GroupedAddPanelActionsIncPriority,
 } from './add_panel_action_menu_items';
 import { openDashboardPanelSelectionFlyout } from './open_dashboard_panel_selection_flyout';
-export interface FactoryGroup {
+export interface FactoryGroup extends Pick<GroupedAddPanelActionsIncPriority, 'placementPriority'> {
   id: string;
   appName: string;
   icon?: IconType;
@@ -58,13 +59,27 @@ export const getEmbeddableFactoryMenuItemProvider =
     };
   };
 
+const sortGroupPanelsByPlacementPriority = (
+  panelGroups: GroupedAddPanelActionsIncPriority[]
+): GroupedAddPanelActions[] => {
+  return (
+    panelGroups
+      .sort(
+        // bigger number on top
+        (panelGroupA, panelGroupB) => panelGroupB.placementPriority - panelGroupA.placementPriority
+      )
+      // strip out placement priority before return
+      .map(({ placementPriority, ...group }) => group)
+  );
+};
+
 export const mergeGroupedItemsProvider =
   (getEmbeddableFactoryMenuItem: GetEmbeddableFactoryMenuItem) =>
   (
     factoryGroupMap: Record<string, FactoryGroup>,
-    groupedAddPanelAction: Record<string, GroupedAddPanelActions>
+    groupedAddPanelAction: Record<string, GroupedAddPanelActionsIncPriority>
   ) => {
-    const panelGroups: GroupedAddPanelActions[] = [];
+    const panelGroups: GroupedAddPanelActionsIncPriority[] = [];
 
     new Set(Object.keys(factoryGroupMap).concat(Object.keys(groupedAddPanelAction))).forEach(
       (groupId) => {
@@ -77,6 +92,7 @@ export const mergeGroupedItemsProvider =
           panelGroups.push({
             id: factoryGroup.id,
             title: factoryGroup.appName,
+            placementPriority: factoryGroup.placementPriority,
             items: [
               ...factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
               ...(addPanelGroup?.items ?? []),
@@ -86,6 +102,7 @@ export const mergeGroupedItemsProvider =
           panelGroups.push({
             id: factoryGroup.id,
             title: factoryGroup.appName,
+            placementPriority: factoryGroup.placementPriority,
             items: factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
           });
         } else if (addPanelGroup) {
@@ -206,6 +223,7 @@ export const EditorMenu = ({
             appName: group.getDisplayName ? group.getDisplayName({ embeddable }) : group.id,
             icon: group.getIconType?.({ embeddable }),
             factories: [factory],
+            placementPriority: group.placementPriority ?? 0,
           };
         }
       });
@@ -265,7 +283,7 @@ export const EditorMenu = ({
     );
 
     // enhance panel groups
-    return initialPanelGroups.map((panelGroup) => {
+    return sortGroupPanelsByPlacementPriority(initialPanelGroups).map((panelGroup) => {
       switch (panelGroup.id) {
         case 'visualizations': {
           return {
