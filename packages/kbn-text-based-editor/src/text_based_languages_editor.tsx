@@ -9,7 +9,6 @@
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import memoize from 'lodash/memoize';
-import { isEqual } from 'lodash';
 import { monaco, ESQL_LANG_ID, ESQL_THEME_ID, ESQLLang, type ESQLCallbacks } from '@kbn/monaco';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, getLanguageDisplayName } from '@kbn/es-query';
@@ -453,12 +452,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     const validateQuery = async () => {
       if (editorModel?.current) {
         const parserMessages = await parseMessages();
-        setClientParserMessages((prev) => {
-          const result = {
-            errors: parserMessages?.errors ?? [],
-            warnings: parserMessages?.warnings ?? [],
-          };
-          return isEqual(prev, result) ? prev : result;
+        setClientParserMessages({
+          errors: parserMessages?.errors ?? [],
+          warnings: parserMessages?.warnings ?? [],
         });
       }
     };
@@ -467,7 +463,6 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         queryString,
         timeZone,
       });
-
       validateQuery();
       setRefetchHistoryItems(false);
     } else {

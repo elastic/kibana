@@ -5,45 +5,20 @@
  * 2.0.
  */
 
-import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import {} from '@kbn/data-views-plugin/common';
-import type { PluginStartDependencies } from '@kbn/security-plugin/public/plugin';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import { sha256 } from '@kbn/esql-utils/src/utils/sha256';
+import type { PluginStartDependencies } from '@kbn/security-plugin/public/plugin';
 
-const getDataViewFromFieldSpec = async (
-  fieldSpecMap: DataViewFieldMap,
+export interface GetAdHocESQLDataView {
+  dataViews: PluginStartDependencies['dataViews'];
+  indexPattern: string;
+}
 
-  dataViews: PluginStartDependencies['dataViews']
-) => {
-  if (!fieldSpecMap) return;
+export async function getESQLAdHocDataViewForSecuritySolution({
+  dataViews,
+  indexPattern,
+}: GetAdHocESQLDataView) {
   if (!dataViews) return;
-
-  const dataViewIdString = `esql-dataView-${Object.values(fieldSpecMap)
-    .map((field) => field.name)
-    .join('-')}`;
-
-  const dataViewId = await sha256(dataViewIdString);
-
-  const dataViewObj = await dataViews.create({
-    title: '',
-    type: 'esql',
-    id: dataViewId,
-    fields: fieldSpecMap,
-  });
-
-  return dataViewObj;
-};
-
-const getDataViewBasedOnIndexPattern = async (dataView: PluginStartDependencies['dataViews']) => {
-  if (!dataViews) return;
-  /*
-   * if indexPatternFromQuery is undefined, it means that the user used the ROW or SHOW META / SHOW INFO
-   * source-commands. In this case, make no changes to the dataView Object
-   *
-   */
-  if (!indexPatternFromQuery) return;
-  const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, dataViews);
+  const dataViewObj = await getESQLAdHocDataview(indexPattern, dataViews);
 
   /*
    *
@@ -53,14 +28,9 @@ const getDataViewBasedOnIndexPattern = async (dataView: PluginStartDependencies[
    * ESQL Ref: https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-commands.html
    *
    */
-  if (indexPatternFromQuery && dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
+  if (indexPattern && dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
     dataViewObj.timeFieldName = '@timestamp';
   }
 
   return dataViewObj;
-};
-
-const esqlDataViewCreationStrategy = {
-  getDataViewFromFieldSpec,
-  getDataViewBasedOnIndexPattern,
-};
+}

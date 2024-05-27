@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-describe('useTextBasedQueryEvents', () => {
-  test.todo('should return an empty array when no events are found');
+describe('useESQLBasedQueryEvents', () => {
+  test('should return an empty array when no events are found');
   test.todo('should return correct set of events in proper format');
   test.todo('should report loading status correctly');
   describe('impact of inputs', () => {

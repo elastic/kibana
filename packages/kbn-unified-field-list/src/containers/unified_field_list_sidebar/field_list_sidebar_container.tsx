@@ -117,7 +117,6 @@ const UnifiedFieldListSidebarContainer = memo(
         variant = 'responsive',
         onFieldEdited,
       } = props;
-      console.log({ sideBarDataView: dataView });
       const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
         createStateService({ options: getCreationOptions() })
       );

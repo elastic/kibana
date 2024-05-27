@@ -15,6 +15,7 @@ import { useQuery } from '@tanstack/react-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
+import { useGetAdHocDataViewWithESQLQuery } from '../../../../../common/containers/sourcerer/use_get_ad_hoc_data_view_with_esql_query';
 import {
   getESQLHasKeepClause,
   getESQLSourceCommand,
@@ -23,11 +24,10 @@ import {
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/use_get_sourcerer_data_view';
-import { useTextBasedEvents } from '../../../../../common/containers/use_text_based_query_events';
+import { useESQLBasedEvents } from '../../../../../common/containers/use_esql_based_query_events';
 import * as timelineActions from '../../../../store/actions';
 import type { ESQLOptions } from '../../../../store/types';
 import type { State } from '../../../../../common/store/types';
-import { useGetAdHocDataViewWithTextQuery } from '../../../../../common/containers/sourcerer/use_get_data_view_with_text_query';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TimelineTabs } from '../../../../../../common/types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -121,7 +121,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     data,
     refetch,
     isLoading: isEventFetchInProgress,
-  } = useTextBasedEvents({
+  } = useESQLBasedEvents({
     query: esqlQuery,
     dataView: esqlDataView,
     expressions,
@@ -132,7 +132,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     },
   });
 
-  const { getDataView, isLoading: isDataViewLoading } = useGetAdHocDataViewWithTextQuery({
+  const { getDataView, isLoading: isDataViewLoading } = useGetAdHocDataViewWithESQLQuery({
     query: esqlQuery,
     dataViews,
     onDataViewCreationSuccess: onAdHocDataViewSuccessCallback,

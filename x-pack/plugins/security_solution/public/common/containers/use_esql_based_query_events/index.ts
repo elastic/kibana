@@ -14,8 +14,9 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { Subscription } from 'rxjs';
 import { lastValueFrom, pluck } from 'rxjs';
 import { useQuery } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
 
-interface UseTextBasedEventsArgs {
+interface UseESQLBasedEventsArgs {
   query: AggregateQuery;
   dataView?: DataView;
   expressions: ExpressionsStart;
@@ -28,33 +29,26 @@ interface UseTextBasedEventsArgs {
   descriptionForInspector?: string;
 }
 
-export interface SecuritySolutionTextBasedQueryResponse {
+export interface SecuritySolutionESQLBasedQueryResponse {
   data: DataTableRecord[];
   columns: Datatable['columns'];
   warnings: string | undefined;
 }
 
-interface TextBasedErrorResponse {
+interface SecuritySolutionESQLBasedErrorResponse {
   error: {
     message: string;
   };
   type: 'error';
 }
 
-interface TextBasedRequestPayload {
-  query: AggregateQuery;
-  filters?: Filter[];
-  inputQuery?: Query;
-  timeRange: TimeRange;
-}
-
-const defaultTextBasedQueryResponse: SecuritySolutionTextBasedQueryResponse = {
+const defaultESQLBasedQueryResponse: SecuritySolutionESQLBasedQueryResponse = {
   data: [],
   columns: [],
   warnings: undefined,
 };
 
-export const useTextBasedEvents = ({
+export const useESQLBasedEvents = ({
   query,
   dataView,
   expressions,
@@ -62,7 +56,9 @@ export const useTextBasedEvents = ({
   filters,
   inputQuery,
   timeRange,
-}: UseTextBasedEventsArgs) => {
+  titleForInspector,
+  descriptionForInspector,
+}: UseESQLBasedEventsArgs) => {
   const abortController = useRef(new AbortController());
   const queryDataSubscriptionRef = useRef<Subscription | null>(null);
 
@@ -79,15 +75,24 @@ export const useTextBasedEvents = ({
       filters,
       time: timeRange,
       inputQuery,
-      titleForInspector: 'ESQL Inspector',
-      descriptionForInspector: 'ESQL Query for Security Solution',
+      titleForInspector:
+        titleForInspector ??
+        i18n.translate('xpack.securitySolution.esql.inspector.title', {
+          defaultMessage: 'Security Solution ESQL',
+        }),
+      descriptionForInspector:
+        descriptionForInspector ??
+        i18n.translate('xpack.securitySolution.esql.inspector.description', {
+          defaultMessage:
+            'This request queries Elasticsearch to fetch the data for the ESQL based requests.',
+        }),
     });
-  }, [dataView, filters, timeRange, inputQuery, query]);
+  }, [dataView, filters, timeRange, inputQuery, query, descriptionForInspector, titleForInspector]);
 
   const fetchEvents = useCallback(async () => {
     const ast = await convertQueryToAst();
     if (!ast) {
-      return defaultTextBasedQueryResponse;
+      return defaultESQLBasedQueryResponse;
     }
 
     const contract = expressions.execute(ast, null, {
@@ -109,7 +114,7 @@ export const useTextBasedEvents = ({
     }
 
     queryDataSubscriptionRef.current = execution.pipe(pluck('result')).subscribe((resp) => {
-      const response = resp as Datatable | TextBasedErrorResponse;
+      const response = resp as Datatable | SecuritySolutionESQLBasedErrorResponse;
       if ('type' in response && response.type === 'error') {
         error = response.error.message;
       } else {
@@ -142,9 +147,8 @@ export const useTextBasedEvents = ({
   }, [convertQueryToAst, expressions, inspectorAdapters]);
 
   const queryResult = useQuery(['esql', query, timeRange, filters], fetchEvents, {
-    enabled: true,
     refetchOnWindowFocus: false,
-    initialData: defaultTextBasedQueryResponse,
+    initialData: defaultESQLBasedQueryResponse,
   });
 
   return queryResult;

@@ -8,13 +8,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { PluginStartDependencies } from '@kbn/security-plugin/public/plugin';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataView, DataViewFieldMap } from '@kbn/data-views-plugin/common';
+import { getESQLAdHocDataViewForSecuritySolution } from './helpers';
 
 interface UseGetDataViewWithTextQueryArgs {
   query: AggregateQuery;
   dataViews: PluginStartDependencies['dataViews'];
-  onDataViewCreationSuccess: (dataView?: DataView) => void;
+  onDataViewCreationSuccess?: (dataView?: DataView) => void;
   /*
    * In Some cases, the esql query might not have an index pattern as
    * show in an example below :
@@ -30,7 +31,7 @@ interface UseGetDataViewWithTextQueryArgs {
   getFieldSpecMap?: () => DataViewFieldMap;
 }
 
-export function useGetAdHocDataViewWithTextQuery({
+export function useGetAdHocDataViewWithESQLQuery({
   query,
   dataViews,
   onDataViewCreationSuccess: onSuccess,
@@ -42,39 +43,26 @@ export function useGetAdHocDataViewWithTextQuery({
     return getIndexPatternFromESQLQuery(query.esql);
   }, [query]);
 
-  const getDataViewBasedOnIndexPattern = useCallback(async () => {
-    if (!dataViews) return;
+  const getDataView = useCallback(async () => {
+    setIsLoading(true);
     /*
      * if indexPatternFromQuery is undefined, it means that the user used the ROW or SHOW META / SHOW INFO
      * source-commands. In this case, make no changes to the dataView Object
      *
      */
-    if (!indexPatternFromQuery) return;
-    const dataViewObj = await getESQLAdHocDataview(indexPatternFromQuery, dataViews);
-
-    /*
-     *
-     * If the indexPatternFromQuery is empty string means that the user used either the ROW or SHOW META / SHOW INFO commands
-     * we don't want to add the @timestamp field in this case : https://github.com/elastic/kibana/issues/163417
-     *
-     * ESQL Ref: https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-commands.html
-     *
-     */
-    if (indexPatternFromQuery && dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
-      dataViewObj.timeFieldName = '@timestamp';
+    if (!indexPatternFromQuery || indexPatternFromQuery === '') {
+      setIsLoading(false);
+      return;
     }
-
-    return dataViewObj;
-  }, [indexPatternFromQuery, dataViews]);
-
-  const getDataView = useCallback(async () => {
-    setIsLoading(true);
-    const dataViewObj: DataView | undefined = await getDataViewBasedOnIndexPattern();
+    const dataViewObj: DataView | undefined = await getESQLAdHocDataViewForSecuritySolution({
+      dataViews,
+      indexPattern: indexPatternFromQuery,
+    });
 
     setDataView(dataViewObj);
     onSuccess?.(dataViewObj);
     setIsLoading(false);
-  }, [getDataViewBasedOnIndexPattern, onSuccess]);
+  }, [onSuccess, dataViews, indexPatternFromQuery]);
 
   return {
     dataView,
