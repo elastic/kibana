@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* Error Rate */
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,8 +28,8 @@ export function ViewInAPMButton({
   to: string;
   kuery?: string;
 }) {
-  const { share } = useApmPluginContext();
-  const serviceNavigator = share.url.locators.get(APM_APP_LOCATOR_ID);
+  const { share } = useApmPluginContext() || {};
+  const serviceNavigator = share?.url?.locators?.get(APM_APP_LOCATOR_ID);
 
   if (!serviceNavigator) {
     return null;

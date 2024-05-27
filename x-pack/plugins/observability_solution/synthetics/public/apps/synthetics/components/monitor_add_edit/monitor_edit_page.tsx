@@ -12,12 +12,13 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
+import { DisabledCallout } from '../monitors_page/management/disabled_callout';
 import { useCanUsePublicLocations } from '../../../../hooks/use_capabilities';
 import { EditMonitorNotFound } from './edit_monitor_not_found';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
 import { ConfigKey, SourceType } from '../../../../../common/runtime_types';
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
-import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
 import { AlertingCallout } from '../common/alerting_callout/alerting_callout';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
@@ -91,6 +92,8 @@ export const MonitorEditPage: React.FC = () => {
 
   return data && locationsLoaded && !loading && !error ? (
     <>
+      <DisabledCallout />
+      <CanUsePublicLocationsCallout canUsePublicLocations={canUsePublicLocations} />
       <AlertingCallout isAlertingEnabled={data[ConfigKey.ALERT_CONFIG]?.status?.enabled} />
       <MonitorForm
         defaultValues={data}
@@ -98,7 +101,6 @@ export const MonitorEditPage: React.FC = () => {
         canUsePublicLocations={canUsePublicLocations}
       >
         <MonitorSteps
-          canUsePublicLocations={canUsePublicLocations}
           stepMap={EDIT_MONITOR_STEPS(isReadOnly)}
           isEditFlow={true}
           readOnly={isReadOnly}
@@ -115,9 +117,3 @@ export const MonitorEditPage: React.FC = () => {
     <LoadingState />
   );
 };
-
-export const MonitorEditPageWithServiceAllowed = React.memo(() => (
-  <ServiceAllowedWrapper>
-    <MonitorEditPage />
-  </ServiceAllowedWrapper>
-));
