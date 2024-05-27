@@ -288,7 +288,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: [subActionParams.incident.title]: expected value of type [string] but got [undefined]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });

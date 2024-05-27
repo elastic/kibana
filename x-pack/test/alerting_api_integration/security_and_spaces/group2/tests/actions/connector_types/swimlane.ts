@@ -374,7 +374,7 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
                 connector_id: simulatedActionId,
                 status: 'error',
                 retry: false,
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
                 message:
                   'error validating action params: [subActionParams]: expected a plain object value, but found [null] instead.',
               });

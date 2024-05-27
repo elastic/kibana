@@ -273,7 +273,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 message: 'an error occurred while running the action',
                 service_message:
                   'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
