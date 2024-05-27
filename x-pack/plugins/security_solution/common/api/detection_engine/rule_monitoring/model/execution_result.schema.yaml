@@ -54,12 +54,14 @@ components:
           type: string
         backfill:
           type: object
+          description: Backfill information for the rule execution result with source event date range
           properties:
             from:
               type: string
               format: date-time
             to:
-              type: string              
+              type: string     
+              format: date-time         
       required:
         - execution_uuid
         - timestamp
