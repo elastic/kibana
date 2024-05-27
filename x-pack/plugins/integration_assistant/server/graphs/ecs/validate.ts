@@ -151,6 +151,6 @@ export function handleValidateMappings(state: EcsMappingState): AnyObject {
     missingKeys,
     duplicateFields,
     invalidEcsFields,
-    lastExecutedChain: 'validate_mappings',
+    lastExecutedChain: 'validateMappings',
   };
 }
