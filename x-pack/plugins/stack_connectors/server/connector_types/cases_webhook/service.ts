@@ -8,10 +8,10 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
-import { isString } from 'lodash';
 import { renderMustacheStringNoEscape } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 import { validateAndNormalizeUrl, validateJson } from './validators';
 import {
   createServiceError,
@@ -69,14 +69,18 @@ export const createExternalService = (
   }
 
   const createIncidentUrl = removeSlash(createIncidentUrlConfig);
+  const headersWithBasicAuth = hasAuth
+    ? combineHeadersWithBasicAuthHeader({
+        username: user ?? undefined,
+        password: password ?? undefined,
+        headers,
+      })
+    : {};
 
   const axiosInstance = axios.create({
-    ...(hasAuth && isString(secrets.user) && isString(secrets.password)
-      ? { auth: { username: secrets.user, password: secrets.password } }
-      : {}),
     headers: {
       ['content-type']: 'application/json',
-      ...(headers != null ? headers : {}),
+      ...headersWithBasicAuth,
     },
   });
 

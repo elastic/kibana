@@ -6,31 +6,17 @@
  */
 
 import createContainer from 'constate';
-import { useInterpret, useSelector } from '@xstate/react';
-import { IToasts } from '@kbn/core-notifications-browser';
-import { IDataStreamsStatsClient } from '../services/data_streams_stats';
-import { createDatasetsSummaryPanelStateMachine } from '../state_machines/summary_panel';
+import { useSelector } from '@xstate/react';
+import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { useDatasetQualityTable } from '.';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { filterInactiveDatasets } from '../utils';
 
-interface SummaryPanelContextDeps {
-  dataStreamStatsClient: IDataStreamsStatsClient;
-  toasts: IToasts;
-}
-
-const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextDeps) => {
+const useSummaryPanel = () => {
   const { service } = useDatasetQualityContext();
-  const { filteredItems } = useDatasetQualityTable();
+  const { filteredItems, isSizeStatsAvailable } = useDatasetQualityTable();
 
   const { timeRange } = useSelector(service, (state) => state.context.filters);
-
-  const summaryPanelStateService = useInterpret(() =>
-    createDatasetsSummaryPanelStateMachine({
-      dataStreamStatsClient,
-      toasts,
-    })
-  );
 
   /*
     Datasets Quality
@@ -62,16 +48,14 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
   /*
     Estimated Data
   */
-  const estimatedData = useSelector(
-    summaryPanelStateService,
-    (state) => state.context.estimatedData
+  const estimatedData = filteredItems.reduce(
+    (acc, curr) => acc + DataStreamStat.calculateFilteredSize(curr),
+    0
   );
+
   const isEstimatedDataLoading = useSelector(
-    summaryPanelStateService,
-    (state) => state.matches('estimatedData.fetching') || state.matches('estimatedData.retrying')
-  );
-  const isEstimatedDataDisabled = useSelector(summaryPanelStateService, (state) =>
-    state.matches('estimatedData.disabled')
+    service,
+    (state) => state.matches('datasets.fetching') || state.matches('degradedDocs.fetching')
   );
 
   return {
@@ -80,7 +64,7 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
 
     isEstimatedDataLoading,
     estimatedData,
-    isEstimatedDataDisabled,
+    isEstimatedDataDisabled: !isSizeStatsAvailable,
 
     isDatasetsActivityLoading,
     datasetsActivity,

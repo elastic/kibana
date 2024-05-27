@@ -11,7 +11,7 @@ import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/con
 import { LensChart } from '../../../../../../components/lens';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
+import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 
@@ -40,7 +40,7 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
     return shouldUseSearchCriteria
       ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
       : [
-          buildCombinedHostsFilter({
+          buildCombinedAssetFilter({
             field: 'host.name',
             values: currentPage.map((p) => p.name),
             dataView,

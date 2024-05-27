@@ -53,6 +53,10 @@ export const createActionRoute = (
   router.post(
     {
       path: `${BASE_ACTION_API_PATH}/connector/{id?}`,
+      options: {
+        access: 'public',
+        description: 'Create a connector',
+      },
       validate: {
         params: schema.maybe(
           schema.object({

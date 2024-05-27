@@ -6,3 +6,4 @@
  */
 
 export * from './tooltip_with_keyboard_shortcut';
+export * from './interval_abbr_screen_reader';

@@ -7,17 +7,17 @@
  */
 
 import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
-import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { registerReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
-
-import img from './portable_dashboard_image.png';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID, PLUGIN_ID } from './constants';
+import img from './portable_dashboard_image.png';
 
 interface SetupDeps {
   developerExamples: DeveloperExamplesSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export interface StartDeps {
@@ -27,7 +27,7 @@ export interface StartDeps {
 }
 
 export class PortableDashboardsExamplePlugin implements Plugin<void, void, SetupDeps, StartDeps> {
-  public setup(core: CoreSetup<StartDeps>, { developerExamples }: SetupDeps) {
+  public setup(core: CoreSetup<StartDeps>, { developerExamples, embeddable }: SetupDeps) {
     core.application.register({
       id: PLUGIN_ID,
       title: 'Portable dashboard examples',
@@ -45,14 +45,14 @@ export class PortableDashboardsExamplePlugin implements Plugin<void, void, Setup
       description: `Showcases different ways to embed a dashboard into your app`,
       image: img,
     });
-  }
 
-  public async start() {
-    registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
+    embeddable.registerReactEmbeddableFactory(FILTER_DEBUGGER_EMBEDDABLE_ID, async () => {
       const { factory } = await import('./filter_debugger_embeddable');
       return factory;
     });
   }
+
+  public async start() {}
 
   public stop() {}
 }

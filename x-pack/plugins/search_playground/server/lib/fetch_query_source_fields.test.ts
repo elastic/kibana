@@ -14,6 +14,10 @@ import {
   ELSER_PASSAGE_CHUNKED_TWO_INDICES,
   ELSER_PASSAGE_CHUNKED_TWO_INDICES_DOCS,
   SPARSE_DOC_SINGLE_INDEX,
+  DENSE_INPUT_OUTPUT_ONE_INDEX,
+  DENSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS,
+  SPARSE_INPUT_OUTPUT_ONE_INDEX,
+  SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS,
 } from '../../__mocks__/fetch_query_source_fields.mock';
 import { parseFieldsCapabilities } from './fetch_query_source_fields';
 
@@ -192,6 +196,58 @@ describe('fetch_query_source_fields', () => {
             'metadata.content',
           ],
           skipped_fields: 18,
+        },
+      });
+    });
+
+    it('should return the correct fields for dense vector using input_output configuration', () => {
+      expect(
+        parseFieldsCapabilities(DENSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS, [
+          {
+            index: 'index2',
+            doc: DENSE_INPUT_OUTPUT_ONE_INDEX[0],
+          },
+        ])
+      ).toEqual({
+        index2: {
+          bm25_query_fields: ['text'],
+          dense_vector_query_fields: [
+            {
+              field: 'text_embedding',
+              indices: ['index2'],
+              model_id: '.multilingual-e5-small',
+              nested: false,
+            },
+          ],
+          elser_query_fields: [],
+          source_fields: ['text'],
+          skipped_fields: 2,
+        },
+      });
+    });
+
+    it('should return the correct fields for sparse vector using input_output configuration', () => {
+      expect(
+        parseFieldsCapabilities(SPARSE_INPUT_OUTPUT_ONE_INDEX_FIELD_CAPS, [
+          {
+            index: 'index',
+            doc: SPARSE_INPUT_OUTPUT_ONE_INDEX[0],
+          },
+        ])
+      ).toEqual({
+        index: {
+          bm25_query_fields: ['text'],
+          elser_query_fields: [
+            {
+              field: 'text_embedding',
+              indices: ['index'],
+              model_id: '.elser_model_2',
+              nested: false,
+            },
+          ],
+          dense_vector_query_fields: [],
+          source_fields: ['text'],
+          skipped_fields: 2,
         },
       });
     });

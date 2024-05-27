@@ -16,6 +16,14 @@ import { TimelineType } from '../../../../../common/api/timeline';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
 
+jest.mock('react-router-dom', () => {
+  const original = jest.requireActual('react-router-dom');
+  return {
+    ...original,
+    useLocation: () => ({}),
+  };
+});
+
 jest.mock('../../../../common/hooks/esql/use_esql_availability', () => ({
   useEsqlAvailability: jest.fn().mockReturnValue({
     isEsqlAdvancedSettingEnabled: true,

@@ -55,7 +55,10 @@ export const assetCriticalityUpsertRoute = (
             criticalityLevel: request.body.criticality_level,
           };
 
-          const result = await assetCriticalityClient.upsert(assetCriticalityRecord);
+          const result = await assetCriticalityClient.upsert(
+            assetCriticalityRecord,
+            request.body.refresh
+          );
 
           securitySolution.getAuditLogger()?.log({
             message: 'User attempted to assign the asset criticality level for an entity',

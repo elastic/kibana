@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { RiskCategories, RiskLevels } from '../../../../common/entity_analytics/risk_engine';
-import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
-import type {
-  CalculateRiskScoreAggregations,
-  CalculateScoresResponse,
-  RiskScoreBucket,
-} from '../types';
+import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
+import type { CalculateRiskScoreAggregations, RiskScoreBucket } from '../types';
+import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics/risk_engine/calculation_route.gen';
+import type { EntityRiskScoreRecord } from '../../../../common/api/entity_analytics/common';
+import { EntityRiskLevelsEnum } from '../../../../common/api/entity_analytics/common';
 
 const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
   key: { 'user.name': 'username' },
@@ -60,8 +58,8 @@ const buildAggregationResponseMock = (
 });
 
 const buildResponseMock = (
-  overrides: Partial<CalculateScoresResponse> = {}
-): CalculateScoresResponse => ({
+  overrides: Partial<RiskScoresCalculationResponse> = {}
+): RiskScoresCalculationResponse => ({
   after_keys: { host: { 'host.name': 'hostname' } },
   scores: {
     host: [
@@ -71,7 +69,7 @@ const buildResponseMock = (
         id_value: 'hostname',
         criticality_level: 'high_impact',
         criticality_modifier: 1.5,
-        calculated_level: RiskLevels.unknown,
+        calculated_level: EntityRiskLevelsEnum.Unknown,
         calculated_score: 20,
         calculated_score_norm: 30,
         category_1_score: 30,
@@ -94,11 +92,13 @@ const buildResponseMock = (
     ],
     user: [],
   },
+  errors: [],
+  scores_written: 1,
   ...overrides,
 });
 
 const buildResponseWithOneScoreMock = () =>
-  buildResponseMock({ scores: { host: [{} as RiskScore] } });
+  buildResponseMock({ scores: { host: [{} as EntityRiskScoreRecord] } });
 
 export const calculateRiskScoresMock = {
   buildResponse: buildResponseMock,

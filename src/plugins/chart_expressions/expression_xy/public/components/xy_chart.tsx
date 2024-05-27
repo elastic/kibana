@@ -812,6 +812,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
+            pointerUpdateDebounce={0} // use the `handleCursorUpdate` debounce time
             onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },

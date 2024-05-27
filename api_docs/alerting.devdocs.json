@@ -4156,9 +4156,21 @@
                 "text": "DataView"
               },
               ">; createSavedObject: (dataView: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", overwrite?: boolean) => Promise<void>; updateSavedObject: (indexPattern: ",
-              "AbstractDataView",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.AbstractDataView",
+                "text": "AbstractDataView"
+              },
               ", saveAttempts?: number, ignoreErrors?: boolean, displayErrors?: boolean) => Promise<void>; defaultDataViewExists: () => Promise<boolean>; getDefaultDataViewLazy: () => Promise<",
               {
                 "pluginId": "dataViews",
@@ -5235,7 +5247,7 @@
           },
           "<Params> | ",
           "SanitizedRuleWithLegacyId",
-          "<Params>>; delete: (params: { id: string; }) => Promise<{}>; getGlobalExecutionLogWithAuth: (params: ",
+          "<Params>>; delete: (params: Readonly<{} & { id: string; }>) => Promise<{}>; getGlobalExecutionLogWithAuth: (params: ",
           "GetGlobalExecutionLogParams",
           ") => Promise<",
           {
@@ -6395,6 +6407,54 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.validateBackfillSchedule",
+        "type": "Function",
+        "tags": [],
+        "label": "validateBackfillSchedule",
+        "description": [],
+        "signature": [
+          "(start: string, end: string | undefined) => string | void"
+        ],
+        "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.validateBackfillSchedule.$1",
+            "type": "string",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.validateBackfillSchedule.$2",
+            "type": "string",
+            "tags": [],
+            "label": "end",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/lib/validate_backfill_schedule.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

@@ -11,6 +11,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { ESQLSearchReponse } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType, type KBN_FIELD_TYPES } from '@kbn/field-types';
+import { splitIntoCommands } from './correct_common_esql_mistakes';
 
 export async function validateEsqlQuery({
   query,
@@ -34,7 +35,16 @@ export async function validateEsqlQuery({
     ignoreOnMissingCallbacks: true,
   });
 
+  const asCommands = splitIntoCommands(query);
+
   const errorMessages = errors?.map((error) => {
+    if ('location' in error) {
+      const commandsUntilEndOfError = splitIntoCommands(query.substring(0, error.location.max));
+      const lastCompleteCommand = asCommands[commandsUntilEndOfError.length - 1];
+      if (lastCompleteCommand) {
+        return `Error in ${lastCompleteCommand.command}\n: ${error.text}`;
+      }
+    }
     return 'text' in error ? error.text : error.message;
   });
 
@@ -65,7 +75,7 @@ export async function validateEsqlQuery({
     .catch((error) => {
       return {
         error,
-        errorMessages,
+        ...(errorMessages.length ? { errorMessages } : {}),
       };
     });
 }

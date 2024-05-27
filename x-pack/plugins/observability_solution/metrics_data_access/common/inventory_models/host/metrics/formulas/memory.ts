@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
+import { MEMORY_FREE_LABEL, MEMORY_USAGE_LABEL } from '../../../shared/charts/constants';
 
 export const memoryCache: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.metric.label.cache', {
@@ -18,9 +19,7 @@ export const memoryCache: LensBaseLayer = {
 };
 
 export const memoryFree: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.memoryFree', {
-    defaultMessage: 'Memory Free',
-  }),
+  label: MEMORY_FREE_LABEL,
   value: 'max(system.memory.total) - average(system.memory.actual.used.bytes)',
   format: 'bytes',
   decimals: 1,
@@ -36,9 +35,7 @@ export const memoryFreeExcludingCache: LensBaseLayer = {
 };
 
 export const memoryUsage: LensBaseLayer = {
-  label: i18n.translate('xpack.metricsData.assetDetails.formulas.memoryUsage', {
-    defaultMessage: 'Memory Usage',
-  }),
+  label: MEMORY_USAGE_LABEL,
   value: 'average(system.memory.actual.used.pct)',
   format: 'percent',
 
