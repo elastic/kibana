@@ -26,7 +26,10 @@ import {
 import type { Filter, Query } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 
@@ -82,7 +85,13 @@ const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
 `;
 
-interface ExecutionLogTableProps {
+interface StartServices {
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+}
+
+interface ExecutionLogTableProps extends StartServices {
   ruleId: string;
   selectAlertsTab: () => void;
 }
@@ -96,6 +105,7 @@ interface CachedGlobalQueryState {
 const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   ruleId,
   selectAlertsTab,
+  ...startServices
 }) => {
   const {
     docLinks,
@@ -299,7 +309,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         successToastId.current = addSuccess(
           {
             title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
-            text: mountReactNode(
+            text: toMountPoint(
               <>
                 <p>{i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION}</p>
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -309,7 +319,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </>
+              </>,
+              startServices
             ),
           },
           // Essentially keep toast around till user dismisses via 'x'
@@ -333,6 +344,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       selectAlertsTab,
       timerange,
       uuidDataViewField,
+      startServices,
     ]
   );
 
