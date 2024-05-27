@@ -20,7 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const apmSynthtraceKibanaClient = getService('apmSynthtraceKibanaClient');
   const esClient = getService('es');
 
-  describe('GET /infra/services', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/176967
+  describe.skip('GET /infra/services', () => {
     let synthtraceApmClient: ApmSynthtraceEsClient;
     const from = new Date(Date.now() - 1000 * 60 * 2).toISOString();
     const to = new Date().toISOString();

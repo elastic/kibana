@@ -66,6 +66,7 @@ xpack.fleet.internal.registry.excludePackages: [
     # Security integrations
     'endpoint',
     'beaconing',
+    'security_detection_engine',
 
     # Removed in 8.11 integrations
     'cisco',
