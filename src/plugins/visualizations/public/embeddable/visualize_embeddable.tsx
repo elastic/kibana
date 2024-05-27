@@ -356,7 +356,13 @@ export class VisualizeEmbeddable
     }
 
     if (this.warningDomNode) {
-      render(<Warnings warnings={warnings || []} />, this.warningDomNode);
+      const { core } = this.deps.start();
+      render(
+        <KibanaRenderContextProvider {...core}>
+          <Warnings warnings={warnings || []} />
+        </KibanaRenderContextProvider>,
+        this.warningDomNode
+      );
     }
   }
 

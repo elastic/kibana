@@ -39,7 +39,8 @@
       "lens",
       "noDataPage",
       "globalSearch",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "aiops"
     ],
     "requiredBundles": ["kibanaUtils", "kibanaReact", "unifiedSearch", "savedObjects"],
     "extraPublicDirs": ["common"]

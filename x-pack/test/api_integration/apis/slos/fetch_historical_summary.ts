@@ -20,8 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const sloApi = getService('slo');
 
   const SLO_ID = 'slo-fake-1';
-  // Failing: See https://github.com/elastic/kibana/issues/183750
-  describe.skip('fetch historical summary', () => {
+
+  describe('fetch historical summary', () => {
     before(async () => {
       const now = moment().startOf('minute');
       const curr = now.clone().subtract(30, 'days');
@@ -81,7 +81,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(response[0].sloId).to.eql(SLO_ID);
       expect(response[0].instanceId).to.eql(ALL_VALUE);
-      expect(response[0].data).to.have.length(168); // 7 days * 24 hours/day * 1 bucket/hour
+      const numberOfBuckets = response[0].data.length;
+      expect(numberOfBuckets).to.be.within(168, 170); // 7 days * 24 hours/day * 1 bucket/hour + 2 extra bucket due to histogram agg rounding
       const last = response[0].data.pop();
       expect(last?.errorBudget).to.eql({
         consumed: 1,
@@ -116,7 +117,8 @@ export default function ({ getService }: FtrProviderContext) {
       });
       expect(response[0].sloId).to.eql(SLO_ID);
       expect(response[0].instanceId).to.eql(ALL_VALUE);
-      expect(response[0].data).to.have.length(168); // 7 days * 24 hours/day * 1 bucket/hour
+      const numberOfBuckets = response[0].data.length;
+      expect(numberOfBuckets).to.be.within(168, 170); // 7 days * 24 hours/day * 1 bucket/hour + 2 extra bucket due to histogram agg rounding
       const last = response[0].data.pop();
       expect(last?.errorBudget).to.eql({
         consumed: 0,

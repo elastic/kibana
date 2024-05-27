@@ -828,6 +828,31 @@
     "misc": [
       {
         "parentPluginId": "navigation",
+        "id": "def-public.AddSolutionNavigationArg",
+        "type": "Type",
+        "tags": [],
+        "label": "AddSolutionNavigationArg",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "SolutionNavigation",
+          ", \"sideNavComponent\"> & { dataTestSubj?: string | undefined; panelContentProvider?: ",
+          {
+            "pluginId": "@kbn/shared-ux-chrome-navigation",
+            "scope": "public",
+            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
+            "section": "def-public.ContentProvider",
+            "text": "ContentProvider"
+          },
+          " | undefined; }"
+        ],
+        "path": "src/plugins/navigation/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "navigation",
         "id": "def-public.SolutionType",
         "type": "Type",
         "tags": [],
@@ -1074,7 +1099,13 @@
           ],
           "signature": [
             "(solutionNavigationAgg: ",
-            "AddSolutionNavigationArg",
+            {
+              "pluginId": "navigation",
+              "scope": "public",
+              "docId": "kibNavigationPluginApi",
+              "section": "def-public.AddSolutionNavigationArg",
+              "text": "AddSolutionNavigationArg"
+            },
             ") => void"
           ],
           "path": "src/plugins/navigation/public/types.ts",
@@ -1089,7 +1120,13 @@
               "label": "solutionNavigationAgg",
               "description": [],
               "signature": [
-                "AddSolutionNavigationArg"
+                {
+                  "pluginId": "navigation",
+                  "scope": "public",
+                  "docId": "kibNavigationPluginApi",
+                  "section": "def-public.AddSolutionNavigationArg",
+                  "text": "AddSolutionNavigationArg"
+                }
               ],
               "path": "src/plugins/navigation/public/types.ts",
               "deprecated": false,
