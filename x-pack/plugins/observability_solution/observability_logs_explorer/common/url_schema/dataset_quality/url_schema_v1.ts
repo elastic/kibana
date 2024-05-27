@@ -55,9 +55,11 @@ const timeRangeRT = rt.strict({
   }),
 });
 
-const degradedFieldRT = rt.strict({
-  table: tableRT,
-});
+const degradedFieldRT = rt.exact(
+  rt.partial({
+    table: tableRT,
+  })
+);
 
 export const flyoutRT = rt.exact(
   rt.partial({

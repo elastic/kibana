@@ -38,7 +38,7 @@ interface TableCriteria<TSortField> {
   };
 }
 
-interface DegradedFields {
+export interface DegradedFields {
   table: TableCriteria<DegradedFieldSortField>;
   data?: DegradedField[];
 }
