@@ -19,7 +19,7 @@ echo "--- Running test script $1"
 cd x-pack/test/security_solution_api_integration
 set +e
 
-TARGET_SCRIPT=$1 node mki_start_api_ftr_execution
+TARGET_SCRIPT=$1 node ./scripts/mki_start_api_ftr_execution
 cmd_status=$?
 echo "Exit code with status: $cmd_status"
 exit $cmd_status

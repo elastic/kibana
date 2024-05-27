@@ -13,10 +13,10 @@ import crypto from 'crypto';
 import {
   readConfigFile,
   EsVersion,
-} from '../../../packages/kbn-test/src/functional_test_runner/lib';
+} from '../../../../packages/kbn-test/src/functional_test_runner/lib';
 import type {
   ProductType,
-  ProjectHandler,
+  ProjectHandler, 
 } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
 import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
 import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';

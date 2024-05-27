@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-require('../../../src/setup_node_env');
+require('../../../../src/setup_node_env');
 require('./mki_api_ftr_execution').cli();
