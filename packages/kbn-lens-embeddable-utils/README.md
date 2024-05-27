@@ -7,4 +7,4 @@
 
 ### Usage
 
-Check kibana developer docs ...
+Check kibana developer docs https://docs.elastic.dev/kibana-dev-docs/lens/config-builder

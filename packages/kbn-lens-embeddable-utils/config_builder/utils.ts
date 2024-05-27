@@ -20,7 +20,7 @@ import type {
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewsCommon } from './config_builder';
 import {
   FormulaValueConfig,
   LensAnnotationLayer,
@@ -123,7 +123,7 @@ export function isFormulaDataset(dataset?: LensDataset) {
  */
 export async function getDataView(
   index: string,
-  dataViewsAPI: DataViewsService,
+  dataViewsAPI: DataViewsCommon,
   timeField?: string
 ) {
   let dataView: DataView;
@@ -223,7 +223,7 @@ export const buildDatasourceStates = async (
     dataView: DataView
   ) => PersistedIndexPatternLayer | FormBasedPersistedState['layers'] | undefined,
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
-  dataViewsAPI: DataViewsService
+  dataViewsAPI: DataViewsCommon
 ) => {
   let layers: Partial<LensAttributes['state']['datasourceStates']> = {};
 

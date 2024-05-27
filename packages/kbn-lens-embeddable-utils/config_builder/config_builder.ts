@@ -21,6 +21,8 @@ import {
   buildPartitionChart,
 } from './charts';
 
+export type DataViewsCommon = Pick<DataViewsService, 'get' | 'create'>;
+
 export class LensConfigBuilder {
   private charts = {
     metric: buildMetric,
@@ -36,10 +38,10 @@ export class LensConfigBuilder {
     table: buildTable,
   };
   private formulaAPI: FormulaPublicApi | undefined;
-  private dataViewsAPI: DataViewsService;
+  private dataViewsAPI: DataViewsCommon;
 
   // formulaApi is optional, as it is not necessary to use it when creating charts with ES|QL
-  constructor(dataViewsAPI: DataViewsService, formulaAPI?: FormulaPublicApi) {
+  constructor(dataViewsAPI: DataViewsCommon, formulaAPI?: FormulaPublicApi) {
     this.formulaAPI = formulaAPI;
     this.dataViewsAPI = dataViewsAPI;
   }
