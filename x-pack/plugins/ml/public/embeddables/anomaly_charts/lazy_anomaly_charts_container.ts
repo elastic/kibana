@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { dynamic } from '@kbn/shared-ux-utility';
 
-import React from 'react';
-
-export const EmbeddableAnomalyChartsContainer = React.lazy(
-  () => import('./embeddable_anomaly_charts_container')
-);
+export const LazyAnomalyChartsContainer = dynamic(() => import('./anomaly_charts_react_container'));
