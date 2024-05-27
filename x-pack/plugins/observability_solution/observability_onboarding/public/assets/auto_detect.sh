@@ -110,12 +110,17 @@ function select_list() {
     fi
   done
 
-  echo -e "\nList logs to exclude (e.g. 1, 2, 3):"
-  read exclude_index_list_string
+  echo -e "\n"
+  read -p "Ingest all of them? [Y/n] (default: Yes): " confirmation_reply
+  confirmation_reply="${confirmation_reply:-Y}"
 
-  IFS=', ' read -r -a exclude_index_list_array <<< "$exclude_index_list_string"
+  if [[ ! "$confirmation_reply" =~ ^[Yy]$ ]]; then
+    echo -e "\nExclude logs by listing their index numbers (e.g. 1, 2, 3):"
+    read exclude_index_list_string
 
-  for index in "${!options[@]}"; do
+    IFS=', ' read -r -a exclude_index_list_array <<< "$exclude_index_list_string"
+
+    for index in "${!options[@]}"; do
       local is_excluded=0
       for excluded_index in "${exclude_index_list_array[@]}"; do
         if [[ "$index" -eq "$excluded_index" ]]; then
@@ -130,7 +135,11 @@ function select_list() {
           selected_unknown_log_file_pattern_array+=("${options[index]}")
         fi
       fi
-  done
+    done
+  else
+    selected_known_integrations_array=("${known_integrations_options[@]}")
+    selected_unknown_log_file_pattern_array=("${unknown_logs_options[@]}")
+  fi
 }
 
 echo "Looking for log files..."
@@ -138,10 +147,10 @@ read_log_file_list
 detect_known_integrations
 build_unknown_log_file_patterns
 
-echo -e "\nWe found these logs on your system, see which ones you'd like to ingest:"
+echo -e "\nWe found these logs on your system:"
 select_list
 
-echo -e "\nYou can list any custom log paths that we have not detected (e.g. /var/log/myapp/*.log, /home/j/myapp/*.log)"
+echo -e "\nList any custom logs that we have not detected (e.g. /var/log/myapp/*.log, /home/j/myapp/*.log). Press Enter to skip."
 read custom_log_file_path_list_string
 
 IFS=', ' read -r -a custom_log_file_path_list_array <<< "$custom_log_file_path_list_string"
@@ -152,7 +161,8 @@ for item in "${selected_known_integrations_array[@]}" "${selected_unknown_log_fi
 done
 
 echo -e "\n"
-read -p "Looks good? [Y/n] (default: Y): " confirmation_reply
+read -p "Confirm selection [Y/n] (default: Yes): " confirmation_reply
+confirmation_reply="${confirmation_reply:-Y}"
 
 if [[ ! "$confirmation_reply" =~ ^[Yy]$ ]]; then
   echo -e "You can run the script again to select different logs."
