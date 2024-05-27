@@ -141,7 +141,7 @@ describe('HeaderActions', () => {
     });
   });
 
-  describe('contditional components based on unifiedComponentsInTimelineEnabled', () => {
+  describe('conditional components based on unifiedComponentsInTimelineEnabled', () => {
     describe('when unifiedComponentsInTimelineEnabled is true', () => {
       beforeEach(() => {
         (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
