@@ -40,7 +40,7 @@ const App = ({
 
   function renderTabContent() {
     if (selectedTabId === CONTROLS_REFACTOR_TEST) {
-      return <ReactControlExample dataViews={data.dataViews} overlays={core.overlays} />;
+      return <ReactControlExample dataViews={data.dataViews} core={core} />;
     }
 
     return <ControlGroupRendererExamples data={data} navigation={navigation} />;
@@ -56,16 +56,16 @@ const App = ({
           <EuiPageSection>
             <EuiTabs>
               <EuiTab
+                onClick={() => onSelectedTabChanged(CONTROLS_REFACTOR_TEST)}
+                isSelected={CONTROLS_REFACTOR_TEST === selectedTabId}
+              >
+                Register a new React control
+              </EuiTab>
+              <EuiTab
                 onClick={() => onSelectedTabChanged(CONTROLS_AS_A_BUILDING_BLOCK)}
                 isSelected={CONTROLS_AS_A_BUILDING_BLOCK === selectedTabId}
               >
                 Controls as a building block
-              </EuiTab>
-              <EuiTab
-                onClick={() => onSelectedTabChanged(CONTROLS_REFACTOR_TEST)}
-                isSelected={CONTROLS_REFACTOR_TEST === selectedTabId}
-              >
-                Register new control type
               </EuiTab>
             </EuiTabs>
 

@@ -11,7 +11,11 @@ import { ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { ControlStyle, ControlWidth } from '@kbn/controls-plugin/public/types';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { HasSerializableState, PresentationContainer } from '@kbn/presentation-containers';
+import {
+  HasSerializableState,
+  HasSerializedChildState,
+  PresentationContainer,
+} from '@kbn/presentation-containers';
 import {
   HasEditCapabilities,
   HasParentApi,
@@ -28,9 +32,16 @@ import { DefaultControlState, PublishesControlDisplaySettings } from '../types';
 type PublishesControlGroupDisplaySettings = PublishesControlDisplaySettings & {
   controlStyle: PublishingSubject<ControlStyle>;
 };
-export interface ControlsPanels<State extends DefaultControlState = DefaultControlState> {
-  [panelId: string]: State;
+export interface ControlPanelsState<ControlState extends ControlPanelState = ControlPanelState> {
+  [panelId: string]: ControlState;
 }
+
+export type ControlGroupUnsavedChanges = Omit<
+  ControlGroupRuntimeState,
+  'initialChildControlState' | 'defaultControlGrow' | 'defaultControlWidth'
+> & {
+  filters: Filter[] | undefined;
+};
 
 export type ControlGroupApi<ChildStateType extends DefaultControlState = DefaultControlState> =
   PresentationContainer &
@@ -38,19 +49,14 @@ export type ControlGroupApi<ChildStateType extends DefaultControlState = Default
     HasSerializableState &
     PublishesFilters &
     PublishesDataViews &
+    HasSerializedChildState<ChildStateType> &
     HasEditCapabilities & // editing for control group settings - this will be a custom action
     PublishesDataLoading & // loading = true if any children loading
-    PublishesUnsavedChanges<
-      Omit<ControlGroupRuntimeState, 'panels' | 'defaultControlGrow' | 'defaultControlWidth'> & {
-        filters: Filter[] | undefined;
-      }
-    > &
+    PublishesUnsavedChanges &
     PublishesControlGroupDisplaySettings &
-    Partial<HasParentApi<PublishesUnifiedSearch>> & {
-      getChildState: (uuid: string) => ChildStateType;
-    };
+    Partial<HasParentApi<PublishesUnifiedSearch>>;
 
-export type ControlPanelState = DefaultControlState & { type: string };
+export type ControlPanelState = DefaultControlState & { type: string; order: number };
 
 export interface ControlGroupRuntimeState<
   ChildStateType extends ControlPanelState = ControlPanelState
@@ -59,20 +65,24 @@ export interface ControlGroupRuntimeState<
   defaultControlGrow?: boolean;
   defaultControlWidth?: ControlWidth;
   controlStyle: ControlStyle;
-  panels: ControlsPanels<ChildStateType>;
   showApplySelections?: boolean;
   ignoreParentSettings?: ParentIgnoreSettings;
 
-  anyChildHasUnsavedChanges: boolean;
+  initialChildControlState: ControlPanelsState<ChildStateType>;
 }
+
+export type ControlGroupEditorState = Pick<
+  ControlGroupRuntimeState,
+  'chainingSystem' | 'controlStyle' | 'showApplySelections' | 'ignoreParentSettings'
+>;
 
 export type ControlGroupSerializedState = Omit<
   ControlGroupRuntimeState,
-  | 'panels'
   | 'ignoreParentSettings'
   | 'defaultControlGrow'
   | 'defaultControlWidth'
   | 'anyChildHasUnsavedChanges'
+  | 'initialChildControlState'
 > & {
   panelsJSON: string;
   ignoreParentSettingsJSON: string;

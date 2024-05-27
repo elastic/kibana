@@ -9,6 +9,7 @@
 import {
   EuiButton,
   EuiButtonGroup,
+  EuiCodeBlock,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
-import { OverlayStart } from '@kbn/core-overlays-browser';
+import { CoreStart } from '@kbn/core/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -27,6 +28,7 @@ import {
   useStateFromPublishingSubject,
   ViewMode as ViewModeType,
 } from '@kbn/presentation-publishing';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { BehaviorSubject } from 'rxjs';
@@ -72,10 +74,10 @@ const mockedParentApi: MockedDashboardApi = {
 };
 
 export const ReactControlExample = ({
-  overlays,
+  core,
   dataViews: dataViewsService,
 }: {
-  overlays: OverlayStart;
+  core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
 }) => {
   const {
@@ -130,7 +132,17 @@ export const ReactControlExample = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             onClick={() => {
-              console.log(controlGroupApi?.serializeState());
+              core.overlays.openModal(
+                toMountPoint(
+                  <EuiCodeBlock language="json">
+                    {JSON.stringify(controlGroupApi?.serializeState(), null, 2)}
+                  </EuiCodeBlock>,
+                  {
+                    theme: core.theme,
+                    i18n: core.i18n,
+                  }
+                )
+              );
             }}
             size="s"
           >

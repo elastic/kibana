@@ -30,9 +30,9 @@ export const ControlRenderer = <
   getParentApi,
   onApiAvailable,
 }: {
-  maybeId?: string;
   type: string;
-  getParentApi: () => ControlGroupApi;
+  maybeId?: string;
+  getParentApi: () => ControlGroupApi<StateType>;
   onApiAvailable?: (api: ApiType) => void;
 }) => {
   const component = useMemo(
@@ -59,7 +59,7 @@ export const ControlRenderer = <
           return fullApi;
         };
 
-        const initialState = parentApi.getChildState<StateType>(uuid);
+        const { rawState: initialState } = parentApi.getSerializedStateForChild(uuid);
 
         const { api, Component } = factory.buildControl(initialState, buildApi, uuid, parentApi);
 

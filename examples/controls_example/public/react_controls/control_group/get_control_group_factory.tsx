@@ -29,7 +29,6 @@ import {
   PublishesDataViews,
   PublishesFilters,
   PublishingSubject,
-  StateComparators,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 
@@ -42,8 +41,8 @@ import {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
+  ControlGroupUnsavedChanges,
   ControlPanelState,
-  ControlsPanels,
 } from './types';
 
 export const getControlGroupEmbeddableFactory = <
@@ -58,124 +57,117 @@ export const getControlGroupEmbeddableFactory = <
     ControlGroupRuntimeState<ChildControlState>
   > = {
     type: CONTROL_GROUP_TYPE,
-    deserializeState: (state) => deserializeControlGroup<ChildControlState>(state),
-    buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
+    deserializeState: (state) => deserializeControlGroup(state),
+    buildEmbeddable: async (initialState, buildApi, uuid, parentApi, setApi) => {
+      const {
+        initialChildControlState: childControlState,
+        defaultControlGrow,
+        defaultControlWidth,
+        controlStyle,
+        chainingSystem,
+        showApplySelections: initialShowApply,
+        ignoreParentSettings: initialParentSettings,
+      } = initialState;
+
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const grow = new BehaviorSubject<boolean | undefined>(initialState.defaultControlGrow);
-      const width = new BehaviorSubject<ControlWidth | undefined>(initialState.defaultControlWidth);
+      const grow = new BehaviorSubject<boolean | undefined>(defaultControlGrow);
+      const width = new BehaviorSubject<ControlWidth | undefined>(defaultControlWidth);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-      const panels$ = new BehaviorSubject<ControlsPanels<ChildControlState>>(initialState.panels);
       const controlStyle$ = new BehaviorSubject<ControlStyle>(
-        initialState.controlStyle ?? DEFAULT_CONTROL_STYLE
+        controlStyle ?? DEFAULT_CONTROL_STYLE
       );
-      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(
-        initialState.chainingSystem
-      );
-      const showApplySelections = new BehaviorSubject<boolean | undefined>(
-        initialState.showApplySelections
-      );
+      const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
+      const showApplySelections = new BehaviorSubject<boolean | undefined>(initialShowApply);
       const ignoreParentSettings = new BehaviorSubject<ParentIgnoreSettings | undefined>(
-        initialState.ignoreParentSettings
+        initialParentSettings
       );
+      const unsavedChanges = new BehaviorSubject<Partial<ControlGroupUnsavedChanges> | undefined>(
+        undefined
+      );
+      // const anyChildHasUnsavedChanges = new BehaviorSubject<boolean>(false);
 
-      const anyChildHasUnsavedChanges = new BehaviorSubject<boolean>(
-        initialState.anyChildHasUnsavedChanges
+      const controlOrder = new BehaviorSubject<Array<{ id: string; order: number; type: string }>>(
+        Object.keys(childControlState)
+          .map((key) => ({
+            id: key,
+            order: childControlState[key].order,
+            type: childControlState[key].type,
+          }))
+          .sort((a, b) => (a.order > b.order ? 1 : -1))
       );
 
       // each child has an unsaved changed behaviour subject it pushes to
       // control group listens to all of them
       // any time they change, it pops it into an object
 
-      const controlGroupComparators: StateComparators<ControlGroupRuntimeState<ChildControlState>> =
-        {
-          chainingSystem: [chainingSystem$, (value) => chainingSystem$.next(value)],
-          defaultControlGrow: [grow, (value) => grow.next(value)],
-          defaultControlWidth: [width, (value) => width.next(value)],
-          controlStyle: [controlStyle$, (value) => controlStyle$.next(value)],
-          showApplySelections: [showApplySelections, (value) => showApplySelections.next(value)],
-          ignoreParentSettings: [ignoreParentSettings, (value) => ignoreParentSettings.next(value)],
-          panels: [
-            panels$,
-            (value) => panels$.next(value),
-            () => true, // each control will be responsible for handling its own unsaved changes
-          ],
-          anyChildHasUnsavedChanges: [
-            anyChildHasUnsavedChanges,
-            (value) => anyChildHasUnsavedChanges.next(value),
-            () => anyChildHasUnsavedChanges.getValue(),
-          ],
-        };
-
-      const api = buildApi(
-        {
-          dataLoading: dataLoading$,
-          children$: children$ as PublishingSubject<{
-            [key: string]: unknown;
-          }>,
-          onEdit: async () => {
-            // TODO: Clean up state manager to only editable state
-            openEditControlGroupFlyout<ChildControlState>(
-              api,
-              {
-                chainingSystem: chainingSystem$,
-                defaultControlGrow: grow,
-                defaultControlWidth: width,
-                controlStyle: controlStyle$,
-                panels: panels$,
-                showApplySelections,
-                ignoreParentSettings,
-                anyChildHasUnsavedChanges,
-              },
-              { core: services.core }
-            );
-          },
-          isEditingEnabled: () => true,
-          getTypeDisplayName: () =>
-            i18n.translate('controls.controlGroup.displayName', {
-              defaultMessage: 'Controls',
-            }),
-          getChildState: (childId) => {
-            return panels$.getValue()[childId];
-          },
-          serializeState: () => {
-            return serializeControlGroup({
-              panels: panels$.getValue(),
+      const api = setApi({
+        unsavedChanges,
+        resetUnsavedChanges: () => {},
+        snapshotRuntimeState: () => {
+          return {} as unknown as ControlGroupSerializedState;
+        },
+        dataLoading: dataLoading$,
+        children$: children$ as PublishingSubject<{
+          [key: string]: unknown;
+        }>,
+        onEdit: async () => {
+          openEditControlGroupFlyout(
+            api,
+            {
+              chainingSystem: chainingSystem$,
+              controlStyle: controlStyle$,
+              showApplySelections,
+              ignoreParentSettings,
+            },
+            { core: services.core }
+          );
+        },
+        isEditingEnabled: () => true,
+        getTypeDisplayName: () =>
+          i18n.translate('controls.controlGroup.displayName', {
+            defaultMessage: 'Controls',
+          }),
+        getSerializedStateForChild: (childId) => {
+          return { rawState: childControlState[childId] };
+        },
+        serializeState: () => {
+          return serializeControlGroup(
+            children$.getValue(),
+            controlOrder.getValue().map(({ id }) => id),
+            {
               controlStyle: controlStyle$.getValue(),
               chainingSystem: chainingSystem$.getValue(),
               showApplySelections: showApplySelections.getValue(),
               ignoreParentSettings: ignoreParentSettings.getValue(),
-            });
-          },
-          addNewPanel: (panel) => {
-            // TODO: Add a new child control
-            return Promise.resolve(undefined);
-          },
-          removePanel: (panelId) => {
-            // TODO: Remove a child control
-          },
-          replacePanel: async (panelId, newPanel) => {
-            // TODO: Replace a child control
-            return Promise.resolve(panelId);
-          },
-          grow,
-          width,
-          filters$,
-          dataViews,
-          controlStyle: controlStyle$,
+            }
+          );
         },
-        controlGroupComparators
-      );
+        addNewPanel: (panel) => {
+          // TODO: Add a new child control
+          return Promise.resolve(undefined);
+        },
+        removePanel: (panelId) => {
+          // TODO: Remove a child control
+        },
+        replacePanel: async (panelId, newPanel) => {
+          // TODO: Replace a child control
+          return Promise.resolve(panelId);
+        },
+        grow,
+        width,
+        filters$,
+        dataViews,
+        controlStyle: controlStyle$,
+      });
 
       /** Subscribe to all children's output filters, combine them, and output them */
       const outputFiltersSubscription = combineCompatibleApis<PublishesFilters, Filter[]>(
         api,
         'filters$',
         apiPublishesFilters
-      ).subscribe((newFilters) => {
-        filters$.next(newFilters);
-      });
+      ).subscribe((newFilters) => filters$.next(newFilters));
 
       /** Subscribe to all children's output data views, combine them, and output them */
       const childDataViewsSubscription = combineCompatibleApis<PublishesDataViews, DataView[]>(
@@ -187,7 +179,7 @@ export const getControlGroupEmbeddableFactory = <
       return {
         api,
         Component: (props, test) => {
-          const panels = useStateFromPublishingSubject(panels$);
+          const controlsInOrder = useStateFromPublishingSubject(controlOrder);
 
           useEffect(() => {
             return () => {
@@ -198,11 +190,11 @@ export const getControlGroupEmbeddableFactory = <
 
           return (
             <EuiFlexGroup className={'controlGroup'} alignItems="center" gutterSize="s" wrap={true}>
-              {Object.keys(panels).map((id) => (
+              {controlsInOrder.map(({ id, type }) => (
                 <ControlRenderer
                   key={uuid}
                   maybeId={id}
-                  type={panels[id].type}
+                  type={type}
                   getParentApi={() => api}
                   onApiAvailable={(controlApi) => {
                     children$.next({

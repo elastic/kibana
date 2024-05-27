@@ -18,13 +18,11 @@ import { BehaviorSubject } from 'rxjs';
 import { ControlStateManager } from '../types';
 import { ControlGroupEditor } from './control_group_editor';
 import { ControlGroupEditorStrings } from './control_group_editor_constants';
-import { ControlGroupApi, ControlGroupRuntimeState, ControlPanelState } from './types';
+import { ControlGroupApi, ControlGroupEditorState } from './types';
 
-export const openEditControlGroupFlyout = <
-  ChildStateType extends ControlPanelState = ControlPanelState
->(
+export const openEditControlGroupFlyout = (
   controlGroupApi: ControlGroupApi,
-  stateManager: ControlStateManager<ControlGroupRuntimeState<ChildStateType>>,
+  stateManager: ControlStateManager<ControlGroupEditorState>,
   services: {
     core: CoreStart;
   }
@@ -33,16 +31,16 @@ export const openEditControlGroupFlyout = <
    * Duplicate all state into a new manager because we do not want to actually apply the changes
    * to the control until the user hits save.
    */
-  const editorStateManager: ControlStateManager<ControlGroupRuntimeState> = Object.keys(
+  const editorStateManager: ControlStateManager<ControlGroupEditorState> = Object.keys(
     stateManager
   ).reduce((prev, key) => {
     return {
       ...prev,
-      [key as keyof ControlGroupRuntimeState]: new BehaviorSubject(
-        stateManager[key as keyof ControlGroupRuntimeState].getValue()
+      [key as keyof ControlGroupEditorState]: new BehaviorSubject(
+        stateManager[key as keyof ControlGroupEditorState].getValue()
       ),
     };
-  }, {} as ControlStateManager<ControlGroupRuntimeState>);
+  }, {} as ControlStateManager<ControlGroupEditorState>);
 
   const closeOverlay = (overlayRef: OverlayRef) => {
     if (apiHasParentApi(controlGroupApi) && tracksOverlays(controlGroupApi.parentApi)) {
@@ -61,8 +59,8 @@ export const openEditControlGroupFlyout = <
       })
       .then((confirmed) => {
         if (confirmed)
-          Object.keys(editorStateManager.panels).forEach((panelId) => {
-            controlGroupApi.removePanel(panelId);
+          Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {
+            controlGroupApi.removePanel(childId);
           });
         ref.close();
       });
@@ -76,10 +74,10 @@ export const openEditControlGroupFlyout = <
         onSave={() => {
           Object.keys(stateManager).forEach((key) => {
             (
-              stateManager[key as keyof ControlGroupRuntimeState] as BehaviorSubject<
-                ControlGroupRuntimeState[keyof ControlGroupRuntimeState]
+              stateManager[key as keyof ControlGroupEditorState] as BehaviorSubject<
+                ControlGroupEditorState[keyof ControlGroupEditorState]
               >
-            ).next(editorStateManager[key as keyof ControlGroupRuntimeState].getValue());
+            ).next(editorStateManager[key as keyof ControlGroupEditorState].getValue());
           });
           closeOverlay(overlay);
         }}

@@ -20,7 +20,6 @@ import {
 export type ControlApi = ControlApiRegistration<DefaultControlApi>;
 
 export const initializeDefaultControlApi = (
-  controlGroup: ControlGroupApi,
   state: DefaultControlState
 ): {
   defaultControlApi: ControlApi;
@@ -31,7 +30,6 @@ export const initializeDefaultControlApi = (
   const blockingError = new BehaviorSubject<Error | undefined>(undefined);
   const grow = new BehaviorSubject<boolean | undefined>(state.grow);
   const width = new BehaviorSubject<ControlWidth | undefined>(state.width);
-  const order = new BehaviorSubject<number | undefined>(state.order);
 
   const defaultControlApi: ControlApi = {
     grow,
@@ -45,13 +43,11 @@ export const initializeDefaultControlApi = (
   const defaultControlStateManager: ControlStateManager<DefaultControlState> = {
     grow,
     width,
-    order,
   };
 
   const defaultControlComparators: StateComparators<DefaultControlState> = {
     grow: [grow, (newGrow: boolean | undefined) => grow.next(newGrow)],
     width: [width, (newWidth: ControlWidth | undefined) => width.next(newWidth)],
-    order: [order, (newOrder: number | undefined) => order.next(newOrder)],
   };
 
   return {

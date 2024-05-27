@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { SerializedStyles } from '@emotion/react';
 import { ControlWidth } from '@kbn/controls-plugin/public/types';
+import { HasSerializableState } from '@kbn/presentation-containers';
 import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasParentApi,
@@ -43,6 +44,7 @@ export type DefaultControlApi = PublishesDataLoading &
   Partial<PublishesPanelTitle & PublishesDisabledActionIds & HasCustomPrepend> &
   HasType &
   HasUniqueId &
+  HasSerializableState &
   HasParentApi<ControlGroupApi> & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
@@ -51,12 +53,11 @@ export type DefaultControlApi = PublishesDataLoading &
 export interface DefaultControlState {
   grow?: boolean;
   width?: ControlWidth;
-  order?: number;
 }
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
-  'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'
+  'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'serializeState'
 >;
 
 export interface ControlFactory<

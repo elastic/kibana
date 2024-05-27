@@ -8,10 +8,9 @@
 
 import { Reference } from '@kbn/content-management-utils';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-plugin/common';
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { SerializedPanelState } from '@kbn/presentation-containers';
 import { omit } from 'lodash';
-import { DefaultDataControlState } from '../data_controls/types';
+import { DefaultControlApi, DefaultControlState } from '../types';
 import { ControlGroupRuntimeState, ControlGroupSerializedState, ControlPanelState } from './types';
 
 export const deserializeControlGroup = <
@@ -44,48 +43,63 @@ export const deserializeControlGroup = <
 
   return {
     ...omit(state.rawState, ['panelsJSON', 'ignoreParentSettingsJSON']),
-    panels: flattenedPanels,
+    initialChildControlState: flattenedPanels,
     ignoreParentSettings,
     defaultControlGrow: DEFAULT_CONTROL_GROW,
     defaultControlWidth: DEFAULT_CONTROL_WIDTH,
-    anyChildHasUnsavedChanges: false,
   };
 };
 
-const isDataControl = (state: unknown): state is DefaultDataControlState => {
-  return typeof (state as DefaultDataControlState).dataViewId === 'string';
-};
-
 export const serializeControlGroup = (
+  children: {
+    [key: string]: DefaultControlApi;
+  },
+  idsInOrder: string[],
   state: Omit<
     ControlGroupRuntimeState,
-    'anyChildHasUnsavedChanges' | 'defaultControlGrow' | 'defaultControlWidth'
+    | 'anyChildHasUnsavedChanges'
+    | 'defaultControlGrow'
+    | 'defaultControlWidth'
+    | 'initialChildControlState'
   >
 ): SerializedPanelState<ControlGroupSerializedState> => {
-  const { panels } = state;
-  const references: Reference[] = [];
+  let references: Reference[] = [];
 
   /** Re-add the `explicitInput` layer on serialize so control group saved object retains shape */
-  const explicitInputPanels = Object.keys(panels).reduce((prev, panelId) => {
-    const currentPanel: ControlPanelState = panels[panelId];
-    const { grow, order, type, width, ...rest } = currentPanel;
+  const explicitInputPanels = Object.keys(children).reduce((prev, panelId) => {
+    const child: DefaultControlApi = children[panelId];
+    const type = child.type;
+    const {
+      rawState: { grow, width, ...rest },
+      references: childReferences,
+    } = (child.serializeState as () => SerializedPanelState<DefaultControlState>)();
 
-    if (isDataControl(currentPanel)) {
-      /** All data controls will have a data view ID, so add the data view to the reference array */
-      references.push({
-        name: `controlGroup_${panelId}:${type}DataView`,
-        type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        id: currentPanel.dataViewId,
-      });
+    if (childReferences && childReferences.length > 0) {
+      references = [...references, ...childReferences];
     }
 
-    // Note: `grow` and `width` are no longer duplicated under explicit input - is this a problem?
-    return { ...prev, [panelId]: { grow, order, type, width, explicitInput: rest } };
+    // if (isDataControl(child)) {
+    //   /** All data controls will have a data view ID, so add the data view to the reference array */
+    //   references.push({
+    //     name: `controlGroup_${panelId}:${type}DataView`,
+    //     type: DATA_VIEW_SAVED_OBJECT_TYPE,
+    //     id: currentPanel.dataViewId,
+    //   });
+    // }
+
+    /**
+     * Note: With legacy control embeddables, `grow` and `width` were duplicated under
+     * explicit input - this is no longer the case.
+     */
+    return {
+      ...prev,
+      [panelId]: { grow, order: idsInOrder.indexOf(panelId), type, width, explicitInput: rest },
+    };
   }, {});
 
   return {
     rawState: {
-      ...omit(state, ['panels', 'ignoreParentSettings']),
+      ...omit(state, ['ignoreParentSettings']),
       ignoreParentSettingsJSON: JSON.stringify(state.ignoreParentSettings),
       panelsJSON: JSON.stringify(explicitInputPanels),
     },

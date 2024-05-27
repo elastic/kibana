@@ -34,13 +34,13 @@ import {
   ControlGroupEditorStrings,
   CONTROL_LAYOUT_OPTIONS,
 } from './control_group_editor_constants';
-import { ControlGroupApi, ControlGroupRuntimeState } from './types';
+import { ControlGroupApi, ControlGroupEditorState } from './types';
 
 interface EditControlGroupProps {
   onCancel: () => void;
   onSave: () => void;
   onDeleteAll: () => void;
-  stateManager: ControlStateManager<ControlGroupRuntimeState>;
+  stateManager: ControlStateManager<ControlGroupEditorState>;
   api: ControlGroupApi; // controls must always have a parent API
 }
 
@@ -52,20 +52,20 @@ export const ControlGroupEditor = ({
   api,
 }: EditControlGroupProps) => {
   const [
-    panels,
+    children,
     selectedChainingSystem,
     selectedControlStyle,
     selectedShowApplySelections,
     selectedIgnoreParentSettings,
   ] = useBatchedPublishingSubjects(
-    stateManager.panels,
+    api.children$,
     stateManager.chainingSystem,
     stateManager.controlStyle,
     stateManager.showApplySelections,
     stateManager.ignoreParentSettings
   );
 
-  const controlCount = useMemo(() => Object.keys(panels).length, [panels]);
+  const controlCount = useMemo(() => Object.keys(children).length, [children]);
 
   const updateIgnoreSetting = useCallback(
     (newSettings: Partial<ParentIgnoreSettings>) => {

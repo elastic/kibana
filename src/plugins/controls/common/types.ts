@@ -28,8 +28,6 @@ export type ControlInput = EmbeddableInput & {
   timeslice?: TimeSlice;
   controlStyle?: ControlStyle;
   ignoreParentSettings?: ParentIgnoreSettings;
-  grow: boolean;
-  width: ControlWidth;
 };
 
 export type DataControlInput = ControlInput & {

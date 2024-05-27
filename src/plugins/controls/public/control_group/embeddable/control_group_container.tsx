@@ -123,6 +123,7 @@ export class ControlGroupContainer extends Container<
 
   /** This currently reports the **entire** persistable control group input on unsaved changes */
   public unsavedChanges: BehaviorSubject<PersistableControlGroupInput | undefined>;
+
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
 
   constructor(

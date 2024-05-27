@@ -33,12 +33,21 @@ export interface DefaultEmbeddableApi<
  * A subset of the default embeddable API used in registration to allow implementors to omit aspects
  * of the API that will be automatically added by the system.
  */
-export type ReactEmbeddableApiRegistration<
+export type SetReactEmbeddableApiRegistration<
+  SerializedState extends object = object,
+  Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
+> = Omit<Api, 'uuid' | 'parent' | 'type'>;
+
+/**
+ * A subset of the default embeddable API used in registration to allow implementors to omit aspects
+ * of the API that handle unsaved changes.
+ */
+export type BuildReactEmbeddableApiRegistration<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 > = Omit<
-  Api,
-  'uuid' | 'parent' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
+  SetReactEmbeddableApiRegistration<SerializedState, Api>,
+  'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
 >;
 
 /**
@@ -82,10 +91,11 @@ export interface ReactEmbeddableFactory<
   buildEmbeddable: (
     initialState: RuntimeState,
     buildApi: (
-      apiRegistration: ReactEmbeddableApiRegistration<SerializedState, Api>,
+      apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
       comparators: StateComparators<RuntimeState>
     ) => Api,
     uuid: string,
-    parentApi?: unknown
+    parentApi: unknown | undefined,
+    setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, Api>) => Api
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

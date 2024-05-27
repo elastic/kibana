@@ -35,7 +35,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   dataControlStateManager: ControlStateManager<DefaultDataControlState>;
 } => {
   const { defaultControlApi, defaultControlComparators, defaultControlStateManager } =
-    initializeDefaultControlApi(controlGroup, state);
+    initializeDefaultControlApi(state);
 
   const panelTitle = new BehaviorSubject<string | undefined>(state.title);
   const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.fieldName);
