@@ -30,7 +30,6 @@ import type {
   SolutionNavigationDefinitions,
 } from '@kbn/core-chrome-browser';
 import { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
-import { definition as esDefinition } from '@kbn/solution-nav-es';
 import { definition as obltDefinition } from '@kbn/solution-nav-oblt';
 import type { PanelContentProvider } from '@kbn/shared-ux-chrome-navigation';
 import { UserProfileData } from '@kbn/user-profile-components';
@@ -271,10 +270,6 @@ export class NavigationPublicPlugin
 
   private addDefaultSolutionNavigation({ chrome }: { chrome: InternalChromeStart }) {
     const solutionNavs: SolutionNavigationDefinitions = {
-      es: {
-        ...esDefinition,
-        sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'searchSideNav' }),
-      },
       oblt: {
         ...obltDefinition,
         sideNavComponent: this.getSideNavComponent({ dataTestSubj: 'observabilitySideNav' }),
