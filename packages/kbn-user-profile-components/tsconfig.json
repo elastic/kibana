@@ -4,7 +4,8 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "@emotion/react/types/css-prop",
     ]
   },
   "include": [

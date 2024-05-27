@@ -326,40 +326,31 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
         id: searchInputId,
       }}
       isPreFiltered
-      listProps={{ onFocusBadge: false }}
+      listProps={{ onFocusBadge: false, rowHeight: 46 }}
       loadingMessage={loadingMessage}
       noMatchesMessage={noMatchesMessage}
       emptyMessage={emptyMessage}
       errorMessage={errorMessage}
       renderOption={(option, searchValue) => {
         if (option.user) {
+          const displayName = getUserDisplayName(option.user);
           return (
-            <EuiFlexGroup
-              alignItems="center"
-              justifyContent="spaceBetween"
-              gutterSize="s"
-              responsive={false}
-            >
-              <EuiFlexItem css={{ maxWidth: '100%' }}>
-                <EuiHighlight className="eui-textTruncate" search={searchValue}>
-                  {option.label}
-                </EuiHighlight>
-              </EuiFlexItem>
-              {option.user.email && option.user.email !== option.label ? (
-                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                  <EuiTextColor
-                    color={option.disabled ? 'disabled' : 'subdued'}
-                    className="eui-textTruncate"
-                  >
+            <>
+              <div className="eui-textTruncate">
+                <EuiHighlight search={searchValue}>{displayName}</EuiHighlight>
+              </div>
+              {option.user.email && option.user.email !== displayName ? (
+                <div className="eui-textTruncate" css={{ fontSize: '0.8em', lineHeight: 1.2 }}>
+                  <EuiTextColor color={option.disabled ? 'disabled' : 'subdued'}>
                     {searchValue ? (
                       <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
                     ) : (
                       option.user.email
                     )}
                   </EuiTextColor>
-                </EuiFlexItem>
+                </div>
               ) : undefined}
-            </EuiFlexGroup>
+            </>
           );
         }
         return <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>;
@@ -451,7 +442,7 @@ function toSelectableOption(
   if (userProfile) {
     return {
       key: userProfile.uid,
-      label: getUserDisplayName(userProfile.user),
+      label: getUserDisplayLabel(userProfile.user),
       data: userProfile,
       'data-test-subj': `userProfileSelectableOption-${userProfile.user.username}`,
     };
@@ -473,4 +464,12 @@ function isMatchingOption<Option extends UserProfileWithAvatar | null>(
   profile: Option
 ) {
   return option.key === (profile ? profile.uid : NULL_OPTION_KEY);
+}
+
+function getUserDisplayLabel(user: UserProfileWithAvatar['user']): string {
+  const displayName = getUserDisplayName(user);
+  if (user.email && user.email !== displayName) {
+    return `${displayName} (${user.email})`;
+  }
+  return displayName;
 }
