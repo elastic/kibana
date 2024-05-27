@@ -13,15 +13,16 @@ import { services } from './services';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
+  const servers = commonConfig.get('servers');
 
   return {
     pageObjects,
     services,
 
     servers: {
-      ...commonConfig.get('servers'),
+      ...servers,
       kibana: {
-        ...commonConfig.get('servers.kibana'),
+        ...servers.kibana,
         protocol: 'https',
         certificateAuthorities: [readFileSync(CA_CERT_PATH, 'utf-8')],
       },
@@ -45,6 +46,9 @@ export default async function ({ readConfigFile }) {
         `--server.ssl.key=${KBN_KEY_PATH}`,
         `--server.ssl.certificate=${KBN_CERT_PATH}`,
         `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+
+        // required because the base config reference its own server definition...
+        `--newsfeed.service.urlRoot=https://${servers.kibana.hostname}:${servers.kibana.port}`,
 
         // override default to not allow hiddenFromHttpApis saved object types access to the HTTP Apis. see https://github.com/elastic/dev/issues/2200
         '--savedObjects.allowHttpApiAccess=false',
