@@ -13,7 +13,7 @@ module.exports = {
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
     '<rootDir>/x-pack/plugins/integration_assistant/{common,public,server}/**/*.{ts,tsx}',
-    '!<rootDir>/x-pack/plugins/integration_assistant/{__jest__/**/*',
+    '!<rootDir>/x-pack/plugins/integration_assistant/{__jest__}/**/*',
     '!<rootDir>/x-pack/plugins/integration_assistant/*.test.{ts,tsx}',
     '!<rootDir>/x-pack/plugins/integration_assistant/*.config.ts',
   ],
