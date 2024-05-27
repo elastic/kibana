@@ -15,7 +15,7 @@ describe('calculateObjectHash', () => {
     expect(calculateObjectHash(object)).toEqual('5094c3dc');
   });
 
-  test('ignores inner properties of index object', () => {
+  test('ignore inner props of index object expect for the value.id', () => {
     const object1 = { test: 123, index: { value: { id: 'test', otherprop: 1 } } };
     const object2 = { test: 123, index: { value: { id: 'test', otherprop: 2 } } };
 
