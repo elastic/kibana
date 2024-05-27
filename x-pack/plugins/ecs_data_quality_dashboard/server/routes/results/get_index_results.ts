@@ -20,65 +20,30 @@ import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import { getAuthorizedIndexNames } from '../../helpers/get_authorized_index_names';
+import { getHitsTotal } from '../../helpers/get_hits_total';
 
 interface GetQuery {
   indexNames: string[];
-  limit?: number;
+  size?: number;
   from?: number;
   outcome?: 'pass' | 'fail';
   startDate?: string;
   endDate?: string;
 }
 
-type ExtractArrayType<T> = T extends Array<infer U> ? U[] : never;
-type NonNullableQuery = NonNullable<SearchRequest['query']>;
-type NonNullableSort = NonNullable<SearchRequest['sort']>;
-type NonNullableQueryBool = NonNullable<NonNullableQuery['bool']>;
-type NonNullableFilter = NonNullable<NonNullableQueryBool['filter']>;
-
-export interface GetQuerySearchRequest extends SearchRequest {
-  query: NonNullableQuery & {
-    bool: NonNullableQueryBool & {
-      filter: ExtractArrayType<NonNullableFilter>;
-    };
-  };
-  sort: NonNullableSort;
-}
-
 export const getQuery = ({
   indexNames,
-  limit,
+  size,
   from,
   outcome,
   startDate,
   endDate,
-}: GetQuery): GetQuerySearchRequest => {
-  const result: GetQuerySearchRequest = {
-    query: {
-      bool: {
-        filter: [
-          {
-            terms: {
-              indexName: indexNames,
-            },
-          },
-        ],
-      },
-    },
-    sort: [{ '@timestamp': 'desc' }],
-  };
-
-  if (limit !== undefined) {
-    result.size = limit;
-  }
-
-  if (from !== undefined) {
-    result.from = from;
-  }
+}: GetQuery): SearchRequest => {
+  const filters = [];
 
   if (outcome !== undefined) {
     const incompatibleFieldCountValueFilter = outcome === 'pass' ? { lt: 1 } : { gt: 0 };
-    result.query.bool.filter.push({
+    filters.push({
       range: {
         incompatibleFieldCount: incompatibleFieldCountValueFilter,
       },
@@ -88,7 +53,7 @@ export const getQuery = ({
   if (startDate || endDate) {
     const startDateValueFilter = startDate && { gte: startDate };
     const endDateValueFilter = endDate && { lte: endDate };
-    result.query.bool.filter.push({
+    filters.push({
       range: {
         '@timestamp': {
           ...startDateValueFilter,
@@ -98,7 +63,23 @@ export const getQuery = ({
     });
   }
 
-  return result;
+  return {
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              indexName: indexNames,
+            },
+          },
+          ...filters,
+        ],
+      },
+    },
+    sort: [{ '@timestamp': 'desc' }],
+    ...(size != null && { size }),
+    ...(from != null && { from }),
+  };
 };
 
 export const getIndexResultsRoute = (
@@ -143,17 +124,17 @@ export const getIndexResultsRoute = (
           const authorizedIndexNames = await getAuthorizedIndexNames(client, pattern);
 
           if (authorizedIndexNames.length === 0) {
-            return response.ok({ body: [] });
+            return response.ok({ body: { data: [], total: 0 } });
           }
 
-          const { from, limit, startDate, endDate, outcome } = request.query;
+          const { from, size, startDate, endDate, outcome } = request.query;
           // Get all results for all index names
           const query = {
             index,
             ...getQuery({
               indexNames: authorizedIndexNames,
               from,
-              limit,
+              size,
               startDate,
               endDate,
               outcome,
@@ -165,7 +146,9 @@ export const getIndexResultsRoute = (
 
           const resultsWithoutUndefined = resultsWithUndefined.filter((r) => r);
 
-          return response.ok({ body: resultsWithoutUndefined });
+          return response.ok({
+            body: { data: resultsWithoutUndefined, total: getHitsTotal(hits) },
+          });
         } catch (err) {
           logger.error(err.message);
 

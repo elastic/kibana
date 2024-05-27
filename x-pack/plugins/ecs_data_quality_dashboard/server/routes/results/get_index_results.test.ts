@@ -18,7 +18,7 @@ import type { CheckIndicesPrivilegesParam } from './privileges';
 import { getIndexResultsRoute, getQuery } from './get_index_results';
 
 const searchResponse = {
-  hits: { hits: [{ _source: resultDocument }] },
+  hits: { total: { value: 1 }, hits: [{ _source: resultDocument }] },
 } as unknown as SearchResponse<ResultDocument>;
 
 const mockCheckIndicesPrivileges = jest.fn(({ indices }: CheckIndicesPrivilegesParam) =>
@@ -48,7 +48,7 @@ describe('getIndexResultsRoute route', () => {
   beforeEach(() => jest.clearAllMocks());
   describe('when querying', () => {
     describe('when the request is successful', () => {
-      it('returns the result', async () => {
+      it('returns the result with total', async () => {
         const { server, context } = createTestSetup();
 
         const req = requestMock.create({
@@ -67,7 +67,7 @@ describe('getIndexResultsRoute route', () => {
         });
 
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual([resultDocument]);
+        expect(response.body).toEqual({ data: [resultDocument], total: 1 });
       });
     });
 
@@ -151,7 +151,7 @@ describe('getIndexResultsRoute route', () => {
       });
     });
 
-    describe('given a "limit" parameter', () => {
+    describe('given a "size" parameter', () => {
       it('calls search with "size" option', async () => {
         const { server, context } = createTestSetup();
 
@@ -159,7 +159,7 @@ describe('getIndexResultsRoute route', () => {
           method: 'get',
           path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
-          query: { limit: 5 },
+          query: { size: 5 },
         });
 
         const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
@@ -406,7 +406,7 @@ describe('getIndexResultsRoute route', () => {
 
         expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalled();
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual([resultDocument]);
+        expect(response.body).toEqual({ data: [resultDocument], total: 1 });
       });
     });
 
@@ -444,7 +444,7 @@ describe('getIndexResultsRoute route', () => {
           }),
         });
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual([resultDocument]);
+        expect(response.body).toEqual({ data: [resultDocument], total: 1 });
       });
     });
 
@@ -465,7 +465,7 @@ describe('getIndexResultsRoute route', () => {
         expect(mockCheckIndicesPrivileges).not.toHaveBeenCalled();
         expect(context.core.elasticsearch.client.asInternalUser.search).not.toHaveBeenCalled();
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual([]);
+        expect(response.body).toEqual({ data: [], total: 0 });
       });
     });
 
@@ -484,7 +484,7 @@ describe('getIndexResultsRoute route', () => {
 
         expect(context.core.elasticsearch.client.asInternalUser.search).not.toHaveBeenCalled();
         expect(response.status).toEqual(200);
-        expect(response.body).toEqual([]);
+        expect(response.body).toEqual({ data: [], total: 0 });
       });
     });
 

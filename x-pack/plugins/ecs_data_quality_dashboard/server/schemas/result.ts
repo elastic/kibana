@@ -46,10 +46,10 @@ export const GetResultsIndicesPatternParams = t.type({
   pattern: t.string,
 });
 
-export const GetResultsIndicesPatternQuery = t.type({
-  limit: t.union([t.number, t.undefined]),
-  from: t.union([t.number, t.undefined]),
-  startDate: t.union([t.string, t.undefined]),
-  endDate: t.union([t.string, t.undefined]),
-  outcome: t.union([t.literal('pass'), t.literal('fail'), t.undefined]),
+export const GetResultsIndicesPatternQuery = t.partial({
+  size: t.number,
+  from: t.number,
+  startDate: t.string,
+  endDate: t.string,
+  outcome: t.union([t.literal('pass'), t.literal('fail')]),
 });
