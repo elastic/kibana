@@ -164,5 +164,6 @@ export function getEcsGraph() {
     });
 
   const compiledEcsGraph = workflow.compile();
+
   return compiledEcsGraph;
 }

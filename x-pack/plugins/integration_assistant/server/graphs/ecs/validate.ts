@@ -146,7 +146,6 @@ export function handleValidateMappings(state: EcsMappingState): AnyObject {
   const missingKeys = findMissingFields(state?.formattedSamples, state?.currentMapping);
   const duplicateFields = findDuplicateFields(state?.samples, state?.currentMapping);
   const invalidEcsFields = findInvalidEcsFields(state?.currentMapping);
-
   return {
     missingKeys,
     duplicateFields,
