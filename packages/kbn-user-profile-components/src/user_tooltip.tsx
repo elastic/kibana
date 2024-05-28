@@ -43,15 +43,13 @@ export const UserToolTip: FunctionComponent<UserToolTipProps> = ({ user, avatar,
           <EuiFlexItem grow={false}>
             <UserAvatar user={user} avatar={avatar} size="l" />
           </EuiFlexItem>
-          <EuiFlexItem grow>
-            <EuiFlexGroup direction="column" gutterSize="none">
-              <EuiFlexItem>
-                <strong>{displayName}</strong>
-              </EuiFlexItem>
-              {user.email && user.email !== displayName ? (
-                <EuiFlexItem>{user.email}</EuiFlexItem>
-              ) : undefined}
-            </EuiFlexGroup>
+          <EuiFlexItem grow style={{ minWidth: 0 }}>
+            <div className="eui-textTruncate">
+              <strong>{displayName}</strong>
+            </div>
+            {user.email && user.email !== displayName ? (
+              <div className="eui-textTruncate">{user.email}</div>
+            ) : undefined}
           </EuiFlexItem>
         </EuiFlexGroup>
       }

@@ -18,7 +18,6 @@ import {
   EuiText,
   EuiCallOut,
   EuiHighlight,
-  EuiTextColor,
 } from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
@@ -26,7 +25,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getUserDisplayName } from './user_profile';
+import { getUserDisplayLabel, getUserDisplayName } from './user_profile';
 import type { UserProfileWithAvatar } from './user_avatar';
 import { UserAvatar } from './user_avatar';
 
@@ -326,7 +325,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
         id: searchInputId,
       }}
       isPreFiltered
-      listProps={{ onFocusBadge: false, rowHeight: 46 }}
+      listProps={{ onFocusBadge: false, rowHeight: 48 }}
       loadingMessage={loadingMessage}
       noMatchesMessage={noMatchesMessage}
       emptyMessage={emptyMessage}
@@ -340,15 +339,17 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
                 <EuiHighlight search={searchValue}>{displayName}</EuiHighlight>
               </div>
               {option.user.email && option.user.email !== displayName ? (
-                <div className="eui-textTruncate" css={{ fontSize: '0.8em', lineHeight: 1.2 }}>
-                  <EuiTextColor color={option.disabled ? 'disabled' : 'subdued'}>
-                    {searchValue ? (
-                      <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
-                    ) : (
-                      option.user.email
-                    )}
-                  </EuiTextColor>
-                </div>
+                <EuiText
+                  size={'xs'}
+                  color={option.disabled ? 'disabled' : 'subdued'}
+                  className="eui-textTruncate"
+                >
+                  {searchValue ? (
+                    <EuiHighlight search={searchValue}>{option.user.email}</EuiHighlight>
+                  ) : (
+                    option.user.email
+                  )}
+                </EuiText>
               ) : undefined}
             </>
           );
@@ -464,12 +465,4 @@ function isMatchingOption<Option extends UserProfileWithAvatar | null>(
   profile: Option
 ) {
   return option.key === (profile ? profile.uid : NULL_OPTION_KEY);
-}
-
-function getUserDisplayLabel(user: UserProfileWithAvatar['user']): string {
-  const displayName = getUserDisplayName(user);
-  if (user.email && user.email !== displayName) {
-    return `${displayName} (${user.email})`;
-  }
-  return displayName;
 }

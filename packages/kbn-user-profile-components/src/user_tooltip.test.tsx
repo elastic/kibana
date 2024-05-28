@@ -61,20 +61,24 @@ describe('UserToolTip', () => {
             </EuiFlexItem>
             <EuiFlexItem
               grow={true}
+              style={
+                Object {
+                  "minWidth": 0,
+                }
+              }
             >
-              <EuiFlexGroup
-                direction="column"
-                gutterSize="none"
+              <div
+                className="eui-textTruncate"
               >
-                <EuiFlexItem>
-                  <strong>
-                    Delighted Nightingale
-                  </strong>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  delighted_nightingale@elastic.co
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                <strong>
+                  Delighted Nightingale
+                </strong>
+              </div>
+              <div
+                className="eui-textTruncate"
+              >
+                delighted_nightingale@elastic.co
+              </div>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
