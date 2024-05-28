@@ -3107,6 +3107,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/alerting-comparators@link:x-pack/packages/kbn-alerting-comparators":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerting-example-plugin@link:x-pack/examples/alerting_example":
   version "0.0.0"
   uid ""
@@ -4903,6 +4907,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/grouping@link:packages/kbn-grouping":
+  version "0.0.0"
+  uid ""
+
 "@kbn/guided-onboarding-example-plugin@link:examples/guided_onboarding_example":
   version "0.0.0"
   uid ""
@@ -5960,10 +5968,6 @@
   uid ""
 
 "@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
-  version "0.0.0"
-  uid ""
-
-"@kbn/securitysolution-grouping@link:packages/kbn-securitysolution-grouping":
   version "0.0.0"
   uid ""
 
