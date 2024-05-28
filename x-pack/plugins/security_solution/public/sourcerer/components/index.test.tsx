@@ -9,21 +9,21 @@ import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
-import { sourcererActions, sourcererModel } from '../../store/sourcerer';
+import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import type { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select/super_select_control';
 import { fireEvent, waitFor, render } from '@testing-library/react';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { useSourcererDataView } from '../containers';
+import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
 
 const mockDispatch = jest.fn();
 
-jest.mock('../../containers/sourcerer');
-jest.mock('../../containers/sourcerer/use_signal_helpers');
+jest.mock('../containers');
+jest.mock('../containers/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
 jest.mock('./use_update_data_view', () => ({
   useUpdateDataView: () => mockUseUpdateDataView,

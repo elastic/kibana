@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { createSelector } from 'reselect';
-import type { State } from '../types';
+import type { State } from '../../common/store/types';
 import type { SourcererModel } from './model';
 import { SourcererScopeName } from './model';
 

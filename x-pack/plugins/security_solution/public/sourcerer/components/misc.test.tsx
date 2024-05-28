@@ -10,12 +10,12 @@ import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash';
 
-import { initialSourcererState, SourcererScopeName } from '../../store/sourcerer/model';
+import { initialSourcererState, SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
-import { sourcererActions, sourcererModel } from '../../store/sourcerer';
+import { sourcererActions, sourcererModel } from '../store';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { useSourcererDataView } from '../containers';
+import { useSignalHelpers } from '../containers/use_signal_helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
@@ -23,8 +23,8 @@ import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 
-jest.mock('../../containers/sourcerer');
-jest.mock('../../containers/sourcerer/use_signal_helpers');
+jest.mock('../containers');
+jest.mock('../containers/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
 jest.mock('./use_update_data_view', () => ({
   useUpdateDataView: () => mockUseUpdateDataView,

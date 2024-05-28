@@ -8,14 +8,13 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { sourcererSelectors } from '../../store';
+import { sourcererSelectors, sourcererActions } from '../store';
 import { useSourcererDataView } from '.';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useDataView } from '../source/use_data_view';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { useKibana } from '../../lib/kibana';
+import { SourcererScopeName } from '../store/model';
+import { useDataView } from '../../common/containers/source/use_data_view';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { useKibana } from '../../common/lib/kibana';
 import { createSourcererDataView } from './create_sourcerer_data_view';
-import { sourcererActions } from '../../store/sourcerer';
 
 export const useSignalHelpers = (): {
   /* when defined, signal index has been initiated but does not exist */

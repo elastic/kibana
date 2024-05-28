@@ -9,16 +9,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { matchPath } from 'react-router-dom';
-import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
+import { sourcererActions, sourcererSelectors } from '../store';
 import type {
   SelectedDataView,
   SourcererDataView,
   SourcererUrlState,
   RunTimeMappings,
-} from '../../store/sourcerer/model';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import { useUserInfo } from '../../../detections/components/user_info';
-import { timelineSelectors } from '../../../timelines/store';
+} from '../store/model';
+import { SourcererScopeName } from '../store/model';
+import { useUserInfo } from '../../detections/components/user_info';
+import { timelineSelectors } from '../../timelines/store';
 import {
   ALERTS_PATH,
   HOSTS_PATH,
@@ -28,19 +28,22 @@ import {
   RULES_PATH,
   CASES_PATH,
   DATA_QUALITY_PATH,
-} from '../../../../common/constants';
-import { TimelineId } from '../../../../common/types';
-import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { checkIfIndicesExist, getScopePatternListSelection } from '../../store/sourcerer/helpers';
-import { useAppToasts } from '../../hooks/use_app_toasts';
+} from '../../../common/constants';
+import { TimelineId } from '../../../common/types';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
+import { checkIfIndicesExist, getScopePatternListSelection } from '../store/helpers';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { createSourcererDataView } from './create_sourcerer_data_view';
-import { getDataViewStateFromIndexFields, useDataView } from '../source/use_data_view';
-import { useFetchIndex } from '../source';
-import type { State } from '../../store';
-import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
-import { URL_PARAM_KEY } from '../../hooks/use_url_state';
-import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
-import { useKibana } from '../../lib/kibana';
+import {
+  getDataViewStateFromIndexFields,
+  useDataView,
+} from '../../common/containers/source/use_data_view';
+import { useFetchIndex } from '../../common/containers/source';
+import type { State } from '../../common/store/types';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
+import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
+import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
+import { useKibana } from '../../common/lib/kibana';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default

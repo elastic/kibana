@@ -7,14 +7,14 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useUpdateDataView } from './use_update_data_view';
-import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
+import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import * as i18n from './translations';
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockPatterns = ['packetbeat-*', 'winlogbeat-*'];
 const mockedUseKibana = mockUseKibana();
-jest.mock('../../hooks/use_app_toasts', () => {
-  const original = jest.requireActual('../../hooks/use_app_toasts');
+jest.mock('../../common/hooks/use_app_toasts', () => {
+  const original = jest.requireActual('../../common/hooks/use_app_toasts');
 
   return {
     ...original,
@@ -24,7 +24,7 @@ jest.mock('../../hooks/use_app_toasts', () => {
     }),
   };
 });
-jest.mock('../../lib/kibana', () => {
+jest.mock('../../common/lib/kibana', () => {
   return {
     useKibana: () => mockedUseKibana,
   };

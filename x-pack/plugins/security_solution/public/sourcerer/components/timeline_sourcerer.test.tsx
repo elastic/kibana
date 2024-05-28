@@ -8,17 +8,17 @@
 import React from 'react';
 
 import { render, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../store/model';
 import { Sourcerer } from '.';
-import { sourcererModel } from '../../store/sourcerer';
-import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
+import { sourcererModel } from '../store';
+import { createMockStore, mockGlobalState, TestProviders } from '../../common/mock';
+import { useSourcererDataView } from '../containers';
+import { useSignalHelpers } from '../containers/use_signal_helpers';
 
 const mockDispatch = jest.fn();
 
-jest.mock('../../containers/sourcerer');
-jest.mock('../../containers/sourcerer/use_signal_helpers');
+jest.mock('../containers');
+jest.mock('../containers/use_signal_helpers');
 const mockUseUpdateDataView = jest.fn().mockReturnValue(() => true);
 jest.mock('./use_update_data_view', () => ({
   useUpdateDataView: () => mockUseUpdateDataView,
@@ -42,8 +42,8 @@ jest.mock('@kbn/react-kibana-mount', () => {
 });
 
 const mockUpdateUrlParam = jest.fn();
-jest.mock('../../utils/global_query_string', () => {
-  const original = jest.requireActual('../../utils/global_query_string');
+jest.mock('../../common/utils/global_query_string', () => {
+  const original = jest.requireActual('../../common/utils/global_query_string');
 
   return {
     ...original,

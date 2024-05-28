@@ -7,9 +7,9 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
-import { useSourcererDataView } from '../../containers/sourcerer';
-import { mockSourcererScope } from '../../containers/sourcerer/mocks';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererDataView } from '../containers';
+import { mockSourcererScope } from '../containers/mocks';
+import { SourcererScopeName } from '../store/model';
 import type { UseGetScopedSourcererDataViewArgs } from './use_get_sourcerer_data_view';
 import { useGetScopedSourcererDataView } from './use_get_sourcerer_data_view';
 
@@ -24,7 +24,7 @@ const renderHookCustom = (args: UseGetScopedSourcererDataViewArgs) => {
   );
 };
 
-jest.mock('../../containers/sourcerer');
+jest.mock('../containers');
 
 const mockGetSourcererDataView = jest.fn(() => mockSourcererScope);
 

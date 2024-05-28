@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { mockGlobalState } from '../../mock';
-import type { SelectedDataView } from '../../store/sourcerer/model';
-import { initSourcererScope } from '../../store/sourcerer/model';
-import { mockBrowserFields, mockRuntimeMappings } from '../source/mock';
+import { mockGlobalState } from '../../common/mock';
+import type { SelectedDataView } from '../store/model';
+import { initSourcererScope } from '../store/model';
+import { mockBrowserFields, mockRuntimeMappings } from '../../common/containers/source/mock';
 
 export const mockPatterns = [
   'auditbeat-*',

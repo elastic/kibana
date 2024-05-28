@@ -9,7 +9,7 @@ import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { EMPTY_BROWSER_FIELDS, EMPTY_INDEX_FIELDS } from '@kbn/timelines-plugin/common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { RuntimeFieldSpec, RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import type { SecuritySolutionDataViewBase } from '../../types';
+import type { SecuritySolutionDataViewBase } from '../../common/types';
 
 /** Uniquely identifies a Sourcerer Scope */
 export enum SourcererScopeName {

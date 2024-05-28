@@ -2,8 +2,8 @@
 
 
 ### Adding sourcerer to a new page
-- In order for the sourcerer to show up on a page, it needs to be added to the array `sourcererPaths` in `containers/sourcerer/index.tsx`
-- The scope of a sourcerer component will be default unless the path is added to the `detectionsPaths` array, in which case the scope can be detections in `containers/sourcerer/index.tsx`
+- In order for the sourcerer to show up on a page, it needs to be added to the array `sourcererPaths` in `../sourcerer/containers/index.tsx`
+- The scope of a sourcerer component will be default unless the path is added to the `detectionsPaths` array, in which case the scope can be detections in `../sourcerer/containers/index.tsx`
 
 ## Default Sourcerer
 ![](../../images/default.png)

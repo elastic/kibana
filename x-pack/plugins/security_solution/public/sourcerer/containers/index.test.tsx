@@ -12,22 +12,24 @@ import { Provider } from 'react-redux';
 
 import { getScopeFromPath, useInitSourcerer, useSourcererDataView } from '.';
 import { mockPatterns } from './mocks';
-import type { RouteSpyState } from '../../utils/route/types';
+import type { RouteSpyState } from '../../common/utils/route/types';
 import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_PATTERN,
   SecurityPageName,
-} from '../../../../common/constants';
+} from '../../../common/constants';
+import { useUserInfo, initialState as userInfoState } from '../../detections/components/user_info';
 import {
-  useUserInfo,
-  initialState as userInfoState,
-} from '../../../detections/components/user_info';
-import { mockGlobalState, mockSourcererState, TestProviders, createMockStore } from '../../mock';
-import type { SelectedDataView } from '../../store/sourcerer/model';
-import { SourcererScopeName } from '../../store/sourcerer/model';
-import * as source from '../source/use_data_view';
-import { sourcererActions } from '../../store/sourcerer';
-import { useInitializeUrlParam, useUpdateUrlParam } from '../../utils/global_query_string';
+  mockGlobalState,
+  mockSourcererState,
+  TestProviders,
+  createMockStore,
+} from '../../common/mock';
+import type { SelectedDataView } from '../store/model';
+import { SourcererScopeName } from '../store/model';
+import * as source from '../../common/containers/source/use_data_view';
+import { sourcererActions } from '../store';
+import { useInitializeUrlParam, useUpdateUrlParam } from '../../common/utils/global_query_string';
 import { createSourcererDataView } from './create_sourcerer_data_view';
 
 const mockRouteSpy: RouteSpyState = {
@@ -39,10 +41,10 @@ const mockRouteSpy: RouteSpyState = {
 };
 const mockDispatch = jest.fn();
 const mockUseUserInfo = useUserInfo as jest.Mock;
-jest.mock('../../lib/apm/use_track_http_request');
-jest.mock('../../../detections/components/user_info');
+jest.mock('../../common/lib/apm/use_track_http_request');
+jest.mock('../../detections/components/user_info');
 jest.mock('./create_sourcerer_data_view');
-jest.mock('../../utils/global_query_string');
+jest.mock('../../common/utils/global_query_string');
 jest.mock('react-redux', () => {
   const original = jest.requireActual('react-redux');
 
@@ -51,7 +53,7 @@ jest.mock('react-redux', () => {
     useDispatch: () => mockDispatch,
   };
 });
-jest.mock('../../utils/route/use_route_spy', () => ({
+jest.mock('../../common/utils/route/use_route_spy', () => ({
   useRouteSpy: () => [mockRouteSpy],
 }));
 
@@ -67,7 +69,7 @@ const mockCreateSourcererDataView = jest.fn(() => {
   throw errToReturn;
 });
 
-jest.mock('../../lib/kibana', () => ({
+jest.mock('../../common/lib/kibana', () => ({
   useToasts: () => ({
     addError: mockAddError,
     addSuccess: jest.fn(),
