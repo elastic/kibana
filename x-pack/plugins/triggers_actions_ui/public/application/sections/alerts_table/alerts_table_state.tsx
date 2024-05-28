@@ -92,7 +92,6 @@ export type AlertsTableStateProps = {
   dynamicRowHeight?: boolean;
   lastReloadRequestTime?: number;
   renderCellPopover?: AlertsTableProps['renderCellPopover'];
-  customRefetch?: () => void;
 } & Omit<Partial<EuiDataGridProps>, 'renderCellPopover'>;
 
 export interface AlertsTableStorage {
@@ -215,7 +214,6 @@ const AlertsTableStateWithQueryProvider = memo(
     shouldHighlightRow,
     dynamicRowHeight,
     lastReloadRequestTime,
-    customRefetch,
   }: AlertsTableStateProps) => {
     const { cases: casesService, fieldFormats } = useKibana<{
       cases?: CasesService;
@@ -431,13 +429,6 @@ const AlertsTableStateWithQueryProvider = memo(
       [maintenanceWindows, isLoadingMaintenanceWindows]
     );
 
-    const refetch = useCallback(() => {
-      if (customRefetch) {
-        customRefetch();
-      }
-      refresh();
-    }, [customRefetch, refresh]);
-
     const tableProps: AlertsTableProps = useMemo(
       () => ({
         alertsTableConfiguration,
@@ -477,7 +468,7 @@ const AlertsTableStateWithQueryProvider = memo(
         oldAlertsData,
         ecsAlertsData,
         getInspectQuery,
-        refetch,
+        refetch: refresh,
         alertsCount,
         onSortChange,
         onPageChange,
@@ -516,7 +507,7 @@ const AlertsTableStateWithQueryProvider = memo(
         oldAlertsData,
         ecsAlertsData,
         getInspectQuery,
-        refetch,
+        refresh,
         alertsCount,
         onSortChange,
         onPageChange,
