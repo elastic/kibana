@@ -119,6 +119,7 @@ export const ALLOWED_SCHEDULES_IN_SECONDS = ['10s', '30s'];
 
 export const ALLOWED_SCHEDULES_IN_MINUTES = [
   '1',
+  '2',
   '3',
   '5',
   '10',

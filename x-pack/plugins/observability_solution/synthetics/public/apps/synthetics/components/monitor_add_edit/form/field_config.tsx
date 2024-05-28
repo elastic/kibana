@@ -79,7 +79,6 @@ import {
   ThrottlingConfig,
   RequestBodyCheck,
   SourceType,
-  FormConfig,
 } from '../types';
 import {
   AlertConfigKey,
@@ -411,29 +410,17 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         'How often do you want to run this test? Higher frequencies will increase your total cost.',
     }),
     props: ({ formState, setValue, field }): EuiSelectProps => {
-      let val = formState?.defaultValues?.schedule?.number;
-      const unit = formState?.defaultValues?.schedule?.unit;
-      if (unit === 's') {
-        val = `${val}s`;
-      }
-
-      return {
-        value: val,
+      const props: EuiSelectProps = {
         'data-test-subj': 'syntheticsMonitorConfigSchedule',
         options: getSchedules(formState.defaultValues?.[ConfigKey.MONITOR_TYPE]),
         disabled: readOnly,
-        onChange: (e) => {
-          const value = e.target.value;
-          if (value.endsWith('s')) {
-            setValue<keyof FormConfig>('schedule.unit', 's');
-            setValue<keyof FormConfig>('schedule.unit', 's');
-            setValue<keyof FormConfig>('schedule.number', value.slice(0, -1));
-          } else {
-            setValue<keyof FormConfig>('schedule.unit', 'm');
-            field?.onChange(e);
-          }
-        },
       };
+      const val = formState?.defaultValues?.schedule?.number;
+      const unit = formState?.defaultValues?.schedule?.unit;
+      if (unit === 's') {
+        props.value = `${val}s`;
+      }
+      return props;
     },
   },
   [ConfigKey.LOCATIONS]: {
