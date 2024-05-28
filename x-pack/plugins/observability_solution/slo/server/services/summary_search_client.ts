@@ -65,13 +65,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     pagination: Pagination,
     hideStale?: boolean
   ): Promise<Paginated<SummaryResult>> {
-    let parsedFilters: any = {};
-
-    try {
-      parsedFilters = JSON.parse(filters);
-    } catch (e) {
-      this.logger.error(`Failed to parse filters: ${e.message}`);
-    }
+    const parsedFilters = this.parseFilters(filters);
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getListOfSummaryIndices(this.esClient, settings);
     const esParams = createEsParams({
@@ -176,6 +170,20 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       this.logger.error(new Error(`Summary search query error, ${err.message}`, { cause: err }));
       return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
     }
+  }
+
+  parseFilters(filters: string) {
+    if (!filters) return {};
+
+    let parsedFilters: any = {};
+
+    try {
+      parsedFilters = JSON.parse(filters);
+    } catch (e) {
+      this.logger.error(`Failed to parse filters: ${e.message}`);
+    }
+
+    return parsedFilters;
   }
 
   private async deleteOutdatedTemporarySummaries(summarySloIds: string[]) {
