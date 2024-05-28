@@ -13,14 +13,14 @@ describe('getLocation', () => {
   it('should return the correct location with source and query', () => {
     const params: ObservabilityOnboardingLocatorParams = {
       source: 'customLogs',
-      query: 'key=value',
+      category: 'infra',
     };
 
     const result = getLocation(params);
 
     expect(result).toEqual({
       app: PLUGIN_ID,
-      path: '/customLogs?key=value',
+      path: '/customLogs?category=infra',
       state: {},
     });
   });
@@ -42,14 +42,14 @@ describe('getLocation', () => {
   it('should return the correct location with only query', () => {
     const params: ObservabilityOnboardingLocatorParams = {
       source: undefined,
-      query: 'key=value',
+      category: 'metrics',
     };
 
     const result = getLocation(params);
 
     expect(result).toEqual({
       app: PLUGIN_ID,
-      path: '/?key=value',
+      path: '/?category=metrics',
       state: {},
     });
   });

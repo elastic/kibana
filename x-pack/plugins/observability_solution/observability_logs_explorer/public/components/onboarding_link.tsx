@@ -33,7 +33,7 @@ export const OnboardingLink = React.memo(({ urlService }: { urlService: BrowserU
 
   const onboardingUrl = locator?.useUrl({});
 
-  const navigateToOnboarding = () => locator?.navigate({ query: 'category=logs' });
+  const navigateToOnboarding = () => locator?.navigate({ category: 'logs' });
   const onboardingLinkProps = getRouterLinkProps({
     href: onboardingUrl,
     onClick: navigateToOnboarding,
