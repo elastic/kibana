@@ -17,7 +17,6 @@ import {
   FieldName,
   FIND_FIELDS_METADATA_URL,
 } from '../../../common/fields_metadata';
-// import { decodeOrThrow } from '../../../common/runtime_types';
 import { IFieldsMetadataClient } from './types';
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
