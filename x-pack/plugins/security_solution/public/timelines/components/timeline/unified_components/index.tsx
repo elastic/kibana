@@ -26,11 +26,11 @@ import { UnifiedFieldListSidebarContainer } from '@kbn/unified-field-list';
 import type { EuiTheme } from '@kbn/react-kibana-context-styled';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import { isEqual } from 'lodash';
 import { EventDetailsWidthProvider } from '../../../../common/components/events_viewer/event_details_width_context';
 import type { ExpandedDetailTimeline } from '../../../../../common/types';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
-import { defaultHeaders } from '../body/column_headers/default_headers';
 import type {
   ColumnHeaderOptions,
   OnChangePage,
@@ -123,6 +123,12 @@ type Props = {
    *
    * */
   textBasedDataViewFields?: DataViewField[];
+  /*
+   * table consumers can pass a callback which handles the change in visible
+   * columns in the Table. All non-visible columns will still be visible in
+   * the FieldList sidebar.
+   * */
+  onVisibleColumnsChange?: (columns: ColumnHeaderOptions[]) => void;
 } & Pick<UnifiedDataTableProps, 'columnsMeta' | 'onSort'>;
 
 const UnifiedTimelineComponent: React.FC<Props> = ({
@@ -152,6 +158,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   textBasedDataViewFields,
   columnsMeta,
   onSort: onSortProp,
+  onVisibleColumnsChange,
 }) => {
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
@@ -231,7 +238,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     );
   }, [sort]);
 
-  const onSortCallback = useCallback(
+  const onSortDefaultCallback = useCallback(
     (nextSort: string[][]) => {
       dispatch(
         timelineActions.updateSort({
@@ -254,20 +261,29 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     [dispatch, timelineId, columns]
   );
 
-  const onSort = useMemo(() => onSortProp ?? onSortCallback, [onSortProp, onSortCallback]);
+  const onSort = useMemo(
+    () => onSortProp ?? onSortDefaultCallback,
+    [onSortProp, onSortDefaultCallback]
+  );
 
   const setAppState = useCallback(
     (newState: { columns: string[]; sort?: string[][] }) => {
       if (newState.sort) {
         onSort(newState.sort);
-      } else {
+      }
+
+      if (!isEqual(columnIds, newState.columns)) {
         const columnsStates = newState.columns.map((columnId) =>
           getColumnHeader(columnId, defaultUdtHeaders)
         );
-        dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
+        if (onVisibleColumnsChange) {
+          onVisibleColumnsChange(columnsStates);
+        } else {
+          dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
+        }
       }
     },
-    [dispatch, onSort, timelineId]
+    [dispatch, onSort, timelineId, onVisibleColumnsChange, columnIds]
   );
 
   const {
@@ -319,19 +335,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const [{ dragging }] = useDragDropContext();
   const draggingFieldName = dragging?.id;
 
-  const onToggleColumn = useCallback(
-    (columnId: string) => {
-      dispatch(
-        timelineActions.upsertColumn({
-          column: getColumnHeader(columnId, defaultHeaders),
-          id: timelineId,
-          index: 1,
-        })
-      );
-    },
-    [dispatch, timelineId]
-  );
-
   const isDropAllowed = useMemo(() => {
     if (!draggingFieldName || columnIds.includes(draggingFieldName)) {
       return false;
@@ -342,31 +345,21 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   const onDropFieldToTable = useCallback(() => {
     if (draggingFieldName) {
       onAddColumn(draggingFieldName);
-      onToggleColumn(draggingFieldName);
     }
-  }, [draggingFieldName, onAddColumn, onToggleColumn]);
+  }, [draggingFieldName, onAddColumn]);
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {
       onAddColumn(field.name);
-      onToggleColumn(field.name);
     },
-    [onAddColumn, onToggleColumn]
+    [onAddColumn]
   );
 
   const onRemoveFieldFromWorkspace = useCallback(
     (field: DataViewField) => {
-      if (columns.some(({ id }) => id === field.name)) {
-        dispatch(
-          timelineActions.removeColumn({
-            columnId: field.name,
-            id: timelineId,
-          })
-        );
-      }
       onRemoveColumn(field.name);
     },
-    [columns, dispatch, onRemoveColumn, timelineId]
+    [onRemoveColumn]
   );
 
   const onFieldEdited = useCallback(() => {

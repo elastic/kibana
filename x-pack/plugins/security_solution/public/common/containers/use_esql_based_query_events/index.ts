@@ -9,14 +9,14 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ExpressionsStart, Datatable } from '@kbn/expressions-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { Subscription } from 'rxjs';
 import { lastValueFrom, pluck } from 'rxjs';
 import { useQuery } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
-interface UseESQLBasedEventsArgs {
+export interface UseESQLBasedEventsArgs {
   query: AggregateQuery;
   dataView?: DataView;
   expressions: ExpressionsStart;
@@ -30,12 +30,12 @@ interface UseESQLBasedEventsArgs {
 }
 
 export interface SecuritySolutionESQLBasedQueryResponse {
-  data: DataTableRecord[];
+  rows: DataTableRecord[];
   columns: Datatable['columns'];
   warnings: string | undefined;
 }
 
-interface SecuritySolutionESQLBasedErrorResponse {
+export interface SecuritySolutionESQLBasedErrorResponse {
   error: {
     message: string;
   };
@@ -43,7 +43,7 @@ interface SecuritySolutionESQLBasedErrorResponse {
 }
 
 const defaultESQLBasedQueryResponse: SecuritySolutionESQLBasedQueryResponse = {
-  data: [],
+  rows: [],
   columns: [],
   warnings: undefined,
 };
@@ -104,7 +104,7 @@ export const useESQLBasedEvents = ({
     });
 
     const execution = contract.getData();
-    let finalData: DataTableRecord[] = [];
+    let finalRows: DataTableRecord[] = [];
     let textBasedQueryColumns: Datatable['columns'] = [];
     let error: string | undefined;
     let textBasedHeaderWarning: string | undefined;
@@ -120,7 +120,7 @@ export const useESQLBasedEvents = ({
       } else {
         const table = response as Datatable;
         const rows = table?.rows ?? [];
-        finalData = rows.map((row: Record<string, string>, idx: number) => {
+        finalRows = rows.map((row: Record<string, string>, idx: number) => {
           return {
             id: String(idx),
             raw: row,
@@ -140,16 +140,20 @@ export const useESQLBasedEvents = ({
     await lastValueFrom(execution);
 
     return {
-      data: finalData,
+      rows: finalRows,
       columns: textBasedQueryColumns,
       warnings: textBasedHeaderWarning,
     };
   }, [convertQueryToAst, expressions, inspectorAdapters]);
 
-  const queryResult = useQuery(['esql', query, timeRange, filters], fetchEvents, {
-    refetchOnWindowFocus: false,
-    initialData: defaultESQLBasedQueryResponse,
-  });
+  const { data = defaultESQLBasedQueryResponse, ...restQueryResult } = useQuery(
+    ['esql', query, timeRange, filters],
+    fetchEvents,
+    {
+      refetchOnWindowFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
-  return queryResult;
+  return useMemo(() => ({ ...restQueryResult, data }), [data, restQueryResult]);
 };

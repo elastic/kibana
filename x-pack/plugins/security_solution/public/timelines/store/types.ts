@@ -55,6 +55,7 @@ export interface ESQLOptions {
   query: AggregateQuery;
   esqlDataViewId?: string;
   sort: SortColumnTimeline[];
+  visibleColumns: ColumnHeaderOptions[];
   queryValidation: {
     hasKeepClause: boolean;
     sourceCommand?: string;

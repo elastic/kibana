@@ -39,7 +39,7 @@ describe('useGetAdHocDataViewWithESQLQuery', () => {
     jest.clearAllMocks();
   });
 
-  describe('when query is invalid or it does not have FROM clause', () => {
+  describe('when query is invalid or it does not have FROM source-command', () => {
     const invalidQuery = {
       esql: 'invalid query',
     };
@@ -100,7 +100,7 @@ describe('useGetAdHocDataViewWithESQLQuery', () => {
       expect(result.current.dataView).not.toBeUndefined();
     });
 
-    test('should updated getDataView handler when only indexPattern changes', async () => {
+    test('should update getDataView handler when only indexPattern changes', async () => {
       let esqlQuery = query;
       const { result, rerender } = renderHook(
         () =>
