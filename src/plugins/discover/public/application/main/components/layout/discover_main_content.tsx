@@ -70,7 +70,7 @@ export const DiscoverMainContent = ({
       stateContainer.appState.update(
         // Resetting to default viewMode: undefined if document level
         // else change for viewMode from undefined to DOCUMENT_LEVEL will triger unsaved changes badge
-        { viewMode: mode === VIEW_MODE.DOCUMENT_LEVEL ? undefined : mode },
+        { viewMode: mode },
         true
       );
 
