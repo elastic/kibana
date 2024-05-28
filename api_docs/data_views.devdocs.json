@@ -13471,7 +13471,7 @@
               },
               {
                 "plugin": "infra",
-                "path": "x-pack/plugins/observability_solution/infra/public/hooks/use_data_view.test.ts"
+                "path": "x-pack/plugins/observability_solution/infra/public/pages/metrics/inventory_view/hooks/use_waffle_filters.test.ts"
               }
             ]
           },
