@@ -476,7 +476,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Dataset quality flyout with degraded fields', () => {
       const goodDatasetName = 'good';
       const degradedDatasetName = 'degraded';
-      const today = Date.now();
+      const today = new Date().toISOString();
       before(async () => {
         await PageObjects.svlCommonPage.loginWithRole('admin');
         await synthtrace.index([

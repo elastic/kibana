@@ -457,7 +457,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     describe('Dataset quality flyout with degraded fields', () => {
       const goodDatasetName = 'good';
       const degradedDatasetName = 'degraded';
-      const today = Date.now();
+      const today = new Date().toISOString();
       before(async () => {
         await synthtrace.index([
           getLogsForDataset({
