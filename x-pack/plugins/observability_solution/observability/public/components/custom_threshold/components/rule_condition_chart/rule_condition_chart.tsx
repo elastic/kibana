@@ -25,11 +25,9 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { EventsAsUnit } from '../../../../../common/constants';
-import {
-  Comparator,
-  CustomThresholdSearchSourceFields,
-} from '../../../../../common/custom_threshold_rule/types';
+import { CustomThresholdSearchSourceFields } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
@@ -121,15 +119,15 @@ export function RuleConditionChart({
     const refLayers = [];
 
     if (
-      comparator === Comparator.OUTSIDE_RANGE ||
-      (comparator === Comparator.BETWEEN && threshold.length === 2)
+      comparator === COMPARATORS.NOT_BETWEEN ||
+      (comparator === COMPARATORS.BETWEEN && threshold.length === 2)
     ) {
       const refLineStart = new XYReferenceLinesLayer({
         data: [
           {
             value: (threshold[0] || 0).toString(),
             color: euiTheme.colors.danger,
-            fill: comparator === Comparator.OUTSIDE_RANGE ? 'below' : 'none',
+            fill: comparator === COMPARATORS.NOT_BETWEEN ? 'below' : 'none',
           },
         ],
       });
@@ -138,7 +136,7 @@ export function RuleConditionChart({
           {
             value: (threshold[1] || 0).toString(),
             color: euiTheme.colors.danger,
-            fill: comparator === Comparator.OUTSIDE_RANGE ? 'above' : 'none',
+            fill: comparator === COMPARATORS.NOT_BETWEEN ? 'above' : 'none',
           },
         ],
       });
@@ -146,7 +144,7 @@ export function RuleConditionChart({
       refLayers.push(refLineStart, refLineEnd);
     } else {
       let fill: FillStyle = 'above';
-      if (comparator === Comparator.LT || comparator === Comparator.LT_OR_EQ) {
+      if (comparator === COMPARATORS.LESS_THAN || comparator === COMPARATORS.LESS_THAN_OR_EQUALS) {
         fill = 'below';
       }
       const thresholdRefLine = new XYReferenceLinesLayer({
