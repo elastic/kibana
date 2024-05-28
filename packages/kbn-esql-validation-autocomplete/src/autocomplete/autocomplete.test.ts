@@ -17,6 +17,7 @@ import { camelCase, partition } from 'lodash';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { groupingFunctionDefinitions } from '../definitions/grouping';
 import { FunctionArgSignature } from '../definitions/types';
+import { METADATA_FIELDS } from '../shared/constants';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -208,7 +209,6 @@ function createCustomCallbackMocks(
     getFieldsFor: jest.fn(async () => finalFields),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
-    getMetaFields: jest.fn(async () => ['_index', '_score']),
   };
 }
 
@@ -358,10 +358,18 @@ describe('autocomplete', () => {
     testSuggestions('from a, b ', ['metadata $0', ',', '|']);
     testSuggestions('from *,', suggestedIndexes);
     testSuggestions('from index', suggestedIndexes, 5 /* space before index */);
-    testSuggestions('from a, b [metadata ]', ['_index', '_score'], ' ]');
-    testSuggestions('from a, b metadata ', ['_index', '_score'], ' ');
-    testSuggestions('from a, b [metadata _index, ]', ['_score'], ' ]');
-    testSuggestions('from a, b metadata _index, ', ['_score'], ' ');
+    testSuggestions('from a, b [metadata ]', METADATA_FIELDS, ' ]');
+    testSuggestions('from a, b metadata ', METADATA_FIELDS, ' ');
+    testSuggestions(
+      'from a, b [metadata _index, ]',
+      METADATA_FIELDS.filter((field) => field !== '_index'),
+      ' ]'
+    );
+    testSuggestions(
+      'from a, b metadata _index, ',
+      METADATA_FIELDS.filter((field) => field !== '_index'),
+      ' '
+    );
   });
 
   describe('show', () => {

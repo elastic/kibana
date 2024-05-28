@@ -113,84 +113,84 @@
     {
       "query": "eval",
       "error": [
-        "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'eval' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "stats",
       "error": [
-        "SyntaxError: mismatched input 'stats' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'stats' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "rename",
       "error": [
-        "SyntaxError: mismatched input 'rename' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'rename' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "limit",
       "error": [
-        "SyntaxError: mismatched input 'limit' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'limit' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "keep",
       "error": [
-        "SyntaxError: mismatched input 'keep' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'keep' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "drop",
       "error": [
-        "SyntaxError: mismatched input 'drop' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'drop' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "mv_expand",
       "error": [
-        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'mv_expand' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "dissect",
       "error": [
-        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'dissect' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "grok",
       "error": [
-        "SyntaxError: mismatched input 'grok' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'grok' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "f",
       "error": [
-        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'row', 'show'}"
+        "SyntaxError: mismatched input 'f' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}"
       ],
       "warning": []
     },
     {
       "query": "from ",
       "error": [
-        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
       ],
       "warning": []
     },
     {
       "query": "from index,",
       "error": [
-        "SyntaxError: missing FROM_UNQUOTED_IDENTIFIER at '<EOF>'"
+        "SyntaxError: missing INDEX_UNQUOTED_IDENTIFIER at '<EOF>'"
       ],
       "warning": []
     },
@@ -275,7 +275,7 @@
     {
       "query": "from index [METADATA _id, _source2]",
       "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]"
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source]"
       ],
       "warning": [
         "Square brackets '[]' need to be removed from FROM METADATA declaration"
@@ -322,7 +322,7 @@
     {
       "query": "from index METADATA _id, _source2",
       "error": [
-        "Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]"
+        "Metadata field [_source2] is not available. Available metadata fields are: [_version, _id, _index, _source]"
       ],
       "warning": []
     },
@@ -8965,6 +8965,42 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval var = date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(stringField), to_datetime(stringField))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(numberField, stringField, stringField)",
+      "error": [
+        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]",
+        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_diff(\"year\", dateField, dateField, extraArg)",
+      "error": [
+        "Error: [date_diff] function expects exactly 3 arguments, got 4."
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | sort date_diff(\"year\", dateField, dateField)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = abs(5)",
       "error": [],
       "warning": []
@@ -9719,42 +9755,6 @@
     },
     {
       "query": "from a_index | sort cosh(numberField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = date_diff(\"year\", dateField, dateField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_diff(\"year\", dateField, dateField)",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval var = date_diff(\"year\", to_datetime(stringField), to_datetime(stringField))",
-      "error": [],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_diff(numberField, stringField, stringField)",
-      "error": [
-        "Argument of [date_diff] must be [string], found value [numberField] type [number]",
-        "Argument of [date_diff] must be [date], found value [stringField] type [string]",
-        "Argument of [date_diff] must be [date], found value [stringField] type [string]"
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | eval date_diff(\"year\", dateField, dateField, extraArg)",
-      "error": [
-        "Error: [date_diff] function expects exactly 3 arguments, got 4."
-      ],
-      "warning": []
-    },
-    {
-      "query": "from a_index | sort date_diff(\"year\", dateField, dateField)",
       "error": [],
       "warning": []
     },

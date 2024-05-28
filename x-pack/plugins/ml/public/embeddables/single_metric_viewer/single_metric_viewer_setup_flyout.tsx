@@ -47,13 +47,13 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
               bounds={timefilter.getBounds()!}
               initialInput={input}
               onCreate={(explicitInput) => {
-                flyoutSession.close();
                 resolve(explicitInput);
+                flyoutSession.close();
                 overlayTracker?.clearOverlays();
               }}
               onCancel={() => {
-                flyoutSession.close();
                 reject();
+                flyoutSession.close();
                 overlayTracker?.clearOverlays();
               }}
             />
@@ -65,8 +65,9 @@ export async function resolveEmbeddableSingleMetricViewerUserInput(
           ownFocus: true,
           size: 's',
           onClose: () => {
-            flyoutSession.close();
             reject();
+            flyoutSession.close();
+            overlayTracker?.clearOverlays();
           },
         }
       );
