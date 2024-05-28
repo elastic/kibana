@@ -11,12 +11,8 @@ import { Config, Secrets, RunActionParams } from '../../../common/gemini/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Services } from '@kbn/actions-plugin/server/types';
-import {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  ElasticsearchClient
-} from '@kbn/core/server';
-import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';\
+import { KibanaRequest, SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
+import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 import { RunApiResponseSchema } from '../../../common/gemini/schema';
 
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
@@ -141,8 +137,9 @@ describe('GeminiConnector', () => {
       };
 
       // Mock the request function to simulate a successful API call
-      jest.spyOn(connector as GeminiConnector, 'runApi').mockResolvedValueOnce({completion:'true',
-       stop_reason: '200' });
+      jest
+        .spyOn(connector as GeminiConnector, 'runApi')
+        .mockResolvedValueOnce({ completion: 'true', stop_reason: '200' });
 
       const response = await connector.runApi(runActionParams);
 
