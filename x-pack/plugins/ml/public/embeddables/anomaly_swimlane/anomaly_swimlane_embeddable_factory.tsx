@@ -199,7 +199,6 @@ export const getAnomalySwimLaneEmbeddableFactory = (
           ...swimLaneComparators,
         }
       );
-
       const appliedTimeRange$: Observable<TimeRange | undefined> = combineLatest([
         api.timeRange$,
         apiHasParentApi(api) && apiPublishesTimeRange(api.parentApi)
