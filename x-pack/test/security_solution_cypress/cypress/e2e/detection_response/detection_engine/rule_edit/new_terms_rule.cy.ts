@@ -80,9 +80,9 @@ describe(
         cy.get(ALERT_SUPPRESSION_FIELDS).should('contain', SUPPRESS_BY_FIELDS.slice(0, 1).join(''));
         cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_SUPPRESS).should('be.checked');
 
-        selectAlertSuppressionPerRuleExecution();
-        selectDoNotSuppressForMissingFields();
         fillAlertSuppressionFields(SUPPRESS_BY_FIELDS.slice(1));
+        selectDoNotSuppressForMissingFields();
+        selectAlertSuppressionPerRuleExecution();
 
         saveEditedRule();
 
