@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
-import { useDataView } from '../../../../../../hooks/use_data_view';
+import useAsync from 'react-use/lib/useAsync';
+import { resolveDataView } from '../../../../../../utils/data_view';
+import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
+import { HOST_NAME_FIELD } from '../../../../../../../common/constants';
 import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -23,7 +26,9 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { loading, searchSessionId } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
-  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
+  const {
+    services: { dataViews },
+  } = useKibanaContextForPlugin();
 
   const shouldUseSearchCriteria = currentPage.length === 0;
 
@@ -36,22 +41,27 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
     searchSessionId,
   });
 
-  const filters = useMemo(() => {
+  const { value: filters = [] } = useAsync(async () => {
+    const resolvedDataView = await resolveDataView({
+      dataViewId: (chartProps.dataset as LensDataviewDataset)?.index,
+      dataViewsService: dataViews,
+    });
+
     return shouldUseSearchCriteria
       ? [...searchCriteria.filters, ...(searchCriteria.panelFilters ?? [])]
       : [
           buildCombinedAssetFilter({
-            field: 'host.name',
+            field: HOST_NAME_FIELD,
             values: currentPage.map((p) => p.name),
-            dataView,
+            dataView: resolvedDataView.dataViewReference,
           }),
         ];
   }, [
-    shouldUseSearchCriteria,
+    currentPage,
+    dataViews,
+    chartProps.dataset,
     searchCriteria.filters,
     searchCriteria.panelFilters,
-    currentPage,
-    dataView,
   ]);
 
   return (
