@@ -178,7 +178,7 @@ export class ConnectorTokenClient {
             perPage: MAX_TOKENS_RETURNED,
             type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
             filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
-            sortField: 'updated_at',
+            sortField: 'updatedAt',
             sortOrder: 'desc',
           })
         ).saved_objects
@@ -191,9 +191,6 @@ export class ConnectorTokenClient {
       );
       return { hasErrors: true, connectorToken: null };
     }
-
-    console.log('CONNECTOR_TOKEN', connectorTokensResult);
-
 
     if (connectorTokensResult.length === 0) {
       return { hasErrors: false, connectorToken: null };
