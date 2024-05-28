@@ -9030,6 +9030,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_diff(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval date_diff(nullVar, nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = abs(5)",
       "error": [],
       "warning": []
@@ -9133,6 +9143,16 @@
       "error": [
         "Argument of [abs] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval abs(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval abs(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -9242,6 +9262,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval acos(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval acos(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = asin(5)",
       "error": [],
       "warning": []
@@ -9345,6 +9375,16 @@
       "error": [
         "Argument of [asin] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval asin(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval asin(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -9454,6 +9494,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval atan(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval atan(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = atan2(5, 5)",
       "error": [],
       "warning": []
@@ -9559,6 +9609,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval atan2(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval atan2(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = case(true, \"a\")",
       "error": [],
       "warning": []
@@ -9588,6 +9648,16 @@
       "error": [
         "Argument of [case] must be [boolean], found value [to_cartesianpoint(\"POINT (30 10)\")] type [cartesian_point]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval case(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval case(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -9697,6 +9767,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval ceil(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval ceil(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = cidr_match(to_ip(\"127.0.0.1\"), \"a\")",
       "error": [],
       "warning": []
@@ -9771,6 +9851,16 @@
         "Argument of [cidr_match] must be [ip], found value [booleanField] type [boolean]",
         "Argument of [cidr_match] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval cidr_match(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval cidr_match(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -10479,6 +10569,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval coalesce(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval coalesce(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = concat(\"a\", \"a\")",
       "error": [],
       "warning": []
@@ -10574,6 +10674,16 @@
         "Argument of [concat] must be [string], found value [booleanField] type [boolean]",
         "Argument of [concat] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval concat(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval concat(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -10683,6 +10793,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval cos(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval cos(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = cosh(5)",
       "error": [],
       "warning": []
@@ -10789,6 +10909,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval cosh(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval cosh(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", now())",
       "error": [],
       "warning": []
@@ -10855,6 +10985,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_extract(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval date_extract(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = date_format(\"a\", now())",
       "error": [],
       "warning": []
@@ -10917,6 +11057,16 @@
         "Argument of [date_format] must be [string], found value [booleanField] type [boolean]",
         "Argument of [date_format] must be [date], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval date_format(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval date_format(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -11014,6 +11164,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_parse(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval date_parse(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = date_trunc(1 year, now())",
       "error": [],
       "warning": []
@@ -11105,6 +11265,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval date_trunc(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval date_trunc(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = e()",
       "error": [],
       "warning": []
@@ -11138,6 +11308,11 @@
     },
     {
       "query": "from a_index | sort e()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval e()",
       "error": [],
       "warning": []
     },
@@ -11223,6 +11398,16 @@
         "Argument of [ends_with] must be [string], found value [booleanField] type [boolean]",
         "Argument of [ends_with] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval ends_with(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval ends_with(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -11329,6 +11514,16 @@
       "error": [
         "Argument of [floor] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval floor(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval floor(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -11651,6 +11846,16 @@
     },
     {
       "query": "from a_index | sort greatest(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval greatest(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval greatest(nullVar)",
       "error": [],
       "warning": []
     },
@@ -11978,6 +12183,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval least(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval least(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = left(\"a\", 5)",
       "error": [],
       "warning": []
@@ -12080,6 +12295,16 @@
         "Argument of [left] must be [string], found value [booleanField] type [boolean]",
         "Argument of [left] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval left(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval left(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -12186,6 +12411,16 @@
       "error": [
         "Argument of [length] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval length(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval length(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -12355,6 +12590,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval log(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval log(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = log10(5)",
       "error": [],
       "warning": []
@@ -12458,6 +12703,16 @@
       "error": [
         "Argument of [log10] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval log10(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval log10(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -12567,6 +12822,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval ltrim(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval ltrim(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_avg(5)",
       "error": [],
       "warning": []
@@ -12673,6 +12938,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_avg(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_avg(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_concat(\"a\", \"a\")",
       "error": [],
       "warning": []
@@ -12775,6 +13050,16 @@
         "Argument of [mv_concat] must be [string], found value [booleanField] type [boolean]",
         "Argument of [mv_concat] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_concat(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_concat(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -13152,6 +13437,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_count(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_count(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_dedupe(\"a\")",
       "error": [],
       "warning": []
@@ -13484,6 +13779,26 @@
     },
     {
       "query": "from a_index | sort mv_dedupe(numberField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row var = mv_dedupe(to_cartesianpoint(\"POINT (30 10)\"))",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_dedupe(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_dedupe(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_dedupe(nullVar)",
       "error": [],
       "warning": []
     },
@@ -13822,6 +14137,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_first(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_first(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_last(\"a\")",
       "error": [],
       "warning": []
@@ -14156,6 +14481,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_last(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_last(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_max(\"a\")",
       "error": [],
       "warning": []
@@ -14398,6 +14733,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_max(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_max(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_median(5)",
       "error": [],
       "warning": []
@@ -14501,6 +14846,16 @@
       "error": [
         "Argument of [mv_median] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_median(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_median(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -14742,6 +15097,16 @@
     },
     {
       "query": "from a_index | sort mv_min(booleanField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_min(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_min(nullVar)",
       "error": [],
       "warning": []
     },
@@ -15177,6 +15542,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_slice(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_slice(nullVar, nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_sort(\"a\", \"asc\")",
       "error": [],
       "warning": []
@@ -15348,6 +15723,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_sort(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_sort(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = mv_sum(5)",
       "error": [],
       "warning": []
@@ -15451,6 +15836,16 @@
       "error": [
         "Argument of [mv_sum] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval mv_sum(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_sum(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -15580,6 +15975,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval mv_zip(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval mv_zip(nullVar, nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = now()",
       "error": [],
       "warning": []
@@ -15608,6 +16013,11 @@
     },
     {
       "query": "from a_index | sort now()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval now()",
       "error": [],
       "warning": []
     },
@@ -15645,6 +16055,11 @@
     },
     {
       "query": "from a_index | sort pi()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval pi()",
       "error": [],
       "warning": []
     },
@@ -15751,6 +16166,16 @@
         "Argument of [pow] must be [number], found value [booleanField] type [boolean]",
         "Argument of [pow] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval pow(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval pow(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -15865,6 +16290,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval replace(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval replace(nullVar, nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = right(\"a\", 5)",
       "error": [],
       "warning": []
@@ -15967,6 +16402,16 @@
         "Argument of [right] must be [string], found value [booleanField] type [boolean]",
         "Argument of [right] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval right(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval right(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -16136,6 +16581,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval round(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval round(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = rtrim(\"a\")",
       "error": [],
       "warning": []
@@ -16239,6 +16694,16 @@
       "error": [
         "Argument of [rtrim] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval rtrim(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval rtrim(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -16348,6 +16813,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval signum(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval signum(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = sin(5)",
       "error": [],
       "warning": []
@@ -16451,6 +16926,16 @@
       "error": [
         "Argument of [sin] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval sin(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval sin(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -16560,6 +17045,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval sinh(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval sinh(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = split(\"a\", \"a\")",
       "error": [],
       "warning": []
@@ -16662,6 +17157,16 @@
         "Argument of [split] must be [string], found value [booleanField] type [boolean]",
         "Argument of [split] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval split(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval split(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -16768,6 +17273,16 @@
       "error": [
         "Argument of [sqrt] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval sqrt(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval sqrt(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -17165,6 +17680,16 @@
     },
     {
       "query": "from a_index | sort st_contains(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_contains(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval st_contains(nullVar, nullVar)",
       "error": [],
       "warning": []
     },
@@ -17567,6 +18092,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval st_disjoint(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval st_disjoint(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = st_intersects(to_geopoint(\"POINT (30 10)\"), to_geopoint(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
@@ -17961,6 +18496,16 @@
     },
     {
       "query": "from a_index | sort st_intersects(cartesianPointField, cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_intersects(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval st_intersects(nullVar, nullVar)",
       "error": [],
       "warning": []
     },
@@ -18363,6 +18908,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval st_within(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval st_within(nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = st_x(to_geopoint(\"POINT (30 10)\"))",
       "error": [],
       "warning": []
@@ -18498,6 +19053,16 @@
     },
     {
       "query": "from a_index | sort st_x(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval st_x(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval st_x(nullVar)",
       "error": [],
       "warning": []
     },
@@ -18641,6 +19206,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval st_y(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval st_y(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = starts_with(\"a\", \"a\")",
       "error": [],
       "warning": []
@@ -18722,6 +19297,16 @@
         "Argument of [starts_with] must be [string], found value [booleanField] type [boolean]",
         "Argument of [starts_with] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval starts_with(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval starts_with(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -18851,6 +19436,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval substring(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval substring(nullVar, nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = tan(5)",
       "error": [],
       "warning": []
@@ -18954,6 +19549,16 @@
       "error": [
         "Argument of [tan] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval tan(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval tan(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -19063,6 +19668,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval tanh(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval tanh(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = tau()",
       "error": [],
       "warning": []
@@ -19096,6 +19711,11 @@
     },
     {
       "query": "from a_index | sort tau()",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval tau()",
       "error": [],
       "warning": []
     },
@@ -19258,6 +19878,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_boolean(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_boolean(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_cartesianpoint(\"a\")",
       "error": [],
       "warning": []
@@ -19352,6 +19982,16 @@
     },
     {
       "query": "from a_index | sort to_cartesianpoint(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_cartesianpoint(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_cartesianpoint(nullVar)",
       "error": [],
       "warning": []
     },
@@ -19480,6 +20120,16 @@
     },
     {
       "query": "from a_index | sort to_cartesianshape(cartesianPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_cartesianshape(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_cartesianshape(nullVar)",
       "error": [],
       "warning": []
     },
@@ -19642,6 +20292,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_datetime(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_datetime(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_degrees(5)",
       "error": [],
       "warning": []
@@ -19745,6 +20405,16 @@
       "error": [
         "Argument of [to_degrees] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_degrees(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_degrees(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -19973,6 +20643,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_double(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_double(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_geopoint(\"a\")",
       "error": [],
       "warning": []
@@ -20067,6 +20747,16 @@
     },
     {
       "query": "from a_index | sort to_geopoint(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_geopoint(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_geopoint(nullVar)",
       "error": [],
       "warning": []
     },
@@ -20195,6 +20885,16 @@
     },
     {
       "query": "from a_index | sort to_geoshape(geoPointField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_geoshape(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_geoshape(nullVar)",
       "error": [],
       "warning": []
     },
@@ -20424,6 +21124,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_integer(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_integer(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_ip(\"a\")",
       "error": [],
       "warning": []
@@ -20518,6 +21228,16 @@
     },
     {
       "query": "from a_index | sort to_ip(ipField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_ip(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_ip(nullVar)",
       "error": [],
       "warning": []
     },
@@ -20707,6 +21427,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_long(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_long(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_lower(\"a\")",
       "error": [],
       "warning": []
@@ -20813,6 +21543,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_lower(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_lower(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_radians(5)",
       "error": [],
       "warning": []
@@ -20916,6 +21656,16 @@
       "error": [
         "Argument of [to_radians] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_radians(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_radians(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -21393,6 +22143,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_string(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_string(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_unsigned_long(\"a\")",
       "error": [],
       "warning": []
@@ -21658,6 +22418,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_unsigned_long(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_unsigned_long(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_upper(\"a\")",
       "error": [],
       "warning": []
@@ -21764,6 +22534,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval to_upper(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_upper(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_version(\"a\")",
       "error": [],
       "warning": []
@@ -21847,6 +22627,16 @@
       "error": [
         "Error: [to_version] function expects exactly one argument, got 2."
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_version(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_version(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -21953,6 +22743,16 @@
       "error": [
         "Argument of [trim] must be [string], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval trim(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval trim(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -22135,6 +22935,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats avg(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats avg(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = sum(numberField)",
       "error": [],
       "warning": []
@@ -22311,6 +23121,16 @@
       "error": [
         "Argument of [sum] must be [number], found value [booleanField] type [boolean]"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats sum(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats sum(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -22493,6 +23313,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats median(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats median(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = median_absolute_deviation(numberField)",
       "error": [],
       "warning": []
@@ -22672,6 +23502,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats median_absolute_deviation(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats median_absolute_deviation(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = percentile(numberField, 5)",
       "error": [],
       "warning": []
@@ -22847,6 +23687,18 @@
       "query": "from a_index | stats percentile(booleanField, 5)",
       "error": [
         "Argument of [percentile] must be [number], found value [booleanField] type [boolean]"
+      ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats percentile(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats percentile(nullVar, nullVar)",
+      "error": [
+        "Argument of [percentile] must be a constant, received [nullVar]"
       ],
       "warning": []
     },
@@ -23102,6 +23954,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats max(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats max(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = min(numberField)",
       "error": [],
       "warning": []
@@ -23353,6 +24215,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats min(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats min(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = count(stringField)",
       "error": [],
       "warning": []
@@ -23432,6 +24304,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats count(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats count(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = count_distinct(stringField, numberField)",
       "error": [],
       "warning": []
@@ -23508,6 +24390,16 @@
       "error": [
         "EVAL does not support function count_distinct"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats count_distinct(null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats count_distinct(nullVar, nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -23657,6 +24549,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats st_centroid_agg(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats st_centroid_agg(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "from a_index | stats var = values(stringField)",
       "error": [],
       "warning": []
@@ -23713,6 +24615,16 @@
       "error": [
         "EVAL does not support function values"
       ],
+      "warning": []
+    },
+    {
+      "query": "from a_index | stats values(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats values(nullVar)",
+      "error": [],
       "warning": []
     },
     {
@@ -23845,6 +24757,20 @@
       "warning": []
     },
     {
+      "query": "from a_index | stats bucket(null, null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | stats bucket(nullVar, nullVar, nullVar, nullVar)",
+      "error": [
+        "Argument of [bucket] must be a constant, received [nullVar]",
+        "Argument of [bucket] must be a constant, received [nullVar]",
+        "Argument of [bucket] must be a constant, received [nullVar]"
+      ],
+      "warning": []
+    },
+    {
       "query": "row var = cbrt(5)",
       "error": [],
       "warning": []
@@ -23920,6 +24846,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval cbrt(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval cbrt(nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = from_base64(\"a\")",
       "error": [],
       "warning": []
@@ -23991,6 +24927,16 @@
     },
     {
       "query": "from a_index | sort from_base64(stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval from_base64(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval from_base64(nullVar)",
       "error": [],
       "warning": []
     },
@@ -24120,6 +25066,16 @@
       "warning": []
     },
     {
+      "query": "from a_index | eval locate(null, null, null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval locate(nullVar, nullVar, nullVar)",
+      "error": [],
+      "warning": []
+    },
+    {
       "query": "row var = to_base64(\"a\")",
       "error": [],
       "warning": []
@@ -24191,6 +25147,16 @@
     },
     {
       "query": "from a_index | sort to_base64(stringField)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from a_index | eval to_base64(null)",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "row nullVar = null | eval to_base64(nullVar)",
       "error": [],
       "warning": []
     }

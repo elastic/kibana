@@ -1986,6 +1986,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.useFetchContext",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchContext",
+        "description": [],
+        "signature": [
+          "(api: unknown) => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.FetchContext",
+            "text": "FetchContext"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.useFetchContext.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.useInheritedViewMode",
         "type": "Function",
         "tags": [],
