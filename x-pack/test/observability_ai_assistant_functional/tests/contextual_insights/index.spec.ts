@@ -121,7 +121,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe('when there are connectors', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/184071
+    describe.skip('when there are connectors', () => {
       let proxy: LlmProxy;
 
       before(async () => {
