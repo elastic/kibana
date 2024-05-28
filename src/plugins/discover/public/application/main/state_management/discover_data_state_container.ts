@@ -252,6 +252,12 @@ export function getDataStateContainer({
             return;
           }
 
+          await profilesManager.resolveDataSourceProfile({
+            dataSource: getAppState().dataSource,
+            dataView: getSavedSearch().searchSource.getField('index'),
+            query: getAppState().query,
+          });
+
           abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
 
@@ -274,12 +280,6 @@ export function getDataStateContainer({
             autoRefreshDone?.();
             autoRefreshDone = undefined;
           }
-
-          await profilesManager.resolveDataSourceProfile({
-            dataSource: getAppState().dataSource,
-            dataView: getSavedSearch().searchSource.getField('index'),
-            query: getAppState().query,
-          });
 
           const defaultColumns = getMergedAccessor(
             profilesManager.getProfiles(),
