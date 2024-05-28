@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 
 import { i18n } from '@kbn/i18n';
 
-import { deleteConnectorById, deleteConnectorSecret } from '@kbn/search-connectors';
+import { deleteConnectorSecret, updateConnectorIndexName } from '@kbn/search-connectors';
 import {
   fetchConnectorByIndexName,
   fetchConnectors,
@@ -207,7 +207,8 @@ export function registerIndexRoutes({
         }
 
         if (connector) {
-          await deleteConnectorById(client.asCurrentUser, connector.id);
+          // detach the deleted index without removing the connector
+          await updateConnectorIndexName(client.asCurrentUser, connector.id, null);
           if (connector.api_key_id) {
             await client.asCurrentUser.security.invalidateApiKey({ ids: [connector.api_key_id] });
           }

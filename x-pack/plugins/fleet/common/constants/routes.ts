@@ -160,6 +160,7 @@ export const AGENT_API_ROUTES = {
   LIST_TAGS_PATTERN: `${API_ROOT}/agents/tags`,
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
   GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
+  DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {
