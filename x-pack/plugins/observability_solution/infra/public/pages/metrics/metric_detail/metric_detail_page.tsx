@@ -25,7 +25,7 @@ export const MetricDetailPage = () => {
     params: { type: nodeType, node: nodeId },
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
   const inventoryModel = findInventoryModel(nodeType);
-  const { sourceId, metricIndicesExist } = useSourceContext();
+  const { sourceId } = useSourceContext();
   const parentBreadcrumbResolver = useParentBreadcrumbResolver();
 
   const {
@@ -79,7 +79,7 @@ export const MetricDetailPage = () => {
 
   if (metadataLoading && !filteredRequiredMetrics.length) {
     return (
-      <MetricsPageTemplate hasData={metricIndicesExist}>
+      <MetricsPageTemplate>
         <InfraLoadingPanel
           height="100vh"
           width="100%"
