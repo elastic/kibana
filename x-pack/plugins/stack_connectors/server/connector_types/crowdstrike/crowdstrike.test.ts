@@ -173,26 +173,29 @@ describe('CrowdstrikeConnector', () => {
       const error = {
         cause: {
           code: 'ENOTFOUND',
+          hostname: 'api.crowdstrike.com111',
         },
       };
 
       // @ts-expect-error testing protected method
       const result = connector.getResponseErrorMessage(error);
 
-      expect(result).toBe('URL not found: {"code":"ENOTFOUND"}');
+      expect(result).toBe('URL not found: api.crowdstrike.com111');
     });
 
     it('returns Connection Refused message when cause code is ECONNREFUSED', () => {
       const error = {
         cause: {
           code: 'ECONNREFUSED',
+          port: 5555,
+          address: 'localhost',
         },
       };
 
       // @ts-expect-error testing protected method
       const result = connector.getResponseErrorMessage(error);
 
-      expect(result).toBe('Connection Refused: {"code":"ECONNREFUSED"}');
+      expect(result).toBe('Connection Refused: localhost:5555');
     });
 
     it('returns Unknown API Error message when error response status is undefined', () => {
