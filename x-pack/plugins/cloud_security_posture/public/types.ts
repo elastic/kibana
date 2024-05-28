@@ -85,7 +85,7 @@ export interface CspSecuritySolutionContext {
     pageName: CloudSecurityPosturePageId;
     state?: Record<string, string | undefined>;
   }>;
-  /** Gets the `SpyRoute` component for navigation highlighting and breadcrumbs. */
+  /** hook to receive registered upselling components based on the current PLI */
   useUpsellingComponent: (id: UpsellingSectionId) => ComponentType | null;
 }
 

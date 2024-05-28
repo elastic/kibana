@@ -34,7 +34,6 @@ const cspSecuritySolutionContext: CspSecuritySolutionContext = {
 const CloudSecurityPosture = () => {
   const { cloudSecurityPosture } = useKibana().services;
   const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
-  console.log(useUpsellingComponent('cloud_security_posture_integration_installation'));
 
   return (
     <PluginTemplateWrapper>
