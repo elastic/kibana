@@ -5,11 +5,5 @@
  * 2.0.
  */
 
-import { MetricsSourceStatus } from '../../../common/metrics_sources';
-
-export interface DerivedIndexPattern {
-  fields: MetricsSourceStatus['indexFields'];
-  title: string;
-}
-
-export type CreateDerivedIndexPattern = () => DerivedIndexPattern;
+export const SLO_ALERTS_EMBEDDABLE_ID = 'SLO_ALERTS_EMBEDDABLE';
+export const ADD_SLO_ALERTS_ACTION_ID = 'CREATE_SLO_ALERTS_EMBEDDABLE';
