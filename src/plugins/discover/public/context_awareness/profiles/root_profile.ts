@@ -30,6 +30,13 @@ export class RootProfileService extends AsyncProfileService<
   RootProfile,
   RootProfileProviderParams,
   RootContext
-> {}
+> {
+  constructor() {
+    super({
+      profileId: 'default-root-profile',
+      solutionType: SolutionType.Default,
+    });
+  }
+}
 
 export type RootProfileProvider = Parameters<RootProfileService['registerProvider']>[0];

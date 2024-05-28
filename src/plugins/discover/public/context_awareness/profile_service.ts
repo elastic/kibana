@@ -24,6 +24,7 @@ export interface ProfileProvider<
   TMode extends ProfileProviderMode
 > {
   order: number;
+  profileId: string;
   profile: ComposableProfile<TProfile>;
   resolve: (
     params: TParams
@@ -31,6 +32,10 @@ export interface ProfileProvider<
     ? ResolveProfileResult<TContext>
     : ResolveProfileResult<TContext> | Promise<ResolveProfileResult<TContext>>;
 }
+
+export type ContextWithProfileId<TContext> = TContext & { profileId: string };
+
+const EMPTY_PROFILE = {};
 
 abstract class BaseProfileService<
   TProfile extends PartialProfile,
@@ -40,33 +45,43 @@ abstract class BaseProfileService<
 > {
   protected readonly providers: Array<ProfileProvider<TProfile, TParams, TContext, TMode>> = [];
 
+  protected constructor(public readonly defaultContext: ContextWithProfileId<TContext>) {}
+
   public registerProvider(provider: ProfileProvider<TProfile, TParams, TContext, TMode>) {
     this.providers.push(provider);
     this.providers.sort((a, b) => a.order - b.order);
   }
 
+  public getProfile(context: ContextWithProfileId<TContext>): ComposableProfile<Profile> {
+    const provider = this.providers.find((current) => current.profileId === context.profileId);
+    return provider?.profile ?? EMPTY_PROFILE;
+  }
+
   public abstract resolve(
     params: TParams
-  ): TMode extends 'sync' ? ComposableProfile<Profile> : Promise<ComposableProfile<Profile>>;
+  ): TMode extends 'sync'
+    ? ContextWithProfileId<TContext>
+    : Promise<ContextWithProfileId<TContext>>;
 }
-
-const EMPTY_PROFILE = {};
 
 export class ProfileService<
   TProfile extends PartialProfile,
   TParams,
   TContext
 > extends BaseProfileService<TProfile, TParams, TContext, 'sync'> {
-  public resolve(params: TParams): ComposableProfile<Profile> {
+  public resolve(params: TParams) {
     for (const provider of this.providers) {
       const result = provider.resolve(params);
 
       if (result.isMatch) {
-        return provider.profile as ComposableProfile<Profile>;
+        return {
+          ...result.context,
+          profileId: provider.profileId,
+        };
       }
     }
 
-    return EMPTY_PROFILE;
+    return this.defaultContext;
   }
 }
 
@@ -75,15 +90,18 @@ export class AsyncProfileService<
   TParams,
   TContext
 > extends BaseProfileService<TProfile, TParams, TContext, 'async'> {
-  public async resolve(params: TParams): Promise<ComposableProfile<Profile>> {
+  public async resolve(params: TParams) {
     for (const provider of this.providers) {
       const result = await provider.resolve(params);
 
       if (result.isMatch) {
-        return provider.profile as ComposableProfile<Profile>;
+        return {
+          ...result.context,
+          profileId: provider.profileId,
+        };
       }
     }
 
-    return EMPTY_PROFILE;
+    return this.defaultContext;
   }
 }

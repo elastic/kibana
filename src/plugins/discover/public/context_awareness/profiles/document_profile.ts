@@ -29,6 +29,13 @@ export class DocumentProfileService extends ProfileService<
   DocumentProfile,
   DocumentProfileProviderParams,
   DocumentContext
-> {}
+> {
+  constructor() {
+    super({
+      profileId: 'default-document-profile',
+      type: DocumentType.Default,
+    });
+  }
+}
 
 export type DocumentProfileProvider = Parameters<DocumentProfileService['registerProvider']>[0];
