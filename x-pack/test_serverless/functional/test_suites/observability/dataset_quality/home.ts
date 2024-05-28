@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { getInitialTestLogs } from './data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
@@ -16,13 +17,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   const testSubjects = getService('testSubjects');
+  const synthtrace = getService('logSynthtraceEsClient');
+  const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality home', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('admin');
     });
 
+    after(async () => {
+      await synthtrace.clean();
+    });
+
+    it('shows the empty state when no datasets are available', async () => {
+      await PageObjects.datasetQuality.navigateTo();
+      await testSubjects.existOrFail(
+        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoDataEmptyState
+      );
+    });
+
     it('dataset quality table exists', async () => {
+      await synthtrace.index(getInitialTestLogs({ to, count: 1 }));
       await PageObjects.datasetQuality.navigateTo();
       await testSubjects.existOrFail(
         PageObjects.datasetQuality.testSubjectSelectors.datasetQualityTable
