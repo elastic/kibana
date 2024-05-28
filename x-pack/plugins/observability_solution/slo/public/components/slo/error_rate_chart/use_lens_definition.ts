@@ -9,11 +9,15 @@ import { transparentize, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  SLOWithSummaryResponse,
+  timeslicesBudgetingMethodSchema,
+} from '@kbn/slo-schema';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { SloTabId } from '../../../pages/slo_details/components/slo_details';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { SloTabId } from '../../../pages/slo_details/components/slo_details';
 
 export interface TimeRange {
   from: Date;
@@ -28,6 +32,7 @@ export interface AlertAnnotation {
 export function useLensDefinition({
   slo,
   threshold,
+  dataTimeRange,
   alertTimeRange,
   annotations,
   showErrorRateAsLine,
@@ -35,6 +40,7 @@ export function useLensDefinition({
 }: {
   slo: SLOWithSummaryResponse;
   threshold: number;
+  dataTimeRange: TimeRange;
   alertTimeRange?: TimeRange;
   annotations?: AlertAnnotation[];
   showErrorRateAsLine?: boolean;
@@ -42,7 +48,16 @@ export function useLensDefinition({
 }): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
-  const interval = 'auto';
+  // For a timeslice SLO
+  // When the date range is lower than 24 hours, we force the interval to be the timeslice window
+  // Greater than 24 hours, the 'auto' interval will be fine
+  const dataTimeRangeDuration = moment(dataTimeRange.to).diff(moment(dataTimeRange.from), 'ms');
+  const interval =
+    timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) &&
+    dataTimeRangeDuration <= 86400000 &&
+    slo.objective?.timesliceWindow
+      ? slo.objective.timesliceWindow
+      : 'auto';
 
   return {
     title: 'SLO Error Rate',
