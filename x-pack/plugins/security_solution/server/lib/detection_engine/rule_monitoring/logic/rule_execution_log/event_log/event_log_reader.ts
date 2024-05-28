@@ -8,7 +8,6 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEventLogClient, IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { EVENT_LOG_ACTIONS } from '@kbn/alerting-plugin/server/plugin';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -132,8 +131,8 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       if (someRunTypeFiltersSelected) {
         const ruleRunEventActions = runTypeFilters.map((runType) => {
           return {
-            [RuleRunTypeEnum.standard]: EVENT_LOG_ACTIONS.execute,
-            [RuleRunTypeEnum.backfill]: EVENT_LOG_ACTIONS.executeBackfill,
+            [RuleRunTypeEnum.standard]: 'execute',
+            [RuleRunTypeEnum.backfill]: 'execute-backfill',
           }[runType];
         });
 
