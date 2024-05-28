@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { i18n } from '@kbn/i18n';
-import { filter, map, tap } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { lastValueFrom } from 'rxjs';
 import { isRunningResponse, ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
@@ -44,8 +44,6 @@ export const fetchDocuments = (
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
-  const profilesCollector = services.profilesManager.createDocumentProfilesCollector();
-
   const fetch$ = searchSource
     .fetch$({
       abortSignal: abortController.signal,
@@ -71,13 +69,10 @@ export const fetchDocuments = (
       map((res) => {
         return buildDataTableRecordList(res.rawResponse.hits.hits as EsHitRecord[], dataView, {
           processRecord: (record) => {
-            profilesCollector.collect({ record });
+            services.profilesManager.resolveDocumentProfile({ record });
             return record;
           },
         });
-      }),
-      tap(() => {
-        profilesCollector.finalize(!isFetchingMore);
       })
     );
 

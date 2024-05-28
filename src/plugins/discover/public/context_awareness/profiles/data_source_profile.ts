@@ -33,6 +33,13 @@ export class DataSourceProfileService extends AsyncProfileService<
   DataSourceProfile,
   DataSourceProfileProviderParams,
   DataSourceContext
-> {}
+> {
+  constructor() {
+    super({
+      profileId: 'default-data-source-profile',
+      category: DataSourceCategory.Default,
+    });
+  }
+}
 
 export type DataSourceProfileProvider = Parameters<DataSourceProfileService['registerProvider']>[0];

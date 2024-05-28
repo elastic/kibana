@@ -24,6 +24,7 @@ import { RootProfileProvider, SolutionType } from './root_profile';
 
 export const o11yRootProfileProvider: RootProfileProvider = {
   order: 0,
+  profileId: 'o11y-root-profile',
   profile: {
     getTopNavItems: (prev) => () =>
       [
@@ -53,6 +54,7 @@ export const o11yRootProfileProvider: RootProfileProvider = {
 
 export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
   order: 0,
+  profileId: 'logs-data-source-profile',
   profile: {
     getTopNavItems: (prev) => () =>
       [
@@ -138,6 +140,7 @@ export const logsDataSourceProfileProvider: DataSourceProfileProvider = {
 
 export const logDocumentProfileProvider: DocumentProfileProvider = {
   order: 0,
+  profileId: 'log-document-profile',
   profile: {
     getDocViewsRegistry: (prev) => (registry) => {
       registry.enableById('doc_view_logs_overview');
