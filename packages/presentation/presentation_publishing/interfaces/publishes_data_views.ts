@@ -11,7 +11,6 @@ import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesDataViews {
   dataViews: PublishingSubject<DataView[] | undefined>;
-  lastUsedDataViewId?: PublishingSubject<string | undefined>;
 }
 
 export const apiPublishesDataViews = (

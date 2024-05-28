@@ -21,7 +21,6 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
-import { EditControlActionApi } from './control_group/actions/edit_control_action';
 import { ControlGroupFilterOutput } from './control_group/types';
 import { ControlsServiceType } from './services/controls/types';
 
@@ -64,7 +63,7 @@ export interface IEditableControlFactory<T extends ControlInput = ControlInput>
   controlEditorOptionsComponent?: (props: ControlEditorProps<T>) => JSX.Element;
   presaveTransformFunction?: (
     newState: Partial<T>,
-    embeddable?: EditControlActionApi
+    embeddable?: ControlEmbeddable<T>
   ) => Partial<T>;
   isFieldCompatible?: (field: DataViewField) => boolean;
 }
