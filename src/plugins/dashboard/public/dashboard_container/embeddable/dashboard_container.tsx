@@ -53,6 +53,7 @@ import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { v4 } from 'uuid';
+import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
@@ -97,7 +98,6 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { PublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 
 export interface InheritedChildInput {
   filters: Filter[];
