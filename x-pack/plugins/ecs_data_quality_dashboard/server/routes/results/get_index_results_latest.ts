@@ -10,7 +10,7 @@ import type { IRouter, Logger } from '@kbn/core/server';
 import { INTERNAL_API_VERSION, GET_INDEX_RESULTS_LATEST } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
-import { GetResultsIndicesLatestParams } from '../../schemas/result';
+import { GetIndexResultsLatestParams } from '../../schemas/result';
 import type { ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
@@ -48,7 +48,7 @@ export const getIndexResultsLatestRoute = (
         version: INTERNAL_API_VERSION,
         validate: {
           request: {
-            params: buildRouteValidation(GetResultsIndicesLatestParams),
+            params: buildRouteValidation(GetIndexResultsLatestParams),
           },
         },
       },

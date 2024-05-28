@@ -12,10 +12,7 @@ import { INTERNAL_API_VERSION, GET_INDEX_RESULTS } from '../../../common/constan
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import type { ResultDocument } from '../../schemas/result';
-import {
-  GetResultsIndicesPatternQuery,
-  GetResultsIndicesPatternParams,
-} from '../../schemas/result';
+import { GetIndexResultsQuery, GetIndexResultsParams } from '../../schemas/result';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
@@ -97,8 +94,8 @@ export const getIndexResultsRoute = (
         version: INTERNAL_API_VERSION,
         validate: {
           request: {
-            params: buildRouteValidation(GetResultsIndicesPatternParams),
-            query: buildRouteValidation(GetResultsIndicesPatternQuery),
+            params: buildRouteValidation(GetIndexResultsParams),
+            query: buildRouteValidation(GetIndexResultsQuery),
           },
         },
       },

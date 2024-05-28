@@ -125,7 +125,7 @@ describe('getIndexResultsRoute route', () => {
           method: 'get',
           path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
-          query: { from: 10 },
+          query: { from: '10' },
         });
 
         const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
@@ -159,7 +159,7 @@ describe('getIndexResultsRoute route', () => {
           method: 'get',
           path: GET_INDEX_RESULTS,
           params: { pattern: 'logs-*' },
-          query: { size: 5 },
+          query: { size: '5' },
         });
 
         const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
