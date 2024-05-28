@@ -42,7 +42,6 @@ import type {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 import { SideNavComponent } from './side_navigation';
-import { SolutionNavUserProfileToggle } from './solution_nav_userprofile_toggle';
 
 const DEFAULT_OPT_OUT_NEW_NAV = false;
 
@@ -213,14 +212,6 @@ export class NavigationPublicPlugin
     ])
       .pipe(takeUntil(this.stop$), debounceTime(10))
       .subscribe(([enabled, userOptedOut]) => {
-        if (enabled) {
-          // Add menu item in the user profile menu to opt in/out of the new navigation
-          this.addOptInOutUserProfile({ core, security, userOptedOut });
-        } else {
-          // TODO. Remove the user profile menu item if the feature is disabled.
-          // But first let's wait as maybe there will be a page refresh when opting out.
-        }
-
         if (!enabled || userOptedOut === true) {
           chrome.project.changeActiveSolutionNavigation(null);
           chrome.setChromeStyle('classic');
@@ -261,36 +252,5 @@ export class NavigationPublicPlugin
     project.updateSolutionNavigations({
       [solutionNavigation.id]: { ...rest, sideNavComponent },
     });
-  }
-
-  private addOptInOutUserProfile({
-    core,
-    security,
-    userOptedOut,
-  }: {
-    core: CoreStart;
-    userOptedOut?: boolean;
-    security?: SecurityPluginStart;
-  }) {
-    if (!security || this.userProfileMenuItemAdded) return;
-
-    const defaultOptOutValue = userOptedOut !== undefined ? userOptedOut : DEFAULT_OPT_OUT_NEW_NAV;
-
-    const menuLink: UserMenuLink = {
-      content: (
-        <SolutionNavUserProfileToggle
-          core={core}
-          security={security}
-          defaultOptOutValue={defaultOptOutValue}
-        />
-      ),
-      order: 500,
-      label: '',
-      iconType: '',
-      href: '',
-    };
-
-    security.navControlService.addUserMenuLinks([menuLink]);
-    this.userProfileMenuItemAdded = true;
   }
 }
