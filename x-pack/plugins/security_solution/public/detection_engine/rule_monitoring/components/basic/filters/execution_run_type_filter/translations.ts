@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export { SloAlertsEmbeddableFactoryDefinition } from './slo_alerts_embeddable_factory';
-export type { SLOAlertsEmbeddable } from './slo_alerts_embeddable';
+import { i18n } from '@kbn/i18n';
+
+export const FILTER_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleMonitoring.executionRunTypeFilter.filterTitle',
+  {
+    defaultMessage: 'Run type',
+  }
+);
