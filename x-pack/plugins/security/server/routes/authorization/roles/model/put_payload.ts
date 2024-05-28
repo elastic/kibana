@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { elasticsearchRoleSchema, getKibanaRoleSchema } from '@kbn/security-plugin-types-server';
@@ -15,7 +16,8 @@ import { transformPrivilegesToElasticsearchPrivileges } from '../../../../lib';
 export const transformPutPayloadToElasticsearchRole = (
   rolePayload: RolePayloadSchemaType,
   application: string,
-  allExistingApplications: ElasticsearchRole['applications'] = []
+  allExistingApplications: ElasticsearchRole['applications'] = [],
+  buildFlavor?: BuildFlavor
 ) => {
   const {
     elasticsearch = {
@@ -35,7 +37,7 @@ export const transformPutPayloadToElasticsearchRole = (
     ...(rolePayload.description && { description: rolePayload.description }),
     metadata: rolePayload.metadata,
     cluster: elasticsearch.cluster || [],
-    remote_cluster: elasticsearch.remote_cluster,
+    ...(buildFlavor === 'traditional' && { remote_cluster: elasticsearch.remote_cluster }),
     indices: elasticsearch.indices || [],
     remote_indices: elasticsearch.remote_indices,
     run_as: elasticsearch.run_as || [],

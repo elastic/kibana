@@ -41,6 +41,7 @@ export function definePutRolesRoutes({
   authz,
   getFeatures,
   getFeatureUsageService,
+  buildFlavor,
 }: RouteDefinitionParams) {
   router.put(
     {
@@ -91,7 +92,8 @@ export function definePutRolesRoutes({
         const body = transformPutPayloadToElasticsearchRole(
           request.body,
           authz.applicationName,
-          rawRoles[name] ? rawRoles[name].applications : []
+          rawRoles[name] ? rawRoles[name].applications : [],
+          buildFlavor
         );
 
         await esClient.asCurrentUser.security.putRole({
