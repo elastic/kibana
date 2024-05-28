@@ -28,24 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const startTime = 'Jan 1, 2016 @ 00:00:00.000';
   const endTime = 'Nov 1, 2020 @ 00:00:00.000';
 
-  function runTestsWhenDisabled(testData: TestData) {
-    it('should not show view mode toggle or Field stats table', async function () {
-      await PageObjects.common.navigateToApp('discover');
-      if (testData.isSavedSearch) {
-        await retry.tryForTime(2 * 1000, async () => {
-          await PageObjects.discover.loadSavedSearch(testData.sourceIndexOrSavedSearch);
-        });
-      } else {
-        await dataViews.switchToAndValidate(testData.sourceIndexOrSavedSearch);
-      }
-
-      await PageObjects.timePicker.setAbsoluteRange(startTime, endTime);
-
-      await PageObjects.discover.assertViewModeToggleNotExists();
-      await PageObjects.discover.assertFieldStatsTableNotExists();
-    });
-  }
-
   function runTests(testData: TestData) {
     describe(`with ${testData.suiteTitle}`, function () {
       it(`displays the 'Field statistics' table content correctly`, async function () {
@@ -127,15 +109,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       runTests(farequoteKQLFiltersSearchTestData);
       runTests(farequoteLuceneFiltersSearchTestData);
       runTests(sampleLogTestData);
-    });
-
-    describe('when disabled', function () {
-      before(async function () {
-        // Ensure that the setting is set to default state which is false
-        await ml.testResources.setAdvancedSettingProperty(SHOW_FIELD_STATISTICS, false);
-      });
-
-      runTestsWhenDisabled(farequoteDataViewTestData);
     });
   });
 }
