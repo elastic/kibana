@@ -56,6 +56,7 @@ export const getVisualizeEmbeddableFactory: (
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
     const vis = await createVisAsync(state.savedVis.type, state.savedVis);
 
+    const renderCount$ = new BehaviorSubject<number>(0);
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
     const id$ = new BehaviorSubject<string>(state.id);
@@ -175,6 +176,7 @@ export const getVisualizeEmbeddableFactory: (
         parentExecutionContext: executionContext,
         abortController: expressionAbortController$.getValue(),
         onRender: () => {
+          renderCount$.next(renderCount$.getValue() + 1);
           if (hasRendered$.getValue() === true) return;
           hasRendered$.next(true);
           hasRendered$.complete();
@@ -220,11 +222,18 @@ export const getVisualizeEmbeddableFactory: (
       api,
       Component: () => {
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
+        const renderCount = useStateFromPublishingSubject(renderCount$);
         const domNode = useRef<HTMLDivElement>(null);
         useExpressionRenderer(domNode, expressionParams);
 
         return (
-          <div style={{ width: '100%', height: '100%' }} ref={domNode}>
+          <div
+            style={{ width: '100%', height: '100%' }}
+            ref={domNode}
+            data-test-subj="visualizationLoader"
+            data-rendering-count={renderCount /* Used for functional tests */}
+            data-description={api.panelDescription?.getValue()}
+          >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup style={{ height: '100%' }} justifyContent="center" alignItems="center">
               <EuiLoadingChart size="l" mono />
