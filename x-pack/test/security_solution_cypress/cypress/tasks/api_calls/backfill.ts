@@ -31,3 +31,83 @@ export const manualRuleRun = ({
     ],
   });
 };
+
+export const interceptFindBackfillsNoData = () => {
+  cy.intercept('POST', `${BACKFILL_RULE_URL}/_find`, {
+    statusCode: 200,
+    body: {
+      page: 1,
+      per_page: 10,
+      total: 0,
+      data: [],
+    },
+  });
+};
+
+export const FIRST_BACKFILL_ID = 'c51259fb-7c55-4210-8137-b50f0c0dbff5';
+
+export const interceptFindBackfills = () => {
+  cy.intercept('POST', `${BACKFILL_RULE_URL}/_find*`, {
+    statusCode: 200,
+    body: {
+      page: 1,
+      per_page: 10,
+      total: 2,
+      data: [
+        {
+          id: 'c51259fb-7c55-4210-8137-b50f0c0dbff5',
+          duration: '5h',
+          enabled: true,
+          end: '2024-05-22T14:05:00.000Z',
+          start: '2024-05-21T13:00:00.000Z',
+          status: 'pending',
+          created_at: '2024-05-27T15:19:43.543Z',
+          space_id: 'default',
+          schedule: [
+            {
+              run_at: '2024-05-21T18:00:00.000Z',
+              status: 'complete',
+              interval: '5h',
+            },
+            {
+              run_at: '2024-05-21T23:00:00.000Z',
+              status: 'complete',
+              interval: '5h',
+            },
+            {
+              run_at: '2024-05-22T04:00:00.000Z',
+              status: 'pending',
+              interval: '5h',
+            },
+            {
+              run_at: '2024-05-22T09:00:00.000Z',
+              status: 'error',
+              interval: '5h',
+            },
+          ],
+        },
+        {
+          id: 'c51259fb-7c55-4210-8137-b50f0c0dbff6',
+          duration: '5h',
+          enabled: true,
+          end: '2024-05-22T14:05:00.000Z',
+          start: '2024-05-21T13:00:00.000Z',
+          status: 'running',
+          created_at: '2024-05-27T15:19:43.543Z',
+          space_id: 'default',
+          schedule: [
+            {
+              run_at: '2024-05-21T18:00:00.000Z',
+              status: 'running',
+              interval: '5h',
+            },
+          ],
+        },
+      ],
+    },
+  });
+};
+
+export const interceptDeleteBackfill = (id: string, alias: string) => {
+  cy.intercept('DELETE', `${BACKFILL_RULE_URL}/${id}`, {}).as(alias);
+};

@@ -77,26 +77,31 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
       field: 'error',
       align: 'right',
       name: i18n.BACKFILLS_TABLE_COLUMN_ERROR,
+      'data-test-subj': 'rule-backfills-column-error',
     },
     {
       field: 'pending',
       align: 'right',
       name: i18n.BACKFILLS_TABLE_COLUMN_PENDING,
+      'data-test-subj': 'rule-backfills-column-pending',
     },
     {
       field: 'running',
       align: 'right',
       name: i18n.BACKFILLS_TABLE_COLUMN_RUNNING,
+      'data-test-subj': 'rule-backfills-column-running',
     },
     {
       field: 'complete',
       align: 'right',
       name: i18n.BACKFILLS_TABLE_COLUMN_COMPLETED,
+      'data-test-subj': 'rule-backfills-column-completed',
     },
     {
       field: 'total',
       align: 'right',
       name: i18n.BACKFILLS_TABLE_COLUMN_TOTAL,
+      'data-test-subj': 'rule-backfills-column-total',
     },
   ];
 
@@ -127,7 +132,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
 
   return (
     <div>
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" data-test-subj="rule-backfills-info">
         <EuiFlexItem grow={true}>
           <HeaderSection
             title={i18n.BACKFILL_TABLE_TITLE}

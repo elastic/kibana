@@ -36,11 +36,17 @@ export const StopBackfill = ({ id }: { id: string }) => {
 
   return (
     <>
-      <EuiButtonEmpty size="s" color={'primary'} onClick={showModal}>
+      <EuiButtonEmpty
+        size="s"
+        color={'primary'}
+        onClick={showModal}
+        data-test-subj="rule-backfills-delete-button"
+      >
         {i18n.BACKFILLS_TABLE_STOP}
       </EuiButtonEmpty>
       {isModalVisible && (
         <EuiConfirmModal
+          data-test-subj="rule-backfills-delete-modal"
           style={{ width: 600 }}
           title={i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_TITLE}
           onCancel={closeModal}
