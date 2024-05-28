@@ -89,6 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(1);
@@ -112,6 +113,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.nextEvent).to.eql(null);
@@ -129,6 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(4);
@@ -155,6 +158,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(2);
@@ -176,6 +180,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(2);
@@ -192,6 +197,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200));
       expect(body.events.length).to.eql(2);
@@ -208,6 +214,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200));
       expect(body.events).to.be.empty();
@@ -225,6 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(4);
@@ -243,6 +251,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(4);
@@ -270,6 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
             from,
             to,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(1);
@@ -288,6 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(0);
@@ -314,6 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       // 2 lifecycle events for the origin and 2 for the origin's parent
@@ -342,6 +354,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200);
       expect(body.events.length).to.eql(2);
@@ -365,6 +378,7 @@ export default function ({ getService }: FtrProviderContext) {
             from: tree.startTime,
             to: tree.endTime,
           },
+          agentId: tree.agentId,
         })
         .expect(200));
 

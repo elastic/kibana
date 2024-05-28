@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
-            agentId: tree.origin.agent.id,
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -101,6 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         expect(body).to.be.empty();
@@ -122,6 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -147,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -175,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: from,
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -202,6 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -238,6 +243,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -269,6 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['doesnotexist-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         expect(body).to.be.empty();
@@ -291,6 +298,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -321,6 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -350,6 +359,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         expect(body).to.be.empty();
@@ -373,6 +383,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -406,6 +417,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -439,6 +451,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -476,6 +489,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -512,6 +526,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: end,
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -541,6 +556,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -579,6 +595,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -617,6 +634,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         verifyTree({
@@ -655,6 +673,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.agentId,
           })
           .expect(200);
         expect(body).to.be.empty();
