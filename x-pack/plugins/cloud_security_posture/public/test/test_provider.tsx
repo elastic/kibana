@@ -30,7 +30,18 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   params = coreMock.createAppMountParameters(),
   children,
 } = {}) => {
-  const queryClient = useMemo(() => new QueryClient(), []);
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: false,
+            cacheTime: 0,
+          },
+        },
+      }),
+    []
+  );
 
   return (
     <KibanaContextProvider services={{ ...core, ...deps }}>
