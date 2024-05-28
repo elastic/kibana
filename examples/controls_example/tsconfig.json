@@ -21,7 +21,6 @@
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
-    "@kbn/core-overlays-browser",
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/ui-actions-plugin",
