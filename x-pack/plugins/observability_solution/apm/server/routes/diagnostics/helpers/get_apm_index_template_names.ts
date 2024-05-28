@@ -10,13 +10,13 @@ import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch
 const suffix = 'template';
 export function getApmIndexTemplateNames() {
   const indexTemplateNames = [
-    `logs-apm.app@${suffix}`,
-    `logs-apm.error@${suffix}`,
-    `metrics-apm.app@${suffix}`,
-    `metrics-apm.internal@${suffix}`,
-    `traces-apm.rum@${suffix}`,
-    `traces-apm.sampled@${suffix}`,
-    `traces-apm@${suffix}`,
+    'logs-apm.app',
+    'logs-apm.error',
+    'metrics-apm.app',
+    'metrics-apm.internal',
+    'traces-apm.rum',
+    'traces-apm.sampled',
+    'traces-apm',
   ];
 
   const rollupIndexTemplateNames = ['1m', '10m', '60m'].flatMap((interval) => {
@@ -25,25 +25,33 @@ export function getApmIndexTemplateNames() {
       'metrics-apm.service_summary',
       'metrics-apm.service_transaction',
       'metrics-apm.transaction',
-    ].map((ds) => `${ds}.${interval}@${suffix}`);
+    ].map((ds) => `${ds}.${interval}`);
   });
 
-  return [...indexTemplateNames, ...rollupIndexTemplateNames];
+  // For retrocompatibility, it returns index template names both pre and post APM integration package v8.15.0
+  return [...indexTemplateNames, ...rollupIndexTemplateNames].reduce((acc, indexTemplateName) => {
+    acc[indexTemplateName] = [indexTemplateName, `${indexTemplateName}@${suffix}`];
+    return acc;
+  }, {} as Record<string, string[]>);
 }
 
 export function getApmIndexTemplates(
   existingIndexTemplates: IndicesGetIndexTemplateIndexTemplateItem[]
 ) {
   const apmIndexTemplateNames = getApmIndexTemplateNames();
-  const standardIndexTemplates = apmIndexTemplateNames.map((templateName) => {
-    const matchingTemplate = existingIndexTemplates.find(({ name }) => name === templateName);
+  const standardIndexTemplates = Object.entries(apmIndexTemplateNames).map(
+    ([baseTemplateName, validIndexTemplateNames]) => {
+      const matchingTemplate = validIndexTemplateNames.find((templateName) =>
+        existingIndexTemplates.find(({ name }) => name === templateName)
+      );
 
-    return {
-      name: templateName,
-      exists: Boolean(matchingTemplate),
-      isNonStandard: false,
-    };
-  });
+      return {
+        name: matchingTemplate ?? baseTemplateName,
+        exists: Boolean(matchingTemplate),
+        isNonStandard: false,
+      };
+    }
+  );
 
   const nonStandardIndexTemplates = existingIndexTemplates
     .filter(
