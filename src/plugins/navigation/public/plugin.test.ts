@@ -139,7 +139,7 @@ describe('Navigation Plugin', () => {
 
       expect(coreStart.chrome.project.updateSolutionNavigations).toHaveBeenCalled();
       const [arg] = coreStart.chrome.project.updateSolutionNavigations.mock.calls[0];
-      expect(Object.keys(arg)).toEqual(['es', 'oblt']);
+      expect(Object.keys(arg)).toEqual(['oblt']);
 
       expect(coreStart.chrome.project.changeActiveSolutionNavigation).toHaveBeenCalledWith(null);
     });

@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression } from '@kbn/es-query';
 import React, { useEffect, useState } from 'react';
-import { DataViewBase } from '@kbn/es-query';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { WithKueryAutocompletion } from '../../../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../../../../components/autocomplete_field';
 
@@ -22,7 +22,6 @@ type LoadSuggestionsFn = (
 export type CurryLoadSuggestionsType = (loadSuggestions: LoadSuggestionsFn) => LoadSuggestionsFn;
 
 interface Props {
-  derivedIndexPattern: DataViewBase;
   onSubmit: (query: string) => void;
   onChange?: (query: string) => void;
   value?: string | null;
@@ -41,7 +40,6 @@ function validateQuery(query: string) {
 }
 
 export const MetricsExplorerKueryBar = ({
-  derivedIndexPattern,
   onSubmit,
   onChange,
   value,
@@ -49,6 +47,7 @@ export const MetricsExplorerKueryBar = ({
   curryLoadSuggestions = defaultCurryLoadSuggestions,
   compressed,
 }: Props) => {
+  const { metricsView } = useMetricsDataViewContext();
   const [draftQuery, setDraftQuery] = useState<string>(value || '');
   const [isValid, setValidation] = useState<boolean>(true);
 
@@ -67,11 +66,6 @@ export const MetricsExplorerKueryBar = ({
     }
   };
 
-  const filteredDerivedIndexPattern = {
-    ...derivedIndexPattern,
-    fields: derivedIndexPattern.fields,
-  };
-
   const defaultPlaceholder = i18n.translate(
     'xpack.infra.homePage.toolbar.kqlSearchFieldPlaceholder',
     {
@@ -80,7 +74,7 @@ export const MetricsExplorerKueryBar = ({
   );
 
   return (
-    <WithKueryAutocompletion indexPattern={filteredDerivedIndexPattern}>
+    <WithKueryAutocompletion dataView={metricsView?.dataViewReference}>
       {({ isLoadingSuggestions, loadSuggestions, suggestions }) => (
         <AutocompleteField
           compressed={compressed}
