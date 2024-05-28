@@ -24,8 +24,10 @@ import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import type { JobId } from '../../../../../common/types/anomaly_detection_jobs/job';
 import { useMlKibana } from '../../../contexts/kibana';
+import { useCasesModal } from '../../../contexts/kibana/use_cases_modal';
 import { getDefaultSingleMetricViewerPanelTitle } from '../../../../embeddables/single_metric_viewer/get_default_panel_title';
 import type { MlEntity } from '../../../../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../../../../embeddables/constants';
@@ -77,9 +79,12 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
   const {
     services: {
       application: { capabilities },
+      cases,
       embeddable,
     },
   } = useMlKibana();
+
+  const globalTimeRange = useTimeRangeUpdates(true);
 
   const canEditDashboards = capabilities.dashboard?.createNew ?? false;
 
@@ -92,6 +97,8 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
     },
     [setIsMenuOpen]
   );
+
+  const openCasesModalCallback = useCasesModal(ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE);
 
   const menuPanels: EuiContextMenuPanelDescriptor[] = [
     {
@@ -111,6 +118,27 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
       ],
     },
   ];
+
+  const casesPrivileges = cases?.helpers.canUseCases();
+
+  if (!!casesPrivileges?.create || !!casesPrivileges?.update) {
+    menuPanels[0].items!.push({
+      name: (
+        <FormattedMessage
+          id="xpack.ml.timeseriesExplorer.addToCaseLabel"
+          defaultMessage="Add to case"
+        />
+      ),
+      onClick: closePopoverOnAction(() => {
+        openCasesModalCallback({
+          jobIds: [selectedJobId],
+          selectedDetectorIndex,
+          selectedEntities,
+          timeRange: globalTimeRange,
+        });
+      }),
+    });
+  }
 
   const onSaveCallback: SaveModalDashboardProps['onSave'] = useCallback(
     ({ dashboardId, newTitle, newDescription }) => {

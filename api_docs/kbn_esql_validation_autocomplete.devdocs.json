@@ -1186,7 +1186,7 @@
             "section": "def-common.FunctionDefinition",
             "text": "FunctionDefinition"
           },
-          ", { withTypes }: { withTypes: boolean; }) => { declaration: string; examples: string[] | undefined; }[]"
+          ", { withTypes }: { withTypes: boolean; }) => { declaration: string; }[]"
         ],
         "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
         "deprecated": false,
@@ -2949,20 +2949,6 @@
           },
           {
             "parentPluginId": "@kbn/esql-validation-autocomplete",
-            "id": "def-common.ESQLCallbacks.getMetaFields",
-            "type": "Function",
-            "tags": [],
-            "label": "getMetaFields",
-            "description": [],
-            "signature": [
-              "CallbackFn<{}, string> | undefined"
-            ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-validation-autocomplete",
             "id": "def-common.ESQLCallbacks.getPolicies",
             "type": "Function",
             "tags": [],
@@ -3249,7 +3235,21 @@
               "FunctionParameterType",
               "; optional?: boolean | undefined; noNestingFunctions?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; literalOptions?: string[] | undefined; literalSuggestions?: string[] | undefined; }[]; minParams?: number | undefined; returnType: ",
               "FunctionReturnType",
-              "; examples?: string[] | undefined; }[]"
+              "; }[]"
+            ],
+            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.FunctionDefinition.examples",
+            "type": "Array",
+            "tags": [],
+            "label": "examples",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
             ],
             "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
