@@ -32,6 +32,7 @@ jest.mock('../../../utils/route/use_route_spy');
 jest.mock('@kbn/expandable-flyout', () => {
   return {
     useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+    useExpandableFlyoutState: () => ({ left: false }),
   };
 });
 
@@ -55,6 +56,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     ...original,
   };
 });
+jest.mock('../../guided_onboarding_tour/tour_step');
 
 const mockRouteSpy: RouteSpyState = {
   pageName: SecurityPageName.overview,
