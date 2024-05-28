@@ -67,16 +67,12 @@ describe('UserToolTip', () => {
                 }
               }
             >
-              <div
-                className="eui-textTruncate"
-              >
+              <div>
                 <strong>
                   Delighted Nightingale
                 </strong>
               </div>
-              <div
-                className="eui-textTruncate"
-              >
+              <div>
                 delighted_nightingale@elastic.co
               </div>
             </EuiFlexItem>
