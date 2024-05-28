@@ -1494,6 +1494,8 @@
               "ActionsClientLlm",
               " | ",
               "ActionsClientChatOpenAI",
+              " | ",
+              "ActionsClientSimpleChatModel",
               " | undefined"
             ],
             "path": "x-pack/plugins/elastic_assistant/server/types.ts",

@@ -56,7 +56,7 @@ export const DocViewerSource = ({
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const useDocExplorer = !isLegacyTableEnabled({
     uiSettings,
-    isTextBasedQueryMode: Array.isArray(textBasedHits),
+    isEsqlMode: Array.isArray(textBasedHits),
   });
   const [requestState, hit] = useEsDocSearch({
     id,

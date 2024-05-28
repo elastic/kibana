@@ -212,7 +212,7 @@ exports[`CustomTimelineDataGridBody should render exactly as snapshots 1`] = `
                         test added a note
                       </p>
                       <div
-                        class="euiText euiMarkdownFormat emotion-euiText-m-euiMarkdownFormat-m"
+                        class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
                       >
                         <p>
                           note

@@ -6,7 +6,8 @@
  */
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useState } from 'react';
+import React from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 interface SemanticTextBannerProps {
   isSemanticTextEnabled: boolean;
@@ -14,7 +15,8 @@ interface SemanticTextBannerProps {
 
 export function SemanticTextBanner({ isSemanticTextEnabled }: SemanticTextBannerProps) {
   const [isSemanticTextBannerDisplayable, setIsSemanticTextBannerDisplayable] =
-    useState<boolean>(true);
+    useLocalStorage<boolean>('semantic-text-banner-display', true);
+
   return isSemanticTextBannerDisplayable && isSemanticTextEnabled ? (
     <>
       <EuiPanel color="success" data-test-subj="indexDetailsMappingsSemanticTextBanner">
