@@ -103,6 +103,11 @@ export const allowedExperimentalValues = Object.freeze({
   responseActionsCrowdstrikeManualHostIsolationEnabled: false,
 
   /**
+   * Enables scan response action on Endpoint
+   */
+  responseActionScanEnabled: false,
+
+  /**
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
@@ -281,6 +286,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables the new rule's bulk action to manage custom highlighted fields
    */
   bulkCustomHighlightedFieldsEnabled: false,
+
+  /**
+   * Enables the manual rule run
+   */
+  manualRuleRunEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

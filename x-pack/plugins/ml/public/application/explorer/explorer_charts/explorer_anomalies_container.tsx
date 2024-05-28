@@ -62,7 +62,9 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   timeRange,
 }) => {
   return (
-    <>
+    // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
+    // These attributes are temporarily needed for reporting to not have any warning
+    <div data-shared-item="" data-rendering-count={1}>
       <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
         <EuiFlexItem grow={false}>
           <SelectSeverityUI severity={severity} onChange={setSeverity} />
@@ -96,9 +98,10 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
             tooManyBucketsCalloutMsg,
             showSelectedInterval,
             chartsService,
+            id,
           }}
         />
       )}
-    </>
+    </div>
   );
 };

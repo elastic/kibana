@@ -434,6 +434,9 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';
 
+export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY =
+  'securitySolution.ruleDetails.ruleExecutionLog.showSourceEventTimeRange.v8.15';
+
 // TODO: https://github.com/elastic/kibana/pull/142950
 /**
  * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
