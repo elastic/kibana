@@ -31209,6 +31209,21 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.ESQL_TABLE_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "ESQL_TABLE_TYPE",
+        "description": [],
+        "signature": [
+          "\"es_ql\""
+        ],
+        "path": "src/plugins/data/common/search/strategies/esql_search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.EsqlExpressionFunctionDefinition",
         "type": "Type",
         "tags": [],

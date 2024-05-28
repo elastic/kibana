@@ -259,7 +259,11 @@ export function useOnSubmit({
         setFormState('INVALID');
         return;
       }
-      if (agentCount !== 0 && !isAgentlessIntegration(packageInfo) && formState !== 'CONFIRM') {
+      if (
+        agentCount !== 0 &&
+        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
+        formState !== 'CONFIRM'
+      ) {
         setFormState('CONFIRM');
         return;
       }
@@ -284,7 +288,6 @@ export function useOnSubmit({
               await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
             }
           }
-
           createdPolicy = await createAgentPolicy({
             newAgentPolicy,
             packagePolicy,
