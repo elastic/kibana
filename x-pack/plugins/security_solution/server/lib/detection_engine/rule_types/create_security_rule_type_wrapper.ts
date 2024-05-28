@@ -478,14 +478,19 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
 
+            if (disabledActions.length > 0) {
+              const disabledActionsWarning = getDisabledActionsWarningText({
+                alertsCreated: true,
+                disabledActions,
+              });
+              warningMessage = [
+                ...(warningMessage ? [warningMessage] : []),
+                disabledActionsWarning,
+              ].join(', ');
+              wroteWarningStatus = true;
+            }
+
             if (result.warningMessages.length) {
-              if (disabledActions.length > 0) {
-                // includes the disabled actions warning message
-                // in the list of warnings displayed
-                result.warningMessages.push(
-                  getDisabledActionsWarningText({ alertsCreated: true, disabledActions })
-                );
-              }
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum['partial failure'],
                 message: truncateList(result.warningMessages).join(', '),
@@ -522,17 +527,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
               } else if (wroteWarningStatus && !hasError && !result.warning) {
-                if (disabledActions.length > 0) {
-                  const disabledActionsWarning = getDisabledActionsWarningText({
-                    alertsCreated: true,
-                    disabledActions,
-                  });
-                  warningMessage = [
-                    ...(warningMessage ? [warningMessage] : []),
-                    disabledActionsWarning,
-                  ].join(', ');
-                  wroteWarningStatus = true;
-                }
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum['partial failure'],
                   message: warningMessage,
