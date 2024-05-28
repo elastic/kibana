@@ -275,6 +275,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
           defaultMessage: 'Illustration of black hole',
         })}
         size="fullWidth"
+        height="140px"
         url={`${props.basePathUrl}illustration_product_no_search_results_${
           colorMode === 'DARK' ? 'dark' : 'light'
         }.svg`}
