@@ -15,19 +15,39 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
-NODE="${DIR}/node/bin/node"
-test -x "$NODE"
-if [ ! -x "$NODE" ]; then
-  echo "unable to find usable node.js executable."
-  exit 1
-fi
+
+test_node() {
+  test -x "$NODE"
+  if [ ! -x "$NODE" ]; then
+    echo "unable to find usable node.js executable."
+    exit 1
+  fi
+}
 
 if [ -f "${CONFIG_DIR}/node.options" ]; then
   KBN_NODE_OPTS="$(grep -v ^# < ${CONFIG_DIR}/node.options | xargs)"
 fi
-
+NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS"
 # Enable capturing heap snapshots. See https://nodejs.org/api/cli.html#--heapsnapshot-signalsignal
 # For now only on POSIX platforms, term signals work differently on Windows.
 NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT="${NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT:---heapsnapshot-signal=SIGUSR2 --diagnostic-dir=$DIR/data}"
 
-NODE_OPTIONS="--no-warnings --max-http-header-size=65536 $NODE_OPTIONS_HEAPSNAPSHOT_DEFAULT $KBN_NODE_OPTS $NODE_OPTIONS" NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" "${@}"
+{{#darwin}}
+NODE="${DIR}/node/default/bin/node"
+test_node
+{{/darwin}}
+{{#linux}}
+NODE="${DIR}/node/glibc-217/bin/node"
+test_node
+{{#serverless}}
+# Pointer compression builds will not set heap size > 4Gb
+# max-old-space-size is a subset of total heap size, so we add a 256mb buffer before switching builds
+CAN_USE_POINTER_COMPRESSION=$($NODE -e 'console.log(v8.getHeapStatistics().heap_size_limit / 1024 / 1024 <= (4096 + 256))')
+if [[ "$CAN_USE_POINTER_COMPRESSION" == 'true' ]]; then
+  NODE="${DIR}/node/pointer-compression/bin/node"
+  test_node
+fi
+{{/serverless}}
+{{/linux}}
+
+NODE_OPTIONS=$NODE_OPTIONS NODE_ENV=production exec "${NODE}" "${DIR}/src/cli/dist" "${@}"
