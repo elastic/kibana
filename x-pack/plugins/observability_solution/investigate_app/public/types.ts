@@ -32,6 +32,7 @@ import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plu
 import type { SloPublicStart } from '@kbn/slo-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ApmPluginStart, ApmPluginSetup } from '@kbn/apm-plugin/public';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
@@ -51,6 +52,7 @@ export interface InvestigateAppSetupDependencies {
   unifiedSearch: {};
   uiActions: UiActionsSetup;
   security: SecurityPluginSetup;
+  apm: ApmPluginSetup;
 }
 
 export interface InvestigateAppStartDependencies {
@@ -67,6 +69,7 @@ export interface InvestigateAppStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
   security: SecurityPluginStart;
+  apm: ApmPluginStart;
 }
 
 export interface InvestigateAppPublicSetup {}

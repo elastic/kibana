@@ -11,13 +11,31 @@ import React, { ComponentProps } from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ServiceList } from '.';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
+import {
+  ServiceInventoryFieldName,
+  ServiceListItem,
+} from '../../../../../common/service_inventory';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_spy';
 import { items, overflowItems } from './__fixtures__/service_api_mock_data';
+import { ServiceLinkBase } from '../../../shared/links/apm/service_link';
+import { InteractiveServiceListItem } from './types';
 
 type Args = ComponentProps<typeof ServiceList>;
+
+function withInteractive(item: ServiceListItem): InteractiveServiceListItem {
+  return {
+    ...item,
+    alerts: { href: '' },
+    serviceLink: (
+      <ServiceLinkBase serviceName={item.serviceName} agentName={item.agentName} href="" />
+    ),
+  };
+}
+
+const interactiveItems = items.map(withInteractive);
+const interactiveOverflowItems = overflowItems.map(withInteractive);
 
 const coreMock = {
   http: {
@@ -53,7 +71,7 @@ export const ServiceListWithItems: Story<Args> = (args) => {
 };
 ServiceListWithItems.args = {
   status: FETCH_STATUS.SUCCESS,
-  items,
+  items: interactiveItems,
   displayHealthStatus: true,
   initialSortField: ServiceInventoryFieldName.HealthStatus,
   initialSortDirection: 'desc',
@@ -80,7 +98,7 @@ export const WithHealthWarnings: Story<Args> = (args) => {
 WithHealthWarnings.args = {
   status: FETCH_STATUS.SUCCESS,
   initialPageSize: 25,
-  items: items.map((item) => ({
+  items: interactiveItems.map((item) => ({
     ...item,
     healthStatus: ServiceHealthStatus.warning,
   })),
@@ -93,7 +111,7 @@ export const ServiceListWithOverflowBucket: Story<Args> = (args) => {
 
 ServiceListWithOverflowBucket.args = {
   status: FETCH_STATUS.SUCCESS,
-  items: overflowItems,
+  items: interactiveOverflowItems,
   displayHealthStatus: false,
   initialSortField: ServiceInventoryFieldName.HealthStatus,
   initialSortDirection: 'desc',

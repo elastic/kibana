@@ -23,6 +23,7 @@ import React from 'react';
 import { PickByValue } from 'utility-types';
 import { useTheme } from '../../hooks/use_theme';
 import { AlertsQuickLink } from './alerts_quick_link';
+import { ApmQuickLink } from './apm_quick_link';
 import { SloQuickLink } from './slo_quick_link';
 
 const groupClassName = css`
@@ -162,6 +163,8 @@ export function AddWidgetQuickLinkList({
 }
 export function AddWidgetQuickLinks({
   onWidgetAdd,
+  start,
+  end,
 }: {
   onWidgetAdd: (create: InvestigateWidgetCreate) => Promise<void>;
   start: Moment;
@@ -174,6 +177,13 @@ export function AddWidgetQuickLinks({
       </EuiErrorBoundary>
       <EuiErrorBoundary>
         <AlertsQuickLink onWidgetAdd={onWidgetAdd} />
+      </EuiErrorBoundary>
+      <EuiErrorBoundary>
+        <ApmQuickLink
+          onWidgetAdd={onWidgetAdd}
+          start={start.toISOString()}
+          end={end.toISOString()}
+        />
       </EuiErrorBoundary>
     </AddWidgetQuickLinkList>
   );

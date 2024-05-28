@@ -54,6 +54,7 @@
     "@kbn/management-settings-ids",
     "@kbn/dashboard-plugin",
     "@kbn/security-plugin",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/apm-plugin"
   ],
 }

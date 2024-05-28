@@ -19,7 +19,8 @@
       "datasetQuality",
       "slo",
       "unifiedSearch",
-      "security"
+      "security",
+      "apm"
     ],
     "requiredBundles": [
       "kibanaReact",

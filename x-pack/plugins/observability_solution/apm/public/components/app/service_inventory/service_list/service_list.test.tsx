@@ -5,26 +5,17 @@
  * 2.0.
  */
 
+import { EuiBasicTableColumn } from '@elastic/eui';
 import { composeStories } from '@storybook/testing-react';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { getServiceColumns } from '.';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { Breakpoints } from '../../../../hooks/use_breakpoints';
-import { apmRouter } from '../../../routing/apm_route_config';
 import * as timeSeriesColor from '../../../shared/charts/helper/get_timeseries_color';
+import { getServiceColumns } from './get_service_columns';
 import * as stories from './service_list.stories';
+import { InteractiveServiceListItem } from './types';
 
 const { ServiceListEmptyState, ServiceListWithItems } = composeStories(stories);
-
-const query = {
-  rangeFrom: 'now-15m',
-  rangeTo: 'now',
-  environment: ENVIRONMENT_ALL.value,
-  kuery: '',
-  serviceGroup: '',
-  comparisonEnabled: false,
-};
 
 const service: any = {
   serviceName: 'opbeans-python',
@@ -44,6 +35,16 @@ const service: any = {
   environments: ['test'],
   transactionType: 'request',
 };
+
+function renderColumn(column: EuiBasicTableColumn<InteractiveServiceListItem>) {
+  const field = 'field' in column ? column.field : undefined;
+
+  if ('render' in column && column.render) {
+    return column.render(field, service);
+  }
+
+  return service[field as keyof typeof service];
+}
 
 describe('ServiceList', () => {
   beforeAll(() => {
@@ -73,7 +74,6 @@ describe('ServiceList', () => {
         const renderedColumns = getServiceColumns({
           comparisonDataLoading: false,
           showHealthStatusColumn: true,
-          query,
           showTransactionTypeColumn: true,
           breakpoints: {
             isSmall: true,
@@ -81,9 +81,7 @@ describe('ServiceList', () => {
             isXl: true,
           } as Breakpoints,
           showAlertsColumn: true,
-          link: apmRouter.link,
-          serviceOverflowCount: 0,
-        }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
+        }).map(renderColumn);
         expect(renderedColumns.length).toEqual(8);
         expect(renderedColumns[3]).toMatchInlineSnapshot(`
           <EnvironmentBadge
@@ -112,7 +110,6 @@ describe('ServiceList', () => {
         const renderedColumns = getServiceColumns({
           comparisonDataLoading: false,
           showHealthStatusColumn: true,
-          query,
           showTransactionTypeColumn: true,
           breakpoints: {
             isSmall: false,
@@ -120,9 +117,7 @@ describe('ServiceList', () => {
             isXl: true,
           } as Breakpoints,
           showAlertsColumn: true,
-          link: apmRouter.link,
-          serviceOverflowCount: 0,
-        }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
+        }).map(renderColumn);
         expect(renderedColumns.length).toEqual(6);
         expect(renderedColumns[3]).toMatchInlineSnapshot(`
           <ListMetric
@@ -140,7 +135,6 @@ describe('ServiceList', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
             showHealthStatusColumn: true,
-            query,
             showTransactionTypeColumn: true,
             breakpoints: {
               isSmall: false,
@@ -148,9 +142,7 @@ describe('ServiceList', () => {
               isXl: true,
             } as Breakpoints,
             showAlertsColumn: true,
-            link: apmRouter.link,
-            serviceOverflowCount: 0,
-          }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
+          }).map(renderColumn);
           expect(renderedColumns.length).toEqual(7);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
             <EnvironmentBadge
@@ -178,7 +170,6 @@ describe('ServiceList', () => {
           const renderedColumns = getServiceColumns({
             comparisonDataLoading: false,
             showHealthStatusColumn: true,
-            query,
             showTransactionTypeColumn: true,
             breakpoints: {
               isSmall: false,
@@ -186,9 +177,7 @@ describe('ServiceList', () => {
               isXl: false,
             } as Breakpoints,
             showAlertsColumn: true,
-            link: apmRouter.link,
-            serviceOverflowCount: 0,
-          }).map((c) => (c.render ? c.render!(service[c.field!], service) : service[c.field!]));
+          }).map(renderColumn);
           expect(renderedColumns.length).toEqual(8);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
                       <EnvironmentBadge
@@ -219,7 +208,6 @@ describe('ServiceList', () => {
       const renderedColumns = getServiceColumns({
         comparisonDataLoading: false,
         showHealthStatusColumn: false,
-        query,
         showTransactionTypeColumn: true,
         breakpoints: {
           isSmall: false,
@@ -227,9 +215,7 @@ describe('ServiceList', () => {
           isXl: false,
         } as Breakpoints,
         showAlertsColumn: true,
-        link: apmRouter.link,
-        serviceOverflowCount: 0,
-      }).map((c) => c.field);
+      }).map(renderColumn);
       expect(renderedColumns.includes('healthStatus')).toBeFalsy();
     });
   });
@@ -239,7 +225,6 @@ describe('ServiceList', () => {
       const renderedColumns = getServiceColumns({
         comparisonDataLoading: false,
         showHealthStatusColumn: true,
-        query,
         showTransactionTypeColumn: true,
         breakpoints: {
           isSmall: false,
@@ -247,9 +232,7 @@ describe('ServiceList', () => {
           isXl: false,
         } as Breakpoints,
         showAlertsColumn: true,
-        link: apmRouter.link,
-        serviceOverflowCount: 0,
-      }).map((c) => c.field);
+      }).map(renderColumn);
       expect(renderedColumns.includes('healthStatus')).toBeTruthy();
     });
   });
@@ -259,7 +242,6 @@ describe('ServiceList', () => {
       const renderedColumns = getServiceColumns({
         comparisonDataLoading: false,
         showHealthStatusColumn: false,
-        query,
         showTransactionTypeColumn: true,
         breakpoints: {
           isSmall: false,
@@ -267,9 +249,7 @@ describe('ServiceList', () => {
           isXl: false,
         } as Breakpoints,
         showAlertsColumn: false,
-        link: apmRouter.link,
-        serviceOverflowCount: 0,
-      }).map((c) => c.field);
+      }).map(renderColumn);
       expect(renderedColumns.includes('alertsCount')).toBeFalsy();
     });
   });
@@ -279,7 +259,6 @@ describe('ServiceList', () => {
       const renderedColumns = getServiceColumns({
         comparisonDataLoading: false,
         showHealthStatusColumn: true,
-        query,
         showTransactionTypeColumn: true,
         breakpoints: {
           isSmall: false,
@@ -287,9 +266,7 @@ describe('ServiceList', () => {
           isXl: false,
         } as Breakpoints,
         showAlertsColumn: true,
-        link: apmRouter.link,
-        serviceOverflowCount: 0,
-      }).map((c) => c.field);
+      }).map(renderColumn);
       expect(renderedColumns.includes('alertsCount')).toBeTruthy();
     });
   });

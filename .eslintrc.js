@@ -893,10 +893,6 @@ module.exports = {
           },
         ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-        'react-hooks/exhaustive-deps': [
-          'error',
-          { additionalHooks: '^(useFetcher|useProgressiveFetcher|useBreadcrumb)$' },
-        ],
       },
     },
     {
@@ -920,13 +916,17 @@ module.exports = {
       files: [
         'x-pack/plugins/aiops/**/*.tsx',
         'x-pack/plugins/observability_solution/**/*.tsx',
+        'x-pack/plugins/observability_solution/**/*.ts',
         'src/plugins/ai_assistant_management/**/*.tsx',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
         'react-hooks/exhaustive-deps': [
           'error',
-          { additionalHooks: '^(useAbortableAsync|useMemoWithAbortSignal)$' },
+          {
+            additionalHooks:
+              '^(useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb)$',
+          },
         ],
       },
     },

@@ -50,7 +50,8 @@
       "licenseManagement",
       "profilingDataAccess",
       "cases",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "investigate"
     ],
     "requiredBundles": [
       "fleet",
@@ -58,7 +59,8 @@
       "kibanaUtils",
       "ml",
       "observability",
-      "maps"
+      "maps",
+      "investigate"
     ]
   }
 }

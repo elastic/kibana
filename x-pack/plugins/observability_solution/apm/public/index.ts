@@ -6,7 +6,15 @@
  */
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
+import {
+  ApmPlugin,
+  ApmPluginSetup,
+  ApmPluginSetupDeps,
+  ApmPluginStart,
+  ApmPluginStartDeps,
+} from './plugin';
+
+export { createInvestigateServiceInventoryWidget } from './components/app/investigate_widgets/investigate_service_inventory/create_investigate_service_inventory_widget';
 
 export interface ConfigSchema {
   serviceMapEnabled: boolean;
@@ -32,8 +40,12 @@ export interface ConfigSchema {
   };
 }
 
-export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
-  pluginInitializerContext: PluginInitializerContext<ConfigSchema>
-) => new ApmPlugin(pluginInitializerContext);
+export const plugin: PluginInitializer<
+  ApmPluginSetup,
+  ApmPluginStart,
+  ApmPluginSetupDeps,
+  ApmPluginStartDeps
+> = (pluginInitializerContext: PluginInitializerContext<ConfigSchema>) =>
+  new ApmPlugin(pluginInitializerContext);
 
 export type { ApmPluginSetup, ApmPluginStart };
