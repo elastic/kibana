@@ -73,6 +73,7 @@ describe('VisualizeESQL', () => {
           ObservabilityAIAssistantMultipaneFlyoutContext={
             ObservabilityAIAssistantMultipaneFlyoutContext
           }
+          rows={[]}
         />
       </ObservabilityAIAssistantMultipaneFlyoutContext.Provider>
     );
