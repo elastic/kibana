@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const findingsFieldLabels: Record<string, string> = {
+export const findingsTableFieldLabels: Record<string, string> = {
   'result.evaluation': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.resultColumnLabel',
     { defaultMessage: 'Result' }

@@ -460,4 +460,36 @@ describe('Data table columns', function () {
       expect(deserializeHeaderRowHeight(2)).toBe(2);
     });
   });
+
+  describe('columnHeaders', () => {
+    it('Column Name should display provided label from columnHeaders otherwise it defaults to columns name', () => {
+      const mockColumnHeaders: Record<string, string> = {
+        test_column_1: 'test_column_one',
+        test_column_2: 'test_column_two',
+        test_column_3: 'test_column_three',
+      } as const;
+      const customizedGridColumns = getEuiGridColumns({
+        columns: ['test_column_1', 'test_column_2', 'test_column_4'],
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        headerRowHeightLines: 5,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        columnHeaders: mockColumnHeaders,
+      });
+      const columnDisplayNames = customizedGridColumns.map((column) => column.displayAsText);
+      expect(columnDisplayNames.includes('test_column_one')).toBeTruthy();
+      expect(columnDisplayNames.includes('test_column_two')).toBeTruthy();
+      expect(columnDisplayNames.includes('test_column_three')).toBeFalsy();
+      expect(columnDisplayNames.includes('test_column_4')).toBeTruthy();
+    });
+  });
 });

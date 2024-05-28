@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const vulnerabilitiesFieldLabels: Record<string, string> = {
+export const vulnerabilitiesTableFieldLabels: Record<string, string> = {
   'resource.id': i18n.translate(
     'xpack.csp.findings.findingsTable.findingsTableColumn.resourceIdColumnLabel',
     { defaultMessage: 'Resource ID' }

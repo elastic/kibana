@@ -128,19 +128,6 @@ async function toggleDocSelection(
   component.update();
 }
 
-const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
-  render(
-    <IntlProvider locale="en">
-      <DataTable {...props} />
-    </IntlProvider>
-  );
-};
-
-const getColumnHeaders = () =>
-  screen
-    .getAllByRole('columnheader')
-    .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
-
 describe('UnifiedDataTable', () => {
   afterEach(async () => {
     jest.clearAllMocks();
@@ -772,6 +759,19 @@ describe('UnifiedDataTable', () => {
   });
 
   describe('document comparison', () => {
+    const renderDataTable = (props: Partial<UnifiedDataTableProps>) => {
+      render(
+        <IntlProvider locale="en">
+          <DataTable {...props} />
+        </IntlProvider>
+      );
+    };
+
+    const getColumnHeaders = () =>
+      screen
+        .getAllByRole('columnheader')
+        .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
+
     const getSelectedDocumentsButton = () => screen.queryByRole('button', { name: /Selected/ });
 
     const selectDocument = (document: EsHitRecord) =>
@@ -844,34 +844,6 @@ describe('UnifiedDataTable', () => {
       renderDataTable({ enableComparisonMode: true });
       await goToComparisonMode();
       expect(getFieldColumns()).toEqual(['@timestamp', '_index', 'bytes', 'extension', 'message']);
-    });
-  });
-  describe('columnHeaders custom column labels', () => {
-    const mockColumnHeaders: Record<string, string> = {
-      test_column_1: 'test_column_one',
-      test_column_2: 'test_column_two',
-    } as const;
-
-    it('Columns that has corresponding custom label in columnHeaders props should show the label name for the column name', async () => {
-      renderDataTable({
-        columns: ['test_column_1', 'test_column_2'],
-        columnHeaders: mockColumnHeaders,
-      });
-      expect(getColumnHeaders().includes('test_column_one')).toBeTruthy();
-      expect(getColumnHeaders().includes('test_column_two')).toBeTruthy();
-      expect(getColumnHeaders().includes('test_column_1')).toBeFalsy();
-      expect(getColumnHeaders().includes('test_column_2')).toBeFalsy();
-    });
-
-    it('Columns that do not have corresponding custom label in columnHeaders props should show the original column name', async () => {
-      renderDataTable({
-        columns: ['test_column_1', 'test_column_3'],
-        columnHeaders: mockColumnHeaders,
-      });
-      expect(getColumnHeaders().includes('test_column_one')).toBeTruthy();
-      expect(getColumnHeaders().includes('test_column_two')).toBeFalsy();
-      expect(getColumnHeaders().includes('test_column_1')).toBeFalsy();
-      expect(getColumnHeaders().includes('test_column_3')).toBeTruthy();
     });
   });
 });
