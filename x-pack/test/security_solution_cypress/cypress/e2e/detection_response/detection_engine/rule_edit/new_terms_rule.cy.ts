@@ -34,6 +34,7 @@ import {
   selectAlertSuppressionPerRuleExecution,
   selectDoNotSuppressForMissingFields,
   fillAlertSuppressionFields,
+  clearAlertSuppressionFields,
 } from '../../../../tasks/create_new_rule';
 import { visit } from '../../../../tasks/navigation';
 
@@ -82,7 +83,9 @@ describe(
 
         selectAlertSuppressionPerRuleExecution();
         selectDoNotSuppressForMissingFields();
-        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS.slice(1));
+
+        clearAlertSuppressionFields();
+        fillAlertSuppressionFields(SUPPRESS_BY_FIELDS);
 
         saveEditedRule();
 

@@ -35,6 +35,7 @@ import {
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_FIELDS_INPUT,
   ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
+  ALERT_SUPPRESSION_FIELDS_CLEAR_BUTTON,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
   THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
   ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
@@ -913,6 +914,10 @@ export const fillAlertSuppressionFields = (fields: string[]) => {
   fields.forEach((field) => {
     cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{enter}`);
   });
+};
+
+export const clearAlertSuppressionFields = () => {
+  cy.get(ALERT_SUPPRESSION_FIELDS_CLEAR_BUTTON).click();
 };
 
 export const selectAlertSuppressionPerInterval = () => {

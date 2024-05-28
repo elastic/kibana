@@ -24,6 +24,8 @@ export const ALERT_SUPPRESSION_FIELDS = '[data-test-subj="alertSuppressionInput"
 export const ALERT_SUPPRESSION_FIELDS_COMBO_BOX =
   '[data-test-subj="alertSuppressionInput"] [data-test-subj="comboBoxInput"]';
 
+export const ALERT_SUPPRESSION_FIELDS_CLEAR_BUTTON = `${ALERT_SUPPRESSION_FIELDS} [data-test-subj="comboBoxClearButton"]`;
+
 export const ALERT_SUPPRESSION_FIELDS_INPUT = `${ALERT_SUPPRESSION_FIELDS_COMBO_BOX} input`;
 
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
