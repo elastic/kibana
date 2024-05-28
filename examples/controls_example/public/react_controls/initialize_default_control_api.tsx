@@ -9,7 +9,6 @@
 import { ControlWidth } from '@kbn/controls-plugin/common';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { ControlGroupApi } from './control_group/types';
 import {
   ControlApiRegistration,
   ControlStateManager,
