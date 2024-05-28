@@ -307,9 +307,6 @@ const nodeToEuiCollapsibleNavProps = (
     };
   }
 
-  // Render as an accordion or a link (handled by EUI) depending if
-  // "items" is undefined or not. If it is undefined --> a link, otherwise an
-  // accordion is rendered.
   if (navNode.renderItem) {
     return {
       items: [
@@ -322,19 +319,20 @@ const nodeToEuiCollapsibleNavProps = (
   }
 
   const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
-    // @ts-ignore - TODO
     {
       id,
       path,
       isSelected,
-      linkProps,
       onClick,
-      href,
       icon: navNode.icon,
       title: navNode.title,
-      items: subItems,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: treeDepth === 0 ? 'm' : 's' },
+
+      // Render as an accordion or a link (handled by EUI) depending if
+      // "items" is undefined or not. If it is undefined --> a link, otherwise an
+      // accordion is rendered.
+      ...(subItems ? { items: subItems } : { href, linkProps }),
     },
   ];
 
@@ -584,14 +582,19 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   if (!isVisible) {
     return null;
   }
+  if (!subItems) {
+    return <EuiCollapsibleNavItem {...props} className={className} />;
+  }
 
   return (
-    // @ts-ignore - TODO
     <EuiCollapsibleNavItem
       {...props}
       className={className}
       items={subItems}
       accordionProps={getAccordionProps(navNode.path)}
+      // Item type ExclusiveUnion - accordions should not contain links
+      href={undefined}
+      linkProps={undefined}
     />
   );
 });
