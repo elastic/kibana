@@ -68,10 +68,11 @@ import {
   retrieveFields,
   retrievePolicies,
   retrievePoliciesFields,
-  retrieveMetadataFields,
   retrieveFieldsFromStringSources,
 } from './resources';
-import { collapseWrongArgumentTypeMessages } from './helpers';
+import { collapseWrongArgumentTypeMessages, getMaxMinNumberOfParams } from './helpers';
+import { getParamAtPosition } from '../autocomplete/helper';
+import { METADATA_FIELDS } from '../shared/constants';
 
 function validateFunctionLiteralArg(
   astFunction: ESQLFunction,
@@ -346,35 +347,28 @@ function validateFunction(
   }
   const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
-    const refSignature = fnDefinition.signatures[0];
-    const numArgs =
-      refSignature.minParams ?? refSignature.params.filter(({ optional }) => !optional).length;
-    if (
-      !refSignature.minParams &&
-      refSignature.params.filter(({ optional }) => !optional).length === refSignature.params.length
-    ) {
+    const { max, min } = getMaxMinNumberOfParams(fnDefinition);
+    if (max === min) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentNumber',
           values: {
             fn: astFunction.name,
-            numArgs:
-              refSignature.minParams ??
-              refSignature.params.filter(({ optional }) => !optional).length,
+            numArgs: max,
             passedArgs: astFunction.args.length,
           },
           locations: astFunction.location,
         })
       );
-    } else if (Math.max(astFunction.args.length - refSignature.params.length, 0) > 0) {
+    } else if (astFunction.args.length > max) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentNumberTooMany',
           values: {
             fn: astFunction.name,
-            numArgs: refSignature.params.length,
+            numArgs: max,
             passedArgs: astFunction.args.length,
-            extraArgs: Math.max(astFunction.args.length - refSignature.params.length, 0),
+            extraArgs: astFunction.args.length - max,
           },
           locations: astFunction.location,
         })
@@ -385,9 +379,9 @@ function validateFunction(
           messageId: 'wrongArgumentNumberTooFew',
           values: {
             fn: astFunction.name,
-            numArgs,
+            numArgs: min,
             passedArgs: astFunction.args.length,
-            missingArgs: Math.max(numArgs - astFunction.args.length, 0),
+            missingArgs: min - astFunction.args.length,
           },
           locations: astFunction.location,
         })
@@ -461,9 +455,9 @@ function validateFunction(
   const failingSignatures: ESQLMessage[][] = [];
   for (const signature of matchingSignatures) {
     const failingSignature: ESQLMessage[] = [];
-    signature.params.forEach((argDef, index) => {
-      const outerArg = astFunction.args[index]!;
-      if (!outerArg && argDef.optional) {
+    astFunction.args.forEach((outerArg, index) => {
+      const argDef = getParamAtPosition(signature, index);
+      if ((!outerArg && argDef?.optional) || !argDef) {
         // that's ok, just skip it
         // the else case is already catched with the argument counts check
         // few lines above
@@ -596,7 +590,8 @@ function validateOption(
   }
   // use dedicate validate fn if provided
   if (optionDef.validate) {
-    messages.push(...optionDef.validate(option, command, referenceMaps.metadataFields));
+    const fields = METADATA_FIELDS;
+    messages.push(...optionDef.validate(option, command, new Set(fields)));
   }
   if (!optionDef.skipCommonValidation) {
     option.args.forEach((arg) => {
@@ -876,7 +871,6 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getFieldsFor: ['unknownColumn', 'wrongArgumentType', 'unsupportedFieldType'],
   getSources: ['unknownIndex'],
   getPolicies: ['unknownPolicy'],
-  getMetaFields: ['unknownMetadataField'],
 };
 
 /**
@@ -945,15 +939,13 @@ async function validateAst(
 
   const { ast, errors } = await astProvider(queryString);
 
-  const [sources, availableFields, availablePolicies, availableMetadataFields] = await Promise.all([
+  const [sources, availableFields, availablePolicies] = await Promise.all([
     // retrieve the list of available sources
     retrieveSources(ast, callbacks),
     // retrieve available fields (if a source command has been defined)
     retrieveFields(queryString, ast, callbacks),
     // retrieve available policies (if an enrich command has been defined)
     retrievePolicies(ast, callbacks),
-    // retrieve available metadata fields
-    retrieveMetadataFields(callbacks),
   ]);
 
   if (availablePolicies.size) {
@@ -987,7 +979,6 @@ async function validateAst(
       fields: availableFields,
       policies: availablePolicies,
       variables,
-      metadataFields: availableMetadataFields,
       query: queryString,
     });
     messages.push(...commandMessages);

@@ -6,58 +6,58 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
-import { formatDurationFromTimeUnitChar } from '../../../../common';
-import { Evaluation } from './lib/evaluate_rule';
-import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
-  BELOW_TEXT,
   ABOVE_TEXT,
+  ABOVE_OR_EQ_TEXT,
+  BELOW_TEXT,
+  BELOW_OR_EQ_TEXT,
   BETWEEN_TEXT,
   NOT_BETWEEN_TEXT,
-  CUSTOM_EQUATION_I18N,
-  ABOVE_OR_EQ_TEXT,
-  BELOW_OR_EQ_TEXT,
-} from './translations';
+} from '../../../../common/i18n';
+import { convertToBuiltInComparators, formatDurationFromTimeUnitChar } from '../../../../common';
+import { Evaluation } from './lib/evaluate_rule';
+import { formatAlertResult, FormattedEvaluation } from './lib/format_alert_result';
+import { CUSTOM_EQUATION_I18N } from './translations';
 import { UNGROUPED_FACTORY_KEY } from './constants';
 
 const toNumber = (value: number | string) =>
   typeof value === 'string' ? parseFloat(value) : value;
 
 const recoveredComparatorToI18n = (
-  comparator: Comparator,
+  comparator: COMPARATORS,
   threshold: number[],
   currentValue: number
 ) => {
   switch (comparator) {
-    case Comparator.BETWEEN:
+    case COMPARATORS.BETWEEN:
       return currentValue < threshold[0] ? BELOW_TEXT : ABOVE_TEXT;
-    case Comparator.OUTSIDE_RANGE:
+    case COMPARATORS.NOT_BETWEEN:
       return BETWEEN_TEXT;
-    case Comparator.GT:
+    case COMPARATORS.GREATER_THAN:
       return ABOVE_TEXT;
-    case Comparator.GT_OR_EQ:
+    case COMPARATORS.GREATER_THAN_OR_EQUALS:
       return ABOVE_OR_EQ_TEXT;
-    case Comparator.LT:
+    case COMPARATORS.LESS_THAN:
       return BELOW_TEXT;
-    case Comparator.LT_OR_EQ:
+    case COMPARATORS.LESS_THAN_OR_EQUALS:
       return BELOW_OR_EQ_TEXT;
   }
 };
 
-const alertComparatorToI18n = (comparator: Comparator) => {
+const alertComparatorToI18n = (comparator: COMPARATORS) => {
   switch (comparator) {
-    case Comparator.BETWEEN:
+    case COMPARATORS.BETWEEN:
       return BETWEEN_TEXT;
-    case Comparator.OUTSIDE_RANGE:
+    case COMPARATORS.NOT_BETWEEN:
       return NOT_BETWEEN_TEXT;
-    case Comparator.GT:
+    case COMPARATORS.GREATER_THAN:
       return ABOVE_TEXT;
-    case Comparator.GT_OR_EQ:
+    case COMPARATORS.GREATER_THAN_OR_EQUALS:
       return ABOVE_OR_EQ_TEXT;
-    case Comparator.LT:
+    case COMPARATORS.LESS_THAN:
       return BELOW_TEXT;
-    case Comparator.LT_OR_EQ:
+    case COMPARATORS.LESS_THAN_OR_EQUALS:
       return BELOW_OR_EQ_TEXT;
   }
 };
@@ -124,7 +124,7 @@ const buildAggregationReason: (evaluation: FormattedEvaluation) => string = ({
     defaultMessage: '{label} is {currentValue}, {comparator} the threshold of {threshold}',
     values: {
       label,
-      comparator: alertComparatorToI18n(comparator),
+      comparator: alertComparatorToI18n(convertToBuiltInComparators(comparator)),
       threshold: thresholdToI18n(threshold),
       currentValue,
     },
@@ -134,7 +134,7 @@ const buildAggregationReason: (evaluation: FormattedEvaluation) => string = ({
 export const buildRecoveredAlertReason: (alertResult: {
   group: string;
   label?: string;
-  comparator: Comparator;
+  comparator: COMPARATORS;
   threshold: Array<number | string>;
   currentValue: number | string;
 }) => string = ({ group, label = CUSTOM_EQUATION_I18N, comparator, threshold, currentValue }) =>
