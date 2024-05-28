@@ -263,9 +263,389 @@
         "agents": 0
       },
       "rules_count": 55
+    },
+    {
+      "package_policy": {
+        "id": "c14da36e-8476-455f-a8a8-127013a4ccee",
+        "version": "WzgxMTcsOV0=",
+        "name": "kspm-1",
+        "namespace": "default",
+        "description": "",
+        "package": {
+          "name": "cloud_security_posture",
+          "title": "Security Posture Management",
+          "version": "1.9.0"
+        },
+        "enabled": true,
+        "policy_id": "689ca301-cf52-4251-b427-85817fa53800",
+        "inputs": [
+          {
+            "type": "cloudbeat/cis_k8s",
+            "policy_template": "kspm",
+            "enabled": true,
+            "streams": [
+              {
+                "enabled": true,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "id": "cloudbeat/cis_k8s-cloud_security_posture.findings-c14da36e-8476-455f-a8a8-127013a4ccee",
+                "compiled_stream": {
+                  "config": {
+                    "v1": {
+                      "type": "kspm",
+                      "deployment": "self_managed",
+                      "benchmark": "cis_k8s"
+                    }
+                  },
+                  "fetchers": [
+                    {
+                      "name": "kube-api"
+                    },
+                    {
+                      "name": "process",
+                      "directory": "/hostfs",
+                      "processes": {
+                        "etcd": null,
+                        "kube-apiserver": null,
+                        "kube-controller": null,
+                        "kube-scheduler": null,
+                        "kubelet": {
+                          "config-file-arguments": ["config"]
+                        }
+                      }
+                    },
+                    {
+                      "name": "file-system",
+                      "patterns": [
+                        "/hostfs/etc/kubernetes/scheduler.conf",
+                        "/hostfs/etc/kubernetes/controller-manager.conf",
+                        "/hostfs/etc/kubernetes/admin.conf",
+                        "/hostfs/etc/kubernetes/kubelet.conf",
+                        "/hostfs/etc/kubernetes/manifests/etcd.yaml",
+                        "/hostfs/etc/kubernetes/manifests/kube-apiserver.yaml",
+                        "/hostfs/etc/kubernetes/manifests/kube-controller-manager.yaml",
+                        "/hostfs/etc/kubernetes/manifests/kube-scheduler.yaml",
+                        "/hostfs/etc/systemd/system/kubelet.service.d/10-kubeadm.conf",
+                        "/hostfs/etc/kubernetes/pki/**",
+                        "/hostfs/var/lib/kubelet/config.yaml",
+                        "/hostfs/var/lib/etcd",
+                        "/hostfs/etc/kubernetes/pki"
+                      ]
+                    }
+                  ],
+                  "processors": [
+                    {
+                      "add_cluster_id": null
+                    }
+                  ],
+                  "runtime_cfg": {
+                    "activated_rules": {
+                      "cis_k8s": [
+                        "cis_1_1_1",
+                        "cis_1_1_2",
+                        "cis_1_1_3",
+                        "cis_1_1_4",
+                        "cis_1_1_5",
+                        "cis_1_1_6",
+                        "cis_1_1_7",
+                        "cis_1_1_8",
+                        "cis_1_1_11",
+                        "cis_1_1_12",
+                        "cis_1_1_13",
+                        "cis_1_1_14",
+                        "cis_1_1_15",
+                        "cis_1_1_16",
+                        "cis_1_1_17",
+                        "cis_1_1_18",
+                        "cis_1_1_19",
+                        "cis_1_1_20",
+                        "cis_1_1_21",
+                        "cis_1_2_2",
+                        "cis_1_2_4",
+                        "cis_1_2_5",
+                        "cis_1_2_6",
+                        "cis_1_2_7",
+                        "cis_1_2_8",
+                        "cis_1_2_9",
+                        "cis_1_2_10",
+                        "cis_1_2_11",
+                        "cis_1_2_12",
+                        "cis_1_2_13",
+                        "cis_1_2_14",
+                        "cis_1_2_15",
+                        "cis_1_2_16",
+                        "cis_1_2_17",
+                        "cis_1_2_18",
+                        "cis_1_2_19",
+                        "cis_1_2_20",
+                        "cis_1_2_21",
+                        "cis_1_2_22",
+                        "cis_1_2_23",
+                        "cis_1_2_24",
+                        "cis_1_2_25",
+                        "cis_1_2_26",
+                        "cis_1_2_27",
+                        "cis_1_2_28",
+                        "cis_1_2_29",
+                        "cis_1_2_32",
+                        "cis_1_3_2",
+                        "cis_1_3_3",
+                        "cis_1_3_4",
+                        "cis_1_3_5",
+                        "cis_1_3_6",
+                        "cis_1_3_7",
+                        "cis_1_4_1",
+                        "cis_1_4_2",
+                        "cis_2_1",
+                        "cis_2_2",
+                        "cis_2_3",
+                        "cis_2_4",
+                        "cis_2_5",
+                        "cis_2_6",
+                        "cis_4_1_1",
+                        "cis_4_1_2",
+                        "cis_4_1_5",
+                        "cis_4_1_6",
+                        "cis_4_1_9",
+                        "cis_4_1_10",
+                        "cis_4_2_1",
+                        "cis_4_2_2",
+                        "cis_4_2_3",
+                        "cis_4_2_4",
+                        "cis_4_2_5",
+                        "cis_4_2_6",
+                        "cis_4_2_7",
+                        "cis_4_2_8",
+                        "cis_4_2_9",
+                        "cis_4_2_10",
+                        "cis_4_2_11",
+                        "cis_4_2_12",
+                        "cis_4_2_13",
+                        "cis_5_1_3",
+                        "cis_5_1_5",
+                        "cis_5_1_6",
+                        "cis_5_2_2",
+                        "cis_5_2_3",
+                        "cis_5_2_4",
+                        "cis_5_2_5",
+                        "cis_5_2_6",
+                        "cis_5_2_7",
+                        "cis_5_2_8",
+                        "cis_5_2_9",
+                        "cis_5_2_10"
+                      ]
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/cis_eks",
+            "policy_template": "kspm",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "vars": {
+                  "access_key_id": {
+                    "type": "text"
+                  },
+                  "secret_access_key": {
+                    "type": "text"
+                  },
+                  "session_token": {
+                    "type": "text"
+                  },
+                  "shared_credential_file": {
+                    "type": "text"
+                  },
+                  "credential_profile_name": {
+                    "type": "text"
+                  },
+                  "role_arn": {
+                    "type": "text"
+                  },
+                  "aws.credentials.type": {
+                    "type": "text"
+                  }
+                },
+                "id": "cloudbeat/cis_eks-cloud_security_posture.findings-c14da36e-8476-455f-a8a8-127013a4ccee"
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/cis_aws",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "vars": {
+                  "access_key_id": {
+                    "type": "text"
+                  },
+                  "secret_access_key": {
+                    "type": "text"
+                  },
+                  "session_token": {
+                    "type": "text"
+                  },
+                  "shared_credential_file": {
+                    "type": "text"
+                  },
+                  "credential_profile_name": {
+                    "type": "text"
+                  },
+                  "role_arn": {
+                    "type": "text"
+                  },
+                  "aws.credentials.type": {
+                    "type": "text"
+                  },
+                  "aws.account_type": {
+                    "type": "text"
+                  }
+                },
+                "id": "cloudbeat/cis_aws-cloud_security_posture.findings-c14da36e-8476-455f-a8a8-127013a4ccee"
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/cis_gcp",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "vars": {
+                  "gcp.account_type": {
+                    "type": "text"
+                  },
+                  "gcp.organization_id": {
+                    "type": "text"
+                  },
+                  "gcp.project_id": {
+                    "type": "text"
+                  },
+                  "gcp.credentials.type": {
+                    "type": "text"
+                  },
+                  "gcp.credentials.file": {
+                    "type": "text"
+                  },
+                  "gcp.credentials.json": {
+                    "type": "text"
+                  }
+                },
+                "id": "cloudbeat/cis_gcp-cloud_security_posture.findings-c14da36e-8476-455f-a8a8-127013a4ccee"
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/cis_azure",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "vars": {
+                  "azure.account_type": {
+                    "type": "text"
+                  },
+                  "azure.credentials.type": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_id": {
+                    "type": "text"
+                  },
+                  "azure.credentials.tenant_id": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_secret": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_username": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_password": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_certificate_path": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_certificate_password": {
+                    "type": "text"
+                  }
+                },
+                "id": "cloudbeat/cis_azure-cloud_security_posture.findings-c14da36e-8476-455f-a8a8-127013a4ccee"
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/vuln_mgmt_aws",
+            "policy_template": "vuln_mgmt",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.vulnerabilities"
+                },
+                "id": "cloudbeat/vuln_mgmt_aws-cloud_security_posture.vulnerabilities-c14da36e-8476-455f-a8a8-127013a4ccee"
+              }
+            ],
+            "config": {
+              "cloud_formation_template_url": {
+                "value": "https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic-cspm-cft.s3.eu-central-1.amazonaws.com/cloudformation-cnvm-8.14.0.yml&stackName=Elastic-Vulnerability-Management&param_EnrollmentToken=FLEET_ENROLLMENT_TOKEN&param_FleetUrl=FLEET_URL&param_ElasticAgentVersion=KIBANA_VERSION&param_ElasticArtifactServer=https://artifacts.elastic.co/downloads/beats/elastic-agent"
+              }
+            }
+          }
+        ],
+        "vars": {
+          "posture": {
+            "value": "kspm",
+            "type": "text"
+          },
+          "deployment": {
+            "value": "self_managed",
+            "type": "text"
+          }
+        },
+        "revision": 1,
+        "created_at": "2024-05-28T21:04:39.013Z",
+        "created_by": "system",
+        "updated_at": "2024-05-28T21:04:39.013Z",
+        "updated_by": "system"
+      },
+      "agent_policy": {
+        "id": "689ca301-cf52-4251-b427-85817fa53800",
+        "name": "Agent policy 1",
+        "agents": 0
+      },
+      "rules_count": 92
     }
   ],
-  "total": 1,
+  "total": 2,
   "page": 1,
   "perPage": 100
 }
