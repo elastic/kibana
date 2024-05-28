@@ -450,12 +450,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const rootPrivilegedDataStreams = packageInfo ? getRootPrivilegedDataStreams(packageInfo) : [];
 
   if (!!pliAuthBlockComponent) {
-    const PliAuthBlock = pliAuthBlockComponent;
+    const PliAuthBlockComponent = pliAuthBlockComponent;
 
     return (
-      <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+      <CreatePackagePolicySinglePageLayout
+        {...layoutProps}
+        data-test-subj="createPackagePolicyPliAuthBlockWrapper"
+      >
         <Suspense fallback={null}>
-          <PliAuthBlock />
+          <PliAuthBlockComponent />
         </Suspense>
       </CreatePackagePolicySinglePageLayout>
     );

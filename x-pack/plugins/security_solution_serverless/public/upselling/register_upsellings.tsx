@@ -20,12 +20,6 @@ import type {
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
 import React from 'react';
-import {
-  UPGRADE_INVESTIGATION_GUIDE,
-  UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
-} from '@kbn/security-solution-upselling/messages';
-import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
 import { CloudSecurityPosturePLIBlockLazy } from './sections/cloud_security_posture';
 import {
   EndpointAgentTamperProtectionLazy,
@@ -45,12 +39,6 @@ import {
   OsqueryResponseActionsUpsellingSectionLazy,
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
-import {
-  EndpointAgentTamperProtectionLazy,
-  EndpointPolicyProtectionsLazy,
-  EndpointProtectionUpdatesLazy,
-  RuleDetailsEndpointExceptionsLazy,
-} from './sections/endpoint_management';
 import * as i18n from './translations';
 
 interface UpsellingsConfig {
