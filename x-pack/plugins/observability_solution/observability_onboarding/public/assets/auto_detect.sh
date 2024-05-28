@@ -1,6 +1,5 @@
 #!/bin/bash
 
-log_file_list_string=""
 known_integrations_list_string=""
 selected_known_integrations_array=()
 selected_known_integrations_tsv_string=""
@@ -13,47 +12,53 @@ custom_log_file_path_list_tsv_string=""
 known_integrations_api_body_string=""
 custom_integrations_api_body_string=""
 
-read_log_file_list() {
-  local exclude_patterns=("^\/Users\/.+?\/Library\/Application Support")
+read_open_log_file_list() {
+  local exclude_patterns=(
+    "^\/Users\/.+?\/Library\/Application Support"
+    "^\/Users\/.+?\/Library\/Caches",
+    # Excluding all patterns that correspond to known integrations
+    # that we are detecting separately
+    "^\/var\/log\/nginx",
+    "^\/var\/log\/apache2",
+    "^\/var\/log\/httpd",
+    "^\/var\/lib\/docker\/containers",
+    "^\/var\/log\/syslog",
+    "^\/var\/log\/auth.log",
+    "^\/var\/log\/system.log",
+    "^\/var\/log\/messages",
+    "^\/var\/log\/secure",
+  )
 
-  local list=$(lsof -Fn | grep "log$" | awk '/^n/ {print substr($0, 2)}' | sort | uniq)
-  local filtered_list=""
+  local list=$(lsof -Fn | grep "\.log$" | awk '/^n/ {print substr($0, 2)}' | sort | uniq)
 
   # Filtering by the exclude patterns
   while IFS= read -r line; do
       if ! grep -qE "$(IFS="|"; echo "${exclude_patterns[*]}")" <<< "$line"; then
-          filtered_list+="$line\n"
+          unknown_log_file_path_list_string+="$line\n"
       fi
   done <<< "$list"
-
-  log_file_list_string=$filtered_list
 }
 
 detect_known_integrations() {
-  while IFS= read -r log_file_path; do
-    local integration=""
-
-    if [[ $log_file_path =~ ^(/private)?/var/log/nginx ]]; then
-      integration="nginx"
-    fi
-    if [[ $log_file_path =~ ^(/private)?/var/log/(apache2|httpd) ]]; then
-      integration="apache"
-    fi
-    if [[ $log_file_path =~ ^(/private)?/var/lib/docker/containers ]]; then
-      integration="docker"
-    fi
-    if [[ $log_file_path =~ ^(/private)?/var/log/(syslog|auth|system|messages|secure) ]]; then
-      integration="system"
+    if [[ -d "/var/log/nginx" ]]; then
+      known_integrations_list_string+="nginx"$'\n'
     fi
 
-    if [ -n "$integration" ]; then
-      known_integrations_list_string+="$integration\n"
-    else
-      unknown_log_file_path_list_string+="$log_file_path\n"
+    if [ -d "/var/log/apache2" ] || [ -d "/var/log/httpd" ] ; then
+      known_integrations_list_string+="apache"$'\n'
     fi
-  done <<< "$(echo -e $log_file_list_string)"
 
-  known_integrations_list_string=$(echo -e "$known_integrations_list_string" | sort -u)
+    if [ -d "/var/lib/docker/containers" ]; then
+      known_integrations_list_string+="docker"$'\n'
+    fi
+
+    if [ -f "/var/log/syslog" ] ||
+       [ -f "/var/log/auth.log" ] ||
+       [ -f "/var/log/system.log" ] ||
+       [ -f "/var/log/messages" ] ||
+       [ -f "/var/log/secure" ]; then
+      known_integrations_list_string+="system"$'\n'
+    fi
 }
 
 known_integration_title() {
@@ -188,11 +193,9 @@ build_custom_integrations_api_body_string() {
   done
 }
 
-# generate_custom_integration_name "/Library/Elastic/Agent/*.log"
-
 echo "Looking for log files..."
-read_log_file_list
 detect_known_integrations
+read_open_log_file_list
 build_unknown_log_file_patterns
 
 echo -e "\nWe found these logs on your system:"
