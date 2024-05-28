@@ -18,6 +18,7 @@ import {
   euiSelectableTemplateSitewideRenderOptions,
   useEuiTheme,
 } from '@elastic/eui';
+import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import { css } from '@emotion/react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
 import React, { FC, KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
@@ -205,14 +206,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
     [chromeStyle, isVisible, buttonRef, searchRef, reportEvent]
   );
 
-  const opensInNewTab = useCallback((selectedKey: string, url: string) => {
-    if (selectedKey === 'command') {
-      return window.open(url, '_blank');
-    }
-  }, []);
-
   const onChange = useCallback(
-    (selection: EuiSelectableTemplateSitewideOption[]) => {
+    (selection: EuiSelectableTemplateSitewideOption[], event: EuiSelectableOnChangeEvent) => {
       let selectedRank: number | null = null;
       const selected = selection.find(({ checked }, rank) => {
         const isChecked = checked === 'on';
@@ -263,8 +258,8 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      if (openInNewTab) {
-        opensInNewTab(selected.key ?? 'unknown', url);
+      if ((openInNewTab && event.ctrlKey) || event.metaKey) {
+        window.open(url, '_blank');
       }
       navigateToUrl(url);
 
@@ -274,7 +269,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [openInNewTab, opensInNewTab, reportEvent, navigateToUrl, searchRef, searchValue]
+    [openInNewTab, reportEvent, navigateToUrl, searchRef, searchValue]
   );
 
   const clearField = () => setSearchValue('');
