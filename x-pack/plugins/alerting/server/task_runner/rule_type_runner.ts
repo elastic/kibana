@@ -13,7 +13,6 @@ import {
   createTaskRunError,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server';
-import { some } from 'lodash';
 import { IAlertsClient } from '../alerts_client/types';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { ErrorWithReason } from '../lib';
@@ -23,7 +22,6 @@ import {
   DEFAULT_FLAPPING_SETTINGS,
   RuleAlertData,
   RuleExecutionStatusErrorReasons,
-  RuleNotifyWhen,
   RuleTypeParams,
   RuleTypeState,
   SanitizedRule,
@@ -321,9 +319,6 @@ export class RuleTypeRunner<
     await this.options.timer.runWithTimer(TaskRunnerTimerSpan.ProcessAlerts, async () => {
       alertsClient.processAlerts({
         flappingSettings: context.flappingSettings ?? DEFAULT_FLAPPING_SETTINGS,
-        notifyOnActionGroupChange:
-          notifyWhen === RuleNotifyWhen.CHANGE ||
-          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
         alertDelay: alertDelay?.active ?? 0,
         ruleRunMetricsStore: context.ruleRunMetricsStore,

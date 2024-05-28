@@ -1240,7 +1240,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             )
             .map((event) => event?.kibana?.alert?.flapping);
           const result = [false, false, false, false, false].concat(
-            new Array(7).fill(true),
+            new Array(9).fill(true),
             false,
             false,
             false
@@ -1348,7 +1348,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             )
             .map((event) => event?.kibana?.alert?.flapping);
           const result = [false, false, false, false, false].concat(
-            new Array(7).fill(true),
+            new Array(9).fill(true),
             false,
             false,
             false
@@ -1544,7 +1544,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([false, false, false, false, false, true, true, true]);
+          expect(flapping).to.eql(
+            [false, false, false, false, false].concat(new Array(8).fill(true))
+          );
         });
 
         it('should generate expected uuids for events for flapping alerts that go active while flapping and eventually recover', async () => {

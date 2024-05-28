@@ -17,7 +17,6 @@ export function getAlertsForNotification<
   RecoveryActionGroupId extends string
 >(
   flappingSettings: RulesSettingsFlappingProperties,
-  notifyOnActionGroupChange: boolean,
   actionGroupId: string,
   alertDelay: number,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
