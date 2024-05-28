@@ -36,7 +36,7 @@ export const BACKFILLS_TABLE_COLUMN_ERROR = i18n.translate(
 );
 
 export const BACKFILLS_TABLE_COLUMN_COMPLETED = i18n.translate(
-  'xpack.securitySolution.rule_gaps.backfillsTable.column.error',
+  'xpack.securitySolution.rule_gaps.backfillsTable.column.completed',
   {
     defaultMessage: 'Completed',
   }
@@ -50,14 +50,14 @@ export const BACKFILLS_TABLE_COLUMN_RUNNING = i18n.translate(
 );
 
 export const BACKFILLS_TABLE_COLUMN_PENDING = i18n.translate(
-  'xpack.securitySolution.rule_gaps.backfillsTable.column.pedning',
+  'xpack.securitySolution.rule_gaps.backfillsTable.column.pending',
   {
     defaultMessage: 'Pending',
   }
 );
 
 export const BACKFILLS_TABLE_COLUMN_TOTAL = i18n.translate(
-  'xpack.securitySolution.rule_gaps.backfillsTable.column.error',
+  'xpack.securitySolution.rule_gaps.backfillsTable.column.total',
   {
     defaultMessage: 'Total',
   }
@@ -78,7 +78,7 @@ export const BACKFILLS_TABLE_STOP_CONFIRMATION_TITLE = i18n.translate(
 );
 
 export const BACKFILLS_TABLE_STOP_CONFIRMATION_CANCEL = i18n.translate(
-  'xpack.securitySolution.rule_gaps.backfillsTable.stop.confirmationTitle',
+  'xpack.securitySolution.rule_gaps.backfillsTable.stop.cancel',
   {
     defaultMessage: 'Cancel',
   }
@@ -92,7 +92,7 @@ export const BACKFILLS_TABLE_STOP_CONFIRMATION_STOP_RUNS = i18n.translate(
 );
 
 export const BACKFILLS_TABLE_STOP_CONFIRMATION_BODY = i18n.translate(
-  'xpack.securitySolution.rule_gaps.backfillsTable.stop.stopRuns',
+  'xpack.securitySolution.rule_gaps.backfillsTable.stop.description',
   {
     defaultMessage: 'All remaining rule runs will be stopped',
   }
