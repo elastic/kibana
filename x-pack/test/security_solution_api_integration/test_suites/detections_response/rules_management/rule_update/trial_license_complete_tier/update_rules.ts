@@ -541,14 +541,15 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('per-action frequencies', () => {
+      describe.only('per-action frequencies', () => {
         const updateSingleRule = async (
           ruleId: string,
           throttle: RuleActionThrottle | undefined,
-          actions: RuleActionArray
+          actions: RuleActionArray,
+          interval: string = '5m'
         ) => {
           // update a simple rule's `throttle` and `actions`
-          const ruleToUpdate = { ...getSimpleRuleUpdate(), interval: '5m' };
+          const ruleToUpdate = { ...getSimpleRuleUpdate(), interval };
           ruleToUpdate.throttle = throttle;
           ruleToUpdate.actions = actions;
           ruleToUpdate.id = ruleId;
@@ -643,7 +644,10 @@ export default ({ getService }: FtrProviderContext) => {
               const actionsWithFrequencies = await getActionsWithFrequencies(supertest);
 
               // create simple rule
-              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
+              const createdRule = await createRule(supertest, log, {
+                ...getSimpleRuleWithoutRuleId(),
+                interval: '5m',
+              });
 
               // update a simple rule's `throttle` and `actions`
               const updatedRule = await updateSingleRule(
@@ -653,7 +657,7 @@ export default ({ getService }: FtrProviderContext) => {
               );
 
               const expectedRule = updateUsername(
-                getSimpleRuleOutputWithoutRuleId(),
+                { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' },
                 ELASTICSEARCH_USERNAME
               );
               expectedRule.revision = 1;
@@ -677,7 +681,8 @@ export default ({ getService }: FtrProviderContext) => {
                 const updatedRule = await updateSingleRule(
                   createdRule.id,
                   throttle,
-                  someActionsWithFrequencies
+                  someActionsWithFrequencies,
+                  '24h'
                 );
 
                 const expectedRule = updateUsername(

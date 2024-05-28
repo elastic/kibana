@@ -146,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           uuid: ruleBody.actions[0].uuid,
-          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+          frequency: { summary: true, throttle: '24h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
       // we want to ensure rule is executing successfully, to prevent any AAD issues related to partial update of rule SO
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext): void => {
             message: 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
           },
           uuid: ruleBody.actions[0].uuid,
-          frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+          frequency: { summary: true, throttle: '24h', notifyWhen: 'onThrottleInterval' },
         },
       ]);
     });
@@ -270,7 +270,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             ...(uuid ? { uuid } : {}),
-            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+            frequency: { summary: true, throttle: '24h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
       });
@@ -377,7 +377,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
             uuid: setTagsRule.actions[0].uuid,
-            frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+            frequency: { summary: true, throttle: '24h', notifyWhen: 'onThrottleInterval' },
           },
         ]);
       });
@@ -427,7 +427,7 @@ export default ({ getService }: FtrProviderContext): void => {
                     {
                       type: BulkActionEditTypeEnum.set_rule_actions,
                       value: {
-                        throttle: '1h',
+                        throttle: '1d',
                         actions: [
                           {
                             ...webHookActionMock,
@@ -448,7 +448,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 id: webHookConnector.id,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
-                frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
+                frequency: { summary: true, throttle: '1d', notifyWhen: 'onThrottleInterval' },
               },
             ];
 

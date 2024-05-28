@@ -343,13 +343,13 @@ export default ({ getService }: FtrProviderContext): void => {
             it(`it correctly transforms 'throttle = ${throttle}' and sets it as a frequency of each action`, async () => {
               const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
 
-              const simpleRule = getSimpleRuleWithoutRuleId();
+              const simpleRule = { ...getSimpleRuleWithoutRuleId(), interval: '5m' };
               simpleRule.throttle = throttle;
               simpleRule.actions = actionsWithoutFrequencies;
 
               const createdRule = await bulkCreateSingleRule(simpleRule);
 
-              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              const expectedRule = { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' };
               expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
                 ...action,
                 frequency: { summary: true, throttle, notifyWhen: 'onThrottleInterval' },
@@ -415,13 +415,13 @@ export default ({ getService }: FtrProviderContext): void => {
             it(`it correctly transforms 'throttle = ${throttle}' and overrides frequency attribute of each action`, async () => {
               const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
 
-              const simpleRule = getSimpleRuleWithoutRuleId();
+              const simpleRule = { ...getSimpleRuleWithoutRuleId(), interval: '5m' };
               simpleRule.throttle = throttle;
               simpleRule.actions = someActionsWithFrequencies;
 
               const createdRule = await bulkCreateSingleRule(simpleRule);
 
-              const expectedRule = getSimpleRuleOutputWithoutRuleId();
+              const expectedRule = { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' };
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({
                 ...action,
                 frequency: action.frequency ?? {
