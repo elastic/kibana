@@ -111,6 +111,8 @@ For simpler use cases, the `useFieldsMetadata` React custom hook is provided. Th
 | integration | string | 1password | ✅ |
 | dataset | string | 1password.item_usages | ✅ |
 
+It also accepts a second argument, an array of dependencies to determine when the hook should update the retrieved data.
+
 ```ts
 const FieldsComponent = () => {
   const {
@@ -120,7 +122,7 @@ const FieldsComponent = () => {
   const { fieldsMetadata, error, loading } = useFieldsMetadata({ 
     fieldsName: ['@timestamp', 'agent.name'],
     attributes: ['name', 'type']
-  });
+  }, []);
 
   if (loading) {
     return <div>Loading...</div>;

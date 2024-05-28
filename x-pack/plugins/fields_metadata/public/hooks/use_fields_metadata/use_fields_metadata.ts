@@ -7,7 +7,6 @@
 
 import { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import hash from 'object-hash';
 import { FieldAttribute, FieldName } from '../../../common';
 import { FindFieldsMetadataResponsePayload } from '../../../common/latest';
 import { IFieldsMetadataClient } from '../../services/fields_metadata';
@@ -31,18 +30,17 @@ export interface UseFieldsMetadataReturnType {
 }
 
 export type UseFieldsMetadataHook = (
-  params?: UseFieldsMetadataParams
+  params?: UseFieldsMetadataParams,
+  deps?: Parameters<typeof useAsyncFn>[1]
 ) => UseFieldsMetadataReturnType;
 
 export const createUseFieldsMetadataHook = ({
   fieldsMetadataClient,
 }: UseFieldsMetadataFactoryDeps): UseFieldsMetadataHook => {
-  return (params = {}) => {
-    const serializedParams = hash(params, { unorderedArrays: true });
-
+  return (params = {}, deps) => {
     const [{ error, loading, value }, load] = useAsyncFn(
       () => fieldsMetadataClient.find(params),
-      [serializedParams]
+      deps
     );
 
     useEffect(() => {

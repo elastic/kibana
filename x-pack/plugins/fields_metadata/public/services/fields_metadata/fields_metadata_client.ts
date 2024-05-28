@@ -6,12 +6,10 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { HashedCache } from '../../../common/hashed_cache';
+import type { HashedCache } from '../../../common/hashed_cache';
 import {
   FindFieldsMetadataRequestQuery,
-  findFieldsMetadataRequestQueryRT,
   FindFieldsMetadataResponsePayload,
-  findFieldsMetadataResponsePayloadRT,
 } from '../../../common/latest';
 import {
   DecodeFieldsMetadataError,
@@ -19,23 +17,31 @@ import {
   FieldName,
   FIND_FIELDS_METADATA_URL,
 } from '../../../common/fields_metadata';
-import { decodeOrThrow } from '../../../common/runtime_types';
+// import { decodeOrThrow } from '../../../common/runtime_types';
 import { IFieldsMetadataClient } from './types';
 
 export class FieldsMetadataClient implements IFieldsMetadataClient {
-  private cache: HashedCache<FindFieldsMetadataRequestQuery, FindFieldsMetadataResponsePayload>;
+  cache?: HashedCache<FindFieldsMetadataRequestQuery, FindFieldsMetadataResponsePayload>;
 
-  constructor(private readonly http: HttpStart) {
-    this.cache = new HashedCache();
-  }
+  constructor(private readonly http: HttpStart) {}
 
   public async find(
     params: FindFieldsMetadataRequestQuery
   ): Promise<FindFieldsMetadataResponsePayload> {
+    const cache = await this.loadLazyCache();
+
     // Initially lookup for existing results given request parameters
-    if (this.cache.has(params)) {
-      return this.cache.get(params) as FindFieldsMetadataResponsePayload;
+    if (cache.has(params)) {
+      return cache.get(params) as FindFieldsMetadataResponsePayload;
     }
+
+    const [
+      { findFieldsMetadataRequestQueryRT, findFieldsMetadataResponsePayloadRT },
+      { decodeOrThrow },
+    ] = await Promise.all([
+      import('../../../common/latest'),
+      import('../../../common/runtime_types'),
+    ]);
 
     const query = findFieldsMetadataRequestQueryRT.encode(params);
 
@@ -56,9 +62,18 @@ export class FieldsMetadataClient implements IFieldsMetadataClient {
     )(response);
 
     // Store cached results for given request parameters
-    this.cache.set(params, data);
+    cache.set(params, data);
 
     return data;
+  }
+
+  private async loadLazyCache() {
+    if (!this.cache) {
+      const { HashedCache } = await import('../../../common/hashed_cache');
+      this.cache = new HashedCache();
+    }
+
+    return this.cache;
   }
 }
 
