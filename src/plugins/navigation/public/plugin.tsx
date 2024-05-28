@@ -96,8 +96,7 @@ export class NavigationPublicPlugin
             ).pipe(shareReplay(1));
     }
 
-    // Here we will read the space state and decide if we are in classic or project style
-    chrome.setChromeStyle('classic');
+    this.initiateChromeStyleAndSideNav(chrome);
 
     // Initialize the solution navigation if it is enabled
     this.isSolutionNavExperiementEnabled$.pipe(take(1)).subscribe((isEnabled) => {
@@ -157,5 +156,22 @@ export class NavigationPublicPlugin
     project.updateSolutionNavigations({
       [solutionNavigation.id]: { ...rest, sideNavComponent },
     });
+  }
+
+  private initiateChromeStyleAndSideNav(chrome: InternalChromeStart) {
+    // Here we will read the space state and decide if we are in classic or project style
+    const mockSpaceState: { solutionView?: 'classic' | 'es' | 'oblt' | 'security' } = {
+      solutionView: 'security', // Change this value to test different solution views
+    };
+
+    const isProjectNav = Boolean(mockSpaceState.solutionView)
+      ? mockSpaceState.solutionView !== 'classic'
+      : false;
+
+    chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
+
+    if (isProjectNav && mockSpaceState.solutionView) {
+      chrome.project.changeActiveSolutionNavigation(mockSpaceState.solutionView);
+    }
   }
 }
