@@ -432,7 +432,6 @@ test('creates a control group from the control group factory and waits for it to
     getOutput$: jest.fn().mockReturnValue(new Observable()),
     onFiltersPublished$: new Observable(),
     unsavedChanges: new BehaviorSubject(undefined),
-    anyControlOutputConsumerLoading$: new BehaviorSubject(undefined),
   } as unknown as ControlGroupContainer;
   const mockControlGroupFactory = {
     create: jest.fn().mockReturnValue(mockControlGroupContainer),

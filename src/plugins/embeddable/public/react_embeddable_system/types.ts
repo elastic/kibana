@@ -30,8 +30,8 @@ export interface DefaultEmbeddableApi<
     HasSnapshottableState<RuntimeState> {}
 
 /**
- * A subset of the default embeddable API used in registration to allow implementors to omit aspects
- * of the API that will be automatically added by the system.
+ * Defines the subset of the default embeddable API that the `setApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `setApi`.
  */
 export type SetReactEmbeddableApiRegistration<
   SerializedState extends object = object,
@@ -39,8 +39,8 @@ export type SetReactEmbeddableApiRegistration<
 > = Omit<Api, 'uuid' | 'parent' | 'type'>;
 
 /**
- * A subset of the default embeddable API used in registration to allow implementors to omit aspects
- * of the API that handle unsaved changes.
+ * Defines the subset of the default embeddable API that the `buildApi` method uses, which allows implementors
+ * to omit aspects of the API that will be automatically added by `buildApi`.
  */
 export type BuildReactEmbeddableApiRegistration<
   SerializedState extends object = object,
@@ -90,12 +90,17 @@ export interface ReactEmbeddableFactory<
    */
   buildEmbeddable: (
     initialState: RuntimeState,
+    /**
+     * `buildApi` should be used by most embeddables that are used in dashboards, since it implements the unsaved
+     * changes logic that the dashboard expects using the provided comparators
+     */
     buildApi: (
       apiRegistration: BuildReactEmbeddableApiRegistration<SerializedState, Api>,
       comparators: StateComparators<RuntimeState>
     ) => Api,
     uuid: string,
     parentApi: unknown | undefined,
+    /** `setApi` should be used when the unsaved changes logic in `buildApi` is unnecessary */
     setApi: (api: SetReactEmbeddableApiRegistration<SerializedState, Api>) => Api
   ) => Promise<{ Component: React.FC<{}>; api: Api }>;
 }

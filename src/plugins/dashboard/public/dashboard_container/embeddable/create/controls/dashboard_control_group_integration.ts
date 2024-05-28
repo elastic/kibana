@@ -102,9 +102,9 @@ export function startSyncingDashboardControlGroup(this: DashboardContainer) {
       'dataLoading',
       apiPublishesDataLoading,
       (childrenLoading) => childrenLoading.some(Boolean)
-    ).subscribe((anyChildLoading) => {
-      this.controlGroup?.anyControlOutputConsumerLoading$.next(anyChildLoading);
-    })
+    ).subscribe((anyChildLoading) =>
+      this.controlGroup?.anyControlOutputConsumerLoading$.next(anyChildLoading)
+    )
   );
 }
 

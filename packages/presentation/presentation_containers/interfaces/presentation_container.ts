@@ -75,30 +75,31 @@ export const listenForCompatibleApi = <ApiType extends unknown>(
 };
 
 export const combineCompatibleApis = <ApiType extends unknown, PublishingSubjectType>(
-  api: PresentationContainer,
+  api: unknown,
   observableKey: keyof ApiType,
   isCompatible: (api: unknown) => api is ApiType,
   flattenMethod?: (array: PublishingSubjectType[]) => PublishingSubjectType
 ): Observable<PublishingSubjectType> => {
+  if (!api || !apiIsPresentationContainer(api)) return of();
+
   return api.children$.pipe(
     switchMap((children) => {
-      const compatibleChildren: ApiType[] = [];
+      const compatibleChildren: Array<Observable<PublishingSubjectType>> = [];
       for (const child of Object.values(children)) {
         if (isCompatible(child) && isObservable(child[observableKey]))
-          compatibleChildren.push(child);
+          compatibleChildren.push(child[observableKey] as BehaviorSubject<PublishingSubjectType>);
       }
-      if (compatibleChildren.length === 0) return of([]);
-      return combineLatest(
-        compatibleChildren.map(
-          (child) => child[observableKey] as BehaviorSubject<PublishingSubjectType>
+
+      if (compatibleChildren.length === 0) return of();
+
+      return combineLatest(compatibleChildren).pipe(
+        map(
+          flattenMethod
+            ? flattenMethod
+            : (nextCompatible) =>
+                nextCompatible.flat().filter((value) => Boolean(value)) as PublishingSubjectType
         )
       );
-    }),
-    map(
-      flattenMethod
-        ? flattenMethod
-        : (nextCompatible) =>
-            nextCompatible.flat().filter((value) => Boolean(value)) as PublishingSubjectType
-    )
+    })
   );
 };

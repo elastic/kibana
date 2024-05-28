@@ -99,8 +99,7 @@ export const initializeReactEmbeddableState = async <
           combineLatestWith(lastSavedState$)
         )
         .subscribe(([latest, last]) => {
-          const changes = runComparators(comparators, comparatorKeys, last, latest);
-          unsavedChanges.next(changes);
+          unsavedChanges.next(runComparators(comparators, comparatorKeys, last, latest));
         })
     );
     return {
