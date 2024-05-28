@@ -273,7 +273,6 @@ describe('Legacy Alerts Client', () => {
         lookBackWindow: 20,
         statusChangeThreshold: 4,
       },
-      true,
       'default',
       5,
       {},

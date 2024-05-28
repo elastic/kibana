@@ -1443,7 +1443,9 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                 event?.event?.action === 'recovered-instance'
             )
             .map((event) => event?.kibana?.alert?.flapping);
-          expect(flapping).to.eql([false, false, false, false, false, true, true, true]);
+          expect(flapping).to.eql(
+            [false, false, false, false, false].concat(new Array(8).fill(true))
+          );
         });
 
         it('should generate expected events for flapping alerts that settle on recovered where the action notifyWhen is NOT set to "on status change"', async () => {
