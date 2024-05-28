@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
-  let roleAuthc: RoleCredentials;
+  let roleAdmin: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
   describe('Summary actions', function () {
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAdmin = await svlUserManager.createApiKeyForRole('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
     });
 
@@ -80,25 +80,25 @@ export default function ({ getService }: FtrProviderContext) {
       await supertest
         .delete(`/api/actions/connector/${connectorId}`)
         .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader)
+        .set(roleAdmin.apiKeyHeader)
         .expect(204);
       await supertest
         .delete(`/api/alerting/rule/${ruleId}`)
         .set(internalReqHeader)
-        .set(roleAuthc.apiKeyHeader)
+        .set(roleAdmin.apiKeyHeader)
         .expect(204);
       await esDeleteAllIndices([ALERT_ACTION_INDEX]);
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
     });
 
     it('should schedule actions for summary of alerts per rule run', async () => {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
@@ -107,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const createdRule = await createEsQueryRule({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
@@ -236,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const createdRule = await createEsQueryRule({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
@@ -365,7 +365,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const createdConnector = await createIndexConnector({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
@@ -374,7 +374,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const createdRule = await createEsQueryRule({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
@@ -441,7 +441,7 @@ export default function ({ getService }: FtrProviderContext) {
       const testStart = new Date();
       const createdConnector = await createIndexConnector({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         name: 'Index Connector: Alerting API test',
         indexName: ALERT_ACTION_INDEX,
@@ -450,7 +450,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const createdRule = await createEsQueryRule({
         supertestWithoutAuth,
-        roleAuthc,
+        roleAuthc: roleAdmin,
         internalReqHeader,
         consumer: 'alerts',
         name: 'always fire',
