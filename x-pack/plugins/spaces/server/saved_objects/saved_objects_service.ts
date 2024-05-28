@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { CoreSetup } from '@kbn/core/server';
 
 import { SpacesSavedObjectMappings, UsageStatsMappings } from './mappings';
@@ -29,6 +30,30 @@ export class SpacesSavedObjectsService {
       schemas: SpacesSavedObjectSchemas,
       migrations: {
         '6.6.0': spaceMigrations.migrateTo660,
+      },
+      modelVersions: {
+        1: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                solution: { type: 'keyword' },
+              },
+            },
+          ],
+          schemas: {
+            create: SpacesSavedObjectSchemas['8.8.0'].extends({
+              solution: schema.maybe(
+                schema.oneOf([
+                  schema.literal('security'),
+                  schema.literal('observability'),
+                  schema.literal('search'),
+                  schema.literal('classic'),
+                ])
+              ),
+            }),
+          },
+        },
       },
     });
 
