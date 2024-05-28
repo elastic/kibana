@@ -756,6 +756,7 @@ export interface DataAccessLayer {
     timeRange,
     indexPatterns,
     winlogRecordID,
+    agentId,
   }: {
     nodeID: string;
     eventCategory: string[];
@@ -764,6 +765,7 @@ export interface DataAccessLayer {
     winlogRecordID: string;
     timeRange?: TimeRange;
     indexPatterns: string[];
+    agentId: string;
   }) => Promise<SafeResolverEvent | null>;
 
   /**

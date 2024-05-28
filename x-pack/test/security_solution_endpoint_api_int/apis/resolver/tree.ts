@@ -75,6 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
               to: tree.endTime.toISOString(),
             },
             indexPatterns: ['logs-*'],
+            agentId: tree.origin.agent.id,
           })
           .expect(200);
         verifyTree({

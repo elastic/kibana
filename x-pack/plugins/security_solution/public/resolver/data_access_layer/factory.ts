@@ -169,6 +169,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
       winlogRecordID,
       timeRange,
       indexPatterns,
+      agentId,
     }: {
       nodeID: string;
       eventCategory: string[];
@@ -177,6 +178,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
       winlogRecordID: string;
       timeRange?: TimeRange;
       indexPatterns: string[];
+      agentId: string;
     }): Promise<SafeResolverEvent | null> {
       /** @description - eventID isn't provided by winlog. This can be removed once runtime fields are available */
       const filter =
@@ -184,6 +186,7 @@ export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
           ? {
               bool: {
                 filter: [
+                  { term: { 'agent.id': agentId } },
                   { terms: { 'event.category': eventCategory } },
                   { term: { 'process.entity_id': nodeID } },
                   { term: { '@timestamp': eventTimestamp } },
