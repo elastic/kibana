@@ -21,6 +21,7 @@ export function SpacesServiceProvider({ getService }: FtrProviderContext) {
   const httpsAgent: Https.Agent | undefined = certificateAuthorities
     ? new Https.Agent({
         ca: certificateAuthorities,
+        // required for self-signed certificates used for HTTPS FTR testing
         rejectUnauthorized: false,
       })
     : undefined;

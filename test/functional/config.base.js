@@ -6,27 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { readFileSync } from 'fs';
-import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import { pageObjects } from './page_objects';
 import { services } from './services';
+import { configureHTTP2 } from '../common/configure_http2';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
-  const servers = commonConfig.get('servers');
 
-  return {
+  return configureHTTP2({
     pageObjects,
     services,
 
-    servers: {
-      ...servers,
-      kibana: {
-        ...servers.kibana,
-        protocol: 'https',
-        certificateAuthorities: [readFileSync(CA_CERT_PATH, 'utf-8')],
-      },
-    },
+    servers: commonConfig.get('servers'),
 
     esTestCluster: {
       ...commonConfig.get('esTestCluster'),
@@ -39,16 +30,6 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
-
-        // Enable HTTP2 and TLS
-        '--server.protocol=http2',
-        '--server.ssl.enabled=true',
-        `--server.ssl.key=${KBN_KEY_PATH}`,
-        `--server.ssl.certificate=${KBN_CERT_PATH}`,
-        `--server.ssl.certificateAuthorities=${CA_CERT_PATH}`,
-
-        // required because the base config reference its own server definition...
-        `--newsfeed.service.urlRoot=https://${servers.kibana.hostname}:${servers.kibana.port}`,
 
         // override default to not allow hiddenFromHttpApis saved object types access to the HTTP Apis. see https://github.com/elastic/dev/issues/2200
         '--savedObjects.allowHttpApiAccess=false',
@@ -128,7 +109,6 @@ export default async function ({ readConfigFile }) {
     },
     browser: {
       type: 'chrome',
-      acceptInsecureCerts: true,
     },
 
     security: {
@@ -502,5 +482,5 @@ export default async function ({ readConfigFile }) {
       },
       defaultRoles: ['test_logstash_reader', 'kibana_admin'],
     },
-  };
+  });
 }

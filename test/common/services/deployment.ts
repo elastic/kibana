@@ -39,6 +39,7 @@ export class DeploymentService extends FtrService {
     let agent: Agent | undefined;
     if (protocol === 'https') {
       agent = new Agent({
+        // required for self-signed certificates used for HTTPS FTR testing
         rejectUnauthorized: false,
       });
     }

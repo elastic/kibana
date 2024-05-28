@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
+process.isFtrRunner = true;
 require('../src/setup_node_env');
 require('@kbn/test').runFtrCli();

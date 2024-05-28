@@ -19,6 +19,7 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext) {
   const options: AgentOptions = {};
   if (kibanaServerConfig.certificateAuthorities) {
     options.ca = kibanaServerConfig.certificateAuthorities;
+    options.rejectUnauthorized = false;
   }
 
   // or add to server url in packages/kbn-test/src/functional_test_runner/lib/config/schema.ts maybe

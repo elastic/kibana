@@ -67,6 +67,14 @@ var IGNORE_WARNINGS = [
     messageContains:
       'header is not valid, the value will be dropped from the header and will never be in use.',
   },
+  // We have to enabled NODE_TLS_REJECT_UNAUTHORIZED for FTR testing
+  // when http2 is enabled to accept dev self-signed certificates
+  {
+    ftrOnly: true,
+    name: 'Warning',
+    message:
+      "Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.",
+  },
 ];
 
 if (process.noProcessWarnings !== true) {
@@ -82,7 +90,6 @@ if (process.noProcessWarnings !== true) {
       console.error();
       console.error('Terminating process...');
     }
-
     process.exit(1);
   });
 
@@ -101,7 +108,18 @@ if (process.noProcessWarnings !== true) {
 
 function shouldIgnore(warn) {
   warn = parseWarn(warn);
-  return IGNORE_WARNINGS.some(function ({ name, code, message, messageContains, file, line, col }) {
+
+  return IGNORE_WARNINGS.some(function ({
+    name,
+    code,
+    message,
+    messageContains,
+    file,
+    line,
+    col,
+    ftrOnly,
+  }) {
+    if (ftrOnly && !process.isFtrRunner) return false;
     if (name && name !== warn.name) return false;
     if (code && code !== warn.code) return false;
     if (message && message !== warn.message) return false;
