@@ -29,7 +29,7 @@ image::images/query-history-in-dashboard.png[An image of the auto option.]
 [discrete]
 ==== Document comparison mode in Discover & {esql}
 
-We are enabling users to select and compare documents or fields. This functionality will be a game-changer for tasks like debugging, allowing you to perform detailed comparisons, such as diffing SIP messages of a certain ID across multiple documents in {es}. This will streamline your analysis and troubleshooting processes.
+You can now select and compare documents or fields. This functionality streamlines analysis and troubleshooting tasks by allowing you to perform detailed comparisons, such as diffing SIP messages of a certain ID across multiple documents in {es}.
 
 [discrete]
 ==== Storing {esql} visualizations in saved searches
