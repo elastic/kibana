@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { mlServicesMock } from '../../../../../machine_learning/mocks';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import {
   getEmptyFindResult,
   getRuleMock,
@@ -24,25 +21,23 @@ import {
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
 import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
-
-jest.mock('../../../../../machine_learning/authz');
+import { HttpAuthzError } from '../../../../../machine_learning/validation';
 
 describe('Update rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
-  let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
 
   beforeEach(() => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
-    ml = mlServicesMock.createSetupContract();
 
     clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams())); // existing rule
     clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit()); // rule exists
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
+    clients.rulesManagementClient.updateRule.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    updateRuleRoute(server.router, ml);
+    updateRuleRoute(server.router);
   });
 
   describe('status codes', () => {
@@ -99,10 +94,8 @@ describe('Update rule route', () => {
     });
 
     it('returns a 403 if mlAuthz fails', async () => {
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
+      clients.rulesManagementClient.updateRule.mockImplementationOnce(async () => {
+        throw new HttpAuthzError('mocked validation message');
       });
       const request = requestMock.create({
         method: 'put',

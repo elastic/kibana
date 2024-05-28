@@ -129,6 +129,10 @@ afterAll(() => {
 });
 
 describe('When on the package policy create page', () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   const createPageUrlPath = pagePathGetters.add_integration_to_policy({ pkgkey: 'nginx-1.3.0' })[1];
 
   let testRenderer: TestRenderer;
@@ -738,6 +742,18 @@ describe('When on the package policy create page', () => {
 
     describe('With agentless policy available', () => {
       beforeEach(async () => {
+        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
+          ...useStartServices(),
+          cloud: {
+            ...useStartServices().cloud,
+            isServerlessEnabled: true,
+          },
+        });
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true });
+        (useGetPackageInfoByKeyQuery as jest.Mock).mockReturnValue(
+          getMockPackageInfo({ requiresRoot: false, dataStreamRequiresRoot: false })
+        );
+
         (sendGetOneAgentPolicy as jest.MockedFunction<any>).mockResolvedValue({
           data: { item: { id: AGENTLESS_POLICY_ID, name: 'Agentless CSPM', namespace: 'default' } },
         });
@@ -756,6 +772,7 @@ describe('When on the package policy create page', () => {
       });
 
       test('should not force create package policy when not in serverless', async () => {
+        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: false });
         (useStartServices as jest.MockedFunction<any>).mockReturnValue({
           ...useStartServices(),
           cloud: {
@@ -784,15 +801,6 @@ describe('When on the package policy create page', () => {
       });
 
       test('should force create package policy', async () => {
-        (useStartServices as jest.MockedFunction<any>).mockReturnValue({
-          ...useStartServices(),
-          cloud: {
-            ...useStartServices().cloud,
-            isServerlessEnabled: true,
-          },
-        });
-        jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ agentless: true });
-
         await act(async () => {
           fireEvent.click(renderResult.getByText('Existing hosts')!);
         });
@@ -813,8 +821,7 @@ describe('When on the package policy create page', () => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/184191
-      test.skip('should not show confirmation modal', async () => {
+      test('should not show confirmation modal', async () => {
         (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
           data: { results: { total: 1 } },
         });
@@ -843,6 +850,12 @@ const mockApiCalls = (http: MockedFleetStartServices['http']) => {
       return Promise.resolve({ data: { items: [] } });
     }
     if (path === '/api/fleet/outputs') {
+      return Promise.resolve({ data: { items: [] } });
+    }
+    if (path === '/api/fleet/fleet_server_hosts') {
+      return Promise.resolve({ data: { items: [] } });
+    }
+    if (path === '/api/fleet/agent_download_sources') {
       return Promise.resolve({ data: { items: [] } });
     }
     const err = new Error(`API [GET ${path}] is not MOCKED!`);
