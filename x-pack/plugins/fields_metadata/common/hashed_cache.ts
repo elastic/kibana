@@ -22,21 +22,25 @@ export class HashedCache<KeyType, ValueType> {
   }
 
   public get(key: KeyType): ValueType | undefined {
-    const serializedKey = hash(key);
+    const serializedKey = this.getHashedKey(key);
     return this.cache.get(serializedKey);
   }
 
   public set(key: KeyType, value: ValueType) {
-    const serializedKey = hash(key);
+    const serializedKey = this.getHashedKey(key);
     return this.cache.set(serializedKey, value);
   }
 
   public has(key: KeyType): boolean {
-    const serializedKey = hash(key);
+    const serializedKey = this.getHashedKey(key);
     return this.cache.has(serializedKey);
   }
 
   public reset() {
     return this.cache.reset();
+  }
+
+  private getHashedKey(key: KeyType) {
+    return hash(key, { unorderedArrays: true });
   }
 }

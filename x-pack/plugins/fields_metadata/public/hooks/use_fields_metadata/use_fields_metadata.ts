@@ -38,7 +38,7 @@ export const createUseFieldsMetadataHook = ({
   fieldsMetadataClient,
 }: UseFieldsMetadataFactoryDeps): UseFieldsMetadataHook => {
   return (params = {}) => {
-    const serializedParams = hash(params);
+    const serializedParams = hash(params, { unorderedArrays: true });
 
     const [{ error, loading, value }, load] = useAsyncFn(
       () => fieldsMetadataClient.find(params),
