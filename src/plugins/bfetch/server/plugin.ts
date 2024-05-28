@@ -66,10 +66,6 @@ export interface BfetchServerSetup {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface BfetchServerStart {}
 
-// NOTE: we will likely want to fully disable bfetch when a client supports/use http2,
-//       or maybe even fully disable bfetch overall now that we have http2 support
-//       but this should be done in a later stage by the appropriate team
-//       so the PR does the easiest fix to just remove http2 banned headers
 const getStreamingHeaders = (protocol: HttpProtocol): Record<string, string> => {
   if (protocol === 'http2') {
     return {

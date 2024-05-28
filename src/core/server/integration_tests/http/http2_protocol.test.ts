@@ -64,7 +64,7 @@ describe('Http2 - Smoke tests', () => {
     await server?.stop();
   });
 
-  describe('Basic test against all supported methods', () => {
+  describe('Basic tests against all supported methods', () => {
     beforeEach(async () => {
       const { registerRouter, server: innerServer } = await server.setup({ config$: of(config) });
       innerServerListener = innerServer.listener;
@@ -167,7 +167,7 @@ describe('Http2 - Smoke tests', () => {
     });
   });
 
-  describe('HTTP2-specific behavior', () => {
+  describe('HTTP2-specific behaviors', () => {
     beforeEach(async () => {
       const { registerRouter, server: innerServer } = await server.setup({ config$: of(config) });
       innerServerListener = innerServer.listener;

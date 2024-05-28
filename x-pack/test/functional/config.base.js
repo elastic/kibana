@@ -30,7 +30,7 @@ export default async function ({ readConfigFile }) {
     services,
     pageObjects,
 
-    servers: kibanaCommonConfig.get('servers'),
+    servers: kibanaFunctionalConfig.get('servers'),
 
     esTestCluster: {
       license: 'trial',

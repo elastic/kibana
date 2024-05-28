@@ -26,7 +26,7 @@ export function getServerListener(
     : configureHttp1Listener(config, options);
 }
 
-export const configureHttp1Listener = (
+const configureHttp1Listener = (
   config: IHttpConfig,
   { configureTLS = true }: GetServerListenerOptions = {}
 ): ServerListener => {
@@ -57,7 +57,7 @@ export const configureHttp1Listener = (
   return listener;
 };
 
-export const configureHttp2Listener = (
+const configureHttp2Listener = (
   config: IHttpConfig,
   { configureTLS = true }: GetServerListenerOptions = {}
 ): ServerListener => {
@@ -67,7 +67,7 @@ export const configureHttp2Listener = (
   const listener = useTLS
     ? http2.createSecureServer({
         ...tlsOptions,
-        // allow ALPN negotiation to HTTP1
+        // allow ALPN negotiation fallback to HTTP/1.x
         allowHTTP1: true,
       })
     : http2.createServer({});
