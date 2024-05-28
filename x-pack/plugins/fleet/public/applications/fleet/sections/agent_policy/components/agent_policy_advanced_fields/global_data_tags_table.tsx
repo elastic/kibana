@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
@@ -20,10 +21,11 @@ import type { NewAgentPolicy, AgentPolicy, GlobalDataTag } from '../../../../../
 
 interface Props {
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
+  initialTags: GlobalDataTag[];
 }
 
-export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy }) => {
-  const [globalDataTags, setGlobalDataTags] = useState<GlobalDataTag[]>([]);
+export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initialTags }) => {
+  const [globalDataTags, setGlobalDataTags] = useState<GlobalDataTag[]>(initialTags);
   const [newTag, setNewTag] = useState<GlobalDataTag>({ name: '', value: '' });
   const [isAdding, setIsAdding] = useState(false);
   const [editingIndices, setEditingIndices] = useState<Set<number>>(new Set());
@@ -34,6 +36,10 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy }) => {
     name: null,
     value: null,
   });
+
+  useEffect(() => {
+    setGlobalDataTags(initialTags);
+  }, [initialTags]);
 
   const handleAddField = () => {
     setIsAdding(true);
@@ -306,6 +312,7 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy }) => {
     </>
   );
 };
+
 // import React, { useState } from 'react';
 // import {
 //   EuiBasicTable,
