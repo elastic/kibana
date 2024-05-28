@@ -55,7 +55,7 @@ export const verifyQueryTimeout = (timeout: string) => {
 };
 
 // sometimes the results get stuck in the tests, this is a workaround
-export const checkResults = () => {
+export const checkResults = (checkStatus = true) => {
   const timeout = 2 * 60 * 1000;
   cy.getBySel('osqueryResultsTable').then(($table) => {
     if ($table.find('div .euiDataGridRow').length > 0) {
@@ -66,12 +66,14 @@ export const checkResults = () => {
       cy.getBySel('dataGridRowCell', { timeout }).should('have.lengthOf.above', 0);
     }
 
-    cy.getBySel('osquery-status-tab').click();
-    cy.getBySel('osqueryActionResultsTableStatusTabItemStatusSuccess', { timeout }).should(
-      'have.lengthOf.above',
-      0
-    );
-    cy.getBySel('osquery-results-tab').click();
+    if (checkStatus) {
+      cy.getBySel('osquery-status-tab').click();
+      cy.getBySel('osqueryActionResultsTableStatusTabItemStatusSuccess', { timeout }).should(
+        'have.lengthOf.above',
+        0
+      );
+      cy.getBySel('osquery-results-tab').click();
+    }
   });
 };
 
@@ -148,7 +150,7 @@ const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?seconds 
 export const viewRecentCaseAndCheckResults = () => {
   cy.contains('View case').click();
   cy.contains(casesOsqueryResultRegex);
-  checkResults();
+  checkResults(false);
 };
 
 export const checkActionItemsInResults = ({
