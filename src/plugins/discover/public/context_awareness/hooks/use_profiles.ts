@@ -6,23 +6,31 @@
  * Side Public License, v 1.
  */
 
-import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
+import { useEffect, useMemo, useState } from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { GetProfilesOptions } from '../profiles_manager';
+import type { GetProfilesOptions } from '../profiles_manager';
 
 export const useProfiles = ({ record }: GetProfilesOptions = {}) => {
   const { profilesManager } = useDiscoverServices();
-
+  const [profiles, setProfiles] = useState(() => profilesManager.getProfiles({ record }));
   const profiles$ = useMemo(
     () => profilesManager.getProfiles$({ record }),
     [profilesManager, record]
   );
 
-  const profiles = useMemo(
-    () => profilesManager.getProfiles({ record }),
-    [profilesManager, record]
-  );
+  useEffect(() => {
+    const subscription = profiles$.subscribe((newProfiles) => {
+      setProfiles((currentProfiles) => {
+        return currentProfiles.every((profile, i) => profile === newProfiles[i])
+          ? currentProfiles
+          : newProfiles;
+      });
+    });
 
-  return useObservable(profiles$, profiles);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [profiles$]);
+
+  return profiles;
 };
