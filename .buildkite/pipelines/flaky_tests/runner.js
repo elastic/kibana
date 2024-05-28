@@ -213,4 +213,20 @@ for (const testSuite of testSuites) {
   }
 }
 
+pipeline.steps.push({
+  wait: '~',
+  continue_on_failure: true,
+});
+
+pipeline.steps.push({
+  command: 'node .buildkite/pipelines/flaky_tests/post_stats_on_pr.js',
+  label: 'Post results on Github pull request',
+  agents: getAgentRule('n2-4-spot'),
+  timeout_in_minutes: 15,
+  retry: {
+    automatic: [{ exit_status: '-1', limit: 3 }],
+  },
+  soft_fail: true,
+});
+
 console.log(JSON.stringify(pipeline, null, 2));
