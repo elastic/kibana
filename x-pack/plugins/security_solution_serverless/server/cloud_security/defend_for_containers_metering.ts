@@ -32,11 +32,11 @@ const buildMeteringRecord = (
   timestamp.setMinutes(0);
   timestamp.setSeconds(0);
   timestamp.setMilliseconds(0);
-
+  const creationTimestamp = new Date();
   const usageRecord = {
-    id: `container-defend-${agentId}-${timestamp.toISOString()}`,
+    id: `defend-for-containers-${agentId}-${timestamp.toISOString()}`,
     usage_timestamp: timestampStr,
-    creation_timestamp: timestampStr,
+    creation_timestamp: creationTimestamp.toISOString(),
     usage: {
       type: CLOUD_SECURITY_TASK_TYPE,
       sub_type: CLOUD_DEFEND,
@@ -54,7 +54,7 @@ const buildMeteringRecord = (
 
   return usageRecord;
 };
-export const getHeartbeatRecords = async (
+export const getUsageRecords = async (
   esClient: ElasticsearchClient,
   searchFrom: Date,
   searchAfter?: any[]
@@ -63,7 +63,7 @@ export const getHeartbeatRecords = async (
     {
       index: CLOUD_DEFEND_HEARTBEAT_INDEX,
       size: BATCH_SIZE,
-      sort: [{ 'event.ingested': 'asc' }, { _id: 'asc' }],
+      sort: [{ 'event.ingested': 'asc' }, { 'agent.id': 'asc' }],
       search_after: searchAfter,
       query: {
         bool: {
@@ -88,7 +88,7 @@ export const getHeartbeatRecords = async (
   );
 };
 
-export const getCloudDefendUsageRecord = async ({
+export const getCloudDefendUsageRecords = async ({
   esClient,
   projectId,
   taskId,
@@ -103,7 +103,7 @@ export const getCloudDefendUsageRecord = async ({
     let fetchMore = true;
 
     while (fetchMore) {
-      const usageRecords = await getHeartbeatRecords(esClient, lastSuccessfulReport, searchAfter);
+      const usageRecords = await getUsageRecords(esClient, lastSuccessfulReport, searchAfter);
 
       if (!usageRecords?.hits?.hits?.length) {
         break;

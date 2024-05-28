@@ -11,7 +11,7 @@ import { CLOUD_DEFEND, CNVM, CSPM, KSPM } from './constants';
 import type { CloudSecuritySolutions } from './types';
 import type { MeteringCallBackResponse, MeteringCallbackInput, Tier, UsageRecord } from '../types';
 import type { ServerlessSecurityConfig } from '../config';
-import { getCloudDefendUsageRecord } from './containters_defend';
+import { getCloudDefendUsageRecords } from './defend_for_containers_metering';
 
 export const cloudSecurityMetringCallback = async ({
   esClient,
@@ -31,7 +31,7 @@ export const cloudSecurityMetringCallback = async ({
     const promiseResults = await Promise.allSettled(
       cloudSecuritySolutions.map((cloudSecuritySolution) => {
         if (cloudSecuritySolution === CLOUD_DEFEND) {
-          return getCloudDefendUsageRecord({
+          return getCloudDefendUsageRecords({
             esClient,
             projectId,
             logger,
