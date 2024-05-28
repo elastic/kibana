@@ -11,11 +11,12 @@ import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 
-import { I18nStart } from '@kbn/core/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
@@ -28,11 +29,11 @@ import { InputControlVisParams } from './types';
 export type InputControlVisControllerType = ReturnType<typeof createInputControlVisController>;
 
 export const createInputControlVisController = (
+  coreStart: CoreStart,
   deps: InputControlVisDependencies,
   handlers: IInterpreterRenderHandlers,
   el: Element
 ) => {
-  let I18nContext: I18nStart['Context'] | undefined;
   let isLoaded = false;
 
   return new (class InputControlVisController {
@@ -65,10 +66,6 @@ export const createInputControlVisController = (
     }
 
     async render(visParams: InputControlVisParams) {
-      if (!I18nContext) {
-        const [{ i18n }] = await deps.core.getStartServices();
-        I18nContext = i18n.Context;
-      }
       if (!isLoaded || !isEqual(visParams, this.visParams)) {
         this.visParams = visParams;
         this.controls = [];
@@ -86,12 +83,8 @@ export const createInputControlVisController = (
     }
 
     drawVis = () => {
-      if (!I18nContext) {
-        throw new Error('no i18n context found');
-      }
-
       render(
-        <I18nContext>
+        <KibanaRenderContextProvider {...coreStart}>
           <VisualizationContainer handlers={handlers}>
             <InputControlVis
               updateFiltersOnChange={this.visParams?.updateFiltersOnChange}
@@ -106,7 +99,7 @@ export const createInputControlVisController = (
               isDarkMode={this.isDarkMode}
             />
           </VisualizationContainer>
-        </I18nContext>,
+        </KibanaRenderContextProvider>,
         el
       );
     };

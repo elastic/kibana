@@ -24,10 +24,10 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE } from '@kbn/slo-schema';
 
 import { SloSelector } from './slo_selector';
-import type { EmbeddableSloProps, SloAlertsEmbeddableInput, SloItem } from './types';
+import type { EmbeddableSloProps, SloItem } from './types';
 
 interface SloConfigurationProps {
-  initialInput?: Partial<SloAlertsEmbeddableInput>;
+  initialInput?: EmbeddableSloProps;
   onCreate: (props: EmbeddableSloProps) => void;
   onCancel: () => void;
 }
