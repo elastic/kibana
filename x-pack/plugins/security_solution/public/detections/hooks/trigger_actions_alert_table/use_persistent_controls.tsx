@@ -13,8 +13,8 @@ import {
   dataTableActions,
 } from '@kbn/securitysolution-data-table';
 import type { ViewSelection, TableId } from '@kbn/securitysolution-data-table';
-import { useGetGroupSelectorStateless } from '@kbn/securitysolution-grouping/src/hooks/use_get_group_selector';
-import { getTelemetryEvent } from '@kbn/securitysolution-grouping/src/telemetry/const';
+import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
+import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
