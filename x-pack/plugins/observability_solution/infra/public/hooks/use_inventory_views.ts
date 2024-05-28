@@ -47,7 +47,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
   const trackMetric = useUiTracker({ app: 'infra_metrics' });
 
   const queryClient = useQueryClient();
-  const { source, updateSourceConfiguration } = useSourceContext();
+  const { source, persistSourceConfiguration } = useSourceContext();
 
   const defaultViewId = source?.configuration.inventoryDefaultView ?? '0';
 
@@ -93,7 +93,7 @@ export const useInventoryViews = (): UseInventoryViewsResult => {
     string,
     MutationContext<InventoryView>
   >({
-    mutationFn: (id) => updateSourceConfiguration({ inventoryDefaultView: id }),
+    mutationFn: (id) => persistSourceConfiguration({ inventoryDefaultView: id }),
     /**
      * To provide a quick feedback, we perform an optimistic update on the list
      * when updating the default view.
