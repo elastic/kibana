@@ -79,7 +79,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(resp.body.datasetUserPrivileges.canRead).to.be(true);
         expect(resp.body.datasetUserPrivileges.canMonitor).to.be(false);
-        expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(true);
+        expect(resp.body.datasetUserPrivileges.canViewIntegrations).to.be(false);
         expect(resp.body.dataStreamsStats).to.eql([]);
       });
 
