@@ -12,7 +12,6 @@ import { OptionalFieldLabel } from './optional_field_label';
 
 interface Props {
   isLoading: boolean;
-  path?: string;
 }
 
 const CategoryComponent: React.FC<Props> = ({ isLoading }) => {

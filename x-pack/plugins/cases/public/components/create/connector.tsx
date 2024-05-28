@@ -61,7 +61,7 @@ const ConnectorComponent: React.FC<Props> = ({ connectors, isLoading, isLoadingC
     <EuiFlexGroup>
       <EuiFlexItem>
         <UseField
-          path={'connectorId'}
+          path="connectorId"
           config={connectorIdConfig}
           component={ConnectorSelector}
           defaultValue={defaultConnectorId}

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, screen, waitFor, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { AppMockRenderer } from '../../common/mock';
@@ -159,13 +159,11 @@ describe('CaseFormFields', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
-          caseFields: {
-            category: 'new',
-            tags: ['template-1'],
-            description: 'This is a case description',
-            title: 'Case with Template 1',
-            syncAlerts: true,
-          },
+          category: 'new',
+          tags: ['template-1'],
+          description: 'This is a case description',
+          title: 'Case with Template 1',
+          syncAlerts: true,
         },
         true
       );
@@ -205,15 +203,13 @@ describe('CaseFormFields', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
-          caseFields: {
-            category: null,
-            tags: [],
-            syncAlerts: true,
-            customFields: {
-              test_key_1: 'My text test value 1',
-              test_key_2: false,
-              test_key_4: false,
-            },
+          category: null,
+          tags: [],
+          syncAlerts: true,
+          customFields: {
+            test_key_1: 'My text test value 1',
+            test_key_2: false,
+            test_key_4: false,
           },
         },
         true
@@ -247,12 +243,10 @@ describe('CaseFormFields', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
-          caseFields: {
-            category: null,
-            tags: [],
-            syncAlerts: true,
-            assignees: [{ uid: userProfiles[0].uid }],
-          },
+          category: null,
+          tags: [],
+          syncAlerts: true,
+          assignees: [{ uid: userProfiles[0].uid }],
         },
         true
       );

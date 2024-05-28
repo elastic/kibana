@@ -13,11 +13,11 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
 import * as i18n from './translations';
 
 import type { ConnectorFieldsProps } from '../types';
 import { useKibana } from '../../../common/lib/kibana';
-import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
 import { useGetChoices } from './use_get_choices';
 import type { Fields } from './types';
 import { choicesToEuiOptions } from './helpers';

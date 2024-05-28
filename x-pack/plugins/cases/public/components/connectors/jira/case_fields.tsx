@@ -13,19 +13,18 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 import { isEmpty } from 'lodash';
+import type { JiraFieldsType } from '../../../../common/types/domain';
 import * as i18n from './translations';
 import { useKibana } from '../../../common/lib/kibana';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
-import { JiraFieldsType } from '@kbn/cases-plugin/common/types/domain';
 
 const { emptyField } = fieldValidators;
 
 const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const [{ fields }] = useFormData<{ fields: JiraFieldsType }>();
-
   const { http } = useKibana().services;
 
   const { issueType } = fields ?? {};
@@ -77,7 +76,7 @@ const JiraFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ co
   return (
     <div data-test-subj={'connector-fields-jira'}>
       <UseField
-        path="fields.priority"
+        path="fields.issueType"
         component={SelectField}
         config={{
           label: i18n.ISSUE_TYPE,

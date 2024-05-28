@@ -156,15 +156,13 @@ describe('form fields', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
-          caseFields: {
-            category: null,
-            connectorId: 'none',
-            tags: [],
-            syncAlerts: true,
-          },
+          category: null,
+          connectorId: 'none',
+          tags: [],
+          syncAlerts: true,
           name: 'Template 1',
-          description: 'this is a first template',
-          tags: ['first'],
+          templateDescription: 'this is a first template',
+          templateTags: ['first'],
         },
         true
       );
@@ -199,15 +197,13 @@ describe('form fields', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
-          caseFields: {
-            category: 'new',
-            tags: ['template-1'],
-            description: 'This is a case description',
-            title: 'Case with Template 1',
-            connectorId: 'none',
-            syncAlerts: true,
-          },
-          tags: [],
+          category: 'new',
+          tags: ['template-1'],
+          description: 'This is a case description',
+          title: 'Case with Template 1',
+          connectorId: 'none',
+          syncAlerts: true,
+          templateTags: [],
         },
         true
       );
@@ -246,18 +242,16 @@ describe('form fields', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
-          caseFields: {
-            category: null,
-            tags: [],
-            connectorId: 'none',
-            customFields: {
-              test_key_1: 'My text test value 1',
-              test_key_2: false,
-              test_key_4: false,
-            },
-            syncAlerts: true,
-          },
+          category: null,
           tags: [],
+          connectorId: 'none',
+          customFields: {
+            test_key_1: 'My text test value 1',
+            test_key_2: false,
+            test_key_4: false,
+          },
+          syncAlerts: true,
+          templateTags: [],
         },
         true
       );
@@ -289,18 +283,17 @@ describe('form fields', () => {
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith(
         {
-          caseFields: {
-            tags: [],
-            category: null,
-            connectorId: 'servicenow-1',
-            fields: {
-              category: 'software',
-              severity: '3',
-              urgency: '2',
-            },
-            syncAlerts: true,
-          },
           tags: [],
+          category: null,
+          connectorId: 'servicenow-1',
+          fields: {
+            category: 'software',
+            severity: '3',
+            urgency: '2',
+            subcategory: null,
+          },
+          syncAlerts: true,
+          templateTags: [],
         },
         true
       );

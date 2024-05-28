@@ -6,7 +6,7 @@
  */
 
 import { getConnectorsFormSerializer, isEmptyValue } from '../utils';
-import { ConnectorTypeFields } from '../../../common/types/domain';
+import type { ConnectorTypeFields } from '../../../common/types/domain';
 import type { TemplateFormProps } from './types';
 
 export const removeEmptyFields = (

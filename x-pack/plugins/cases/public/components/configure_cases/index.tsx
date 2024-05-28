@@ -49,6 +49,8 @@ import { transformCustomFieldsData } from '../custom_fields/utils';
 import { useLicense } from '../../common/use_license';
 import { Templates } from '../templates';
 import type { TemplateFormProps } from '../templates/types';
+import { CustomFieldsForm } from '../custom_fields/form';
+import { TemplateForm } from '../templates/form';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -84,12 +86,6 @@ export const ConfigureCases: React.FC = React.memo(() => {
   const [customFieldToEdit, setCustomFieldToEdit] = useState<CustomFieldConfiguration | null>(null);
   const [templateToEdit, setTemplateToEdit] = useState<TemplateConfiguration | null>(null);
   const { euiTheme } = useEuiTheme();
-  const flyoutType =
-    flyOutVisibility?.type === 'customField' && flyOutVisibility?.visible
-      ? 'customField'
-      : flyOutVisibility?.type === 'template' && flyOutVisibility?.visible
-      ? 'template'
-      : null;
 
   const {
     data: {
@@ -331,83 +327,92 @@ export const ConfigureCases: React.FC = React.memo(() => {
     [setFlyOutVisibility, setCustomFieldToEdit, customFields]
   );
 
-  const onCloseAddFieldFlyout = useCallback(() => {
+  const onCloseCustomFieldFlyout = useCallback(() => {
     setFlyOutVisibility({ type: 'customField', visible: false });
     setCustomFieldToEdit(null);
   }, [setFlyOutVisibility, setCustomFieldToEdit]);
 
-  const onFlyoutSave = useCallback(
-    (data: CustomFieldConfiguration | TemplateFormProps | null | {}) => {
-      if (flyoutType === 'customField') {
-        const updatedCustomFields = addOrReplaceField(
-          customFields,
-          data as CustomFieldConfiguration
-        );
+  const onCustomFieldSave = useCallback(
+    (data: CustomFieldConfiguration | null) => {
+      const updatedCustomFields = addOrReplaceField(customFields, data as CustomFieldConfiguration);
 
-        persistCaseConfigure({
-          connector,
-          customFields: updatedCustomFields as CustomFieldsConfiguration,
-          templates,
-          id: configurationId,
-          version: configurationVersion,
-          closureType,
-        });
+      persistCaseConfigure({
+        connector,
+        customFields: updatedCustomFields as CustomFieldsConfiguration,
+        templates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+      });
 
-        setFlyOutVisibility({ type: 'customField', visible: false });
-        setCustomFieldToEdit(null);
+      setFlyOutVisibility({ type: 'customField', visible: false });
+      setCustomFieldToEdit(null);
+    },
+    [
+      closureType,
+      configurationId,
+      configurationVersion,
+      connector,
+      customFields,
+      templates,
+      persistCaseConfigure,
+    ]
+  );
 
-        return;
-      }
+  const onCloseTemplateFlyout = useCallback(() => {
+    setFlyOutVisibility({ type: 'template', visible: false });
+    setTemplateToEdit(null);
+  }, [setFlyOutVisibility, setTemplateToEdit]);
 
-      if (flyoutType === 'template') {
-        const {
-          connectorId,
-          fields,
-          customFields: templateCustomFields,
-          syncAlerts = false,
-          key,
-          name,
-          templateTags,
-          templateDescription,
-          ...otherCaseFields
-        } = data as TemplateFormProps;
+  const onTemplateSave = useCallback(
+    (data: TemplateFormProps | null) => {
+      const {
+        connectorId,
+        fields,
+        customFields: templateCustomFields,
+        syncAlerts = false,
+        key,
+        name,
+        templateTags,
+        templateDescription,
+        ...otherCaseFields
+      } = (data ?? {}) as TemplateFormProps;
 
-        const transformedCustomFields = templateCustomFields
-          ? transformCustomFieldsData(templateCustomFields, customFields)
-          : [];
-        const templateConnector = connectorId ? getConnectorById(connectorId, connectors) : null;
+      const transformedCustomFields = templateCustomFields
+        ? transformCustomFieldsData(templateCustomFields, customFields)
+        : [];
+      const templateConnector = connectorId ? getConnectorById(connectorId, connectors) : null;
 
-        const transformedConnector = templateConnector
-          ? normalizeActionConnector(templateConnector, fields)
-          : getNoneConnector();
+      const transformedConnector = templateConnector
+        ? normalizeActionConnector(templateConnector, fields)
+        : getNoneConnector();
 
-        const transformedData: TemplateConfiguration = {
-          key,
-          name,
-          description: templateDescription,
-          tags: templateTags,
-          caseFields: {
-            ...otherCaseFields,
-            connector: transformedConnector,
-            customFields: transformedCustomFields,
-            settings: { syncAlerts },
-          },
-        };
+      const transformedData: TemplateConfiguration = {
+        key,
+        name,
+        description: templateDescription,
+        tags: templateTags,
+        caseFields: {
+          ...otherCaseFields,
+          connector: transformedConnector,
+          customFields: transformedCustomFields,
+          settings: { syncAlerts },
+        },
+      };
 
-        const updatedTemplates = addOrReplaceField(templates, transformedData);
+      const updatedTemplates = addOrReplaceField(templates, transformedData);
 
-        persistCaseConfigure({
-          connector,
-          customFields,
-          templates: updatedTemplates,
-          id: configurationId,
-          version: configurationVersion,
-          closureType,
-        });
+      persistCaseConfigure({
+        connector,
+        customFields,
+        templates: updatedTemplates,
+        id: configurationId,
+        version: configurationVersion,
+        closureType,
+      });
 
-        setFlyOutVisibility({ type: 'template', visible: false });
-        setTemplateToEdit(null);
-      }
+      setFlyOutVisibility({ type: 'template', visible: false });
+      setTemplateToEdit(null);
     },
     [
       closureType,
@@ -418,13 +423,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
       customFields,
       templates,
       persistCaseConfigure,
-      flyoutType,
     ]
   );
 
-  const AddOrEditFlyout =
-    flyOutVisibility !== null && flyoutType !== null ? (
-      <CommonFlyout
+  const AddOrEditCustomFieldFlyout = useMemo(() => {
+    return flyOutVisibility?.type === 'customField' && flyOutVisibility?.visible ? (
+      <CommonFlyout<CustomFieldConfiguration>
         isLoading={loadingCaseConfigure || isPersistingConfiguration}
         disabled={
           !permissions.create ||
@@ -432,15 +436,56 @@ export const ConfigureCases: React.FC = React.memo(() => {
           loadingCaseConfigure ||
           isPersistingConfiguration
         }
-        type={flyoutType}
-        data={flyoutType === 'template' ? templateToEdit : customFieldToEdit}
-        connectors={connectors ?? []}
-        configurationConnectorId={connector.id}
-        configurationCustomFields={customFields}
-        onCloseFlyout={onCloseAddFieldFlyout}
-        onSaveField={onFlyoutSave}
+        onCloseFlyout={onCloseCustomFieldFlyout}
+        onSaveField={onCustomFieldSave}
+        data={customFieldToEdit as CustomFieldConfiguration}
+        renderHeader={() => <span>{i18n.ADD_CUSTOM_FIELD}</span>}
+        renderBody={({ initialValue, onChange }) => (
+          <CustomFieldsForm onChange={onChange} initialValue={initialValue} />
+        )}
       />
     ) : null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flyOutVisibility]);
+
+  const AddOrEditTemplateFlyout = useMemo(
+    () =>
+      flyOutVisibility?.type === 'template' && flyOutVisibility?.visible ? (
+        <CommonFlyout<TemplateFormProps | null>
+          isLoading={loadingCaseConfigure || isPersistingConfiguration}
+          disabled={
+            !permissions.create ||
+            !permissions.update ||
+            loadingCaseConfigure ||
+            isPersistingConfiguration
+          }
+          onCloseFlyout={onCloseTemplateFlyout}
+          onSaveField={onTemplateSave}
+          data={templateToEdit as TemplateFormProps | null}
+          connectors={connectors}
+          configurationConnectorId={connector.id}
+          configurationCustomFields={customFields}
+          renderHeader={() => <span>{i18n.CRATE_TEMPLATE}</span>}
+          renderBody={({
+            initialValue,
+            configConnectors,
+            configConnectorId,
+            configCustomFields,
+            onChange,
+          }) => (
+            <TemplateForm
+              initialValue={initialValue}
+              connectors={configConnectors ?? []}
+              configurationConnectorId={configConnectorId ?? ''}
+              configurationCustomFields={configCustomFields ?? []}
+              onChange={onChange}
+            />
+          )}
+        />
+      ) : null,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [flyOutVisibility]
+  );
 
   return (
     <EuiPageSection restrictWidth={true}>
@@ -532,7 +577,8 @@ export const ConfigureCases: React.FC = React.memo(() => {
           <EuiSpacer size="xl" />
           {ConnectorAddFlyout}
           {ConnectorEditFlyout}
-          {AddOrEditFlyout}
+          {AddOrEditCustomFieldFlyout}
+          {AddOrEditTemplateFlyout}
         </div>
       </EuiPageBody>
     </EuiPageSection>

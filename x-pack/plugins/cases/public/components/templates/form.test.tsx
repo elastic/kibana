@@ -15,9 +15,13 @@ import { connectorsMock, customFieldsConfigurationMock } from '../../containers/
 import userEvent from '@testing-library/user-event';
 import { useGetChoices } from '../connectors/servicenow/use_get_choices';
 import { useGetChoicesResponse } from '../create/mock';
-import { MAX_TAGS_PER_TEMPLATE, MAX_TEMPLATE_TAG_LENGTH } from '../../../common/constants';
-import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
-import { connect } from 'http2';
+import {
+  MAX_TAGS_PER_TEMPLATE,
+  MAX_TEMPLATE_DESCRIPTION_LENGTH,
+  MAX_TEMPLATE_NAME_LENGTH,
+  MAX_TEMPLATE_TAG_LENGTH,
+} from '../../../common/constants';
+import { CustomFieldTypes } from '../../../common/types/domain';
 
 jest.mock('../connectors/servicenow/use_get_choices');
 
@@ -65,8 +69,8 @@ describe('TemplateForm', () => {
       initialValue: {
         key: 'template_key_1',
         name: 'Template 1',
-        description: 'Sample description',
-        caseFields: null,
+        templateDescription: 'Sample description',
+        templateTags: [],
       },
     };
     appMockRenderer.render(<TemplateForm {...newProps} />);
@@ -90,11 +94,10 @@ describe('TemplateForm', () => {
       initialValue: {
         key: 'template_key_1',
         name: 'Template 1',
-        description: 'Sample description',
-        caseFields: {
-          title: 'Case with template 1',
-          description: 'case description',
-        },
+        templateDescription: 'Sample description',
+        title: 'Case with template 1',
+        description: 'case description',
+        templateTags: [],
       },
     };
     appMockRenderer.render(<TemplateForm {...newProps} />);
@@ -156,13 +159,11 @@ describe('TemplateForm', () => {
       expect(data).toEqual({
         key: expect.anything(),
         name: 'Template 1',
-        description: 'this is a first template',
-        tags: ['foo', 'bar'],
-        caseFields: {
-          connectorId: 'none',
-          fields: null,
-          syncAlerts: true,
-        },
+        templateDescription: 'this is a first template',
+        templateTags: ['foo', 'bar'],
+        connectorId: 'none',
+        fields: null,
+        syncAlerts: true,
       });
     });
   });
@@ -209,17 +210,14 @@ describe('TemplateForm', () => {
       expect(data).toEqual({
         key: expect.anything(),
         name: 'Template 1',
-        description: 'this is a first template',
-        tags: [],
-        caseFields: {
-          title: 'Case with Template 1',
-          description: 'This is a case description',
-          tags: ['template-1'],
-          category: 'new',
-          connectorId: 'none',
-          fields: null,
-          syncAlerts: true,
-        },
+        templateDescription: 'this is a first template',
+        title: 'Case with Template 1',
+        description: 'This is a case description',
+        tags: ['template-1'],
+        category: 'new',
+        connectorId: 'none',
+        fields: null,
+        syncAlerts: true,
       });
     });
   });
@@ -264,19 +262,16 @@ describe('TemplateForm', () => {
       expect(data).toEqual({
         key: expect.anything(),
         name: 'Template 1',
-        description: 'this is a first template',
-        tags: [],
-        caseFields: {
-          connectorId: 'servicenow-1',
-          fields: {
-            category: 'software',
-            impact: null,
-            severity: null,
-            subcategory: null,
-            urgency: '1',
-          },
-          syncAlerts: true,
+        templateDescription: 'this is a first template',
+        connectorId: 'servicenow-1',
+        fields: {
+          category: 'software',
+          impact: null,
+          severity: null,
+          subcategory: null,
+          urgency: '1',
         },
+        syncAlerts: true,
       });
     });
   });
@@ -336,17 +331,14 @@ describe('TemplateForm', () => {
       expect(data).toEqual({
         key: expect.anything(),
         name: 'Template 1',
-        description: 'this is a first template',
-        tags: [],
-        caseFields: {
-          connectorId: 'none',
-          fields: null,
-          syncAlerts: true,
-          customFields: {
-            test_key_1: 'My text test value 1',
-            test_key_2: true,
-            test_key_4: true,
-          },
+        templateDescription: 'this is a first template',
+        connectorId: 'none',
+        fields: null,
+        syncAlerts: true,
+        customFields: {
+          test_key_1: 'My text test value 1',
+          test_key_2: true,
+          test_key_4: true,
         },
       });
     });
@@ -374,6 +366,30 @@ describe('TemplateForm', () => {
     });
   });
 
+  it('shows from state as invalid when template name is too long', async () => {
+    let formState: TemplateFormState;
+
+    const onChangeState = (state: TemplateFormState) => (formState = state);
+
+    appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    const name = 'a'.repeat(MAX_TEMPLATE_NAME_LENGTH + 1);
+
+    userEvent.paste(await screen.findByTestId('template-name-input'), name);
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(false);
+
+      expect(data).toEqual({});
+    });
+  });
+
   it('shows from state as invalid when template description missing', async () => {
     let formState: TemplateFormState;
 
@@ -386,6 +402,30 @@ describe('TemplateForm', () => {
     });
 
     userEvent.paste(await screen.findByTestId('template-name-input'), 'Template 1');
+
+    await act(async () => {
+      const { data, isValid } = await formState!.submit();
+
+      expect(isValid).toBe(false);
+
+      expect(data).toEqual({});
+    });
+  });
+
+  it('shows from state as invalid when template description is too long', async () => {
+    let formState: TemplateFormState;
+
+    const onChangeState = (state: TemplateFormState) => (formState = state);
+
+    appMockRenderer.render(<TemplateForm {...{ ...defaultProps, onChange: onChangeState }} />);
+
+    await waitFor(() => {
+      expect(formState).not.toBeUndefined();
+    });
+
+    const description = 'a'.repeat(MAX_TEMPLATE_DESCRIPTION_LENGTH + 1);
+
+    userEvent.paste(await screen.findByTestId('template-description-input'), description);
 
     await act(async () => {
       const { data, isValid } = await formState!.submit();

@@ -15,6 +15,8 @@ import {
   MAX_TAGS_PER_TEMPLATE,
   MAX_TEMPLATE_TAG_LENGTH,
   MAX_TITLE_LENGTH,
+  MAX_TEMPLATE_NAME_LENGTH,
+  MAX_TEMPLATE_DESCRIPTION_LENGTH,
 } from '../../../common/constants';
 import { OptionalFieldLabel } from '../create/optional_field_label';
 import { SEVERITY_TITLE } from '../severity/translations';
@@ -38,6 +40,12 @@ export const schema: FormSchema<TemplateFormProps> = {
       {
         validator: emptyField(i18n.REQUIRED_FIELD(i18n.TEMPLATE_NAME)),
       },
+      {
+        validator: maxLengthField({
+          length: MAX_TEMPLATE_NAME_LENGTH,
+          message: i18n.MAX_LENGTH_ERROR('template name', MAX_TEMPLATE_NAME_LENGTH),
+        }),
+      },
     ],
   },
   templateDescription: {
@@ -45,6 +53,12 @@ export const schema: FormSchema<TemplateFormProps> = {
     validations: [
       {
         validator: emptyField(i18n.REQUIRED_FIELD(i18n.DESCRIPTION)),
+      },
+      {
+        validator: maxLengthField({
+          length: MAX_TEMPLATE_DESCRIPTION_LENGTH,
+          message: i18n.MAX_LENGTH_ERROR('template description', MAX_TEMPLATE_DESCRIPTION_LENGTH),
+        }),
       },
     ],
   },

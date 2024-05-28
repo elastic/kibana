@@ -19,43 +19,51 @@ import {
 } from '@elastic/eui';
 import type { CustomFieldFormState } from '../custom_fields/form';
 import type { TemplateFormState } from '../templates/form';
-import { CustomFieldsForm } from '../custom_fields/form';
-import { TemplateForm } from '../templates/form';
-import type {
-  ActionConnector,
-  CustomFieldConfiguration,
-  TemplateConfiguration,
-} from '../../../common/types/domain';
+import type { ActionConnector, CustomFieldConfiguration } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 import type { TemplateFormProps } from '../templates/types';
 import type { CasesConfigurationUI } from '../../containers/types';
 
-export interface FlyoutProps {
+interface FlyOutBodyProps<T> {
+  initialValue: T;
+  onChange: (state: CustomFieldFormState | TemplateFormState) => void;
+  configConnectors?: ActionConnector[];
+  configConnectorId?: string;
+  configCustomFields?: CasesConfigurationUI['customFields'];
+}
+
+export interface FlyoutProps<T> {
   disabled: boolean;
   isLoading: boolean;
   onCloseFlyout: () => void;
-  onSaveField: (data: CustomFieldConfiguration | TemplateFormProps | null) => void;
-  data: CustomFieldConfiguration | TemplateConfiguration | null;
-  type: 'customField' | 'template';
+  onSaveField: (data: T) => void;
+  data: T;
   connectors?: ActionConnector[];
   configurationConnectorId?: string;
   configurationCustomFields?: CasesConfigurationUI['customFields'];
+  renderHeader: () => React.ReactNode;
+  renderBody: ({
+    initialValue,
+    onChange,
+    configConnectors,
+    configConnectorId,
+    configCustomFields,
+  }: FlyOutBodyProps<T>) => React.ReactNode;
 }
 
-const FlyoutComponent: React.FC<FlyoutProps> = ({
+export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormProps | null>({
   onCloseFlyout,
   onSaveField,
   isLoading,
   disabled,
   data: initialValue,
-  type,
+  renderHeader,
+  renderBody,
   connectors,
   configurationConnectorId,
   configurationCustomFields,
-}) => {
-  const dataTestSubj = `${type}Flyout`;
-
+}: FlyoutProps<T>) => {
   const [formState, setFormState] = useState<CustomFieldFormState | TemplateFormState>({
     isValid: undefined,
     submit: async () => ({
@@ -70,42 +78,32 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
     const { isValid, data } = await submit();
 
     if (isValid) {
-      onSaveField(data as CustomFieldConfiguration | TemplateFormProps | null);
+      onSaveField(data as T);
     }
   }, [onSaveField, submit]);
 
   return (
-    <EuiFlyout onClose={onCloseFlyout} data-test-subj={dataTestSubj}>
-      <EuiFlyoutHeader hasBorder data-test-subj={`${dataTestSubj}Header`}>
+    <EuiFlyout onClose={onCloseFlyout} data-test-subj="common-flyout">
+      <EuiFlyoutHeader hasBorder data-test-subj="flyout-header">
         <EuiTitle size="s">
-          <h3 id="flyoutTitle">
-            {type === 'customField' ? i18n.ADD_CUSTOM_FIELD : i18n.CRATE_TEMPLATE}
-          </h3>
+          <h3 id="flyoutTitle">{renderHeader()}</h3>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {type === 'customField' ? (
-          <CustomFieldsForm
-            onChange={setFormState}
-            initialValue={initialValue as CustomFieldConfiguration}
-          />
-        ) : null}
-        {type === 'template' ? (
-          <TemplateForm
-            onChange={setFormState}
-            initialValue={initialValue as TemplateFormProps}
-            connectors={connectors ?? []}
-            configurationConnectorId={configurationConnectorId ?? ''}
-            configurationCustomFields={configurationCustomFields ?? []}
-          />
-        ) : null}
+        {renderBody({
+          initialValue,
+          configConnectors: connectors,
+          configConnectorId: configurationConnectorId,
+          configCustomFields: configurationCustomFields,
+          onChange: setFormState,
+        })}
       </EuiFlyoutBody>
-      <EuiFlyoutFooter data-test-subj={`${dataTestSubj}Footer`}>
+      <EuiFlyoutFooter data-test-subj={'flyout-footer'}>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onCloseFlyout}
-              data-test-subj={`${dataTestSubj}Cancel`}
+              data-test-subj={'flyout-cancel'}
               disabled={disabled}
               isLoading={isLoading}
             >
@@ -117,7 +115,7 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
               <EuiButton
                 fill
                 onClick={handleSaveField}
-                data-test-subj={`${dataTestSubj}Save`}
+                data-test-subj={'flyout-save'}
                 disabled={disabled}
                 isLoading={isLoading}
               >
@@ -131,6 +129,4 @@ const FlyoutComponent: React.FC<FlyoutProps> = ({
   );
 };
 
-FlyoutComponent.displayName = 'CommonFlyout';
-
-export const CommonFlyout = React.memo(FlyoutComponent);
+CommonFlyout.displayName = 'CommonFlyout';

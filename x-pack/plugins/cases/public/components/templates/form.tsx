@@ -43,6 +43,7 @@ const FormComponent: React.FC<Props> = ({
       key: keyDefaultValue,
       name: '',
       templateDescription: '',
+      templateTags: [],
     },
     options: { stripEmptyFields: false },
     schema,
