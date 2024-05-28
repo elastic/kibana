@@ -44,13 +44,11 @@ export const getEmbeddableFactoryMenuItemProvider =
   (factory: EmbeddableFactory): PanelSelectionMenuItem => {
     const icon = factory?.getIconType ? factory.getIconType() : 'empty';
 
-    const toolTipContent = factory?.getDescription ? factory.getDescription() : undefined;
-
     return {
       id: factory.type,
       name: factory.getDisplayName(),
       icon,
-      toolTipContent,
+      description: factory.getDescription?.(),
       onClick: async () => {
         closePopover();
         api.addNewPanel({ panelType: factory.type }, true);
@@ -239,7 +237,7 @@ export const EditorMenu = ({
       icon,
       onClick: createNewVisType(visType),
       'data-test-subj': `visType-${name}`,
-      toolTipContent: description,
+      description,
     };
   };
 
@@ -252,7 +250,7 @@ export const EditorMenu = ({
       icon,
       onClick: createNewVisType(visTypeAlias),
       'data-test-subj': `visType-${name}`,
-      toolTipContent: description,
+      description,
     };
   };
 

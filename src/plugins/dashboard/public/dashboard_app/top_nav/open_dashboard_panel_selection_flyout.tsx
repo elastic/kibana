@@ -70,7 +70,7 @@ export function openDashboardPanelSelectionFlyout({
   flyoutRef = overlays.openFlyout(mount, {
     size: 'm',
     paddingSize: flyoutPanelPaddingSize,
-    'aria-labelledby': 'add-panels-flyout',
+    'aria-labelledby': 'addPanelsFlyout',
   });
 
   return flyoutRef;
@@ -125,7 +125,7 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
     <>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h1>
+          <h1 id="addPanelsFlyout">
             <FormattedMessage
               id="dashboard.solutionToolbar.addPanelFlyout.headingText"
               defaultMessage="Add Panel"
@@ -159,46 +159,52 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column">
               {Object.values(panelsSearchResult).map(({ id, title, items, isDisabled }) => (
-                <React.Fragment key={id}>
-                  <EuiFlexItem>
-                    <EuiTitle
-                      size="xxs"
-                      css={isDisabled ? { color: euiTheme.colors.disabled } : {}}
-                    >
-                      {typeof title === 'string' ? <h3>{title}</h3> : title}
-                    </EuiTitle>
-                    <EuiListGroup size="s" gutterSize="none" maxWidth={false} flush>
-                      {items?.map((item, idx) => {
-                        return (
-                          <EuiListGroupItem
-                            key={`${id}.${idx}`}
-                            label={
-                              !item.isDeprecated ? (
-                                item.name
-                              ) : (
-                                <EuiFlexGroup wrap responsive={false} gutterSize="s">
-                                  <EuiFlexItem grow={false}>{item.name}</EuiFlexItem>
-                                  <EuiFlexItem grow={false}>
-                                    <EuiBadge color="warning">
-                                      <FormattedMessage
-                                        id="dashboard.editorMenu.deprecatedTag"
-                                        defaultMessage="Deprecated"
-                                      />
-                                    </EuiBadge>
-                                  </EuiFlexItem>
-                                </EuiFlexGroup>
-                              )
-                            }
-                            onClick={item?.onClick}
-                            iconType={item.icon}
-                            data-test-subj={item['data-test-subj']}
-                            isDisabled={item.isDisabled}
-                          />
-                        );
-                      })}
-                    </EuiListGroup>
-                  </EuiFlexItem>
-                </React.Fragment>
+                <EuiFlexItem key={id}>
+                  <EuiTitle
+                    id={`${title}-group`}
+                    size="xxs"
+                    css={isDisabled ? { color: euiTheme.colors.disabled } : {}}
+                  >
+                    {typeof title === 'string' ? <h3>{title}</h3> : title}
+                  </EuiTitle>
+                  <EuiListGroup
+                    aria-labelledby={`${title}-group`}
+                    size="s"
+                    gutterSize="none"
+                    maxWidth={false}
+                    flush
+                  >
+                    {items?.map((item, idx) => {
+                      return (
+                        <EuiListGroupItem
+                          key={`${id}.${idx}`}
+                          label={
+                            !item.isDeprecated ? (
+                              item.name
+                            ) : (
+                              <EuiFlexGroup wrap responsive={false} gutterSize="s">
+                                <EuiFlexItem grow={false}>{item.name}</EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiBadge color="warning">
+                                    <FormattedMessage
+                                      id="dashboard.editorMenu.deprecatedTag"
+                                      defaultMessage="Deprecated"
+                                    />
+                                  </EuiBadge>
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            )
+                          }
+                          onClick={item?.onClick}
+                          iconType={item.icon}
+                          data-test-subj={item['data-test-subj']}
+                          isDisabled={item.isDisabled}
+                          aria-description={item.description}
+                        />
+                      );
+                    })}
+                  </EuiListGroup>
+                </EuiFlexItem>
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>

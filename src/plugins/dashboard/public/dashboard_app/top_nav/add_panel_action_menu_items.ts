@@ -17,7 +17,7 @@ export interface PanelSelectionMenuItem extends Pick<CommonProps, 'data-test-sub
   name: string;
   icon: IconType;
   onClick: MouseEventHandler;
-  toolTipContent?: string;
+  description?: string;
   isDisabled?: boolean;
   isDeprecated?: boolean;
 }
@@ -60,7 +60,7 @@ export const getAddPanelActionMenuItemsGroup = (
     trigger: addPanelMenuTrigger,
   };
 
-  const getMenuItem = (item: Action<object>) => {
+  const getMenuItem = (item: Action<object>): PanelSelectionMenuItem => {
     const actionName = item.getDisplayName(context);
 
     return {
@@ -70,7 +70,7 @@ export const getAddPanelActionMenuItemsGroup = (
         (typeof item.getIconType === 'function' ? item.getIconType(context) : undefined) ?? 'empty',
       onClick: onAddPanelActionClick(item, context, closePopover),
       'data-test-subj': `create-action-${actionName}`,
-      toolTipContent: item?.getDisplayNameTooltip?.(context),
+      description: item?.getDisplayNameTooltip?.(context),
     };
   };
 
