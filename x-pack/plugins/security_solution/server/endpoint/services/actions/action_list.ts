@@ -201,9 +201,10 @@ const getActionDetailsList = async ({
   totalRecords: number;
 }> => {
   let actionRequests: LogsEndpointAction[] = [];
+  let totalRecords: number = 0;
 
   try {
-    actionRequests = await fetchActionRequests({
+    const { data, total } = await fetchActionRequests({
       agentTypes,
       commands: commands as ResponseActionsApiCommandNames[],
       esClient,
@@ -217,6 +218,9 @@ const getActionDetailsList = async ({
       types: types as ResponseActionType[],
       logger,
     });
+
+    actionRequests = data;
+    totalRecords = total;
   } catch (error) {
     // all other errors
     const err = new CustomHttpRequestError(
@@ -228,8 +232,6 @@ const getActionDetailsList = async ({
     logger.error(err);
     throw err;
   }
-
-  const totalRecords = actionRequests.length;
 
   if (!totalRecords) {
     return { actionDetails: [], totalRecords: 0 };

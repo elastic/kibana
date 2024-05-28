@@ -31,27 +31,32 @@ describe('fetchActionRequests()', () => {
   });
 
   it('should return an array of items', async () => {
-    await expect(fetchActionRequests(fetchOptions)).resolves.toEqual([
-      {
-        '@timestamp': '2022-04-27T16:08:47.449Z',
-        EndpointActions: {
-          action_id: '123',
-          data: {
-            command: 'kill-process',
-            comment: '5wb6pu6kh2xix5i',
+    await expect(fetchActionRequests(fetchOptions)).resolves.toEqual({
+      data: [
+        {
+          '@timestamp': '2022-04-27T16:08:47.449Z',
+          EndpointActions: {
+            action_id: '123',
+            data: {
+              command: 'kill-process',
+              comment: '5wb6pu6kh2xix5i',
+            },
+            expiration: '2022-05-10T16:08:47.449Z',
+            input_type: 'endpoint',
+            type: 'INPUT_ACTION',
           },
-          expiration: '2022-05-10T16:08:47.449Z',
-          input_type: 'endpoint',
-          type: 'INPUT_ACTION',
+          agent: {
+            id: 'agent-a',
+          },
+          user: {
+            id: 'Shanel',
+          },
         },
-        agent: {
-          id: 'agent-a',
-        },
-        user: {
-          id: 'Shanel',
-        },
-      },
-    ]);
+      ],
+      total: 1,
+      from: 0,
+      size: 10,
+    });
 
     expect(esClientMock.search).toHaveBeenCalledWith(
       {
@@ -78,7 +83,7 @@ describe('fetchActionRequests()', () => {
   it('should filter using `from` and `size` provided on input', async () => {
     fetchOptions.size = 101;
     fetchOptions.from = 50;
-    await fetchActionRequests(fetchOptions);
+    const response = await fetchActionRequests(fetchOptions);
 
     expect(esClientMock.search).toHaveBeenCalledWith(
       {
@@ -100,6 +105,8 @@ describe('fetchActionRequests()', () => {
       },
       { ignore: [404] }
     );
+
+    expect(response).toMatchObject({ size: 101, from: 50 });
   });
 
   it('should filter by commands', async () => {

@@ -9,6 +9,7 @@ import type {
   SearchRequest,
   QueryDslQueryContainer,
   QueryDslBoolQuery,
+  SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -39,6 +40,13 @@ export interface FetchActionRequestsOptions {
   types?: ResponseActionType[];
 }
 
+interface FetchActionRequestsResponse {
+  data: LogsEndpointAction[];
+  total: number;
+  from: number;
+  size: number;
+}
+
 /**
  * Fetches a list of Action Requests from the Endpoint action request index (not fleet)
  * @param logger
@@ -67,7 +75,7 @@ export const fetchActionRequests = async ({
   userIds,
   unExpiredOnly = false,
   types,
-}: FetchActionRequestsOptions): Promise<LogsEndpointAction[]> => {
+}: FetchActionRequestsOptions): Promise<FetchActionRequestsResponse> => {
   const additionalFilters = [];
 
   if (commands?.length) {
@@ -115,16 +123,28 @@ export const fetchActionRequests = async ({
     sort: [{ '@timestamp': { order: 'desc' } }],
   };
 
-  logger.debug(`Searching for actions requests with:\n${stringify(actionsSearchQuery)}`);
-
   const actionRequests = await esClient
     .search<LogsEndpointAction>(actionsSearchQuery, { ignore: [404] })
     .catch(catchAndWrapError);
 
-  return (actionRequests?.hits?.hits ?? []).map((esHit) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return esHit._source!;
-  });
+  const total = (actionRequests.hits?.total as SearchTotalHits)?.value;
+
+  logger.debug(
+    `Searching for actions requests found a total of [${total}] records using search query:\n${stringify(
+      actionsSearchQuery,
+      15
+    )}`
+  );
+
+  return {
+    data: (actionRequests?.hits?.hits ?? []).map((esHit) => {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      return esHit._source!;
+    }),
+    size,
+    from,
+    total,
+  };
 };
 
 /** @private */
