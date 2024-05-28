@@ -9,6 +9,7 @@
 export {
   getESQLAdHocDataview,
   getIndexPatternFromESQLQuery,
+  hasTransformationalCommand,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
   getIndexForESQLQuery,
