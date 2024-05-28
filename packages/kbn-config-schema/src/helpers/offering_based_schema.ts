@@ -12,6 +12,16 @@ import { Type, TypeOptions } from '../types';
 /**
  * Helper to apply different validations depending on whether Kibana is running the Serverless or Traditional offering.
  *
+ * @remark This utility is intended to be used for Kibana YAML-based configuration validation only! Using it in other
+ *         contexts will lead to only `traditional` validation being used.
+ *
+ *         If you want to switch schemas based on the offering in other contexts do the following:
+ *
+ * ```ts
+ * // env is passed to your plugin constructor
+ * const schema = env.packageInfo.buildFlavor === 'serverless' ? baseSchema.extend(a) : baseSchema.extend(b);
+ * ```
+ *
  * @example Only allow the setting on Serverless
  * const config = schema.object({
  *   myProp: offeringBasedSchema({ serverless: schema.boolean({ defaultValue: true }) }),

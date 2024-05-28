@@ -11,11 +11,13 @@ import { InfraAssetMetricsItem } from '../../../../../common/http_api';
 import * as useUnifiedSearchHooks from './use_unified_search';
 import * as useHostsViewHooks from './use_hosts_view';
 import * as useKibanaContextForPluginHook from '../../../../hooks/use_kibana';
-import * as useMetricsDataViewHooks from './use_metrics_data_view';
+import * as useMetricsDataViewHooks from '../../../../containers/metrics_source';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 
 jest.mock('./use_unified_search');
 jest.mock('./use_hosts_view');
-jest.mock('./use_metrics_data_view');
+jest.mock('../../../../containers/metrics_source');
 jest.mock('../../../../hooks/use_kibana');
 
 const mockUseUnifiedSearchContext =
@@ -138,7 +140,15 @@ describe('useHostTable hook', () => {
     } as ReturnType<typeof useHostsViewHooks.useHostsViewContext>);
 
     mockUseMetricsDataViewContext.mockReturnValue({
-      dataView: { id: 'default' },
+      metricsView: {
+        indices: 'metrics-*',
+        fields: [],
+        timeFieldName: TIMESTAMP_FIELD,
+        dataViewReference: { id: 'default' } as DataView,
+      },
+      error: undefined,
+      loading: false,
+      refetch: jest.fn(),
     } as ReturnType<typeof useMetricsDataViewHooks.useMetricsDataViewContext>);
 
     mockUseKibanaContextForPlugin.mockReturnValue({

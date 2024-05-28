@@ -391,8 +391,8 @@ export class DataViewLazy extends AbstractDataView {
       fld = new DataViewField({
         ...field,
         scripted: true,
-        searchable: false,
-        aggregatable: false,
+        searchable: true,
+        aggregatable: true,
         count: this.fieldAttrs?.[field.name]?.count,
         customLabel: this.fieldAttrs?.[field.name]?.customLabel,
         customDescription: this.fieldAttrs?.[field.name]?.customDescription,
