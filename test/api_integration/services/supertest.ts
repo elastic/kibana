@@ -24,7 +24,6 @@ export function KibanaSupertestProvider({ getService }: FtrProviderContext): sup
     options.rejectUnauthorized = false;
   }
 
-  // or add to server url in packages/kbn-test/src/functional_test_runner/lib/config/schema.ts maybe
   const serverArgs = config.get('kbnTestServer.serverArgs', []) as string[];
   const http2Enabled = serverArgs.includes('--server.protocol=http2');
   if (http2Enabled) {
