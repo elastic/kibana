@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { OpenAPIV3 } from 'openapi-types';
 import { assignToPaths, extractTags } from './util';
 
 describe('extractTags', () => {
