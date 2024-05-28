@@ -5,241 +5,136 @@
  * 2.0.
  */
 
+import { setupMockServer, startMockServer } from '../test/mock_server/mock_server';
 import React from 'react';
-import { render } from '@testing-library/react';
-import { createReactQueryResponse } from '../test/fixtures/react_query';
-import { TestProvider } from '../test/test_provider';
+import { screen, waitFor } from '@testing-library/react';
 import { NoFindingsStates } from './no_findings_states';
-import { useCspSetupStatusApi } from '../common/api/use_setup_status_api';
-import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
-import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
-import { useSubscriptionStatus } from '../common/hooks/use_subscription_status';
+import { renderWrapper } from '../test/mock_server/mock_server_test_provider';
+import {
+  statusIndexing,
+  statusIndexTimeout,
+  statusNotDeployed,
+  statusNotInstalled,
+  statusUnprivileged,
+} from '../test/mock_server/handlers/internal/cloud_security_posture/status_handlers';
+import { PostureTypes } from '../../common/types_old';
 
-jest.mock('../common/api/use_setup_status_api', () => ({
-  useCspSetupStatusApi: jest.fn(),
-}));
+const server = setupMockServer();
 
-jest.mock('../common/navigation/use_csp_integration_link', () => ({
-  useCspIntegrationLink: jest.fn(),
-}));
-
-jest.mock('../common/api/use_license_management_locator_api', () => ({
-  useLicenseManagementLocatorApi: jest.fn(),
-}));
-
-jest.mock('../common/hooks/use_subscription_status', () => ({
-  useSubscriptionStatus: jest.fn(),
-}));
-
-const customRederer = (postureType: 'cspm' | 'kspm') => {
-  return render(
-    <TestProvider>
-      <NoFindingsStates postureType={postureType} />
-    </TestProvider>
-  );
+const renderNoFindingsStates = (postureType: PostureTypes = 'cspm') => {
+  return renderWrapper(<NoFindingsStates postureType={postureType} />);
 };
 
 describe('NoFindingsStates', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  startMockServer(server);
 
-    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: true,
-      })
-    );
+  it('shows integrations installation prompt when integration is not-installed', async () => {
+    server.use(statusNotInstalled);
+    renderNoFindingsStates();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: true,
-      })
-    );
-
-    (useCspIntegrationLink as jest.Mock).mockReturnValue('http://cspm-or-kspm-integration-link');
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', {
+          name: /detect security misconfigurations in your cloud infrastructure!/i,
+        })
+      ).toBeInTheDocument();
+      expect(screen.getByText('Add CSPM Integration')).toBeInTheDocument();
+      expect(screen.getByText('Add KSPM Integration')).toBeInTheDocument();
+    });
   });
+  it('shows install agent prompt when status is not-deployed', async () => {
+    server.use(statusNotDeployed);
+    renderNoFindingsStates();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-  it('should show the indexing notification when CSPM is not installed and KSPM is indexing', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          cspm: {
-            status: 'not-deployed',
-          },
-          kspm: {
-            status: 'indexing',
-          },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', {
+          name: /no agents installed/i,
+        })
+      ).toBeInTheDocument();
+    });
 
-    const { getByText } = customRederer('kspm');
-    expect(getByText(/posture evaluation underway/i)).toBeInTheDocument();
+    // Loading state
     expect(
-      getByText(
-        /waiting for data to be collected and indexed. check back later to see your findings/i
-      )
-    ).toBeInTheDocument();
-  });
-
-  it('should show the indexing notification when KSPM is not installed and CSPM is indexing', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: {
-            status: 'not-deployed',
-          },
-          cspm: {
-            status: 'indexing',
-          },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
+      screen.getByRole('button', {
+        name: /install agent/i,
       })
-    );
+    ).toBeDisabled();
 
-    const { getByText } = customRederer('cspm');
-    expect(getByText(/posture evaluation underway/i)).toBeInTheDocument();
-    expect(
-      getByText(
-        /waiting for data to be collected and indexed. Check back later to see your findings/i
-      )
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      const link = screen.getByRole('link', {
+        name: /install agent/i,
+      });
+      expect(link).toBeInTheDocument();
+      expect(link).toHaveAttribute(
+        'href',
+        '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=1f850b02-c6db-4378-9323-d439db4d65b4&integration=9b69ad21-1451-462c-9cd7-cc7dee50a34e'
+      );
+    });
   });
+  it('shows indexing message when status is indexing', async () => {
+    server.use(statusIndexing);
 
-  it('should show the indexing timout notification when CSPM is status is index-timeout', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: {
-            status: 'installed',
-          },
-          cspm: {
-            status: 'index-timeout',
-          },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
+    renderNoFindingsStates();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-    const { getByText } = customRederer('cspm');
-    expect(getByText(/waiting for findings data/i)).toBeInTheDocument();
-    const indexTimeOutMessage = getByText(/collecting findings is taking longer than expected/i);
-    expect(indexTimeOutMessage).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', {
+          name: /posture evaluation underway/i,
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /waiting for data to be collected and indexed. check back later to see your findings/i
+        )
+      ).toBeInTheDocument();
+    });
   });
+  it('shows timeout message when status is index-timeout', async () => {
+    server.use(statusIndexTimeout);
 
-  it('should show the indexing timout notification when KSPM is status is index-timeout', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: {
-            status: 'index-timeout',
-          },
-          cspm: {
-            status: 'installed',
-          },
-          indicesDetails: [
-            { index: 'logs-cloud_security_posture.findings_latest-default', status: 'empty' },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'empty' },
-          ],
-        },
-      })
-    );
+    renderNoFindingsStates();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
-    const { getByText } = customRederer('kspm');
-    expect(getByText(/waiting for findings data/i)).toBeInTheDocument();
-    expect(getByText(/collecting findings is taking longer than expected/i)).toBeInTheDocument();
+    await waitFor(() => {
+      screen.getByRole('heading', {
+        name: /waiting for findings data/i,
+      });
+      expect(
+        screen.getByText(/collecting findings is taking longer than expected/i)
+      ).toBeInTheDocument();
+    });
   });
+  it('shows unprivileged message when status is unprivileged', async () => {
+    server.use(statusUnprivileged);
 
-  it('should show the unprivileged notification when CSPM is status is index-timeout', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: {
-            status: 'installed',
-          },
-          cspm: {
-            status: 'unprivileged',
-          },
-          indicesDetails: [
-            {
-              index: 'logs-cloud_security_posture.findings_latest-default',
-              status: 'unprivileged',
-            },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'unprivileged' },
-          ],
-        },
-      })
-    );
-
-    const { getByText } = customRederer('cspm');
-    expect(getByText(/privileges required/i)).toBeInTheDocument();
-  });
-
-  it('should show the unprivileged notification when KSPM is status is index-timeout', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: {
-            status: 'unprivileged',
-          },
-          cspm: {
-            status: 'installed',
-          },
-          indicesDetails: [
-            {
-              index: 'logs-cloud_security_posture.findings_latest-default',
-              status: 'unprivileged',
-            },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'unprivileged' },
-          ],
-        },
-      })
-    );
-
-    const { getByText } = customRederer('kspm');
-    expect(getByText(/privileges required/i)).toBeInTheDocument();
-  });
-
-  it('should show the not-installed notification when CSPM and KSPM status is not-installed', async () => {
-    (useCspSetupStatusApi as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: {
-          kspm: {
-            status: 'not-installed',
-          },
-          cspm: {
-            status: 'not-installed',
-          },
-          indicesDetails: [
-            {
-              index: 'logs-cloud_security_posture.findings_latest-default',
-              status: 'success',
-            },
-            { index: 'logs-cloud_security_posture.findings-default*', status: 'success' },
-          ],
-        },
-      })
-    );
-
-    const { getByText } = customRederer('cspm');
-    expect(getByText(/learn more about cloud security posture/i)).toBeInTheDocument();
+    renderNoFindingsStates();
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', {
+          name: /privileges required/i,
+        })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /to view cloud posture data, you must update privileges\. for more information, contact your kibana administrator\./i
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(/required elasticsearch index privilege for the following indices:/i)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText('logs-cloud_security_posture.findings_latest-default')
+      ).toBeInTheDocument();
+      expect(screen.getByText('logs-cloud_security_posture.findings-default*')).toBeInTheDocument();
+      expect(screen.getByText('logs-cloud_security_posture.scores-default')).toBeInTheDocument();
+      expect(
+        screen.getByText('logs-cloud_security_posture.vulnerabilities_latest-default')
+      ).toBeInTheDocument();
+    });
   });
 });
