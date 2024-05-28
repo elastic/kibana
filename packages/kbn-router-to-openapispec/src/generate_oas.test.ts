@@ -18,7 +18,10 @@ interface RecursiveType {
 describe('generateOpenApiDocument', () => {
   describe('@kbn/config-schema', () => {
     it('generates the expected OpenAPI document', () => {
-      const [routers, versionedRouters] = createTestRouters();
+      const [routers, versionedRouters] = createTestRouters({
+        routers: { testRouter: { routes: [{ method: 'get' }, { method: 'post' }] } },
+        versionedRouters: { testVersionedRouter: { routes: [{}] } },
+      });
       expect(
         generateOpenApiDocument(
           {
@@ -189,26 +192,34 @@ describe('generateOpenApiDocument', () => {
   describe('tags', () => {
     it('handles tags as expected', () => {
       const [routers, versionedRouters] = createTestRouters({
-        routers: [
-          [
-            { path: '/1-1/{id}', options: { tags: ['oas-tag:1', 'oas-tag:2', 'foo'] } },
-            { path: '/1-2/{id}', options: { tags: ['oas-tag:1', 'foo'] } },
-          ],
-          [{ path: '/2-1/{id}', options: { tags: undefined } }],
-        ],
-        versionedRouters: [
-          [
-            { path: '/v1-1', options: { access: 'public', options: { tags: ['oas-tag:v1'] } } },
-            {
-              path: '/v1-2',
-              options: {
-                access: 'public',
-                options: { tags: ['foo', 'bar', 'oas-tag:v2', 'oas-tag:v3'] },
+        routers: {
+          testRouter1: {
+            routes: [
+              { path: '/1-1/{id}', options: { tags: ['oas-tag:1', 'oas-tag:2', 'foo'] } },
+              { path: '/1-2/{id}', options: { tags: ['oas-tag:1', 'foo'] } },
+            ],
+          },
+          testRouter2: { routes: [{ path: '/2-1/{id}', options: { tags: undefined } }] },
+        },
+        versionedRouters: {
+          testVersionedRouter1: {
+            routes: [
+              { path: '/v1-1', options: { access: 'public', options: { tags: ['oas-tag:v1'] } } },
+              {
+                path: '/v1-2',
+                options: {
+                  access: 'public',
+                  options: { tags: ['foo', 'bar', 'oas-tag:v2', 'oas-tag:v3'] },
+                },
               },
-            },
-          ],
-          [{ path: '/v2-1', options: { access: 'public', options: { tags: undefined } } }],
-        ],
+            ],
+          },
+          testVersionedRouter2: {
+            routes: [
+              { path: '/v2-1', options: { access: 'public', options: { tags: undefined } } },
+            ],
+          },
+        },
       });
       const result = generateOpenApiDocument(
         {
