@@ -7,8 +7,11 @@ selected_known_integrations_tsv_string=""
 unknown_log_file_path_list_string=""
 unknown_log_file_pattern_list_string=""
 selected_unknown_log_file_pattern_array=()
+excluded_options_string=""
 selected_unknown_log_file_pattern_tsv_string=""
 custom_log_file_path_list_tsv_string=""
+known_integrations_api_body_string=""
+custom_integrations_api_body_string=""
 
 read_log_file_list() {
   local exclude_patterns=("^\/Users\/.+?\/Library\/Application Support")
@@ -104,9 +107,9 @@ function select_list() {
 
   for i in "${!options[@]}"; do
     if [[ "$i" -lt "${#known_integrations_options[@]}" ]]; then
-      printf "\e[32m%s)\e[0m %s\n" "${i}" "$(known_integration_title "${options[$i]}")"
+      printf "\e[32m%s)\e[0m %s\n" "$((i + 1))" "$(known_integration_title "${options[$i]}")"
     else
-      printf "\e[32m%s)\e[0m %s\n" "${i}" "${options[$i]}"
+      printf "\e[32m%s)\e[0m %s\n" "$((i + 1))" "${options[$i]}"
     fi
   done
 
@@ -123,7 +126,7 @@ function select_list() {
     for index in "${!options[@]}"; do
       local is_excluded=0
       for excluded_index in "${exclude_index_list_array[@]}"; do
-        if [[ "$index" -eq "$excluded_index" ]]; then
+        if [[ "$index" -eq "$((excluded_index - 1))" ]]; then
             is_excluded=1
         fi
       done
@@ -134,6 +137,8 @@ function select_list() {
         else
           selected_unknown_log_file_pattern_array+=("${options[index]}")
         fi
+      else
+        excluded_options_string+="$((index + 1))) ${options[index]}\n"
       fi
     done
   else
@@ -141,6 +146,49 @@ function select_list() {
     selected_unknown_log_file_pattern_array=("${unknown_logs_options[@]}")
   fi
 }
+
+generate_custom_integration_name() {
+    local path_pattern="$1"
+    local dir_path
+    local name_parts=()
+    local name
+
+    dir_path=$(dirname "$path_pattern")
+    IFS='/' read -r -a dir_array <<< "$dir_path"
+
+    # Get the last up to 4 parts of the path
+    for (( i=${#dir_array[@]}-1, count=0; i>=0 && count<4; i--, count++ )); do
+        name_parts=("${dir_array[$i]}" "${name_parts[@]}")
+    done
+
+    # Join the parts into a single string with underscores
+    name=$(printf "%s_" "${name_parts[@]}")
+    name="${name#_}"  # Remove leading underscore
+    name="${name%_}"  # Remove trailing underscore
+
+    # Replace special characters with underscores
+    name="${name// /_}"
+    name="${name//-/_}"
+    name="${name//./_}"
+
+    echo "$name"
+}
+
+build_known_integrations_api_body_string() {
+  for item in "${selected_known_integrations_array[@]}"; do
+    known_integrations_api_body_string+="$item\tregistry\n"
+  done
+}
+
+build_custom_integrations_api_body_string() {
+  for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
+    local integration_name=$(generate_custom_integration_name "$item")
+
+    custom_integrations_api_body_string+="$integration_name\tcustom\t$item\n"
+  done
+}
+
+# generate_custom_integration_name "/Library/Elastic/Agent/*.log"
 
 echo "Looking for log files..."
 read_log_file_list
@@ -150,13 +198,21 @@ build_unknown_log_file_patterns
 echo -e "\nWe found these logs on your system:"
 select_list
 
+if [[ -n "$excluded_options_string" ]]; then
+  echo -e "\nThese logs will not be ingested:"
+  echo -e "$excluded_options_string"
+fi
+
 echo -e "\nList any custom logs that we have not detected (e.g. /var/log/myapp/*.log, /home/j/myapp/*.log). Press Enter to skip."
 read custom_log_file_path_list_string
 
 IFS=', ' read -r -a custom_log_file_path_list_array <<< "$custom_log_file_path_list_string"
 
 echo -e "\nThese logs will be ingested:"
-for item in "${selected_known_integrations_array[@]}" "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
+for item in "${selected_known_integrations_array[@]}"; do
+  printf "• %s\n" "$(known_integration_title "${item}")"
+done
+for item in "${selected_unknown_log_file_pattern_array[@]}" "${custom_log_file_path_list_array[@]}"; do
   printf "• %s\n" "$item"
 done
 
@@ -169,9 +225,5 @@ if [[ ! "$confirmation_reply" =~ ^[Yy]$ ]]; then
   exit 1
 fi
 
-# Converting to TSV strings
-IFS=$'\t'
-selected_known_integrations_tsv_string="${selected_known_integrations_array[*]}"
-selected_unknown_log_file_pattern_tsv_string="${selected_unknown_log_file_pattern_array[*]}"
-custom_log_file_path_list_tsv_string="${custom_log_file_path_list_array[*]}"
-unset IFS
+build_known_integrations_api_body_string
+build_custom_integrations_api_body_string
