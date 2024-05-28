@@ -301,7 +301,7 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.events[0].security_message).to.eql(
         'Rule execution completed successfully'
       );
-      const backfillStart = moment(fromManualRuleRun).add(5, 'm').toISOString();
+      const backfillStart = moment(fromManualRuleRun).add(24, 'h').toISOString();
       expect(response.body.events[0].backfill.to).to.eql(backfillStart);
       expect(response.body.events[0].backfill.from).to.eql(fromManualRuleRun);
     });
