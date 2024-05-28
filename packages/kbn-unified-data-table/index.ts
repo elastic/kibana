@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { UnifiedDataTable } from './src/components/data_table';
-export { DataLoadingState } from './src/components/data_table';
+export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
 export type { UnifiedDataTableProps } from './src/components/data_table';
 export {
   RowHeightSettings,
@@ -36,7 +35,3 @@ export {
   getRenderCustomToolbarWithElements,
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default UnifiedDataTable;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import UnifiedDataTable, { DataLoadingState } from '@kbn/unified-data-table';
+import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import React, { useCallback, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';

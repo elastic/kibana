@@ -22,8 +22,9 @@ import { CellActionsProvider } from '@kbn/cell-actions';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { UnifiedDataTable } from '@kbn/unified-data-table';
 import { untilPluginStartServicesReady } from './kibana_services';
-import { RowViewer } from './row_flyout_viewer';
+import { RowViewer } from './row_viewer_lazy';
 
 interface ESQLDatatableProps {
   rows: ESQLRow[];
@@ -42,18 +43,16 @@ type DataTableColumnsMeta = Record<
 
 /*
 Remaining tasks:
-- Is it a good idea to render the flyout from the Discover plugin? Maybe is smarter to move it on another package.
 - Keep the selected columns in LLM
+- Something goes wrong with the CSS in the conversations app
 **/
 
 export const ESQLTable = (props: ESQLDatatableProps) => {
   const { loading, value } = useAsync(() => {
     const startServicesPromise = untilPluginStartServicesReady();
-    const modulePromise = import('@kbn/unified-data-table');
-    return Promise.all([startServicesPromise, modulePromise]);
+    return Promise.all([startServicesPromise]);
   }, []);
 
-  const UnifiedDataTable = value?.[1].default;
   const deps = value?.[0];
   const storage = new Storage(localStorage);
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
