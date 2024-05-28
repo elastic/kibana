@@ -314,7 +314,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           </h3>
         }
       >
-        {GlobalDataTagsTable()}
+        <GlobalDataTagsTable updateAgentPolicy={updateAgentPolicy} />
       </EuiDescribedFormGroup>
       <EuiDescribedFormGroup
         title={

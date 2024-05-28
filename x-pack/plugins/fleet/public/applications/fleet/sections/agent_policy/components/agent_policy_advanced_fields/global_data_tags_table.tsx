@@ -4,28 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
   EuiButtonIcon,
   EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
   EuiFormRow,
   EuiIcon,
   EuiText,
   EuiBadge,
 } from '@elastic/eui';
 
-interface GlobalDataTag {
-  name: string;
-  value: string | number;
+import type { NewAgentPolicy, AgentPolicy, GlobalDataTag } from '../../../../../../../common/types';
+
+interface Props {
+  updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
 }
 
-export const GlobalDataTagsTable: React.FC = () => {
+export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy }) => {
   const [globalDataTags, setGlobalDataTags] = useState<GlobalDataTag[]>([]);
   const [newTag, setNewTag] = useState<GlobalDataTag>({ name: '', value: '' });
   const [isAdding, setIsAdding] = useState(false);
@@ -78,6 +75,7 @@ export const GlobalDataTagsTable: React.FC = () => {
       { ...newTag, name: newTag.name.trim(), value: newTag.value.toString().trim() },
     ];
     setGlobalDataTags(updatedTags);
+    updateAgentPolicy({ global_data_tags: updatedTags });
     console.log('Updated Global Data Tags:', updatedTags);
     setNewTag({ name: '', value: '' });
     setIsAdding(false);
@@ -112,6 +110,7 @@ export const GlobalDataTagsTable: React.FC = () => {
   const handleDelete = (index: number) => {
     const updatedTags = globalDataTags.filter((_, i) => i !== index);
     setGlobalDataTags(updatedTags);
+    updateAgentPolicy({ global_data_tags: updatedTags });
     setEditingIndices((prevIndices) => {
       const newIndices = new Set(prevIndices);
       newIndices.delete(index);
@@ -148,6 +147,7 @@ export const GlobalDataTagsTable: React.FC = () => {
       i === index ? { ...tag, name: tag.name.trim(), value: tag.value.toString().trim() } : t
     );
     setGlobalDataTags(updatedTags);
+    updateAgentPolicy({ global_data_tags: updatedTags });
     setEditingIndices((prevIndices) => {
       const newIndices = new Set(prevIndices);
       newIndices.delete(index);
@@ -229,85 +229,53 @@ export const GlobalDataTagsTable: React.FC = () => {
     {
       actions: [
         {
+          name: 'Confirm/Edit',
           render: (item: GlobalDataTag) => {
             const index = globalDataTags.indexOf(item);
-            if (editingIndices.has(index)) {
+            if (editingIndices.has(index) || (isAdding && item === newTag)) {
               return (
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="top" content="Confirm">
-                      <EuiText
-                        color="primary"
-                        onClick={() => handleSaveEdit(index)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <EuiIcon type="checkInCircleFilled" color="primary" />
-                        Confirm
-                      </EuiText>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="top" content="Cancel">
-                      <EuiText
-                        color="danger"
-                        onClick={() => handleCancelEdit(index)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <EuiIcon type="cross" color="danger" />
-                        Cancel
-                      </EuiText>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              );
-            } else if (isAdding && item === newTag) {
-              return (
-                <EuiFlexGroup gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="top" content="Confirm">
-                      <EuiText
-                        color="primary"
-                        onClick={handleConfirm}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <EuiIcon type="checkInCircleFilled" color="primary" />
-                        Confirm
-                      </EuiText>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip position="top" content="Cancel">
-                      <EuiText color="danger" onClick={handleCancel} style={{ cursor: 'pointer' }}>
-                        <EuiIcon type="cross" color="danger" />
-                        Cancel
-                      </EuiText>
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <EuiText
+                  color="primary"
+                  onClick={isAdding ? handleConfirm : () => handleSaveEdit(index)}
+                  style={{ cursor: 'pointer', color: '#0079a5' }}
+                >
+                  <EuiIcon type="checkInCircleFilled" color="primary" />
+                  Confirm
+                </EuiText>
               );
             }
             return (
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip position="top" content="Edit">
-                    <EuiButtonIcon
-                      aria-label="Edit"
-                      iconType="pencil"
-                      onClick={() => handleEdit(index)}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiToolTip position="top" content="Delete">
-                    <EuiButtonIcon
-                      aria-label="Delete"
-                      iconType="trash"
-                      color="danger"
-                      onClick={() => handleDelete(index)}
-                    />
-                  </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <EuiButtonIcon
+                aria-label="Edit"
+                iconType="pencil"
+                onClick={() => handleEdit(index)}
+              />
+            );
+          },
+        },
+        {
+          name: 'Cancel/Delete',
+          render: (item: GlobalDataTag) => {
+            const index = globalDataTags.indexOf(item);
+            if (editingIndices.has(index) || (isAdding && item === newTag)) {
+              return (
+                <EuiText
+                  color="danger"
+                  onClick={isAdding ? handleCancel : () => handleCancelEdit(index)}
+                  style={{ cursor: 'pointer', color: '#BD271E' }}
+                >
+                  <EuiIcon type="cross" color="danger" />
+                  Cancel
+                </EuiText>
+              );
+            }
+            return (
+              <EuiButtonIcon
+                aria-label="Delete"
+                iconType="trash"
+                color="danger"
+                onClick={() => handleDelete(index)}
+              />
             );
           },
         },
@@ -338,7 +306,6 @@ export const GlobalDataTagsTable: React.FC = () => {
     </>
   );
 };
-
 // import React, { useState } from 'react';
 // import {
 //   EuiBasicTable,
