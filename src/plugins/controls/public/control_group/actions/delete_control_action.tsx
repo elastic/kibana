@@ -24,6 +24,7 @@ import {
   HasParentApi,
   HasType,
   HasUniqueId,
+  PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { ACTION_DELETE_CONTROL } from '.';
 import { pluginServices } from '../../services';
@@ -32,7 +33,7 @@ import { CONTROL_GROUP_TYPE } from '../types';
 
 export type DeleteControlActionApi = HasType &
   HasUniqueId &
-  HasParentApi<PresentationContainer & HasType>;
+  HasParentApi<PresentationContainer & PublishesViewMode & HasType>;
 
 const isApiCompatible = (api: unknown | null): api is DeleteControlActionApi =>
   Boolean(
