@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { ControlWidth } from '@kbn/controls-plugin/common';
-import { StateComparators } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
+
+import { ControlWidth } from '@kbn/controls-plugin/common';
+import { SerializedPanelState } from '@kbn/presentation-containers';
+import { StateComparators } from '@kbn/presentation-publishing';
+
 import {
-  ControlApiRegistration,
+  ControlApiInitialization,
   ControlStateManager,
   DefaultControlApi,
   DefaultControlState,
 } from './types';
 
-export type ControlApi = ControlApiRegistration<DefaultControlApi>;
+export type ControlApi = ControlApiInitialization<DefaultControlApi>;
 
 export const initializeDefaultControlApi = (
   state: DefaultControlState
@@ -24,6 +27,7 @@ export const initializeDefaultControlApi = (
   defaultControlApi: ControlApi;
   defaultControlStateManager: ControlStateManager<DefaultControlState>;
   defaultControlComparators: StateComparators<DefaultControlState>;
+  serializeDefaultControl: () => SerializedPanelState<DefaultControlState>;
 } => {
   const dataLoading = new BehaviorSubject<boolean | undefined>(false);
   const blockingError = new BehaviorSubject<Error | undefined>(undefined);
@@ -53,5 +57,8 @@ export const initializeDefaultControlApi = (
     defaultControlApi,
     defaultControlComparators,
     defaultControlStateManager,
+    serializeDefaultControl: () => {
+      return { rawState: { grow: grow.getValue(), width: width.getValue() }, references: [] };
+    },
   };
 };

@@ -9,14 +9,15 @@
 import { BehaviorSubject, distinctUntilChanged, skip } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { Filter } from '@kbn/es-query';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
 
-import { Filter } from '@kbn/es-query';
 import { ControlGroupApi } from '../control_group/types';
 import { initializeDefaultControlApi } from '../initialize_default_control_api';
-import { ControlApiRegistration, ControlStateManager } from '../types';
+import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
 import { DataControlApi, DefaultDataControlState } from './types';
 
@@ -31,12 +32,17 @@ export const initializeDataControl = <EditorState extends object = {}>(
     dataViews: DataViewsPublicPluginStart;
   }
 ): {
-  dataControlApi: ControlApiRegistration<DataControlApi>;
+  dataControlApi: ControlApiInitialization<DataControlApi>;
   dataControlComparators: StateComparators<DefaultDataControlState>;
   dataControlStateManager: ControlStateManager<DefaultDataControlState>;
+  serializeDataControl: () => SerializedPanelState<DefaultControlState>;
 } => {
-  const { defaultControlApi, defaultControlComparators, defaultControlStateManager } =
-    initializeDefaultControlApi(state);
+  const {
+    defaultControlApi,
+    defaultControlComparators,
+    defaultControlStateManager,
+    serializeDefaultControl,
+  } = initializeDefaultControlApi(state);
 
   const panelTitle = new BehaviorSubject<string | undefined>(state.title);
   const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.fieldName);
@@ -88,22 +94,39 @@ export const initializeDataControl = <EditorState extends object = {}>(
     );
   };
 
-  const dataControlApi: ControlApiRegistration<DataControlApi> = {
+  const dataControlApi: ControlApiInitialization<DataControlApi> = {
     ...defaultControlApi,
     panelTitle,
     defaultPanelTitle,
     dataViews,
     onEdit,
     isEditingEnabled: () => true,
-    getTypeDisplayName: () => 'Test', // TODO
     filters$: filters,
-    setOutputFilter: (newFilter: Filter | undefined) =>
-      filters.next(newFilter ? [newFilter] : undefined),
+    setOutputFilter: (newFilter: Filter | undefined) => {
+      filters.next(newFilter ? [newFilter] : undefined);
+    },
   };
 
   return {
     dataControlApi,
     dataControlComparators,
     dataControlStateManager: stateManager,
+    serializeDataControl: () => {
+      return {
+        rawState: {
+          ...serializeDefaultControl().rawState,
+          dataViewId: dataViewId.getValue(),
+          fieldName: fieldName.getValue(),
+          title: panelTitle.getValue(),
+        },
+        references: [
+          {
+            name: `controlGroup_${controlId}:${controlType}DataView`,
+            type: DATA_VIEW_SAVED_OBJECT_TYPE,
+            id: dataViewId.getValue(),
+          },
+        ],
+      };
+    },
   };
 };

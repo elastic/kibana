@@ -57,8 +57,11 @@ export interface DefaultControlState {
 
 export type ControlApiRegistration<ControlApi extends DefaultControlApi = DefaultControlApi> = Omit<
   ControlApi,
-  'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges' | 'serializeState'
+  'uuid' | 'parentApi' | 'type' | 'unsavedChanges' | 'resetUnsavedChanges'
 >;
+
+export type ControlApiInitialization<ControlApi extends DefaultControlApi = DefaultControlApi> =
+  Omit<ControlApiRegistration<ControlApi>, 'serializeState' | 'getTypeDisplayName'>;
 
 export interface ControlFactory<
   State extends DefaultControlState = DefaultControlState,

@@ -78,15 +78,6 @@ export const serializeControlGroup = (
       references = [...references, ...childReferences];
     }
 
-    // if (isDataControl(child)) {
-    //   /** All data controls will have a data view ID, so add the data view to the reference array */
-    //   references.push({
-    //     name: `controlGroup_${panelId}:${type}DataView`,
-    //     type: DATA_VIEW_SAVED_OBJECT_TYPE,
-    //     id: currentPanel.dataViewId,
-    //   });
-    // }
-
     /**
      * Note: With legacy control embeddables, `grow` and `width` were duplicated under
      * explicit input - this is no longer the case.

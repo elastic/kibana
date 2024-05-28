@@ -23,6 +23,7 @@ import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import {
+  HasUniqueId,
   PublishesUnifiedSearch,
   PublishesViewMode,
   useStateFromPublishingSubject,
@@ -31,6 +32,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import useMount from 'react-use/lib/useMount';
 import { BehaviorSubject } from 'rxjs';
 import { ControlGroupApi } from '../react_controls/control_group/types';
 
@@ -51,27 +53,13 @@ const toggleViewButtons = [
  * I am mocking the dashboard API so that the data table embeddble responds to changes to the
  * data view publishing subject from the control group
  */
-type MockedDashboardApi = PresentationContainer & PublishesViewMode & PublishesUnifiedSearch;
-
-const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
-const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
-const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
-const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
-const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
-const mockedParentApi: MockedDashboardApi = {
-  viewMode,
-  filters$,
-  query$,
-  timeRange$,
-  children$,
-  removePanel: () => {},
-  replacePanel: () => {
-    return Promise.resolve('');
-  },
-  addNewPanel: () => {
-    return Promise.resolve(undefined);
-  },
-};
+type MockedDashboardApi = PresentationContainer &
+  PublishesViewMode &
+  PublishesUnifiedSearch & {
+    publishFilters: (newFilters: Filter[] | undefined) => void;
+    setViewMode: (newViewMode: ViewMode) => void;
+    setChild: (child: HasUniqueId) => void;
+  };
 
 export const ReactControlExample = ({
   core,
@@ -80,6 +68,36 @@ export const ReactControlExample = ({
   core: CoreStart;
   dataViews: DataViewsPublicPluginStart;
 }) => {
+  const [dashboardApi, setDashboardApi] = useState<MockedDashboardApi | undefined>(undefined);
+  const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
+  const viewModeSelected = useStateFromPublishingSubject(dashboardApi?.viewMode);
+
+  useMount(() => {
+    const viewMode = new BehaviorSubject<ViewModeType>(ViewMode.EDIT as ViewModeType);
+    const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
+    const query$ = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
+    const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
+    const children$ = new BehaviorSubject<{ [key: string]: unknown }>({});
+
+    setDashboardApi({
+      viewMode,
+      filters$,
+      query$,
+      timeRange$,
+      children$,
+      publishFilters: (newFilters) => filters$.next(newFilters),
+      setViewMode: (newViewMode) => viewMode.next(newViewMode),
+      setChild: (child) => children$.next({ ...children$.getValue(), [child.uuid]: child }),
+      removePanel: () => {},
+      replacePanel: () => {
+        return Promise.resolve('');
+      },
+      addNewPanel: () => {
+        return Promise.resolve(undefined);
+      },
+    });
+  });
+
   const {
     loading,
     value: dataViews,
@@ -88,20 +106,17 @@ export const ReactControlExample = ({
     return await dataViewsService.find('kibana_sample_data_logs');
   }, []);
 
-  const [controlGroupApi, setControlGroupApi] = useState<ControlGroupApi | undefined>(undefined);
-  const viewModeSelected = useStateFromPublishingSubject(viewMode);
-
   useEffect(() => {
     if (!controlGroupApi) return;
 
     const subscription = controlGroupApi.filters$.subscribe((controlGroupFilters) => {
-      filters$.next(controlGroupFilters);
+      if (dashboardApi) dashboardApi.publishFilters(controlGroupFilters);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [controlGroupApi]);
+  }, [dashboardApi, controlGroupApi]);
 
   if (error || (!dataViews?.[0]?.id && !loading))
     return (
@@ -155,7 +170,7 @@ export const ReactControlExample = ({
             options={toggleViewButtons}
             idSelected={`viewModeToggle_${viewModeSelected}`}
             onChange={(_, value) => {
-              viewMode.next(value);
+              dashboardApi?.setViewMode(value);
             }}
           />
         </EuiFlexItem>
@@ -163,13 +178,13 @@ export const ReactControlExample = ({
       <EuiSpacer size="m" />
       <ReactEmbeddableRenderer
         onApiAvailable={(api) => {
-          children$.next({ ...children$.getValue(), [api.uuid]: api });
+          dashboardApi?.setChild(api);
           setControlGroupApi(api as ControlGroupApi);
         }}
         hidePanelChrome={true}
         type={CONTROL_GROUP_TYPE}
         getParentApi={() => ({
-          ...mockedParentApi,
+          ...dashboardApi,
           getSerializedStateForChild: () => ({
             rawState: {
               controlStyle: 'oneLine',
@@ -188,7 +203,7 @@ export const ReactControlExample = ({
               },
             ],
           }),
-        })} // should be the dashboard
+        })}
         key={`control_group`}
       />
       <EuiSpacer size="l" />
@@ -196,7 +211,7 @@ export const ReactControlExample = ({
         <ReactEmbeddableRenderer
           type={'data_table'}
           getParentApi={() => ({
-            ...mockedParentApi,
+            ...dashboardApi,
             getSerializedStateForChild: () => ({
               rawState: {
                 timeRange: { from: 'now-60d/d', to: 'now+60d/d' },
@@ -206,7 +221,7 @@ export const ReactControlExample = ({
           })}
           hidePanelChrome={false}
           onApiAvailable={(api) => {
-            children$.next({ ...children$.getValue(), [api.uuid]: api });
+            dashboardApi?.setChild(api);
           }}
         />
       </div>

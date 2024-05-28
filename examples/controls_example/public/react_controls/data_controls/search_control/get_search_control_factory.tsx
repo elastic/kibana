@@ -82,22 +82,40 @@ export const getSearchEmbeddableFactory = ({
       );
       const editorStateManager = { searchTechnique };
 
-      const { dataControlApi, dataControlComparators, dataControlStateManager } =
-        initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
-          uuid,
-          SEARCH_CONTROL_TYPE,
-          initialState,
-          editorStateManager,
-          parentApi,
-          {
-            core,
-            dataViews: dataViewsService,
-          }
-        );
+      const {
+        dataControlApi,
+        dataControlComparators,
+        dataControlStateManager,
+        serializeDataControl,
+      } = initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
+        uuid,
+        SEARCH_CONTROL_TYPE,
+        initialState,
+        editorStateManager,
+        parentApi,
+        {
+          core,
+          dataViews: dataViewsService,
+        }
+      );
 
       const api = buildApi(
         {
           ...dataControlApi,
+          getTypeDisplayName: () => {
+            return 'TEST';
+          },
+          serializeState: () => {
+            const { rawState: dataControlState, references } = serializeDataControl();
+            return {
+              rawState: {
+                ...dataControlState,
+                searchString: searchString.getValue(),
+                searchTechnique: searchTechnique.getValue(),
+              },
+              references, // does not have any references other than those provided by the data control serializer
+            };
+          },
           clearSelections: () => {
             searchString.next(undefined);
           },
