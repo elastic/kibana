@@ -541,7 +541,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe.only('per-action frequencies', () => {
+      describe('per-action frequencies', () => {
         const updateSingleRule = async (
           ruleId: string,
           throttle: RuleActionThrottle | undefined,
