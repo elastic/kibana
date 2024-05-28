@@ -14231,10 +14231,6 @@
               "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
             },
             {
-              "plugin": "slo",
-              "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
-            },
-            {
               "plugin": "links",
               "path": "src/plugins/links/public/plugin.ts"
             }
