@@ -32,7 +32,7 @@ export const processVersionedRouter = (
   pathStartsWith?: string
 ) => {
   const routes = prepareRoutes(appRouter.getRoutes(), pathStartsWith);
-  const paths = new Map<string, OpenAPIV3.PathItemObject>();
+  const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     const pathParams = getPathParameters(route.path);
     /**
@@ -91,7 +91,7 @@ export const processVersionedRouter = (
       throw e;
     }
   }
-  return { paths: Object.fromEntries(paths.entries()) };
+  return { paths };
 };
 
 export const extractVersionedRequestBody = (

@@ -34,7 +34,7 @@ export const processRouter = (
     pathStartsWith
   );
 
-  const paths = new Map<string, OpenAPIV3.PathItemObject>();
+  const paths: OpenAPIV3.PathsObject = {};
   for (const route of routes) {
     try {
       const pathParams = getPathParameters(route.path);
@@ -87,7 +87,7 @@ export const processRouter = (
       throw e;
     }
   }
-  return { paths: Object.fromEntries(paths.entries()) };
+  return { paths };
 };
 
 export type InternalRouterRoute = ReturnType<Router['getRoutes']>[0];
