@@ -8,8 +8,9 @@
 import { renderHook } from '@testing-library/react-hooks';
 
 import { createUseFieldsMetadataHook, UseFieldsMetadataParams } from './use_fields_metadata';
-import { createFieldsMetadataClientMock } from '../../services/fields_metadata/fields_metadata_client.mock';
 import { FindFieldsMetadataResponsePayload } from '../../../common/latest';
+import { createFieldsMetadataServiceStartMock } from '../../services/fields_metadata/fields_metadata_service.mock';
+import { IFieldsMetadataClient } from '../../services/fields_metadata';
 
 const fields: FindFieldsMetadataResponsePayload['fields'] = {
   '@timestamp': {
@@ -29,13 +30,15 @@ const fields: FindFieldsMetadataResponsePayload['fields'] = {
 
 const mockedFieldsMetadataResponse = { fields };
 
-const fieldsMetadataClient = createFieldsMetadataClientMock();
+const fieldsMetadataService = createFieldsMetadataServiceStartMock();
 
-const useFieldsMetadata = createUseFieldsMetadataHook({ fieldsMetadataClient });
+const useFieldsMetadata = createUseFieldsMetadataHook({ fieldsMetadataService });
 
 describe('useFieldsMetadata', () => {
-  beforeEach(() => {
+  let fieldsMetadataClient: jest.Mocked<IFieldsMetadataClient>;
+  beforeEach(async () => {
     jest.clearAllMocks();
+    fieldsMetadataClient = await fieldsMetadataService.getClient();
   });
 
   it('should return the fieldsMetadata value from the API', async () => {

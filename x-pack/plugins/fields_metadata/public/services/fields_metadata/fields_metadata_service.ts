@@ -5,23 +5,33 @@
  * 2.0.
  */
 
-import { FieldsMetadataClient } from './fields_metadata_client';
-import {
+import type {
   FieldsMetadataServiceStartDeps,
   FieldsMetadataServiceSetup,
   FieldsMetadataServiceStart,
+  IFieldsMetadataClient,
 } from './types';
 
 export class FieldsMetadataService {
+  private client?: IFieldsMetadataClient;
+
   public setup(): FieldsMetadataServiceSetup {
     return {};
   }
 
   public start({ http }: FieldsMetadataServiceStartDeps): FieldsMetadataServiceStart {
-    const client = new FieldsMetadataClient(http);
-
     return {
-      client,
+      getClient: () => this.getClient({ http }),
     };
+  }
+
+  private async getClient({ http }: FieldsMetadataServiceStartDeps) {
+    if (!this.client) {
+      const { FieldsMetadataClient } = await import('./fields_metadata_client');
+      const client = new FieldsMetadataClient(http);
+      this.client = client;
+    }
+
+    return this.client;
   }
 }

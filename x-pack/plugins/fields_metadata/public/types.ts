@@ -7,13 +7,13 @@
 
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { UseFieldsMetadataHook } from './hooks/use_fields_metadata/use_fields_metadata';
-import type { IFieldsMetadataClient } from './services/fields_metadata';
+import type { FieldsMetadataServiceStart } from './services/fields_metadata';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FieldsMetadataPublicSetup {}
 
 export interface FieldsMetadataPublicStart {
-  client: IFieldsMetadataClient;
+  getClient: FieldsMetadataServiceStart['getClient'];
   useFieldsMetadata: UseFieldsMetadataHook;
 }
 

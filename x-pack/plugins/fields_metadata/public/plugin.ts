@@ -26,12 +26,12 @@ export class FieldsMetadataPlugin implements FieldsMetadataClientPluginClass {
   public start(core: CoreStart) {
     const { http } = core;
 
-    const { client } = this.fieldsMetadata.start({ http });
+    const fieldsMetadataService = this.fieldsMetadata.start({ http });
 
-    const useFieldsMetadata = createUseFieldsMetadataHook({ fieldsMetadataClient: client });
+    const useFieldsMetadata = createUseFieldsMetadataHook({ fieldsMetadataService });
 
     return {
-      client,
+      getClient: fieldsMetadataService.getClient,
       useFieldsMetadata,
     };
   }

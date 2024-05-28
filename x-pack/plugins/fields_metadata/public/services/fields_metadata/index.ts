@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './fields_metadata_client';
 export * from './fields_metadata_service';
 export * from './types';

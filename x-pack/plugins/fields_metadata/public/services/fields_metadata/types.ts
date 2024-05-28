@@ -15,7 +15,7 @@ import {
 export interface FieldsMetadataServiceSetup {}
 
 export interface FieldsMetadataServiceStart {
-  client: IFieldsMetadataClient;
+  getClient: () => Promise<IFieldsMetadataClient>;
 }
 
 export interface FieldsMetadataServiceStartDeps {

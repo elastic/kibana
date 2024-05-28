@@ -9,10 +9,10 @@ import { useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FieldAttribute, FieldName } from '../../../common';
 import { FindFieldsMetadataResponsePayload } from '../../../common/latest';
-import { IFieldsMetadataClient } from '../../services/fields_metadata';
+import { FieldsMetadataServiceStart } from '../../services/fields_metadata';
 
 interface UseFieldsMetadataFactoryDeps {
-  fieldsMetadataClient: IFieldsMetadataClient;
+  fieldsMetadataService: FieldsMetadataServiceStart;
 }
 
 export interface UseFieldsMetadataParams {
@@ -35,13 +35,13 @@ export type UseFieldsMetadataHook = (
 ) => UseFieldsMetadataReturnType;
 
 export const createUseFieldsMetadataHook = ({
-  fieldsMetadataClient,
+  fieldsMetadataService,
 }: UseFieldsMetadataFactoryDeps): UseFieldsMetadataHook => {
   return (params = {}, deps) => {
-    const [{ error, loading, value }, load] = useAsyncFn(
-      () => fieldsMetadataClient.find(params),
-      deps
-    );
+    const [{ error, loading, value }, load] = useAsyncFn(async () => {
+      const client = await fieldsMetadataService.getClient();
+      return client.find(params);
+    }, deps);
 
     useEffect(() => {
       load();

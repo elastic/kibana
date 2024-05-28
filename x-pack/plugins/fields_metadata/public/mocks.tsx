@@ -9,7 +9,7 @@ import { createUseFieldsMetadataHookMock } from './hooks/use_fields_metadata/use
 import { createFieldsMetadataServiceStartMock } from './services/fields_metadata/fields_metadata_service.mock';
 
 const createFieldsMetadataPublicStartMock = () => ({
-  client: createFieldsMetadataServiceStartMock().client,
+  getClient: createFieldsMetadataServiceStartMock().getClient,
   useFieldsMetadata: createUseFieldsMetadataHookMock(),
 });
 

@@ -6,9 +6,13 @@
  */
 
 import { createFieldsMetadataClientMock } from './fields_metadata_client.mock';
-import { FieldsMetadataServiceStart } from './types';
+import { IFieldsMetadataClient } from './types';
+
+interface FieldsMetadataServiceStartMock {
+  getClient: () => Promise<jest.Mocked<IFieldsMetadataClient>>;
+}
 
 export const createFieldsMetadataServiceStartMock =
-  (): jest.Mocked<FieldsMetadataServiceStart> => ({
-    client: createFieldsMetadataClientMock(),
+  (): jest.Mocked<FieldsMetadataServiceStartMock> => ({
+    getClient: jest.fn().mockResolvedValue(createFieldsMetadataClientMock()),
   });
