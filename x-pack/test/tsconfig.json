@@ -123,7 +123,6 @@
     "@kbn/discover-plugin",
     "@kbn/files-plugin",
     "@kbn/shared-ux-file-types",
-    "@kbn/alerting-state-types",
     "@kbn/assetManager-plugin",
     "@kbn/guided-onboarding-plugin",
     "@kbn/field-formats-plugin",
@@ -175,6 +174,8 @@
     "@kbn/esql-utils",
     "@kbn/search-types",
     "@kbn/analytics-ftr-helpers-plugin",
-    "@kbn/reporting-server",
+    "@kbn/alerting-comparators",
+    "@kbn/alerting-state-types",
+    "@kbn/reporting-server"
   ]
 }

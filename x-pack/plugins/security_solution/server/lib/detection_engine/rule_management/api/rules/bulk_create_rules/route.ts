@@ -16,11 +16,7 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
-import type { SetupPlugins } from '../../../../../../plugin';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
-import { createRules } from '../../../logic/crud/create_rules';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/rule_management/read_rules';
 import { getDuplicates } from './get_duplicates';
 import { transformValidateBulkError } from '../../../utils/validate';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
@@ -37,11 +33,7 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../.
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const bulkCreateRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  logger: Logger
-) => {
+export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .post({
       access: 'public',
@@ -69,16 +61,8 @@ export const bulkCreateRulesRoute = (
 
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'licensing', 'alerting']);
-
           const rulesClient = ctx.alerting.getRulesClient();
-          const savedObjectsClient = ctx.core.savedObjects.client;
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           const ruleDefinitions = request.body;
           const dupes = getDuplicates(ruleDefinitions, 'rule_id');
@@ -125,10 +109,7 @@ export const bulkCreateRulesRoute = (
                     });
                   }
 
-                  throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
-
-                  const createdRule = await createRules({
-                    rulesClient,
+                  const createdRule = await rulesManagementClient.createCustomRule({
                     params: payloadRule,
                   });
 
