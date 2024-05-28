@@ -434,6 +434,12 @@ export function LensEditConfigurationFlyout({
                 flex: 1;
               }
             }
+            .lnsIndexPatternDimensionEditor-advancedOptions {
+              .euiAccordion__childWrapper {
+                flex: none;
+                overflow: hidden !important;
+              }
+            }
           `}
           direction="column"
           gutterSize="none"
