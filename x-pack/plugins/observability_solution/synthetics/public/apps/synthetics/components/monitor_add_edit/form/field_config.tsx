@@ -79,13 +79,26 @@ import {
   ThrottlingConfig,
   RequestBodyCheck,
   SourceType,
+  FormConfig,
 } from '../types';
-import { AlertConfigKey, ALLOWED_SCHEDULES_IN_MINUTES } from '../constants';
+import {
+  AlertConfigKey,
+  ALLOWED_SCHEDULES_IN_MINUTES,
+  ALLOWED_SCHEDULES_IN_SECONDS,
+} from '../constants';
 import { getDefaultFormFields } from './defaults';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 import { KeyValuePairsFieldProps } from '../fields/key_value_field';
 
-const getScheduleContent = (value: number) => {
+const getScheduleContent = (value: number, seconds?: boolean) => {
+  if (seconds) {
+    return i18n.translate('xpack.synthetics.monitorConfig.schedule.seconds.label', {
+      defaultMessage: 'Every {value, number} {value, plural, one {second} other {seconds}}',
+      values: {
+        value,
+      },
+    });
+  }
   if (value > 60) {
     return i18n.translate('xpack.synthetics.monitorConfig.schedule.label', {
       defaultMessage: 'Every {value, number} {value, plural, one {hour} other {hours}}',
@@ -103,10 +116,25 @@ const getScheduleContent = (value: number) => {
   }
 };
 
-const SCHEDULES = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
-  value,
-  text: getScheduleContent(parseInt(value, 10)),
-}));
+const getSchedules = (monitorType?: MonitorTypeEnum) => {
+  const minutes = ALLOWED_SCHEDULES_IN_MINUTES.map((value) => ({
+    value,
+    text: getScheduleContent(parseInt(value, 10)),
+  }));
+  const allowSeconds =
+    monitorType === MonitorTypeEnum.HTTP ||
+    monitorType === MonitorTypeEnum.TCP ||
+    monitorType === MonitorTypeEnum.ICMP;
+  if (allowSeconds) {
+    const seconds = ALLOWED_SCHEDULES_IN_SECONDS.map((value) => ({
+      value,
+      text: getScheduleContent(parseInt(value, 10), true),
+    }));
+    return [...seconds, ...minutes];
+  } else {
+    return minutes;
+  }
+};
 
 export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
@@ -372,7 +400,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
   },
   ['schedule.number']: {
-    fieldKey: `${ConfigKey.SCHEDULE}.number`,
+    fieldKey: `schedule.number`,
     required: true,
     component: Select,
     label: i18n.translate('xpack.synthetics.monitorConfig.frequency.label', {
@@ -382,11 +410,22 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'How often do you want to run this test? Higher frequencies will increase your total cost.',
     }),
-    props: (): EuiSelectProps => {
+    props: ({ formState, setValue, field }): EuiSelectProps => {
       return {
         'data-test-subj': 'syntheticsMonitorConfigSchedule',
-        options: SCHEDULES,
+        options: getSchedules(formState.defaultValues?.[ConfigKey.MONITOR_TYPE]),
         disabled: readOnly,
+        onChange: (e) => {
+          const value = e.target.value;
+          if (value.endsWith('s')) {
+            setValue<keyof FormConfig>('schedule.unit', 's');
+            setValue<keyof FormConfig>('schedule.unit', 's');
+            setValue<keyof FormConfig>('schedule.number', value.slice(0, -1));
+          } else {
+            setValue<keyof FormConfig>('schedule.unit', 'm');
+            field?.onChange(e);
+          }
+        },
       };
     },
   },

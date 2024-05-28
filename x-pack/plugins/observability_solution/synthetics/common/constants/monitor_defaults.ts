@@ -115,6 +115,8 @@ export const PROFILES_MAP = PROFILE_VALUES.reduce((acc, profile) => {
   return acc;
 }, {} as { [key: string]: ThrottlingConfig });
 
+export const ALLOWED_SCHEDULES_IN_SECONDS = ['10s', '30s'];
+
 export const ALLOWED_SCHEDULES_IN_MINUTES = [
   '1',
   '3',
