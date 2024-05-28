@@ -1002,6 +1002,39 @@
       },
       {
         "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.hasTransformationalCommand",
+        "type": "Function",
+        "tags": [],
+        "label": "hasTransformationalCommand",
+        "description": [],
+        "signature": [
+          "(esql: string | undefined) => boolean"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.hasTransformationalCommand.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
         "id": "def-common.removeDropCommandsFromESQLQuery",
         "type": "Function",
         "tags": [],
