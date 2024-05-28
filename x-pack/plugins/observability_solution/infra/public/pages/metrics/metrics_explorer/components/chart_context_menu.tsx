@@ -18,7 +18,7 @@ import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
+import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -26,7 +26,7 @@ import {
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,
 } from '../hooks/use_metrics_explorer_options';
-import { createTSVBLink } from './helpers/create_tsvb_link';
+import { createTSVBLink, TSVB_WORKAROUND_INDEX_PATTERN } from './helpers/create_tsvb_link';
 import { useNodeDetailsRedirect } from '../../../link_to';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 
@@ -34,16 +34,12 @@ export interface Props {
   options: MetricsExplorerOptions;
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
-  source?: MetricsSourceConfigurationProperties;
   timeRange: MetricsExplorerTimeOptions;
   uiCapabilities?: Capabilities;
   chartOptions: MetricsExplorerChartOptions;
 }
 
-const fieldToNodeType = (
-  source: MetricsSourceConfigurationProperties,
-  groupBy: string | string[]
-): InventoryItemType | undefined => {
+const fieldToNodeType = (groupBy: string | string[]): InventoryItemType | undefined => {
   const fields = Array.isArray(groupBy) ? groupBy : [groupBy];
   if (fields.includes(HOST_FIELD)) {
     return 'host';
@@ -66,7 +62,6 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   onFilter,
   options,
   series,
-  source,
   timeRange,
   uiCapabilities,
   chartOptions,
@@ -74,6 +69,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
   const { getNodeDetailUrl } = useNodeDetailsRedirect();
   const [isPopoverOpen, setPopoverState] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
+  const { metricsView } = useMetricsDataViewContext();
   const supportFiltering = options.groupBy != null && onFilter != null;
   const handleFilter = useCallback(() => {
     // onFilter needs check for Typescript even though it's
@@ -104,7 +100,7 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       ]
     : [];
 
-  const nodeType = source && options.groupBy && fieldToNodeType(source, options.groupBy);
+  const nodeType = options.groupBy && fieldToNodeType(options.groupBy);
 
   const nodeDetailLinkProps = nodeType
     ? getNodeDetailUrl({
@@ -117,7 +113,13 @@ export const MetricsExplorerChartContextMenu: React.FC<Props> = ({
       })
     : {};
   const tsvbLinkProps = useLinkProps({
-    ...createTSVBLink(source, options, series, timeRange, chartOptions),
+    ...createTSVBLink(
+      metricsView?.indices ?? TSVB_WORKAROUND_INDEX_PATTERN,
+      options,
+      series,
+      timeRange,
+      chartOptions
+    ),
   });
   const viewNodeDetail = nodeType
     ? [

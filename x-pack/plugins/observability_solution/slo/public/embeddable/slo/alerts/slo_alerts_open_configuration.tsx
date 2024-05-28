@@ -4,21 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React from 'react';
-import { toMountPoint } from '@kbn/react-kibana-mount';
-
 import type { CoreStart } from '@kbn/core/public';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { EmbeddableSloProps, SloAlertsEmbeddableInput } from './types';
-
-import { SloPublicPluginsStart } from '../../../types';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { SloPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
-export async function resolveEmbeddableSloUserInput(
+import type { EmbeddableSloProps } from './types';
+export async function openSloConfiguration(
   coreStart: CoreStart,
   pluginStart: SloPublicPluginsStart,
-  input?: SloAlertsEmbeddableInput
+  initialState?: EmbeddableSloProps
 ): Promise<EmbeddableSloProps> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
@@ -34,15 +31,14 @@ export async function resolveEmbeddableSloUserInput(
           >
             <QueryClientProvider client={queryClient}>
               <SloConfiguration
-                initialInput={input}
+                initialInput={initialState}
                 onCreate={(update: EmbeddableSloProps) => {
                   modalSession.close();
                   resolve(update);
                 }}
                 onCancel={() => {
                   modalSession.close();
-                  // @ts-expect-error
-                  resolve(undefined);
+                  reject();
                 }}
               />
             </QueryClientProvider>
