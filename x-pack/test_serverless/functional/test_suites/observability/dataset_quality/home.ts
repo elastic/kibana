@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   ]);
 
   const testSubjects = getService('testSubjects');
-  const synthtrace = getService('logSynthtraceEsClient');
+  const synthtrace = getService('svlLogsSynthtraceClient');
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality home', () => {
