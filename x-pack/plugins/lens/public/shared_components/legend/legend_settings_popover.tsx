@@ -227,6 +227,12 @@ const legendTitleStrings = {
   getDataTestSubj: () => `lnsLegendTitle`,
 };
 
+export function shouldDisplayTable<LegendStats extends string = XYLegendValue>(
+  stats?: LegendStats[]
+) {
+  return !!(stats && stats.filter((v) => v !== XYLegendValue.CurrentAndLastValue).length);
+}
+
 export function LegendSettingsPopover<LegendStats extends string = XYLegendValue>({
   allowedLegendStats,
   legendOptions,
@@ -261,9 +267,6 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
   showAutoLegendSizeOption,
   titlePlaceholder,
 }: LegendSettingsPopoverProps<LegendStats>) {
-  const shouldDisplayTable = (stats?: LegendStats[]) =>
-    !!(stats && stats.filter((v) => v !== XYLegendValue.CurrentAndLastValue).length);
-
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.shared.legendLabel', {
@@ -311,10 +314,10 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
             options={allowedLegendStats}
             selectedOptions={allowedLegendStats.filter(({ value }) => legendStats?.includes(value))}
             onChange={(options) => {
-              const values = options.map(({ value }) => value).filter(nonNullable);
+              const newLegendStats = options.map(({ value }) => value).filter(nonNullable);
               const hasConvertedToTable =
-                !shouldDisplayTable(legendStats) && shouldDisplayTable(values);
-              onLegendStatsChange(values, hasConvertedToTable);
+                !shouldDisplayTable(legendStats) && shouldDisplayTable(newLegendStats);
+              onLegendStatsChange(newLegendStats, hasConvertedToTable);
             }}
             isClearable={true}
             compressed
@@ -412,7 +415,7 @@ export function LegendSettingsPopover<LegendStats extends string = XYLegendValue
             <ColumnsNumberSetting
               floatingColumns={floatingColumns}
               onFloatingColumnsChange={onFloatingColumnsChange}
-              isHidden={location === 'outside' || shouldDisplayTable(legendStats ?? [])}
+              isHidden={location === 'outside' || shouldDisplayTable(legendStats)}
             />
           )}
           {legendLayout !== LegendLayout.List && (

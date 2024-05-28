@@ -13,6 +13,7 @@ import { isQueryAnnotationConfig } from '@kbn/event-annotation-components';
 import { i18n } from '@kbn/i18n';
 import fastIsEqual from 'fast-deep-equal';
 import { validateQuery } from '@kbn/visualization-ui-components';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { DataViewsState } from '../../state_management';
 import { FramePublicAPI, DatasourcePublicAPI } from '../../types';
 import {
@@ -210,4 +211,10 @@ export function getAnnotationLayerErrors(
   }
 
   return invalidMessages;
+}
+
+export function shouldDisplayTable<LegendStats extends string = XYLegendValue>(
+  legendValues: LegendStats[]
+) {
+  return legendValues.some((v) => v !== XYLegendValue.CurrentAndLastValue);
 }
