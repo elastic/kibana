@@ -22,8 +22,10 @@ import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { useUserData } from '../../../../detections/components/user_info';
 import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
+  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
   const [autoRefreshInterval, setAutoRefreshInterval] = useState(3000);
   const [isAutoRefresh, setIsAutoRefresh] = useState(false);
   const [pageIndex, setPageIndex] = useState(0);
@@ -39,8 +41,13 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
     },
     {
       refetchInterval: isAutoRefresh ? autoRefreshInterval : false,
+      enabled: isManualRuleRunEnabled,
     }
   );
+
+  if (!isManualRuleRunEnabled) {
+    return null;
+  }
 
   const backfills: BackfillRow[] = getBackfillRowsFromResponse(data?.data ?? []);
 
