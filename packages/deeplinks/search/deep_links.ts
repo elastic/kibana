@@ -11,17 +11,16 @@ import {
   SERVERLESS_ES_CONNECTORS_ID,
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
-  ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
   ENTERPRISE_SEARCH_APPSEARCH_APP_ID,
   ENTERPRISE_SEARCH_WORKPLACESEARCH_APP_ID,
   SERVERLESS_ES_SEARCH_PLAYGROUND_ID,
+  SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID,
 } from './constants';
 
 export type EnterpriseSearchApp = typeof ENTERPRISE_SEARCH_APP_ID;
 export type EnterpriseSearchContentApp = typeof ENTERPRISE_SEARCH_CONTENT_APP_ID;
-export type EnterpriseSearchRelevanceApp = typeof ENTERPRISE_SEARCH_RELEVANCE_APP_ID;
 export type EnterpriseSearchApplicationsApp = typeof ENTERPRISE_SEARCH_APPLICATIONS_APP_ID;
 export type EnterpriseSearchAnalyticsApp = typeof ENTERPRISE_SEARCH_ANALYTICS_APP_ID;
 export type EnterpriseSearchAppsearchApp = typeof ENTERPRISE_SEARCH_APPSEARCH_APP_ID;
@@ -29,10 +28,9 @@ export type EnterpriseSearchWorkplaceSearchApp = typeof ENTERPRISE_SEARCH_WORKPL
 export type ServerlessSearchApp = typeof SERVERLESS_ES_APP_ID;
 export type ConnectorsId = typeof SERVERLESS_ES_CONNECTORS_ID;
 export type SearchPlaygroundId = typeof SERVERLESS_ES_SEARCH_PLAYGROUND_ID;
+export type SearchInferenceEndpointsId = typeof SERVERLESS_ES_SEARCH_INFERENCE_ENDPOINTS_ID;
 
 export type ContentLinkId = 'searchIndices' | 'connectors' | 'webCrawlers';
-
-export type RelevanceLinkId = 'inferenceEndpoints';
 
 export type ApplicationsLinkId = 'searchApplications' | 'playground';
 
@@ -41,7 +39,6 @@ export type AppsearchLinkId = 'engines';
 export type DeepLinkId =
   | EnterpriseSearchApp
   | EnterpriseSearchContentApp
-  | EnterpriseSearchRelevanceApp
   | EnterpriseSearchApplicationsApp
   | EnterpriseSearchAnalyticsApp
   | EnterpriseSearchAppsearchApp
@@ -49,7 +46,7 @@ export type DeepLinkId =
   | ServerlessSearchApp
   | ConnectorsId
   | SearchPlaygroundId
+  | SearchInferenceEndpointsId
   | `${EnterpriseSearchContentApp}:${ContentLinkId}`
   | `${EnterpriseSearchApplicationsApp}:${ApplicationsLinkId}`
-  | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`
-  | `${EnterpriseSearchRelevanceApp}:${RelevanceLinkId}`;
+  | `${EnterpriseSearchAppsearchApp}:${AppsearchLinkId}`;

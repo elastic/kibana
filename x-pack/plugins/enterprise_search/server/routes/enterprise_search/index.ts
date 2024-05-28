@@ -9,14 +9,12 @@ import { RouteDependencies } from '../../plugin';
 
 import { registerDocumentRoute } from './documents';
 import { registerIndexRoutes } from './indices';
-import { registerInferenceEndpointRoutes } from './inference_endpoints';
 import { registerMappingRoute } from './mapping';
 import { registerSearchRoute } from './search';
 import { registerSearchApplicationsRoutes } from './search_applications';
 
 export const registerEnterpriseSearchRoutes = (dependencies: RouteDependencies) => {
   registerIndexRoutes(dependencies);
-  registerInferenceEndpointRoutes(dependencies);
   registerMappingRoute(dependencies);
   registerSearchRoute(dependencies);
   registerDocumentRoute(dependencies);

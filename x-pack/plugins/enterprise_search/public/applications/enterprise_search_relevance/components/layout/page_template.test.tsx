@@ -32,7 +32,7 @@ describe('EnterpriseSearchRelevancePageTemplate', () => {
     );
 
     expect(wrapper.type()).toEqual(EnterpriseSearchPageTemplateWrapper);
-    expect(wrapper.prop('solutionNav')).toEqual({ items: [], name: 'Search' });
+    expect(wrapper.prop('solutionNav')).toEqual({ items: [], name: 'Inference Endpoints' });
     expect(wrapper.find('.hello').text()).toEqual('world');
   });
 

@@ -23,7 +23,7 @@ import {
   AI_SEARCH_PLUGIN,
   VECTOR_SEARCH_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_RELEVANCE_PLUGIN,
+  INFERENCE_ENDPOINTS_PLUGIN,
 } from '../../../../common/constants';
 import {
   SEARCH_APPLICATIONS_PATH,
@@ -161,7 +161,7 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
           ...generateNavLink({
             shouldNotCreateHref: true,
             shouldShowActiveForSubroutes: true,
-            to: ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
+            to: INFERENCE_ENDPOINTS_PLUGIN.URL + INFERENCE_ENDPOINTS_PATH,
           }),
         },
       ],

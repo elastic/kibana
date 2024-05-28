@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { setMockValues } from '../__mocks__/kea_logic';
 import '../__mocks__/shallow_useeffect.mock';
 import '../__mocks__/enterprise_search_url.mock';
@@ -16,8 +15,6 @@ import { shallow } from 'enzyme';
 
 import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 import { VersionMismatchPage } from '../shared/version_mismatch';
-
-import { InferenceEndpointsRouter } from './components/inference_endpoints/inference_endpoints_router';
 
 import { EnterpriseSearchRelevance, EnterpriseSearchRelevanceConfigured } from '.';
 
@@ -52,13 +49,5 @@ describe('EnterpriseSearchRelevance', () => {
     const wrapper = shallow(<EnterpriseSearchRelevance />);
 
     expect(wrapper.find(EnterpriseSearchRelevanceConfigured)).toHaveLength(1);
-  });
-});
-
-describe('EnterpriseSearchRelevanceConfigured', () => {
-  const wrapper = shallow(<EnterpriseSearchRelevanceConfigured {...DEFAULT_INITIAL_APP_DATA} />);
-
-  it('renders engine routes', () => {
-    expect(wrapper.find(InferenceEndpointsRouter)).toHaveLength(1);
   });
 });

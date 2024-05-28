@@ -9,7 +9,6 @@
 export {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
-  ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
   ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
@@ -22,7 +21,6 @@ export {
 export type {
   EnterpriseSearchApp,
   EnterpriseSearchContentApp,
-  EnterpriseSearchRelevanceApp,
   EnterpriseSearchApplicationsApp,
   EnterpriseSearchAnalyticsApp,
   EnterpriseSearchAppsearchApp,

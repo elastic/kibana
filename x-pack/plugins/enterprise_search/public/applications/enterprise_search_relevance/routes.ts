@@ -6,6 +6,5 @@
  */
 
 export const ROOT_PATH = '/';
-export const SETUP_GUIDE_PATH = '/setup_guide';
 export const ERROR_STATE_PATH = '/error_state';
 export const INFERENCE_ENDPOINTS_PATH = `${ROOT_PATH}inference_endpoints`;

@@ -32,6 +32,7 @@ import { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { SearchConnectorsPluginStart } from '@kbn/search-connectors-plugin/public';
+import { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/public';
 import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -96,6 +97,7 @@ export interface PluginsStart {
   navigation: NavigationPublicPluginStart;
   searchConnectors?: SearchConnectorsPluginStart;
   searchPlayground?: SearchPlaygroundPluginStart;
+  searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   security?: SecurityPluginStart;
   share?: SharePluginStart;
 }
@@ -137,7 +139,7 @@ const relevanceLinks: AppDeepLink[] = [
     title: i18n.translate(
       'xpack.enterpriseSearch.navigation.relevanceInferenceEndpointsLinkLabel',
       {
-        defaultMessage: 'Inference endpoints',
+        defaultMessage: 'Inference Endpoints',
       }
     ),
   },

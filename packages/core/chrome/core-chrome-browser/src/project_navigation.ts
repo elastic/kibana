@@ -23,7 +23,6 @@ import type {
 import type {
   EnterpriseSearchApp,
   EnterpriseSearchContentApp,
-  EnterpriseSearchRelevanceApp,
   EnterpriseSearchApplicationsApp,
   EnterpriseSearchAnalyticsApp,
   EnterpriseSearchAppsearchApp,
@@ -51,7 +50,6 @@ export type AppId =
   | ManagementApp
   | EnterpriseSearchApp
   | EnterpriseSearchContentApp
-  | EnterpriseSearchRelevanceApp
   | EnterpriseSearchApplicationsApp
   | EnterpriseSearchAnalyticsApp
   | EnterpriseSearchAppsearchApp

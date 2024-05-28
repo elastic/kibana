@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { ENTERPRISE_SEARCH_RELEVANCE_PLUGIN } from '../../../../../common/constants';
+import { INFERENCE_ENDPOINTS_PLUGIN } from '../../../../../common/constants';
 import { PageTemplateProps } from '../../../shared/layout';
 import { NotFoundPrompt } from '../../../shared/not_found';
 import { SendEnterpriseSearchTelemetry } from '../../../shared/telemetry';
@@ -17,7 +17,7 @@ export const NotFound: React.FC<PageTemplateProps> = ({ pageChrome = [] }) => {
   return (
     <EnterpriseSearchRelevancePageTemplate pageChrome={[...pageChrome, '404']} customPageSections>
       <SendEnterpriseSearchTelemetry action="error" metric="not_found" />
-      <NotFoundPrompt productSupportUrl={ENTERPRISE_SEARCH_RELEVANCE_PLUGIN.SUPPORT_URL} />
+      <NotFoundPrompt productSupportUrl={INFERENCE_ENDPOINTS_PLUGIN.SUPPORT_URL} />
     </EnterpriseSearchRelevancePageTemplate>
   );
 };

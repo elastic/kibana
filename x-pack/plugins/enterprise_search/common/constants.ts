@@ -8,7 +8,6 @@
 import {
   ENTERPRISE_SEARCH_APP_ID,
   ENTERPRISE_SEARCH_CONTENT_APP_ID,
-  ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
   ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
   ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
   ENTERPRISE_SEARCH_ANALYTICS_APP_ID,
@@ -178,32 +177,18 @@ export const VECTOR_SEARCH_PLUGIN = {
   URL: '/app/enterprise_search/vector_search',
 };
 
-export const ENTERPRISE_SEARCH_RELEVANCE_PLUGIN = {
-  ID: ENTERPRISE_SEARCH_RELEVANCE_APP_ID,
-  NAME: SEARCH_PRODUCT_NAME,
-  NAV_TITLE: i18n.translate('xpack.enterpriseSearch.relevance.navTitle', {
-    defaultMessage: 'Relevance',
-  }),
-  DESCRIPTION: i18n.translate('xpack.enterpriseSearch.relevance.description', {
-    defaultMessage: 'View for managing inference endpoints.', // TODO: Make sure this content is correct.
-  }),
-  URL: '/app/enterprise_search/relevance',
-  LOGO: 'logoEnterpriseSearch',
-  SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
-};
-
 export const INFERENCE_ENDPOINTS_PLUGIN = {
   ID: ENTERPRISE_SEARCH_INFERENCE_ENDPOINTS_APP_ID,
   NAME: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.productName', {
     defaultMessage: 'Inference Endpoints',
   }),
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.navTitle', {
-    defaultMessage: 'Inference Endpoints',
+    defaultMessage: 'Relevance',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.inferenceEndpoints.description', {
     defaultMessage: 'View for managing inference endpoints.', // TODO: Make sure this content is correct.
   }),
-  URL: '/app/enterprise_search/relevance/inference_endpoints',
+  URL: '/app/enterprise_search/relevance',
   LOGO: 'logoEnterpriseSearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };

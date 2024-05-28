@@ -34,7 +34,6 @@ import {
   appSearchTitle,
   elasticsearchTitle,
   enterpriseSearchContentTitle,
-  enterpriseSearchRelevanceTitle,
   searchExperiencesTitle,
   searchTitle,
   vectorSearchTitle,
@@ -180,17 +179,13 @@ export const SetEnterpriseSearchContentChrome: React.FC<SetChromeProps> = ({ tra
 };
 
 export const SetEnterpriseSearchRelevanceChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
-  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
-
-  const title = reverseArray(trail);
-  const docTitle = enterpriseSearchRelevanceTitle(title);
+  const { setBreadcrumbs } = useValues(KibanaLogic);
 
   const crumbs = useGenerateBreadcrumbs(trail);
   const breadcrumbs = useEnterpriseSearchRelevanceBreadcrumbs(crumbs);
 
   useEffect(() => {
     setBreadcrumbs(breadcrumbs);
-    setDocTitle(docTitle);
   }, [trail]);
 
   return null;

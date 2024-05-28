@@ -14,15 +14,14 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
-import { SetupGuide } from '../enterprise_search_overview/components/setup_guide';
 import { ErrorStatePrompt } from '../shared/error_state';
 import { HttpLogic } from '../shared/http';
 import { KibanaLogic } from '../shared/kibana';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { InferenceEndpointsRouter } from './components/inference_endpoints/inference_endpoints_router';
+import { InferenceEndpoints } from './components/inference_endpoints';
 import { NotFound } from './components/not_found';
-import { INFERENCE_ENDPOINTS_PATH, ERROR_STATE_PATH, SETUP_GUIDE_PATH, ROOT_PATH } from './routes';
+import { INFERENCE_ENDPOINTS_PATH, ERROR_STATE_PATH, ROOT_PATH } from './routes';
 
 export const EnterpriseSearchRelevance: React.FC<InitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -45,9 +44,6 @@ export const EnterpriseSearchRelevance: React.FC<InitialAppData> = (props) => {
 
   return (
     <Routes>
-      <Route exact path={SETUP_GUIDE_PATH}>
-        <SetupGuide />
-      </Route>
       <Route exact path={ERROR_STATE_PATH}>
         {config.host && config.canDeployEntSearch && errorConnectingMessage ? (
           <ErrorStatePrompt />
@@ -65,7 +61,7 @@ export const EnterpriseSearchRelevanceConfigured: React.FC<Required<InitialAppDa
     <Routes>
       <Redirect exact from={ROOT_PATH} to={INFERENCE_ENDPOINTS_PATH} />
       <Route path={INFERENCE_ENDPOINTS_PATH}>
-        <InferenceEndpointsRouter />
+        <InferenceEndpoints />
       </Route>
       <Route>
         <NotFound />
