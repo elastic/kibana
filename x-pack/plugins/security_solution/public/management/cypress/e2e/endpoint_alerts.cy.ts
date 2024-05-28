@@ -15,18 +15,18 @@ import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endp
 import { enableAllPolicyProtections } from '../tasks/endpoint_policy';
 import type { PolicyData, ResponseActionApiResponse } from '../../../../common/endpoint/types';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../scripts/endpoint/common/endpoint_host_services';
-import { login, ROLE } from '../tasks/login';
+import { login } from '../tasks/login';
 import { EXECUTE_ROUTE } from '../../../../common/endpoint/constants';
 import { waitForActionToComplete } from '../tasks/response_actions';
 
 // Failing: See https://github.com/elastic/kibana/issues/184055
-describe.skip('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
+describe('Endpoint generated alerts', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
 
   beforeEach(() => {
-    login(ROLE.soc_manager);
+    login();
     getEndpointIntegrationVersion().then((version) => {
       createAgentPolicyTask(version, 'alerts test').then((data) => {
         indexedPolicy = data;
