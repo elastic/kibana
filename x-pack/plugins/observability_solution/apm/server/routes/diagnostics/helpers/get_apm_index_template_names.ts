@@ -7,15 +7,16 @@
 
 import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 
+const suffix = 'template';
 export function getApmIndexTemplateNames() {
   const indexTemplateNames = [
-    'logs-apm.app',
-    'logs-apm.error',
-    'metrics-apm.app',
-    'metrics-apm.internal',
-    'traces-apm.rum',
-    'traces-apm.sampled',
-    'traces-apm',
+    `logs-apm.app@${suffix}`,
+    `logs-apm.error@${suffix}`,
+    `metrics-apm.app@${suffix}`,
+    `metrics-apm.internal@${suffix}`,
+    `traces-apm.rum@${suffix}`,
+    `traces-apm.sampled@${suffix}`,
+    `traces-apm@${suffix}`,
   ];
 
   const rollupIndexTemplateNames = ['1m', '10m', '60m'].flatMap((interval) => {
@@ -24,7 +25,7 @@ export function getApmIndexTemplateNames() {
       'metrics-apm.service_summary',
       'metrics-apm.service_transaction',
       'metrics-apm.transaction',
-    ].map((ds) => `${ds}.${interval}`);
+    ].map((ds) => `${ds}.${interval}@${suffix}`);
   });
 
   return [...indexTemplateNames, ...rollupIndexTemplateNames];
