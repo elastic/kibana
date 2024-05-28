@@ -74,6 +74,10 @@ export default function ({ getService }: FtrProviderContext) {
       objectRemover.removeAll();
     });
 
+    after(async () => {
+      await svlUserManager.invalidateApiKeyForRole(roleAdmin);
+    });
+
     it('should generate an alert document for an active alert', async () => {
       const createdRule = await createEsQueryRule({
         supertestWithoutAuth,
