@@ -15,6 +15,10 @@ export const registerCreateRoute = (router: IRouter, url: ServerUrlService) => {
   router.post(
     {
       path: '/api/short_url',
+      options: {
+        access: 'public',
+        description: `Create a short URL`,
+      },
       validate: {
         body: schema.object({
           locatorId: schema.string({
