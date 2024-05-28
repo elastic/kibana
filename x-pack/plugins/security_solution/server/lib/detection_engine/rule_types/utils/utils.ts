@@ -1016,11 +1016,14 @@ export const getDisabledActionsWarningText = ({
   disabledActions: SanitizedRuleAction[];
 }) => {
   const actionTypes = disabledActions.map((action) => action.actionTypeId);
+  // This rule generated alerts but did not send external notifications because rule action connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics tier.
+  const alertsGeneratedText = alertsCreated
+    ? 'This rule generated alerts but did not send external notifications because r'
+    : 'R';
+
   if (disabledActions.length > 1) {
-    return `${alertsCreated ? 'Alerts created but the r' : 'R'}egistered actions ${actionTypes} are
-     disabled. Please check your license / tier and ensure the connectors ${actionTypes} are enabled for your given license / tier`;
+    return `${alertsGeneratedText}'ule action connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics license / tier`;
   } else {
-    return `${alertsCreated ? 'Alerts created but the r' : 'R'}egistered action ${actionTypes} is
-     disabled. Please check your license / tier and ensure the connector ${actionTypes} is enabled for your given license / tier`;
+    return `${alertsGeneratedText}'ule action connector ${actionTypes} is not enabled. To send notifications, you need a higher Security Analytics license / tier`;
   }
 };
