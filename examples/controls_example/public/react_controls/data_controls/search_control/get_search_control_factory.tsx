@@ -84,6 +84,7 @@ export const getSearchEmbeddableFactory = ({
 
       const { dataControlApi, dataControlComparators, dataControlStateManager } =
         initializeDataControl<Pick<SearchControlState, 'searchTechnique'>>(
+          uuid,
           SEARCH_CONTROL_TYPE,
           initialState,
           editorStateManager,

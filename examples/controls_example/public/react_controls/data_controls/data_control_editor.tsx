@@ -45,20 +45,18 @@ import {
 } from '@kbn/controls-plugin/common';
 import { CONTROL_WIDTH_OPTIONS } from '@kbn/controls-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { getAllControlTypes, getControlFactory } from '../control_factory_registry';
 import { ControlGroupApi } from '../control_group/types';
 import { ControlStateManager } from '../types';
-import {
-  getControlTypeErrorMessage,
-  getDataControlFieldRegistry,
-} from './data_control_editor_utils';
+import { DataControlEditorStrings } from './data_control_constants';
+import { getDataControlFieldRegistry } from './data_control_editor_utils';
 import { DataControlFactory, DefaultDataControlState, isDataControlFactory } from './types';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
 > {
-  controlType?: string; // if provided, then editing existing control; otherwise, creating a new control
+  controlId?: string; // if provided, then editing existing control; otherwise, creating a new control
+  controlType?: string;
   onCancel: () => void;
   onSave: (type?: string) => void;
   stateManager: ControlStateManager<State>;
@@ -72,6 +70,7 @@ const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
 export const DataControlEditor = ({
+  controlId,
   controlType,
   onSave,
   onCancel,
@@ -102,8 +101,7 @@ export const DataControlEditor = ({
   const [selectedFieldDisplayName, setSelectedFieldDisplayName] = useState(selectedFieldName);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlEditorValid, setControlEditorValid] = useState(false);
-
-  // const editorConfig = controlGroup.select((state) => state.componentState.editorConfig);
+  // const editorConfig = controlGroup.getEditorConfig(); // TODO: Make this work
 
   const { loading: dataViewListLoading, value: dataViewListItems = [] } = useAsync(() => {
     return dataViewService.getIdsWithTitle();
@@ -129,9 +127,9 @@ export const DataControlEditor = ({
 
   useEffect(() => {
     setControlEditorValid(
-      Boolean(selectedFieldName) && Boolean(selectedDataView) // && Boolean(selectedControlType)
+      Boolean(selectedFieldName) && Boolean(selectedDataView) && Boolean(selectedControlType)
     );
-  }, [selectedFieldName, setControlEditorValid, selectedDataView]);
+  }, [selectedFieldName, setControlEditorValid, selectedDataView, selectedControlType]);
 
   const dataControlFactories = useMemo(() => {
     return getAllControlTypes()
@@ -167,10 +165,12 @@ export const DataControlEditor = ({
           return disabled ? (
             <EuiToolTip
               key={`disabled__${controlType}`}
-              content={getControlTypeErrorMessage({
-                fieldSelected: Boolean(selectedFieldName),
-                controlType,
-              })}
+              content={DataControlEditorStrings.manageControl.dataSource.getControlTypeErrorMessage(
+                {
+                  fieldSelected: Boolean(selectedFieldName),
+                  controlType,
+                }
+              )}
             >
               {keyPadMenuItem}
             </EuiToolTip>
@@ -195,21 +195,13 @@ export const DataControlEditor = ({
         ratio="third"
         title={
           <h2>
-            {i18n.translate(
-              'controls.controlGroup.manageControl.controlTypeSettings.formGroupTitle',
-              {
-                defaultMessage: '{controlType} settings',
-                values: { controlType: controlFactory.getDisplayName() },
-              }
+            {DataControlEditorStrings.manageControl.controlTypeSettings.getFormGroupTitle(
+              controlFactory.getDisplayName()
             )}
           </h2>
         }
-        description={i18n.translate(
-          'controls.controlGroup.manageControl.controlTypeSettings.formGroupDescription',
-          {
-            defaultMessage: 'Custom settings for your {controlType} control.',
-            values: { controlType: controlFactory.getDisplayName().toLocaleLowerCase() },
-          }
+        description={DataControlEditorStrings.manageControl.controlTypeSettings.getFormGroupDescription(
+          controlFactory.getDisplayName()
         )}
         data-test-subj="control-editor-custom-settings"
       >
@@ -224,12 +216,8 @@ export const DataControlEditor = ({
         <EuiTitle size="m">
           <h2>
             {!controlType
-              ? i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {
-                  defaultMessage: 'Create control',
-                })
-              : i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
-                  defaultMessage: 'Edit control',
-                })}
+              ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
+              : DataControlEditorStrings.manageControl.getFlyoutEditTitle()}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -237,29 +225,12 @@ export const DataControlEditor = ({
         <EuiForm fullWidth>
           <EuiDescribedFormGroup
             ratio="third"
-            title={
-              <h2>
-                {i18n.translate('controls.controlGroup.manageControl.dataSource.formGroupTitle', {
-                  defaultMessage: 'Data source',
-                })}
-              </h2>
-            }
-            description={i18n.translate(
-              'controls.controlGroup.manageControl.dataSource.formGroupDescription',
-              {
-                defaultMessage:
-                  'Select the data view and field that you want to create a control for.',
-              }
-            )}
+            title={<h2>{DataControlEditorStrings.manageControl.dataSource.getFormGroupTitle()}</h2>}
+            description={DataControlEditorStrings.manageControl.dataSource.getFormGroupDescription()}
           >
             {/* {!editorConfig?.hideDataViewSelector && ( */}
             <EuiFormRow
-              label={i18n.translate(
-                'controls.controlGroup.manageControl.dataSource.dataViewTitle',
-                {
-                  defaultMessage: 'Data view',
-                }
-              )}
+              label={DataControlEditorStrings.manageControl.dataSource.getDataViewTitle()}
             >
               <DataViewPicker
                 dataViews={dataViewListItems}
@@ -270,27 +241,18 @@ export const DataControlEditor = ({
                 trigger={{
                   label:
                     selectedDataView?.getName() ??
-                    i18n.translate(
-                      'controls.controlGroup.manageControl.dataSource.selectDataViewMessage',
-                      {
-                        defaultMessage: 'Please select a data view',
-                      }
-                    ),
+                    DataControlEditorStrings.manageControl.dataSource.getSelectDataViewMessage(),
                 }}
                 selectableProps={{ isLoading: dataViewListLoading }}
               />
             </EuiFormRow>
             {/* )} */}
-            <EuiFormRow
-              label={i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
-                defaultMessage: 'Field',
-              })}
-            >
+            <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
               <FieldPicker
                 filterPredicate={(field: DataViewField) => {
-                  return Boolean(fieldRegistry?.[field.name]);
+                  // TODO: Handle custom `fieldFilterPredicate`, which is provided through the control group renderer
                   // const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
-                  // return Boolean(fieldRegistry?.[field.name]) && customPredicate;
+                  return Boolean(fieldRegistry?.[field.name]);
                 }}
                 selectedFieldName={selectedFieldName}
                 dataView={selectedDataView}
@@ -307,12 +269,7 @@ export const DataControlEditor = ({
               />
             </EuiFormRow>
             <EuiFormRow
-              label={i18n.translate(
-                'controls.controlGroup.manageControl.dataSource.controlTypesTitle',
-                {
-                  defaultMessage: 'Control type',
-                }
-              )}
+              label={DataControlEditorStrings.manageControl.dataSource.getControlTypeTitle()}
             >
               {CompatibleControlTypesComponent}
             </EuiFormRow>
@@ -320,29 +277,12 @@ export const DataControlEditor = ({
           <EuiDescribedFormGroup
             ratio="third"
             title={
-              <h2>
-                {i18n.translate(
-                  'controls.controlGroup.manageControl.displaySettings.formGroupTitle',
-                  {
-                    defaultMessage: 'Display settings',
-                  }
-                )}
-              </h2>
+              <h2>{DataControlEditorStrings.manageControl.displaySettings.getFormGroupTitle()}</h2>
             }
-            description={i18n.translate(
-              'controls.controlGroup.manageControl.displaySettings.formGroupDescription',
-              {
-                defaultMessage: 'Change how the control appears on your dashboard.',
-              }
-            )}
+            description={DataControlEditorStrings.manageControl.displaySettings.getFormGroupDescription()}
           >
             <EuiFormRow
-              label={i18n.translate(
-                'controls.controlGroup.manageControl.displaySettings.titleInputTitle',
-                {
-                  defaultMessage: 'Label',
-                }
-              )}
+              label={DataControlEditorStrings.manageControl.displaySettings.getTitleInputTitle()}
             >
               <EuiFieldText
                 data-test-subj="control-editor-title-input"
@@ -353,34 +293,19 @@ export const DataControlEditor = ({
             </EuiFormRow>
             {/* {!editorConfig?.hideWidthSettings && ( */}
             <EuiFormRow
-              label={i18n.translate(
-                'controls.controlGroup.manageControl.displaySettings.widthInputTitle',
-                {
-                  defaultMessage: 'Minimum width',
-                }
-              )}
+              label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
             >
               <div>
                 <EuiButtonGroup
                   color="primary"
-                  legend={i18n.translate(
-                    'controls.controlGroup.management.layout.controlWidthLegend',
-                    {
-                      defaultMessage: 'Change control size',
-                    }
-                  )}
+                  legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
                   options={CONTROL_WIDTH_OPTIONS}
                   idSelected={selectedWidth ?? defaultWidth ?? DEFAULT_CONTROL_WIDTH}
                   onChange={(newWidth: string) => stateManager.width.next(newWidth as ControlWidth)}
                 />
                 <EuiSpacer size="s" />
                 <EuiSwitch
-                  label={i18n.translate(
-                    'controls.controlGroup.manageControl.displaySettings.growSwitchTitle',
-                    {
-                      defaultMessage: 'Expand width to fit available space',
-                    }
-                  )}
+                  label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
                   color="primary"
                   checked={
                     (selectedGrow === undefined ? defaultGrow : selectedGrow) ??
@@ -395,23 +320,23 @@ export const DataControlEditor = ({
           </EuiDescribedFormGroup>
           {CustomSettingsComponent}
           {/* {!editorConfig?.hideAdditionalSettings ? CustomSettingsComponent : null} */}
-          {/* {removeControl && (
+          {controlId && (
             <>
               <EuiSpacer size="l" />
               <EuiButtonEmpty
-                aria-label={`delete-${currentInput.title}`}
+                aria-label={`delete-${currentTitle ?? selectedFieldName}`}
                 iconType="trash"
                 flush="left"
                 color="danger"
                 onClick={() => {
-                  onCancel({ input: currentInput, grow: currentGrow, width: currentWidth });
-                  removeControl();
+                  onCancel();
+                  controlGroup.removePanel(controlId);
                 }}
               >
-                {ControlGroupStrings.management.getDeleteButtonTitle()}
+                {DataControlEditorStrings.manageControl.getDeleteButtonTitle()}
               </EuiButtonEmpty>
             </>
-          )} */}
+          )}
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -425,9 +350,7 @@ export const DataControlEditor = ({
                 onCancel();
               }}
             >
-              {i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
-                defaultMessage: 'Cancel',
-              })}
+              {DataControlEditorStrings.manageControl.getCancelTitle()}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -441,9 +364,7 @@ export const DataControlEditor = ({
                 onSave();
               }}
             >
-              {i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
-                defaultMessage: 'Save and close',
-              })}
+              {DataControlEditorStrings.manageControl.getSaveChangesTitle()}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

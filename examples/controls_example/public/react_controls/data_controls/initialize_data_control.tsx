@@ -21,6 +21,7 @@ import { openDataControlEditor } from './open_data_control_editor';
 import { DataControlApi, DefaultDataControlState } from './types';
 
 export const initializeDataControl = <EditorState extends object = {}>(
+  controlId: string,
   controlType: string,
   state: DefaultDataControlState,
   editorStateManager: ControlStateManager<EditorState>,
@@ -82,7 +83,8 @@ export const initializeDataControl = <EditorState extends object = {}>(
       >,
       controlGroup,
       services,
-      controlType
+      controlType,
+      controlId
     );
   };
 

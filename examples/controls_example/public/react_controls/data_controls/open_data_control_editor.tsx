@@ -31,7 +31,8 @@ export const openDataControlEditor = async <
     core: CoreStart;
     dataViews: DataViewsPublicPluginStart;
   },
-  controlType?: string
+  controlType?: string,
+  controlId?: string
 ): Promise<undefined> => {
   return new Promise((resolve) => {
     /**
@@ -95,6 +96,7 @@ export const openDataControlEditor = async <
     const overlay = services.core.overlays.openFlyout(
       toMountPoint(
         <DataControlEditor
+          controlId={controlId}
           controlType={controlType}
           parentApi={controlGroupApi}
           onCancel={() => {

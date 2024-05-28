@@ -69,6 +69,12 @@ export interface ControlGroupRuntimeState<
   ignoreParentSettings?: ParentIgnoreSettings;
 
   initialChildControlState: ControlPanelsState<ChildStateType>;
+  /** TODO: Handle the editor config, which is used with the control group renderer component */
+  editorConfig?: {
+    hideDataViewSelector?: boolean;
+    hideWidthSettings?: boolean;
+    hideAdditionalSettings?: boolean;
+  };
 }
 
 export type ControlGroupEditorState = Pick<
