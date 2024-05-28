@@ -264,7 +264,11 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     ],
     error: [
       () => [selectors.connector],
-      (connector: Connector | undefined) => connector?.error || connector?.last_sync_error || null,
+      (connector: Connector | undefined) =>
+        connector?.error ||
+        connector?.last_sync_error ||
+        connector?.last_access_control_sync_error ||
+        null,
     ],
     hasAdvancedFilteringFeature: [
       () => [selectors.connector],
