@@ -45,6 +45,7 @@ type DataTableColumnsMeta = Record<
 Remaining tasks:
 - Keep the selected columns in LLM
 - Something goes wrong with the CSS in the conversations app
+- Does it make to load all the time? Even when the user doesnt ask for a table?
 **/
 
 export const ESQLTable = (props: ESQLDatatableProps) => {
