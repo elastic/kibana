@@ -118,7 +118,7 @@ export const bulkActionAnonymizationFieldsRoute = (
 ) => {
   router.versioned
     .post({
-      access: 'public',
+      access: 'internal',
       path: ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
       options: {
         tags: ['access:securitySolution-updateAIAssistantAnonymization'],
@@ -129,7 +129,7 @@ export const bulkActionAnonymizationFieldsRoute = (
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(PerformBulkActionRequestBody),

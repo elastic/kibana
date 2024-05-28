@@ -6,11 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { schema, metaFields } from '@kbn/config-schema';
-import { set } from '@kbn/safer-lodash-set';
-import { omit } from 'lodash';
-import { OpenAPIV3 } from 'openapi-types';
-import { is, tryConvertToRef, isNullableObjectType } from './lib';
+import { schema } from '@kbn/config-schema';
+import { is, isNullableObjectType } from './lib';
 
 describe('is', () => {
   test.each([
@@ -32,27 +29,6 @@ describe('is', () => {
   ])('"is" correctly identifies %#', (value, result) => {
     expect(is(value)).toBe(result);
   });
-});
-
-test('tryConvertToRef', () => {
-  const schemaObject: OpenAPIV3.SchemaObject = {
-    type: 'object',
-    properties: {
-      a: {
-        type: 'string',
-      },
-    },
-  };
-  set(schemaObject, metaFields.META_FIELD_X_OAS_REF_ID, 'foo');
-  expect(tryConvertToRef(schemaObject)).toEqual({
-    idSchema: ['foo', { type: 'object', properties: { a: { type: 'string' } } }],
-    ref: {
-      $ref: '#/components/schemas/foo',
-    },
-  });
-
-  const schemaObject2 = omit(schemaObject, metaFields.META_FIELD_X_OAS_REF_ID);
-  expect(tryConvertToRef(schemaObject2)).toBeUndefined();
 });
 
 test('isNullableObjectType', () => {
