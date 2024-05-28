@@ -45,6 +45,7 @@ import { Form, UseField, useForm } from '../../../shared_imports';
 import { useLoadInferenceModels } from '../../../../../services/api';
 import { getTrainedModelStats } from '../../../../../../hooks/use_details_page_mappings_model_management';
 import { InferenceToModelIdMap } from '../fields';
+import { NotificationToasts } from './notification_toasts';
 
 const inferenceServiceTypeElasticsearchModelMap: Record<string, ElasticsearchModelDefaultOptions> =
   {
@@ -141,13 +142,19 @@ export const SelectInferenceId = ({
   const onSaveInferenceCallback = useCallback(
     async (inferenceId: string, taskType: InferenceTaskType, modelConfig: ModelConfig) => {
       setIsCreateInferenceApiLoading(true);
+      setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
+      let oldOptions = options;
       try {
+        <NotificationToasts />;
+        const combined: EuiSelectableOption[] = [{ label: inferenceId }];
+        setOptions([...oldOptions, ...combined]);
+        console.log('OUTPUT', combined);
+
         await ml?.mlApi?.inferenceModels?.createInferenceEndpoint(
           inferenceId,
           taskType,
           modelConfig
         );
-        setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
         setIsCreateInferenceApiLoading(false);
         setInferenceAddError(undefined);
         const trainedModelStats = await ml?.mlApi?.trainedModels.getTrainedModelStats();
@@ -164,6 +171,8 @@ export const SelectInferenceId = ({
         resendRequest();
         setNewInferenceEndpoint(newModelId);
       } catch (error) {
+        <NotificationToasts error={error} />;
+
         const errorObj = extractErrorProperties(error);
         setInferenceAddError(errorObj.message);
         setIsCreateInferenceApiLoading(false);
