@@ -453,10 +453,15 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   });
 
   const executionLogColumns = useMemo(() => {
-    const columns = [...EXECUTION_LOG_COLUMNS];
+    const columns = [...EXECUTION_LOG_COLUMNS].filter((item) => {
+      if ('field' in item) {
+        return item.field === 'type' ? isManualRuleRunEnabled : true;
+      }
+      return true;
+    });
     let messageColumnWidth = 50;
 
-    if (showSourceEventTimeRange) {
+    if (showSourceEventTimeRange && isManualRuleRunEnabled) {
       columns.push(...getSourceEventTimeRangeColumns());
       messageColumnWidth = 30;
     }
@@ -481,6 +486,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
 
     return columns;
   }, [
+    isManualRuleRunEnabled,
     actions,
     docLinks,
     showMetricColumns,
