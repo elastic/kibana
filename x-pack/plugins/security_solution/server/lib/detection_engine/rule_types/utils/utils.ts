@@ -1015,15 +1015,12 @@ export const getDisabledActionsWarningText = ({
   alertsCreated: boolean;
   disabledActions: SanitizedRuleAction[];
 }) => {
-  const moreThanOneAction = disabledActions.length > 1;
   const actionTypes = disabledActions.map((action) => action.actionTypeId);
-  return `${alertsCreated ? 'Alerts created but the r' : 'R'}egistered action${
-    moreThanOneAction ? 's' : '' // action(s)
-  } ${actionTypes} ${
-    moreThanOneAction ? 'are' : 'is' // are / is
-  } disabled. Please check your license / tier and ensure the connector${
-    moreThanOneAction ? 's' : '' // action(s)
-  } ${actionTypes} ${
-    moreThanOneAction ? 'are' : 'is' // are / is
-  } enabled for your given license / tier`;
+  if (disabledActions.length > 1) {
+    return `${alertsCreated ? 'Alerts created but the r' : 'R'}egistered actions ${actionTypes} are
+     disabled. Please check your license / tier and ensure the connectors ${actionTypes} are enabled for your given license / tier`;
+  } else {
+    return `${alertsCreated ? 'Alerts created but the r' : 'R'}egistered action ${actionTypes} is
+     disabled. Please check your license / tier and ensure the connector ${actionTypes} is enabled for your given license / tier`;
+  }
 };

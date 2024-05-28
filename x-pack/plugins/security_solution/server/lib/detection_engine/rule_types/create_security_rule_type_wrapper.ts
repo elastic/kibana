@@ -511,12 +511,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 }`
               );
 
-              if (
-                !hasError &&
-                !wroteWarningStatus &&
-                !result.warning &&
-                disabledActions.length === 0
-              ) {
+              if (!hasError && !wroteWarningStatus && !result.warning) {
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum.succeeded,
                   message: 'Rule execution completed successfully',
@@ -527,30 +522,20 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   },
                 });
               } else if (wroteWarningStatus && !hasError && !result.warning) {
+                if (disabledActions.length > 0) {
+                  const disabledActionsWarning = getDisabledActionsWarningText({
+                    alertsCreated: true,
+                    disabledActions,
+                  });
+                  warningMessage = [
+                    ...(warningMessage ? [warningMessage] : []),
+                    disabledActionsWarning,
+                  ].join(', ');
+                  wroteWarningStatus = true;
+                }
                 await ruleExecutionLogger.logStatusChange({
                   newStatus: RuleExecutionStatusEnum['partial failure'],
-                  message:
-                    disabledActions.length > 0
-                      ? [
-                          warningMessage,
-                          getDisabledActionsWarningText({ alertsCreated: true, disabledActions }),
-                        ].join(', ')
-                      : warningMessage,
-                  metrics: {
-                    searchDurations: result.searchAfterTimes,
-                    indexingDurations: result.bulkCreateTimes,
-                    enrichmentDurations: result.enrichmentTimes,
-                  },
-                });
-              } else if (
-                !wroteWarningStatus &&
-                !hasError &&
-                !result.warning &&
-                disabledActions.length > 0
-              ) {
-                await ruleExecutionLogger.logStatusChange({
-                  newStatus: RuleExecutionStatusEnum['partial failure'],
-                  message: getDisabledActionsWarningText({ alertsCreated: true, disabledActions }),
+                  message: warningMessage,
                   metrics: {
                     searchDurations: result.searchAfterTimes,
                     indexingDurations: result.bulkCreateTimes,
@@ -559,13 +544,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 });
               }
             } else {
-              if (disabledActions.length > 0) {
-                // includes the disabled actions warning message
-                // in the list of errors displayed
-                result.errors.push(
-                  getDisabledActionsWarningText({ alertsCreated: true, disabledActions })
-                );
-              }
               await ruleExecutionLogger.logStatusChange({
                 newStatus: RuleExecutionStatusEnum.failed,
                 message: `An error occurred during rule execution: message: "${truncateList(
