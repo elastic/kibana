@@ -29,7 +29,7 @@ export const suggestUserProfilesRoute = (
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
             query: buildRouteValidationWithZod(SuggestUserProfilesRequestQuery),

@@ -24,7 +24,7 @@ export const readAlertsIndexExistsRoute = (router: SecuritySolutionPluginRouter)
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: false,
       },
       async (context, _, response): Promise<IKibanaResponse<ReadAlertsIndexExistsResponse>> => {
