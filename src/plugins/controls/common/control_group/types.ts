@@ -43,8 +43,10 @@ export const persistableControlGroupInputKeys: Array<
     'panels' | 'chainingSystem' | 'controlStyle' | 'ignoreParentSettings' | 'showApplySelections'
   >
 > = ['panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings', 'showApplySelections'];
-export type PersistableControlGroupInput = object &
-  Pick<ControlGroupInput, typeof persistableControlGroupInputKeys[number]>;
+export type PersistableControlGroupInput = Pick<
+  ControlGroupInput,
+  typeof persistableControlGroupInputKeys[number]
+>;
 
 /**
  * Some use cases need the Persistable Control Group Input to conform to the SerializableRecord format which requires string index signatures in any objects

@@ -15,6 +15,7 @@ import { PublishesFilters } from '../publishes_filters';
 export interface PublishesTimeslice {
   timeslice$?: PublishingSubject<[number, number] | undefined>;
 }
+
 export interface PublishesTimeRange extends PublishesTimeslice {
   timeRange$: PublishingSubject<TimeRange | undefined>;
   timeRestore$?: PublishingSubject<boolean | undefined>;

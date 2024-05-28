@@ -78,6 +78,7 @@ export const combineCompatibleApis = <ApiType extends unknown, PublishingSubject
   api: unknown,
   observableKey: keyof ApiType,
   isCompatible: (api: unknown) => api is ApiType,
+  emptyState: PublishingSubjectType,
   flattenMethod?: (array: PublishingSubjectType[]) => PublishingSubjectType
 ): Observable<PublishingSubjectType> => {
   if (!api || !apiIsPresentationContainer(api)) return of();
@@ -90,7 +91,7 @@ export const combineCompatibleApis = <ApiType extends unknown, PublishingSubject
           compatibleChildren.push(child[observableKey] as BehaviorSubject<PublishingSubjectType>);
       }
 
-      if (compatibleChildren.length === 0) return of();
+      if (compatibleChildren.length === 0) return of(emptyState);
 
       return combineLatest(compatibleChildren).pipe(
         map(

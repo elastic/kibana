@@ -166,14 +166,16 @@ export const getControlGroupEmbeddableFactory = <
       const outputFiltersSubscription = combineCompatibleApis<PublishesFilters, Filter[]>(
         api,
         'filters$',
-        apiPublishesFilters
+        apiPublishesFilters,
+        []
       ).subscribe((newFilters) => filters$.next(newFilters));
 
       /** Subscribe to all children's output data views, combine them, and output them */
       const childDataViewsSubscription = combineCompatibleApis<PublishesDataViews, DataView[]>(
         api,
         'dataViews',
-        apiPublishesDataViews
+        apiPublishesDataViews,
+        []
       ).subscribe((newDataViews) => dataViews.next(newDataViews));
 
       return {
