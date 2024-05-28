@@ -9,7 +9,6 @@ import {
   INTERNAL_ALERTING_BACKFILL_API_PATH,
 } from '@kbn/alerting-plugin/common';
 
-
 const BACKFILL_RULE_URL_SCHEDULE = `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule`;
 
 export const manualRuleRun = ({
