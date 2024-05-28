@@ -9,7 +9,7 @@ import type { SearchHitsMetadata } from '@elastic/elasticsearch/lib/api/types';
 
 export const getHitsTotal = <T extends SearchHitsMetadata>(hits: T): number | undefined => {
   const hitsTotal = hits.total;
-  if (hitsTotal) {
+  if (hitsTotal != null) {
     if (typeof hitsTotal === 'object') {
       return hitsTotal.value;
     } else {
