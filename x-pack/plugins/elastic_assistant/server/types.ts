@@ -39,6 +39,7 @@ import {
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server';
 
+import { AttackDiscoveryTask } from './services/task_manager/attack_discovery_task';
 import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
@@ -104,6 +105,7 @@ export interface ElasticAssistantPluginStartDependencies {
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
+  attackDiscoveryTask: AttackDiscoveryTask;
   getRegisteredFeatures: GetRegisteredFeatures;
   getRegisteredTools: GetRegisteredTools;
   logger: Logger;

@@ -25,6 +25,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { appContextService } from './services/app_context';
 import { createGetElserId } from './ai_assistant_service/helpers';
+import { AttackDiscoveryTask } from './services/task_manager/attack_discovery_task';
 
 export class ElasticAssistantPlugin
   implements
@@ -37,6 +38,7 @@ export class ElasticAssistantPlugin
 {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
+  private attackDiscoveryTask: AttackDiscoveryTask | undefined;
   private pluginStop$: Subject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
 
@@ -63,12 +65,19 @@ export class ElasticAssistantPlugin
       pluginStop$: this.pluginStop$,
     });
 
+    this.attackDiscoveryTask = new AttackDiscoveryTask({
+      core,
+      logFactory: this.logger.get('service'),
+      taskManager: plugins.taskManager,
+    });
+
     const requestContextFactory = new RequestContextFactory({
       logger: this.logger,
       core,
       plugins,
       kibanaVersion: this.kibanaVersion,
       assistantService: this.assistantService,
+      attackDiscoveryTask: this.attackDiscoveryTask,
     });
 
     const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
