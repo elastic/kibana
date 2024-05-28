@@ -730,9 +730,7 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
         );
-        await reportingAPI.waitForJobToFinish(res.path, undefined, undefined, {
-          timeout: 80 * 1000,
-        });
+        await reportingAPI.waitForJobToFinish(res.path);
         const csvFile = await reportingAPI.getCompletedJobOutput(res.path);
         expect((csvFile as string).length).to.be(4826973);
         expectSnapshot(createPartialCsv(csvFile)).toMatch();

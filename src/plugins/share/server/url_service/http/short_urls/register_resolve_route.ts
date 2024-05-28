@@ -15,6 +15,10 @@ export const registerResolveRoute = (router: IRouter, url: ServerUrlService) => 
   router.get(
     {
       path: '/api/short_url/_slug/{slug}',
+      options: {
+        access: 'public',
+        description: `Resolve a short URL`,
+      },
       validate: {
         params: schema.object({
           slug: schema.string({
