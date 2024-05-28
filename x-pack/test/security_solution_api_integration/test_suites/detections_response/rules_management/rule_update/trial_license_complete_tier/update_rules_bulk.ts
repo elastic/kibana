@@ -595,10 +595,11 @@ export default ({ getService }: FtrProviderContext) => {
       const bulkUpdateSingleRule = async (
         ruleId: string,
         throttle: RuleActionThrottle | undefined,
-        actions: RuleActionArray
+        actions: RuleActionArray,
+        interval: string = '5m'
       ) => {
         // update a simple rule's `throttle` and `actions`
-        const ruleToUpdate = { ...getSimpleRuleUpdate(), interval: '5m' };
+        const ruleToUpdate = { ...getSimpleRuleUpdate(), interval };
         ruleToUpdate.throttle = throttle;
         ruleToUpdate.actions = actions;
         ruleToUpdate.id = ruleId;
@@ -620,20 +621,18 @@ export default ({ getService }: FtrProviderContext) => {
               const actionsWithoutFrequencies = await getActionsWithoutFrequencies(supertest);
 
               // create simple rule
-              const createdRule = await createRule(supertest, log, {
-                ...getSimpleRuleWithoutRuleId(),
-                interval: '5m',
-              });
+              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
               // update a simple rule's `throttle` and `actions`
               const updatedRule = await bulkUpdateSingleRule(
                 createdRule.id,
                 throttle,
-                actionsWithoutFrequencies
+                actionsWithoutFrequencies,
+                createdRule.interval
               );
 
               const expectedRule = updateUsername(
-                { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' },
+                getSimpleRuleOutputWithoutRuleId(),
                 ELASTICSEARCH_USERNAME
               );
               expectedRule.revision = 1;
@@ -725,20 +724,18 @@ export default ({ getService }: FtrProviderContext) => {
               const someActionsWithFrequencies = await getSomeActionsWithFrequencies(supertest);
 
               // create simple rule
-              const createdRule = await createRule(supertest, log, {
-                ...getSimpleRuleWithoutRuleId(),
-                interval: '5m',
-              });
+              const createdRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
               // update a simple rule's `throttle` and `actions`
               const updatedRule = await bulkUpdateSingleRule(
                 createdRule.id,
                 throttle,
-                someActionsWithFrequencies
+                someActionsWithFrequencies,
+                createdRule.interval
               );
 
               const expectedRule = updateUsername(
-                { ...getSimpleRuleOutputWithoutRuleId(), interval: '5m' },
+                getSimpleRuleOutputWithoutRuleId(),
                 ELASTICSEARCH_USERNAME
               );
               expectedRule.revision = 1;
