@@ -163,6 +163,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -311,6 +312,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -434,6 +437,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -555,6 +559,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -690,6 +696,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -811,6 +818,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -933,6 +942,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1054,6 +1064,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -1194,6 +1206,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1342,6 +1355,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -1475,6 +1490,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1623,6 +1639,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -1749,6 +1767,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1786,6 +1805,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -1904,6 +1925,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -1941,6 +1963,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2064,6 +2088,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2143,6 +2168,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2278,6 +2305,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2357,6 +2385,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2478,6 +2508,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2557,6 +2588,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2680,6 +2713,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2759,6 +2793,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -2919,6 +2955,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -2998,6 +3035,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
@@ -3136,6 +3175,7 @@ Array [
               "type": "number",
             },
           ],
+          "getAllowHidden": [Function],
           "getComputedFields": [Function],
           "getFieldByName": [MockFunction] {
             "calls": Array [
@@ -3215,6 +3255,8 @@ Array [
           "getFormatterForField": [MockFunction],
           "getIndexPattern": [Function],
           "getName": [Function],
+          "getRuntimeField": [Function],
+          "getScriptedField": [Function],
           "getSourceFiltering": [Function],
           "getTimeField": [Function],
           "id": "index-pattern-with-timefield-id",
