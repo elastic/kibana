@@ -20,7 +20,7 @@ export async function getExistingApmIndexTemplates({
   const apmIndexTemplateNames = getApmIndexTemplateNames();
   const values = await Promise.all(
     Object.values(apmIndexTemplateNames)
-      .flatMap((validIndexTemplateNames) => validIndexTemplateNames)
+      .flat()
       .map(async (indexTemplateName) => {
         const res = await getIndexTemplate(esClient, { name: indexTemplateName });
         return res.index_templates[0];

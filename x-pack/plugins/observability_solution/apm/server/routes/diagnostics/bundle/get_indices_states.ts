@@ -86,7 +86,7 @@ export function validateIngestPipelineName(
 
   const indexTemplateNames = getApmIndexTemplateNames();
   return Object.values(indexTemplateNames)
-    .flatMap((validIndexTemplateNames) => validIndexTemplateNames)
+    .flat()
     .some(
       (indexTemplateName) =>
         dataStream.startsWith(indexTemplateName) && ingestPipelineId.startsWith(indexTemplateName)
