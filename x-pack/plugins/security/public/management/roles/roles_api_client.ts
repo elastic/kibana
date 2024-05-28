@@ -5,13 +5,18 @@
  * 2.0.
  */
 
+import type { BuildFlavor } from '@kbn/config';
 import type { HttpStart } from '@kbn/core/public';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
 import { copyRole } from '../../../common/model';
 
+interface RolesAPIClientOptions {
+  buildFlavor?: BuildFlavor;
+}
+
 export class RolesAPIClient {
-  constructor(private readonly http: HttpStart) {}
+  constructor(private readonly http: HttpStart, private readonly options?: RolesAPIClientOptions) {}
 
   public async getRoles() {
     return await this.http.get<Role[]>('/api/security/role');
@@ -63,6 +68,9 @@ export class RolesAPIClient {
         kibanaPrivilege.feature = {};
       }
     });
+    if (this.options?.buildFlavor === 'serverless') {
+      delete role.elasticsearch.remote_cluster;
+    }
 
     // @ts-expect-error
     delete role.name;

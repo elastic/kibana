@@ -72,7 +72,7 @@ export const rolesManagementApp = Object.freeze({
 
         chrome.docTitle.change(title);
 
-        const rolesAPIClient = new RolesAPIClient(http);
+        const rolesAPIClient = new RolesAPIClient(http, { buildFlavor });
 
         const EditRolePageWithBreadcrumbs = ({ action }: { action: 'edit' | 'clone' }) => {
           const { roleName } = useParams<{ roleName?: string }>();
