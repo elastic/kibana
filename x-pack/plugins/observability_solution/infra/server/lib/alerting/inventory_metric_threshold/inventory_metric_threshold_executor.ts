@@ -415,7 +415,6 @@ const mapToConditionsLookup = (
 ) =>
   list.map(mapFn).reduce<Record<string, any>>((result, value, i) => {
     result[`condition${i}`] = value;
-    console.log('result', result);
     return result;
   }, {});
 
