@@ -39,11 +39,6 @@ export const getBackfillRowsFromResponse = (backfills: Backfill[]): BackfillRow[
     backfills?.map((backfill) => ({
       ...backfill,
       ...getScheduledEntryAmount(backfill),
-      // total: backfill?.schedule?.length ?? 0,
-      // complete: getScheduledEntryAmountByStatus(backfill, 'complete'),
-      // running: getScheduledEntryAmountByStatus(backfill, 'running'),
-      // pending: getScheduledEntryAmountByStatus(backfill, 'pending'),
-      // error: getScheduledEntryAmountByStatus(backfill, 'error'),
     })) ?? [];
 
   return backfillRows;

@@ -14,7 +14,7 @@ export type BackfillStatus = Backfill['status'];
 export interface BackfillRow extends Backfill {
   error: number;
   total: number;
-  completed: number;
+  complete: number;
   pending: number;
   running: number;
   timeout: number;
