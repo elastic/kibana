@@ -62,22 +62,15 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   showAboutMappings: boolean;
   jsonData: any;
   refetchMapping: () => void;
-  isSemanticTextEnabled?: boolean;
-}> = ({
-  index,
-  data,
-  jsonData,
-  refetchMapping,
-  showAboutMappings,
-  isSemanticTextEnabled = false,
-}) => {
+}> = ({ index, data, jsonData, refetchMapping, showAboutMappings }) => {
   const {
     services: { extensionsService },
     core: { getUrlForApp },
     plugins: { ml },
     url,
+    config,
   } = useAppContext();
-
+  const { enableSemanticText: isSemanticTextEnabled } = config;
   const [errorsInTrainedModelDeployment, setErrorsInTrainedModelDeployment] = useState<string[]>(
     []
   );
