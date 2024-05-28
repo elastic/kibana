@@ -50,15 +50,7 @@ const EmptyMessage = () => (
 );
 
 export const SearchBar: FC<SearchBarProps> = (opts) => {
-  const {
-    globalSearch,
-    taggingApi,
-    navigateToUrl,
-    reportEvent,
-    chromeStyle$,
-    openInNewTab,
-    ...props
-  } = opts;
+  const { globalSearch, taggingApi, navigateToUrl, reportEvent, chromeStyle$, ...props } = opts;
 
   const isMounted = useMountedState();
   const { euiTheme } = useEuiTheme();
@@ -258,10 +250,11 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         console.log('Error trying to track searchbar metrics', err);
       }
 
-      if ((openInNewTab && event.ctrlKey) || event.metaKey) {
+      if (event.ctrlKey || event.metaKey) {
         window.open(url, '_blank');
+      } else {
+        navigateToUrl(url);
       }
-      navigateToUrl(url);
 
       (document.activeElement as HTMLElement).blur();
       if (searchRef) {
@@ -269,7 +262,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
         searchRef.dispatchEvent(blurEvent);
       }
     },
-    [openInNewTab, reportEvent, navigateToUrl, searchRef, searchValue]
+    [reportEvent, navigateToUrl, searchRef, searchValue]
   );
 
   const clearField = () => setSearchValue('');
