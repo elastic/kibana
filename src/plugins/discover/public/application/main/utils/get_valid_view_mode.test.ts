@@ -31,6 +31,13 @@ describe('getValidViewMode', () => {
         isEsqlMode: false,
       })
     ).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+
+    expect(
+      getValidViewMode({
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+        isEsqlMode: false,
+      })
+    ).toBe(VIEW_MODE.PATTERN_LEVEL);
   });
 
   test('should work correctly for ES|QL mode', () => {
@@ -54,5 +61,12 @@ describe('getValidViewMode', () => {
         isEsqlMode: true,
       })
     ).toBe(VIEW_MODE.AGGREGATED_LEVEL);
+
+    expect(
+      getValidViewMode({
+        viewMode: VIEW_MODE.PATTERN_LEVEL,
+        isEsqlMode: true,
+      })
+    ).toBe(VIEW_MODE.DOCUMENT_LEVEL);
   });
 });

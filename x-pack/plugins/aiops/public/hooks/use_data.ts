@@ -36,6 +36,7 @@ export const useData = (
   selectedSignificantItem?: SignificantItem,
   selectedGroup: GroupTableItem | null = null,
   barTarget: number = DEFAULT_BAR_TARGET,
+  changePointsByDefault = true,
   timeRange?: { min: Moment; max: Moment }
 ) => {
   const { executionContext, uiSettings } = useAiopsAppContext();
@@ -103,7 +104,8 @@ export const useData = (
   const documentStats = useDocumentCountStats(
     overallStatsRequest,
     selectedSignificantItemStatsRequest,
-    lastRefresh
+    lastRefresh,
+    changePointsByDefault
   );
 
   useEffect(() => {
@@ -111,14 +113,17 @@ export const useData = (
       timefilter.getAutoRefreshFetch$(),
       timefilter.getTimeUpdate$(),
       mlTimefilterRefresh$
-    ).subscribe(() => {
+    ).subscribe((done) => {
       if (onUpdate) {
         onUpdate({
           time: timefilter.getTime(),
           refreshInterval: timefilter.getRefreshInterval(),
         });
-        setLastRefresh(Date.now());
+        if (typeof done === 'function') {
+          done();
+        }
       }
+      setLastRefresh(Date.now());
     });
 
     // This listens just for an initial update of the timefilter to be switched on.

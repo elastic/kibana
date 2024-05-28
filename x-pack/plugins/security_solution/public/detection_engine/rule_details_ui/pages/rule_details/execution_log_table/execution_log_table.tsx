@@ -26,11 +26,17 @@ import {
 import type { Filter, Query } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 
-import { RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY } from '../../../../../../common/constants';
+import {
+  RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY,
+  RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
+} from '../../../../../../common/constants';
 import type {
   RuleExecutionResult,
   RuleExecutionStatus,
@@ -69,8 +75,10 @@ import {
   getMessageColumn,
   getExecutionLogMetricsColumns,
   expanderColumn,
+  getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
 
@@ -82,7 +90,13 @@ const DatePickerEuiFlexItem = styled(EuiFlexItem)`
   max-width: 582px;
 `;
 
-interface ExecutionLogTableProps {
+interface StartServices {
+  analytics: AnalyticsServiceStart;
+  i18n: I18nStart;
+  theme: ThemeServiceStart;
+}
+
+interface ExecutionLogTableProps extends StartServices {
   ruleId: string;
   selectAlertsTab: () => void;
 }
@@ -96,6 +110,7 @@ interface CachedGlobalQueryState {
 const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   ruleId,
   selectAlertsTab,
+  ...startServices
 }) => {
   const {
     docLinks,
@@ -105,6 +120,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     storage,
     timelines,
   } = useKibana().services;
+  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
 
   const {
     [RuleDetailTabs.executionResults]: {
@@ -112,7 +128,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         superDatePicker: { recentlyUsedRanges, refreshInterval, isPaused, start, end },
         queryText,
         statusFilters,
+        runTypeFilters,
         showMetricColumns,
+        showSourceEventTimeRange,
         pagination: { pageIndex, pageSize },
         sort: { sortField, sortDirection },
       },
@@ -129,6 +147,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         setSortField,
         setStart,
         setStatusFilters,
+        setRunTypeFilters,
+        setShowSourceEventTimeRange,
       },
     },
   } = useRuleDetailsContext();
@@ -197,6 +217,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     end,
     queryText,
     statusFilters,
+    runTypeFilters,
     page: pageIndex,
     perPage: pageSize,
     sortField,
@@ -299,7 +320,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         successToastId.current = addSuccess(
           {
             title: i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE,
-            text: mountReactNode(
+            text: toMountPoint(
               <>
                 <p>{i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION}</p>
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -309,7 +330,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </>
+              </>,
+              startServices
             ),
           },
           // Essentially keep toast around till user dismisses via 'x'
@@ -333,7 +355,19 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
       selectAlertsTab,
       timerange,
       uuidDataViewField,
+      startServices,
     ]
+  );
+
+  const onShowSourceEventTimeRange = useCallback(
+    (showEventTimeRange: boolean) => {
+      storage.set(
+        RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY,
+        showEventTimeRange
+      );
+      setShowSourceEventTimeRange(showEventTimeRange);
+    },
+    [setShowSourceEventTimeRange, storage]
   );
 
   const onShowMetricColumnsCallback = useCallback(
@@ -419,12 +453,27 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
   });
 
   const executionLogColumns = useMemo(() => {
-    const columns = [...EXECUTION_LOG_COLUMNS];
+    const columns = [...EXECUTION_LOG_COLUMNS].filter((item) => {
+      if ('field' in item) {
+        return item.field === 'type' ? isManualRuleRunEnabled : true;
+      }
+      return true;
+    });
+    let messageColumnWidth = 50;
+
+    if (showSourceEventTimeRange && isManualRuleRunEnabled) {
+      columns.push(...getSourceEventTimeRangeColumns());
+      messageColumnWidth = 30;
+    }
 
     if (showMetricColumns) {
-      columns.push(getMessageColumn('20%'), ...getExecutionLogMetricsColumns(docLinks));
+      messageColumnWidth = 20;
+      columns.push(
+        getMessageColumn(`${messageColumnWidth}%`),
+        ...getExecutionLogMetricsColumns(docLinks)
+      );
     } else {
-      columns.push(getMessageColumn('50%'));
+      columns.push(getMessageColumn(`${messageColumnWidth}%`));
     }
 
     columns.push(
@@ -436,10 +485,18 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
     );
 
     return columns;
-  }, [actions, docLinks, showMetricColumns, rows.toggleRowExpanded, rows.isRowExpanded]);
+  }, [
+    isManualRuleRunEnabled,
+    actions,
+    docLinks,
+    showMetricColumns,
+    showSourceEventTimeRange,
+    rows.toggleRowExpanded,
+    rows.isRowExpanded,
+  ]);
 
   return (
-    <EuiPanel hasBorder>
+    <EuiPanel data-test-subj="executionLogContainer" hasBorder>
       {/* Filter bar */}
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={true}>
@@ -451,6 +508,8 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
             selectedStatuses={statusFilters}
             onStatusFilterChange={onStatusFilterChangeCallback}
             onSearch={onSearchCallback}
+            selectedRunTypes={runTypeFilters}
+            onRunTypeFilterChange={setRunTypeFilters}
           />
         </EuiFlexItem>
         <DatePickerEuiFlexItem>
@@ -504,6 +563,14 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                 updatedAt: dataUpdatedAt,
               })}
             </UtilityBarText>
+            {isManualRuleRunEnabled && (
+              <UtilitySwitch
+                label={i18n.RULE_EXECUTION_LOG_SHOW_SOURCE_EVENT_TIME_RANGE}
+                checked={showSourceEventTimeRange}
+                compressed={true}
+                onChange={(e) => onShowSourceEventTimeRange(e.target.checked)}
+              />
+            )}
             <UtilitySwitch
               label={i18n.RULE_EXECUTION_LOG_SHOW_METRIC_COLUMNS_SWITCH}
               checked={showMetricColumns}
@@ -524,6 +591,7 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         onChange={onTableChangeCallback}
         itemId={getItemId}
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
+        data-test-subj="executionsTable"
       />
     </EuiPanel>
   );

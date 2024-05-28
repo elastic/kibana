@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('#delete', async () => {
           const { body, status } = await supertestWithoutAuth
             .delete('/api/spaces/space/default')
-            .set(commonRequestHeader)
+            .set(internalRequestHeader)
             .set(roleAuthc.apiKeyHeader);
 
           // normally we'd get a 400 bad request if we tried to delete the default space
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('#create', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/space')
-            .set(commonRequestHeader)
+            .set(internalRequestHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
               id: 'custom',
@@ -58,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('#update requires internal header', async () => {
           const { body, status } = await supertestWithoutAuth
             .put('/api/spaces/space/default')
-            .set(commonRequestHeader)
+            .set(internalRequestHeader)
             .set(roleAuthc.apiKeyHeader)
             .send({
               id: 'default',
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('#copyToSpace', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_copy_saved_objects')
-            .set(commonRequestHeader)
+            .set(internalRequestHeader)
             .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
@@ -82,7 +82,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('#resolveCopyToSpaceErrors', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_resolve_copy_saved_objects_errors')
-            .set(commonRequestHeader)
+            .set(internalRequestHeader)
             .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('#updateObjectsSpaces', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_update_objects_spaces')
-            .set(commonRequestHeader)
+            .set(internalRequestHeader)
             .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
@@ -102,7 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('#getShareableReferences', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_get_shareable_references')
-            .set(commonRequestHeader)
+            .set(internalRequestHeader)
             .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
@@ -112,7 +112,7 @@ export default function ({ getService }: FtrProviderContext) {
         it('#disableLegacyUrlAliases', async () => {
           const { body, status } = await supertestWithoutAuth
             .post('/api/spaces/_disable_legacy_url_aliases')
-            .set(commonRequestHeader)
+            .set(internalRequestHeader)
             .set(roleAuthc.apiKeyHeader);
 
           // without a request body we would normally a 400 bad request if the endpoint was registered
