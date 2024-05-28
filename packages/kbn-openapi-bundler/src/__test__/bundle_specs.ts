@@ -18,12 +18,13 @@ import {
 } from 'fs';
 import { dump, load } from 'js-yaml';
 import { OpenAPIV3 } from 'openapi-types';
-import { bundle } from '../openapi_bundler';
+import { bundle, BundlerConfig } from '../openapi_bundler';
 
 const ROOT_PATH = join(__dirname, '..', '..');
 
 export async function bundleSpecs(
-  oasSpecs: Record<string, OpenAPIV3.Document>
+  oasSpecs: Record<string, OpenAPIV3.Document>,
+  options?: BundlerConfig['options']
 ): Promise<Record<string, OpenAPIV3.Document>> {
   const randomStr = (Math.random() + 1).toString(36).substring(7);
   const folderToBundlePath = join(ROOT_PATH, 'target', 'oas-test', randomStr);
@@ -32,7 +33,7 @@ export async function bundleSpecs(
 
   dumpSpecs(folderToBundlePath, oasSpecs);
 
-  await bundleFolder(folderToBundlePath, bundledFilePathTemplate);
+  await bundleFolder(folderToBundlePath, bundledFilePathTemplate, options);
 
   return readBundledSpecs(resultFolderPath);
 }
@@ -70,10 +71,12 @@ export function readBundledSpecs(folderPath: string): Record<string, OpenAPIV3.D
 
 export async function bundleFolder(
   folderToBundlePath: string,
-  bundledFilePathTemplate: string
+  bundledFilePathTemplate: string,
+  options?: BundlerConfig['options']
 ): Promise<void> {
   await bundle({
     sourceGlob: join(folderToBundlePath, '*.schema.yaml'),
     outputFilePath: bundledFilePathTemplate,
+    options,
   });
 }

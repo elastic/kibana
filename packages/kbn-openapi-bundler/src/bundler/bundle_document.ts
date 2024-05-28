@@ -24,6 +24,7 @@ import {
   createMergeNonConflictingAllOfItemsProcessor,
   createUnfoldSingleAllOfItemProcessor,
 } from './document_processors/reduce_all_of_items';
+import { createExcludeXLabelsProcessor } from './document_processors/exclude_x_labels';
 
 export class SkipException extends Error {
   constructor(public documentPath: string, message: string) {
@@ -33,6 +34,10 @@ export class SkipException extends Error {
 
 export interface BundledDocument extends ResolvedDocument {
   bundledRefs: ResolvedRef[];
+}
+
+interface BundleDocumentOptions {
+  excludeXLabels?: string[];
 }
 
 /**
@@ -49,7 +54,10 @@ export interface BundledDocument extends ResolvedDocument {
  * @param absoluteDocumentPath document's absolute path
  * @returns bundled document
  */
-export async function bundleDocument(absoluteDocumentPath: string): Promise<BundledDocument> {
+export async function bundleDocument(
+  absoluteDocumentPath: string,
+  options?: BundleDocumentOptions
+): Promise<BundledDocument> {
   if (!isAbsolute(absoluteDocumentPath)) {
     throw new Error(
       `bundleDocument expects an absolute document path but got "${absoluteDocumentPath}"`
@@ -69,10 +77,7 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     throw new SkipException(resolvedDocument.absolutePath, 'Document has no paths defined');
   }
 
-  const bundleRefsProcessor = new BundleRefProcessor(X_INLINE);
-  const removeUnusedComponentsProcessor = new RemoveUnusedComponentsProcessor();
-
-  await processDocument(resolvedDocument, refResolver, [
+  const defaultProcessors = [
     createSkipNodeWithInternalPropProcessor(X_INTERNAL),
     createSkipInternalPathProcessor('/internal'),
     createModifyPartialProcessor(),
@@ -81,6 +86,17 @@ export async function bundleDocument(absoluteDocumentPath: string): Promise<Bund
     createFlattenFoldedAllOfItemsProcessor(),
     createMergeNonConflictingAllOfItemsProcessor(),
     createUnfoldSingleAllOfItemProcessor(),
+  ];
+
+  if (options?.excludeXLabels) {
+    defaultProcessors.push(createExcludeXLabelsProcessor(options?.excludeXLabels));
+  }
+
+  const bundleRefsProcessor = new BundleRefProcessor(X_INLINE);
+  const removeUnusedComponentsProcessor = new RemoveUnusedComponentsProcessor();
+
+  await processDocument(resolvedDocument, refResolver, [
+    ...defaultProcessors,
     bundleRefsProcessor,
     removeUnusedComponentsProcessor,
   ]);

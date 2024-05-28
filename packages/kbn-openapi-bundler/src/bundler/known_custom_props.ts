@@ -29,3 +29,9 @@ export const X_MODIFY = 'x-modify';
  *  in result bundled document.
  */
 export const X_CODEGEN_ENABLED = 'x-codegen-enabled';
+
+/**
+ * `x-labels` allows to mark nodes with arbitrary labels. It allows to exclude or include nodes
+ * marked with specific labels into the resulting bundle.
+ */
+export const X_LABELS = 'x-labels';

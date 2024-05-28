@@ -4,6 +4,7 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/rules/_bulk_update:
+    x-labels: [ess]
     put:
       operationId: BulkUpdateRules
       x-codegen-enabled: true
