@@ -8,6 +8,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import orderBy from 'lodash/orderBy';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -94,30 +95,33 @@ export const DashboardPanelSelectionListFlyout: React.FC<Props> = ({
     const q = searchTerm.toLowerCase();
 
     setPanelsSearchResult(
-      panels.current.map((panel) => {
-        const groupSearchMatch = panel.title.toLowerCase().includes(q);
+      orderBy(
+        panels.current.map((panel) => {
+          const groupSearchMatch = panel.title.toLowerCase().includes(q);
 
-        const [groupSearchMatchAgg, items] = panel.items.reduce(
-          (acc, cur) => {
-            const searchMatch = cur.name.toLowerCase().includes(q);
+          const [groupSearchMatchAgg, items] = panel.items.reduce(
+            (acc, cur) => {
+              const searchMatch = cur.name.toLowerCase().includes(q);
 
-            acc[0] = acc[0] || searchMatch;
-            acc[1].push({
-              ...cur,
-              isDisabled: !(groupSearchMatch || searchMatch),
-            });
+              acc[0] = acc[0] || searchMatch;
+              acc[1].push({
+                ...cur,
+                isDisabled: !(groupSearchMatch || searchMatch),
+              });
 
-            return acc;
-          },
-          [groupSearchMatch, [] as PanelSelectionMenuItem[]]
-        );
+              return acc;
+            },
+            [groupSearchMatch, [] as PanelSelectionMenuItem[]]
+          );
 
-        return {
-          ...panel,
-          isDisabled: !groupSearchMatchAgg,
-          items,
-        };
-      })
+          return {
+            ...panel,
+            isDisabled: !groupSearchMatchAgg,
+            items,
+          };
+        }),
+        ['isDisabled']
+      )
     );
   }, [searchTerm]);
 
