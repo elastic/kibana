@@ -5,8 +5,6 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -14,7 +12,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'svlManagementPage', 'security']);
   const browser = getService('browser');
 
-  describe.only('Roles', function () {
+  describe('Roles', function () {
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
