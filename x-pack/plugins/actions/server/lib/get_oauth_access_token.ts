@@ -6,7 +6,6 @@
  */
 import { Logger } from '@kbn/core/server';
 import { ConnectorToken, ConnectorTokenClientContract } from '../types';
-import { ActionsConfigurationUtilities } from '../actions_config';
 import { GoogleAuth } from 'google-auth-library';
 
 
@@ -40,7 +39,6 @@ export const getOAuthJwtAccessToken = async ({
     connectorToken = token;
     hasErrors = errors;
 
-    console.log('TOKEN | hasErrors', connectorToken, hasErrors);
   }
 
   if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
@@ -68,7 +66,6 @@ export const getOAuthJwtAccessToken = async ({
 
     // try to update connector_token SO
     if (connectorId && connectorTokenClient) {
-      console.log('In updateOrReplace');
       try {
         await connectorTokenClient.updateOrReplace({
           connectorId,
@@ -86,7 +83,6 @@ export const getOAuthJwtAccessToken = async ({
     }
   } else {
     // use existing valid token
-    console.log('HERE!!');
     accessToken = connectorToken.token;
   }
   return accessToken;
