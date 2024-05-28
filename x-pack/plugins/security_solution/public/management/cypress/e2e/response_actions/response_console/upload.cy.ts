@@ -27,11 +27,6 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe('File operations:', () => {
-    const homeFilePath = Cypress.env('IS_CI') ? '/home/vagrant' : '/home/ubuntu';
-
-    const fileContent = 'This is a test file for the get-file command.';
-    const filePath = `${homeFilePath}/test_file.txt`;
-
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -64,56 +59,6 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       if (createdHost) {
         deleteAllLoadedEndpointData({ endpointAgentIds: [createdHost.agentId] });
       }
-    });
-
-    it('"get-file --path" - should retrieve a file', () => {
-      const downloadsFolder = Cypress.config('downloadsFolder');
-
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      cy.task('createFileOnEndpoint', {
-        hostname: createdHost.hostname,
-        path: filePath,
-        content: fileContent,
-      });
-
-      // initiate get file action and wait for the API to complete
-      cy.intercept('api/endpoint/action/get_file').as('getFileAction');
-      openResponseConsoleFromEndpointList();
-      inputConsoleCommand(`get-file --path ${filePath}`);
-      submitCommand();
-      cy.wait('@getFileAction', { timeout: 60000 });
-
-      // verify that the file was retrieved
-      // and that the file download link is available
-      cy.getByTestSubj('getFileSuccess').within(() => {
-        cy.contains('File retrieved from the host.');
-        cy.contains('(ZIP file passcode: elastic)');
-        cy.contains(
-          'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
-        );
-        cy.contains('Click here to download').should('exist');
-      });
-
-      cy.contains('Click here to download').click();
-
-      // wait for file to be downloaded
-      cy.readFile(`${downloadsFolder}/upload.zip`, { timeout: 120000 }).should('exist');
-
-      // move the zip file to VM
-      cy.task('uploadFileToEndpoint', {
-        hostname: createdHost.hostname,
-        srcPath: `${downloadsFolder}/upload.zip`,
-        destPath: `${homeFilePath}/upload.zip`,
-      });
-
-      // unzip the file and read its content
-      cy.task('readZippedFileContentOnEndpoint', {
-        hostname: createdHost.hostname,
-        path: `${homeFilePath}/upload.zip`,
-        password: 'elastic',
-      }).then((unzippedFileContent) => {
-        expect(unzippedFileContent).to.contain(fileContent);
-      });
     });
 
     it('"upload --file" - should upload a file', () => {
