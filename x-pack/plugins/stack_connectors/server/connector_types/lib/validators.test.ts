@@ -22,11 +22,11 @@ describe('validators', () => {
     it('returns an error if the keys of the record are greater than the maximum', () => {
       expect(
         validateRecordMaxKeys({
-          record: { foo: 'bar' },
-          maxNumberOfFields: 0,
+          record: { foo: 'bar', bar: 'test', test: 'foo' },
+          maxNumberOfFields: 2,
           fieldName: 'myFieldName',
         })
-      ).toEqual('A maximum of 0 fields in myFieldName can be defined at a time.');
+      ).toEqual('A maximum of 2 fields in myFieldName can be defined at a time.');
     });
   });
 

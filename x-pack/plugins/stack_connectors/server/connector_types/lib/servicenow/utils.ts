@@ -34,9 +34,9 @@ export const prepareIncident = (
     return restIncidentFields;
   }
 
-  const baseFields = Object.entries(restIncidentFields).reduce(
+  const baseFields = Object.entries(restIncidentFields).reduce<Partial<Incident>>(
     (acc, [key, value]) => ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }),
-    {} as Incident
+    {}
   );
 
   return { ...additionalFields, ...baseFields };
