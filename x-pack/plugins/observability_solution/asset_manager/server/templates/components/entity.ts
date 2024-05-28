@@ -22,8 +22,13 @@ export const entitiesEntityComponentTemplateConfig: ClusterPutComponentTemplateR
               type: 'keyword',
             },
             displayName: {
-              ignore_above: 1024,
-              type: 'keyword',
+              type: 'text',
+              fields: {
+                keyword: {
+                  ignore_above: 1024,
+                  type: 'keyword',
+                },
+              },
             },
             definitionId: {
               ignore_above: 1024,

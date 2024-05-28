@@ -48,7 +48,7 @@ export function generateSummaryTransform(
           terms: { field: 'entity.id' },
         },
         ['entity.displayName']: {
-          terms: { field: 'entity.displayName' },
+          terms: { field: 'entity.displayName.keyword' },
         },
         ...definition.identityFields.reduce(
           (acc, id) => ({

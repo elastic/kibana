@@ -29,6 +29,11 @@ export const entitiesIndexTemplateConfig: IndicesPutIndexTemplateRequest = {
             mapping: {
               ignore_above: 1024,
               type: 'keyword',
+              fields: {
+                text: {
+                  type: 'text',
+                },
+              },
             },
             match_mapping_type: 'string',
           },
