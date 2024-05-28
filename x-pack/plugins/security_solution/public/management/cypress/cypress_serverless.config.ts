@@ -14,9 +14,6 @@ export default defineCypressConfig(
     env: {
       IS_SERVERLESS: true,
 
-      // FIXME:PT Do not commit to `main`. Using it only for debugging and should be removed prior to PR review
-      TOOLING_LOG_LEVEL: 'verbose',
-
       grepTags: '@serverless --@brokenInServerless --@skipInServerless',
     },
   })
