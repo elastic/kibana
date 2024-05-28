@@ -178,7 +178,7 @@ export class ConnectorTokenClient {
             perPage: MAX_TOKENS_RETURNED,
             type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
             filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
-            sortField: 'updatedAt',
+            sortField: 'updated_at',
             sortOrder: 'desc',
           })
         ).saved_objects

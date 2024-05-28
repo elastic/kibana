@@ -54,7 +54,11 @@ export const getOAuthJwtAccessToken = async ({
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
     });
 
-    accessToken = await auth.getAccessToken();
+    try {
+      accessToken = await auth.getAccessToken();
+    } catch (error) {
+      return `Unable to retreive access token: ${error.message}`;
+    }
 
     if (accessToken === null || accessToken === undefined) {
       accessToken = '';
