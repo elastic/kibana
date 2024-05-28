@@ -5,87 +5,48 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { renderParameterTemplates } from './render';
-import { ExecutorParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { SUB_ACTION } from '../../../common/gemini/constants';
-import { Logger } from '@kbn/logging';
+import Mustache from 'mustache';
 
-// Mock the renderMustacheString function
-jest.mock('@kbn/actions-plugin/server/lib/mustache_renderer', () => ({
-  renderMustacheString: jest.fn(variables),
-}));
-
-const mockLogger: Logger = {
-  trace: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-  fatal: jest.fn(),
-  log: jest.fn(),
-  isLevelEnabled: jest.fn().mockReturnValue(true), // Enable all levels by default
-  get: jest.fn((...childContextPaths: string[]) => mockLogger), // Return the same mock for child loggers
+const params = {
+  subAction: 'run',
+  subActionParams: {
+    body: '{"domain":"{{domain}}"}',
+  },
 };
 
+const variables = { domain: 'm0zepcuuu2' };
+const logger = loggingSystemMock.createLogger();
+
 describe('Gemini - renderParameterTemplates', () => {
-  const variables = { someVar: 'someValue' }; // Sample variables for rendering
-
-  it('should return params unchanged for non-RUN/TEST subActions', () => {
-    const params: ExecutorParams = {
-      subAction: 'some_other_action',
-      subActionParams: {},
-    };
-
-    const result = renderParameterTemplates(mockLogger, params, variables);
-    expect(result).toEqual(params); // No changes expected
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+  it('should not render body on test action', () => {
+    const testParams = { subAction: 'test', subActionParams: { body: 'test_json' } };
+    const result = renderParameterTemplates(logger, testParams, variables);
+    expect(result).toEqual(testParams);
   });
 
-  it('should render Mustache templates in body for RUN and TEST subActions', () => {
-    const runParams: ExecutorParams = {
-      subAction: SUB_ACTION.RUN,
-      subActionParams: {
-        body: '{"message": "Hello, {{someVar}}!"}',
-      },
-    };
+  it('should rendered body with variables', () => {
+    const result = renderParameterTemplates(logger, params, variables);
 
-    const testParams: ExecutorParams = {
-      subAction: SUB_ACTION.TEST,
-      subActionParams: {
-        body: '{"test": "{{someVar}} works!"}',
-      },
-    };
-
-    const runResult = renderParameterTemplates(mockLogger, runParams, variables);
-    expect(runResult.subActionParams.body).toEqual(JSON.stringify({ message: 'Hello, !' }));
-
-    const testResult = renderParameterTemplates(mockLogger, testParams, variables);
-    expect(testResult.subActionParams.body).toEqual(JSON.stringify({ test: 'someValue works!' }));
+    expect(result.subActionParams.body).toEqual(
+      JSON.stringify({
+        ...variables,
+      })
+    );
   });
 
-  it('should handle missing or invalid subActionParams gracefully', () => {
-    const paramsWithNoSubActionParams: ExecutorParams = {
-      subAction: SUB_ACTION.RUN,
-      subActionParams: {
-        body: '123',
-      },
-    };
-    const paramsWithNonStringBody: ExecutorParams = {
-      subAction: SUB_ACTION.TEST,
-      subActionParams: {
-        body: true, // Invalid body
-      },
-    };
-
-    expect(renderParameterTemplates(mockLogger, paramsWithNoSubActionParams, variables)).toEqual(
-      paramsWithNoSubActionParams
+  it('should render error body', () => {
+    const errorMessage = 'test error';
+    jest.spyOn(Mustache, 'render').mockImplementation(() => {
+      throw new Error(errorMessage);
+    });
+    const result = renderParameterTemplates(logger, params, variables);
+    expect(result.subActionParams.body).toEqual(
+      'error rendering mustache template "{"domain":"{{domain}}"}": test error'
     );
-    expect(renderParameterTemplates(mockLogger, paramsWithNonStringBody, variables)).toEqual(
-      paramsWithNonStringBody
-    );
-
-    expect(mockLogger.debug).toHaveBeenCalledTimes(1); // Should log a debug message for invalid body
   });
 });
-function variables(this: any, ...args: any[]): unknown {
-  throw new Error('Function not implemented.');
-}
