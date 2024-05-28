@@ -16,7 +16,7 @@ import {
 } from '../../../../packages/kbn-test/src/functional_test_runner/lib';
 import type {
   ProductType,
-  ProjectHandler, 
+  ProjectHandler,
 } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/project_handler';
 import { CloudHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/cloud_project_handler';
 import { ProxyHandler } from '@kbn/security-solution-plugin/scripts/run_cypress/project_handler/proxy_project_handler';
@@ -32,7 +32,7 @@ const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 const PROJECT_NAME_PREFIX = 'kibana-ftr-api-integration-security-solution';
 
 // Function to execute a command and return a Promise with the status code
-function executeCommand(command: string, envVars: any, workDir?: string): Promise<number> {
+function executeCommand(command: string, envVars: any, log: ToolingLog, workDir?: string): Promise<number> {
   return new Promise((resolve, reject) => {
     // const childProcess = exec(command, { env: envVars, cwd: workDir }, (error, stdout, stderr) => {
     const childProcess = exec(command, { env: envVars }, (error, stdout, stderr) => {
@@ -44,17 +44,17 @@ function executeCommand(command: string, envVars: any, workDir?: string): Promis
 
     // Listen and print stdout data
     childProcess.stdout?.on('data', (data) => {
-      console.log(data);
+      log.info(data);
     });
 
     // Listen and print stderr data
     childProcess.stderr?.on('data', (data) => {
-      console.log(data);
+      log.info(data);
     });
 
     // Listen for process exit
     childProcess.on('exit', (code) => {
-      console.log(`Node process for target ${process.env.TARGET_SCRIPT} exits with code : ${code}`);
+      log.info(`Node process for target ${process.env.TARGET_SCRIPT} exits with code : ${code}`);
       if (code !== 0) {
         reject(code);
         return;
@@ -75,9 +75,9 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
 
   const scriptName: string = process.env.TARGET_SCRIPT;
   if (packageJson.scripts && packageJson.scripts[scriptName]) {
-    console.log(`Script ${scriptName} was found. Proceeding.`);
+    log.info(`Script ${scriptName} was found. Proceeding.`);
   } else {
-    console.log(`Script ${scriptName} not found in package.json`);
+    log.info(`Script ${scriptName} not found in package.json`);
   }
 
   // Getting parent script, domain and project type defined in the script in package.json
@@ -100,7 +100,7 @@ async function parseProductTypes(log: ToolingLog): Promise<ProductType[] | undef
   );
 
   let productTypes: ProductType[];
-  if (filteredList.length == 1) {
+  if (filteredList.length === 1) {
     const pTypes = filteredList[0]?.split('=')[1];
     productTypes = JSON.parse(pTypes);
     return productTypes.length > 0 ? productTypes : undefined;
@@ -192,7 +192,7 @@ export const cli = () => {
           TEST_KIBANA_URL: testKibanaUrl,
         };
 
-        statusCode = await executeCommand(command, envVars);
+        statusCode = await executeCommand(command, envVars, log);
       } catch (err) {
         log.error('An error occured when running the test script.');
         log.error(err.message);
