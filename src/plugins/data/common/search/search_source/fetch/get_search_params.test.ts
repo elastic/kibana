@@ -25,29 +25,6 @@ describe('getSearchParams', () => {
     expect(searchParams.preference).toBe('aaa');
   });
 
-  test('extracts track total hits', () => {
-    const getConfig = getConfigStub({
-      [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
-      [UI_SETTINGS.COURIER_CUSTOM_REQUEST_PREFERENCE]: 'aaa',
-    });
-    const searchParams = getSearchParamsFromRequest(
-      {
-        index: 'abc',
-        body: {
-          query: 123,
-          track_total_hits: true,
-        },
-      },
-      { getConfig }
-    );
-    expect(searchParams.index).toBe('abc');
-    // @ts-expect-error `track_total_hits` not allowed at top level for `typesWithBodyKey`
-    expect(searchParams.track_total_hits).toBe(true);
-    expect(searchParams.body).toStrictEqual({
-      query: 123,
-    });
-  });
-
   test('sets expand_wildcards=all if data view has allowHidden=true', () => {
     const getConfig = getConfigStub({
       [UI_SETTINGS.COURIER_SET_REQUEST_PREFERENCE]: 'custom',
