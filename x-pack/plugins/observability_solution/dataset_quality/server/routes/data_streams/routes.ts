@@ -13,7 +13,7 @@ import {
   DataStreamStat,
   DegradedDocs,
   NonAggregatableDatasets,
-  DegradedField,
+  DegradedFieldResponse,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
 import { rangeRt, typeRt } from '../../types/default_api_types';
@@ -136,7 +136,7 @@ const degradedFieldsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
-  async handler(resources): Promise<DegradedField[]> {
+  async handler(resources): Promise<DegradedFieldResponse> {
     const { context, params } = resources;
     const { dataStream } = params.path;
     const coreContext = await context.core;

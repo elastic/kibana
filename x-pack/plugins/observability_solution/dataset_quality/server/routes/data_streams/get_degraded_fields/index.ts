@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery, existsQuery } from '@kbn/observability-plugin/server';
-import { DegradedField } from '../../../../common/api_types';
+import { DegradedFieldResponse } from '../../../../common/api_types';
 import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { createDatasetQualityESClient } from '../../../utils';
 import { _IGNORED, TIMESTAMP } from '../../../../common/es_fields';
@@ -22,7 +22,7 @@ export async function getDegradedFields({
   start: number;
   end: number;
   dataStream: string;
-}): Promise<DegradedField[]> {
+}): Promise<DegradedFieldResponse> {
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
   const filterQuery = [...rangeQuery(start, end)];
@@ -36,7 +36,7 @@ export async function getDegradedFields({
         field: _IGNORED,
       },
       aggs: {
-        last_occurrence: {
+        lastOccurrence: {
           max: {
             field: TIMESTAMP,
           },
@@ -57,11 +57,12 @@ export async function getDegradedFields({
     aggs,
   });
 
-  return (
-    response.aggregations?.degradedFields.buckets.map((bucket) => ({
-      fieldName: bucket.key as string,
-      count: bucket.doc_count,
-      last_occurrence: bucket.last_occurrence.value,
-    })) ?? []
-  );
+  return {
+    degradedFields:
+      response.aggregations?.degradedFields.buckets.map((bucket) => ({
+        name: bucket.key as string,
+        count: bucket.doc_count,
+        lastOccurrence: bucket.lastOccurrence.value,
+      })) ?? [],
+  };
 }

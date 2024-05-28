@@ -6,34 +6,20 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle, EuiToolTip } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiPanel, EuiTitle, EuiIconTip } from '@elastic/eui';
 import { flyoutImprovementText, flyoutImprovementTooltip } from '../../../../common/translations';
 import { DegradedFieldTable } from './table';
 
 export function DegradedFields() {
   return (
     <EuiPanel hasBorder grow={false}>
-      <EuiFlexGroup justifyContent="spaceBetween" direction="column">
-        <EuiFlexItem
-          css={css`
-            flex-direction: row;
-            justify-content: flex-start;
-            align-items: flex-start;
-            gap: 4px;
-          `}
-        >
-          <EuiTitle size="xxxs">
-            <h6>{flyoutImprovementText}</h6>
-          </EuiTitle>
-          <EuiToolTip content={flyoutImprovementTooltip}>
-            <EuiIcon size="m" color="subdued" type="questionInCircle" className="eui-alignTop" />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <DegradedFieldTable />
-        </EuiFlexItem>
+      <EuiFlexGroup responsive={false} alignItems="center" gutterSize="xs">
+        <EuiTitle size="xxxs">
+          <h6>{flyoutImprovementText}</h6>
+        </EuiTitle>
+        <EuiIconTip content={flyoutImprovementTooltip} color="subdued" size="m" />
       </EuiFlexGroup>
+      <DegradedFieldTable />
     </EuiPanel>
   );
 }

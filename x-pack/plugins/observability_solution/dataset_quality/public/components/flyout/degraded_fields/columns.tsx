@@ -6,7 +6,9 @@
  */
 
 import { EuiBasicTableColumn } from '@elastic/eui';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
+
 import { DegradedField } from '../../../../common/api_types';
 
 const fieldColumnName = i18n.translate('xpack.datasetQuality.flyout.degradedField.field', {
@@ -18,16 +20,20 @@ const countColumnName = i18n.translate('xpack.datasetQuality.flyout.degradedFiel
 });
 
 const lastOccurrenceColumnName = i18n.translate(
-  'xpack.datasetQuality.flyout.degradedField.last_occurrence',
+  'xpack.datasetQuality.flyout.degradedField.lastOccurrence',
   {
     defaultMessage: 'Last Occurrence',
   }
 );
 
-export const getDegradedFieldsColumns = (): Array<EuiBasicTableColumn<DegradedField>> => [
+export const getDegradedFieldsColumns = ({
+  dateFormatter,
+}: {
+  dateFormatter: FieldFormat;
+}): Array<EuiBasicTableColumn<DegradedField>> => [
   {
     name: fieldColumnName,
-    field: 'fieldName',
+    field: 'name',
   },
   {
     name: countColumnName,
@@ -38,14 +44,9 @@ export const getDegradedFieldsColumns = (): Array<EuiBasicTableColumn<DegradedFi
   {
     name: lastOccurrenceColumnName,
     sortable: true,
-    field: 'last_occurrence',
+    field: 'lastOccurrence',
     render: (lastOccurrence: number) => {
-      if (lastOccurrence) {
-        const date = new Date(lastOccurrence);
-        return date.toISOString();
-      }
-
-      return '';
+      return dateFormatter.convert(lastOccurrence);
     },
   },
 ];

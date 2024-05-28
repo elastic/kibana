@@ -8,7 +8,7 @@
 import { IToasts } from '@kbn/core/public';
 import { getDateISORange } from '@kbn/timerange';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { DataStreamStat, DegradedField } from '../../../../common/api_types';
+import { DataStreamStat, DegradedFieldResponse } from '../../../../common/api_types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { IDataStreamDetailsClient } from '../../../services/data_stream_details';
 import {
@@ -532,14 +532,14 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
-        storeDegradedFields: assign((context, event) => {
+        storeDegradedFields: assign((context, event: DoneInvokeEvent<DegradedFieldResponse>) => {
           return 'data' in event
             ? {
                 flyout: {
                   ...context.flyout,
                   degradedFields: {
                     ...context.flyout.degradedFields,
-                    data: event.data as DegradedField[],
+                    data: event.data.degradedFields,
                   },
                 },
               }
@@ -684,8 +684,6 @@ export const createDatasetQualityControllerStateMachine = ({
 
       loadDegradedFieldsPerDataStream: (context) => {
         if (!context.flyout.dataset || !context.flyout.insightsTimeRange) {
-          fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));
-
           return Promise.resolve({});
         }
 

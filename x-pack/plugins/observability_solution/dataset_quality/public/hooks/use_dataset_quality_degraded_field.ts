@@ -14,13 +14,17 @@ import {
   DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
   DEFAULT_DEGRADED_FIELD_SORT_FIELD,
 } from '../../common/constants';
+import { useKibanaContextForPlugin } from '../utils';
 
 export type DegradedFieldSortField = keyof DegradedField;
 
 export function useDatasetQualityDegradedField() {
   const { service } = useDatasetQualityContext();
+  const {
+    services: { fieldFormats },
+  } = useKibanaContextForPlugin();
 
-  const { degradedFields } = useSelector(service, (state) => state.context.flyout) ?? {};
+  const degradedFields = useSelector(service, (state) => state.context.flyout.degradedFields) ?? {};
   const { data, table } = degradedFields;
   const { page, rowsPerPage, sort } = table;
 
@@ -56,17 +60,16 @@ export function useDatasetQualityDegradedField() {
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
   }, [data, sort.field, sort.direction, page, rowsPerPage]);
 
-  const loadingState = useSelector(service, (state) => ({
-    datasetDegradedFieldsLoading: state.matches(
-      'flyout.initializing.dataStreamDegradedFields.fetching'
-    ),
-  }));
+  const isLoading = useSelector(service, (state) =>
+    state.matches('flyout.initializing.dataStreamDegradedFields.fetching')
+  );
 
   return {
-    loadingState,
+    isLoading,
     pagination,
     onTableChange,
     renderedItems,
     sort: { sort },
+    fieldFormats,
   };
 }

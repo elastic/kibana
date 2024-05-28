@@ -22,6 +22,7 @@ import {
   DataStreamStatType,
   GetNonAggregatableDataStreamsResponse,
   DegradedField,
+  DegradedFieldResponse,
 } from '../../../../common/data_streams_stats';
 
 export type FlyoutDataset = Omit<
@@ -219,7 +220,7 @@ export type DatasetQualityControllerEvent =
   | DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
   | DoneInvokeEvent<DashboardType>
   | DoneInvokeEvent<DataStreamDetails>
-  | DoneInvokeEvent<DegradedField[]>
+  | DoneInvokeEvent<DegradedFieldResponse>
   | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<IntegrationsResponse>

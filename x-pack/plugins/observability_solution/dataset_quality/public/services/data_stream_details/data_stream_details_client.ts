@@ -8,7 +8,6 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import {
-  DegradedField,
   getDataStreamDegradedFieldsResponseRt,
   getDataStreamsDetailsResponseRt,
   getDataStreamsSettingsResponseRt,
@@ -17,6 +16,7 @@ import {
 import {
   DataStreamDetails,
   DataStreamSettings,
+  DegradedFieldResponse,
   GetDataStreamDegradedFieldsParams,
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
@@ -77,7 +77,7 @@ export class DataStreamDetailsClient implements IDataStreamDetailsClient {
     end,
   }: GetDataStreamDegradedFieldsParams) {
     const response = await this.http
-      .get<DegradedField[]>(
+      .get<DegradedFieldResponse>(
         `/internal/dataset_quality/data_streams/${dataStream}/degraded_fields`,
         {
           query: { start, end },
