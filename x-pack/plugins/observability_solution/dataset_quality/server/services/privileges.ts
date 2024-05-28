@@ -61,12 +61,11 @@ class DatasetQualityPrivileges {
     });
 
     const canRead = indexPrivileges.index[dataset]?.read ?? false;
-    const _canMonitor = indexPrivileges.index[dataset]?.monitor ?? false;
-    const _canViewIndexMetadata = indexPrivileges.index[dataset]?.view_index_metadata ?? false;
+    const canViewIndexMetadata = indexPrivileges.index[dataset]?.view_index_metadata ?? false;
 
     const canViewIntegrations = await this.getCanViewIntegrations(esClient, space);
 
-    return { canRead, canMonitor: _canMonitor && _canViewIndexMetadata, canViewIntegrations };
+    return { canRead, canMonitor: canViewIndexMetadata, canViewIntegrations };
   }
 
   public async canReadDataset(

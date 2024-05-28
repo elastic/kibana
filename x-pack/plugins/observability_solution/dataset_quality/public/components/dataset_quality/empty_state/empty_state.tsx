@@ -26,7 +26,7 @@ export default function EmptyStateWrapper({ children }: { children: React.ReactN
         title={
           <h2>
             {i18n.translate('xpack.datasetQuality.emptyState.noPrivileges.title', {
-              defaultMessage: `Dataset couldn't be loaded`,
+              defaultMessage: `Datasets couldn't be loaded`,
             })}
           </h2>
         }
@@ -34,9 +34,9 @@ export default function EmptyStateWrapper({ children }: { children: React.ReactN
           <p data-test-subj="datasetQualityNoPrivilegesEmptyState">
             <FormattedMessage
               id="xpack.datasetQuality.emptyState.noPrivileges.message"
-              defaultMessage="You don't have the required privileges to view logs data. Make sure you have sufficient privileges to view {dataset}."
+              defaultMessage="You don't have the required privileges to view logs data. Make sure you have sufficient privileges to view {datasetPattern}."
               values={{
-                dataset: <EuiCode>{`${DEFAULT_DATASET_TYPE}-*`}</EuiCode>,
+                datasetPattern: <EuiCode>{`${DEFAULT_DATASET_TYPE}-*`}</EuiCode>,
               }}
             />
             {/* TODO: Learn more link to docs */}
@@ -54,7 +54,7 @@ export default function EmptyStateWrapper({ children }: { children: React.ReactN
         title={
           <h2>
             {i18n.translate('xpack.datasetQuality.emptyState.noData.title', {
-              defaultMessage: 'No data streams found',
+              defaultMessage: 'No datasets found',
             })}
           </h2>
         }
@@ -62,9 +62,9 @@ export default function EmptyStateWrapper({ children }: { children: React.ReactN
           <p data-test-subj="datasetQualityNoDataEmptyState">
             <FormattedMessage
               id="xpack.datasetQuality.emptyState.noData.message"
-              defaultMessage="No logs data streams found. To get started, make sure you have logs data streams available matching {dataset} dataset."
+              defaultMessage="No logs datasets found. To get started, make sure you have logs data streams available matching {datasetPattern}."
               values={{
-                dataset: <EuiCode>{DEFAULT_LOGS_DATA_VIEW}</EuiCode>,
+                datasetPattern: <EuiCode>{DEFAULT_LOGS_DATA_VIEW}</EuiCode>,
               }}
             />
           </p>

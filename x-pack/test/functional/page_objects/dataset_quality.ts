@@ -76,6 +76,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyoutKpiValue: 'datasetQualityFlyoutKpiValue',
     datasetQualityFlyoutKpiLink: 'datasetQualityFlyoutKpiLink',
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
+    datasetQualityNoDataEmptyState: 'datasetQualityNoDataEmptyState',
+    datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
 
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
