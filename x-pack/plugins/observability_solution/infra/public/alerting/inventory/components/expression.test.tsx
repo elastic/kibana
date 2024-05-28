@@ -13,7 +13,6 @@ import { DataView, type FieldSpec } from '@kbn/data-views-plugin/common';
 import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { InventoryMetricConditions } from '../../../../common/alerting/metrics';
-import { SnapshotCustomMetricInput } from '../../../../common/http_api/snapshot_api';
 import { AlertContextMeta, defaultExpression, ExpressionRow, Expressions } from './expression';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { ResolvedDataView } from '../../../utils/data_view';
