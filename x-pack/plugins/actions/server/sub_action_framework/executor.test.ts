@@ -175,7 +175,7 @@ describe('Executor', () => {
     );
   });
 
-  it('teest', async () => {
+  it('marks schema validation errors as user error', async () => {
     const executor = createExecutor(TestExecutor);
 
     try {
