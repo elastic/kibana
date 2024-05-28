@@ -22,7 +22,7 @@ export const suggestUserProfilesRoute = (
   router.versioned
     .get({
       path: DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
-      access: 'public',
+      access: 'internal',
       options: {
         tags: ['access:securitySolution'],
       },
