@@ -10,14 +10,10 @@ import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { compareFilters, COMPARE_ALL_OPTIONS, type Filter } from '@kbn/es-query';
 import { combineCompatibleApis } from '@kbn/presentation-containers';
-import {
-  apiPublishesDataLoading,
-  PublishesDataLoading,
-  PublishingSubject,
-} from '@kbn/presentation-publishing';
+import { apiPublishesDataLoading, PublishesDataLoading } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
 import { isEqual } from 'lodash';
-import { combineLatest, distinctUntilChanged, map, Observable, skip, switchMap } from 'rxjs';
+import { distinctUntilChanged, Observable, skip } from 'rxjs';
 import { DashboardContainerInput } from '../../../../../common';
 import { DashboardContainer } from '../../dashboard_container';
 
