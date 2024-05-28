@@ -16,6 +16,7 @@ import {
   statusNotDeployed,
   statusNotInstalled,
   statusUnprivileged,
+  statusIndexed,
 } from '../test/mock_server/handlers/internal/cloud_security_posture/status_handlers';
 import { PostureTypes } from '../../common/types_old';
 
@@ -28,7 +29,7 @@ const renderNoFindingsStates = (postureType: PostureTypes = 'cspm') => {
 describe('NoFindingsStates', () => {
   startMockServer(server);
 
-  it('shows integrations installation prompt when integration is not-installed', async () => {
+  it('shows integrations installation prompt with installation links when integration is not-installed', async () => {
     server.use(statusNotInstalled);
     renderNoFindingsStates();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -39,11 +40,31 @@ describe('NoFindingsStates', () => {
           name: /detect security misconfigurations in your cloud infrastructure!/i,
         })
       ).toBeInTheDocument();
-      expect(screen.getByText('Add CSPM Integration')).toBeInTheDocument();
-      expect(screen.getByText('Add KSPM Integration')).toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      const link = screen.getByRole('link', {
+        name: /add cspm integration/i,
+      });
+
+      expect(link).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/cloud_security_posture-1.9.0/add-integration/cspm'
+      );
+    });
+
+    await waitFor(() => {
+      const link = screen.getByRole('link', {
+        name: /add kspm integration/i,
+      });
+
+      expect(link).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/cloud_security_posture-1.9.0/add-integration/kspm'
+      );
     });
   });
-  it('shows install agent prompt when status is not-deployed', async () => {
+  it('shows install agent prompt with install agent link when status is not-deployed', async () => {
     server.use(statusNotDeployed);
     renderNoFindingsStates();
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
@@ -56,21 +77,36 @@ describe('NoFindingsStates', () => {
       ).toBeInTheDocument();
     });
 
-    // Loading state
-    expect(
-      screen.getByRole('button', {
+    await waitFor(() => {
+      const link = screen.getByRole('link', {
         name: /install agent/i,
-      })
-    ).toBeDisabled();
+      });
+      expect(link).toHaveAttribute(
+        'href',
+        '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=1f850b02-c6db-4378-9323-d439db4d65b4&integration=9b69ad21-1451-462c-9cd7-cc7dee50a34e'
+      );
+    });
+  });
+  it('shows install agent prompt with install agent link when status is not-deployed and postureType is KSPM', async () => {
+    server.use(statusNotDeployed);
+    renderNoFindingsStates('kspm');
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', {
+          name: /no agents installed/i,
+        })
+      ).toBeInTheDocument();
+    });
 
     await waitFor(() => {
       const link = screen.getByRole('link', {
         name: /install agent/i,
       });
-      expect(link).toBeInTheDocument();
       expect(link).toHaveAttribute(
         'href',
-        '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=1f850b02-c6db-4378-9323-d439db4d65b4&integration=9b69ad21-1451-462c-9cd7-cc7dee50a34e'
+        '/app/integrations/detail/cloud_security_posture-1.9.0/policies?addAgentToPolicyId=689ca301-cf52-4251-b427-85817fa53800&integration=c14da36e-8476-455f-a8a8-127013a4ccee'
       );
     });
   });
@@ -103,10 +139,11 @@ describe('NoFindingsStates', () => {
       screen.getByRole('heading', {
         name: /waiting for findings data/i,
       });
-      expect(
-        screen.getByText(/collecting findings is taking longer than expected/i)
-      ).toBeInTheDocument();
     });
+
+    expect(
+      screen.getByText(/collecting findings is taking longer than expected/i)
+    ).toBeInTheDocument();
   });
   it('shows unprivileged message when status is unprivileged', async () => {
     server.use(statusUnprivileged);
@@ -119,11 +156,7 @@ describe('NoFindingsStates', () => {
           name: /privileges required/i,
         })
       ).toBeInTheDocument();
-      expect(
-        screen.getByText(
-          /to view cloud posture data, you must update privileges\. for more information, contact your kibana administrator\./i
-        )
-      ).toBeInTheDocument();
+
       expect(
         screen.getByText(/required elasticsearch index privilege for the following indices:/i)
       ).toBeInTheDocument();
@@ -136,5 +169,23 @@ describe('NoFindingsStates', () => {
         screen.getByText('logs-cloud_security_posture.vulnerabilities_latest-default')
       ).toBeInTheDocument();
     });
+  });
+  it('renders empty container when the status does not match a no finding status', async () => {
+    server.use(statusIndexed);
+
+    const { container } = renderNoFindingsStates();
+
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.queryByText(/loading/i)).not.toBeInTheDocument();
+    });
+    expect(container).toMatchInlineSnapshot(`
+      <div>
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-l-center-center-column"
+        />
+      </div>
+    `);
   });
 });
