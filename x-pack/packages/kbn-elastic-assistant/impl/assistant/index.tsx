@@ -90,6 +90,7 @@ import { clearPresentationData } from '../connectorland/connector_setup/helpers'
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
 
 export interface Props {
   conversationTitle?: string;
@@ -861,6 +862,9 @@ const AssistantComponent: React.FC<Props> = ({
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     isFlyoutMode
                   />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <InstallKnowledgeBaseButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>

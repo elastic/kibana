@@ -8,9 +8,13 @@
 import { Duplex } from 'stream';
 import { v4 as uuidv4 } from 'uuid';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ReportSource } from '@kbn/reporting-common/types';
+import {
+  REPORTING_DATA_STREAM_ALIAS,
+  REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+} from '@kbn/reporting-server';
 import type { ReportingCore } from '..';
 
 const ONE_MB = 1024 * 1024;
@@ -31,6 +35,7 @@ interface ChunkOutput {
 }
 
 interface ChunkSource {
+  '@timestamp': string;
   parent_id: string;
   output: ChunkOutput;
 }
@@ -90,7 +95,7 @@ export class ContentStream extends Duplex {
 
   private async readHead() {
     const { id, index } = this.document;
-    const body: SearchRequest['body'] = {
+    const body: SearchRequest = {
       _source: { includes: ['output.content', 'output.size', 'jobtype'] },
       query: {
         constant_score: {
@@ -110,13 +115,14 @@ export class ContentStream extends Duplex {
     const hits = response?.hits?.hits?.[0];
 
     this.jobSize = hits?._source?.output?.size;
+    this.logger.debug(`Reading job of size ${this.jobSize}`);
 
     return hits?._source?.output?.content;
   }
 
   private async readChunk() {
-    const { id, index } = this.document;
-    const body: SearchRequest['body'] = {
+    const { id } = this.document;
+    const body: SearchRequest = {
       _source: { includes: ['output.content'] },
       query: {
         constant_score: {
@@ -132,7 +138,10 @@ export class ContentStream extends Duplex {
 
     this.logger.debug(`Reading chunk #${this.chunksRead}.`);
 
-    const response = await this.client.search<ChunkSource>({ body, index });
+    const response = await this.client.search<ChunkSource>({
+      body,
+      index: REPORTING_DATA_STREAM_WILDCARD_WITH_LEGACY,
+    });
     const hits = response?.hits?.hits?.[0];
 
     return hits?._source?.output.content;
@@ -179,10 +188,11 @@ export class ContentStream extends Duplex {
   }
 
   private async writeHead(content: string) {
-    this.logger.debug(`Updating report contents.`);
+    this.logger.debug(`Updating chunk #0 (${this.document.id}).`);
 
     const body = await this.client.update<ReportSource>({
       ...this.document,
+      refresh: 'wait_for',
       body: {
         doc: {
           output: { content },
@@ -194,16 +204,19 @@ export class ContentStream extends Duplex {
   }
 
   private async writeChunk(content: string) {
-    const { id: parentId, index } = this.document;
+    const { id: parentId } = this.document;
     const id = uuidv4();
 
     this.logger.debug(`Writing chunk #${this.chunksWritten} (${id}).`);
 
     await this.client.index<ChunkSource>({
       id,
-      index,
+      index: REPORTING_DATA_STREAM_ALIAS,
+      refresh: 'wait_for',
+      op_type: 'create',
       body: {
         parent_id: parentId,
+        '@timestamp': new Date(0).toISOString(), // required for data streams compatibility
         output: {
           content,
           chunk: this.chunksWritten,

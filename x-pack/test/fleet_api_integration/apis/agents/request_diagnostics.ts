@@ -41,8 +41,9 @@ export default function (providerContext: FtrProviderContext) {
 
       expect(actionStatus.nbAgentsActionCreated).to.eql(agentCount);
       expect(
-        moment(actionStatus.expiration).diff(moment(actionStatus.creationTime), 'hours')
-      ).to.eql(3);
+        moment(actionStatus.expiration).diff(moment(actionStatus.creationTime), 'minutes') > 170 &&
+          moment(actionStatus.expiration).diff(moment(actionStatus.creationTime), 'minutes') < 190
+      ).to.eql(true);
     }
 
     it('should respond 403 if user lacks fleet read permissions', async () => {
