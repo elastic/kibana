@@ -52,8 +52,7 @@ describe(
       deleteAlertsAndRules();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/183941
-    describe.skip('with suppression configured', () => {
+    describe('with suppression configured', () => {
       beforeEach(() => {
         createRule({
           ...rule,
