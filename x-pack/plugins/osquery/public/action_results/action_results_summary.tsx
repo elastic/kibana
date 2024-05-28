@@ -83,30 +83,48 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
   const renderStatusColumn = useCallback(
     (_, item) => {
       if (item.fields['error.skipped']) {
-        return i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {
-          defaultMessage: 'skipped',
-        });
+        return (
+          <div data-test-subj="osqueryActionResultsTableStatusTabItemStatusSkipped">
+            {i18n.translate('xpack.osquery.liveQueryActionResults.table.skippedStatusText', {
+              defaultMessage: 'skipped',
+            })}
+          </div>
+        );
       }
 
       if (!item.fields.completed_at) {
-        return expired
-          ? i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
+        return expired ? (
+          <div data-test-subj="osqueryActionResultsTableStatusTabItemStatusExpired">
+            {i18n.translate('xpack.osquery.liveQueryActionResults.table.expiredStatusText', {
               defaultMessage: 'expired',
-            })
-          : i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
+            })}
+          </div>
+        ) : (
+          <div data-test-subj="osqueryActionResultsTableStatusTabItemStatusPending">
+            {i18n.translate('xpack.osquery.liveQueryActionResults.table.pendingStatusText', {
               defaultMessage: 'pending',
-            });
+            })}
+          </div>
+        );
       }
 
       if (item.fields['error.keyword']) {
-        return i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
-          defaultMessage: 'error',
-        });
+        return (
+          <div data-test-subj="osqueryActionResultsTableStatusTabItemStatusError">
+            {i18n.translate('xpack.osquery.liveQueryActionResults.table.errorStatusText', {
+              defaultMessage: 'error',
+            })}
+          </div>
+        );
       }
 
-      return i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
-        defaultMessage: 'success',
-      });
+      return (
+        <div data-test-subj="osqueryActionResultsTableStatusTabItemStatusSuccess">
+          {i18n.translate('xpack.osquery.liveQueryActionResults.table.successStatusText', {
+            defaultMessage: 'success',
+          })}
+        </div>
+      );
     },
     [expired]
   );
@@ -119,6 +137,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
           defaultMessage: 'Status',
         }),
         render: renderStatusColumn,
+        'data-test-subj': 'osqueryActionResultsTableStatusTabStatusColumn',
       },
       {
         field: 'fields.agent_id[0]',
@@ -127,6 +146,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
         }),
         truncateText: true,
         render: renderAgentIdColumn,
+        'data-test-subj': 'osqueryActionResultsTableStatusTabAgentIdColumn',
       },
       {
         field: '_source.action_response.osquery.count',
@@ -137,6 +157,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
           }
         ),
         render: renderRowsColumn,
+        'data-test-subj': 'osqueryActionResultsTableStatusTabRowsColumn',
       },
       {
         field: 'fields.error[0]',
@@ -144,6 +165,7 @@ const ActionResultsSummaryComponent: React.FC<ActionResultsSummaryProps> = ({
           defaultMessage: 'Error',
         }),
         render: renderErrorMessage,
+        'data-test-subj': 'osqueryActionResultsTableStatusTabErrorColumn',
       },
     ],
     [renderAgentIdColumn, renderRowsColumn, renderStatusColumn]
