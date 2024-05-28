@@ -25,8 +25,6 @@
     "@kbn/xstate-utils",
     "@kbn/shared-ux-utility",
     "@kbn/ui-theme",
-    "@kbn/core-notifications-browser",
-    "@kbn/formatters",
     "@kbn/data-service",
     "@kbn/observability-shared-plugin",
     "@kbn/data-plugin",
@@ -42,7 +40,8 @@
     "@kbn/deeplinks-management",
     "@kbn/deeplinks-analytics",
     "@kbn/core-elasticsearch-server",
-    "@kbn/ui-actions-plugin"
+    "@kbn/ui-actions-plugin",
+    "@kbn/metrics-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -23,6 +23,6 @@ export const esqlValidationErrorMessage = (message: string) =>
 export const ESQL_VALIDATION_MISSING_ID_IN_QUERY_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.esqlValidation.missingIdInQueryError',
   {
-    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the [metadata _id, _version, _index] operator after the source command. For example: FROM logs* [metadata _id, _version, _index].  In addition, the metadata properties (_id, _version, and _index)  must be returned in the query response.`,
+    defaultMessage: `Queries that don’t use the STATS...BY function (non-aggregating queries) must include the "metadata _id, _version, _index" operator after the source command. For example: FROM logs* metadata _id, _version, _index.  In addition, the metadata properties (_id, _version, and _index)  must be returned in the query response.`,
   }
 );

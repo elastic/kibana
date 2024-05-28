@@ -5,15 +5,10 @@
  * 2.0.
  */
 
-import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { once } from 'lodash/fp';
+import type { Logger } from '@kbn/core/server';
 
-import { postAlertsInsightsRoute } from './insights/alerts/post_alerts_insights';
-import {
-  ElasticAssistantPluginRouter,
-  ElasticAssistantPluginSetupDependencies,
-  GetElser,
-} from '../types';
+import { postAttackDiscoveryRoute } from './attack_discovery/post_attack_discovery';
+import { ElasticAssistantPluginRouter, GetElser } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
 import { readConversationRoute } from './user_conversations/read_route';
@@ -36,7 +31,7 @@ import { findAnonymizationFieldsRoute } from './anonymization_fields/find_route'
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  plugins: ElasticAssistantPluginSetupDependencies
+  getElserId: GetElser
 ) => {
   // Capabilities
   getCapabilitiesRoute(router);
@@ -56,12 +51,6 @@ export const registerRoutes = (
 
   // Knowledge Base
   deleteKnowledgeBaseRoute(router);
-  const getElserId: GetElser = once(
-    async (request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) => {
-      return (await plugins.ml.trainedModelsProvider(request, savedObjectsClient).getELSER())
-        .model_id;
-    }
-  );
   getKnowledgeBaseStatusRoute(router, getElserId);
   postKnowledgeBaseRoute(router, getElserId);
 
@@ -80,6 +69,6 @@ export const registerRoutes = (
   bulkActionAnonymizationFieldsRoute(router, logger);
   findAnonymizationFieldsRoute(router, logger);
 
-  // Alerts Insights
-  postAlertsInsightsRoute(router);
+  // Attack Discovery
+  postAttackDiscoveryRoute(router);
 };

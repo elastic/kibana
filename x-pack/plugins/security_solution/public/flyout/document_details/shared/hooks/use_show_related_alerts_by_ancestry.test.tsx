@@ -14,7 +14,6 @@ import type {
 import { useShowRelatedAlertsByAncestry } from './use_show_related_alerts_by_ancestry';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { licenseService } from '../../../../common/hooks/use_license';
-import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
 import { mockDataAsNestedObject } from '../mocks/mock_data_as_nested_object';
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 
@@ -36,7 +35,6 @@ jest.mock(
 const licenseServiceMock = licenseService as jest.Mocked<typeof licenseService>;
 const eventId = 'event-id';
 const dataAsNestedObject = mockDataAsNestedObject;
-const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 
 describe('useShowRelatedAlertsByAncestry', () => {
   let hookResult: RenderHookResult<
@@ -53,7 +51,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
       useShowRelatedAlertsByAncestry({
         getFieldsData,
         dataAsNestedObject,
-        dataFormattedForFieldBrowser,
         eventId,
         isPreview: false,
       })
@@ -62,7 +59,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: false,
       documentId: 'event-id',
-      indices: ['rule-parameters-index'],
     });
   });
 
@@ -74,7 +70,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
       useShowRelatedAlertsByAncestry({
         getFieldsData,
         dataAsNestedObject,
-        dataFormattedForFieldBrowser,
         eventId,
         isPreview: false,
       })
@@ -83,7 +78,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: false,
       documentId: 'event-id',
-      indices: ['rule-parameters-index'],
     });
   });
 
@@ -95,7 +89,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
       useShowRelatedAlertsByAncestry({
         getFieldsData,
         dataAsNestedObject,
-        dataFormattedForFieldBrowser,
         eventId,
         isPreview: false,
       })
@@ -104,7 +97,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: false,
       documentId: 'event-id',
-      indices: ['rule-parameters-index'],
     });
   });
 
@@ -117,7 +109,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
       useShowRelatedAlertsByAncestry({
         getFieldsData,
         dataAsNestedObject,
-        dataFormattedForFieldBrowser,
         eventId,
         isPreview: false,
       })
@@ -126,7 +117,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: true,
       documentId: 'event-id',
-      indices: ['rule-parameters-index'],
     });
   });
 
@@ -139,7 +129,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
       useShowRelatedAlertsByAncestry({
         getFieldsData,
         dataAsNestedObject,
-        dataFormattedForFieldBrowser,
         eventId,
         isPreview: true,
       })
@@ -148,7 +137,6 @@ describe('useShowRelatedAlertsByAncestry', () => {
     expect(hookResult.result.current).toEqual({
       show: true,
       documentId: 'ancestors-id',
-      indices: ['rule-parameters-index'],
     });
   });
 });

@@ -20,7 +20,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
 
   const apmApiClient = getService('apmApiClient');
-  const synthtrace = getService('synthtraceEsClient');
+  const synthtrace = getService('apmSynthtraceEsClient');
 
   const archiveName = 'apm_8.0.0';
 

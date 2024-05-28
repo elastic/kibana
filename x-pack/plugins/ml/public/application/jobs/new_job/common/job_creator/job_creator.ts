@@ -21,6 +21,7 @@ import {
 } from '@kbn/ml-anomaly-utils';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import type {
@@ -327,11 +328,18 @@ export class JobCreator {
 
   public set modelMemoryLimit(mml: string | null) {
     if (mml !== null) {
-      this._job_config.analysis_limits = {
-        model_memory_limit: mml,
-      };
+      if (this._job_config.analysis_limits === undefined) {
+        this._job_config.analysis_limits = {};
+      }
+      this._job_config.analysis_limits.model_memory_limit = mml;
     } else {
-      delete this._job_config.analysis_limits;
+      if (this._job_config.analysis_limits !== undefined) {
+        delete this._job_config.analysis_limits.model_memory_limit;
+
+        if (isPopulatedObject(this._job_config.analysis_limits) === false) {
+          delete this._job_config.analysis_limits;
+        }
+      }
     }
   }
 

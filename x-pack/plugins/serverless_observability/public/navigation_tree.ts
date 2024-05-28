@@ -72,6 +72,7 @@ export const navigationTree: NavigationTreeDefinition = {
         {
           id: 'aiops',
           title: 'AIOps',
+          link: 'ml:anomalyDetection',
           renderAs: 'accordion',
           spaceBefore: null,
           children: [
@@ -80,6 +81,7 @@ export const navigationTree: NavigationTreeDefinition = {
                 defaultMessage: 'Anomaly detection',
               }),
               link: 'ml:anomalyDetection',
+              id: 'ml:anomalyDetection',
               renderAs: 'item',
               children: [
                 {
@@ -124,6 +126,7 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.applications', {
             defaultMessage: 'Applications',
           }),
+          link: 'apm:services',
           renderAs: 'accordion',
           children: [
             {
@@ -156,6 +159,7 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
+          link: 'metrics:inventory',
           renderAs: 'accordion',
           children: [
             {
@@ -216,7 +220,7 @@ export const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       title: i18n.translate('xpack.serverlessObservability.nav.getStarted', {
-        defaultMessage: 'Get started',
+        defaultMessage: 'Add data',
       }),
       link: 'observabilityOnboarding',
       icon: 'launch',

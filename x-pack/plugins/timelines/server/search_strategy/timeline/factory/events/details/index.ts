@@ -7,7 +7,7 @@
 
 import { merge } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { TimelineEventsQueries } from '../../../../../../common/api/search_strategy';
 import {
   EventHit,

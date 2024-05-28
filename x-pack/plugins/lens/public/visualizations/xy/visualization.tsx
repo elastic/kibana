@@ -60,15 +60,11 @@ import {
   type XYLayerConfig,
   type XYDataLayerConfig,
   type SeriesType,
-  type PersistedState,
   visualizationTypes,
 } from './types';
 import {
-  getPersistableState,
   getAnnotationLayerErrors,
-  injectReferences,
   isHorizontalChart,
-  isPersistedState,
   annotationLayerHasUnsavedChanges,
   isHorizontalSeries,
 } from './state_helpers';
@@ -111,7 +107,7 @@ import {
   validateLayersForDimension,
   isTimeChart,
 } from './visualization_helpers';
-import { groupAxesByType } from './axes_configuration';
+import { getAxesConfiguration, groupAxesByType } from './axes_configuration';
 import type { XYByValueAnnotationLayerConfig, XYState } from './types';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
@@ -122,6 +118,7 @@ import { AddLayerButton } from './add_layer';
 import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
+import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
 
 const XY_ID = 'lnsXY';
 
@@ -151,7 +148,7 @@ export const getXyVisualization = ({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViewsService: DataViewsPublicPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
-}): Visualization<State, PersistedState, ExtraAppendLayerArg> => ({
+}): Visualization<State, XYPersistedState, ExtraAppendLayerArg> => ({
   id: XY_ID,
   visualizationTypes,
   getVisualizationTypeId(state) {
@@ -245,7 +242,7 @@ export const getXyVisualization = ({
   },
 
   getPersistableState(state) {
-    return getPersistableState(state);
+    return convertToPersistable(state);
   },
 
   getDescription,
@@ -273,31 +270,28 @@ export const getXyVisualization = ({
     annotationGroups?: AnnotationGroups,
     references?: SavedObjectReference[]
   ) {
-    const finalState =
-      state && isPersistedState(state)
-        ? injectReferences(state, annotationGroups!, references)
-        : state;
-    return (
-      finalState || {
-        title: 'Empty XY chart',
-        legend: { isVisible: true, position: Position.Right },
-        valueLabels: 'hide',
-        preferredSeriesType: defaultSeriesType,
-        layers: [
-          {
-            layerId: addNewLayer(),
-            accessors: [],
-            position: Position.Top,
-            seriesType: defaultSeriesType,
-            showGridlines: false,
-            layerType: LayerTypes.DATA,
-            palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-            colorMapping:
-              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
-          },
-        ],
-      }
-    );
+    if (state) {
+      return convertToRuntime(state, annotationGroups!, references);
+    }
+    return {
+      title: 'Empty XY chart',
+      legend: { isVisible: true, position: Position.Right },
+      valueLabels: 'hide',
+      preferredSeriesType: defaultSeriesType,
+      layers: [
+        {
+          layerId: addNewLayer(),
+          accessors: [],
+          position: Position.Top,
+          seriesType: defaultSeriesType,
+          showGridlines: false,
+          layerType: LayerTypes.DATA,
+          palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
+          colorMapping:
+            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
+        },
+      ],
+    };
   },
 
   getLayerType(layerId, state) {
@@ -334,7 +328,7 @@ export const getXyVisualization = ({
           eventAnnotationService,
           savedObjectsTagging,
           dataViews: data.dataViews,
-          kibanaTheme,
+          startServices: core,
         })
       );
     }
@@ -750,7 +744,7 @@ export const getXyVisualization = ({
       />
     );
   },
-  toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
+  toExpression: (state, layers, _attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,
       layers,
@@ -938,6 +932,93 @@ export const getXyVisualization = ({
       );
     }
 
+    const shouldRotate = state?.layers.length ? isHorizontalChart(state.layers) : false;
+    const dataLayers = getDataLayers(state.layers);
+    const axisGroups = getAxesConfiguration(dataLayers, shouldRotate, frame.activeData);
+    const logAxisGroups = axisGroups.filter(
+      ({ groupId }) =>
+        (groupId === 'left' && state.yLeftScale === 'log') ||
+        (groupId === 'right' && state.yRightScale === 'log')
+    );
+
+    if (logAxisGroups.length > 0) {
+      logAxisGroups
+        .map((axis) => {
+          const mixedDomainSeries = axis.series.filter((series) => {
+            let hasNegValues = false;
+            let hasPosValues = false;
+            const arr = activeData?.[series.layer]?.rows ?? [];
+            for (let index = 0; index < arr.length; index++) {
+              const value = arr[index][series.accessor];
+
+              if (value < 0) {
+                hasNegValues = true;
+              } else {
+                hasPosValues = true;
+              }
+
+              if (hasNegValues && hasPosValues) {
+                return true;
+              }
+            }
+
+            return false;
+          });
+          return {
+            ...axis,
+            mixedDomainSeries,
+          };
+        })
+        .forEach((axisGroup) => {
+          if (axisGroup.mixedDomainSeries.length === 0) return;
+          const { groupId } = axisGroup;
+
+          warnings.push({
+            uniqueId: `mixedLogScale-${groupId}`,
+            severity: 'warning',
+            shortMessage: '',
+            longMessage: (
+              <FormattedMessage
+                id="xpack.lens.xyVisualization.mixedLogScaleWarning"
+                defaultMessage="When the {axisName} axis is set to logarithmic scale, the dataset should not contain positive and negative data."
+                values={{
+                  axisName:
+                    groupId === 'left' ? (
+                      <FormattedMessage
+                        id="xpack.lens.xyVisualization.mixedLogScaleWarningLeft"
+                        defaultMessage="left"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.lens.xyVisualization.mixedLogScaleWarningRight"
+                        defaultMessage="right"
+                      />
+                    ),
+                }}
+              />
+            ),
+            displayLocations: [{ id: 'toolbar' }],
+            fixableInEditor: true,
+          });
+
+          axisGroup.mixedDomainSeries.forEach(({ accessor }) => {
+            warnings.push({
+              uniqueId: `mixedLogScale-dimension-${accessor}`,
+              severity: 'warning',
+              shortMessage: '',
+              longMessage: (
+                <FormattedMessage
+                  id="xpack.lens.xyVisualization.mixedLogScaleDimensionWarning"
+                  defaultMessage="This metric is using logarithmic scale and should not contain positive and negative data."
+                />
+              ),
+              displayLocations: [{ id: 'dimensionButton', dimensionId: accessor }],
+              fixableInEditor: true,
+            });
+          });
+        });
+    }
+
     const info = getNotifiableFeatures(state, frame, paletteService, fieldFormats);
 
     return errors.concat(warnings, info);
@@ -984,8 +1065,8 @@ export const getXyVisualization = ({
   },
 
   isEqual(state1, references1, state2, references2, annotationGroups) {
-    const injected1 = injectReferences(state1, annotationGroups, references1);
-    const injected2 = injectReferences(state2, annotationGroups, references2);
+    const injected1 = convertToRuntime(state1, annotationGroups, references1);
+    const injected2 = convertToRuntime(state2, annotationGroups, references2);
     return isEqual(injected1, injected2);
   },
 

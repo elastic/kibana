@@ -22,6 +22,7 @@ export enum SUB_ACTION {
   TEST = 'test',
 }
 
+export const DEFAULT_TIMEOUT_MS = 120000;
 export const DEFAULT_TOKEN_LIMIT = 8191;
 export const DEFAULT_BEDROCK_MODEL = 'anthropic.claude-3-sonnet-20240229-v1:0';
 

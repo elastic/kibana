@@ -17,7 +17,7 @@ import {
 describe(
   'App Features for Security Complete PLI with Endpoint Complete Addon',
   {
-    tags: ['@serverless'],
+    tags: ['@serverless', '@skipInServerlessMKI'],
     env: {
       ftrConfig: {
         productTypes: [

@@ -8,6 +8,7 @@ import type { ESFilter } from '@kbn/es-types';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type {
   AssetCriticalityCsvUploadResponse,
   AssetCriticalityUpsert,
@@ -16,9 +17,12 @@ import type { AssetCriticalityRecord } from '../../../../common/api/entity_analy
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
 import { assetCriticalityFieldMap } from './constants';
+import { AssetCriticalityAuditActions } from './audit';
+import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
+  auditLogger: AuditLogger | undefined;
   esClient: ElasticsearchClient;
   namespace: string;
 }
@@ -47,6 +51,16 @@ export class AssetCriticalityDataClient {
       options: {
         index: this.getIndex(),
         mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
+      },
+    });
+
+    this.options.auditLogger?.log({
+      message: 'User installed asset criticality Elasticsearch resources',
+      event: {
+        action: AssetCriticalityAuditActions.ASSET_CRITICALITY_INITIALIZE,
+        category: AUDIT_CATEGORY.DATABASE,
+        type: AUDIT_TYPE.CREATION,
+        outcome: AUDIT_OUTCOME.SUCCESS,
       },
     });
   }
@@ -83,6 +97,17 @@ export class AssetCriticalityDataClient {
       const result = await this.options.esClient.indices.exists({
         index: this.getIndex(),
       });
+
+      this.options.auditLogger?.log({
+        message: 'User checked if the asset criticality Elasticsearch resources were installed',
+        event: {
+          action: AssetCriticalityAuditActions.ASSET_CRITICALITY_INITIALIZE,
+          category: AUDIT_CATEGORY.DATABASE,
+          type: AUDIT_TYPE.ACCESS,
+          outcome: AUDIT_OUTCOME.SUCCESS,
+        },
+      });
+
       return result;
     } catch (e) {
       return false;
@@ -116,7 +141,10 @@ export class AssetCriticalityDataClient {
     }
   }
 
-  public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityRecord> {
+  public async upsert(
+    record: AssetCriticalityUpsert,
+    refresh = 'wait_for' as const
+  ): Promise<AssetCriticalityRecord> {
     const id = createId(record);
     const doc = {
       id_field: record.idField,
@@ -128,6 +156,7 @@ export class AssetCriticalityDataClient {
     await this.options.esClient.update({
       id,
       index: this.getIndex(),
+      refresh: refresh ?? false,
       body: {
         doc,
         doc_as_upsert: true,
@@ -215,10 +244,11 @@ export class AssetCriticalityDataClient {
     return { errors, stats };
   };
 
-  public async delete(idParts: AssetCriticalityIdParts) {
+  public async delete(idParts: AssetCriticalityIdParts, refresh = 'wait_for' as const) {
     await this.options.esClient.delete({
       id: createId(idParts),
       index: this.getIndex(),
+      refresh: refresh ?? false,
     });
   }
 }

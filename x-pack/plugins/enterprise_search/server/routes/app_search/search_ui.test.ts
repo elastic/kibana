@@ -27,8 +27,8 @@ describe('reference application routes', () => {
       });
     });
 
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({
+    it('creates a request to enterprise search', async () => {
+      await mockRouter.callRoute({
         params: { engineName: 'some-engine' },
       });
 

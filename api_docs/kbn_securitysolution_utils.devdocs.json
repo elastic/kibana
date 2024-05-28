@@ -228,7 +228,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"match\" | \"wildcard\" | \"match_any\""
+                  "\"wildcard\" | \"match\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -357,7 +357,7 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"match\" | \"wildcard\" | \"match_any\""
+                  "\"wildcard\" | \"match\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -528,7 +528,7 @@
         "label": "validateHasWildcardWithWrongOperator",
         "description": [],
         "signature": [
-          "({ operator, value, }: { operator: \"match\" | \"wildcard\" | \"nested\" | \"exists\" | \"match_any\"; value: string; }) => boolean"
+          "({ operator, value, }: { operator: \"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\"; value: string; }) => boolean"
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -553,7 +553,7 @@
                 "label": "operator",
                 "description": [],
                 "signature": [
-                  "\"match\" | \"wildcard\" | \"nested\" | \"exists\" | \"match_any\""
+                  "\"wildcard\" | \"match\" | \"nested\" | \"exists\" | \"match_any\""
                 ],
                 "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
                 "deprecated": false,
@@ -790,7 +790,7 @@
         "label": "EntryTypes",
         "description": [],
         "signature": [
-          "\"match\" | \"wildcard\" | \"match_any\""
+          "\"wildcard\" | \"match\" | \"match_any\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,
@@ -854,7 +854,7 @@
         "label": "TrustedAppEntryTypes",
         "description": [],
         "signature": [
-          "\"match\" | \"wildcard\""
+          "\"wildcard\" | \"match\""
         ],
         "path": "packages/kbn-securitysolution-utils/src/path_validations/index.ts",
         "deprecated": false,

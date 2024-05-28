@@ -7,6 +7,7 @@
  */
 
 import type { ESQLSearchReponse } from '@kbn/es-types';
+import { appendToESQLQuery } from '@kbn/esql-utils';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FieldStatsResponse } from '../../types';
 import {
@@ -74,14 +75,15 @@ export async function getStringTopValues(
   size = DEFAULT_TOP_VALUES_SIZE
 ): Promise<FieldStatsResponse<string | boolean>> {
   const { searchHandler, field, esqlBaseQuery } = params;
-  const esqlQuery =
-    esqlBaseQuery +
-    `| WHERE ${getSafeESQLFieldName(field.name)} IS NOT NULL
-    | STATS ${getSafeESQLFieldName(`${field.name}_terms`)} = count(${getSafeESQLFieldName(
-      field.name
-    )}) BY ${getSafeESQLFieldName(field.name)}
-    | SORT ${getSafeESQLFieldName(`${field.name}_terms`)} DESC
-    | LIMIT ${size}`;
+  const safeEsqlFieldName = getSafeESQLFieldName(field.name);
+  const safeEsqlFieldNameTerms = getSafeESQLFieldName(`${field.name}_terms`);
+  const esqlQuery = appendToESQLQuery(
+    esqlBaseQuery,
+    `| WHERE ${safeEsqlFieldName} IS NOT NULL
+    | STATS ${safeEsqlFieldNameTerms} = count(${safeEsqlFieldName}) BY ${safeEsqlFieldName}
+    | SORT ${safeEsqlFieldNameTerms} DESC
+    | LIMIT ${size}`
+  );
 
   const result = await searchHandler({ query: esqlQuery });
   const values = result?.values as Array<[number, string]>;
@@ -111,11 +113,13 @@ export async function getSimpleTextExamples(
   params: FetchAndCalculateFieldStatsParams
 ): Promise<FieldStatsResponse<string | boolean>> {
   const { searchHandler, field, esqlBaseQuery } = params;
-  const esqlQuery =
-    esqlBaseQuery +
-    `| WHERE ${getSafeESQLFieldName(field.name)} IS NOT NULL
-    | KEEP ${getSafeESQLFieldName(field.name)}
-    | LIMIT ${SIMPLE_EXAMPLES_FETCH_SIZE}`;
+  const safeEsqlFieldName = getSafeESQLFieldName(field.name);
+  const esqlQuery = appendToESQLQuery(
+    esqlBaseQuery,
+    `| WHERE ${safeEsqlFieldName} IS NOT NULL
+    | KEEP ${safeEsqlFieldName}
+    | LIMIT ${SIMPLE_EXAMPLES_FETCH_SIZE}`
+  );
 
   const result = await searchHandler({ query: esqlQuery });
   const values = ((result?.values as Array<[string | string[]]>) || []).map((value) =>

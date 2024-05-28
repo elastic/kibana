@@ -105,12 +105,32 @@ const PackagePolicyBaseSchema = {
       title: schema.string(),
       version: schema.string(),
       experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+      requires_root: schema.maybe(schema.boolean()),
     })
   ),
   // Deprecated TODO create remove issue
   output_id: schema.maybe(schema.string()),
   inputs: schema.arrayOf(schema.object(PackagePolicyInputsSchema)),
   vars: schema.maybe(ConfigRecordSchema),
+  overrides: schema.maybe(
+    schema.nullable(
+      schema.object({
+        inputs: schema.maybe(
+          schema.recordOf(schema.string(), schema.any(), {
+            validate: (val) => {
+              if (
+                Object.keys(val).some(
+                  (key) => key.match(/^compiled_inputs(\.)?/) || key.match(/^compiled_stream(\.)?/)
+                )
+              ) {
+                return 'Overrides of compiled_inputs and compiled_stream are not allowed';
+              }
+            },
+          })
+        ),
+      })
+    )
+  ),
 };
 
 export const NewPackagePolicySchema = schema.object({
@@ -129,6 +149,7 @@ const CreatePackagePolicyProps = {
       title: schema.maybe(schema.string()),
       version: schema.string(),
       experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+      requires_root: schema.maybe(schema.boolean()),
     })
   ),
   // Deprecated TODO create remove issue
@@ -203,6 +224,7 @@ export const SimplifiedCreatePackagePolicyRequestBodySchema =
       name: schema.string(),
       version: schema.string(),
       experimental_data_stream_features: schema.maybe(ExperimentalDataStreamFeatures),
+      requires_root: schema.maybe(schema.boolean()),
     }),
   });
 

@@ -7,7 +7,7 @@
  */
 
 import { join } from 'path';
-import { readdir, unlink, access } from 'fs/promises';
+import { readdir, access } from 'fs/promises';
 import { getFileNameMatcher, getRollingFileName } from './pattern_matcher';
 import { moveFile } from './utils';
 
@@ -45,16 +45,6 @@ export const getOrderedRolledFiles = async ({
     .filter(({ index }) => index !== undefined)
     .sort((a, b) => a.index! - b.index!)
     .map(({ fileName }) => fileName);
-};
-
-export const deleteFiles = async ({
-  logFileFolder,
-  filesToDelete,
-}: {
-  logFileFolder: string;
-  filesToDelete: string[];
-}) => {
-  await Promise.all(filesToDelete.map((fileToDelete) => unlink(join(logFileFolder, fileToDelete))));
 };
 
 export const rollPreviousFilesInOrder = async ({

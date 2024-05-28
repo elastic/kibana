@@ -50,7 +50,7 @@ describe('timeSeriesQuery', () => {
   });
 
   it('fails as expected when the query params are invalid', async () => {
-    expect(
+    await expect(
       timeSeriesQuery({ ...params, query: { ...params.query, dateStart: 'x' } })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid date format for dateStart: \\"x\\""`);
   });

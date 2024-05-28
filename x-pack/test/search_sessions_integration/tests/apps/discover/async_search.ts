@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/discover/default'
       );
       await kibanaServer.uiSettings.replace({
-        'discover:enableESQL': true,
+        enableESQL: true,
       });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();

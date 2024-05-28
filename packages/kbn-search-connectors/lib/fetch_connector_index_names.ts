@@ -8,18 +8,13 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { CONNECTORS_INDEX } from '..';
+import { fetchConnectors } from './fetch_connectors';
 import { isIndexNotFoundException } from '../utils/identify_exceptions';
 
 export async function fetchConnectorIndexNames(client: ElasticsearchClient): Promise<string[]> {
   try {
-    const result = await client.search({
-      _source: false,
-      fields: [{ field: 'index_name' }],
-      index: CONNECTORS_INDEX,
-      size: 10000,
-    });
-    return (result?.hits.hits ?? []).map((field) => field.fields?.index_name[0] ?? '');
+    const allConnectors = await fetchConnectors(client);
+    return (allConnectors ?? []).map((connector) => connector.index_name ?? '');
   } catch (error) {
     if (isIndexNotFoundException(error)) {
       return [];

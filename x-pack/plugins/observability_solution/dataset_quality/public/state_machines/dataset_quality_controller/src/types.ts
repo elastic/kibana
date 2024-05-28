@@ -7,17 +7,21 @@
 
 import { DoneInvokeEvent } from 'xstate';
 import { RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
+import { QualityIndicators } from '../../../../common/types';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   DashboardType,
   DataStreamDegradedDocsStatServiceResponse,
+  DataStreamSettings,
   DataStreamDetails,
   DataStreamStatServiceResponse,
   IntegrationsResponse,
+  DataStreamStat,
+  DataStreamStatType,
+  GetNonAggregatableDataStreamsResponse,
 } from '../../../../common/data_streams_stats';
-import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
 export type FlyoutDataset = Omit<
   DataStreamStat,
@@ -43,6 +47,7 @@ interface FiltersCriteria {
   timeRange: TimeRangeConfig;
   integrations: string[];
   namespaces: string[];
+  qualities: QualityIndicators[];
   query?: string;
 }
 
@@ -53,9 +58,11 @@ export interface WithTableOptions {
 export interface WithFlyoutOptions {
   flyout: {
     dataset?: FlyoutDataset;
+    datasetSettings?: DataStreamSettings;
     datasetDetails?: DataStreamDetails;
     insightsTimeRange?: TimeRangeConfig;
     breakdownField?: string;
+    isNonAggregatable?: boolean;
   };
 }
 
@@ -64,15 +71,20 @@ export interface WithFilters {
 }
 
 export interface WithDataStreamStats {
-  dataStreamStats: DataStreamStat[];
+  dataStreamStats: DataStreamStatType[];
 }
 
 export interface WithDegradedDocs {
   degradedDocStats: DegradedDocsStat[];
 }
 
+export interface WithNonAggregatableDatasets {
+  nonAggregatableDatasets: string[];
+}
+
 export interface WithDatasets {
   datasets: DataStreamStat[];
+  isSizeStatsAvailable: boolean;
 }
 
 export interface WithIntegrations {
@@ -85,6 +97,7 @@ export type DefaultDatasetQualityControllerState = { type: string } & WithTableO
   WithFlyoutOptions &
   WithDatasets &
   WithFilters &
+  WithNonAggregatableDatasets &
   Partial<WithIntegrations>;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
@@ -104,14 +117,6 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'datasets.loaded.flyoutOpen.fetching';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
-      value: 'datasets.loaded.flyoutOpen';
-      context: DefaultDatasetQualityStateContext;
-    }
-  | {
       value: 'degradedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     }
@@ -121,6 +126,14 @@ export type DatasetQualityControllerTypeState =
     }
   | {
       value: 'integrations.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'nonAggregatableDatasets.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'flyout.initializing.dataStreamSettings.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {
@@ -180,11 +193,18 @@ export type DatasetQualityControllerEvent =
       namespaces: string[];
     }
   | {
+      type: 'UPDATE_QUALITIES';
+      qualities: QualityIndicators[];
+    }
+  | {
       type: 'UPDATE_QUERY';
       query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | DoneInvokeEvent<GetNonAggregatableDataStreamsResponse>
   | DoneInvokeEvent<DashboardType>
+  | DoneInvokeEvent<DataStreamDetails>
+  | DoneInvokeEvent<DataStreamSettings>
   | DoneInvokeEvent<DataStreamStatServiceResponse>
   | DoneInvokeEvent<IntegrationsResponse>
   | DoneInvokeEvent<Error>;

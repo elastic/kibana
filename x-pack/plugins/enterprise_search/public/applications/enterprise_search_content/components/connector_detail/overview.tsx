@@ -148,7 +148,12 @@ export const ConnectorDetailOverview: React.FC = () => {
                   defaultMessage="Convert it to a {link}, to be self-managed on your own infrastructure. Native connectors are available only in your Elastic Cloud deployment."
                   values={{
                     link: (
-                      <EuiLink href={docLinks.buildConnector} target="_blank">
+                      <EuiLink
+                        data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                        data-telemetry-id="entSearchContent-connectorDetailOverview-nativeCloudCallout-connectorClientLink"
+                        href={docLinks.buildConnector}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.connectors.overview.nativeCloudCallout.connectorClient',
                           { defaultMessage: 'connector client' }
@@ -160,7 +165,12 @@ export const ConnectorDetailOverview: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiButton color="warning" fill onClick={() => showModal()}>
+            <EuiButton
+              data-test-subj="entSearchContent-connectorDetailOverview-nativeCloudCallout-convertToSelfManagedClientButton"
+              color="warning"
+              fill
+              onClick={() => showModal()}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.connectors.overview.convertConnector.buttonLabel',
                 { defaultMessage: 'Convert connector' }
@@ -176,7 +186,10 @@ export const ConnectorDetailOverview: React.FC = () => {
       {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
         <>
           <EuiSpacer />
-          <SyncJobs />
+          <SyncJobs
+            errorOnAccessSync={Boolean(connector.last_access_control_sync_error)}
+            errorOnContentSync={Boolean(connector.last_sync_error)}
+          />
         </>
       )}
     </>

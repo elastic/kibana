@@ -17,7 +17,11 @@ import {
 } from '@elastic/eui';
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EndpointAgentStatus } from '../../../../../common/components/endpoint/endpoint_agent_status';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import {
+  AgentStatus,
+  EndpointAgentStatus,
+} from '../../../../../common/components/agents/agent_status';
 import { isPolicyOutOfDate } from '../../utils';
 import type { HostInfo } from '../../../../../../common/endpoint/types';
 import { useEndpointSelector } from '../hooks';
@@ -54,6 +58,7 @@ interface EndpointDetailsContentProps {
 
 export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
   ({ hostInfo, policyInfo }) => {
+    const agentStatusClientEnabled = useIsExperimentalFeatureEnabled('agentStatusClientEnabled');
     const queryParams = useEndpointSelector(uiQueryParams);
     const policyStatus = useMemo(
       () => hostInfo.metadata.Endpoint.policy.applied.status,
@@ -95,7 +100,10 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
               />
             </ColumnTitle>
           ),
-          description: (
+          // TODO: 8.15 remove `EndpointAgentStatus` when `agentStatusClientEnabled` FF is enabled and removed
+          description: agentStatusClientEnabled ? (
+            <AgentStatus agentId={hostInfo.metadata.agent.id} agentType="endpoint" />
+          ) : (
             <EndpointAgentStatus
               pendingActions={getHostPendingActions(hostInfo.metadata.agent.id)}
               endpointHostInfo={hostInfo}
@@ -219,6 +227,7 @@ export const EndpointDetailsContent = memo<EndpointDetailsContentProps>(
         },
       ];
     }, [
+      agentStatusClientEnabled,
       hostInfo,
       getHostPendingActions,
       missingPolicies,

@@ -165,6 +165,7 @@ export function createProfilingEsClient({
       azureCostDiscountRate,
       sampleSize,
       limit,
+      durationSeconds,
     }) {
       const controller = new AbortController();
 
@@ -187,6 +188,7 @@ export function createProfilingEsClient({
               aws_cost_factor: awsCostDiscountRate,
               cost_per_core_hour: costPervCPUPerHour,
               azure_cost_factor: azureCostDiscountRate,
+              requested_duration: durationSeconds,
             },
           },
           {

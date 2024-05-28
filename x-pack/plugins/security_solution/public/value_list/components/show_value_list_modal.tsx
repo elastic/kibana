@@ -10,6 +10,7 @@ import React, { useState, useCallback } from 'react';
 import { useListsPrivileges } from '../../detections/containers/detection_engine/lists/use_lists_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { ValueListModal } from './value_list_modal';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 export const ShowValueListModal = ({
   listId,
@@ -27,7 +28,10 @@ export const ShowValueListModal = ({
   );
 
   const onCloseModal = useCallback(() => setShowModal(false), []);
-  const onShowModal = useCallback(() => setShowModal(true), []);
+  const onShowModal = useCallback(() => {
+    track(METRIC_TYPE.CLICK, TELEMETRY_EVENT.OPEN_VALUE_LIST_MODAL);
+    setShowModal(true);
+  }, []);
 
   if (loading) return null;
 

@@ -21,9 +21,8 @@ import {
 
 import type { PatchRuleRequestBody } from '../../../../../common/api/detection_engine/rule_management';
 import type {
-  RelatedIntegrationArray,
-  RequiredFieldArray,
   RuleCreateProps,
+  RuleUpdateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
@@ -78,12 +77,14 @@ import type {
 } from '../../rule_schema';
 import { transformFromAlertThrottle, transformToActionFrequency } from './rule_actions';
 import {
+  addEcsToRequiredFields,
   convertAlertSuppressionToCamel,
   convertAlertSuppressionToSnake,
   migrateLegacyInvestigationFields,
 } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import { convertObjectKeysToSnakeCase } from '../../../../utils/object_case_converters';
 
 const DEFAULT_FROM = 'now-6m' as const;
 const DEFAULT_TO = 'now' as const;
@@ -120,6 +121,7 @@ export const typeSpecificSnakeToCamel = (
         type: params.type,
         language: params.language,
         query: params.query,
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'threat_match': {
@@ -236,6 +238,8 @@ const patchEsqlParams = (
     type: existingRule.type,
     language: params.language ?? existingRule.language,
     query: params.query ?? existingRule.query,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
@@ -426,12 +430,68 @@ export const patchTypeSpecificSnakeToCamel = (
   }
 };
 
+interface ConvertUpdateAPIToInternalSchemaProps {
+  existingRule: SanitizedRule<RuleParams>;
+  ruleUpdate: RuleUpdateProps;
+}
+
+export const convertUpdateAPIToInternalSchema = ({
+  existingRule,
+  ruleUpdate,
+}: ConvertUpdateAPIToInternalSchemaProps) => {
+  const alertActions =
+    ruleUpdate.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
+  const actions = transformToActionFrequency(alertActions, ruleUpdate.throttle);
+
+  const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
+
+  const newInternalRule: InternalRuleUpdate = {
+    name: ruleUpdate.name,
+    tags: ruleUpdate.tags ?? [],
+    params: {
+      author: ruleUpdate.author ?? [],
+      buildingBlockType: ruleUpdate.building_block_type,
+      description: ruleUpdate.description,
+      ruleId: existingRule.params.ruleId,
+      falsePositives: ruleUpdate.false_positives ?? [],
+      from: ruleUpdate.from ?? 'now-6m',
+      investigationFields: ruleUpdate.investigation_fields,
+      immutable: existingRule.params.immutable,
+      license: ruleUpdate.license,
+      outputIndex: ruleUpdate.output_index ?? '',
+      timelineId: ruleUpdate.timeline_id,
+      timelineTitle: ruleUpdate.timeline_title,
+      meta: ruleUpdate.meta,
+      maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
+      relatedIntegrations: ruleUpdate.related_integrations ?? [],
+      requiredFields: addEcsToRequiredFields(ruleUpdate.required_fields),
+      riskScore: ruleUpdate.risk_score,
+      riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
+      ruleNameOverride: ruleUpdate.rule_name_override,
+      setup: ruleUpdate.setup,
+      severity: ruleUpdate.severity,
+      severityMapping: ruleUpdate.severity_mapping ?? [],
+      threat: ruleUpdate.threat ?? [],
+      timestampOverride: ruleUpdate.timestamp_override,
+      timestampOverrideFallbackDisabled: ruleUpdate.timestamp_override_fallback_disabled,
+      to: ruleUpdate.to ?? 'now',
+      references: ruleUpdate.references ?? [],
+      namespace: ruleUpdate.namespace,
+      note: ruleUpdate.note,
+      version: ruleUpdate.version ?? existingRule.params.version,
+      exceptionsList: ruleUpdate.exceptions_list ?? [],
+      ...typeSpecificParams,
+    },
+    schedule: { interval: ruleUpdate.interval ?? '5m' },
+    actions,
+  };
+
+  return newInternalRule;
+};
+
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  nextParams: PatchRuleRequestBody & {
-    related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
-  },
+  nextParams: PatchRuleRequestBody,
   existingRule: SanitizedRule<RuleParams>
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
@@ -461,7 +521,7 @@ export const convertPatchAPIToInternalSchema = (
       meta: nextParams.meta ?? existingParams.meta,
       maxSignals: nextParams.max_signals ?? existingParams.maxSignals,
       relatedIntegrations: nextParams.related_integrations ?? existingParams.relatedIntegrations,
-      requiredFields: nextParams.required_fields ?? existingParams.requiredFields,
+      requiredFields: addEcsToRequiredFields(nextParams.required_fields),
       riskScore: nextParams.risk_score ?? existingParams.riskScore,
       riskScoreMapping: nextParams.risk_score_mapping ?? existingParams.riskScoreMapping,
       ruleNameOverride: nextParams.rule_name_override ?? existingParams.ruleNameOverride,
@@ -486,15 +546,18 @@ export const convertPatchAPIToInternalSchema = (
   };
 };
 
+interface RuleCreateOptions {
+  immutable?: boolean;
+  defaultEnabled?: boolean;
+}
+
 // eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
-  input: RuleCreateProps & {
-    related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
-  },
-  immutable = false,
-  defaultEnabled = true
+  input: RuleCreateProps,
+  options?: RuleCreateOptions
 ): InternalRuleCreate => {
+  const { immutable = false, defaultEnabled = true } = options ?? {};
+
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
 
@@ -536,7 +599,7 @@ export const convertCreateAPIToInternalSchema = (
       version: input.version ?? 1,
       exceptionsList: input.exceptions_list ?? [],
       relatedIntegrations: input.related_integrations ?? [],
-      requiredFields: input.required_fields ?? [],
+      requiredFields: addEcsToRequiredFields(input.required_fields),
       setup: input.setup ?? '',
       ...typeSpecificParams,
     },
@@ -570,6 +633,7 @@ export const typeSpecificCamelToSnake = (
         type: params.type,
         language: params.language,
         query: params.query,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'threat_match': {
@@ -691,6 +755,7 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     version: params.version,
     exceptions_list: params.exceptionsList,
     immutable: params.immutable,
+    rule_source: convertObjectKeysToSnakeCase(params.ruleSource),
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
     setup: params.setup ?? '',
@@ -774,6 +839,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
   return RuleResponse.parse({
     ...prebuiltRuleAssetDefaults,
     ...prebuiltRuleAsset,
+    required_fields: addEcsToRequiredFields(prebuiltRuleAsset.required_fields),
     ...ruleResponseSpecificFields,
   });
 };

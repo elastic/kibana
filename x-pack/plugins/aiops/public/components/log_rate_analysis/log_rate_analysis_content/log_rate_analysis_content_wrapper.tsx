@@ -96,7 +96,6 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
             <StorageContextProvider storage={localStorage} storageKeys={AIOPS_STORAGE_KEYS}>
               <DatePickerContextProvider {...datePickerDeps}>
                 <LogRateAnalysisContent
-                  dataView={dataView}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
                   stickyHistogram={stickyHistogram}

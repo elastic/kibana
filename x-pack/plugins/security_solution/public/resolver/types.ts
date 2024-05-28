@@ -878,7 +878,7 @@ export interface ResolverPluginSetup {
 
   /**
    * The Resolver component without the required Providers.
-   * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
+   * You must wrap this component in: `KibanaRenderContextProvider`, `Router` (from react-router,) `KibanaContextProvider`,
    * and the `Provider` component provided by this object.
    */
   ResolverWithoutProviders: React.MemoExoticComponent<

@@ -179,6 +179,11 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
       defaultMessage: 'Site menu',
     }),
+    'euiCollapsedNavButton.ariaLabelButtonIcon': ({ title }: EuiValues) =>
+      i18n.translate('core.euiCollapsedNavButton.ariaLabelButtonIcon', {
+        defaultMessage: '{title}, quick navigation menu',
+        values: { title },
+      }),
     'euiCollapsibleNavButton.ariaLabelExpand': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelExpand',
       { defaultMessage: 'Expand navigation' }
@@ -194,6 +199,18 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelOpen',
       { defaultMessage: 'Open navigation' }
+    ),
+    'euiCollapsibleNavKibanaSolution.switcherTitle': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.switcherTitle',
+      { defaultMessage: 'Solution view' }
+    ),
+    'euiCollapsibleNavKibanaSolution.switcherAriaLabel': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.switcherAriaLabel',
+      { defaultMessage: '- click to switch to another solution' }
+    ),
+    'euiCollapsibleNavKibanaSolution.groupLabel': i18n.translate(
+      'core.euiCollapsibleNavKibanaSolution.groupLabel',
+      { defaultMessage: 'Navigate to solution' }
     ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
@@ -1377,11 +1394,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       'core.euiDatePopoverContent.nowTabButtonEnd',
       { defaultMessage: 'Set end date and time to now' }
     ),
-    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) =>
-      i18n.translate('core.euiAbsoluteTab.dateFormatError', {
-        defaultMessage: 'Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp.',
-        values: { dateFormat },
-      }),
+    'euiAbsoluteTab.dateFormatError': ({ dateFormat }: EuiValues) => (
+      <FormattedMessage
+        id="core.euiAbsoluteTab.dateFormatError"
+        defaultMessage="Allowed formats: {dateFormat}, ISO 8601, RFC 2822, or Unix timestamp."
+        values={{ dateFormat }}
+      />
+    ),
     'euiRelativeTab.fullDescription': ({ unit }: EuiValues) =>
       i18n.translate('core.euiRelativeTab.fullDescription', {
         defaultMessage: 'The unit is changeable. Currently set to {unit}.',
@@ -1399,9 +1418,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiRelativeTab.dateInputError': i18n.translate('core.euiRelativeTab.dateInputError', {
       defaultMessage: 'Must be a valid range',
     }),
-    'euiAbsoluteTab.dateFormatHint': i18n.translate('core.euiAbsoluteTab.dateFormatHint', {
-      defaultMessage: 'Press the Enter key to parse as a date.',
-    }),
+    'euiAbsoluteTab.dateFormatButtonLabel': i18n.translate(
+      'core.euiAbsoluteTab.dateFormatButtonLabel',
+      {
+        defaultMessage: 'Parse date',
+      }
+    ),
     'euiResizableButton.horizontalResizerAriaLabel': i18n.translate(
       'core.euiResizableButton.horizontalResizerAriaLabel',
       {

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { jsonRt, toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { offsetRt } from '../../../common/comparison_rt';
@@ -23,6 +22,7 @@ import {
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
   environmentRt,
+  filtersRt,
   kueryRt,
   rangeRt,
   serviceTransactionDataSourceRt,
@@ -221,7 +221,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
         bucketSizeInSeconds: toNumberRt,
         useDurationSummary: toBooleanRt,
       }),
-      t.partial({ transactionName: t.string }),
+      t.partial({ transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
       serviceTransactionDataSourceRt,
     ]),
@@ -235,6 +235,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
     const {
       environment,
       kuery,
+      filters,
       transactionType,
       transactionName,
       latencyAggregationType,
@@ -250,6 +251,7 @@ const transactionLatencyChartsRoute = createApmServerRoute({
     const options = {
       environment,
       kuery,
+      filters,
       serviceName,
       transactionType,
       transactionName,
@@ -372,7 +374,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     }),
     query: t.intersection([
       t.type({ transactionType: t.string, bucketSizeInSeconds: toNumberRt }),
-      t.partial({ transactionName: t.string }),
+      t.partial({ transactionName: t.string, filters: filtersRt }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt, serviceTransactionDataSourceRt]),
     ]),
   }),
@@ -385,6 +387,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     const {
       environment,
       kuery,
+      filters,
       transactionType,
       transactionName,
       start,
@@ -398,6 +401,7 @@ const transactionChartsErrorRateRoute = createApmServerRoute({
     return getFailedTransactionRatePeriods({
       environment,
       kuery,
+      filters,
       serviceName,
       transactionType,
       transactionName,

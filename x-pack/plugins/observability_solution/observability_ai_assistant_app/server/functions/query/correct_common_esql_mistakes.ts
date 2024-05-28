@@ -62,7 +62,7 @@ function split(value: string, splitToken: string) {
   return statements;
 }
 
-function splitIntoCommands(query: string) {
+export function splitIntoCommands(query: string) {
   const commands: string[] = split(query, '|');
 
   return commands.map((command) => {
@@ -93,8 +93,8 @@ function removeColumnQuotesAndEscape(column: string) {
 function replaceAsKeywordWithAssignments(command: string) {
   return command.replaceAll(/^STATS\s*(.*)/g, (__, statsOperations: string) => {
     return `STATS ${statsOperations.replaceAll(
-      /(,\s*)?(.*?)\sAS\s([`a-zA-Z0-9.\-_]+)/g,
-      '$1$3 = $2'
+      /(,\s*)?(.*?)\s(AS|as)\s([`a-zA-Z0-9.\-_]+)/g,
+      '$1$4 = $2'
     )}`;
   });
 }
@@ -104,7 +104,7 @@ function isValidColumnName(column: string) {
 }
 
 function escapeColumns(line: string) {
-  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/) ?? ['', '', ''];
+  const [, command, body] = line.match(/^([A-Za-z_]+)(.*)$/s) ?? ['', '', ''];
 
   const escapedBody = split(body.trim(), ',')
     .map((statement) => {
@@ -196,9 +196,33 @@ function escapeExpressionsInSort(sortCommand: string) {
   return `SORT ${columnsInSort.join(', ')}`;
 }
 
+function ensureEqualityOperators(whereCommand: string) {
+  const body = whereCommand.split(/^WHERE /)[1];
+
+  const byChar = body.split('');
+
+  let next = '';
+  let isColumnName = false;
+  byChar.forEach((char, index) => {
+    next += char;
+
+    if (!isColumnName && char === '=' && byChar[index - 1] === ' ' && byChar[index + 1] === ' ') {
+      next += '=';
+    }
+
+    if (!isColumnName && (char === '`' || char.match(/[a-z@]/i))) {
+      isColumnName = true;
+    } else if (isColumnName && (char === '`' || !char.match(/[a-z@0-9]/i))) {
+      isColumnName = false;
+    }
+  });
+
+  return `WHERE ${next}`;
+}
+
 export function correctCommonEsqlMistakes(content: string, log: Logger) {
   return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
-    const commands = splitIntoCommands(query);
+    const commands = splitIntoCommands(query.trim());
 
     const formattedCommands: string[] = commands.map(({ name, command }, index) => {
       let formattedCommand = command;
@@ -206,12 +230,14 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
       switch (name) {
         case 'FROM':
           formattedCommand = formattedCommand
-            .replaceAll(/FROM "(.*)"/g, 'FROM `$1`')
-            .replaceAll(/FROM '(.*)'/g, 'FROM `$1`');
+            .replaceAll(/FROM "(.*)"/g, 'FROM $1')
+            .replaceAll(/FROM '(.*)'/g, 'FROM $1')
+            .replaceAll(/FROM `(.*)`/g, 'FROM $1');
           break;
 
         case 'WHERE':
           formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+          formattedCommand = ensureEqualityOperators(formattedCommand);
           break;
 
         case 'EVAL':

@@ -8,7 +8,9 @@ import { validateQuery, getActions } from '@kbn/esql-validation-autocomplete';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 
 const fixedQueryByOneAction = async (queryString: string) => {
-  const { errors } = await validateQuery(queryString, getAstAndSyntaxErrors);
+  const { errors } = await validateQuery(queryString, getAstAndSyntaxErrors, {
+    ignoreOnMissingCallbacks: true,
+  });
 
   const actions = await getActions(queryString, errors, getAstAndSyntaxErrors, {
     relaxOnMissingCallbacks: true,
@@ -20,6 +22,7 @@ const fixedQueryByOneAction = async (queryString: string) => {
     const correctText = firstAction.edits[0].text;
     const problematicString = queryString.substring(range.startColumn - 1, range.endColumn - 1);
     const fixedQuery = queryString.replace(problematicString, correctText);
+
     return {
       query: fixedQuery,
       shouldRunAgain: Boolean(actions.length),

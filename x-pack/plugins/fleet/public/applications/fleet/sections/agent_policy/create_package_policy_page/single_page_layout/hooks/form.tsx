@@ -31,7 +31,10 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
 } from '../../../../../../../../common';
-import { getMaxPackageName } from '../../../../../../../../common/services';
+import {
+  getMaxPackageName,
+  isRootPrivilegesRequired,
+} from '../../../../../../../../common/services';
 import { useConfirmForceInstall } from '../../../../../../integrations/hooks';
 import { validatePackagePolicy, validationHasErrors } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -45,7 +48,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useAgentlessPolicy } from './setup_technology';
+import { useAgentless } from './setup_technology';
 
 async function createAgentPolicy({
   packagePolicy,
@@ -131,7 +134,8 @@ export function useOnSubmit({
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
-  const { isAgentlessPolicyId } = useAgentlessPolicy();
+  const { isAgentlessIntegration, isAgentlessAgentPolicy, isAgentlessPackagePolicy } =
+    useAgentless();
 
   // Update agent policy method
   const updateAgentPolicy = useCallback(
@@ -260,10 +264,20 @@ export function useOnSubmit({
       }
       if (
         agentCount !== 0 &&
-        !isAgentlessPolicyId(packagePolicy?.policy_id) &&
+        !(isAgentlessIntegration(packageInfo) || isAgentlessPackagePolicy(packagePolicy)) &&
         formState !== 'CONFIRM'
       ) {
         setFormState('CONFIRM');
+        return;
+      }
+      if (
+        packageInfo &&
+        isRootPrivilegesRequired(packageInfo) &&
+        (agentPolicy?.unprivileged_agents ?? 0) > 0 &&
+        formState !== 'CONFIRM' &&
+        formState !== 'CONFIRM_UNPRIVILEGED'
+      ) {
+        setFormState('CONFIRM_UNPRIVILEGED');
         return;
       }
       let createdPolicy = overrideCreatedAgentPolicy;
@@ -272,7 +286,8 @@ export function useOnSubmit({
           setFormState('LOADING');
           if ((withSysMonitoring || newAgentPolicy.monitoring_enabled?.length) ?? 0 > 0) {
             const packagesToPreinstall: Array<string | { name: string; version: string }> = [];
-            if (packageInfo) {
+            // skip preinstall of input package, to be able to rollback when package policy creation fails
+            if (packageInfo && packageInfo.type !== 'input') {
               packagesToPreinstall.push({ name: packageInfo.name, version: packageInfo.version });
             }
             if (withSysMonitoring) {
@@ -286,7 +301,6 @@ export function useOnSubmit({
               await sendBulkInstallPackages([...new Set(packagesToPreinstall)]);
             }
           }
-
           createdPolicy = await createAgentPolicy({
             newAgentPolicy,
             packagePolicy,
@@ -306,7 +320,12 @@ export function useOnSubmit({
       }
 
       const agentPolicyIdToSave = createdPolicy?.id ?? packagePolicy.policy_id;
-      const shouldForceInstallOnAgentless = isAgentlessPolicyId(agentPolicyIdToSave);
+
+      const shouldForceInstallOnAgentless =
+        isAgentlessAgentPolicy(createdPolicy) ||
+        isAgentlessIntegration(packageInfo) ||
+        isAgentlessPackagePolicy(packagePolicy);
+
       const forceInstall = force || shouldForceInstallOnAgentless;
 
       setFormState('LOADING');
@@ -410,18 +429,20 @@ export function useOnSubmit({
       formState,
       hasErrors,
       agentCount,
-      packagePolicy,
+      isAgentlessIntegration,
+      packageInfo,
       selectedPolicyTab,
-      isAgentlessPolicyId,
+      packagePolicy,
+      isAgentlessAgentPolicy,
+      isAgentlessPackagePolicy,
+      hasFleetAddAgentsPrivileges,
       withSysMonitoring,
       newAgentPolicy,
       updatePackagePolicy,
-      packageInfo,
       notifications.toasts,
       agentPolicy,
       onSaveNavigate,
       confirmForceInstall,
-      hasFleetAddAgentsPrivileges,
     ]
   );
 

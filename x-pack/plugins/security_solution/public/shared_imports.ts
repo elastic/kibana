@@ -11,9 +11,12 @@ export type {
   FormData,
   FormHook,
   FormSchema,
+  FormSubmitHandler,
   ValidationError,
+  ValidationFuncArg,
   ValidationFunc,
   ArrayItem,
+  FieldConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 export {
   getUseField,
@@ -23,6 +26,7 @@ export {
   FormDataProvider,
   UseField,
   UseMultiFields,
+  UseArray,
   useForm,
   useFormContext,
   useFormData,

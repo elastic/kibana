@@ -6,7 +6,7 @@
  */
 
 import { EuiTextArea } from '@elastic/eui';
-import React, { useCallback, useEffect, forwardRef } from 'react';
+import React, { useCallback, forwardRef } from 'react';
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
@@ -41,10 +41,6 @@ export const PromptTextArea = forwardRef<HTMLTextAreaElement, Props>(
       },
       [value, onPromptSubmit, handlePromptChange]
     );
-
-    useEffect(() => {
-      handlePromptChange(value);
-    }, [handlePromptChange, value]);
 
     return (
       <EuiTextArea

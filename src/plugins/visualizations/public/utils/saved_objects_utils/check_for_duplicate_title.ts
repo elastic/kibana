@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { OverlayStart } from '@kbn/core/public';
-import type { VisSavedObject } from '../../types';
+import type { StartServices, VisSavedObject } from '../../types';
 import { SAVE_DUPLICATE_REJECTED } from './constants';
 import { findObjectByTitle } from './find_object_by_title';
 import { displayDuplicateTitleConfirmModal } from './display_duplicate_title_confirm_modal';
@@ -26,11 +25,8 @@ export async function checkForDuplicateTitle(
   copyOnSave: boolean,
   isTitleDuplicateConfirmed: boolean,
   onTitleDuplicate: (() => void) | undefined,
-  services: {
-    overlays: OverlayStart;
-  }
+  services: StartServices
 ): Promise<boolean> {
-  const { overlays } = services;
   // Don't check for duplicates if user has already confirmed save with duplicate title
   if (isTitleDuplicateConfirmed) {
     return true;
@@ -55,5 +51,5 @@ export async function checkForDuplicateTitle(
 
   // TODO: make onTitleDuplicate a required prop and remove UI components from this class
   // Need to leave here until all users pass onTitleDuplicate.
-  return displayDuplicateTitleConfirmModal(savedObject, overlays);
+  return displayDuplicateTitleConfirmModal(savedObject, services);
 }

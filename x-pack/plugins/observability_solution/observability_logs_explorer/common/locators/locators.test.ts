@@ -99,6 +99,21 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
+    it('should allow specifying breakdown field', async () => {
+      const params: AllDatasetsLocatorParams = {
+        breakdownField: 'service.name',
+      };
+
+      const { allDatasetsLocator } = await setup();
+      const location = await allDatasetsLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: '/?pageState=(breakdownField:service.name,dataSourceSelection:(selectionType:all),v:2)',
+        state: {},
+      });
+    });
+
     it('should allow specifying columns', async () => {
       const params: AllDatasetsLocatorParams = {
         columns: [{ field: '_source', type: 'document-field' }],
@@ -207,6 +222,22 @@ describe('Observability Logs Explorer Locators', () => {
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: `/?pageState=(dataSourceSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),refreshInterval:(pause:!f,value:666),v:2)`,
+        state: {},
+      });
+    });
+
+    it('should allow specifying breakdown field', async () => {
+      const params: ObsLogsExplorerDataViewLocatorParams = {
+        id: 'data-view-id',
+        breakdownField: 'service.name',
+      };
+
+      const { dataViewLocator } = await setup();
+      const location = await dataViewLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(breakdownField:service.name,dataSourceSelection:(selection:(dataView:(dataType:unresolved,id:data-view-id)),selectionType:dataView),v:2)`,
         state: {},
       });
     });
@@ -327,6 +358,23 @@ describe('Observability Logs Explorer Locators', () => {
       expect(location).toMatchObject({
         app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
         path: `/?pageState=(dataSourceSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),refreshInterval:(pause:!f,value:666),v:2)`,
+        state: {},
+      });
+    });
+
+    it('should allow specifying breakdown field', async () => {
+      const params: SingleDatasetLocatorParams = {
+        integration,
+        dataset,
+        breakdownField: 'service.name',
+      };
+
+      const { singleDatasetLocator } = await setup();
+      const location = await singleDatasetLocator.getLocation(params);
+
+      expect(location).toMatchObject({
+        app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
+        path: `/?pageState=(breakdownField:service.name,dataSourceSelection:(selection:(dataset:(name:'logs-test-*-*',title:test),name:Test),selectionType:unresolved),v:2)`,
         state: {},
       });
     });

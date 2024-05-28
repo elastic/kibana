@@ -1,13 +1,10 @@
 TO_CARTESIANSHAPE
 
 Syntax
-TO_CARTESIANSHAPE(v)
 Parameters
-v
+field
 Input value. The input can be a single- or multi-valued column or an expression.
-The input type must be a string, a cartesian_shape or a cartesian_point.
-DescriptionConverts an input value to a cartesian_shape value.A string will only be successfully converted if it respects the
-WKT format.Supported types
+DescriptionConverts an input value to a cartesian_shape value. A string will only be successfully converted if it respects the WKT format.Supported types
 Example
 ```esql
 ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]

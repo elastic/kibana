@@ -108,7 +108,7 @@ export const showInitialLoadingSpinner = ({
   isLoadingAlerts: boolean;
 }): boolean => isInitialLoading && isLoadingAlerts;
 
-export const parseCombinedQueries = (query?: string) => {
+export const parseFilterQuery = (query?: string) => {
   try {
     return query != null && !isEmpty(query) ? JSON.parse(query) : {};
   } catch {
@@ -116,9 +116,9 @@ export const parseCombinedQueries = (query?: string) => {
   }
 };
 
-export const buildCombinedQueries = (query?: string) => {
+export const buildFilterQuery = (query?: string) => {
   try {
-    return isEmpty(query) ? [] : [parseCombinedQueries(query)];
+    return isEmpty(query) ? [] : [parseFilterQuery(query)];
   } catch {
     return [];
   }

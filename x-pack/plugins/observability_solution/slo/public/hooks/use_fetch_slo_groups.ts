@@ -22,11 +22,12 @@ import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { SearchState } from '../pages/slos/hooks/use_url_search_state';
+import { GroupByField } from '../pages/slos/components/slo_list_group_by';
 
 interface SLOGroupsParams {
   page?: number;
   perPage?: number;
-  groupBy?: string;
+  groupBy?: GroupByField;
   groupsFilter?: string[];
   kqlQuery?: string;
   tagsFilter?: SearchState['tagsFilter'];

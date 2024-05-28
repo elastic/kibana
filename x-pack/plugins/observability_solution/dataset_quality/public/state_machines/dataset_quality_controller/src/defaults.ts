@@ -37,7 +37,10 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     },
     integrations: [],
     namespaces: [],
+    qualities: [],
   },
   flyout: {},
   datasets: [],
+  isSizeStatsAvailable: true,
+  nonAggregatableDatasets: [],
 };

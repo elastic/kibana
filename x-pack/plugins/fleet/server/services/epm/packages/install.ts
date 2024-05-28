@@ -1279,7 +1279,7 @@ export const saveKibanaAssetsRefs = async (
   // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
   // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
   // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
-  pRetry(
+  await pRetry(
     () =>
       savedObjectsClient.update(
         PACKAGES_SAVED_OBJECT_TYPE,

@@ -25,6 +25,9 @@ describe('correctCommonEsqlMistakes', () => {
 
   it('replaces aliasing via the AS keyword with the = operator', () => {
     expectQuery(`FROM logs-* | STATS COUNT() AS count`, 'FROM logs-*\n| STATS count = COUNT()');
+
+    expectQuery(`FROM logs-* | STATS COUNT() as count`, 'FROM logs-*\n| STATS count = COUNT()');
+
     expectQuery(
       `FROM logs-* | STATS AVG(transaction.duration.histogram) AS avg_request_latency, PERCENTILE(transaction.duration.histogram, 95) AS p95`,
       `FROM logs-*
@@ -42,9 +45,31 @@ describe('correctCommonEsqlMistakes', () => {
   });
 
   it(`replaces " or ' escaping in FROM statements with backticks`, () => {
-    expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM `logs-*`\n| LIMIT 10');
-    expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM `logs-*`\n| LIMIT 10');
+    expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
+    expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
     expectQuery(`FROM logs-* | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
+  });
+
+  it('replaces = as equal operator with ==', () => {
+    expectQuery(
+      `FROM logs-*\n| WHERE service.name = "foo"`,
+      `FROM logs-*\n| WHERE service.name == "foo"`
+    );
+
+    expectQuery(
+      `FROM logs-*\n| WHERE service.name = "foo" AND service.environment = "bar"`,
+      `FROM logs-*\n| WHERE service.name == "foo" AND service.environment == "bar"`
+    );
+
+    expectQuery(
+      `FROM logs-*\n| WHERE (service.name = "foo" AND service.environment = "bar") OR agent.name = "baz"`,
+      `FROM logs-*\n| WHERE (service.name == "foo" AND service.environment == "bar") OR agent.name == "baz"`
+    );
+
+    expectQuery(
+      `FROM logs-*\n| WHERE \`what=ever\` = "foo=bar"`,
+      `FROM logs-*\n| WHERE \`what=ever\` == "foo=bar"`
+    );
   });
 
   it('replaces single-quote escaped strings with double-quote escaped strings', () => {
@@ -102,11 +127,30 @@ describe('correctCommonEsqlMistakes', () => {
       | EVAL "@timestamp" = TO_DATETIME(timestamp)
       | WHERE statement LIKE 'SELECT%'
       | STATS avg_duration = AVG(duration)`,
-      `FROM \`postgres-logs*\`
+      `FROM postgres-logs*
     | GROK message "%{TIMESTAMP_ISO8601:timestamp} %{TZ} \[%{NUMBER:process_id}\]: \[%{NUMBER:log_line}\] user=%{USER:user},db=%{USER:database},app=\[%{DATA:application}\],client=%{IP:client_ip} LOG:  duration: %{NUMBER:duration:float} ms  statement: %{GREEDYDATA:statement}"
     | EVAL @timestamp = TO_DATETIME(timestamp)
     | WHERE statement LIKE "SELECT%"
     | STATS avg_duration = AVG(duration)`
+    );
+
+    expectQuery(
+      `FROM metrics-apm*
+      | WHERE metricset.name == "service_destination" AND @timestamp > NOW() - 24 hours
+      | EVAL total_events = span.destination.service.response_time.count
+      | EVAL total_latency = span.destination.service.response_time.sum.us
+      | EVAL is_failure = CASE(event.outcome == "failure", 1, 0)
+      | STATS 
+          avg_throughput = AVG(total_events), 
+          avg_latency_per_request = AVG(total_latency / total_events), 
+          failure_rate = AVG(is_failure) 
+        BY span.destination.service.resource`,
+      `FROM metrics-apm*
+      | WHERE metricset.name == "service_destination" AND @timestamp > NOW() - 24 hours
+      | EVAL total_events = span.destination.service.response_time.count
+      | EVAL total_latency = span.destination.service.response_time.sum.us
+      | EVAL is_failure = CASE(event.outcome == "failure", 1, 0)
+      | STATS avg_throughput = AVG(total_events), avg_latency_per_request = AVG(total_latency / total_events), failure_rate = AVG(is_failure) BY span.destination.service.resource`
     );
   });
 });

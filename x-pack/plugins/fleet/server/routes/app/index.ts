@@ -47,6 +47,20 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
           error: 'MISSING_PRIVILEGES',
         } as CheckPermissionsResponse,
       });
+    } else if (request.query.fleetServerSetup) {
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
+        body: { cluster: ['manage_service_account'] },
+      });
+
+      if (!hasAllPrivileges) {
+        return response.ok({
+          body: {
+            success: false,
+            error: 'MISSING_FLEET_SERVER_SETUP_PRIVILEGES',
+          } as CheckPermissionsResponse,
+        });
+      }
     }
 
     return response.ok({ body: { success: true } as CheckPermissionsResponse });
@@ -142,7 +156,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(
@@ -159,7 +173,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .post({
       path: APP_API_ROUTES.GENERATE_SERVICE_TOKEN_PATTERN_DEPRECATED,
       fleetAuthz: {
-        fleet: { all: true },
+        fleet: { allAgents: true },
       },
     })
     .addVersion(

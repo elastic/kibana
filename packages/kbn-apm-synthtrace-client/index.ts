@@ -19,7 +19,6 @@ export type {
   OSInfo,
 } from './src/lib/apm/mobile_device';
 export { httpExitSpan } from './src/lib/apm/span';
-export { type AssetDocument } from './src/lib/assets';
 export { DistributedTrace } from './src/lib/dsl/distributed_trace_client';
 export { serviceMap } from './src/lib/dsl/service_map';
 export type { Fields } from './src/lib/entity';
@@ -34,3 +33,4 @@ export { generateLongId, generateShortId } from './src/lib/utils/generate_id';
 export { appendHash, hashKeysOf } from './src/lib/utils/hash';
 export type { ESDocumentWithOperation, SynthtraceESAction, SynthtraceGenerator } from './src/types';
 export { log, type LogDocument } from './src/lib/logs';
+export { type AssetDocument } from './src/lib/assets';

@@ -81,7 +81,6 @@ export function getLensAttributeService(
       };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
-      const overlays = core.overlays;
       return checkForDuplicateTitle(
         {
           title: props.newTitle,
@@ -93,7 +92,7 @@ export function getLensAttributeService(
         props.onTitleDuplicate,
         {
           client: savedObjectStore,
-          overlays,
+          ...core,
         }
       );
     },

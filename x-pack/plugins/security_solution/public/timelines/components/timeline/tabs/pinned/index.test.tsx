@@ -11,7 +11,6 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 import { defaultRowRenderers } from '../../body/renderers';
 import type { Sort } from '../../body/sort';
@@ -126,6 +125,8 @@ describe('PinnedTabContent', () => {
       pinnedEventIds: {},
       showExpandedDetails: false,
       onEventClosed: jest.fn(),
+      eventIdToNoteIds: {},
+      expandedDetail: {},
     };
   });
 

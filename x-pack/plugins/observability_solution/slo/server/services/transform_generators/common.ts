@@ -6,7 +6,9 @@
  */
 
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
+import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
+import { SLODefinition } from '../../domain/models';
+import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 import { InvalidTransformError } from '../../errors';
 
 export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
@@ -34,4 +36,31 @@ export function parseIndex(index: string): string | string[] {
   }
 
   return index.split(',');
+}
+
+export function getTimesliceTargetComparator(timesliceTarget: number) {
+  return timesliceTarget === 0 ? '>' : '>=';
+}
+
+/**
+ * Use the settings.preventInitialBackfill flag to determine the range filter for the rollup transform
+ * preventInitialBackfill == true: we use the current time minus some buffer to account for the ingestion delay
+ * preventInitialBackfill === false: we use the time window duration to get the data for the last N days
+ */
+export function getFilterRange(slo: SLODefinition, timestampField: string) {
+  return slo.settings.preventInitialBackfill === true
+    ? {
+        range: {
+          [timestampField]: {
+            gte: `now-${getDelayInSecondsFromSLO(slo)}s/m`,
+          },
+        },
+      }
+    : {
+        range: {
+          [timestampField]: {
+            gte: `now-${slo.timeWindow.duration.format()}/d`,
+          },
+        },
+      };
 }

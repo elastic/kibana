@@ -47,7 +47,7 @@ export const CONVERSATIONS_QUERY_KEYS = [
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   query.page,
   query.perPage,
-  API_VERSIONS.public.v1,
+  API_VERSIONS.internal.v1,
 ];
 
 export const useFetchCurrentUserConversations = ({
@@ -62,7 +62,7 @@ export const useFetchCurrentUserConversations = ({
     async () =>
       http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
         method: 'GET',
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         query,
         signal,
       }),

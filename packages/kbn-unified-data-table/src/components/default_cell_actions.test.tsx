@@ -63,8 +63,7 @@ describe('Default cell actions ', function () {
       dataTableContextMock.valueToStringConverter,
       jest.fn()
     );
-    expect(cellActions).toContain(FilterInBtn);
-    expect(cellActions).toContain(FilterOutBtn);
+    expect(cellActions).toHaveLength(3);
   });
 
   it('should show Copy action for _source field', async () => {
@@ -96,11 +95,7 @@ describe('Default cell actions ', function () {
     );
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
-    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      dataTableContextMock.dataView.fields.getByName('extension'),
-      'jpg',
-      '+'
-    );
+    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith({}, 'jpg', '+');
   });
   it('triggers filter function when FilterInBtn is clicked for a non-provided value', async () => {
     const component = mountWithIntl(
@@ -116,11 +111,7 @@ describe('Default cell actions ', function () {
     );
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
-    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      dataTableContextMock.dataView.fields.getByName('extension'),
-      undefined,
-      '+'
-    );
+    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith({}, undefined, '+');
   });
   it('triggers filter function when FilterInBtn is clicked for an empty string value', async () => {
     const component = mountWithIntl(
@@ -136,11 +127,7 @@ describe('Default cell actions ', function () {
     );
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
-    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      dataTableContextMock.dataView.fields.getByName('message'),
-      '',
-      '+'
-    );
+    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith({}, '', '+');
   });
   it('triggers filter function when FilterOutBtn is clicked', async () => {
     const component = mountWithIntl(
@@ -156,11 +143,7 @@ describe('Default cell actions ', function () {
     );
     const button = findTestSubject(component, 'filterOutButton');
     await button.simulate('click');
-    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      dataTableContextMock.dataView.fields.getByName('extension'),
-      'jpg',
-      '-'
-    );
+    expect(dataTableContextMock.onFilter).toHaveBeenCalledWith({}, 'jpg', '-');
   });
   it('triggers clipboard copy when CopyBtn is clicked', async () => {
     const component = mountWithIntl(

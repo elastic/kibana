@@ -158,10 +158,10 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
         if (valueListMetaData?.total_list_count) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
         }
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
         return trustedApplicationsCount + endpointExceptionsCount + endpointEventFiltersCount;
       } catch (err) {
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

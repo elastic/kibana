@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { css } from '@emotion/css';
@@ -20,6 +21,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
@@ -99,7 +101,7 @@ const tabPaddingClassName = css`
   padding: 0 ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeXL} ${euiThemeVars.euiSizeM};
 `;
 
-export const TabContentPadding: React.FC = ({ children }) => (
+export const TabContentPadding: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <div className={tabPaddingClassName}>{children}</div>
 );
 
@@ -181,19 +183,24 @@ export const RuleDetailsFlyout = ({
     setSelectedTabId(tab.id);
   };
 
+  const prebuiltRulesFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'prebuiltRulesFlyoutTitle',
+  });
+
   return (
     <EuiFlyout
       id={id}
       size={size}
       onClose={closeFlyout}
-      ownFocus={false}
       key="prebuilt-rules-flyout"
       paddingSize="l"
       data-test-subj={dataTestSubj}
+      aria-labelledby={prebuiltRulesFlyoutTitleId}
+      ownFocus
     >
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2>{rule.name}</h2>
+          <h2 id={prebuiltRulesFlyoutTitleId}>{rule.name}</h2>
         </EuiTitle>
         <EuiSpacer size="l" />
       </EuiFlyoutHeader>

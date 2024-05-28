@@ -62,7 +62,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         if (!prebuiltRules) {
           log.l('no prebuilt rules found');
-          taskMetricsService.end(trace);
+          await taskMetricsService.end(trace);
           return 0;
         }
 
@@ -118,7 +118,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         for (const batch of batches) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, batch);
         }
-        taskMetricsService.end(trace);
+        await taskMetricsService.end(trace);
 
         log.l(
           `Task: ${taskId} executed.  Processed ${detectionRuleExceptionsJson.length} exceptions`
@@ -126,7 +126,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
         return detectionRuleExceptionsJson.length;
       } catch (err) {
-        taskMetricsService.end(trace, err);
+        await taskMetricsService.end(trace, err);
         return 0;
       }
     },

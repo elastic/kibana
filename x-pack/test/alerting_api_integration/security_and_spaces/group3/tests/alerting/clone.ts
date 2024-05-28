@@ -147,6 +147,26 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                     uuid: response.body.actions[0].uuid,
                   },
                 ],
+                monitoring: {
+                  run: {
+                    history: [],
+                    calculated_metrics: {
+                      success_ratio: 0,
+                    },
+                    last_run: {
+                      timestamp: response.body.monitoring.run.last_run.timestamp,
+                      metrics: {
+                        duration: 0,
+                        total_search_duration_ms: null,
+                        total_indexing_duration_ms: null,
+                        total_alerts_detected: null,
+                        total_alerts_created: null,
+                        gap_duration_s: null,
+                      },
+                    },
+                  },
+                },
+                snooze_schedule: [],
                 enabled: true,
                 rule_type_id: 'test.noop',
                 running: false,

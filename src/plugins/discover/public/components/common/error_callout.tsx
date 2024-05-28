@@ -43,6 +43,7 @@ export const ErrorCallout = ({ title, error }: Props) => {
               <p
                 css={css`
                   white-space: break-spaces;
+                  word-wrap: break-word;
                   font-family: ${euiTheme.font.familyCode};
                 `}
                 data-test-subj="discoverErrorCalloutMessage"

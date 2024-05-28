@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSkeletonText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useRef, Suspense, useState } from 'react';
+import React, { useRef, Suspense, useEffect } from 'react';
 import useAsyncRetry from 'react-use/lib/useAsyncRetry';
 import { PackageList, fetchAvailablePackagesHook } from './lazy';
 import { useIntegrationCardList } from './use_integration_card_list';
@@ -19,7 +19,7 @@ import { CustomCard } from './types';
 
 interface Props {
   /**
-   * A subset of either existing card names to feature, or generated
+   * A subset of either existing card names to feature, or virtual
    * cards to display. The inclusion of CustomCards will override the default
    * list functionality.
    */
@@ -27,15 +27,18 @@ interface Props {
   /**
    * Override the default `observability` option.
    */
-  selectedCategory?: string;
+  selectedCategory?: string[];
   showSearchBar?: boolean;
-  searchBarRef?: React.Ref<HTMLInputElement>;
+  packageListRef?: React.Ref<HTMLDivElement>;
   searchQuery?: string;
   setSearchQuery?: React.Dispatch<React.SetStateAction<string>>;
+  flowCategory?: string | null;
+  flowSearch?: string;
   /**
    * When enabled, custom and integration cards are joined into a single list.
    */
   joinCardLists?: boolean;
+  onLoaded?: () => void;
 }
 
 type WrapperProps = Props & {
@@ -45,16 +48,18 @@ type WrapperProps = Props & {
 const Loading = () => <EuiSkeletonText isLoading={true} lines={10} />;
 
 const PackageListGridWrapper = ({
-  selectedCategory = 'observability',
+  selectedCategory = ['observability', 'os_system'],
   useAvailablePackages,
   showSearchBar = false,
-  searchBarRef,
+  packageListRef,
   searchQuery,
   setSearchQuery,
   customCards,
+  flowCategory,
+  flowSearch,
   joinCardLists = false,
+  onLoaded,
 }: WrapperProps) => {
-  const [isInitialHidden, setIsInitialHidden] = useState(showSearchBar);
   const customMargin = useCustomMargin();
   const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: false,
@@ -64,22 +69,24 @@ const PackageListGridWrapper = ({
     filteredCards,
     selectedCategory,
     customCards,
+    flowCategory,
+    flowSearch,
     joinCardLists
   );
 
-  React.useEffect(() => {
-    if (isInitialHidden && searchQuery) {
-      setIsInitialHidden(false);
+  useEffect(() => {
+    if (!isLoading && onLoaded !== undefined) {
+      onLoaded();
     }
-  }, [searchQuery, isInitialHidden]);
+  }, [isLoading, onLoaded]);
 
-  if (!isInitialHidden && isLoading) return <Loading />;
+  if (isLoading) return <Loading />;
 
-  const showPackageList = (showSearchBar && !isInitialHidden) || showSearchBar === false;
+  const showPackageList = (showSearchBar && !!searchQuery) || showSearchBar === false;
 
   return (
     <Suspense fallback={<Loading />}>
-      <div css={customMargin}>
+      <div css={customMargin} ref={packageListRef}>
         {showSearchBar && (
           <div
             css={css`
@@ -89,17 +96,13 @@ const PackageListGridWrapper = ({
             <EuiSearchBar
               box={{
                 incremental: true,
-                inputRef: (ref: any) => {
-                  (searchBarRef as React.MutableRefObject<HTMLInputElement>).current = ref;
-                },
               }}
-              onChange={(arg) => {
-                if (setSearchQuery) {
-                  setSearchQuery(arg.queryText);
-                }
-                setIsInitialHidden(false);
+              onChange={({ queryText, error }) => {
+                if (error) return;
+
+                setSearchQuery?.(queryText);
               }}
-              query={searchQuery}
+              query={searchQuery ?? ''}
             />
           </div>
         )}
@@ -111,12 +114,13 @@ const PackageListGridWrapper = ({
             showSearchTools={false}
             // we either don't need these properties (yet) or handle them upstream, but
             // they are marked as required in the original API.
-            selectedCategory={selectedCategory}
+            selectedCategory=""
             setSearchTerm={() => {}}
             setCategory={() => {}}
             categories={[]}
             setUrlandReplaceHistory={() => {}}
             setUrlandPushHistory={() => {}}
+            showCardLabels={false}
           />
         )}
       </div>
@@ -125,7 +129,7 @@ const PackageListGridWrapper = ({
 };
 
 const WithAvailablePackages = React.forwardRef(
-  (props: Props, searchBarRef?: React.Ref<HTMLInputElement>) => {
+  (props: Props, packageListRef?: React.Ref<HTMLDivElement>) => {
     const ref = useRef<AvailablePackagesHookType | null>(null);
 
     const {
@@ -173,7 +177,7 @@ const WithAvailablePackages = React.forwardRef(
       <PackageListGridWrapper
         {...props}
         useAvailablePackages={ref.current}
-        searchBarRef={searchBarRef}
+        packageListRef={packageListRef}
       />
     );
   }

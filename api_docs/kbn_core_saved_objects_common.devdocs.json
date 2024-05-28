@@ -2048,15 +2048,19 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/visualizations/xy/persistence.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/visualizations/xy/persistence.ts"
           },
           {
             "plugin": "lens",
-            "path": "x-pack/plugins/lens/public/visualizations/xy/state_helpers.ts"
+            "path": "x-pack/plugins/lens/public/visualizations/xy/persistence.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/plugins/lens/public/visualizations/xy/persistence.ts"
           },
           {
             "plugin": "lens",

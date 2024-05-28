@@ -9,8 +9,6 @@
     "requiredPlugins": [
       "urlForwarding"
     ],
-    "requiredBundles": [
-      "kibanaReact"
-    ]
+    "requiredBundles": []
   }
 }

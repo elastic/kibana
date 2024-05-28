@@ -17,6 +17,7 @@ import {
 import { css } from '@emotion/css';
 import { uniq } from 'lodash';
 import { useObservabilityAIAssistantAppService } from '../../hooks/use_observability_ai_assistant_app_service';
+import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { nonNullable } from '../../utils/non_nullable';
 
 const starterPromptClassName = css`
@@ -30,6 +31,12 @@ const starterPromptInnerClassName = css`
 
 export function StarterPrompts({ onSelectPrompt }: { onSelectPrompt: (prompt: string) => void }) {
   const service = useObservabilityAIAssistantAppService();
+
+  const { connectors } = useGenAIConnectors();
+
+  if (!connectors || connectors.length === 0) {
+    return null;
+  }
 
   const contexts = service.getScreenContexts();
 

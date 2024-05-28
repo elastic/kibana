@@ -14,12 +14,14 @@ export interface SloResetConfirmationModalProps {
   slo: SLOWithSummaryResponse | SLODefinitionResponse;
   onCancel: () => void;
   onConfirm: () => void;
+  isLoading?: boolean;
 }
 
 export function SloResetConfirmationModal({
   slo,
   onCancel,
   onConfirm,
+  isLoading,
 }: SloResetConfirmationModalProps) {
   const { name } = slo;
   return (
@@ -38,6 +40,7 @@ export function SloResetConfirmationModal({
       })}
       onCancel={onCancel}
       onConfirm={onConfirm}
+      isLoading={isLoading}
     >
       {i18n.translate('xpack.slo.resetConfirmationModal.descriptionText', {
         defaultMessage: 'Resetting this SLO will also regenerate the historical data.',

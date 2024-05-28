@@ -7,7 +7,7 @@
 
 import { ComponentStory } from '@storybook/react';
 import React from 'react';
-import { getAssistantSystemMessage } from '@kbn/observability-ai-assistant-plugin/public';
+import { buildSystemMessage } from '../../utils/builders';
 import { KibanaReactStorybookDecorator } from '../../utils/storybook_decorator';
 import { ChatFlyout as Component } from './chat_flyout';
 
@@ -30,7 +30,7 @@ const Template: ComponentStory<typeof Component> = (props: ChatFlyoutProps) => {
 const defaultProps: ChatFlyoutProps = {
   isOpen: true,
   initialTitle: 'How is this working',
-  initialMessages: [getAssistantSystemMessage({ contexts: [] })],
+  initialMessages: [buildSystemMessage()],
   onClose: () => {},
 };
 

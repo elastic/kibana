@@ -11,12 +11,14 @@ import type { InternalApplicationStart } from '@kbn/core-application-browser-int
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { InternalSecurityServiceStart } from '@kbn/core-security-browser-internal';
+import type { InternalUserProfileServiceStart } from '@kbn/core-user-profile-browser-internal';
 
 /** @internal */
 export interface InternalCoreStart
-  extends Omit<CoreStart, 'application' | 'plugins' | 'http' | 'security'> {
+  extends Omit<CoreStart, 'application' | 'plugins' | 'http' | 'security' | 'userProfile'> {
   application: InternalApplicationStart;
   injectedMetadata: InternalInjectedMetadataStart;
   http: InternalHttpStart;
   security: InternalSecurityServiceStart;
+  userProfile: InternalUserProfileServiceStart;
 }

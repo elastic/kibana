@@ -23,13 +23,9 @@ import {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   SeriesType,
-  XYPersistedState,
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
-  XYPersistedByReferenceAnnotationLayerConfig,
-  XYPersistedByValueAnnotationLayerConfig,
   XYAnnotationLayerConfig,
-  XYPersistedLinkedByValueAnnotationLayerConfig,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
@@ -58,6 +54,13 @@ import {
 } from './visualization_helpers';
 import { cloneDeep } from 'lodash';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import {
+  XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedState,
+} from './persistence';
 
 const DATE_HISTORGRAM_COLUMN_ID = 'date_histogram_column';
 const exampleAnnotation: EventAnnotationConfig = {
@@ -602,6 +605,53 @@ describe('xy_visualization', () => {
         )
       ).toHaveLength(1);
     });
+
+    describe('transforming to legend stats', () => {
+      it('loads a xy chart with `legendStats` property', () => {
+        const persistedState: XYPersistedState = {
+          ...exampleState(),
+          legend: {
+            ...exampleState().legend,
+            legendStats: [XYLegendValue.CurrentAndLastValue],
+          },
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+      it('loads a xy chart with `valuesInLegend` property equal to false and transforms to legendStats: []', () => {
+        const persistedState = {
+          ...exampleState(),
+          valuesInLegend: false,
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual([]);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+
+      it('loads a xy chart with `valuesInLegend` property equal to true and transforms to legendStats: [`values`]', () => {
+        const persistedState = {
+          ...exampleState(),
+          valuesInLegend: true,
+        };
+
+        const transformedState = xyVisualization.initialize(() => 'first', persistedState);
+
+        expect(transformedState.legend.legendStats).toEqual(['currentAndLastValue']);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+
+      it('loads a xy chart with deprecated undefined `valuesInLegend` and transforms to legendStats: [`values`]', () => {
+        const transformedState = xyVisualization.initialize(() => 'first', exampleState());
+
+        expect(transformedState.legend.legendStats).toEqual(undefined);
+        expect('valuesInLegend' in transformedState).toEqual(false);
+      });
+    });
   });
 
   describe('#removeLayer', () => {
@@ -796,6 +846,7 @@ describe('xy_visualization', () => {
           },
         },
         dateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
+        absDateRange: { fromDate: '2022-04-10T00:00:00.000Z', toDate: '2022-04-20T00:00:00.000Z' },
       };
     });
 

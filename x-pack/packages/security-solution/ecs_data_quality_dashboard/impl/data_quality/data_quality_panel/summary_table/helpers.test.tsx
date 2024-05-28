@@ -22,6 +22,7 @@ import {
   getShowPagination,
   getSummaryTableColumns,
   getSummaryTableILMPhaseColumn,
+  getSummaryTableSizeInBytesColumn,
   getToggleButtonId,
   IndexSummaryTableItem,
 } from './helpers';
@@ -464,6 +465,25 @@ describe('helpers', () => {
 
       test('it returns an emptry array when `isILMAvailable` is false', () => {
         const column = getSummaryTableILMPhaseColumn(false);
+        expect(column.length).toEqual(0);
+      });
+    });
+
+    describe('getSummaryTableSizeInBytesColumn', () => {
+      test('it returns the expected column configuration when `isILMAvailable` is true', () => {
+        const column = getSummaryTableSizeInBytesColumn({
+          isILMAvailable: true,
+          formatBytes: jest.fn(),
+        });
+        expect(column.length).toEqual(1);
+        expect(column[0].name).toEqual('Size');
+      });
+
+      test('it returns an emptry array when `isILMAvailable` is false', () => {
+        const column = getSummaryTableSizeInBytesColumn({
+          isILMAvailable: false,
+          formatBytes: jest.fn(),
+        });
         expect(column.length).toEqual(0);
       });
     });

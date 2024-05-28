@@ -90,6 +90,7 @@ import { clearPresentationData } from '../connectorland/connector_setup/helpers'
 import { getGenAiConfig } from '../connectorland/helpers';
 import { AssistantAnimatedIcon } from './assistant_animated_icon';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
+import { InstallKnowledgeBaseButton } from '../knowledge_base/install_knowledge_base_button';
 
 export interface Props {
   conversationTitle?: string;
@@ -182,7 +183,7 @@ const AssistantComponent: React.FC<Props> = ({
   } = useFetchAnonymizationFields();
 
   // Connector details
-  const { data: connectors, isFetched: areConnectorsFetched } = useLoadConnectors({
+  const { data: connectors, isFetchedAfterMount: areConnectorsFetched } = useLoadConnectors({
     http,
   });
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
@@ -208,6 +209,10 @@ const AssistantComponent: React.FC<Props> = ({
       if (conversationId) {
         const updatedConversation = await getConversation(conversationId);
 
+        if (updatedConversation) {
+          setCurrentConversation(updatedConversation);
+        }
+
         return updatedConversation;
       }
     },
@@ -226,14 +231,28 @@ const AssistantComponent: React.FC<Props> = ({
 
         if (deepEqual(prev, nextConversation)) return prev;
 
-        return (
+        const conversationToReturn =
           (nextConversation &&
             conversations[
               nextConversation?.id !== '' ? nextConversation?.id : nextConversation?.title
             ]) ??
           conversations[WELCOME_CONVERSATION_TITLE] ??
-          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE, isFlyoutMode })
-        );
+          getDefaultConversation({ cTitle: WELCOME_CONVERSATION_TITLE, isFlyoutMode });
+
+        if (
+          prev &&
+          prev.id === conversationToReturn.id &&
+          // if the conversation id has not changed and the previous conversation has more messages
+          // it is because the local conversation has a readable stream running
+          // and it has not yet been persisted to the stored conversation
+          prev.messages.length > conversationToReturn.messages.length
+        ) {
+          return {
+            ...conversationToReturn,
+            messages: prev.messages,
+          };
+        }
+        return conversationToReturn;
       });
     }
   }, [
@@ -358,6 +377,12 @@ const AssistantComponent: React.FC<Props> = ({
     }
     // when scrollHeight changes, parent is scrolled to bottom
     parent.scrollTop = parent.scrollHeight;
+
+    if (isFlyoutMode) {
+      (
+        commentsContainerRef.current?.childNodes[0].childNodes[0] as HTMLElement
+      ).lastElementChild?.scrollIntoView();
+    }
   });
 
   const getWrapper = (children: React.ReactNode, isCommentContainer: boolean) =>
@@ -390,9 +415,6 @@ const AssistantComponent: React.FC<Props> = ({
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
         );
-        if (refetchedConversation) {
-          setCurrentConversation(refetchedConversation);
-        }
         setCurrentConversationId(cId);
       }
     },
@@ -521,7 +543,6 @@ const AssistantComponent: React.FC<Props> = ({
 
   const {
     abortStream,
-    handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
     handleSendMessage,
@@ -752,6 +773,29 @@ const AssistantComponent: React.FC<Props> = ({
     refetchConversationsState,
   ]);
 
+  const disclaimer = useMemo(
+    () =>
+      isNewConversation && (
+        <EuiText
+          data-test-subj="assistant-disclaimer"
+          textAlign="center"
+          color={euiThemeVars.euiColorMediumShade}
+          size="xs"
+          css={
+            isFlyoutMode
+              ? css`
+                  margin: 0 ${euiThemeVars.euiSizeL} ${euiThemeVars.euiSizeM}
+                    ${euiThemeVars.euiSizeL};
+                `
+              : {}
+          }
+        >
+          {i18n.DISCLAIMER}
+        </EuiText>
+      ),
+    [isFlyoutMode, isNewConversation]
+  );
+
   const flyoutBodyContent = useMemo(() => {
     if (isWelcomeSetup) {
       return (
@@ -818,6 +862,9 @@ const AssistantComponent: React.FC<Props> = ({
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
                     isFlyoutMode
                   />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <InstallKnowledgeBaseButton />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -888,7 +935,7 @@ const AssistantComponent: React.FC<Props> = ({
                     selectedConversation={currentConversation}
                     defaultConnector={defaultConnector}
                     docLinks={docLinks}
-                    isDisabled={isDisabled}
+                    isDisabled={isDisabled || isLoadingChatSend}
                     isSettingsModalVisible={isSettingsModalVisible}
                     onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
                     setIsSettingsModalVisible={setIsSettingsModalVisible}
@@ -901,6 +948,7 @@ const AssistantComponent: React.FC<Props> = ({
                     conversations={conversations}
                     refetchConversationsState={refetchConversationsState}
                     onConversationCreate={handleCreateConversation}
+                    isAssistantEnabled={isAssistantEnabled}
                   />
 
                   {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
@@ -940,13 +988,19 @@ const AssistantComponent: React.FC<Props> = ({
                     )
                   }
                 >
-                  {flyoutBodyContent}
-                  {/* <BlockBotCallToAction
-                    connectorPrompt={connectorPrompt}
-                    http={http}
-                    isAssistantEnabled={isAssistantEnabled}
-                    isWelcomeSetup={isWelcomeSetup}
-                  /> */}
+                  {!isAssistantEnabled ? (
+                    <BlockBotCallToAction
+                      connectorPrompt={connectorPrompt}
+                      http={http}
+                      isAssistantEnabled={isAssistantEnabled}
+                      isWelcomeSetup={isWelcomeSetup}
+                    />
+                  ) : (
+                    <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+                      <EuiFlexItem grow={false}>{flyoutBodyContent}</EuiFlexItem>
+                      <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+                    </EuiFlexGroup>
+                  )}
                 </EuiFlyoutBody>
                 <EuiFlyoutFooter
                   css={css`
@@ -1002,7 +1056,6 @@ const AssistantComponent: React.FC<Props> = ({
                           isDisabled={isSendingDisabled}
                           shouldRefocusPrompt={shouldRefocusPrompt}
                           userPrompt={userPrompt}
-                          handleButtonSendMessage={handleChatSend}
                           handleOnChatCleared={handleOnChatCleared}
                           handlePromptChange={handlePromptChange}
                           handleSendMessage={handleChatSend}
@@ -1083,28 +1136,34 @@ const AssistantComponent: React.FC<Props> = ({
         )}
       </EuiModalHeader>
       <EuiModalBody>
-        {getWrapper(
-          <>
-            {comments}
-
-            {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
+        <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            {' '}
+            {getWrapper(
               <>
-                <EuiSpacer />
-                <EuiFlexGroup justifyContent="spaceAround">
-                  <EuiFlexItem grow={false}>
-                    <ConnectorMissingCallout
-                      isConnectorConfigured={(connectors?.length ?? 0) > 0}
-                      isSettingsModalVisible={isSettingsModalVisible}
-                      setIsSettingsModalVisible={setIsSettingsModalVisible}
-                      isFlyoutMode={isFlyoutMode}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
+                {comments}
+
+                {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
+                  <>
+                    <EuiSpacer />
+                    <EuiFlexGroup justifyContent="spaceAround">
+                      <EuiFlexItem grow={false}>
+                        <ConnectorMissingCallout
+                          isConnectorConfigured={(connectors?.length ?? 0) > 0}
+                          isSettingsModalVisible={isSettingsModalVisible}
+                          setIsSettingsModalVisible={setIsSettingsModalVisible}
+                          isFlyoutMode={isFlyoutMode}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </>
+                )}
+              </>,
+              !embeddedLayout
             )}
-          </>,
-          !embeddedLayout
-        )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{disclaimer}</EuiFlexItem>
+        </EuiFlexGroup>
       </EuiModalBody>
       <EuiModalFooter
         css={css`
@@ -1122,7 +1181,6 @@ const AssistantComponent: React.FC<Props> = ({
           isDisabled={isSendingDisabled}
           shouldRefocusPrompt={shouldRefocusPrompt}
           userPrompt={userPrompt}
-          handleButtonSendMessage={handleButtonSendMessage}
           handleOnChatCleared={handleOnChatCleared}
           handlePromptChange={handlePromptChange}
           handleSendMessage={handleChatSend}

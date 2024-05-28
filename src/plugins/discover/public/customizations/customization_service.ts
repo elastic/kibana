@@ -28,6 +28,9 @@ export type DiscoverCustomizationId = DiscoverCustomization['id'];
 
 export interface DiscoverCustomizationService {
   set: (customization: DiscoverCustomization) => void;
+  get: <TCustomizationId extends DiscoverCustomizationId>(
+    id: TCustomizationId
+  ) => Extract<DiscoverCustomization, { id: TCustomizationId }> | undefined;
   get$: <TCustomizationId extends DiscoverCustomizationId>(
     id: TCustomizationId
   ) => Observable<Extract<DiscoverCustomization, { id: TCustomizationId }> | undefined>;
@@ -44,6 +47,15 @@ export const createCustomizationService = (): DiscoverCustomizationService => {
   const update$ = new Subject<DiscoverCustomizationId>();
   const customizations = new Map<DiscoverCustomizationId, CustomizationEntry>();
 
+  const getCustomization = <TCustomizationId extends DiscoverCustomizationId>(
+    id: TCustomizationId
+  ): Extract<DiscoverCustomization, { id: TCustomizationId }> | undefined => {
+    const entry = customizations.get(id);
+    if (entry && entry.enabled) {
+      return entry.customization as Extract<DiscoverCustomization, { id: TCustomizationId }>;
+    }
+  };
+
   return {
     set: (customization: DiscoverCustomization) => {
       const entry = customizations.get(customization.id);
@@ -54,16 +66,13 @@ export const createCustomizationService = (): DiscoverCustomizationService => {
       update$.next(customization.id);
     },
 
+    get: getCustomization,
+
     get$: <TCustomizationId extends DiscoverCustomizationId>(id: TCustomizationId) => {
       return update$.pipe(
         startWith(id),
         filter((currentId) => currentId === id),
-        map(() => {
-          const entry = customizations.get(id);
-          if (entry && entry.enabled) {
-            return entry.customization as Extract<DiscoverCustomization, { id: TCustomizationId }>;
-          }
-        })
+        map(() => getCustomization(id))
       );
     },
 

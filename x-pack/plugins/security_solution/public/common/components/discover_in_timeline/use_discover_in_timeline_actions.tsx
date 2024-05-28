@@ -12,7 +12,7 @@ import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
 import { useDispatch } from 'react-redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/state_management/discover_app_state_container';
 import type { TimeRange } from '@kbn/es-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useDiscoverState } from '../../../timelines/components/timeline/tabs/esql/use_discover_state';
@@ -58,7 +58,7 @@ export const useDiscoverInTimelineActions = (
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: saveSavedSearch, status } = useMutation({
+  const { mutateAsync: saveSavedSearch, status: saveSavedSearchStatus } = useMutation({
     mutationFn: ({
       savedSearch,
       savedSearchOptions,
@@ -189,7 +189,7 @@ export const useDiscoverInTimelineActions = (
    *
    * */
   const updateSavedSearch = useCallback(
-    async (savedSearch: SavedSearch, timelineId: string) => {
+    async (savedSearch: SavedSearch, timelineId: string, onUpdate?: () => void) => {
       savedSearch.timeRestore = true;
       savedSearch.timeRange =
         savedSearch.timeRange ?? discoverDataService.query.timefilter.timefilter.getTime();
@@ -219,7 +219,7 @@ export const useDiscoverInTimelineActions = (
         // If no saved search exists. Create a new saved search instance and associate it with the timeline.
         try {
           // Make sure we're not creating a saved search while a previous creation call is in progress
-          if (status !== 'idle') {
+          if (saveSavedSearchStatus === 'loading') {
             return;
           }
           dispatch(
@@ -244,6 +244,7 @@ export const useDiscoverInTimelineActions = (
             );
             // Also save the timeline, this will only happen once, in case there is no saved search id yet
             dispatch(timelineActions.saveTimeline({ id: TimelineId.active, saveAsNew: false }));
+            onUpdate?.();
           }
         } catch (err) {
           dispatch(
@@ -254,7 +255,7 @@ export const useDiscoverInTimelineActions = (
         }
       }
     },
-    [persistSavedSearch, savedSearchId, dispatch, discoverDataService, status]
+    [persistSavedSearch, savedSearchId, dispatch, discoverDataService, saveSavedSearchStatus]
   );
 
   const initializeLocalSavedSearch = useCallback(

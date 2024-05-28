@@ -7,10 +7,14 @@
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import type { Platform } from '../../../management/components/endpoint_responder/components/header_info/platforms';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
 import type { ThirdPartyAgentInfo } from '../../../../common/types';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionAgentType,
+  EndpointCapabilities,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointDetails, useWithShowResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import {
@@ -18,13 +22,14 @@ import {
   LOADING_ENDPOINT_DATA_TOOLTIP,
   METADATA_API_ERROR_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
+  SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING,
 } from './translations';
 import { getFieldValue } from '../host_isolation/helpers';
 
 export interface ResponderContextMenuItemProps {
   endpointId: string;
   onClick?: () => void;
-  agentType?: ResponseActionAgentType;
+  agentType: ResponseActionAgentType;
   eventData?: TimelineEventsDetailsItem[] | null;
 }
 
@@ -67,7 +72,7 @@ const getThirdPartyAgentInfo = (
 export const useResponderActionData = ({
   endpointId,
   onClick,
-  agentType = 'endpoint',
+  agentType,
   eventData,
 }: ResponderContextMenuItemProps): {
   handleResponseActionsClick: () => void;
@@ -75,7 +80,6 @@ export const useResponderActionData = ({
   tooltip: ReactNode;
 } => {
   const isEndpointHost = agentType === 'endpoint';
-  const isSentinelOneHost = agentType === 'sentinel_one';
   const showResponseActionsConsole = useWithShowResponder();
 
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
@@ -90,7 +94,26 @@ export const useResponderActionData = ({
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
     // v8.13 disabled for third-party agent alerts if the feature flag is not enabled
     if (!isEndpointHost) {
-      return [isSentinelOneHost ? !isSentinelOneV1Enabled : true, undefined];
+      switch (agentType) {
+        case 'sentinel_one':
+          // Disable it if feature flag is disabled
+          if (!isSentinelOneV1Enabled) {
+            return [true, undefined];
+          }
+          // Event must have the property that identifies the agent id
+          if (!getSentinelOneAgentId(eventData ?? null)) {
+            return [true, SENTINEL_ONE_AGENT_ID_PROPERTY_MISSING];
+          }
+
+          return [false, undefined];
+
+        default:
+          return [true, undefined];
+      }
+    }
+
+    if (!endpointId) {
+      return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
     }
 
     // Still loading host info
@@ -122,11 +145,13 @@ export const useResponderActionData = ({
     return [false, undefined];
   }, [
     isEndpointHost,
-    isSentinelOneHost,
-    isSentinelOneV1Enabled,
+    endpointId,
     isFetching,
     error,
     hostInfo?.host_status,
+    agentType,
+    isSentinelOneV1Enabled,
+    eventData,
   ]);
 
   const handleResponseActionsClick = useCallback(() => {
@@ -140,12 +165,13 @@ export const useResponderActionData = ({
         platform: agentInfoFromAlert.host.os.family,
       });
     }
-    if (hostInfo) {
+    if (isEndpointHost && hostInfo) {
       showResponseActionsConsole({
         agentId: hostInfo.metadata.agent.id,
-        agentType: 'endpoint',
-        capabilities: hostInfo.metadata.Endpoint.capabilities ?? [],
+        agentType,
+        capabilities: (hostInfo.metadata.Endpoint.capabilities as EndpointCapabilities[]) ?? [],
         hostName: hostInfo.metadata.host.name,
+        platform: hostInfo.metadata.host.os.name.toLowerCase() as Platform,
       });
     }
     if (onClick) onClick();

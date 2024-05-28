@@ -7,6 +7,8 @@
 
 import { HttpStart } from '@kbn/core/public';
 import {
+  GetDataStreamSettingsParams,
+  DataStreamSettings,
   GetDataStreamDetailsParams,
   DataStreamDetails,
   GetIntegrationDashboardsParams,
@@ -24,6 +26,7 @@ export interface DataStreamDetailsServiceStartDeps {
 }
 
 export interface IDataStreamDetailsClient {
+  getDataStreamSettings(params: GetDataStreamSettingsParams): Promise<DataStreamSettings>;
   getDataStreamDetails(params: GetDataStreamDetailsParams): Promise<DataStreamDetails>;
   getIntegrationDashboards(
     params: GetIntegrationDashboardsParams

@@ -16,6 +16,7 @@ export const dataStreamStatRt = rt.intersection([
     sizeBytes: rt.number,
     lastActivity: rt.number,
     integration: rt.string,
+    totalDocs: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
   }),
 ]);
 
@@ -70,15 +71,26 @@ export const getIntegrationsResponseRt = rt.exact(
 
 export const degradedDocsRt = rt.type({
   dataset: rt.string,
-  percentage: rt.number,
   count: rt.number,
+  docsCount: rt.number,
+  percentage: rt.number,
 });
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
+export const dataStreamSettingsRt = rt.partial({
+  createdOn: rt.union([rt.null, rt.number]), // rt.null is needed because `createdOn` is not available on Serverless
+});
+
+export type DataStreamSettings = rt.TypeOf<typeof dataStreamSettingsRt>;
+
 export const dataStreamDetailsRt = rt.partial({
-  createdOn: rt.number,
   lastActivity: rt.number,
+  degradedDocsCount: rt.number,
+  docsCount: rt.number,
+  sizeBytes: rt.union([rt.null, rt.number]), // rt.null is only needed for https://github.com/elastic/kibana/issues/178954
+  services: rt.record(rt.string, rt.array(rt.string)),
+  hosts: rt.record(rt.string, rt.array(rt.string)),
 });
 
 export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;
@@ -95,6 +107,8 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
   })
 );
 
+export const getDataStreamsSettingsResponseRt = rt.exact(dataStreamSettingsRt);
+
 export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);
 
 export const dataStreamsEstimatedDataInBytesRT = rt.type({
@@ -106,3 +120,12 @@ export type DataStreamsEstimatedDataInBytes = rt.TypeOf<typeof dataStreamsEstima
 export const getDataStreamsEstimatedDataInBytesResponseRt = rt.exact(
   dataStreamsEstimatedDataInBytesRT
 );
+
+export const getNonAggregatableDatasetsRt = rt.exact(
+  rt.type({
+    aggregatable: rt.boolean,
+    datasets: rt.array(rt.string),
+  })
+);
+
+export type NonAggregatableDatasets = rt.TypeOf<typeof getNonAggregatableDatasetsRt>;

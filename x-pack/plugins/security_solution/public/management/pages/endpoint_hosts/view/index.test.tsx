@@ -9,7 +9,6 @@ import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EndpointList } from '.';
-import '../../../../common/mock/match_media';
 import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 import {
@@ -1456,12 +1455,15 @@ describe('when on the endpoint list page', () => {
       const hostLink = await renderResult.findByTestId('hostLink');
       expect(hostLink).not.toBeNull();
     });
-    it('shows Agent Policy, View Agent Details and Reassign Policy Links when canAccessFleet RBAC control is enabled', async () => {
+    it('shows Agent Policy, View Agent Details and Reassign Policy Links when canReadFleetAgents,canWriteFleetAgents,canReadFleetAgentPolicies RBAC control is enabled', async () => {
       mockUserPrivileges.mockReturnValue({
         ...mockInitialUserPrivilegesState(),
         endpointPrivileges: {
           ...mockInitialUserPrivilegesState().endpointPrivileges,
           canAccessFleet: true,
+          canReadFleetAgents: true,
+          canWriteFleetAgents: true,
+          canReadFleetAgentPolicies: true,
         },
       });
       await renderAndClickActionsButton();

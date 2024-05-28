@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess @brokenInServerless @skipInQA export_rules', () => {
+  describe('@ess @skipInServerlessMKI export_rules', () => {
     describe('exporting rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

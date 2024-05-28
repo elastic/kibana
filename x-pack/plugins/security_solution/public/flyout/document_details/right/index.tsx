@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { memo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DocumentDetailsRightPanelKey } from '../shared/constants/panel_keys';
 import { useTabs } from './hooks/use_tabs';
 import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
@@ -22,10 +23,9 @@ import { PanelFooter } from './footer';
 import { useFlyoutIsExpandable } from './hooks/use_flyout_is_expandable';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
-export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
 
 export interface RightPanelProps extends FlyoutPanelProps {
-  key: 'document-details-right';
+  key: typeof DocumentDetailsRightPanelKey;
   path?: PanelPath;
   params?: {
     id: string;

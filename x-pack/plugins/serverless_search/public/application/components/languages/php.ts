@@ -29,7 +29,10 @@ export const phpDefinition: LanguageDefinition = {
   },
   iconType: 'php.svg',
   id: Languages.PHP,
-  ingestData: `$body = [
+  ingestData: ({ ingestPipeline }) => `$params =[${
+    ingestPipeline ? `\n  'pipeline' => '${ingestPipeline}',` : ''
+  }
+  'body' => [
     [ "index" => [ "_index" => "books" ]],
     [ "name" => "Snow Crash", "author" => "Neal Stephenson", "release_date" => "1992-06-01", "page_count" => 470],
     [ "index" => [ "_index" => "books" ]],
@@ -42,22 +45,27 @@ export const phpDefinition: LanguageDefinition = {
     [ "name" => "Brave New World", "author" => "Aldous Huxley", "release_date" => "1932-06-01", "page_count" => 268],
     [ "index" => [ "_index" => "books" ]],
     [ "name" => "The Handmaid's Tale", "author" => "Margaret Atwood", "release_date" => "1985-06-01", "page_count" => 311]
-];
+]];
 
-$response = $client->bulk(body: $body);
+$response = $client->bulk($params);
 echo $response->getStatusCode();
 echo (string) $response->getBody();`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `$client = ClientBuilder::create()
+  ingestDataIndex: ({
+    apiKey,
+    url,
+    indexName,
+    ingestPipeline,
+  }) => `$client = ClientBuilder::create()
   ->setEndpoint('${url}')
   ->setApiKey('${apiKey}')
   ->build();
+$params =[${ingestPipeline ? `\n  'pipeline' => '${ingestPipeline}',` : ''}
+  'body' => [
+    [ 'index' => [ '_index' => '${indexName ?? INDEX_NAME_PLACEHOLDER}', '_id' => '1' ]],
+    [ 'name' => 'foo', 'title' => 'bar' ]
+]];
 
-$body = [
-  [ 'index' => [ '_index' => '${indexName ?? INDEX_NAME_PLACEHOLDER}', '_id' => '1' ]],
-  [ 'name' => 'foo', 'title' => 'bar' ]
-];
-
-$response = $client->bulk(body: $body);
+$response = $client->bulk($params);
 echo $response->getStatusCode();
 echo (string) $response->getBody();
 `,

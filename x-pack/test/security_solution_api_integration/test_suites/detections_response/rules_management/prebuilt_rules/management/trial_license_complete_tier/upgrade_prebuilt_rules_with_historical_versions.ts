@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInQA upgrade prebuilt rules from package with historical versions with mock rule assets', () => {
+  describe('@ess @serverless @skipInServerlessMKI upgrade prebuilt rules from package with historical versions with mock rule assets', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);

@@ -28,6 +28,7 @@ import {
   mockCustomBrandingService,
   mockUserSettingsService,
   mockSecurityService,
+  mockUserProfileService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -129,6 +130,8 @@ test('sets up services on "setup"', async () => {
   expect(mockCustomBrandingService.setup).not.toHaveBeenCalled();
   expect(mockUserSettingsService.setup).not.toHaveBeenCalled();
   expect(mockSecurityService.setup).not.toHaveBeenCalled();
+  expect(mockSecurityService.setup).not.toHaveBeenCalled();
+  expect(mockUserProfileService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -148,6 +151,7 @@ test('sets up services on "setup"', async () => {
   expect(mockCustomBrandingService.setup).toHaveBeenCalledTimes(1);
   expect(mockUserSettingsService.setup).toHaveBeenCalledTimes(1);
   expect(mockSecurityService.setup).toHaveBeenCalledTimes(1);
+  expect(mockUserProfileService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -201,6 +205,7 @@ test('runs services on "start"', async () => {
   expect(mockDocLinksService.start).not.toHaveBeenCalled();
   expect(mockCustomBrandingService.start).not.toHaveBeenCalled();
   expect(mockSecurityService.start).not.toHaveBeenCalled();
+  expect(mockUserProfileService.start).not.toHaveBeenCalled();
 
   await server.start();
 
@@ -213,6 +218,8 @@ test('runs services on "start"', async () => {
   expect(mockDocLinksService.start).toHaveBeenCalledTimes(1);
   expect(mockCustomBrandingService.start).toHaveBeenCalledTimes(1);
   expect(mockSecurityService.start).toHaveBeenCalledTimes(1);
+  expect(mockUserProfileService.start).toHaveBeenCalledTimes(1);
+  expect(mockUserSettingsService.start).toHaveBeenCalledTimes(1);
 });
 
 test('does not fail on "setup" if there are unused paths detected', async () => {
@@ -241,6 +248,7 @@ test('stops services on "stop"', async () => {
   expect(mockLoggingService.stop).not.toHaveBeenCalled();
   expect(mockCustomBrandingService.stop).not.toHaveBeenCalled();
   expect(mockSecurityService.stop).not.toHaveBeenCalled();
+  expect(mockUserProfileService.stop).not.toHaveBeenCalled();
 
   await server.stop();
 
@@ -255,6 +263,7 @@ test('stops services on "stop"', async () => {
   expect(mockLoggingService.stop).toHaveBeenCalledTimes(1);
   expect(mockCustomBrandingService.stop).toHaveBeenCalledTimes(1);
   expect(mockSecurityService.stop).toHaveBeenCalledTimes(1);
+  expect(mockUserProfileService.stop).toHaveBeenCalledTimes(1);
 });
 
 test(`doesn't preboot core services if config validation fails`, async () => {

@@ -6,23 +6,24 @@
  */
 
 import React from 'react';
+import { formatNumber } from '@elastic/eui';
 
-import { formatBytes } from '@kbn/formatters';
 import { useSummaryPanelContext } from '../../../hooks';
+import { BYTE_NUMBER_FORMAT } from '../../../../common/constants';
 import {
   summaryPanelEstimatedDataText,
   summaryPanelEstimatedDataTooltipText,
 } from '../../../../common/translations';
-import { LastDayDataPlaceholder } from './last_day_data_placeholder';
+import { DataPlaceholder } from './data_placeholder';
 
 export function EstimatedData() {
   const { estimatedData, isEstimatedDataLoading } = useSummaryPanelContext();
 
   return (
-    <LastDayDataPlaceholder
+    <DataPlaceholder
       title={summaryPanelEstimatedDataText}
       tooltip={summaryPanelEstimatedDataTooltipText}
-      value={formatBytes(estimatedData.estimatedDataInBytes)}
+      value={formatNumber(estimatedData, BYTE_NUMBER_FORMAT)}
       isLoading={isEstimatedDataLoading}
     />
   );
