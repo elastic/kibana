@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { SloAlertsEmbeddableFactoryDefinition } from './slo_alerts_embeddable_factory';
-export type { SLOAlertsEmbeddable } from './slo_alerts_embeddable';
+export const SLO_ALERTS_EMBEDDABLE_ID = 'SLO_ALERTS_EMBEDDABLE';
+export const ADD_SLO_ALERTS_ACTION_ID = 'CREATE_SLO_ALERTS_EMBEDDABLE';
