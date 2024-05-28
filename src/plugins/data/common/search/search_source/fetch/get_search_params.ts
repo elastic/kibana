@@ -42,6 +42,7 @@ export function getSearchParamsFromRequest(
     index: searchRequest.index.title || searchRequest.index,
     body,
     track_total_hits,
+    failure_store: searchRequest.failure_store,
     ...(searchRequest.index?.allowHidden && { expand_wildcards: 'all' }),
     ...searchParams,
   };

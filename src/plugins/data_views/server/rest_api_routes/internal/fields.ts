@@ -41,6 +41,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       type,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
+      failure_store: failureStore,
       include_unmapped: includeUnmapped,
       field_types: fieldTypes,
     } = request.query;
@@ -62,6 +63,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
         metaFields: parsedMetaFields,
         type,
         rollupIndex,
+        failureStore,
         fieldCapsOptions: {
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,

@@ -122,6 +122,8 @@ export abstract class AbstractDataView {
    */
   public name: string = '';
 
+  public failureStoreMode: string | undefined;
+
   /*
    * list of indices that the index pattern matched
    */
@@ -178,6 +180,8 @@ export abstract class AbstractDataView {
     this.fieldFormatMap = { ...spec.fieldFormats };
 
     this.version = spec.version;
+
+    this.failureStoreMode = spec.failureStoreMode;
 
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
@@ -371,6 +375,7 @@ export abstract class AbstractDataView {
       typeMeta: stringifyOrUndefined(this.typeMeta),
       allowNoIndex: this.allowNoIndex ? this.allowNoIndex : undefined,
       runtimeFieldMap: stringifyOrUndefined(this.runtimeFieldMap),
+      failureStoreMode: this.failureStoreMode,
       name: this.name,
       allowHidden: this.allowHidden,
     };

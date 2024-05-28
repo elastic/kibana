@@ -57,6 +57,12 @@ export const schema = {
     }),
     validations: [],
   },
+  failureStoreMode: {
+    label: 'Show failed documents',
+    helpText: 'This exposes the failure store data under the hood',
+    validations: [],
+    defaultValue: 'exclude',
+  },
   allowHidden: {
     label: i18n.translate('indexPatternEditor.editor.form.allowHiddenLabel', {
       defaultMessage: 'Allow hidden and system indices',

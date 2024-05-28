@@ -75,6 +75,7 @@ export class IndexPatternsFetcher {
     metaFields?: string[];
     fieldCapsOptions?: { allow_no_indices: boolean; includeUnmapped?: boolean };
     type?: string;
+    failureStore?: string;
     rollupIndex?: string;
     indexFilter?: QueryDslQueryContainer;
     fields?: string[];
@@ -91,6 +92,7 @@ export class IndexPatternsFetcher {
       indexFilter,
       allowHidden,
       fieldTypes,
+      failureStore,
       includeEmptyFields,
     } = options;
     const allowNoIndices = fieldCapsOptions
@@ -109,6 +111,7 @@ export class IndexPatternsFetcher {
         include_unmapped: fieldCapsOptions?.includeUnmapped,
       },
       indexFilter,
+      failureStore,
       fields: options.fields || ['*'],
       expandWildcards,
       fieldTypes,

@@ -74,6 +74,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     this.fields = fieldList([], this.shortDotsEnable);
     this.flattenHit = flattenHitWrapper(this, metaFields);
+    this.failureStoreMode = spec.failureStoreMode;
 
     // set values
     this.fields.replaceAll(Object.values(spec.fields || {}));

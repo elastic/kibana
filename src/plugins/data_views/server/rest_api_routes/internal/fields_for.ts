@@ -47,6 +47,7 @@ export interface IQuery {
   meta_fields: string | string[];
   type?: string;
   rollup_index?: string;
+  failure_store?: string;
   allow_no_index?: boolean;
   include_unmapped?: boolean;
   fields?: string | string[];
@@ -63,6 +64,7 @@ export const querySchema = schema.object({
   type: schema.maybe(schema.string()),
   rollup_index: schema.maybe(schema.string()),
   allow_no_index: schema.maybe(schema.boolean()),
+  failure_store: schema.maybe(schema.string()),
   include_unmapped: schema.maybe(schema.boolean()),
   fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
   allow_hidden: schema.maybe(schema.boolean()),
@@ -137,6 +139,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       pattern,
       meta_fields: metaFields,
       type,
+      failure_store: failureStoreMode,
       rollup_index: rollupIndex,
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
@@ -169,6 +172,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
+        failureStore: failureStoreMode,
         fieldTypes: parsedFieldTypes,
         indexFilter,
         allowHidden,

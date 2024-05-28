@@ -165,6 +165,7 @@ export interface DataViewAttributes {
    * Allow hidden and system indices when loading field list
    */
   allowHidden?: boolean;
+  failureStoreMode?: string;
 }
 
 /**
@@ -318,6 +319,7 @@ export interface GetFieldsOptions {
   rollupIndex?: string;
   allowNoIndex?: boolean;
   indexFilter?: QueryDslQueryContainer;
+  failureStore?: string;
   includeUnmapped?: boolean;
   fields?: string[];
   allowHidden?: boolean;
@@ -553,6 +555,7 @@ export type DataViewSpec = {
    * Allow hidden and system indices when loading field list
    */
   allowHidden?: boolean;
+  failureStoreMode?: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions

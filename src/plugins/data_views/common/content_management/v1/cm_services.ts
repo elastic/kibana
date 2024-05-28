@@ -25,6 +25,7 @@ const dataViewAttributesSchema = schema.object(
     title: schema.string(),
     type: schema.maybe(schema.literal(DataViewType.ROLLUP)),
     timeFieldName: schema.maybe(schema.string()),
+    failureStoreMode: schema.maybe(schema.string()),
     sourceFilters: schema.maybe(
       schema.arrayOf(
         schema.object({

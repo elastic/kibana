@@ -30,6 +30,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     rollupIndex,
     allowNoIndex,
     indexFilter,
+    failureStore,
     fields,
     includeEmptyFields,
   }: GetFieldsOptions) {
@@ -45,6 +46,7 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
         type,
         rollupIndex,
         indexFilter,
+        failureStore,
         fields,
         includeEmptyFields,
       })

@@ -93,6 +93,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       indexFilter,
       includeUnmapped,
       fields,
+      failureStore,
       forceRefresh,
       allowHidden,
       fieldTypes,
@@ -110,6 +111,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         rollup_index: rollupIndex,
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
+        failure_store: failureStore,
         fields,
         fieldTypes,
         // default to undefined to keep value out of URL params and improve caching
