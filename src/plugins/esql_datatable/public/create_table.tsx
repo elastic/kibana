@@ -94,7 +94,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
     [activeColumns, deps?.core.notifications, props.dataView, props.query]
   );
 
-  if (loading || !deps || !UnifiedDataTable) return <EuiLoadingSpinner />;
+  if (loading || !deps) return <EuiLoadingSpinner />;
 
   const columnsMeta = props.columns.reduce((acc, column) => {
     acc[column.id] = {
