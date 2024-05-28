@@ -15,7 +15,7 @@ export const getReportersRoute = createCasesRoute({
   path: CASE_REPORTERS_URL,
   routerOptions: {
     access: 'public',
-    description: `Get case user information`,
+    description: `Get all case creators`,
   },
   handler: async ({ context, request, response }) => {
     try {

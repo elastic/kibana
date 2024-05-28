@@ -15,7 +15,7 @@ export const findCaseRoute = createCasesRoute({
   path: `${CASES_URL}/_find`,
   routerOptions: {
     access: 'public',
-    description: `Get cases`,
+    description: `Search cases`,
   },
   handler: async ({ context, request, response }) => {
     try {
