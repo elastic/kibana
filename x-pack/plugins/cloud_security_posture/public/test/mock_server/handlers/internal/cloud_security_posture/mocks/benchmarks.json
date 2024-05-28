@@ -1,0 +1,271 @@
+{
+  "items": [
+    {
+      "package_policy": {
+        "id": "9b69ad21-1451-462c-9cd7-cc7dee50a34e",
+        "version": "Wzc2MjAsM10=",
+        "name": "cspm 1715966013",
+        "namespace": "default",
+        "description": "",
+        "package": {
+          "name": "cloud_security_posture",
+          "title": "Security Posture Management",
+          "version": "1.9.0"
+        },
+        "enabled": true,
+        "policy_id": "1f850b02-c6db-4378-9323-d439db4d65b4",
+        "inputs": [
+          {
+            "type": "cloudbeat/cis_k8s",
+            "policy_template": "kspm",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "id": "cloudbeat/cis_k8s-cloud_security_posture.findings-9b69ad21-1451-462c-9cd7-cc7dee50a34e"
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/cis_eks",
+            "policy_template": "kspm",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "vars": {
+                  "access_key_id": {
+                    "type": "text"
+                  },
+                  "secret_access_key": {
+                    "type": "text"
+                  },
+                  "session_token": {
+                    "type": "text"
+                  },
+                  "shared_credential_file": {
+                    "type": "text"
+                  },
+                  "credential_profile_name": {
+                    "type": "text"
+                  },
+                  "role_arn": {
+                    "type": "text"
+                  },
+                  "aws.credentials.type": {
+                    "type": "text"
+                  }
+                },
+                "id": "cloudbeat/cis_eks-cloud_security_posture.findings-9b69ad21-1451-462c-9cd7-cc7dee50a34e"
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/cis_aws",
+            "policy_template": "cspm",
+            "enabled": true,
+            "streams": [
+              {
+                "enabled": true,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "vars": {
+                  "access_key_id": {
+                    "type": "text"
+                  },
+                  "secret_access_key": {
+                    "type": "text"
+                  },
+                  "session_token": {
+                    "type": "text"
+                  },
+                  "shared_credential_file": {
+                    "type": "text"
+                  },
+                  "credential_profile_name": {
+                    "type": "text"
+                  },
+                  "role_arn": {
+                    "type": "text"
+                  },
+                  "aws.credentials.type": {
+                    "type": "text"
+                  },
+                  "aws.account_type": {
+                    "value": "organization-account",
+                    "type": "text"
+                  }
+                },
+                "id": "cloudbeat/cis_aws-cloud_security_posture.findings-9b69ad21-1451-462c-9cd7-cc7dee50a34e",
+                "compiled_stream": {
+                  "period": "24h",
+                  "fetchers": [
+                    {
+                      "name": "aws-iam"
+                    },
+                    {
+                      "name": "aws-ec2-network"
+                    },
+                    {
+                      "name": "aws-s3"
+                    },
+                    {
+                      "name": "aws-trail"
+                    },
+                    {
+                      "name": "aws-monitoring"
+                    },
+                    {
+                      "name": "aws-rds"
+                    }
+                  ],
+                  "config": {
+                    "v1": {
+                      "type": "cspm",
+                      "deployment": "aws",
+                      "benchmark": "cis_aws",
+                      "aws": {
+                        "account_type": "organization-account",
+                        "credentials": {
+                          "type": null
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/cis_gcp",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "vars": {
+                  "gcp.account_type": {
+                    "type": "text"
+                  },
+                  "gcp.organization_id": {
+                    "type": "text"
+                  },
+                  "gcp.project_id": {
+                    "type": "text"
+                  },
+                  "gcp.credentials.type": {
+                    "type": "text"
+                  },
+                  "gcp.credentials.file": {
+                    "type": "text"
+                  },
+                  "gcp.credentials.json": {
+                    "type": "text"
+                  }
+                },
+                "id": "cloudbeat/cis_gcp-cloud_security_posture.findings-9b69ad21-1451-462c-9cd7-cc7dee50a34e"
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/cis_azure",
+            "policy_template": "cspm",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.findings"
+                },
+                "vars": {
+                  "azure.account_type": {
+                    "type": "text"
+                  },
+                  "azure.credentials.type": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_id": {
+                    "type": "text"
+                  },
+                  "azure.credentials.tenant_id": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_secret": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_username": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_password": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_certificate_path": {
+                    "type": "text"
+                  },
+                  "azure.credentials.client_certificate_password": {
+                    "type": "text"
+                  }
+                },
+                "id": "cloudbeat/cis_azure-cloud_security_posture.findings-9b69ad21-1451-462c-9cd7-cc7dee50a34e"
+              }
+            ]
+          },
+          {
+            "type": "cloudbeat/vuln_mgmt_aws",
+            "policy_template": "vuln_mgmt",
+            "enabled": false,
+            "streams": [
+              {
+                "enabled": false,
+                "data_stream": {
+                  "type": "logs",
+                  "dataset": "cloud_security_posture.vulnerabilities"
+                },
+                "id": "cloudbeat/vuln_mgmt_aws-cloud_security_posture.vulnerabilities-9b69ad21-1451-462c-9cd7-cc7dee50a34e"
+              }
+            ]
+          }
+        ],
+        "vars": {
+          "posture": {
+            "value": "cspm",
+            "type": "text"
+          },
+          "deployment": {
+            "value": "aws",
+            "type": "text"
+          }
+        },
+        "revision": 3,
+        "created_at": "2024-05-17T17:14:19.955Z",
+        "created_by": "system",
+        "updated_at": "2024-05-21T07:27:03.286Z",
+        "updated_by": "system"
+      },
+      "agent_policy": {
+        "id": "1f850b02-c6db-4378-9323-d439db4d65b4",
+        "name": "Agent Policy 1715965995",
+        "agents": 0
+      },
+      "rules_count": 55
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "perPage": 100
+}

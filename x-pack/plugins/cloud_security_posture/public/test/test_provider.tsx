@@ -13,16 +13,9 @@ import { Router } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
-import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { discoverPluginMock } from '@kbn/discover-plugin/public/mocks';
-import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { sessionStorageMock } from '@kbn/core-http-server-mocks';
 import type { CspClientPluginStartDeps } from '../types';
+import { getMockDependencies } from './fixtures/get_mock_dependencies';
 
 interface CspAppDeps {
   core: CoreStart;
@@ -33,16 +26,7 @@ interface CspAppDeps {
 
 export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   core = coreMock.createStart(),
-  deps = {
-    data: dataPluginMock.createStartContract(),
-    unifiedSearch: unifiedSearchPluginMock.createStartContract(),
-    charts: chartPluginMock.createStartContract(),
-    discover: discoverPluginMock.createStartContract(),
-    fleet: fleetMock.createStartMock(),
-    licensing: licensingMock.createStart(),
-    uiActions: uiActionsPluginMock.createStartContract(),
-    storage: sessionStorageMock.create(),
-  },
+  deps = getMockDependencies(),
   params = coreMock.createAppMountParameters(),
   children,
 } = {}) => {
