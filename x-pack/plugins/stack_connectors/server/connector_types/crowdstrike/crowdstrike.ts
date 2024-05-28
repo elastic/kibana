@@ -207,16 +207,17 @@ export class CrowdstrikeConnector extends SubActionConnector<
       return errorData.message;
     }
 
-    // @ts-expect-error Seems like AxiosError is not typed correctly
+    // @ts-expect-error TODO: Can't find a way to make the types work here
     const cause = isArray(error.cause?.errors) ? error.cause.errors[0] : error.cause;
-
-    // ENOTFOUND is the error code for when the host is unreachable eg. api.crowdstrike.com1
-    if (cause?.code === 'ENOTFOUND') {
-      return `URL not found: ${JSON.stringify(cause ?? {})}`;
-    }
-    // ECONNREFUSED is the error code for when the host is unreachable eg. http://MacBook-Pro-Tomasz.local:55555
-    if (cause?.code === 'ECONNREFUSED') {
-      return `Connection Refused: ${JSON.stringify(cause ?? {})}`;
+    if (cause) {
+      // ENOTFOUND is the error code for when the host is unreachable eg. api.crowdstrike.com111
+      if (cause.code === 'ENOTFOUND') {
+        return `URL not found: ${cause.hostname}`;
+      }
+      // ECONNREFUSED is the error code for when the host is unreachable eg. http://MacBook-Pro-Tomasz.local:55555
+      if (cause.code === 'ECONNREFUSED') {
+        return `Connection Refused: ${cause.address}:${cause.port}`;
+      }
     }
 
     if (!error.response?.status) {
