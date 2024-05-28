@@ -46,7 +46,6 @@ export function definePutRolesRoutes({
     {
       path: '/api/security/role/{name}',
       options: {
-        access: 'public',
         description: `Create or update a role`,
       },
       validate: {
