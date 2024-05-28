@@ -53,6 +53,7 @@ const pickAgentPolicyKeysToSend = (agentPolicy: AgentPolicy) =>
     'agent_features',
     'is_protected',
     'advanced_settings',
+    'global_data_tags',
   ]);
 
 const FormWrapper = styled.div`
@@ -81,6 +82,9 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
     const [hasAdvancedSettingsErrors, setHasAdvancedSettingsErrors] = useState<boolean>(false);
 
     const updateAgentPolicy = (updatedFields: Partial<AgentPolicy>) => {
+      console.log('******************************************');
+      console.log(updatedFields);
+      console.log('******************************************');
       setAgentPolicy({
         ...agentPolicy,
         ...updatedFields,
@@ -109,8 +113,8 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
             error
               ? error.message
               : i18n.translate('xpack.fleet.editAgentPolicy.errorNotificationTitle', {
-                  defaultMessage: 'Unable to update agent policy',
-                })
+                defaultMessage: 'Unable to update agent policy',
+              })
           );
         }
       } catch (e) {

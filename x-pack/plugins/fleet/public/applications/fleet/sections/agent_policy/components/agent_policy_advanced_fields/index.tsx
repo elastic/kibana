@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, Suspense } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -73,6 +73,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   validation,
   disabled = false,
 }) => {
+  useEffect(() => {
+    console.log('=============================');
+    console.log(agentPolicy);
+    console.log('=============================');
+  });
   const { docLinks } = useStartServices();
   const AgentTamperProtectionWrapper = useUIExtension(
     'endpoint',
