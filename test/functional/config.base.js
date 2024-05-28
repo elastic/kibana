@@ -29,7 +29,6 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--telemetry.optIn=false',
         '--savedObjects.maxImportPayloadBytes=10485760',
-
         // override default to not allow hiddenFromHttpApis saved object types access to the HTTP Apis. see https://github.com/elastic/dev/issues/2200
         '--savedObjects.allowHttpApiAccess=false',
 
