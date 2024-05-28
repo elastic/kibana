@@ -24,12 +24,12 @@ describe('extractTags', () => {
 
 describe('assignToPaths', () => {
   it('should transform path names', () => {
-    const paths = new Map<string, OpenAPIV3.PathItemObject>();
+    const paths = {};
     assignToPaths(paths, '/foo', {});
     assignToPaths(paths, '/bar/{id?}', {});
-    expect(Array.from(paths.entries())).toEqual([
-      ['/foo', {}],
-      ['/bar/{id}', {}],
-    ]);
+    expect(paths).toEqual({
+      '/foo': {},
+      '/bar/{id}': {},
+    });
   });
 });
