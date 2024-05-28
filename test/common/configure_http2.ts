@@ -14,9 +14,14 @@ type ConfigType = Record<string, any>;
 /**
  * Enables HTTP2 by adding/changing the appropriate config settings
  *
- * note: it DOES mutate the provided config.
+ * Important: this must be used on "final" (non-reused) configs, otherwise
+ * the override from the children configs could remote the overrides
+ * done in that helper.
  */
 export const configureHTTP2 = (config: ConfigType): ConfigType => {
+  // Add env flag to avoid terminating on NODE_TLS_REJECT_UNAUTHORIZED warning
+  process.env.IS_FTR_RUNNER = 'true';
+
   // tell native node agents to trust unsafe certificates
   // this is ugly, but unfortunately required, as some libraries (such as supertest)
   // have no real alternatives to accept self-signed certs

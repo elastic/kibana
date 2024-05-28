@@ -8,12 +8,11 @@
 
 import { pageObjects } from './page_objects';
 import { services } from './services';
-import { configureHTTP2 } from '../common/configure_http2';
 
 export default async function ({ readConfigFile }) {
   const commonConfig = await readConfigFile(require.resolve('../common/config'));
 
-  return configureHTTP2({
+  return {
     pageObjects,
     services,
 
@@ -482,5 +481,5 @@ export default async function ({ readConfigFile }) {
       },
       defaultRoles: ['test_logstash_reader', 'kibana_admin'],
     },
-  });
+  };
 }

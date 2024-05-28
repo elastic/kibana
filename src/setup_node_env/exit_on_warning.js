@@ -119,7 +119,7 @@ function shouldIgnore(warn) {
     col,
     ftrOnly,
   }) {
-    if (ftrOnly && !process.isFtrRunner) return false;
+    if (ftrOnly && !process.env.IS_FTR_RUNNER) return false;
     if (name && name !== warn.name) return false;
     if (code && code !== warn.code) return false;
     if (message && message !== warn.message) return false;
