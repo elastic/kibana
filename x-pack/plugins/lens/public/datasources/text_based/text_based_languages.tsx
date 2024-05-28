@@ -450,7 +450,7 @@ export function getTextBasedDatasource({
     removeColumn,
 
     toExpression: (state, layerId, indexPatterns, dateRange, searchSessionId) => {
-      return toExpression(state, layerId);
+      return toExpression(state, layerId, dateRange);
     },
     getSelectedFields(state) {
       return getSelectedFieldsFromColumns(

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 import type { AggregateQuery } from '@kbn/es-query';
-import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import {
+  getESQLAdHocDataview,
+  getIndexPatternFromESQLQuery,
+  hasTimeNamedParams,
+} from '@kbn/esql-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../../build_services';
 
@@ -27,6 +31,10 @@ export async function getEsqlDataView(
     // we don't want to add the @timestamp field in this case https://github.com/elastic/kibana/issues/163417
     if (indexPatternFromQuery && dataViewObj.fields.getByName('@timestamp')?.type === 'date') {
       dataViewObj.timeFieldName = '@timestamp';
+    }
+
+    if (hasTimeNamedParams(query.esql)) {
+      dataViewObj.timeFieldName = 'timestamp';
     }
     return dataViewObj;
   }

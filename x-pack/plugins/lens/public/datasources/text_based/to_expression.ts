@@ -8,13 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import { Ast } from '@kbn/interpreter';
 import { textBasedQueryStateToExpressionAst } from '@kbn/data-plugin/common';
-import type { OriginalColumn } from '../../../common/types';
+import type { OriginalColumn, DateRange } from '../../../common/types';
 import { TextBasedPrivateState, TextBasedLayer, IndexPatternRef } from './types';
 
 function getExpressionForLayer(
   layer: TextBasedLayer,
   layerId: string,
-  refs: IndexPatternRef[]
+  refs: IndexPatternRef[],
+  dateRange: DateRange
 ): Ast | null {
   if (!layer.columns || layer.columns?.length === 0) {
     return null;
@@ -40,6 +41,10 @@ function getExpressionForLayer(
     }
   });
   const timeFieldName = layer.timeField ?? undefined;
+  const timeRange = {
+    from: dateRange.fromDate,
+    to: dateRange.toDate,
+  };
 
   if (!layer.table) {
     const textBasedQueryToAst = textBasedQueryStateToExpressionAst({
@@ -52,6 +57,7 @@ function getExpressionForLayer(
         defaultMessage:
           'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
+      time: timeRange,
     });
 
     textBasedQueryToAst.chain.push({
@@ -85,9 +91,9 @@ function getExpressionForLayer(
   }
 }
 
-export function toExpression(state: TextBasedPrivateState, layerId: string) {
+export function toExpression(state: TextBasedPrivateState, layerId: string, dateRange: DateRange) {
   if (state.layers[layerId]) {
-    return getExpressionForLayer(state.layers[layerId], layerId, state.indexPatternRefs);
+    return getExpressionForLayer(state.layers[layerId], layerId, state.indexPatternRefs, dateRange);
   }
 
   return null;

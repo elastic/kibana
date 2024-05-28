@@ -8,6 +8,7 @@ import {
   getIndexPatternFromESQLQuery,
   getESQLAdHocDataview,
   getESQLQueryColumns,
+  hasTimeNamedParams,
 } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
@@ -38,6 +39,10 @@ export const getSuggestions = async (
 
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
+    }
+
+    if (hasTimeNamedParams(query.esql) && !dataViewSpec) {
+      dataView.timeFieldName = 'timestamp';
     }
 
     const columns = await getESQLQueryColumns({

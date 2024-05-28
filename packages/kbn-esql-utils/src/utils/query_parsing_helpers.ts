@@ -40,3 +40,8 @@ export function removeDropCommandsFromESQLQuery(esql?: string): string {
   const pipes = (esql || '').split('|');
   return pipes.filter((statement) => !/DROP\s/i.test(statement)).join('|');
 }
+
+// this should be done with ast parsing
+export const hasTimeNamedParams = (esql: string) => {
+  return /\?earliest/i.test(esql) && /\?latest/i.test(esql);
+};

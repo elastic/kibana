@@ -42,6 +42,8 @@ interface Arguments {
    */
   titleForInspector?: string;
   descriptionForInspector?: string;
+  earliest?: string;
+  latest?: string;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -124,10 +126,32 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
+      earliest: {
+        aliases: ['earliest'],
+        types: ['string'],
+        help: i18n.translate('data.search.esql.earliest.help', {
+          defaultMessage: 'Earliest time param.',
+        }),
+      },
+      latest: {
+        aliases: ['latest'],
+        types: ['string'],
+        help: i18n.translate('data.search.esql.latest.help', {
+          defaultMessage: 'Latest time param.',
+        }),
+      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale, titleForInspector, descriptionForInspector },
+      {
+        query,
+        /* timezone, */ timeField,
+        locale,
+        titleForInspector,
+        descriptionForInspector,
+        earliest,
+        latest,
+      },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -149,6 +173,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             // time_zone: timezone,
             locale,
             version: ESQL_LATEST_VERSION,
+            ...(earliest && latest ? { params: [{ earliest }, { latest }] } : {}),
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(

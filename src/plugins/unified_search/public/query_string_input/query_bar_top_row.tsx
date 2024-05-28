@@ -18,6 +18,7 @@ import {
   isOfAggregateQueryType,
   getLanguageDisplayName,
 } from '@kbn/es-query';
+import { hasTimeNamedParams } from '@kbn/esql-utils';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
@@ -476,11 +477,15 @@ export const QueryBarTopRow = React.memo(
       let isDisabled: boolean | { display: React.ReactNode } = Boolean(props.isDisabled);
       let enableTooltip = false;
       // On text based mode the datepicker is always on when the user has unsaved changes.
-      // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field
+      // When the user doesn't have any changes it should be disabled if dataview doesn't have @timestamp field and ?latest, ?earliest named params
       if (Boolean(isQueryLangSelected) && !props.isDirty) {
         const adHocDataview = props.indexPatterns?.[0];
         if (adHocDataview && typeof adHocDataview !== 'string') {
-          if (!adHocDataview.timeFieldName) {
+          const hasTimeParams =
+            props.query && isOfAggregateQueryType(props.query)
+              ? hasTimeNamedParams(props.query.esql)
+              : false;
+          if (!adHocDataview.timeFieldName && !hasTimeParams) {
             isDisabled = {
               display: (
                 <span data-test-subj="kbnQueryBar-datePicker-disabled">
@@ -489,7 +494,7 @@ export const QueryBarTopRow = React.memo(
               ),
             };
           }
-          enableTooltip = !Boolean(adHocDataview.timeFieldName);
+          enableTooltip = !Boolean(adHocDataview.timeFieldName) && !hasTimeParams;
         }
       }
 
