@@ -155,7 +155,7 @@ describe('GeminiConnectorFields renders', () => {
 
       expect(onSubmit).toBeCalledWith({
         data: geminiConnector,
-        isValid: false,
+        isValid: true,
       });
     });
 

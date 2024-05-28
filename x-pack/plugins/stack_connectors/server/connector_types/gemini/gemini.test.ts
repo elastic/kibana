@@ -11,12 +11,9 @@ import { Config, Secrets, RunActionParams } from '../../../common/gemini/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Services } from '@kbn/actions-plugin/server/types';
-import {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  ElasticsearchClient
-} from '@kbn/core/server';
+import { KibanaRequest, SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { RunApiResponseSchema } from '../../../common/gemini/schema';
 
 jest.mock('../lib/gen_ai/create_gen_ai_dashboard');
@@ -47,6 +44,7 @@ jest.mock('@kbn/actions-plugin/server', () => {
 describe('GeminiConnector', () => {
   let connector: GeminiConnector;
   let mockServiceParams: ServiceParams<Config, Secrets>;
+  let mockRequest: jest.Mock;
 
   const mockConfigurationUtilities: ActionsConfigurationUtilities = {
     isHostnameAllowed: jest.fn().mockReturnValue(true), // Always allow hostname
@@ -78,7 +76,7 @@ describe('GeminiConnector', () => {
 
   beforeEach(() => {
     mockServiceParams = {
-      connector: { id: 'Gemini-id', type: 'gemini' },
+      connector: { id: '1', type: '.gemini' },
       configurationUtilities: mockConfigurationUtilities,
       config: {
         apiUrl: 'https://api.gemini.com',
@@ -108,18 +106,72 @@ describe('GeminiConnector', () => {
     connector = new GeminiConnector(mockServiceParams);
   });
 
-  describe('getDashboard', () => {
-    it('should return available: true when user has privileges', async () => {
-      const dashboardId = 'some-dashboard-id';
-
-      // Mock initDashboard to simulate a successful dashboard fetch
-      jest.spyOn(connector, 'getDashboard').mockResolvedValueOnce({ available: true });
-
-      const response = await connector.getDashboard({ dashboardId });
+  describe('Token dashboard', () => {
+    const mockGenAi = initDashboard as jest.Mock;
+    beforeEach(() => {
+      // @ts-ignore
+      connector.esClient.transport.request = mockRequest;
+      mockRequest.mockResolvedValue({ has_all_requested: true });
+      mockGenAi.mockResolvedValue({ success: true });
+      jest.clearAllMocks();
+    });
+    it('the create dashboard API call returns available: true when user has correct permissions', async () => {
+      const response = await connector.getDashboard({ dashboardId: '123' });
+      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: ['.kibana-event-log-*'],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      });
       expect(response).toEqual({ available: true });
     });
+    it('the create dashboard API call returns available: false when user has correct permissions', async () => {
+      mockRequest.mockResolvedValue({ has_all_requested: false });
+      const response = await connector.getDashboard({ dashboardId: '123' });
+      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: ['.kibana-event-log-*'],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      });
+      expect(response).toEqual({ available: false });
+    });
 
-    // Add a test for the case when the user doesn't have privileges
+    it('the create dashboard API call returns available: false when init dashboard fails', async () => {
+      mockGenAi.mockResolvedValue({ success: false });
+      const response = await connector.getDashboard({ dashboardId: '123' });
+      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith({
+        path: '/_security/user/_has_privileges',
+        method: 'POST',
+        body: {
+          index: [
+            {
+              names: ['.kibana-event-log-*'],
+              allow_restricted_indices: true,
+              privileges: ['read'],
+            },
+          ],
+        },
+      });
+      expect(response).toEqual({ available: false });
+    });
   });
 
   describe('runApi', () => {
@@ -141,8 +193,9 @@ describe('GeminiConnector', () => {
       };
 
       // Mock the request function to simulate a successful API call
-      jest.spyOn(connector as GeminiConnector, 'runApi').mockResolvedValueOnce({completion:'true',
-       stop_reason: '200' });
+      jest
+        .spyOn(connector as GeminiConnector, 'runApi')
+        .mockResolvedValueOnce({ completion: 'true', stop_reason: '200' });
 
       const response = await connector.runApi(runActionParams);
 
