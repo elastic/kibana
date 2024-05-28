@@ -13,7 +13,6 @@ import {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 
-export type DataTableSerializedState = SerializedTitles &
-  SerializedTimeRange & { dataViewId?: string };
+export type DataTableSerializedState = SerializedTitles & SerializedTimeRange;
 
 export type DataTableApi = DefaultEmbeddableApi<DataTableSerializedState> & PublishesDataLoading;
