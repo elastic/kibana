@@ -10,8 +10,10 @@
 import type { interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { CoreId } from '@kbn/core-base-common-internal';
-import type { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { InjectionRequestHandlerContext } from '@kbn/core-di-server';
+import { RequestToken, ResponseToken } from '@kbn/core-http-server';
+import { Global } from '@kbn/core-di-common';
 import type { InternalCoreDiServiceStart } from './internal_contracts';
 
 /**
@@ -22,6 +24,7 @@ export class CoreInjectionRouteHandlerContext implements InjectionRequestHandler
   constructor(
     private readonly injectionServiceStart: InternalCoreDiServiceStart,
     private readonly request: KibanaRequest,
+    private readonly response: KibanaResponseFactory,
     private readonly callerId: PluginOpaqueId | CoreId
   ) {}
 
@@ -30,8 +33,14 @@ export class CoreInjectionRouteHandlerContext implements InjectionRequestHandler
   public get container() {
     if (this.#container == null) {
       this.#container = this.injectionServiceStart.fork();
+      this.#container.bind(RequestToken).toConstantValue(this.request);
+      this.#container.bind(ResponseToken).toConstantValue(this.response);
+      this.#container.bind(Global).toConstantValue(RequestToken);
+      this.#container.bind(Global).toConstantValue(ResponseToken);
     }
 
-    return this.#container;
+    return (
+      this.injectionServiceStart.getContainer(this.callerId, this.#container) ?? this.#container
+    );
   }
 }

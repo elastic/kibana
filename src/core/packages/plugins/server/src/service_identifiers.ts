@@ -41,3 +41,6 @@ export const LoggingService: interfaces.ServiceIdentifier<CoreSetup['logging']> 
  */
 export const ConfigService: interfaces.ServiceIdentifier<PluginInitializerContext['config']> =
   Symbol.for('ConfigService');
+
+export const HttpService: interfaces.ServiceIdentifier<CoreSetup['http']> =
+  Symbol.for('HttpService');
