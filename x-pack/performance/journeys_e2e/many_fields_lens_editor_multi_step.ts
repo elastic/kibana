@@ -31,9 +31,9 @@ export const journey = new Journey({
     await kibanaPage.waitForCharts({ count: 1, timeout: 60000 });
     await kibanaPage.waitForChartsSuggestions(6);
   })
-  .step('Change to area', async ({ page, kibanaPage }) => {
+  .step('Change to horizontal', async ({ page, kibanaPage }) => {
     await page.click(subj('lnsChartSwitchPopover'));
-    await page.click(subj(`lnsChartSwitchPopover_area`));
+    await page.click(subj(`lnsChartSwitchPopover_bar_horizontal`));
     await kibanaPage.waitForCharts({ count: 1, timeout: 60000 });
     await kibanaPage.waitForChartsSuggestions(6);
   })
