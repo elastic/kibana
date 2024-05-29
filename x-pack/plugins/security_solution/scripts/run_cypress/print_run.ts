@@ -277,7 +277,11 @@ function formatFooterSummary(results: CypressCommandLine.CypressRunResult) {
 export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[]) {
   const parsedResults = _.reduce(
     results,
-    (acc: CypressCommandLine.CypressRunResult, result) => {
+    (acc: CypressCommandLine.CypressRunResult, result, index) => {
+      if (!result) {
+        console.warn(`Result for index: ${index} is empty (${result}). Skipping...`);
+      }
+
       acc.startedTestsAt =
         acc.startedTestsAt && new Date(result.startedTestsAt) > new Date(acc.startedTestsAt)
           ? acc.startedTestsAt
