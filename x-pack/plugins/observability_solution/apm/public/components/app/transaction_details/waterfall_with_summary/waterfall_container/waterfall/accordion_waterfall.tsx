@@ -33,8 +33,6 @@ import { useWaterfallContext } from './context/use_waterfall';
 
 interface AccordionWaterfallProps {
   isOpen: boolean;
-  item: IWaterfallSpanOrTransaction;
-  level: number;
   duration: IWaterfall['duration'];
   waterfallItemId?: string;
   waterfall: IWaterfall;
@@ -88,7 +86,6 @@ const StyledAccordion = euiStyled(EuiAccordion).withConfig({
 `;
 
 export function AccordionWaterfall({
-  item,
   maxLevelOpen,
   showCriticalPath,
   waterfall,
@@ -97,18 +94,17 @@ export function AccordionWaterfall({
 }: AccordionWaterfallProps) {
   return (
     <WaterfallContextProvider
-      item={item}
       maxLevelOpen={maxLevelOpen}
       showCriticalPath={showCriticalPath}
       waterfall={waterfall}
       isOpen={isOpen}
     >
-      <WaterfallTree {...props} />
+      <Waterfall {...props} />
     </WaterfallContextProvider>
   );
 }
 
-function WaterfallTree(props: WaterfallTreeProps) {
+function Waterfall(props: WaterfallTreeProps) {
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const { traceList } = useWaterfallContext();
@@ -119,13 +115,11 @@ function WaterfallTree(props: WaterfallTreeProps) {
 
   const getRowSize = (index: number) => {
     // adds 1px for the border top
-    return rowSizeMapRef?.current.get(index) || ACCORDION_HEIGHT + 1;
+    return rowSizeMapRef.current.get(index) || ACCORDION_HEIGHT + 1;
   };
 
   const onScroll = useCallback(({ scrollTop }: { scrollTop: number }) => {
-    if (listRef.current) {
-      listRef.current.scrollTo(scrollTop);
-    }
+    listRef.current?.scrollTo(scrollTop);
   }, []);
 
   return (
@@ -183,20 +177,13 @@ const VirtualRow = React.memo(
 const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
   const theme = useTheme();
   const { duration, waterfallItemId, onClickWaterfallItem, timelineMargins, node } = props;
-  const { criticalPathSegmentsById, errorCount, updateTreeNode, showCriticalPath } =
+  const { criticalPathSegmentsById, getErrorCount, updateTreeNode, showCriticalPath } =
     useWaterfallContext();
 
   const displayedColor = showCriticalPath ? transparentize(0.5, node.item.color) : node.item.color;
   const marginLeftLevel = 8 * node.level;
-  const hasToggle = !!node.childrenCount;
-
-  const toggleAccordion = () => {
-    updateTreeNode({ ...node, expanded: !node.expanded });
-  };
-
-  const onWaterfallItemClick = (flyoutDetailTab: string) => {
-    onClickWaterfallItem(node.item, flyoutDetailTab);
-  };
+  const hasToggle = !!node.childrenToLoad;
+  const errorCount = getErrorCount(node.item.id);
 
   const segments = criticalPathSegmentsById[node.item.id]
     ?.filter((segment) => segment.self)
@@ -205,6 +192,14 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
       left: (segment.offset - node.item.offset - node.item.skew) / node.item.duration,
       width: segment.duration / node.item.duration,
     }));
+
+  const toggleAccordion = () => {
+    updateTreeNode({ ...node, expanded: !node.expanded });
+  };
+
+  const onWaterfallItemClick = (flyoutDetailTab: string) => {
+    onClickWaterfallItem(node.item, flyoutDetailTab);
+  };
 
   return (
     <StyledAccordion
@@ -222,7 +217,7 @@ const WaterfallNode = React.memo((props: WaterfallNodeProps) => {
             <ToggleAccordionButton
               show={hasToggle}
               isOpen={node.expanded}
-              childrenCount={node.childrenCount}
+              childrenCount={node.childrenToLoad}
               onClick={toggleAccordion}
             />
           </EuiFlexItem>

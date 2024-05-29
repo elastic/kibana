@@ -166,8 +166,6 @@ export function Waterfall({ waterfall, waterfallItemId, showCriticalPath }: Prop
         {!waterfall.entryWaterfallTransaction ? null : (
           <AccordionWaterfall
             isOpen={isAccordionOpen}
-            item={waterfall.entryWaterfallTransaction}
-            level={0}
             waterfallItemId={waterfallItemId}
             duration={duration}
             waterfall={waterfall}

@@ -96,13 +96,18 @@ export interface IWaterfallLegend {
 
 export interface IWaterfallNode {
   id: string;
-  item: IWaterfallSpanOrTransaction;
+  item: IWaterfallItem;
+  // children that are loaded
   children: IWaterfallNode[];
-  level: number;
+  // total number of children that needs to be loaded
+  childrenToLoad: number;
+  // collapsed or expanded state
   expanded: boolean;
+  // level in the tree
+  level: number;
 }
 
-export type IWaterfallNodeFlatten = Omit<IWaterfallNode, 'children'> & { childrenCount: number };
+export type IWaterfallNodeFlatten = Omit<IWaterfallNode, 'children'>;
 
 function getLegendValues(transactionOrSpan: WaterfallTransaction | WaterfallSpan) {
   return {
@@ -474,19 +479,88 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   };
 }
 
-export const buildTraceTree = ({
-  criticalPathSegmentsById,
-  isOpen,
-  maxLevelOpen,
-  showCriticalPath,
+function getChildren({
+  path,
   waterfall,
+  waterfallItemId,
+}: {
+  waterfallItemId: string;
+  waterfall: IWaterfall;
+  path: {
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    showCriticalPath: boolean;
+  };
+}) {
+  const children = waterfall.childrenByParentId[waterfallItemId] ?? [];
+  return path.showCriticalPath
+    ? children.filter((child) => path.criticalPathSegmentsById[child.id]?.length)
+    : children;
+}
+
+function buildTree({
+  root,
+  waterfall,
+  maxLevelOpen,
+  path,
+}: {
+  root: IWaterfallNode;
+  waterfall: IWaterfall;
+  maxLevelOpen: number;
+  path: {
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    showCriticalPath: boolean;
+  };
+}) {
+  const tree = { ...root };
+  const queue: IWaterfallNode[] = [tree];
+
+  while (queue.length > 0 && maxLevelOpen > queue[0].level) {
+    const node = queue.shift()!;
+
+    const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
+    node.childrenToLoad = children.length;
+
+    children.forEach((child, index) => {
+      const level = node.level + 1;
+
+      const currentNode: IWaterfallNode = {
+        id: btoa(`${node.id}-${child.id}-${index}`),
+        item: child,
+        children: [],
+        level,
+        expanded: level < maxLevelOpen,
+        childrenToLoad: 0,
+      };
+
+      node.children.push(currentNode);
+      queue.push(currentNode);
+    });
+  }
+
+  // Set childrenToLoad for the remaning visible nodes in the tree
+  // this allows lazy loading of child nodes
+  queue.forEach((node) => {
+    const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
+    node.childrenToLoad = children.length;
+  });
+
+  return tree;
+}
+
+export function buildTraceTree({
+  waterfall,
+  maxLevelOpen,
+  isOpen,
+  path,
 }: {
   waterfall: IWaterfall;
-  criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
-  showCriticalPath: boolean;
   maxLevelOpen: number;
   isOpen: boolean;
-}): IWaterfallNode | null => {
+  path: {
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    showCriticalPath: boolean;
+  };
+}): IWaterfallNode | null {
   const entry = waterfall.entryWaterfallTransaction;
   if (!entry) {
     return null;
@@ -498,38 +572,11 @@ export const buildTraceTree = ({
     children: [],
     level: 0,
     expanded: isOpen,
+    childrenToLoad: 0,
   };
 
-  const queue: IWaterfallNode[] = [root];
-
-  while (queue.length > 0) {
-    const node = queue.shift()!;
-
-    const children = waterfall.childrenByParentId[node.item.id] ?? [];
-    const filteredChildren = showCriticalPath
-      ? children.filter((child) => criticalPathSegmentsById[child.id]?.length)
-      : children;
-
-    filteredChildren.forEach((child, index) => {
-      const nextLevel = node.level + 1;
-      const childNode: IWaterfallNode = {
-        id: btoa(`${node.id}-${child.id}-${index}`),
-        item: child,
-        children: [],
-        level: nextLevel,
-        expanded: true,
-      };
-
-      node.children.push(childNode);
-
-      if (maxLevelOpen > nextLevel) {
-        queue.push(childNode);
-      }
-    });
-  }
-
-  return root;
-};
+  return buildTree({ root, maxLevelOpen, waterfall, path });
+}
 
 export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFlatten[] => {
   if (!root) {
@@ -543,7 +590,7 @@ export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFl
     const node = stack.pop()!;
 
     const { children, ...nodeWithoutChildren } = node;
-    result.push({ ...nodeWithoutChildren, childrenCount: node.children.length });
+    result.push(nodeWithoutChildren);
 
     if (node.expanded) {
       for (let i = node.children.length - 1; i >= 0; i--) {
@@ -555,7 +602,20 @@ export const convertTreeToList = (root: IWaterfallNode | null): IWaterfallNodeFl
   return result;
 };
 
-export const updateTraceTreeNode = (root: IWaterfallNode, updatedNode: IWaterfallNodeFlatten) => {
+export const updateTraceTreeNode = ({
+  root,
+  updatedNode,
+  waterfall,
+  path,
+}: {
+  root: IWaterfallNode;
+  updatedNode: IWaterfallNodeFlatten;
+  waterfall: IWaterfall;
+  path: {
+    criticalPathSegmentsById: Dictionary<CriticalPathSegment[]>;
+    showCriticalPath: boolean;
+  };
+}) => {
   if (!root) {
     return;
   }
@@ -569,11 +629,16 @@ export const updateTraceTreeNode = (root: IWaterfallNode, updatedNode: IWaterfal
     const { parent, index, node } = stack.pop()!;
 
     if (node.id === updatedNode.id) {
-      const { childrenCount: _, ...restUpdatedNode } = updatedNode;
-      const newNode = {
-        ...node,
-        ...restUpdatedNode,
-      };
+      const newNode = { ...node, ...updatedNode };
+
+      if (updatedNode.expanded && updatedNode.childrenToLoad !== node.children.length) {
+        newNode.children = buildTree({
+          root: node,
+          waterfall,
+          maxLevelOpen: node.level + 1, // Load only one level above the current node
+          path,
+        }).children;
+      }
 
       if (parent) {
         parent.children[index] = newNode;
@@ -581,7 +646,7 @@ export const updateTraceTreeNode = (root: IWaterfallNode, updatedNode: IWaterfal
         tree = newNode;
       }
 
-      break;
+      return tree;
     }
 
     for (let i = node.children.length - 1; i >= 0; i--) {

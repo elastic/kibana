@@ -757,6 +757,28 @@ describe('waterfall_helpers', () => {
   });
 
   describe('#trace tree', () => {
+    const waterfall = getWaterfall({
+      traceItems: {
+        traceDocs: hits,
+        errorDocs,
+        exceedsMax: false,
+        spanLinksCountById: {},
+        traceDocsTotal: hits.length,
+        maxTraceItems: 5000,
+      },
+      entryTransaction: {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTraceId' },
+        service: { name: 'opbeans-node' },
+        transaction: {
+          duration: { us: 49660 },
+          name: 'GET /api',
+          id: 'myTransactionId1',
+        },
+        timestamp: { us: 1549324795784006 },
+      } as Transaction,
+    });
+
     const tree: IWaterfallNode = {
       id: 'myTransactionId1',
       item: {
@@ -840,123 +862,142 @@ describe('waterfall_helpers', () => {
                 spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
               },
               children: [],
+              childrenToLoad: 0,
               level: 2,
               expanded: true,
             },
           ],
+          childrenToLoad: 1,
           level: 1,
-          expanded: true,
+          expanded: false,
         },
       ],
       level: 0,
+      childrenToLoad: 1,
       expanded: true,
     };
 
     describe('buildTraceTree', () => {
       it('should build the trace tree correctly', () => {
-        const apiResp = {
-          traceItems: {
-            traceDocs: hits,
-            errorDocs,
-            exceedsMax: false,
-            spanLinksCountById: {},
-            traceDocsTotal: hits.length,
-            maxTraceItems: 5000,
-          },
-          entryTransaction: {
-            processor: { event: 'transaction' },
-            trace: { id: 'myTraceId' },
-            service: { name: 'opbeans-node' },
-            transaction: {
-              duration: { us: 49660 },
-              name: 'GET /api',
-              id: 'myTransactionId1',
-            },
-            timestamp: { us: 1549324795784006 },
-          } as Transaction,
-        };
-        const waterfall = getWaterfall(apiResp);
-
         const result = buildTraceTree({
           waterfall,
-          criticalPathSegmentsById: {},
-          showCriticalPath: false,
-          maxLevelOpen: 2,
+          path: {
+            criticalPathSegmentsById: {},
+            showCriticalPath: false,
+          },
+          maxLevelOpen: 1,
           isOpen: true,
         });
 
-        expect(result?.item.id).toEqual('myTransactionId1');
-        expect(result?.level).toEqual(0);
-        expect(result?.expanded).toBe(true);
-        expect(result?.children[0].item.id).toEqual('mySpanIdD');
-        expect(result?.children[0].level).toEqual(1);
-        expect(result?.children[0].expanded).toBe(true);
-        expect(result?.children[0].children[0].item.id).toEqual('myTransactionId2');
-        expect(result?.children[0].children[0].level).toEqual(2);
-        expect(result?.children[0].children[0].expanded).toBe(true);
+        expect(result).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myTransactionId1' }),
+            level: 0,
+            expanded: true,
+          })
+        );
+
+        expect(result?.children[0]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'mySpanIdD' }),
+            level: 1,
+            expanded: false,
+            childrenToLoad: 1,
+            children: [],
+          })
+        );
       });
     });
 
     describe('convertTreeToList', () => {
       it('should convert the trace tree to a list correctly', () => {
         const result = convertTreeToList(tree);
-        expect(result).toHaveLength(3);
-        expect(result[0].id).toBe('myTransactionId1');
-        expect(result[0].level).toBe(0);
-        expect(result[2].expanded).toBe(true);
-        expect(result[1].item.id).toBe('mySpanIdD');
-        expect(result[1].level).toBe(1);
-        expect(result[2].expanded).toBe(true);
-        expect(result[2].item.id).toBe('myTransactionId2');
-        expect(result[2].level).toBe(2);
-        expect(result[2].expanded).toBe(true);
+
+        expect(result).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              item: expect.objectContaining({ id: 'myTransactionId1' }),
+              level: 0,
+              expanded: true,
+            }),
+            expect.objectContaining({
+              item: expect.objectContaining({ id: 'mySpanIdD' }),
+              level: 1,
+              expanded: false,
+            }),
+          ])
+        );
       });
     });
 
     describe('updateTraceTreeNode', () => {
       it('should update the trace tree node correctly setting "expanded" to false', () => {
         const updatedNode: IWaterfallNodeFlatten = {
-          id: 'YlhsVWNtRnVjMkZqZEdsdmJrbGtNUzF0ZVZOd1lXNUpaRVF0TUE9PS1teVRyYW5zYWN0aW9uSWQyLTA=',
+          id: 'bXlUcmFuc2FjdGlvbklkMS1teVNwYW5JZEQtMA==',
           item: {
-            docType: 'transaction',
+            docType: 'span',
             doc: {
               agent: { name: 'nodejs' },
-              parent: { id: 'mySpanIdD' },
-              processor: { event: 'transaction' },
+              parent: { id: 'myTransactionId1' },
+              processor: { event: 'span' },
               trace: { id: 'myTraceId' },
-              service: { name: 'opbeans-ruby' },
-              transaction: {
-                duration: { us: 8634 },
-                name: 'Api::ProductsController#index',
-                id: 'myTransactionId2',
+              service: { name: 'opbeans-node' },
+              transaction: { id: 'myTransactionId1' },
+              span: {
+                duration: { us: 47557 },
+                name: 'GET opbeans-ruby:3000/api/products',
+                id: 'mySpanIdD',
                 type: 'request',
               },
-              timestamp: { us: 1549324795823304 },
+              timestamp: { us: 1549324795785760 },
             },
-            id: 'myTransactionId2',
-            parentId: 'mySpanIdD',
-            duration: 8634,
-            offset: 39298,
+            id: 'mySpanIdD',
+            parentId: 'myTransactionId1',
+            duration: 47557,
+            offset: 1754,
             skew: 0,
-            legendValues: { serviceName: 'opbeans-ruby', spanType: '' },
+            legendValues: { serviceName: 'opbeans-node', spanType: '' },
             color: '',
             spanLinksCount: { linkedParents: 0, linkedChildren: 0 },
           },
-          childrenCount: 0,
-          level: 2,
-          expanded: false,
+          childrenToLoad: 1,
+          level: 1,
+          expanded: true,
         };
 
-        const result = updateTraceTreeNode(tree, updatedNode);
-        expect(result?.item.id).toEqual('myTransactionId1');
-        expect(result?.level).toEqual(0);
-        expect(result?.expanded).toBe(true);
-        expect(result?.children[0].item.id).toEqual('mySpanIdD');
-        expect(result?.children[0].level).toEqual(1);
-        expect(result?.children[0].expanded).toBe(true);
-        expect(result?.children[0].children[0].item.id).toEqual('myTransactionId2');
-        expect(result?.children[0].children[0].level).toEqual(2);
-        expect(result?.children[0].children[0].expanded).toBe(false);
+        const result = updateTraceTreeNode({
+          root: tree,
+          updatedNode,
+          waterfall,
+          path: {
+            criticalPathSegmentsById: {},
+            showCriticalPath: false,
+          },
+        });
+
+        expect(result).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myTransactionId1' }),
+            level: 0,
+            expanded: true,
+          })
+        );
+
+        expect(result?.children[0]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'mySpanIdD' }),
+            level: 1,
+            expanded: true,
+          })
+        );
+
+        expect(result?.children[0].children[0]).toEqual(
+          expect.objectContaining({
+            item: expect.objectContaining({ id: 'myTransactionId2' }),
+            level: 2,
+            expanded: true,
+          })
+        );
       });
     });
   });
