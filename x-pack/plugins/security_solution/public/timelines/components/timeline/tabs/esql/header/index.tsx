@@ -12,30 +12,25 @@ import type { TimeRange } from '@kbn/data-plugin/common';
 import { useDispatch, useSelector } from 'react-redux';
 import { useDeepEqualSelector } from '../../../../../../common/hooks/use_selector';
 import { timelineActions } from '../../../../../store';
-import { useValidateSecuritySolutionESQLQuery } from '../../../../../../common/hooks/esql/use_validate_timeline_esql_query';
 import { APP_ID } from '../../../../../../../common';
 import { useGetStatefulQueryBar } from '../use_get_stateful_query_bar';
 import { selectTimelineDateRange, selectTimelineESQLOptions } from '../../../../../store/selectors';
 import type { State } from '../../../../../../common/store/types';
 import type { ESQLOptions } from '../../../../../store/types';
 
-type QueryValidationResult = ReturnType<typeof useValidateSecuritySolutionESQLQuery>;
-
 interface OnQueryChangeArgs {
-  queryValidationResult: QueryValidationResult;
   query: AggregateQuery;
   dateRange: TimeRange;
 }
 
 interface OnQuerySubmitArgs {
-  queryValidationResult: QueryValidationResult;
   query: AggregateQuery;
   dateRange: TimeRange;
 }
 
 type OnQueryChange = (args: OnQueryChangeArgs) => void;
 
-type OnQuerySubmit = ({ queryValidationResult, query, dateRange }: OnQuerySubmitArgs) => void;
+type OnQuerySubmit = (args: OnQuerySubmitArgs) => void;
 
 export type ESQLTabHeaderProps = {
   onQuerySubmit?: OnQuerySubmit;
@@ -92,10 +87,6 @@ export const ESQLTabHeader = (props: ESQLTabHeaderProps) => {
 
   const { CustomSearchBar } = useGetStatefulQueryBar();
 
-  const queryValidationResult = useValidateSecuritySolutionESQLQuery({
-    query: localQuery,
-  });
-
   const onQuerySubmit = useCallback(
     (payload) => {
       updateESQLOptionsHandler({
@@ -111,14 +102,12 @@ export const ESQLTabHeader = (props: ESQLTabHeaderProps) => {
       );
 
       onQuerySubmitProp?.({
-        queryValidationResult,
         query: payload.query,
         dateRange: payload.dateRange,
       });
     },
     [
       onQuerySubmitProp,
-      queryValidationResult,
       updateESQLOptionsHandler,
       dispatch,
       timelineId,
@@ -133,12 +122,11 @@ export const ESQLTabHeader = (props: ESQLTabHeaderProps) => {
       setLocalQuery(payload.query);
       setLocalDateRange(payload.dateRange);
       onQueryChangeProp?.({
-        queryValidationResult,
         query: payload.query,
         dateRange: payload.dateRange,
       });
     },
-    [queryValidationResult, onQueryChangeProp]
+    [onQueryChangeProp]
   );
 
   return (

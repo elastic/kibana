@@ -133,7 +133,6 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
             },
           })
         );
-
         store.dispatch(
           setChanged({
             id: action.payload.id,

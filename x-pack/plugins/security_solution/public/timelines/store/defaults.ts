@@ -12,7 +12,6 @@ import { defaultHeaders } from '../components/timeline/body/column_headers/defau
 import { normalizeTimeRange } from '../../common/utils/normalize_time_range';
 import type { SubsetTimelineModel, TimelineModel } from './model';
 import type { ESQLOptions } from './types';
-import { defaultUdtHeaders } from '../components/timeline/unified_components/default_headers';
 
 // normalizeTimeRange uses getTimeRangeSettings which cannot be used outside Kibana context if the uiSettings is not false
 const { from: start, to: end } = normalizeTimeRange({ from: '', to: '' }, false);
@@ -22,11 +21,7 @@ const timelineESQLDefaults: ESQLOptions = {
     esql: '',
   },
   esqlDataViewId: undefined,
-  queryValidation: {
-    hasKeepClause: false,
-    sourceCommand: undefined,
-  },
-  visibleColumnIds: defaultUdtHeaders,
+  visibleColumns: [],
   sort: [
     {
       columnId: '@timestamp',

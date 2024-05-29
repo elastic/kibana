@@ -134,6 +134,19 @@ const basicTimeline: TimelineModel = {
   savedSearch: null,
   isDataProviderVisible: true,
   sampleSize: 500,
+  esqlOptions: {
+    query: {
+      esql: '',
+    },
+    sort: [
+      {
+        columnId: '@timestamp',
+        columnType: 'date',
+        sortDirection: Direction.desc,
+      },
+    ],
+    visibleColumns: [],
+  },
 };
 const timelineByIdMock: TimelineById = {
   foo: { ...basicTimeline },

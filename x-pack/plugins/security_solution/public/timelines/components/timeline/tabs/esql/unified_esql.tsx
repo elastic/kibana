@@ -15,12 +15,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
+import { getESQLHasKeepClause, getESQLSourceCommand } from '@kbn/securitysolution-utils';
 import { useGetAdHocDataViewWithESQLQuery } from '../../../../../common/containers/sourcerer/use_get_ad_hoc_data_view_with_esql_query';
-import {
-  getESQLHasKeepClause,
-  getESQLSourceCommand,
-  parseESQLQuery,
-} from '../../../../../common/hooks/esql/use_validate_timeline_esql_query';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import { useGetScopedSourcererDataView } from '../../../../../common/components/sourcerer/use_get_sourcerer_data_view';
@@ -48,6 +44,26 @@ import {
 
 interface UnifiedEsqlProps {
   timelineId: string;
+}
+
+interface ESQLColumnsWithMeta {
+  /*
+   * Columns that are visible in the ESQL Data. This depends on the query. If user has `KEEP` clause then only
+   * those columns are visible Otherwise, default set of columns defined by timelines are visible
+   */
+  visibleColumns: ColumnHeaderOptions[];
+  /*
+   * If user has custom columns or aggregations then we have to create dataView fields based on those columns.
+   */
+  dataViewFields?: DataViewField[];
+  /*
+   * Meta information about all the columns returned from ESQL query needed by unified data table
+   */
+  columnsMeta: DataTableColumnsMeta;
+  /*
+   * If the query has a timestamp column selected or not. This helps in rendering default sorting
+   */
+  hasTimestamp: boolean;
 }
 
 export const UnifiedEsql = (props: UnifiedEsqlProps) => {
@@ -142,13 +158,8 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     onDataViewCreationSuccess: onAdHocDataViewSuccessCallback,
   });
 
-  /*
-   *
-   * getAugumentedColumns loops over all the columns and tries to extract all the
-   * information it needs to render the ESQL Data properly.
-   *
-   * */
-  const augumentedColumns = useMemo(() => {
+  const esqlColumnsWithMeta: ESQLColumnsWithMeta = useMemo(() => {
+    // Only calculate the columns if the data is completely loaded
     if (augumentedColumnsRef.current && (isEventFetchInProgress || isDataViewLoading)) {
       return augumentedColumnsRef.current;
     }
@@ -173,9 +184,8 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
         hasTimestamp = true;
       }
 
-      const queryAst = parseESQLQuery(esqlQuery).ast;
-      const isFromCommand = getESQLSourceCommand(queryAst) === 'from';
-      const hasKeepClause = getESQLHasKeepClause(queryAst);
+      const isFromCommand = getESQLSourceCommand(esqlQuery.esql) === 'from';
+      const hasKeepClause = getESQLHasKeepClause(esqlQuery.esql);
 
       if (!isFromCommand || hasKeepClause) {
         /*
@@ -217,13 +227,14 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
 
   useEffect(() => {
     /*
-     * Bring ESQL Displayed columns upto date according to the columns
-     * fetched from the ESQL query
+     *
+     * Bring ESQL visible columns in table upto date according to
+     * the columns fetched from the ESQL query
      *
      * */
-    if (augumentedColumns.visibleColumns.length > 0) {
+    if (esqlColumnsWithMeta.visibleColumns.length > 0) {
       updateESQLOptionsHandler({
-        visibleColumns: augumentedColumns.visibleColumns,
+        visibleColumns: esqlColumnsWithMeta.visibleColumns,
       });
       return;
     }
@@ -236,7 +247,7 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
     updateESQLOptionsHandler({
       visibleColumns: defaultUdtHeaders,
     });
-  }, [augumentedColumns.visibleColumns, updateESQLOptionsHandler]);
+  }, [esqlColumnsWithMeta.visibleColumns, updateESQLOptionsHandler]);
 
   const onQuerySubmit: ESQLTabHeaderProps['onQuerySubmit'] = useCallback(async () => {
     await getDataView();
@@ -253,20 +264,20 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
   const rowRenderersMemo = useMemo(() => [], []);
 
   const esqlSort = useMemo(() => {
-    return sort.filter(({ columnId }) => columnId in augumentedColumns.columnsMeta);
-  }, [augumentedColumns, sort]);
+    return sort.filter(({ columnId }) => columnId in esqlColumnsWithMeta.columnsMeta);
+  }, [esqlColumnsWithMeta, sort]);
 
   const onSort = useCallback(
     (newSort: string[][]) => {
       updateESQLOptionsHandler({
         sort: newSort.map(([field, direction]) => ({
           columnId: field,
-          columnType: augumentedColumns.columnsMeta[field]?.type ?? 'unknown',
+          columnType: esqlColumnsWithMeta.columnsMeta[field]?.type ?? 'unknown',
           sortDirection: direction as 'asc' | 'desc',
         })),
       });
     },
-    [updateESQLOptionsHandler, augumentedColumns.columnsMeta]
+    [updateESQLOptionsHandler, esqlColumnsWithMeta.columnsMeta]
   );
 
   const onVisibleColumnsChange = useCallback(
@@ -315,8 +326,8 @@ export const UnifiedEsql = (props: UnifiedEsqlProps) => {
             activeTab={TimelineTabs.esql}
             isTextBasedQuery={true}
             dataView={esqlDataView ?? securityDataView}
-            textBasedDataViewFields={augumentedColumns.dataViewFields}
-            columnsMeta={augumentedColumns.columnsMeta}
+            textBasedDataViewFields={esqlColumnsWithMeta.dataViewFields}
+            columnsMeta={esqlColumnsWithMeta.columnsMeta}
             onVisibleColumnsChange={onVisibleColumnsChange}
           />
         </EuiFlexItem>

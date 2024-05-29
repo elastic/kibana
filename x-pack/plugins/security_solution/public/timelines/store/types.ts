@@ -56,8 +56,4 @@ export interface ESQLOptions {
   esqlDataViewId?: string;
   sort: SortColumnTimeline[];
   visibleColumns: ColumnHeaderOptions[];
-  queryValidation: {
-    hasKeepClause: boolean;
-    sourceCommand?: string;
-  };
 }
