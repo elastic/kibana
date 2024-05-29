@@ -68,6 +68,7 @@ describe('CreateSLO', () => {
           settings: {
             syncDelay: oneMinute(),
             frequency: oneMinute(),
+            preventInitialBackfill: false,
           },
           revision: 1,
           tags: [],
@@ -108,6 +109,40 @@ describe('CreateSLO', () => {
           settings: {
             syncDelay: fiveMinute(),
             frequency: oneMinute(),
+            preventInitialBackfill: false,
+          },
+          revision: 1,
+          tags: ['one', 'two'],
+          enabled: true,
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        }),
+        { throwOnConflict: true }
+      );
+    });
+
+    it('overrides the settings when provided', async () => {
+      const sloParams = createSLOParams({
+        indicator: createAPMTransactionErrorRateIndicator(),
+        tags: ['one', 'two'],
+        settings: {
+          syncDelay: fiveMinute(),
+          frequency: fiveMinute(),
+          preventInitialBackfill: true,
+        },
+      });
+      mockTransformManager.install.mockResolvedValue('slo-transform-id');
+
+      await createSLO.execute(sloParams);
+
+      expect(mockRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...sloParams,
+          id: expect.any(String),
+          settings: {
+            syncDelay: fiveMinute(),
+            frequency: fiveMinute(),
+            preventInitialBackfill: true,
           },
           revision: 1,
           tags: ['one', 'two'],
