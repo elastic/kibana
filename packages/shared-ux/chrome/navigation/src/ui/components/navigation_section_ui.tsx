@@ -307,9 +307,6 @@ const nodeToEuiCollapsibleNavProps = (
     };
   }
 
-  // Render as an accordion or a link (handled by EUI) depending if
-  // "items" is undefined or not. If it is undefined --> a link, otherwise an
-  // accordion is rendered.
   if (navNode.renderItem) {
     return {
       items: [
@@ -322,19 +319,20 @@ const nodeToEuiCollapsibleNavProps = (
   }
 
   const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
-    // @ts-ignore - TODO
     {
       id,
       path,
       isSelected,
-      linkProps,
       onClick,
-      href,
       icon: navNode.icon,
       title: navNode.title,
-      items: subItems,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: treeDepth === 0 ? 'm' : 's' },
+
+      // Render as an accordion or a link (handled by EUI) depending if
+      // "items" is undefined or not. If it is undefined --> a link, otherwise an
+      // accordion is rendered.
+      ...(subItems ? { items: subItems } : { href, linkProps }),
     },
   ];
 
@@ -558,22 +556,47 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     ): EuiCollapsibleNavSubItemProps[] | undefined => {
       if (!_items) return;
 
-      return _items.map((item) => {
+      return _items.map(({ path, ...item }) => {
         if (item.renderItem) {
           return item;
         }
-        // @ts-ignore - TODO
-        const parsed: EuiCollapsibleNavSubItemProps = {
-          ...item,
-          items: serializeAccordionItems(item.items),
-          accordionProps:
-            item.items !== undefined
-              ? getAccordionProps(item.path ?? item.id!, {
-                  onClick: item.onClick,
-                  ...item.accordionProps,
-                })
-              : undefined,
-        };
+
+        const itemsSerialized: EuiCollapsibleNavSubItemProps['items'] = serializeAccordionItems(
+          item.items
+        );
+
+        const accordionProps =
+          itemsSerialized === undefined
+            ? undefined
+            : getAccordionProps(path ?? item.id!, {
+                onClick: item.onClick,
+                ...item.accordionProps,
+              });
+
+        // The EuiCollapsibleNavSubItemProps can have *either* href/linkProps or items/accordionProps/isCollapsible. Mixing them is not allowed
+        // See ExclusiveUnion type in EUI repo at eui/src/components/collapsible_nav_beta/collapsible_nav_item/collapsible_nav_item.tsx#L63-L102
+        const {
+          href,
+          linkProps,
+          isCollapsible,
+          items: __items,
+          accordionProps: __accordionProps,
+          ...rest
+        } = item;
+
+        const parsed: EuiCollapsibleNavSubItemProps = itemsSerialized
+          ? {
+              ...rest,
+              items: itemsSerialized,
+              accordionProps,
+              isCollapsible,
+            }
+          : {
+              ...rest,
+              href,
+              linkProps,
+            };
+
         return parsed;
       });
     };
@@ -584,14 +607,19 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   if (!isVisible) {
     return null;
   }
+  if (!subItems) {
+    return <EuiCollapsibleNavItem {...props} className={className} />;
+  }
 
   return (
-    // @ts-ignore - TODO
     <EuiCollapsibleNavItem
       {...props}
       className={className}
       items={subItems}
       accordionProps={getAccordionProps(navNode.path)}
+      // Item type ExclusiveUnion - accordions should not contain links
+      href={undefined}
+      linkProps={undefined}
     />
   );
 });

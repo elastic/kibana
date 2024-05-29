@@ -21,6 +21,7 @@ x-pack/plugins/aiops @elastic/ml-ui
 x-pack/packages/ml/aiops_test_utils @elastic/ml-ui
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
+x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
@@ -336,6 +337,7 @@ x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 src/plugins/dashboard @elastic/kibana-presentation
 x-pack/packages/kbn-data-forge @elastic/obs-ux-management-team
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
+x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
@@ -470,6 +472,7 @@ x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/grokdebugger @elastic/kibana-management
+packages/kbn-grouping @elastic/response-ops
 packages/kbn-guided-onboarding @elastic/appex-sharedux
 examples/guided_onboarding_example @elastic/appex-sharedux
 src/plugins/guided_onboarding @elastic/appex-sharedux
@@ -611,7 +614,7 @@ x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/packages/observability/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_logs_explorer @elastic/obs-ux-logs-team
-x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team
+x-pack/plugins/observability_solution/observability_onboarding @elastic/obs-ux-logs-team @elastic/obs-ux-onboarding-team
 x-pack/plugins/observability_solution/observability @elastic/obs-ux-management-team
 x-pack/plugins/observability_solution/observability_shared @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
@@ -735,7 +738,6 @@ x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-in
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
-packages/kbn-securitysolution-grouping @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-hook-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-detection-engine
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
@@ -818,7 +820,6 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/kibana-management
-packages/solution-nav/oblt @elastic/appex-sharedux @elastic/obs-ux-management-team
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
@@ -1218,6 +1219,7 @@ x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /WORKSPACE.bazel @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /.buildkite/scripts/steps/esql_grammar_sync.sh @elastic/kibana-esql
+/.buildkite/scripts/steps/esql_generate_function_definitions.sh @elastic/kibana-esql
 /.buildkite/pipelines/esql_grammar_sync.yml @elastic/kibana-esql
 /kbn_pm/ @elastic/kibana-operations
 /x-pack/dev-tools @elastic/kibana-operations
