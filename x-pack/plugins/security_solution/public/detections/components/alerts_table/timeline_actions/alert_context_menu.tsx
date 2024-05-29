@@ -426,10 +426,14 @@ export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps>
     return null;
   }, [maybeRule]);
 
+  const isESQLRule = enrichedAlert?.['kibana.alert.rule.parameters']?.type === 'esql';
+  const isWaitingForIndexOrDataView =
+    !isESQLRule && memoRuleIndices == null && memoDataViewId == null;
+
   const isLoading =
     (isLoadingAlertData && isSignalIndexLoading) ||
     enrichedAlert == null ||
-    (memoRuleIndices == null && memoDataViewId == null);
+    isWaitingForIndexOrDataView;
 
   if (isLoading || isRuleLoading) return null;
 
