@@ -20,11 +20,12 @@ import {
   RecoveredActionGroup,
 } from '@kbn/alerting-plugin/common';
 import { AlertsClientError, RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
-import type { TimeUnitChar } from '@kbn/observability-plugin/common';
-import { getAlertUrl } from '@kbn/observability-plugin/common';
+import { TimeUnitChar, getAlertUrl } from '@kbn/observability-plugin/common';
 import { ObservabilityMetricsAlert } from '@kbn/alerts-as-data-utils';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
-import { AlertStates, Comparator } from '../../../../common/alerting/metrics';
+import { AlertStates } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
 import { InfraBackendLibs } from '../../infra_types';
 import {
@@ -296,7 +297,16 @@ export const createMetricThresholdExecutor =
         reason = alertResults
           .map((result) =>
             buildFiredAlertReason({
-              ...formatAlertResult(result[group], nextState === AlertStates.WARNING),
+              ...formatAlertResult(
+                {
+                  ...result[group],
+                  comparator: convertToBuiltInComparators(result[group].comparator),
+                  warningComparator: result[group].comparator
+                    ? convertToBuiltInComparators(result[group].comparator)
+                    : undefined,
+                },
+                nextState === AlertStates.WARNING
+              ),
               group,
             })
           )
@@ -367,21 +377,33 @@ export const createMetricThresholdExecutor =
           }),
           reason,
           threshold: mapToConditionsLookup(alertResults, (result, index) => {
-            const evaluation = result[group];
+            const evaluation = result[group] as Evaluation;
             if (!evaluation) {
               return criteria[index].threshold;
             }
-            return formatAlertResult(evaluation).threshold;
+            return formatAlertResult({
+              ...evaluation,
+              comparator: convertToBuiltInComparators(evaluation.comparator),
+              warningComparator: evaluation.warningComparator
+                ? convertToBuiltInComparators(evaluation.warningComparator)
+                : undefined,
+            }).threshold;
           }),
           timestamp,
           value: mapToConditionsLookup(alertResults, (result, index) => {
-            const evaluation = result[group];
+            const evaluation = result[group] as Evaluation;
             if (!evaluation && criteria[index].aggType === 'count') {
               return 0;
             } else if (!evaluation) {
               return null;
             }
-            return formatAlertResult(evaluation).currentValue;
+            return formatAlertResult({
+              ...evaluation,
+              comparator: convertToBuiltInComparators(evaluation.comparator),
+              warningComparator: evaluation.warningComparator
+                ? convertToBuiltInComparators(evaluation.warningComparator)
+                : undefined,
+            }).currentValue;
           }),
           viewInAppUrl: getMetricsViewInAppUrlWithSpaceId({
             basePath: libs.basePath,
@@ -518,9 +540,9 @@ const formatAlertResult = <AlertResult>(
     metric: string;
     currentValue: number | null;
     threshold: number[];
-    comparator: Comparator;
+    comparator: COMPARATORS;
     warningThreshold?: number[];
-    warningComparator?: Comparator;
+    warningComparator?: COMPARATORS;
     timeSize: number;
     timeUnit: TimeUnitChar;
   } & AlertResult,
@@ -544,7 +566,7 @@ const formatAlertResult = <AlertResult>(
       threshold: Array.isArray(thresholdToFormat)
         ? thresholdToFormat.map((v: number) => formatter(v))
         : formatter(thresholdToFormat),
-      comparator: comparatorToUse,
+      comparator: convertToBuiltInComparators(comparatorToUse),
     };
   }
 
