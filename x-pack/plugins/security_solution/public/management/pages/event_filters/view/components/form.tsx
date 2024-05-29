@@ -47,6 +47,7 @@ import {
   getPolicyIdsFromArtifact,
   GLOBAL_ARTIFACT_TAG,
   BY_POLICY_ARTIFACT_TAG_PREFIX,
+  isGlobalPolicyEffected,
 } from '../../../../../../common/endpoint/service/artifacts';
 
 import {
@@ -62,7 +63,6 @@ import { ENDPOINT_EVENT_FILTERS_LIST_ID, EVENT_FILTER_LIST_TYPE } from '../../co
 
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';

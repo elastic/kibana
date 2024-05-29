@@ -29,7 +29,7 @@ import {
   getArtifactTagsWithoutPolicies,
   getEffectedPolicySelectionByTags,
   isGlobalPolicyEffected,
-} from '../../../../components/effected_policy_select/utils';
+} from '../../../../../../common/endpoint/service/artifacts';
 import {
   DESCRIPTION_LABEL,
   DESCRIPTION_PLACEHOLDER,

@@ -43,6 +43,7 @@ import {
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
+  isGlobalPolicyEffected,
 } from '../../../../../../common/endpoint/service/artifacts';
 import {
   isMacosLinuxTrustedAppCondition,
@@ -72,7 +73,6 @@ import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
-import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 
 interface FieldValidationState {
