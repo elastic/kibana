@@ -19,7 +19,6 @@ import { catchError, map, switchMap, tap } from 'rxjs';
 import { buildEsQuery } from '@kbn/es-query';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import { ESQL_ASYNC_SEARCH_STRATEGY, KibanaContext, ESQL_TABLE_TYPE } from '..';
@@ -148,7 +147,6 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             query,
             // time_zone: timezone,
             locale,
-            version: ESQL_LATEST_VERSION,
           };
           if (input) {
             const esQueryConfigs = getEsQueryConfig(

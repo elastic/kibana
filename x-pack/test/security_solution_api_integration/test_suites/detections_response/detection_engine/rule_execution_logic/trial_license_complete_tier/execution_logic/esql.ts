@@ -104,6 +104,9 @@ export default ({ getService }: FtrProviderContext) => {
           version: 1,
           exceptions_list: [],
           immutable: false,
+          rule_source: {
+            type: 'internal',
+          },
           related_integrations: [],
           required_fields: [],
           setup: '',
