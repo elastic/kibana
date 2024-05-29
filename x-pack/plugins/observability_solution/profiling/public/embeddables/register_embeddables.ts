@@ -15,7 +15,7 @@ import { getEmbeddableFlamegraphComponent } from './flamegraph';
 import { EmbeddableFunctionsFactory } from './functions/embeddable_functions_factory';
 import { ProfilingEmbeddablesDependencies } from './profiling_embeddable_provider';
 import { EmbeddableSearchBarFactory } from './search_bar/embeddable_search_bar_factory';
-import { EmbeddableStackTracesFactory } from './stack_traces/embeddable_stack_traces_factory';
+import { getEmbeddableStackTracesComponent } from './stack_traces';
 
 export function registerEmbeddables(deps: ProfilingEmbeddablesDependencies) {
   const {
@@ -33,8 +33,8 @@ export function registerEmbeddables(deps: ProfilingEmbeddablesDependencies) {
     EMBEDDABLE_PROFILING_SEARCH_BAR,
     new EmbeddableSearchBarFactory(() => Promise.resolve(deps))
   );
-  embeddable.registerEmbeddableFactory(
+  observabilityShared.registerProfilingComponent(
     EMBEDDABLE_STACK_TRACES,
-    new EmbeddableStackTracesFactory(() => Promise.resolve(deps))
+    getEmbeddableStackTracesComponent(deps)
   );
 }

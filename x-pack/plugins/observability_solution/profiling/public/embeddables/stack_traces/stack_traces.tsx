@@ -13,7 +13,7 @@ import { AsyncStatus, useAsync } from '../../hooks/use_async';
 import { EmptyDataPrompt } from '../empty_data_prompt';
 import { ErrorPrompt } from '../error_prompt';
 
-interface Props {
+export interface StackTracesProps {
   type: TopNType;
   kuery: string;
   rangeFrom: number;
@@ -22,7 +22,14 @@ interface Props {
   onChartBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
 }
 
-export function StackTraces({ type, kuery, rangeFrom, rangeTo, onClick, onChartBrushEnd }: Props) {
+export function StackTraces({
+  type,
+  kuery,
+  rangeFrom,
+  rangeTo,
+  onClick,
+  onChartBrushEnd,
+}: StackTracesProps) {
   const {
     services: { fetchTopN },
   } = useProfilingDependencies();
