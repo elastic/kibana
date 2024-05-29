@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RESULTS_ROUTE_PATH } from '../../../common/constants';
+import { POST_INDEX_RESULTS } from '../../../common/constants';
 
 import { serverMock } from '../../__mocks__/server';
 import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
-import { postResultsRoute } from './post_results';
+import { postIndexResultsRoute } from './post_index_results';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { resultDocument } from './results.mock';
@@ -27,7 +27,7 @@ jest.mock('./privileges', () => ({
 
 const USER_PROFILE_UID = 'mocked_profile_uid';
 
-describe('postResultsRoute route', () => {
+describe('postIndexResultsRoute route', () => {
   describe('indexation', () => {
     let server: ReturnType<typeof serverMock.create>;
     let { context } = requestContextMock.createTools();
@@ -35,7 +35,7 @@ describe('postResultsRoute route', () => {
 
     const req = requestMock.create({
       method: 'post',
-      path: RESULTS_ROUTE_PATH,
+      path: POST_INDEX_RESULTS,
       body: resultDocument,
     });
 
@@ -53,7 +53,7 @@ describe('postResultsRoute route', () => {
       context.core.security.authc.getCurrentUser.mockReturnValue({
         profile_uid: USER_PROFILE_UID,
       } as AuthenticatedUser);
-      postResultsRoute(server.router, logger);
+      postIndexResultsRoute(server.router, logger);
     });
 
     it('indexes result', async () => {
@@ -110,7 +110,7 @@ describe('postResultsRoute route', () => {
 
     const req = requestMock.create({
       method: 'post',
-      path: RESULTS_ROUTE_PATH,
+      path: POST_INDEX_RESULTS,
       body: resultDocument,
     });
 
@@ -132,7 +132,7 @@ describe('postResultsRoute route', () => {
         result: 'created',
       } as WriteResponseBase);
 
-      postResultsRoute(server.router, logger);
+      postIndexResultsRoute(server.router, logger);
     });
 
     it('should authorize index', async () => {
@@ -193,13 +193,13 @@ describe('postResultsRoute route', () => {
     beforeEach(() => {
       server = serverMock.create();
       logger = loggerMock.create();
-      postResultsRoute(server.router, logger);
+      postIndexResultsRoute(server.router, logger);
     });
 
     test('disallows invalid pattern', () => {
       const req = requestMock.create({
         method: 'post',
-        path: RESULTS_ROUTE_PATH,
+        path: POST_INDEX_RESULTS,
         body: { indexName: 'invalid body' },
       });
       const result = server.validate(req);

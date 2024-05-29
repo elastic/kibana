@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export const _IGNORED = '_ignored';
-export const TIMESTAMP = '@timestamp';
-
-export const DATA_STREAM_DATASET = 'data_stream.dataset';
-export const DATA_STREAM_NAMESPACE = 'data_stream.namespace';
-export const DATA_STREAM_TYPE = 'data_stream.type';
+export class GetDataStreamsDetailsError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'GetDataStreamsDetailsError';
+  }
+}
