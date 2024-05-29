@@ -61,7 +61,7 @@ export function transformLiteralToPath(node: { path: hbs.AST.PathExpression | hb
 
 export function allowUnsafeEval() {
   try {
-    new Function();
+    new Function('kbnUnsafeEvalTest', 'return true;');
     return true;
   } catch (e) {
     return false;
