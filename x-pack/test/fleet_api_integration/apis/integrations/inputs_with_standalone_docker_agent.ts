@@ -73,6 +73,7 @@ ${inputsYaml}
         const searchRes = await es.search({
           index: 'metrics-system.cpu-default',
           q: `agent.name:${agent.name}`,
+          ignore_unavailable: true,
         });
 
         // @ts-expect-error TotalHit
