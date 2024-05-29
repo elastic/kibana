@@ -8,7 +8,14 @@
 
 import _ from 'lodash';
 import { Datatable } from '@kbn/expressions-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, toggleFilterNegated } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+  toggleFilterNegated,
+  type AggregateQuery,
+} from '@kbn/es-query';
+import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -22,6 +29,7 @@ interface ValueClickDataContext {
   }>;
   timeFieldName?: string;
   negate?: boolean;
+  query?: AggregateQuery;
 }
 
 /**
@@ -147,4 +155,41 @@ export const createFiltersFromValueClickAction = async ({
   return _.uniqWith(mapAndFlattenFilters(filters), (a, b) =>
     compareFilters(a, b, COMPARE_ALL_OPTIONS)
   );
+};
+
+/** @public */
+export const appendFilterToESQLQueryFromValueClickAction = async ({
+  data,
+  query,
+}: ValueClickDataContext) => {
+  let queryWithFilter: string | undefined;
+
+  await Promise.all(
+    data
+      .filter((point) => point)
+      .map(async (val) => {
+        const { table, column: columnIndex, row: rowIndex } = val;
+        if (table && table.columns && table.columns[columnIndex]) {
+          const column = table.columns[columnIndex];
+          const value: unknown = rowIndex > -1 ? table.rows[rowIndex][column.id] : null;
+
+          // Do not append in case of time series, for now. We need to find a way to compute the interval
+          // to create the time range filter correctly. The users can brush to update the time filter instead.
+          const isDate = column.meta?.type === 'date';
+
+          if (value === null || value === undefined || isDate || !query) return;
+
+          const queryString = query.esql;
+          queryWithFilter = appendWhereClauseToESQLQuery(
+            queryString,
+            column.id,
+            value,
+            '+',
+            column.meta?.type
+          );
+        }
+      })
+  );
+
+  return queryWithFilter;
 };
