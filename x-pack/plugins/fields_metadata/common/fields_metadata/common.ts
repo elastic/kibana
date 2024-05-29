@@ -6,3 +6,4 @@
  */
 
 export const FIND_FIELDS_METADATA_URL = '/internal/fields_metadata';
+export const ANY_DATASET = '*';

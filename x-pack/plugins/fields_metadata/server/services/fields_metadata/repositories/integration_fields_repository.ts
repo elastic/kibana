@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ANY_DATASET } from '../../../../common/fields_metadata';
 import { HashedCache } from '../../../../common/hashed_cache';
 import { FieldMetadata, IntegrationFieldName } from '../../../../common';
 import {
@@ -73,6 +74,7 @@ export class IntegrationFieldsRepository {
   ): FieldMetadata | undefined {
     const cacheKey = this.getCacheKey({ integration, dataset });
     const cachedIntegration = this.cache.get(cacheKey);
+    const datasetName = dataset === ANY_DATASET ? null : dataset;
 
     // 1. Integration fields were never fetched
     if (!cachedIntegration) {
@@ -80,18 +82,18 @@ export class IntegrationFieldsRepository {
     }
 
     // 2. Dataset is passed but was never fetched before
-    if (dataset && !cachedIntegration.hasOwnProperty(dataset)) {
+    if (datasetName && !cachedIntegration.hasOwnProperty(datasetName)) {
       return undefined;
     }
 
     // 3. Dataset is passed and it was previously fetched, should return the field
-    if (dataset && cachedIntegration.hasOwnProperty(dataset)) {
-      const targetDataset = cachedIntegration[dataset];
+    if (datasetName && cachedIntegration.hasOwnProperty(datasetName)) {
+      const targetDataset = cachedIntegration[datasetName];
       return targetDataset[fieldName];
     }
 
     // 4. Dataset is not passed, we attempt search on all stored datasets
-    if (!dataset) {
+    if (!datasetName) {
       // Merge all the available datasets into a unique field list. Overriding fields might occur in the process.
       const cachedDatasetsFields = Object.assign({}, ...Object.values(cachedIntegration));
       return cachedDatasetsFields[fieldName];

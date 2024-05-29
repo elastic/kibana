@@ -24,7 +24,7 @@ const timestampField = await client.getByName('@timestamp')
 */
 ```
 
-- `find(params?: {fieldNames: string[], integration: string, dataset?: string})`: Retrieves a record of matching `FieldMetadata` instances based on the query parameters.
+- `find(params?: {fieldNames?: string[], integration?: string, dataset?: string})`: Retrieves a record of matching `FieldMetadata` instances based on the query parameters.
 
 **Parameters**
 | Name | Type | Example | Optional |
@@ -37,6 +37,7 @@ const timestampField = await client.getByName('@timestamp')
 const fields = await client.find({
   fieldNames: ['@timestamp', 'onepassword.client.platform_version'], 
   integration: '1password'
+  dataset: '*'
 })
 /*
 {
@@ -54,7 +55,9 @@ const fields = await client.find({
 */
 ```
 
-> N.B. Passing the `dataset` name parameter to `.find` helps narrowing the scope of the integration assets that need to be fetched, increasing the performance of the request. Using only the `integration` parameter should achieve the same result, but is recommended always passing the `dataset` as well if known or unless the required fields come from different datasets of the same integration.
+> N.B. Passing the `dataset` name parameter to `.find` helps narrowing the scope of the integration assets that need to be fetched, increasing the performance of the request. 
+In case the exact dataset for a field is unknown, is it still possible to pass a `*` value as `dataset` parameter to access all the integration datasets' fields. 
+Still, is recommended always passing the `dataset` as well if known or unless the required fields come from different datasets of the same integration.
 
 > N.B. In case the `fieldNames` parameter is not passed to `.find`, the result will give the whole list of ECS fields by default. This should be avoided as much as possible, although it helps covering cases where we might need the whole ECS fields list.
 
