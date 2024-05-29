@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover esql view', async function () {
+  // Failing: See https://github.com/elastic/kibana/issues/183493
+  describe.skip('discover esql view', async function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       log.debug('load kibana index with default index pattern');
@@ -173,7 +174,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('errors', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183479
+    describe.skip('errors', () => {
       it('should show error messages for syntax errors in query', async function () {
         await PageObjects.discover.selectTextBaseLang();
         const brokenQueries = [

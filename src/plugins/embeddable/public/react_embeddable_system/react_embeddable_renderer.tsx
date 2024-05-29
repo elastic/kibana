@@ -8,9 +8,14 @@
 
 import { HasSerializedChildState, SerializedPanelState } from '@kbn/presentation-containers';
 import { PresentationPanel, PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
-import { ComparatorDefinition, StateComparators } from '@kbn/presentation-publishing';
+import {
+  apiPublishesDataLoading,
+  ComparatorDefinition,
+  PhaseEvent,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import React, { useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { combineLatest, debounceTime, skip, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, skip, Subscription, switchMap } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import { getReactEmbeddableFactory } from './react_embeddable_registry';
 import { initializeReactEmbeddableState } from './react_embeddable_state';
@@ -62,13 +67,32 @@ export const ReactEmbeddableRenderer = <
   onAnyStateChange?: (state: SerializedPanelState<SerializedState>) => void;
 }) => {
   const cleanupFunction = useRef<(() => void) | null>(null);
+  const firstLoadCompleteTime = useRef<number | null>(null);
 
   const componentPromise = useMemo(
-    () =>
-      (async () => {
+    () => {
+      const uuid = maybeId ?? generateId();
+
+      /**
+       * Phase tracking instrumentation for telemetry
+       */
+      const phase$ = new BehaviorSubject<PhaseEvent | undefined>(undefined);
+      const embeddableStartTime = performance.now();
+      const reportPhaseChange = (loading: boolean) => {
+        if (firstLoadCompleteTime.current === null) {
+          firstLoadCompleteTime.current = performance.now();
+        }
+        const duration = firstLoadCompleteTime.current - embeddableStartTime;
+        phase$.next({ id: uuid, status: loading ? 'loading' : 'rendered', timeToEvent: duration });
+      };
+
+      /**
+       * Build the embeddable promise
+       */
+      return (async () => {
         const parentApi = getParentApi();
-        const uuid = maybeId ?? generateId();
         const factory = await getReactEmbeddableFactory<SerializedState, Api, RuntimeState>(type);
+        const subscriptions = new Subscription();
 
         const { initialState, startStateDiffing } = await initializeReactEmbeddableState<
           SerializedState,
@@ -101,23 +125,25 @@ export const ReactEmbeddableRenderer = <
             const comparatorDefinitions: Array<
               ComparatorDefinition<RuntimeState, keyof RuntimeState>
             > = Object.values(comparators);
-            combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
-              .pipe(
-                skip(1),
-                debounceTime(ON_STATE_CHANGE_DEBOUNCE),
-                switchMap(() => {
-                  const isAsync =
-                    apiRegistration.serializeState.prototype?.name === 'AsyncFunction';
-                  return isAsync
-                    ? (apiRegistration.serializeState() as Promise<
-                        SerializedPanelState<SerializedState>
-                      >)
-                    : Promise.resolve(apiRegistration.serializeState());
+            subscriptions.add(
+              combineLatest(comparatorDefinitions.map((comparator) => comparator[0]))
+                .pipe(
+                  skip(1),
+                  debounceTime(ON_STATE_CHANGE_DEBOUNCE),
+                  switchMap(() => {
+                    const isAsync =
+                      apiRegistration.serializeState.prototype?.name === 'AsyncFunction';
+                    return isAsync
+                      ? (apiRegistration.serializeState() as Promise<
+                          SerializedPanelState<SerializedState>
+                        >)
+                      : Promise.resolve(apiRegistration.serializeState());
+                  })
+                )
+                .subscribe((serializedState) => {
+                  onAnyStateChange(serializedState);
                 })
-              )
-              .subscribe((serializedState) => {
-                onAnyStateChange(serializedState);
-              });
+            );
           }
 
           const { unsavedChanges, resetUnsavedChanges, cleanup, snapshotRuntimeState } =
@@ -125,6 +151,7 @@ export const ReactEmbeddableRenderer = <
 
           const fullApi = setApi({
             ...apiRegistration,
+            phase$,
             unsavedChanges,
             resetUnsavedChanges,
             snapshotRuntimeState,
@@ -142,13 +169,22 @@ export const ReactEmbeddableRenderer = <
           setApi
         );
 
+        if (apiPublishesDataLoading(api)) {
+          subscriptions.add(
+            api.dataLoading.subscribe((loading) => reportPhaseChange(Boolean(loading)))
+          );
+        } else {
+          reportPhaseChange(false);
+        }
+
         return React.forwardRef<typeof api>((_, ref) => {
           // expose the api into the imperative handle
           useImperativeHandle(ref, () => api, []);
 
           return <Component />;
         });
-      })(),
+      })();
+    },
     /**
      * Disabling exhaustive deps because we do not want to re-fetch the component
      * from the embeddable registry unless the type changes.
