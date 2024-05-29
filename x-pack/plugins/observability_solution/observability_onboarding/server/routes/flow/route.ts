@@ -23,7 +23,6 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getHasLogs } from './get_has_logs';
 import { getSystemLogsDataStreams } from '../../../common/elastic_agent_logs';
 
-import { getAuthenticationAPIKey } from '../../lib/get_authentication_api_key';
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 
 const updateOnboardingFlowRoute = createObservabilityOnboardingServerRoute({
@@ -265,7 +264,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       throw error;
     }
 
-    const authApiKey = getAuthenticationAPIKey(request);
     const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
       : await getFallbackESUrl(services.esLegacyConfigService);
@@ -275,7 +273,6 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
         'content-type': 'application/yaml',
       },
       body: generateAgentConfig({
-        apiKey: authApiKey ? `${authApiKey?.apiKeyId}:${authApiKey?.apiKey}` : '$API_KEY',
         esHost: elasticsearchUrl,
         inputs: agentInputs,
       }),
@@ -392,21 +389,13 @@ function parseIntegrationsTSV(tsv: string) {
   );
 }
 
-const generateAgentConfig = ({
-  esHost,
-  apiKey,
-  inputs = [],
-}: {
-  esHost: string[];
-  apiKey: string;
-  inputs: unknown[];
-}) => {
+const generateAgentConfig = ({ esHost, inputs = [] }: { esHost: string[]; inputs: unknown[] }) => {
   return dump({
     outputs: {
       default: {
         type: 'elasticsearch',
         hosts: esHost,
-        api_key: apiKey,
+        api_key: '${API_KEY}', // Placeholder to be replaced by bash script with the actual API key
       },
     },
     inputs,
