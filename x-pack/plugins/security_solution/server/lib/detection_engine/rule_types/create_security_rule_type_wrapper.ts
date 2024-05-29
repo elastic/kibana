@@ -485,11 +485,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 alertsCreated: createdSignalsCount > 0,
                 disabledActions,
               });
-              warningMessage = [
-                ...(warningMessage ? [warningMessage] : []),
-                disabledActionsWarning,
-              ].join(', ');
-              wroteWarningStatus = true;
+              if (result.warningMessages.length) {
+                result.warningMessages.push(disabledActionsWarning);
+              } else {
+                warningMessage = [
+                  ...(warningMessage ? [warningMessage] : []),
+                  disabledActionsWarning,
+                ].join(', ');
+                wroteWarningStatus = true;
+              }
             }
 
             if (result.warningMessages.length) {
