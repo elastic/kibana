@@ -10,6 +10,7 @@ import { connectorRoutes } from './connectors/route';
 import { conversationRoutes } from './conversations/route';
 import { functionRoutes } from './functions/route';
 import { knowledgeBaseRoutes } from './knowledge_base/route';
+import { instructionRoutes } from './instructions/route';
 
 export function getGlobalObservabilityAIAssistantServerRouteRepository() {
   return {
@@ -18,6 +19,7 @@ export function getGlobalObservabilityAIAssistantServerRouteRepository() {
     ...connectorRoutes,
     ...functionRoutes,
     ...knowledgeBaseRoutes,
+    ...instructionRoutes,
   };
 }
 
