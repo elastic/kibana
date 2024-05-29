@@ -22,7 +22,3 @@ if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   echo "gcloud compute ssh --tunnel-through-iap --project elastic-kibana-ci --zone \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/zone)\" \"$(curl -sH Metadata-Flavor:Google http://metadata.google.internal/computeMetadata/v1/instance/name)\""
   echo ""
 fi
-
-echo '--- FIPS Debug'
-whoami
-printenv | grep OPENSSL || true
