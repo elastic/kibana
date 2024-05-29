@@ -15,9 +15,7 @@ export const useKibanaQuerySettings = (): EsQueryConfig => {
   const [allowLeadingWildcards] = useUiSetting$<boolean>(UI_SETTINGS.QUERY_ALLOW_LEADING_WILDCARDS);
   const [queryStringOptions] = useUiSetting$<SerializableRecord>(UI_SETTINGS.QUERY_STRING_OPTIONS);
   const [dateFormatTZ] = useUiSetting$<string>(UI_SETTINGS.DATEFORMAT_TZ);
-  const [ignoreFilterIfFieldNotInIndex] = useUiSetting$<boolean>(
-    UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX
-  );
+  const [] = useUiSetting$<boolean>(UI_SETTINGS.COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX);
 
   return useMemo(
     () => ({
