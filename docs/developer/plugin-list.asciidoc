@@ -531,6 +531,10 @@ Plugin server-side only. Plugin has three main functions:
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/data_quality/README.md[dataQuality]
+|Page where users can see the quality of their log datasets.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/dataset_quality/README.md[datasetQuality]
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of dataset quality, where users can easily get an overview on the datasets they have with information such as integration, size, last activity, among others.
 
