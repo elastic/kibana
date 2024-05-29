@@ -21,6 +21,7 @@ x-pack/plugins/aiops @elastic/ml-ui
 x-pack/packages/ml/aiops_test_utils @elastic/ml-ui
 x-pack/test/alerting_api_integration/packages/helpers @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
+x-pack/packages/kbn-alerting-comparators @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
@@ -470,6 +471,7 @@ x-pack/plugins/global_search_providers @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/global_search_test @elastic/kibana-core
 x-pack/plugins/graph @elastic/kibana-visualizations
 x-pack/plugins/grokdebugger @elastic/kibana-management
+packages/kbn-grouping @elastic/response-ops
 packages/kbn-guided-onboarding @elastic/appex-sharedux
 examples/guided_onboarding_example @elastic/appex-sharedux
 src/plugins/guided_onboarding @elastic/appex-sharedux
@@ -735,7 +737,6 @@ x-pack/packages/security-solution/data_table @elastic/security-threat-hunting-in
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-exception-list-components @elastic/security-detection-engine
-packages/kbn-securitysolution-grouping @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-hook-utils @elastic/security-detection-engine
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-detection-engine
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-detection-engine
