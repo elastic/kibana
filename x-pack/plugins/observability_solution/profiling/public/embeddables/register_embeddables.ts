@@ -5,37 +5,36 @@
  * 2.0.
  */
 
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import {
   EMBEDDABLE_FLAMEGRAPH,
   EMBEDDABLE_FUNCTIONS,
   EMBEDDABLE_PROFILING_SEARCH_BAR,
   EMBEDDABLE_STACK_TRACES,
 } from '@kbn/observability-shared-plugin/public';
-import { EmbeddableFlamegraphFactory } from './flamegraph/embeddable_flamegraph_factory';
+import { getEmbeddableFlamegraphComponent } from './flamegraph';
 import { EmbeddableFunctionsFactory } from './functions/embeddable_functions_factory';
-import { GetProfilingEmbeddableDependencies } from './profiling_embeddable_provider';
+import { ProfilingEmbeddablesDependencies } from './profiling_embeddable_provider';
 import { EmbeddableSearchBarFactory } from './search_bar/embeddable_search_bar_factory';
 import { EmbeddableStackTracesFactory } from './stack_traces/embeddable_stack_traces_factory';
 
-export function registerEmbeddables(
-  embeddable: EmbeddableSetup,
-  getProfilingEmbeddableDependencies: GetProfilingEmbeddableDependencies
-) {
-  embeddable.registerEmbeddableFactory(
+export function registerEmbeddables(deps: ProfilingEmbeddablesDependencies) {
+  const {
+    pluginsSetup: { embeddable, observabilityShared },
+  } = deps;
+  observabilityShared.registerProfilingComponent(
     EMBEDDABLE_FLAMEGRAPH,
-    new EmbeddableFlamegraphFactory(getProfilingEmbeddableDependencies)
+    getEmbeddableFlamegraphComponent(deps)
   );
   embeddable.registerEmbeddableFactory(
     EMBEDDABLE_FUNCTIONS,
-    new EmbeddableFunctionsFactory(getProfilingEmbeddableDependencies)
+    new EmbeddableFunctionsFactory(() => Promise.resolve(deps))
   );
   embeddable.registerEmbeddableFactory(
     EMBEDDABLE_PROFILING_SEARCH_BAR,
-    new EmbeddableSearchBarFactory(getProfilingEmbeddableDependencies)
+    new EmbeddableSearchBarFactory(() => Promise.resolve(deps))
   );
   embeddable.registerEmbeddableFactory(
     EMBEDDABLE_STACK_TRACES,
-    new EmbeddableStackTracesFactory(getProfilingEmbeddableDependencies)
+    new EmbeddableStackTracesFactory(() => Promise.resolve(deps))
   );
 }

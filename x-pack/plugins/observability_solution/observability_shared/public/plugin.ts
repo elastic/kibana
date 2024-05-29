@@ -18,6 +18,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { createLazyObservabilityPageTemplate } from './components/page_template';
 import { createNavigationRegistry } from './components/page_template/helpers/navigation_registry';
+import { registerProfilingComponent } from './components/profiling/helpers/component_registry';
 import {
   type AssetDetailsFlyoutLocator,
   AssetDetailsFlyoutLocatorDefinition,
@@ -102,6 +103,7 @@ export class ObservabilitySharedPlugin implements Plugin {
     });
 
     return {
+      registerProfilingComponent,
       locators: this.createLocators(pluginsSetup.share.url),
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
