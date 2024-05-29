@@ -13,10 +13,10 @@ import { z } from 'zod';
  *
  * info:
  *   title: Bulk Actions API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
-import { UUID, NonEmptyString, User } from '../conversations/common_attributes.gen';
+import { NonEmptyString, User } from '../common_attributes.gen';
 
 export type BulkActionSkipReason = z.infer<typeof BulkActionSkipReason>;
 export const BulkActionSkipReason = z.literal('PROMPT_FIELD_NOT_MODIFIED');
@@ -44,7 +44,7 @@ export const NormalizedPromptError = z.object({
 
 export type PromptResponse = z.infer<typeof PromptResponse>;
 export const PromptResponse = z.object({
-  id: UUID,
+  id: NonEmptyString,
   timestamp: NonEmptyString.optional(),
   name: z.string(),
   promptType: z.string(),

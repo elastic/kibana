@@ -119,16 +119,24 @@ interface CheckIfIndicesExistParams {
   signalIndexName: string | null;
   isDefaultDataViewSelected: boolean;
 }
+
 export const checkIfIndicesExist = ({
   patternList,
   scopeId,
   signalIndexName,
   isDefaultDataViewSelected,
-}: CheckIfIndicesExistParams) =>
-  scopeId === SourcererScopeName.detections
-    ? patternList.includes(`${signalIndexName}`)
-    : scopeId === SourcererScopeName.default
-    ? isDefaultDataViewSelected
-      ? patternList.filter((i) => i !== signalIndexName).length > 0
-      : patternList.length > 0
-    : patternList.length > 0;
+}: CheckIfIndicesExistParams) => {
+  if (scopeId === SourcererScopeName.detections) {
+    return patternList.includes(`${signalIndexName}`);
+  }
+
+  if (scopeId === SourcererScopeName.default) {
+    if (isDefaultDataViewSelected) {
+      return patternList.filter((i) => i !== signalIndexName).length > 0;
+    }
+
+    return patternList.length > 0;
+  }
+
+  return patternList.length > 0;
+};

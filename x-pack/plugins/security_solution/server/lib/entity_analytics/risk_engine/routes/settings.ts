@@ -7,6 +7,7 @@
 
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { RiskEngineSettingsResponse } from '../../../../../common/api/entity_analytics/risk_engine';
 import { RISK_ENGINE_SETTINGS_URL, APP_ID } from '../../../../../common/constants';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../../audit';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
@@ -42,10 +43,11 @@ export const riskEngineSettingsRoute = (router: EntityAnalyticsRoutesDeps['route
         if (!result) {
           throw new Error('Unable to get risk engine configuration');
         }
+        const body: RiskEngineSettingsResponse = {
+          range: result.range,
+        };
         return response.ok({
-          body: {
-            range: result.range,
-          },
+          body,
         });
       } catch (e) {
         const error = transformError(e);

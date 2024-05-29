@@ -69,11 +69,11 @@ const getRiskLevelTableColumns = (): Array<EuiBasicTableColumn<RiskLevelTableIte
 ];
 
 const riskLevelTableItems: RiskLevelTableItem[] = [
-  { level: RiskSeverity.critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
-  { level: RiskSeverity.high, range: '70 - 90 ' },
-  { level: RiskSeverity.moderate, range: '40 - 70' },
-  { level: RiskSeverity.low, range: '20 - 40' },
-  { level: RiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
+  { level: RiskSeverity.Critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
+  { level: RiskSeverity.High, range: '70 - 90 ' },
+  { level: RiskSeverity.Moderate, range: '40 - 70' },
+  { level: RiskSeverity.Low, range: '20 - 40' },
+  { level: RiskSeverity.Unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
 
 interface CriticalityLevelTableItem {

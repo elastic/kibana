@@ -34,11 +34,11 @@ jest.mock('../../../common/lib/kibana', () => {
 });
 
 const mockSeverityCount: SeverityCount = {
-  [RiskSeverity.low]: 1,
-  [RiskSeverity.high]: 1,
-  [RiskSeverity.moderate]: 1,
-  [RiskSeverity.unknown]: 1,
-  [RiskSeverity.critical]: 1,
+  [RiskSeverity.Low]: 1,
+  [RiskSeverity.High]: 1,
+  [RiskSeverity.Moderate]: 1,
+  [RiskSeverity.Unknown]: 1,
+  [RiskSeverity.Critical]: 1,
 };
 
 const mockUseQueryToggle = jest
@@ -168,7 +168,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
             name: 'testUsername',
             risk: {
               rule_risks: [],
-              calculated_level: RiskSeverity.high,
+              calculated_level: RiskSeverity.High,
               calculated_score_norm: 75,
               multipliers: [],
             },
@@ -203,7 +203,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
             name,
             risk: {
               rule_risks: [],
-              calculated_level: RiskSeverity.high,
+              calculated_level: RiskSeverity.High,
               calculated_score_norm: 75,
               multipliers: [],
             },
@@ -246,7 +246,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
             name,
             risk: {
               rule_risks: [],
-              calculated_level: RiskSeverity.high,
+              calculated_level: RiskSeverity.High,
               calculated_score_norm: 75,
               multipliers: [],
             },

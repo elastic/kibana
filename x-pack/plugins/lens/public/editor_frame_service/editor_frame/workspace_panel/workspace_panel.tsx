@@ -772,6 +772,7 @@ export const VisualizationWrapper = ({
         className="lnsExpressionRenderer__component"
         padding={displayOptions?.noPadding ? undefined : 'm'}
         expression={expression!}
+        allowCache={true}
         searchContext={searchContext}
         searchSessionId={searchSessionId}
         onEvent={onEvent}

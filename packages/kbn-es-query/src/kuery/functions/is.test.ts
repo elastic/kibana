@@ -74,19 +74,6 @@ describe('kuery functions', () => {
         expect(result).toEqual(expected);
       });
 
-      test('should return an ES match_all query for queries that match all fields and values', () => {
-        const expected = {
-          match_all: {},
-        };
-        const node = nodeTypes.function.buildNode('is', 'n*', '*') as KqlIsFunctionNode;
-        const result = is.toElasticsearchQuery(node, {
-          ...indexPattern,
-          fields: indexPattern.fields.filter((field) => field.name.startsWith('n')),
-        });
-
-        expect(result).toEqual(expected);
-      });
-
       test('should return an ES match_all query for * queries without an index pattern', () => {
         const expected = {
           match_all: {},

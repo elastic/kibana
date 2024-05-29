@@ -22,15 +22,24 @@ const PageTitleComponent: React.FC = () => {
         </EuiTitle>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          vertical-align: middle;
+          padding-left: ${euiTheme.size.m};
+          * {
+            vertical-align: middle;
+          }
+        `}
+      >
         <EuiBetaBadge
+          iconType={'beaker'}
           label={i18n.BETA}
           tooltipContent={i18n.BETA_TOOLTIP}
           size="m"
+          color="hollow"
           css={css`
-            color: ${euiTheme.colors.text};
-            margin-top: ${euiTheme.size.s};
-            margin-left: ${euiTheme.size.m};
+            margin-bottom: ${euiTheme.size.s};
           `}
         />
       </EuiFlexItem>
