@@ -22,6 +22,14 @@ describe('validateJSON', () => {
     expect(validateJSON({ maxProperties: 0 })).toBeUndefined();
   });
 
+  it('does not return an error with no values', () => {
+    expect(validateJSON({})).toBeUndefined();
+  });
+
+  it('does not return an error with empty object and maxProperties=0', () => {
+    expect(validateJSON({ value: JSON.stringify({}), maxProperties: 0 })).toBeUndefined();
+  });
+
   it('validates syntax errors correctly', () => {
     expect(validateJSON({ value: 'foo' })).toBe('Invalid JSON.');
   });
@@ -30,7 +38,7 @@ describe('validateJSON', () => {
     const value = { foo: 'test', bar: 'test 2' };
 
     expect(validateJSON({ value: JSON.stringify(value), maxProperties: 1 })).toBe(
-      'A maximum of 1 attributes can be defined at a time.'
+      'A maximum of 1 additional fields can be defined at a time.'
     );
   });
 });

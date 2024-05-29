@@ -15,7 +15,7 @@ interface ValidateJSONArgs {
 export const MAX_ATTRIBUTES_ERROR = (length: number) =>
   i18n.translate('xpack.stackConnectors.schema.additionalFieldsLengthError', {
     values: { length },
-    defaultMessage: 'A maximum of {length} attributes can be defined at a time.',
+    defaultMessage: 'A maximum of {length} additional fields can be defined at a time.',
   });
 
 export const INVALID_JSON_FORMAT = i18n.translate(

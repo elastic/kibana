@@ -131,7 +131,7 @@ describe('servicenow action params validation', () => {
         'subActionParams.incident.correlation_id': [],
         'subActionParams.incident.short_description': [],
         ['subActionParams.incident.additional_fields']: [
-          `A maximum of ${MAX_ADDITIONAL_FIELDS_LENGTH} attributes can be defined at a time.`,
+          `A maximum of ${MAX_ADDITIONAL_FIELDS_LENGTH} additional fields can be defined at a time.`,
         ],
       },
     });
