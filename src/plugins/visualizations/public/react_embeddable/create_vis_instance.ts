@@ -6,18 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
 import { SerializedVis } from '../vis';
 import { createVisAsync } from '../vis_async';
-import { getSearch } from '../services';
+import { getSearch, getSavedSearch } from '../services';
 
-export const createVisInstance = async (serializedVis: SerializedVis, indexPatternId?: string) => {
+export const createVisInstance = async (serializedVis: SerializedVis) => {
   const vis = await createVisAsync(serializedVis.type, serializedVis);
-  if (indexPatternId) {
-    const indexPattern = { id: indexPatternId } as DataView;
-    vis.data.indexPattern = indexPattern;
-    vis.data.searchSource?.setField('index', indexPattern);
-    vis.data.aggs = getSearch().aggs.createAggConfigs(indexPattern, serializedVis.data.aggs);
+  if (serializedVis.data.savedSearchId) {
+    const savedSearch = await getSavedSearch().get(serializedVis.data.savedSearchId);
+    const indexPattern = savedSearch.searchSource.getField('index');
+    if (indexPattern) {
+      vis.data.indexPattern = indexPattern;
+      vis.data.searchSource?.setField('index', indexPattern);
+      vis.data.aggs = getSearch().aggs.createAggConfigs(indexPattern, serializedVis.data.aggs);
+    }
   }
   return vis;
 };

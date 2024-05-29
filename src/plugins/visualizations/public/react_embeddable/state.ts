@@ -54,7 +54,7 @@ export const deserializeState = async (
   const references: Reference[] = state.references ?? [];
 
   const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
-  const vis = await createVisInstance(deserializedSavedVis, serializedState.indexPatternId);
+  const vis = await createVisInstance(deserializedSavedVis);
   return {
     ...serializedState,
     vis,
@@ -93,7 +93,8 @@ export const deserializeSavedVisState = (
     data: {
       ...data,
       searchSource: deserializedSearchSource,
-      savedSearchId: deserializedReferences.find((r) => r.name === 'search_0')?.id,
+      savedSearchId:
+        deserializedReferences.find((r) => r.name === 'search_0')?.id ?? data.savedSearchId,
     },
   };
 };
@@ -133,17 +134,14 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
 export const serializeState = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
-  indexPatternId,
 }: {
   serializedVis: SerializedVis;
   titles: SerializedTitles;
-  indexPatternId?: string;
 }) => {
   const { references, serializedSearchSource } = serializeReferences(serializedVis);
   return {
     rawState: {
       ...titles,
-      indexPatternId,
       savedVis: {
         ...serializedVis,
         data: {

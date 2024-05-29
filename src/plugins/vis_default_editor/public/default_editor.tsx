@@ -117,7 +117,6 @@ function DefaultEditor({
                     getSerializedStateForChild: () => ({
                       rawState: {
                         savedVis: vis.serialize(),
-                        indexPatternId: vis.data.indexPattern?.id,
                       },
                       references: [],
                     }),

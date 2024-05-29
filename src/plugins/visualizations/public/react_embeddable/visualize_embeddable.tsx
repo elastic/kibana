@@ -51,7 +51,6 @@ export const getVisualizeEmbeddableFactory: (
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
     const vis$ = new BehaviorSubject<Vis>(state.vis);
-    const indexPatternId$ = new BehaviorSubject<string | undefined>(state.indexPatternId);
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
@@ -78,7 +77,6 @@ export const getVisualizeEmbeddableFactory: (
         ...titlesApi,
         serializeState: () => {
           return serializeState({
-            indexPatternId: indexPatternId$.getValue(),
             serializedVis: vis$.getValue().serialize(),
             titles: serializeTitles(),
           });
@@ -110,7 +108,7 @@ export const getVisualizeEmbeddableFactory: (
         },
         isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
         setVis: async (newSerializedVis) => {
-          vis$.next(await createVisInstance(newSerializedVis, indexPatternId$.getValue()));
+          vis$.next(await createVisInstance(newSerializedVis));
         },
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
         openInspector: () => {
@@ -136,7 +134,6 @@ export const getVisualizeEmbeddableFactory: (
           },
           (a, b) => isEqual(a, b),
         ],
-        indexPatternId: [indexPatternId$, (value) => indexPatternId$.next(value), isEqual],
       }
     );
     fetch$(api)

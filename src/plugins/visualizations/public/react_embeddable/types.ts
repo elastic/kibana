@@ -15,7 +15,6 @@ import type { SerializedVis } from '../vis';
 
 export type VisualizeRuntimeState = SerializedTitles & {
   vis: Vis<VisParams>;
-  indexPatternId?: string;
 };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
@@ -30,7 +29,6 @@ export type VisualizeSavedObjectInputState = SerializedTitles & {
 
 export type VisualizeSavedVisInputState = SerializedTitles & {
   savedVis: SerializedVis<VisParams>;
-  indexPatternId?: string;
 };
 
 export type VisualizeSerializedState = VisualizeSavedObjectInputState | VisualizeSavedVisInputState;
