@@ -244,3 +244,14 @@ export const getESQLSources = async (dataViews: DataViewsPublicPluginStart) => {
 export const esqlHasPipes = (esqlQuery: string): boolean => {
   return esqlQuery.lastIndexOf('|') > -1;
 };
+
+/**
+ * Checks if an ES|QL query source command needs fields to be loaded. This test
+ * is conservative it returns `false` only for the source commands we know
+ * for sure don't need fields, so it may return false positives.
+ */
+export const esqlSourceNeedsFields = (esqlQuery: string): boolean => {
+  esqlQuery = esqlQuery.trim();
+  if (!esqlQuery) return false;
+  return !/^\s*(from|row|show).*/i.test(esqlQuery);
+};

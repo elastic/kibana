@@ -14,6 +14,7 @@ import {
   getIndicesList,
   getRemoteIndicesList,
   esqlHasPipes,
+  esqlSourceNeedsFields,
 } from './helpers';
 
 describe('helpers', function () {
@@ -347,6 +348,46 @@ describe('helpers', function () {
       ];
       for (const query of queries) {
         expect(esqlHasPipes(query)).toEqual(true);
+      }
+    });
+  });
+
+  describe('esqlSourceNeedsFields', function () {
+    it("returns `false` for queries which don't need fields loaded", async function () {
+      const queries = [
+        'from asdf',
+        ' FROM adsf',
+        '  fROM asdf metadata _id',
+        'fROM asdf metadata _id | dissect',
+        'SHOW asdf',
+        'show',
+        '  row  asdf ',
+        '  ROW',
+        '\n ',
+        '\n',
+        '  ',
+        '',
+      ];
+      for (const query of queries) {
+        expect(esqlSourceNeedsFields(query)).toEqual(false);
+      }
+    });
+
+    it('returns `true` for queries that might need fields loaded', async function () {
+      const queries = [
+        // The METRICS command needs fields loaded.
+        'METRICS',
+        'metrics asdf',
+        ' METRICS adsf ',
+        '  mETRICS  asdf metadata _id',
+
+        // The future unknown source commands might need fields loaded.
+        'asdf',
+        ' asdf ',
+        '\nasd\n',
+      ];
+      for (const query of queries) {
+        expect(esqlSourceNeedsFields(query)).toEqual(true);
       }
     });
   });
