@@ -270,6 +270,7 @@ describe('split .kibana index into multiple system indices', () => {
             "slo-settings",
             "space",
             "spaces-usage-stats",
+            "synthetics-dynamic-settings",
             "synthetics-monitor",
             "synthetics-param",
             "synthetics-privates-locations",
