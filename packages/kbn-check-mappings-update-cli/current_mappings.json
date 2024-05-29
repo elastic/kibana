@@ -1678,6 +1678,10 @@
       "fleet_server_host_id": {
         "type": "keyword"
       },
+      "global_data_tags": {
+        "index": false,
+        "type": "flattened"
+      },
       "inactivity_timeout": {
         "type": "integer"
       },
@@ -3062,6 +3066,9 @@
           }
         },
         "type": "text"
+      },
+      "solution": {
+        "type": "keyword"
       }
     }
   },
