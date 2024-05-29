@@ -15033,6 +15033,52 @@
           },
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.AbstractDataView.getScriptedField",
+            "type": "Function",
+            "tags": [],
+            "label": "getScriptedField",
+            "description": [
+              "\nOnly used by search source to process sorting of scripted fields"
+            ],
+            "signature": [
+              "(name: string) => ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.DataViewFieldBase",
+                "text": "DataViewFieldBase"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data_views/common/data_views/abstract_data_views.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.AbstractDataView.getScriptedField.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [
+                  "field name"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/data_views/abstract_data_views.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "DataViewFieldBase"
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.AbstractDataView.hasRuntimeField",
             "type": "Function",
             "tags": [],
