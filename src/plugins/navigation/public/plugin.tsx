@@ -84,15 +84,10 @@ export class NavigationPublicPlugin
     const onCloud = cloud !== undefined; // The new side nav will initially only be available to cloud users
     const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    if (cloudExperiments) {
-      this.isSolutionNavExperiementEnabled$ =
-        !onCloud || isServerless
-          ? of(false)
-          : from(
-              cloudExperiments
-                .getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false)
-                .catch(() => false)
-            ).pipe(shareReplay(1));
+    if (cloudExperiments && onCloud && !isServerless) {
+      this.isSolutionNavExperiementEnabled$ = from(
+        cloudExperiments.getVariation(SOLUTION_NAV_FEATURE_FLAG_NAME, false).catch(() => false)
+      ).pipe(shareReplay(1));
     }
 
     // Initialize the solution navigation if it is enabled
@@ -166,12 +161,10 @@ export class NavigationPublicPlugin
       solutionView: 'security', // Change this value to test different solution views
     };
 
-    let isProjectNav = false;
-    if (isFeatureEnabled) {
-      isProjectNav = Boolean(mockSpaceState.solutionView)
-        ? mockSpaceState.solutionView !== 'classic'
-        : false;
-    }
+    const isProjectNav =
+      isFeatureEnabled &&
+      Boolean(mockSpaceState.solutionView) &&
+      mockSpaceState.solutionView !== 'classic';
 
     // On serverless the chrome style is already set by the serverless plugin
     if (!isServerless) {
