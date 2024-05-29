@@ -1,0 +1,108 @@
+diff --git a/x-pack/plugins/security_solution/public/detection_engine/rule_creation/components/related_integrations/related_integrations.tsx b/x-pack/plugins/security_solution/public/detection_engine/rule_creation/components/related_integrations/related_integrations.tsx
+index a57ce5fe8cd..d5c3dee1481 100644
+--- a/x-pack/plugins/security_solution/public/detection_engine/rule_creation/components/related_integrations/related_integrations.tsx
++++ b/x-pack/plugins/security_solution/public/detection_engine/rule_creation/components/related_integrations/related_integrations.tsx
+@@ -14,6 +14,7 @@ import {
+   EuiSpacer,
+   EuiText,
+ } from '@elastic/eui';
++import type { ArrayItem } from '../../../../shared_imports';
+ import { UseArray, useFormData } from '../../../../shared_imports';
+ import { RelatedIntegrationsHelpInfo } from './related_integrations_help_info';
+ import { RelatedIntegrationFieldRow } from './related_integration_field_row';
+@@ -24,49 +25,61 @@ interface RelatedIntegrationsProps {
+   dataTestSubj?: string;
+ }
+ 
+-export function RelatedIntegrations({ path, dataTestSubj }: RelatedIntegrationsProps): JSX.Element {
++function RelatedIntegrationsComponent({
++  path,
++  dataTestSubj,
++}: RelatedIntegrationsProps): JSX.Element {
+   const label = (
+     <>
+       {i18n.RELATED_INTEGRATIONS_LABEL}
+       <RelatedIntegrationsHelpInfo />
+     </>
+   );
+-  const [formData] = useFormData();
+ 
+   return (
+     <UseArray path={path} initialNumberOfItems={0}>
+-      {({ items, addItem, removeItem }) => (
+-        <EuiFormRow
+-          label={label}
+-          labelAppend={
+-            <EuiText color="subdued" size="xs">
+-              {i18n.OPTIONAL}
+-            </EuiText>
+-          }
+-          labelType="legend"
+-          fullWidth
+-          data-test-subj={dataTestSubj}
+-          hasChildLabel={false}
+-        >
+-          <>
+-            <EuiFlexGroup direction="column" gutterSize="s">
+-              {items.map((item) => (
+-                <EuiFlexItem key={item.id} data-test-subj="relatedIntegrationRow">
+-                  <RelatedIntegrationFieldRow
+-                    item={item}
+-                    relatedIntegrations={formData[path] ?? []}
+-                    removeItem={removeItem}
+-                  />
+-                </EuiFlexItem>
+-              ))}
+-            </EuiFlexGroup>
+-            {items.length > 0 && <EuiSpacer size="s" />}
+-            <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addItem}>
+-              {i18n.ADD_INTEGRATION}
+-            </EuiButtonEmpty>
+-          </>
+-        </EuiFormRow>
+-      )}
++      {({ items, addItem, removeItem, form }) => {
++        const internalField = form.getFields()[`${path}__array__`] ?? {};
++        const internalFieldValue = (internalField?.value ?? []) as ArrayItem[];
++        const flattenedFieldNames = internalFieldValue.map((item) => item.path);
++
++        const [formData] = useFormData({ watch: flattenedFieldNames });
++        return (
++          <EuiFormRow
++            label={label}
++            labelAppend={
++              <EuiText color="subdued" size="xs">
++                {i18n.OPTIONAL}
++              </EuiText>
++            }
++            labelType="legend"
++            fullWidth
++            data-test-subj={dataTestSubj}
++            hasChildLabel={false}
++          >
++            <>
++              <EuiFlexGroup direction="column" gutterSize="s">
++                {items.map((item) => (
++                  <EuiFlexItem key={item.id} data-test-subj="relatedIntegrationRow">
++                    <RelatedIntegrationFieldRow
++                      item={item}
++                      relatedIntegrations={formData[path] ?? []}
++                      removeItem={removeItem}
++                    />
++                  </EuiFlexItem>
++                ))}
++              </EuiFlexGroup>
++              {items.length > 0 && <EuiSpacer size="s" />}
++              <EuiButtonEmpty size="xs" iconType="plusInCircle" onClick={addItem}>
++                {i18n.ADD_INTEGRATION}
++              </EuiButtonEmpty>
++            </>
++          </EuiFormRow>
++        );
++      }}
+     </UseArray>
+   );
+ }
++
++export const RelatedIntegrations = React.memo(RelatedIntegrationsComponent);
++RelatedIntegrations.displayName = 'RelatedIntegrations';
