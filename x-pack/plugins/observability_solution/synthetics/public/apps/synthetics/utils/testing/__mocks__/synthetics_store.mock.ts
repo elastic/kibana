@@ -164,6 +164,11 @@ export const mockState: SyntheticsAppState = {
       certs: [],
     },
   },
+  monitorStatusHeatmap: {
+    heatmap: [],
+    loading: false,
+    error: null,
+  },
 };
 
 function getBrowserJourneyMockSlice() {

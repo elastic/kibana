@@ -10,7 +10,6 @@ import React, { useMemo } from 'react';
 import { EuiPanel, useEuiTheme, EuiResizeObserver, EuiSpacer } from '@elastic/eui';
 import { Chart, Settings, Heatmap, ScaleType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { usePingStatusesIsLoading } from '../hooks/use_ping_statuses';
 import { MonitorStatusHeader } from './monitor_status_header';
 import { MonitorStatusCellTooltip } from './monitor_status_cell_tooltip';
 import { MonitorStatusLegend } from './monitor_status_legend';
@@ -32,9 +31,8 @@ export const MonitorStatusPanel = ({
   onBrushed,
 }: MonitorStatusPanelProps) => {
   const { euiTheme, colorMode } = useEuiTheme();
-  const { timeBins, handleResize, getTimeBinByXValue, xDomain, intervalByWidth } =
+  const { loading, timeBins, handleResize, getTimeBinByXValue, xDomain, minsPerBin } =
     useMonitorStatusData({ from, to });
-  const isPingStatusesLoading = usePingStatusesIsLoading();
 
   const heatmap = useMemo(() => {
     return getMonitorStatusChartTheme(euiTheme, brushable);
@@ -65,7 +63,7 @@ export const MonitorStatusPanel = ({
                 customTooltip={({ values }) => (
                   <MonitorStatusCellTooltip
                     timeBin={getTimeBinByXValue(values?.[0]?.datum?.x)}
-                    isLoading={isPingStatusesLoading}
+                    isLoading={loading}
                   />
                 )}
               />
@@ -87,18 +85,18 @@ export const MonitorStatusPanel = ({
                   bands: getColorBands(euiTheme, colorMode),
                 }}
                 data={timeBins}
-                xAccessor={(timeBin) => timeBin.end}
+                xAccessor={({ end }) => end}
                 yAccessor={() => 'T'}
                 valueAccessor={(timeBin) => timeBin.value}
                 valueFormatter={(d) => d.toFixed(2)}
-                xAxisLabelFormatter={getXAxisLabelFormatter(intervalByWidth)}
+                xAxisLabelFormatter={getXAxisLabelFormatter(minsPerBin)}
                 timeZone="UTC"
                 xScale={{
                   type: ScaleType.Time,
                   interval: {
                     type: 'calendar',
                     unit: 'm',
-                    value: intervalByWidth,
+                    value: minsPerBin,
                   },
                 }}
               />

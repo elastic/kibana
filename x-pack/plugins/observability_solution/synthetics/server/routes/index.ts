@@ -46,7 +46,11 @@ import { installIndexTemplatesRoute } from './synthetics_service/install_index_t
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
 import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
-import { syntheticsGetPingsRoute, syntheticsGetPingStatusesRoute } from './pings';
+import {
+  syntheticsGetPingsRoute,
+  syntheticsGetPingStatusesRoute,
+  syntheticsGetPingHeatmapRoute,
+} from './pings';
 import { createGetCurrentStatusRoute } from './overview_status/overview_status';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
@@ -101,6 +105,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getConnectorTypesRoute,
   createGetDynamicSettingsRoute,
   createPostDynamicSettingsRoute,
+  syntheticsGetPingHeatmapRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
