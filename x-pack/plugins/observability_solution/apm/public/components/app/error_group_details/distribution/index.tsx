@@ -16,6 +16,7 @@ import {
   Tooltip,
   LIGHT_THEME,
   DARK_THEME,
+  LegendValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -94,7 +95,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
           <Settings
             xDomain={{ min, max }}
             showLegend
-            showLegendExtra
+            legendValues={[LegendValue.CurrentAndLastValue]}
             legendPosition={Position.Bottom}
             theme={theme.darkMode ? DARK_THEME : LIGHT_THEME}
             locale={i18n.getLocale()}

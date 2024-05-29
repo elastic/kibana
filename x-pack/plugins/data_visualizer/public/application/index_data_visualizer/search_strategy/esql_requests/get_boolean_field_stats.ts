@@ -9,7 +9,7 @@ import type { UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { ESQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import pLimit from 'p-limit';
-import { ESQL_LATEST_VERSION, appendToESQLQuery } from '@kbn/esql-utils';
+import { appendToESQLQuery } from '@kbn/esql-utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { getSafeESQLName } from '../requests/esql_utils';
 import { isFulfilled, isRejected } from '../../../common/util/promise_all_settled_utils';
@@ -49,7 +49,6 @@ export const getESQLBooleanFieldStats = async ({
           params: {
             query,
             ...(filter ? { filter } : {}),
-            version: ESQL_LATEST_VERSION,
           },
         },
       };
