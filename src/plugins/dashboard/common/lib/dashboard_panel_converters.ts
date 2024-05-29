@@ -13,7 +13,10 @@ import { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plu
 import { Reference } from '@kbn/content-management-utils';
 import { DashboardPanelMap, DashboardPanelState } from '..';
 import { SavedDashboardPanel } from '../content_management';
-import { prefixReferencesFromPanel } from '../dashboard_container/persistable_state/dashboard_container_references';
+import {
+  getReferencesForPanelId,
+  prefixReferencesFromPanel,
+} from '../dashboard_container/persistable_state/dashboard_container_references';
 
 export function convertSavedDashboardPanelToPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
@@ -85,14 +88,16 @@ export const convertPanelMapToSavedPanels = (
 export const generateNewPanelIds = (panels: DashboardPanelMap, references?: Reference[]) => {
   const newPanelsMap: DashboardPanelMap = {};
   const newReferences: Reference[] = [];
-  for (const panel of Object.values(panels)) {
+  for (const [oldId, panel] of Object.entries(panels)) {
     const newId = v4();
     newPanelsMap[newId] = {
       ...panel,
       gridData: { ...panel.gridData, i: newId },
       explicitInput: { ...panel.explicitInput, id: newId },
     };
-    newReferences.push(...prefixReferencesFromPanel(newId, references ?? []));
+    newReferences.push(
+      ...prefixReferencesFromPanel(newId, getReferencesForPanelId(oldId, references ?? []))
+    );
   }
   return { panels: newPanelsMap, references: newReferences };
 };
