@@ -280,6 +280,7 @@ export function renderSummaryTable(results: CypressCommandLine.CypressRunResult[
     (acc: CypressCommandLine.CypressRunResult, result, index) => {
       if (!result) {
         console.warn(`Result for index: ${index} is empty (${result}). Skipping...`);
+        return acc;
       }
 
       acc.startedTestsAt =
