@@ -8,15 +8,17 @@ import React, { useState, useEffect } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiText,
   EuiBadge,
   EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
+  EuiOverlayMask,
+  EuiConfirmModal,
 } from '@elastic/eui';
 
 import type { NewAgentPolicy, AgentPolicy, GlobalDataTag } from '../../../../../../../common/types';
@@ -38,6 +40,8 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
     name: null,
     value: null,
   });
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
 
   useEffect(() => {
     setGlobalDataTags(initialTags);
@@ -129,6 +133,7 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
       return remainingErrors;
     });
     console.log('Updated Global Data Tags:', updatedTags);
+    closeModal();
   };
 
   const handleEdit = (index: number) => {
@@ -181,6 +186,32 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
       return newErrors;
     });
   };
+
+  const showModal = (index: number) => {
+    setDeleteIndex(index);
+    setIsModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsModalVisible(false);
+    setDeleteIndex(null);
+  };
+
+  const confirmModal = (
+    <EuiOverlayMask>
+      <EuiConfirmModal
+        title={`Remove the ${globalDataTags[deleteIndex]?.name} field?`}
+        onCancel={closeModal}
+        onConfirm={() => handleDelete(deleteIndex!)}
+        cancelButtonText="Cancel"
+        confirmButtonText="Remove"
+        buttonColor="danger"
+        defaultFocusedButton="confirm"
+      >
+        <p>Removing the field will affect the next sync. This action cannot be undone.</p>
+      </EuiConfirmModal>
+    </EuiOverlayMask>
+  );
 
   const badgeStyle = {
     backgroundColor: '#f5f7fa',
@@ -286,7 +317,7 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
                     <EuiButtonEmpty
                       size="s"
                       color="danger"
-                      iconType="errorFilled"
+                      iconType="cross"
                       onClick={isAdding ? handleCancel : () => handleCancelEdit(index)}
                       style={{ padding: '0 8px' }}
                       flush="left"
@@ -302,7 +333,7 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
                 aria-label="Delete"
                 iconType="trash"
                 color="text"
-                onClick={() => handleDelete(index)}
+                onClick={() => showModal(index)}
               />
             );
           },
@@ -320,13 +351,17 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
           <EuiText>
             <h4>This policy has no custom fields</h4>
           </EuiText>
-          <EuiButton
-            iconType="plusInCircle"
-            onClick={handleAddField}
-            style={{ marginTop: '16px', textAlign: 'left' }}
-          >
-            Add another field
-          </EuiButton>
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="plusInCircle"
+                onClick={handleAddField}
+                style={{ marginTop: '16px' }}
+              >
+                Add field
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       ) : (
         <>
@@ -349,311 +384,7 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
           </EuiFlexGroup>
         </>
       )}
+      {isModalVisible && confirmModal}
     </>
   );
 };
-
-// import React, { useState } from 'react';
-// import {
-//   EuiBasicTable,
-//   EuiButton,
-//   EuiButtonIcon,
-//   EuiFieldText,
-//   EuiFlexGroup,
-//   EuiFlexItem,
-//   EuiToolTip,
-//   EuiFormRow,
-//   EuiIcon,
-//   EuiText,
-// } from '@elastic/eui';
-//
-// interface GlobalDataTag {
-//   name: string;
-//   value: string | number;
-// }
-//
-// export const GlobalDataTagsTable: React.FC = () => {
-//   const [globalDataTags, setGlobalDataTags] = useState<GlobalDataTag[]>([]);
-//   const [newTag, setNewTag] = useState<GlobalDataTag>({ name: '', value: '' });
-//   const [isAdding, setIsAdding] = useState(false);
-//   const [editingIndices, setEditingIndices] = useState<Set<number>>(new Set());
-//   const [errors, setErrors] = useState<
-//     Record<number, { name: string | null; value: string | null }>
-//   >({});
-//
-//   const handleAddField = () => {
-//     setIsAdding(true);
-//     setNewTag({ name: '', value: '' });
-//     setErrors({});
-//   };
-//
-//   const validateTag = (tag: GlobalDataTag, index?: number) => {
-//     const trimmedName = tag.name.trim();
-//     const trimmedValue = tag.value.toString().trim();
-//     let nameError = null;
-//     let valueError = null;
-//
-//     if (!trimmedName) {
-//       nameError = 'Name cannot be empty';
-//     } else if (/\s/.test(trimmedName)) {
-//       nameError = 'Name cannot contain spaces';
-//     } else if (globalDataTags.some((t, i) => i !== index && t.name === trimmedName)) {
-//       nameError = 'Name must be unique';
-//     }
-//
-//     if (!trimmedValue) {
-//       valueError = 'Value cannot be empty';
-//     }
-//
-//     return { nameError, valueError, isValid: !nameError && !valueError };
-//   };
-//
-//   const handleConfirm = () => {
-//     const { nameError, valueError, isValid } = validateTag(newTag);
-//
-//     if (!isValid) {
-//       setErrors({ [-1]: { name: nameError, value: valueError } });
-//       return;
-//     }
-//
-//     const updatedTags = [
-//       ...globalDataTags,
-//       {
-//         ...newTag,
-//         name: newTag.name.trim(),
-//         value: newTag.value.toString().trim(),
-//       },
-//     ];
-//     setGlobalDataTags(updatedTags);
-//     console.log('Updated Global Data Tags:', updatedTags);
-//     setNewTag({ name: '', value: '' });
-//     setIsAdding(false);
-//     setErrors({});
-//   };
-//
-//   const handleCancel = () => {
-//     setNewTag({ name: '', value: '' });
-//     setIsAdding(false);
-//     setErrors({});
-//   };
-//
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     setNewTag({
-//       ...newTag,
-//       [e.target.name]: e.target.value,
-//     });
-//     setErrors({ ...errors, [-1]: { ...errors[-1], [e.target.name]: null } });
-//   };
-//
-//   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
-//     const updatedTags = globalDataTags.map((tag, i) =>
-//       i === index ? { ...tag, [e.target.name]: e.target.value } : tag
-//     );
-//     setGlobalDataTags(updatedTags);
-//     setErrors({
-//       ...errors,
-//       [index]: { ...errors[index], [e.target.name]: null },
-//     });
-//   };
-//
-//   const handleDelete = (index: number) => {
-//     const updatedTags = globalDataTags.filter((_, i) => i !== index);
-//     setGlobalDataTags(updatedTags);
-//     console.log('Updated Global Data Tags:', updatedTags);
-//   };
-//
-//   const handleEdit = (index: number) => {
-//     setEditingIndices((prevIndices) => new Set(prevIndices.add(index)));
-//     setErrors({ ...errors, [index]: { name: null, value: null } });
-//   };
-//
-//   const handleSaveEdit = (index: number) => {
-//     const tag = globalDataTags[index];
-//     const { nameError, valueError, isValid } = validateTag(tag, index);
-//
-//     if (!isValid) {
-//       setErrors({ ...errors, [index]: { name: nameError, value: valueError } });
-//       return;
-//     }
-//
-//     const updatedTags = globalDataTags.map((t, i) =>
-//       i === index ? { ...tag, name: tag.name.trim(), value: tag.value.toString().trim() } : t
-//     );
-//     setGlobalDataTags(updatedTags);
-//     setEditingIndices((prevIndices) => {
-//       const newIndices = new Set(prevIndices);
-//       newIndices.delete(index);
-//       return newIndices;
-//     });
-//     console.log('Updated Global Data Tags:', updatedTags);
-//     setErrors({});
-//   };
-//
-//   const handleCancelEdit = (index: number) => {
-//     setEditingIndices((prevIndices) => {
-//       const newIndices = new Set(prevIndices);
-//       newIndices.delete(index);
-//       return newIndices;
-//     });
-//     setErrors({});
-//   };
-//
-//   const columns = [
-//     {
-//       field: 'name',
-//       name: 'Name',
-//       render: (name: string, item: GlobalDataTag) => {
-//         const index = globalDataTags.indexOf(item);
-//         const isEditing = editingIndices.has(index);
-//         const isAddingRow = isAdding && item === newTag;
-//         const error = errors[isAddingRow ? -1 : index] || {};
-//         return isEditing || isAddingRow ? (
-//           <EuiFormRow isInvalid={!!error.name} error={error.name}>
-//             <EuiFieldText
-//               placeholder="Enter name"
-//               value={isEditing ? globalDataTags[index].name : newTag.name}
-//               name="name"
-//               onChange={(e) => (isEditing ? handleEditChange(e, index) : handleChange(e))}
-//               isInvalid={!!error.name}
-//             />
-//           </EuiFormRow>
-//         ) : (
-//           name
-//         );
-//       },
-//     },
-//     {
-//       field: 'value',
-//       name: 'Value',
-//       render: (value: string | number, item: GlobalDataTag) => {
-//         const index = globalDataTags.indexOf(item);
-//         const isEditing = editingIndices.has(index);
-//         const isAddingRow = isAdding && item === newTag;
-//         const error = errors[isAddingRow ? -1 : index] || {};
-//         return isEditing || isAddingRow ? (
-//           <EuiFormRow isInvalid={!!error.value} error={error.value}>
-//             <EuiFieldText
-//               placeholder="Enter value"
-//               value={isEditing ? globalDataTags[index].value.toString() : newTag.value.toString()}
-//               name="value"
-//               onChange={(e) => (isEditing ? handleEditChange(e, index) : handleChange(e))}
-//               isInvalid={!!error.value}
-//             />
-//           </EuiFormRow>
-//         ) : (
-//           value
-//         );
-//       },
-//     },
-//     {
-//       name: 'Actions',
-//       actions: [
-//         {
-//           render: (item: GlobalDataTag) => {
-//             const index = globalDataTags.indexOf(item);
-//             if (editingIndices.has(index)) {
-//               return (
-//                 <EuiFlexGroup gutterSize="s">
-//                   <EuiFlexItem grow={false}>
-//                     <EuiToolTip position="top" content="Confirm">
-//                       <EuiText
-//                         color="primary"
-//                         onClick={() => handleSaveEdit(index)}
-//                         style={{ cursor: 'pointer' }}
-//                       >
-//                         <EuiIcon type="checkInCircleFilled" color="primary" />
-//                         Confirm
-//                       </EuiText>
-//                     </EuiToolTip>
-//                   </EuiFlexItem>
-//                   <EuiFlexItem grow={false}>
-//                     <EuiToolTip position="top" content="Cancel">
-//                       <EuiText
-//                         color="danger"
-//                         onClick={() => handleCancelEdit(index)}
-//                         style={{ cursor: 'pointer' }}
-//                       >
-//                         <EuiIcon type="cross" color="danger" />
-//                         Cancel
-//                       </EuiText>
-//                     </EuiToolTip>
-//                   </EuiFlexItem>
-//                 </EuiFlexGroup>
-//               );
-//             } else if (isAdding && item === newTag) {
-//               return (
-//                 <EuiFlexGroup gutterSize="s">
-//                   <EuiFlexItem grow={true}>
-//                     <EuiToolTip position="top" content="Confirm">
-//                       <EuiText
-//                         color="primary"
-//                         onClick={handleConfirm}
-//                         style={{ cursor: 'pointer' }}
-//                       >
-//                         <EuiIcon type="checkInCircleFilled" color="primary" />
-//                         Confirm
-//                       </EuiText>
-//                     </EuiToolTip>
-//                   </EuiFlexItem>
-//                   <EuiFlexItem grow={true}>
-//                     <EuiToolTip position="top" content="Cancel">
-//                       <EuiText color="danger" onClick={handleCancel} style={{ cursor: 'pointer' }}>
-//                         <EuiIcon type="cross" color="danger" />
-//                         Cancel
-//                       </EuiText>
-//                     </EuiToolTip>
-//                   </EuiFlexItem>
-//                 </EuiFlexGroup>
-//               );
-//             }
-//             return (
-//               <EuiFlexGroup gutterSize="s">
-//                 <EuiFlexItem grow={false}>
-//                   <EuiToolTip position="top" content="Edit">
-//                     <EuiButtonIcon
-//                       aria-label="Edit"
-//                       iconType="pencil"
-//                       onClick={() => handleEdit(index)}
-//                     />
-//                   </EuiToolTip>
-//                 </EuiFlexItem>
-//                 <EuiFlexItem grow={false}>
-//                   <EuiToolTip position="top" content="Delete">
-//                     <EuiButtonIcon
-//                       aria-label="Delete"
-//                       iconType="trash"
-//                       onClick={() => handleDelete(index)}
-//                     />
-//                   </EuiToolTip>
-//                 </EuiFlexItem>
-//               </EuiFlexGroup>
-//             );
-//           },
-//         },
-//       ],
-//     },
-//   ];
-//
-//   const items = isAdding ? [...globalDataTags, newTag] : globalDataTags;
-//
-//   return (
-//     <>
-//       {globalDataTags.length === 0 && !isAdding ? (
-//         <EuiButton onClick={handleAddField} style={{ marginTop: '16px' }}>
-//           Add Field
-//         </EuiButton>
-//       ) : (
-//         <>
-//           <EuiBasicTable
-//             items={items}
-//             columns={columns}
-//             noItemsMessage="No global data tags available"
-//           />
-//           <EuiButton onClick={handleAddField} style={{ marginTop: '16px' }}>
-//             Add Field
-//           </EuiButton>
-//         </>
-//       )}
-//     </>
-//   );
-// };
