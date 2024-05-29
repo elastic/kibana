@@ -25,6 +25,7 @@ export type {
 export { SharedGlobalConfigKeys } from './src';
 export {
   ConfigService,
+  HttpService,
   LoggerService,
   LoggingService,
   OpaqueIdToken,
