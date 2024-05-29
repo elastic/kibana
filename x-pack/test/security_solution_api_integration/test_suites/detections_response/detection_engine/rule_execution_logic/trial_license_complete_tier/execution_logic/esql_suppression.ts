@@ -1014,7 +1014,7 @@ export default ({ getService }: FtrProviderContext) => {
         previewId,
       });
       // lodash sortBy is used here because custom_field is non ECS and not mapped in alerts index, so can't be sorted by
-      const sortedAlerts = sortBy(previewAlerts, 'custom_field');
+      const sortedAlerts = sortBy(previewAlerts, '_source.custom_field');
       expect(previewAlerts.length).toEqual(2);
 
       expect(sortedAlerts[0]._source).toEqual({
@@ -1112,7 +1112,7 @@ export default ({ getService }: FtrProviderContext) => {
         previewId,
       });
       // lodash sortBy is used here because custom_field is non ECS and not mapped in alerts index, so can't be sorted by
-      const sortedAlerts = sortBy(previewAlerts, 'custom_field');
+      const sortedAlerts = sortBy(previewAlerts, '_source.custom_field');
       expect(previewAlerts.length).toEqual(2);
 
       expect(sortedAlerts[0]._source).toEqual({

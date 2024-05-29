@@ -17,7 +17,7 @@ import { toHighPrecision } from '../utils/number';
 import { createEsParams, typedSearch } from '../utils/queries';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
 import { fromRemoteSummaryDocumentToSloDefinition } from './unsafe_federated/remote_summary_doc_to_slo';
 import { getFlattenedGroupings } from './utils';
 
@@ -65,13 +65,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     pagination: Pagination,
     hideStale?: boolean
   ): Promise<Paginated<SummaryResult>> {
-    let parsedFilters: any = {};
-
-    try {
-      parsedFilters = JSON.parse(filters);
-    } catch (e) {
-      this.logger.error(`Failed to parse filters: ${e.message}`);
-    }
+    const parsedFilters = parseStringFilters(filters, this.logger);
     const settings = await getSloSettings(this.soClient);
     const { indices } = await getListOfSummaryIndices(this.esClient, settings);
     const esParams = createEsParams({
