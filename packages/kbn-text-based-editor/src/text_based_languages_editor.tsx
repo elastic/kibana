@@ -52,6 +52,8 @@ import {
   parseErrors,
   clearCacheWhenOld,
   getESQLSources,
+  esqlHasPipes,
+  esqlSourceNeedsFields,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
@@ -64,7 +66,7 @@ import './overwrite.scss';
 export interface TextBasedLanguagesEditorProps {
   /** The aggregate type query */
   query: AggregateQuery;
-  /** Callback running everytime the query changes */
+  /** Callback running every time the query changes */
   onTextLangQueryChange: (query: AggregateQuery) => void;
   /** Callback running when the user submits the query */
   onTextLangQuerySubmit: (
@@ -168,7 +170,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const { dataViews, expressions, indexManagementApiService, application, docLinks, core } =
     kibana.services;
   const timeZone = core?.uiSettings?.get('dateFormat:tz');
-  const [code, setCode] = useState<string>(queryString ?? '');
+  const [code, _setCode] = useState<string>(queryString ?? '');
+  const queryStringRef = useRef<string>(queryString);
+  const setCode = (newCode: string) => {
+    _setCode(newCode);
+    queryStringRef.current = newCode;
+  };
   const [codeOneLiner, setCodeOneLiner] = useState<string | null>(null);
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
@@ -369,7 +376,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
-      ({ esql }) => esql
+      ({ esql }) => {
+        // Below checks prevent fetching fields for queries that don't need them
+        const currentQuery = queryStringRef.current;
+        const queryHasOnlySourceCommand = !esqlHasPipes(currentQuery);
+        if (queryHasOnlySourceCommand) {
+          const querySourceDoesNotNeedFields = !esqlSourceNeedsFields(currentQuery);
+          if (querySourceDoesNotNeedFields) return '';
+        }
+        return esql;
+      }
     );
 
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
