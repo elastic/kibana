@@ -700,7 +700,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'xpack.security.management.editRole.customRoleSuccessfullySavedNotificationTitle',
-            { defaultMessage: 'Custom role created' }
+            { defaultMessage: 'Custom role saved' }
           ),
           text: toMountPoint(
             <>
