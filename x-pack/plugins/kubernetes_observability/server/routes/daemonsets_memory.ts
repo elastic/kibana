@@ -109,11 +109,13 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
           var reasons = '';
           var memory = '';
           var deviation_alarm = '';
+          var namespace = request.query.namespace;
           if (podObjects.length !== 0) {
             //Create overall message for deployment
             var pods_memory_medium = new Array();
             var pods_memory_high = new Array();
             var pods_deviation_high = new Array();
+            namespace = podObjects[0].namespace;
             for (const podObject of podObjects) {
               if (podObject.alarm == "Medium") {
                 pods_memory_medium.push(podObject.name);
@@ -146,6 +148,8 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
             const daemonset = {
               'name': daemonsetName,
               'pods': podObjects,
+              'namespace': namespace,
+              'alarm': memory, 
               'message': `${resource} has ${memory} memory usage  and ${deviation_alarm} deviation from median value`,
               'reason': reasons,
             };

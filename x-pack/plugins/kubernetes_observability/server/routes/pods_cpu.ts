@@ -73,7 +73,7 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
             const pod = podObjects.pods[0];
             return response.ok({
               body: {
-                time: podObjects.time,
+                'time': podObjects.time,
                 'name': pod.name,
                 'namespace': pod.namespace,
                 'node': pod.node,
@@ -88,7 +88,7 @@ export const registerPodsCpuRoute = (router: IRouter, logger: Logger) => {
           }
           return response.ok({
             body: {
-              time: podObjects,
+              time: podObjects.time,
               pods: podObjects.pods
             },
           });

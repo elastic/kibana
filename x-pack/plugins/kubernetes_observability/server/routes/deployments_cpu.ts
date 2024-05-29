@@ -95,12 +95,14 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
           var reasons = '';
           var cpu = '';
           var deviation_alarm = '';
+          var namespace = request.query.namespace;
           if (podObjects !== null) {
             //Create overall message for deployment
             var pods_cpu_medium = new Array();
             var pods_cpu_high = new Array();
             var pods_deviation_high = new Array();
             time = podObjects.time;
+            namespace = podObjects.pods[0].namespace;
             for (const podObject of podObjects.pods) {
               if (podObject.alarm == "Medium") {
                 pods_cpu_medium.push(podObject.name);
@@ -133,6 +135,8 @@ export const registerDeploymentsCpuRoute = (router: IRouter, logger: Logger) => 
             const deployment = {
               'name': deploy,
               'pods': podObjects.pods,
+              'alarm': cpu, 
+              'namespace': namespace,
               'message': `Deployment has ${cpu} cpu utilization  and ${deviation_alarm} deviation `,
               'reason': reasons,
             };

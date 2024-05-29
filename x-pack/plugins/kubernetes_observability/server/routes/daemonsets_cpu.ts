@@ -91,6 +91,7 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
         }
 
         var time = '';
+        
         for (const daemonsetName of daemonNames) {
           const daemonPods = await getDaemonPodsasList(client, daemonsetName, request.query.namespace)
           var podObjects = new Array();
@@ -107,11 +108,13 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
           var reasons = '';
           var cpu = '';
           var deviation_alarm = '';
+          var namespace = request.query.namespace;
           if (podObjects.length !== 0) {
             //Create overall message for deployment
             var pods_cpu_medium = new Array();
             var pods_cpu_high = new Array();
             var pods_deviation_high = new Array();
+            namespace = podObjects[0].namesapce;
             for (const podObject of podObjects) {
               if (podObject.alarm == "Medium") {
                 pods_cpu_medium.push(podObject.name);
@@ -144,6 +147,8 @@ export const registerDaemonsetsCpuRoute = (router: IRouter, logger: Logger) => {
             const daemonset = {
               'name': daemonsetName,
               'pods': podObjects,
+              'namespace': namespace,
+              'alarm': cpu, 
               'message': `${resource} has ${cpu} cpu utilization  and ${deviation_alarm} deviation `,
               'reason': reasons,
             };

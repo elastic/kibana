@@ -107,6 +107,48 @@ export class PublicKubernetesObservabilityClient {
       console.log(results);
       return results;
     }
+
+    async getDeploymentsMemory() {
+      console.log("CALLED TO GET DEPLOYMENTS MEMORY")
+      const results = await this.http.get('/api/kubernetes/deployments/memory', {version: '1',});
+      console.log(results);
+      return results;
+    }
+
+    async getDeploymentsCpu() {
+      console.log("CALLED TO GET DEPLOYMENTS CPU")
+      const results = await this.http.get('/api/kubernetes/deployments/cpu', {version: '1',});
+      console.log(results);
+      return results;
+    }
+
+    async getDaemonsetsMemory() {
+      console.log("CALLED TO GET DAEMONSETS MEMORY")
+      const results = await this.http.get('/api/kubernetes/daemonsets/memory', {version: '1',});
+      console.log(results);
+      return results;
+    }
+
+    async getDaemonsetsCpu() {
+      console.log("CALLED TO GET DAEMONSETS CPU")
+      const results = await this.http.get('/api/kubernetes/daemonsets/cpu', {version: '1',});
+      console.log(results);
+      return results;
+    }
+
+    async getPodsCpu() {
+      console.log("CALLED TO GET PODS CPU")
+      const results = await this.http.get('/api/kubernetes/pods/cpu', {version: '1',});
+      console.log(results);
+      return results;
+    }
+
+    async getPodsMemory() {
+      console.log("CALLED TO GET PODS MEMORY")
+      const results = await this.http.get('/api/kubernetes/pods/memory', {version: '1',});
+      console.log(results);
+      return results;
+    }
 }
 
 const  KubernetesObservabilityComp = ({
@@ -125,6 +167,18 @@ const  KubernetesObservabilityComp = ({
   const [deploysStatus, setDeploysStatus] = useState([]);
   const [daemonsStatusTime, setDaemonsStatusTime] = useState([]);
   const [daemonsStatus, setDaemonsStatus] = useState([]);
+  const [deploysMemTime, setDeploysMemTime] = useState([]);
+  const [deploysMem, setDeploysMem] = useState([]);
+  const [deploysCpuTime, setDeploysCpuTime] = useState([]);
+  const [deploysCpu, setDeploysCpu] = useState([]);
+  const [daemonsMemTime, setDaemonsMemTime] = useState([]);
+  const [daemonsMem, setDaemonsMem] = useState([]);
+  const [daemonsCpuTime, setDaemonsCpuTime] = useState([]);
+  const [daemonsCpu, setDaemonsCpu] = useState([]);
+  const [podsMemTime, setPodsMemTime] = useState([]);
+  const [podsMem, setPodsMem] = useState([]);
+  const [podsCpuTime, setPodsCpuTime] = useState([]);
+  const [podsCpu, setPodsCpu] = useState([]);
   console.log("called");
   console.log(client);
   
@@ -203,6 +257,96 @@ const  KubernetesObservabilityComp = ({
   }, [client]); // *** Note the dependency
 
   useEffect(() => {
+    client.getDeploymentsMemory().then(data => {
+      console.log(data);
+      setDeploysMemTime(data.time);
+      const deployArray = data.deployments;
+      const keys = ['name', 'namespace',  'reason', 'message', 'alarm'];
+      
+      const deploys = deployArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      setDeploysMem(deploys);
+      })
+      .catch(error => {
+          console.log(error)
+      });
+  }, [client]); // *** Note the dependency
+
+  useEffect(() => {
+    client.getDeploymentsCpu().then(data => {
+      console.log(data);
+      setDeploysCpuTime(data.time);
+      const deployArray = data.deployments;
+      const keys = ['name', 'namespace',  'reason', 'message', 'alarm'];
+      
+      const deploys = deployArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      setDeploysCpu(deploys);
+      })
+      .catch(error => {
+          console.log(error)
+      });
+  }, [client]); // *** Note the dependency
+
+  useEffect(() => {
+    client.getDaemonsetsMemory().then(data => {
+      console.log(data);
+      setDaemonsMemTime(data.time);
+      const daemonArray = data.daemonsets;
+      const keys = ['name', 'namespace',  'reason', 'message', 'alarm'];
+      
+      const daemons = daemonArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      setDaemonsMem(daemons);
+      })
+      .catch(error => {
+          console.log(error)
+      });
+  }, [client]); // *** Note the dependency
+
+  useEffect(() => {
+    client.getDaemonsetsMemory().then(data => {
+      console.log(data);
+      setDaemonsCpuTime(data.time);
+      const daemonArray = data.daemonsets;
+      const keys = ['name', 'namespace',  'reason', 'message', 'alarm'];
+      
+      const daemons = daemonArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      setDaemonsCpu(daemons);
+      })
+      .catch(error => {
+          console.log(error)
+      });
+  }, [client]); // *** Note the dependency
+
+  useEffect(() => {
+    client.getPodsMemory().then(data => {
+      console.log(data);
+      setPodsMemTime(data.time);
+      const podsArray = data.pods;
+      const keys = ['name', 'namespace',  'node', 'memory_utilization', 'message', 'alarm'];
+      
+      const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      setPodsMem(pods);
+      })
+      .catch(error => {
+          console.log(error)
+      });
+  }, [client]); // *** Note the dependency
+
+  useEffect(() => {
+    client.getPodsCpu().then(data => {
+      console.log(data);
+      setPodsCpuTime(data.time);
+      const podsArray = data.pods;
+      const keys = ['name', 'namespace',  'node', 'cpu_utilization', 'message', 'alarm'];
+      
+      const pods = podsArray.map(item => keys.reduce((acc, key) => ({...acc, [key]: item[key]}), {}));
+      setPodsCpu(pods);
+      })
+      .catch(error => {
+          console.log(error)
+      });
+  }, [client]); // *** Note the dependency
+
+  useEffect(() => {
     client.getPodsStatus().then(data => {
       console.log(data);
       setPodsStatusTime(data.time);
@@ -217,7 +361,6 @@ const  KubernetesObservabilityComp = ({
       });
   }, [client]); // *** Note the dependency
 
-  
   return (
     <ContentWrapper gutterSize="none" justifyContent="center" direction="column">
       <EuiFlexGroup alignItems="center" direction="column">
@@ -383,6 +526,278 @@ const  KubernetesObservabilityComp = ({
                   name: 'Pod Events',
                 }
               ]}
+            />
+        </EuiFlexItem>
+        <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3 id="KubernetesDeploymentsMemoryTitle">
+                  <FormattedMessage
+                    id="xpack.fleet.kubernetesObservability.deploysmem"
+                    defaultMessage="Kubernetes Deployments Memory"
+                  />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s"><b>Timestamp</b>: {deploysMemTime}</EuiText>
+            <EuiSpacer size="s" />
+            <EuiBasicTable
+              items= {deploysMem}
+              columns= {[
+                {
+                  field: 'name',
+                  name: 'Name',
+                },
+                {
+                  field: 'namespace',
+                  name: 'Namespace',
+                },
+                {
+                  field: 'message',
+                  name: 'Message',
+                },
+                {
+                  field: 'alarm',
+                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                },
+                {
+                  field: 'reason',
+                  name: 'Status Reason',
+                }
+              ]}
+              sorting={{
+                sort: {
+                  field: 'alarm',
+                  direction: 'desc',
+                },
+              }}
+            />
+        </EuiFlexItem>
+        <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3 id="KubernetesDeploymentsCpuTitle">
+                  <FormattedMessage
+                    id="xpack.fleet.kubernetesObservability.deployscpu"
+                    defaultMessage="Kubernetes Deployments Cpu"
+                  />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s"><b>Timestamp</b>: {deploysCpuTime}</EuiText>
+            <EuiSpacer size="s" />
+            <EuiBasicTable
+              items= {deploysCpu}
+              columns= {[
+                {
+                  field: 'name',
+                  name: 'Name',
+                },
+                {
+                  field: 'namespace',
+                  name: 'Namespace',
+                },
+                {
+                  field: 'message',
+                  name: 'Message',
+                },
+                {
+                  field: 'alarm',
+                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                },
+                {
+                  field: 'reason',
+                  name: 'Status Reason',
+                }
+              ]}
+              sorting={{
+                sort: {
+                  field: 'alarm',
+                  direction: 'desc',
+                },
+              }}
+            />
+        </EuiFlexItem>
+        <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3 id="KubernetesDaemonstesMemoryTitle">
+                  <FormattedMessage
+                    id="xpack.fleet.kubernetesObservability.daemonsmem"
+                    defaultMessage="Kubernetes Daemonsets Memory"
+                  />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s"><b>Timestamp</b>: {daemonsMemTime}</EuiText>
+            <EuiSpacer size="s" />
+            <EuiBasicTable
+              items= {daemonsMem}
+              columns= {[
+                {
+                  field: 'name',
+                  name: 'Name',
+                },
+                {
+                  field: 'namespace',
+                  name: 'Namespace',
+                },
+                {
+                  field: 'message',
+                  name: 'Message',
+                },
+                {
+                  field: 'alarm',
+                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                },
+                {
+                  field: 'reason',
+                  name: 'Status Reason',
+                }
+              ]}
+              sorting={{
+                sort: {
+                  field: 'alarm',
+                  direction: 'desc',
+                },
+              }}
+            />
+        </EuiFlexItem>
+        <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3 id="KubernetesDaemonsetsCpuTitle">
+                  <FormattedMessage
+                    id="xpack.fleet.kubernetesObservability.daemonscpu"
+                    defaultMessage="Kubernetes Daemonsets Cpu"
+                  />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s"><b>Timestamp</b>: {daemonsCpuTime}</EuiText>
+            <EuiSpacer size="s" />
+            <EuiBasicTable
+              items= {daemonsCpu}
+              columns= {[
+                {
+                  field: 'name',
+                  name: 'Name',
+                },
+                {
+                  field: 'namespace',
+                  name: 'Namespace',
+                },
+                {
+                  field: 'message',
+                  name: 'Message',
+                },
+                {
+                  field: 'alarm',
+                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                },
+                {
+                  field: 'reason',
+                  name: 'Status Reason',
+                }
+              ]}
+              sorting={{
+                sort: {
+                  field: 'alarm',
+                  direction: 'desc',
+                },
+              }}
+            />
+        </EuiFlexItem>
+        <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3 id="KubernetesPodsMemoryTitle">
+                  <FormattedMessage
+                    id="xpack.fleet.kubernetesObservability.podsmem"
+                    defaultMessage="Kubernetes Pods Memory"
+                  />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s"><b>Timestamp</b>: {podsMemTime}</EuiText>
+            <EuiSpacer size="s" />
+            <EuiBasicTable
+              items= {podsMem}
+              columns= {[
+                {
+                  field: 'name',
+                  name: 'Name',
+                },
+                {
+                  field: 'namespace',
+                  name: 'Namespace',
+                },
+                {
+                  field: 'node',
+                  name: 'Node',
+                },
+                {
+                  field: 'memory_utilization',
+                  name: 'Memory Utilization',
+                },
+                {
+                  field: 'message',
+                  name: 'Message',
+                },
+                {
+                  field: 'alarm',
+                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              ]}
+              sorting={{
+                sort: {
+                  field: 'memory_utilization',
+                  direction: 'desc',
+                },
+              }}
+            />
+        </EuiFlexItem>
+        <EuiFlexItem>
+            <EuiTitle size="s">
+              <h3 id="KubernetesPodsCpuTitle">
+                  <FormattedMessage
+                    id="xpack.fleet.kubernetesObservability.podscpu"
+                    defaultMessage="Kubernetes Pods Cpu"
+                  />
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="s"><b>Timestamp</b>: {podsCpuTime}</EuiText>
+            <EuiSpacer size="s" />
+            <EuiBasicTable
+              items= {podsCpu}
+              columns= {[
+                {
+                  field: 'name',
+                  name: 'Name',
+                },
+                {
+                  field: 'namespace',
+                  name: 'Namespace',
+                },
+                {
+                  field: 'node',
+                  name: 'Node',
+                },
+                {
+                  field: 'cpu_utilization',
+                  name: 'Memory Cpu',
+                },
+                {
+                  field: 'message',
+                  name: 'Message',
+                },
+                {
+                  field: 'alarm',
+                  name: 'Notification Low < 70%, 70% <= Medium < 90%, High >= 90%',
+                }
+              ]}
+              sorting={{
+                sort: {
+                  field: 'cpu_utilization',
+                  direction: 'desc',
+                },
+              }}
             />
         </EuiFlexItem>
         <EuiFlexItem>
