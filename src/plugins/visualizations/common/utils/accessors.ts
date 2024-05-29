@@ -14,7 +14,7 @@ const getAccessorByIndex = (accessor: number, columns: Datatable['columns']) =>
   columns.length > accessor ? accessor : undefined;
 
 const getAccessorById = (accessor: DatatableColumn['id'], columns: Datatable['columns']) =>
-  columns.find((c) => c.id === accessor);
+  columns.find((c) => (c.id ? c.id === accessor : c.name === 'accessor'));
 
 export function findAccessor(
   accessor: string,
@@ -112,7 +112,7 @@ export const getColumnByAccessor = (
   columns: Datatable['columns'] = []
 ) => {
   if (typeof accessor === 'string') {
-    return columns.find(({ id }) => accessor === id);
+    return columns.find(({ id, name }) => (id ? accessor === id : accessor === name));
   }
 
   const visDimensionAccessor = accessor.accessor;

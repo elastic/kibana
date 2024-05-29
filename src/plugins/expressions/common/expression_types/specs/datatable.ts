@@ -8,6 +8,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { map, pick, zipObject } from 'lodash';
+import { Table, tableFromJSON } from 'apache-arrow';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import { ExpressionTypeDefinition, ExpressionValueBoxed } from '../types';
@@ -198,6 +199,74 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
         return { id: colName, name: val.expression, meta: { type: val.type } };
       }),
     }),
+    arrow: (value: { type: 'arrow'; table: Table }): Datatable => {
+      const jsArray = [];
+
+      console.time('todataset');
+      // slowest, walks over each row and gets values for all columns
+      // for (let i = 0; i < value.table.numRows; i++) {
+      //   const row = value.table.get(i)!;
+      //   const newRow: Record<string, unknown> = {};
+      //   value.table.schema.fields.forEach((field) => {
+      //     newRow[field.name] = row[field.name];
+      //   });
+      //   jsArray.push({ ...newRow });
+      // }
+
+      // a bit faster, accesses the column first and then gets the value for the row
+      // for (let i = 0; i < value.table.numRows; i++) {
+      //   const newRow: Record<string, unknown> = {};
+      //   value.table.schema.fields.forEach((field) => {
+      //     newRow[field.name] = value.table.getChild(field.name)!.get(i);
+      //   });
+      //   jsArray.push({ ...newRow });
+      // }
+
+      // fastest, fill jsarray column by column
+      for (let i = 0; i < value.table.numRows; i++) {
+        jsArray.push({});
+      }
+      value.table.schema.fields.forEach((field) => {
+        const child = value.table.getChild(field.name)!;
+        for (let i = 0; i < value.table.numRows; i++) {
+          jsArray[i][field.name] = child.get(i);
+        }
+      });
+
+      // use built in method to convert whole row, slow
+      // for (let i = 0; i < value.table.numRows; i++) {
+      //   const row = value.table.get(i)!;
+      //   jsArray.push(row.toJSON());
+      // }
+
+      console.timeEnd('todataset');
+
+      return {
+        type: 'datatable',
+        columns: value.table.schema.fields.map((field) => {
+          const meta: Record<string, unknown> = {};
+
+          console.time('fromdatatable');
+          for (const key in field.metadata.keys()) {
+            if (field.metadata.has(key)) {
+              meta[key] = field.metadata.get(key);
+            }
+          }
+          console.timeEnd('fromdatatable');
+
+          return {
+            id: field.name,
+            name: field.name,
+            type: field.type,
+            meta: {
+              type: field.type,
+              ...meta,
+            },
+          };
+        }),
+        rows: jsArray,
+      };
+    },
   },
   to: {
     render: (table): ExpressionValueRender<RenderedDatatable> => ({
@@ -226,6 +295,16 @@ export const datatable: ExpressionTypeDefinition<typeof name, Datatable, Seriali
         }, {}),
         rows,
       };
+    },
+    arrow: (value: Datatable): { type: 'arrow'; table: Table } => {
+      const table = tableFromJSON(value.rows);
+      table.schema.fields.forEach((field, i) => {
+        Object.keys(value.columns[i].meta).forEach((key) => {
+          // @ts-ignore
+          field.metadata.set(key, value.columns[i].meta[key]);
+        });
+      });
+      return { type: 'arrow', table };
     },
   },
 };

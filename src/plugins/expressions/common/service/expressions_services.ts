@@ -19,6 +19,8 @@ import {
 } from '@kbn/kibana-utils-plugin/common';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { ExecutionContextSearch } from '@kbn/es-query';
+import { arrowlog } from '../expression_functions/specs/arrowlog';
+import { demoarrow } from '../expression_functions/specs/demoarrow';
 import { Executor } from '../executor';
 import { AnyExpressionRenderDefinition, ExpressionRendererRegistry } from '../expression_renderers';
 import { ExpressionAstExpression } from '../ast';
@@ -467,6 +469,8 @@ export class ExpressionsService
       mapColumn,
       math,
       mathColumn,
+      arrowlog,
+      demoarrow,
     ]) {
       this.registerFunction(fn);
     }

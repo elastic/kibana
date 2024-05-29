@@ -955,6 +955,7 @@
     "ajv": "^8.12.0",
     "ansi-regex": "^6.0.1",
     "antlr4": "^4.13.1-patch-1",
+    "apache-arrow": "^16.1.0",
     "archiver": "^5.3.1",
     "async": "^3.2.3",
     "aws4": "^1.12.0",

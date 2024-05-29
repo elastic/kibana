@@ -8,12 +8,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  prepareLogTable,
-  Dimension,
-  validateAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import { Dimension, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { ColorMode } from '@kbn/charts-plugin/common';
+import { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { visType } from '../types';
 import { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, LabelPosition } from '../constants';
@@ -40,7 +37,7 @@ const errors = {
 export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
   name: EXPRESSION_METRIC_NAME,
   type: 'render',
-  inputTypes: ['datatable'],
+  inputTypes: ['arrow'],
   help: i18n.translate('expressionLegacyMetricVis.function.help', {
     defaultMessage: 'Metric visualization',
   }),
@@ -145,8 +142,10 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
       }
     }
 
-    args.metric.forEach((metric) => validateAccessor(metric, input.columns));
-    validateAccessor(args.bucket, input.columns);
+    const columns = input.table.schema.fields as unknown as DatatableColumn[];
+
+    args.metric.forEach((metric) => validateAccessor(metric, columns));
+    validateAccessor(args.bucket, columns);
 
     if (handlers?.inspectorAdapters?.tables) {
       handlers.inspectorAdapters.tables.reset();
@@ -168,15 +167,15 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
           }),
         ]);
       }
-      const logTable = prepareLogTable(input, argsTable, true);
-      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+      // const logTable = prepareLogTable(input, argsTable, true);
+      // handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
 
     return {
       type: 'render',
       as: EXPRESSION_METRIC_NAME,
       value: {
-        visData: input,
+        visData: input.table,
         visType,
         visConfig: {
           metric: {
@@ -194,7 +193,7 @@ export const metricVisFunction = (): MetricVisExpressionFunctionDefinition => ({
               },
             },
             colorFullBackground:
-              args.metric.length > 1 || input.rows.length > 1 ? false : args.colorFullBackground,
+              args.metric.length > 1 || input.table.numRows > 1 ? false : args.colorFullBackground,
             style: {
               bgColor: args.colorMode === ColorMode.Background,
               labelColor: args.colorMode === ColorMode.Labels,

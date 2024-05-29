@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { Table } from 'apache-arrow';
 import type { PaletteOutput } from '@kbn/coloring';
 import {
-  Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueRender,
   Style,
@@ -33,11 +33,14 @@ export interface MetricArguments {
   autoScale?: boolean;
 }
 
-export type MetricInput = Datatable;
+export interface MetricInput {
+  type: 'arrow';
+  table: Table;
+}
 
 export interface MetricVisRenderConfig {
   visType: typeof visType;
-  visData: Datatable;
+  visData: Table;
   visConfig: Pick<VisParams, 'metric' | 'dimensions'>;
   canNavigateToLens: boolean;
 }

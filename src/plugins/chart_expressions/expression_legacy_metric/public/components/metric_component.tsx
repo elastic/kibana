@@ -13,9 +13,10 @@ import {
   getAccessor,
   getFormatByAccessor,
 } from '@kbn/visualizations-plugin/common/utils';
-import { Datatable } from '@kbn/expressions-plugin/public';
+import { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { Table } from 'apache-arrow/Arrow.node';
 import { getFormatService, getPaletteService } from '../services';
 import { VisParams, MetricOptions } from '../../common/types';
 import { MetricVisValue } from './metric_value';
@@ -27,7 +28,7 @@ import './metric.scss';
 
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
-  visData: Datatable;
+  visData: Table;
   filterable: boolean[];
   fireEvent: (event: any) => void;
   renderComplete: () => void;
@@ -43,7 +44,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
   }
 
-  private processTableGroups(table: Datatable) {
+  private processTableGroups(table: Table) {
     const { metric: metricConfig, dimensions } = this.props.visParams;
     const { percentageMode: isPercentageMode, style, palette } = metricConfig;
     const { stops = [] } = palette ?? {};
@@ -53,24 +54,25 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     let bucketColumnId: string;
     let bucketFormatter: IFieldFormat;
 
+    const columns = table.schema.fields as unknown as DatatableColumn[];
+
     if (dimensions.bucket) {
-      const bucketColumn = getColumnByAccessor(dimensions.bucket!, table.columns);
+      const bucketColumn = getColumnByAccessor(dimensions.bucket!, columns);
       bucketColumnId = bucketColumn?.id!;
       bucketFormatter = getFormatService().deserialize(
-        getFormatByAccessor(dimensions.bucket, table.columns)
+        getFormatByAccessor(dimensions.bucket, columns)
       );
     }
 
     return dimensions.metrics.reduce(
       (acc: MetricOptions[], metric: string | ExpressionValueVisDimension) => {
-        const column = getColumnByAccessor(metric, table?.columns);
-        const colIndex = table?.columns.indexOf(column!);
-        const formatter = getFormatService().deserialize(
-          getFormatByAccessor(metric, table.columns)
-        );
-        const metrics = table.rows.map((row, rowIndex) => {
+        const column = getColumnByAccessor(metric, columns);
+        const colIndex = columns.indexOf(column!);
+        const formatter = getFormatService().deserialize(getFormatByAccessor(metric, columns));
+        const metrics = [...new Array(table.numRows)].map((arrayRow, rowIndex) => {
+          const row = table.get(rowIndex)!;
           let title = column!.name;
-          let value: number = row[column!.id];
+          let value: number = row[title];
           const color = palette ? this.getColor(value, palette) : undefined;
 
           if (isPercentageMode && stops.length) {
@@ -107,7 +109,9 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     const table = this.props.visData;
     let column = dimensions.bucket ? getAccessor(dimensions.bucket) : metricColIndex;
     if (typeof column === 'object' && 'id' in column) {
-      column = table.columns.indexOf(column);
+      column = table.schema.fields.findIndex(
+        (field) => field.name === (column as DatatableColumn).id
+      );
     }
     this.props.fireEvent({
       name: 'filter',
