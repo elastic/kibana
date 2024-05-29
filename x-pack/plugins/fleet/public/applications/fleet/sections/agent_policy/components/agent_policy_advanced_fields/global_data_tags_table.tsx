@@ -11,12 +11,12 @@ import {
   EuiButtonIcon,
   EuiFieldText,
   EuiFormRow,
-  EuiIcon,
   EuiText,
   EuiBadge,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import type { NewAgentPolicy, AgentPolicy, GlobalDataTag } from '../../../../../../../common/types';
@@ -249,14 +249,20 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
             const index = globalDataTags.indexOf(item);
             if (editingIndices.has(index) || (isAdding && item === newTag)) {
               return (
-                <EuiText
-                  color="primary"
-                  onClick={isAdding ? handleConfirm : () => handleSaveEdit(index)}
-                  style={{ cursor: 'pointer', color: '#0079a5' }}
-                >
-                  <EuiIcon type="checkInCircleFilled" color="primary" />
-                  Confirm
-                </EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="primary"
+                      iconType="checkInCircleFilled"
+                      onClick={isAdding ? handleConfirm : () => handleSaveEdit(index)}
+                      style={{ padding: '0 8px' }}
+                      flush="left"
+                    >
+                      Confirm
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               );
             }
             return (
@@ -275,14 +281,20 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
             const index = globalDataTags.indexOf(item);
             if (editingIndices.has(index) || (isAdding && item === newTag)) {
               return (
-                <EuiText
-                  color="danger"
-                  onClick={isAdding ? handleCancel : () => handleCancelEdit(index)}
-                  style={{ cursor: 'pointer', color: '#BD271E' }}
-                >
-                  <EuiIcon type="cross" color="danger" />
-                  Cancel
-                </EuiText>
+                <EuiFlexGroup alignItems="center" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      color="danger"
+                      iconType="errorFilled"
+                      onClick={isAdding ? handleCancel : () => handleCancelEdit(index)}
+                      style={{ padding: '0 8px' }}
+                      flush="left"
+                    >
+                      Cancel
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               );
             }
             return (
