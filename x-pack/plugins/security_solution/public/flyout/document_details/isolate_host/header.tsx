@@ -31,7 +31,7 @@ export const PanelHeader: FC = () => {
   const responseActionsCrowdstrikeManualHostIsolationEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsCrowdstrikeManualHostIsolationEnabled'
   );
-  const isExternalEdr =
+  const showAsTechPreview =
     (isSentinelOneV1Enabled && isSentinelOneAlert) ||
     (responseActionsCrowdstrikeManualHostIsolationEnabled && isAlertFromCrowdstrikeAlert);
   const title = (
@@ -49,7 +49,7 @@ export const PanelHeader: FC = () => {
           />
         )}
       </EuiFlexItem>
-      {isExternalEdr && (
+      {showAsTechPreview && (
         <EuiFlexItem grow={false}>
           <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_TOOLTIP} />
         </EuiFlexItem>

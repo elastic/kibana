@@ -503,7 +503,22 @@ export const getEndpointConsoleCommands = ({
 
   switch (agentType) {
     case 'sentinel_one':
-      return adjustCommandsForSentinelOne({ commandList: consoleCommands });
+      return adjustCommandsForVendor({
+        commandList: consoleCommands,
+        vendor: 'sentinel_one',
+        featureFlags: {
+          isHostIsolationEnabled: featureFlags.responseActionsSentinelOneV1Enabled,
+          isGetFileFeatureEnabled: featureFlags.responseActionsSentinelOneGetFileEnabled,
+        },
+      });
+    case 'crowdstrike':
+      return adjustCommandsForVendor({
+        commandList: consoleCommands,
+        vendor: 'crowdstrike',
+        featureFlags: {
+          isHostIsolationEnabled: featureFlags.responseActionsCrowdstrikeManualHostIsolationEnabled,
+        },
+      });
     default:
       // agentType === endpoint: just returns the defined command list
       return consoleCommands;
@@ -511,20 +526,25 @@ export const getEndpointConsoleCommands = ({
 };
 
 /** @private */
-const adjustCommandsForSentinelOne = ({
+const adjustCommandsForVendor = ({
   commandList,
+  vendor,
+  featureFlags,
 }: {
   commandList: CommandDefinition[];
+  vendor: 'sentinel_one' | 'crowdstrike';
+  featureFlags: {
+    isHostIsolationEnabled: boolean;
+    isGetFileFeatureEnabled?: boolean;
+  };
 }): CommandDefinition[] => {
-  const featureFlags = ExperimentalFeaturesService.get();
-  const isHostIsolationEnabled = featureFlags.responseActionsSentinelOneV1Enabled;
-  const isGetFileFeatureEnabled = featureFlags.responseActionsSentinelOneGetFileEnabled;
+  const { isHostIsolationEnabled, isGetFileFeatureEnabled } = featureFlags;
 
   const disableCommand = (command: CommandDefinition) => {
     command.helpDisabled = true;
     command.helpHidden = true;
     command.validate = () =>
-      UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', command.name as ConsoleResponseActionCommands);
+      UPGRADE_AGENT_FOR_RESPONDER(vendor, command.name as ConsoleResponseActionCommands);
   };
 
   return commandList.map((command) => {
@@ -532,14 +552,13 @@ const adjustCommandsForSentinelOne = ({
       command.name === 'status'
         ? false
         : isActionSupportedByAgentType(
-            'sentinel_one',
+            vendor,
             RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
               command.name as ConsoleResponseActionCommands
             ],
             'manual'
           );
 
-    // If command is not supported by SentinelOne - disable it
     if (
       !agentSupportsResponseAction ||
       (command.name === 'get-file' && !isGetFileFeatureEnabled) ||
