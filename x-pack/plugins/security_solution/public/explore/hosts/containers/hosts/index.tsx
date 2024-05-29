@@ -129,6 +129,8 @@ export const useAllHost = ({
     ]
   );
 
+  console.log('hostsResponse', hostsResponse);
+
   useEffect(() => {
     if (riskScoreStatusLoading) {
       return;
@@ -151,6 +153,8 @@ export const useAllHost = ({
         },
         isNewRiskScoreModuleInstalled,
       };
+      console.log('prevRequest', prevRequest);
+      console.log('myRequest', myRequest);
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }

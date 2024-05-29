@@ -32,6 +32,9 @@ import { formatHostEdgesData, HOSTS_FIELDS } from './helpers';
 
 import type { EndpointAppContext } from '../../../../../endpoint/types';
 import { buildRiskScoreQuery } from '../../risk_score/all/query.risk_score.dsl';
+import { buildAssetCriticalityQuery } from '../../asset_criticality/query.asset_criticality.dsl';
+import { getAssetCriticalityIndex } from '@kbn/security-solution-plugin/common/entity_analytics/asset_criticality';
+import { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics/asset_criticality';
 
 export const allHosts: SecuritySolutionFactory<HostsQueries.hosts> = {
   buildDsl: (options) => {
@@ -103,6 +106,17 @@ async function enhanceEdges(
     hostNames,
     isNewRiskScoreModuleInstalled
   );
+
+  const criticality = await getHostCriticalityData(esClient, hostNames);
+
+  const criticalityData = criticality?.hits.hits.reduce(
+    (acc, hit) => ({
+      ...acc,
+      [hit?._source?.id_value ?? '']: hit?._source?.criticality_level,
+    }),
+    {}
+  );
+
   const hostsRiskByHostName: Record<string, string> | undefined = hostRiskData?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,
@@ -111,15 +125,21 @@ async function enhanceEdges(
     {}
   );
 
-  return hostsRiskByHostName
+  const result = hostsRiskByHostName
     ? edges.map(({ node, cursor }) => ({
         node: {
           ...node,
           risk: hostsRiskByHostName[node._id ?? ''],
+          criticality: criticalityData?.[node._id ?? ''],
         },
         cursor,
       }))
     : edges;
+
+  console.log('hostRiskData', hostsRiskByHostName);
+  console.log('criticalityData', criticalityData);
+  console.log('result', result);
+  return result;
 }
 
 export async function getHostRiskData(
@@ -138,6 +158,23 @@ export async function getHostRiskData(
       })
     );
     return hostRiskResponse;
+  } catch (error) {
+    if (error?.meta?.body?.error?.type !== 'index_not_found_exception') {
+      throw error;
+    }
+    return undefined;
+  }
+}
+
+export async function getHostCriticalityData(esClient: IScopedClusterClient, hostNames: string[]) {
+  try {
+    const criticalityResponse = await esClient.asCurrentUser.search<AssetCriticalityRecord>(
+      buildAssetCriticalityQuery({
+        defaultIndex: [getAssetCriticalityIndex('default')], // TODO:(@tiansivive) move to constant or import from somewhere else
+        filterQuery: { terms: { id_value: hostNames } },
+      })
+    );
+    return criticalityResponse;
   } catch (error) {
     if (error?.meta?.body?.error?.type !== 'index_not_found_exception') {
       throw error;
