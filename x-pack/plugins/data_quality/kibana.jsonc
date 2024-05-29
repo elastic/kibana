@@ -4,12 +4,13 @@
   "owner": "@elastic/obs-ux-logs-team",
   "plugin": {
     "id": "dataQuality",
-    "server": false,
+    "server": true,
     "browser": true,
     "configPath": ["xpack", "data_quality"],
     "requiredPlugins": [
       "datasetQuality",
       "management",
+      "features",
   ],
     "optionalPlugins": [],
     "requiredBundles": [
