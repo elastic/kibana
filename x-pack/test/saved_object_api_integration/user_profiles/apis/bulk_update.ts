@@ -31,49 +31,47 @@ export default function ({ getService }: FtrProviderContext) {
       const { type, id } = TEST_CASES.SINGLE_NAMESPACE_DEFAULT_SPACE;
 
       // update with interactive user 1
-      const sessionHeaders1 = await loginAsInteractiveUser({
+      const interactiveUser1 = await loginAsInteractiveUser({
         getService,
         ...AUTHENTICATION.KIBANA_RBAC_USER,
       });
       const updateResponse1 = await supertest
         .put(`/api/saved_objects/_bulk_update`)
-        .set(sessionHeaders1)
+        .set(interactiveUser1.headers)
         .send([{ id, type, attributes: { title: 'test' } }]);
 
       expect(updateResponse1.status).to.be(200);
-      expect(typeof updateResponse1.body.saved_objects[0].updated_by).to.be('string');
+      expect(updateResponse1.body.saved_objects[0].updated_by).to.be(interactiveUser1.uid);
       expect(updateResponse1.body.saved_objects[0].created_by).not.to.be.ok();
 
       const getResponse1 = await supertest
         .get(`/api/saved_objects/${type}/${id}`)
-        .set(sessionHeaders1);
+        .set(interactiveUser1.headers);
 
-      expect(typeof getResponse1.body.updated_by).to.be('string');
+      expect(getResponse1.body.updated_by).to.be(interactiveUser1.uid);
       expect(getResponse1.body.created_by).not.to.be.ok();
 
       // update with interactive user 2
-      const sessionHeaders2 = await loginAsInteractiveUser({
+      const interactiveUser2 = await loginAsInteractiveUser({
         getService,
         ...AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
       });
 
       const updateResponse2 = await supertest
         .put(`/api/saved_objects/_bulk_update`)
-        .set(sessionHeaders2)
+        .set(interactiveUser2.headers)
         .send([{ type, id, attributes: { title: 'test 2' } }]);
 
       expect(updateResponse2.status).to.be(200);
-      expect(typeof updateResponse2.body.saved_objects[0].updated_by).to.be('string');
+      expect(updateResponse2.body.saved_objects[0].updated_by).to.be(interactiveUser2.uid);
       expect(updateResponse2.body.saved_objects[0].created_by).not.to.be.ok();
 
       const getResponse2 = await supertest
         .get(`/api/saved_objects/${type}/${id}`)
-        .set(sessionHeaders2);
+        .set(interactiveUser2.headers);
 
-      expect(typeof getResponse2.body.updated_by).to.be('string');
+      expect(getResponse2.body.updated_by).to.be(interactiveUser2.uid);
       expect(getResponse2.body.created_by).not.to.be.ok();
-
-      expect(getResponse2.body.updated_by).to.not.be.eql(getResponse1.body.updated_by);
 
       // update with "non-interactive" user, updated_by should become empty
       const updateResponse3 = await supertest
@@ -87,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const getResponse3 = await supertest
         .get(`/api/saved_objects/${type}/${id}`)
-        .set(sessionHeaders2);
+        .set(interactiveUser2.headers);
 
       expect(getResponse3.body.updated_by).not.to.be.ok();
       expect(getResponse3.body.created_by).not.to.be.ok();

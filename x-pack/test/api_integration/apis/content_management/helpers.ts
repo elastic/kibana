@@ -56,12 +56,18 @@ export async function cleanupInteractiveUser({
   await security.role.delete(role);
 }
 
+export interface LoginAsInteractiveUserResponse {
+  headers: {
+    Cookie: string;
+  };
+  uid: string;
+}
 export async function loginAsInteractiveUser({
   getService,
   username = users[0],
-}: Pick<FtrProviderContext, 'getService'> & { username?: typeof users[number] }): Promise<{
-  Cookie: string;
-}> {
+}: Pick<FtrProviderContext, 'getService'> & {
+  username?: typeof users[number];
+}): Promise<LoginAsInteractiveUserResponse> {
   const supertest = getService('supertestWithoutAuth');
 
   const response = await supertest
@@ -76,5 +82,10 @@ export async function loginAsInteractiveUser({
     .expect(200);
   const cookie = parseCookie(response.header['set-cookie'][0])!.cookieString();
 
-  return { Cookie: cookie };
+  const { body: userWithProfileId } = await supertest
+    .get('/internal/security/me')
+    .set('Cookie', cookie)
+    .expect(200);
+
+  return { headers: { Cookie: cookie }, uid: userWithProfileId.profile_uid };
 }

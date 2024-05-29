@@ -12,6 +12,7 @@ import {
   setupInteractiveUser,
   sampleDashboard,
   cleanupInteractiveUser,
+  LoginAsInteractiveUserResponse,
 } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -65,18 +66,18 @@ export default function ({ getService }: FtrProviderContext) {
     describe('for interactive user', function () {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
       const supertestWithAuth = getService('supertest');
-      let sessionHeaders: { [key: string]: string } = {};
+      let interactiveUser: LoginAsInteractiveUserResponse;
       let createResponse: any;
 
       before(async () => {
         await setupInteractiveUser({ getService });
-        sessionHeaders = await loginAsInteractiveUser({ getService });
+        interactiveUser = await loginAsInteractiveUser({ getService });
       });
 
       beforeEach(async () => {
         createResponse = await supertestWithoutAuth
           .post('/api/content_management/rpc/create')
-          .set(sessionHeaders)
+          .set(interactiveUser.headers)
           .set('kbn-xsrf', 'true')
           .send(sampleDashboard);
       });
@@ -89,6 +90,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(createResponse.status).to.be(200);
         expect(createResponse.body.result.result.item).to.be.ok();
         expect(createResponse.body.result.result.item).to.have.key('updatedBy');
+        expect(createResponse.body.result.result.item.updatedBy).to.be(interactiveUser.uid);
       });
 
       it('updated_by is empty after update with non interactive user', async () => {
@@ -132,14 +134,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('updated_by is with profile_id of another user after update', async () => {
-        const sessionHeaders2 = await loginAsInteractiveUser({
+        const interactiveUser2 = await loginAsInteractiveUser({
           getService,
           username: 'content_manager_dashboard_2',
         });
 
         const updateResponse = await supertestWithoutAuth
           .post('/api/content_management/rpc/update')
-          .set(sessionHeaders2)
+          .set(interactiveUser2.headers)
           .set('kbn-xsrf', 'true')
           .send({
             contentTypeId: sampleDashboard.contentTypeId,
@@ -173,7 +175,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(updatedObject).to.have.key('updatedBy');
         expect(updatedObject.updatedBy).to.not.eql(createdObject.updatedBy);
-        expect(updatedObject.createdBy).to.eql(createdObject.createdBy);
+        expect(updatedObject.createdBy).to.eql(interactiveUser.uid);
+        expect(updatedObject.updatedBy).to.eql(interactiveUser2.uid);
         expect(updatedObject.createdAt).to.eql(createdObject.createdAt);
         expect(updatedObject.updatedAt).to.be.greaterThan(createdObject.updatedAt);
       });

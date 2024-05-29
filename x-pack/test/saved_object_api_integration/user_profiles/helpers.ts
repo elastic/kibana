@@ -8,13 +8,21 @@
 import { parse as parseCookie } from 'tough-cookie';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 
+export interface LoginAsInteractiveUserResponse {
+  headers: {
+    Cookie: string;
+  };
+  uid: string;
+}
+
 export async function loginAsInteractiveUser({
   getService,
   username,
   password,
-}: Pick<FtrProviderContext, 'getService'> & { username: string; password: string }): Promise<{
-  Cookie: string;
-}> {
+}: Pick<FtrProviderContext, 'getService'> & {
+  username: string;
+  password: string;
+}): Promise<LoginAsInteractiveUserResponse> {
   const supertest = getService('supertestWithoutAuth');
 
   const response = await supertest
@@ -32,5 +40,10 @@ export async function loginAsInteractiveUser({
     .expect(200);
   const cookie = parseCookie(response.header['set-cookie'][0])!.cookieString();
 
-  return { Cookie: cookie };
+  const { body: userWithProfileId } = await supertest
+    .get('/internal/security/me')
+    .set('Cookie', cookie)
+    .expect(200);
+
+  return { headers: { Cookie: cookie }, uid: userWithProfileId.profile_uid };
 }

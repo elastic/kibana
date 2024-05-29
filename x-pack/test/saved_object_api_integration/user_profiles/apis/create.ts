@@ -6,17 +6,17 @@
  */
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { loginAsInteractiveUser } from '../helpers';
+import { loginAsInteractiveUser, LoginAsInteractiveUserResponse } from '../helpers';
 import { TEST_CASES } from '../../common/suites/create';
 import { AUTHENTICATION } from '../../common/lib/authentication';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
   describe('create', function () {
-    let sessionHeaders: { [key: string]: string } = {};
+    let interactiveUser: LoginAsInteractiveUserResponse;
 
     before(async () => {
-      sessionHeaders = await loginAsInteractiveUser({
+      interactiveUser = await loginAsInteractiveUser({
         getService,
         ...AUTHENTICATION.KIBANA_RBAC_USER,
       });
@@ -26,14 +26,13 @@ export default function ({ getService }: FtrProviderContext) {
       const soType = TEST_CASES.NEW_SINGLE_NAMESPACE_OBJ.type;
       const createResponse = await supertest
         .post(`/api/saved_objects/${soType}`)
-        .set(sessionHeaders)
+        .set(interactiveUser.headers)
         .send({ attributes: { title: 'test' } });
 
       expect(createResponse.status).to.be(200);
       const so = createResponse.body;
-      expect(typeof so.created_by).to.be('string');
-      expect(typeof so.updated_by).to.be('string');
-      expect(so.created_by).to.be(so.updated_by);
+      expect(so.created_by).to.be(interactiveUser.uid);
+      expect(so.updated_by).to.be(interactiveUser.uid);
     });
   });
 }
