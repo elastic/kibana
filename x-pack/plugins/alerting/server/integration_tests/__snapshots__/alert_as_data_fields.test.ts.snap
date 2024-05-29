@@ -1120,6 +1120,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.rule.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.rule.tags": Object {
       "array": true,
       "required": false,
@@ -2176,6 +2181,11 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
+    },
+    "kibana.alert.rule.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -3234,6 +3244,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.rule.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.rule.tags": Object {
       "array": true,
       "required": false,
@@ -4291,6 +4306,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.rule.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.rule.tags": Object {
       "array": true,
       "required": false,
@@ -5347,6 +5367,11 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
+    },
+    "kibana.alert.rule.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
@@ -6411,6 +6436,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.rule.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.rule.tags": Object {
       "array": true,
       "required": false,
@@ -7468,6 +7498,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.rule.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
+    },
     "kibana.alert.rule.tags": Object {
       "array": true,
       "required": false,
@@ -8524,6 +8559,11 @@ Object {
       "array": false,
       "required": true,
       "type": "keyword",
+    },
+    "kibana.alert.rule.snoozed": Object {
+      "array": false,
+      "required": false,
+      "type": "boolean",
     },
     "kibana.alert.rule.tags": Object {
       "array": true,
