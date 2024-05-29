@@ -21,23 +21,34 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const to = '2024-01-01T12:00:00.000Z';
 
   describe('Dataset quality home', () => {
-    after(async () => {
-      await synthtrace.clean();
+    describe('with no datasets available', () => {
+      before(async () => {
+        await PageObjects.datasetQuality.navigateTo();
+      });
+
+      it('shows the empty state', async () => {
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoDataEmptyState
+        );
+      });
     });
 
-    it('shows the empty state when no datasets are available', async () => {
-      await PageObjects.datasetQuality.navigateTo();
-      await testSubjects.existOrFail(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityNoDataEmptyState
-      );
-    });
+    describe('with datasets available', () => {
+      before(async () => {
+        await synthtrace.index(getInitialTestLogs({ to, count: 1 }));
+        await PageObjects.datasetQuality.navigateTo();
+      });
 
-    it('dataset quality table exists', async () => {
-      await synthtrace.index(getInitialTestLogs({ to, count: 1 }));
-      await PageObjects.datasetQuality.navigateTo();
-      await testSubjects.existOrFail(
-        PageObjects.datasetQuality.testSubjectSelectors.datasetQualityTable
-      );
+      after(async () => {
+        await synthtrace.clean();
+      });
+
+      it('dataset quality table exists', async () => {
+        await PageObjects.datasetQuality.navigateTo();
+        await testSubjects.existOrFail(
+          PageObjects.datasetQuality.testSubjectSelectors.datasetQualityTable
+        );
+      });
     });
   });
 }
