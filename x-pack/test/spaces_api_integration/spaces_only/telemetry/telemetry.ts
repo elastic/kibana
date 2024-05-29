@@ -6,16 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
-} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const spacesService = getService('spaces');
+  const usageAPI = getService('usageAPI');
 
   describe('Verify disabledFeatures telemetry payloads', async () => {
     beforeEach(async () => {
@@ -42,20 +38,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes only disabledFeatures findings', async () => {
-      const {
-        body: [{ stats: apiResponse }],
-      } = await supertest
-        .post(`/internal/telemetry/clusters/_stats`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .set('kbn-xsrf', 'xxxx')
-        .send({
-          unencrypted: true,
-          refreshCache: true,
-        })
-        .expect(200);
+      const [{ stats }] = await usageAPI.getTelemetryStats({
+        unencrypted: true,
+        refreshCache: true,
+      });
 
-      expect(apiResponse.stack_stats.kibana.plugins.spaces.disabledFeatures).to.eql({
+      expect(stats.stack_stats.kibana.plugins.spaces.disabledFeatures).to.eql({
         guidedOnboardingFeature: 0,
         actions: 0,
         observabilityAIAssistant: 0,
