@@ -12,8 +12,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  Tooltip,
-  TooltipType,
   XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
@@ -23,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useRef } from 'react';
+import { useAnnotations } from '@kbn/observability-plugin/public';
 import { TimeBounds } from '../../../slo_details/types';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -53,6 +52,12 @@ export function GoodBadEventsChart({
     isDateHistogram: true,
   });
 
+  const { ObservabilityAnnotations, annotations, wrapOnBrushEnd, onAnnotationClick } =
+    useAnnotations({
+      sloId: slo?.id,
+      sloInstanceId: slo?.instanceId,
+    });
+
   const dateFormat = uiSettings.get('dateFormat');
 
   const yAxisNumberFormat = '0,0';
@@ -78,11 +83,11 @@ export function GoodBadEventsChart({
 
   const barClickHandler = (params: XYChartElementEvent[]) => {
     if (slo?.indicator?.type === 'sli.kql.custom') {
-      const [datanum, eventDetail] = params[0];
+      const [dataenum, eventDetail] = params[0];
       const isBad = eventDetail.specId === badEventId;
       const timeRange = {
-        from: moment(datanum.x).toISOString(),
-        to: moment(datanum.x).add(intervalInMilliseconds, 'ms').toISOString(),
+        from: moment(dataenum.x).toISOString(),
+        to: moment(dataenum.x).add(intervalInMilliseconds, 'ms').toISOString(),
         mode: 'absolute' as const,
       };
       openInDiscover(discover, slo, isBad, !isBad, timeRange);
@@ -95,7 +100,7 @@ export function GoodBadEventsChart({
 
       {!isLoading && (
         <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
-          <Tooltip type={TooltipType.VerticalCursor} />
+          <ObservabilityAnnotations annotations={annotations} />
           <Settings
             baseTheme={baseTheme}
             showLegend={true}
@@ -118,9 +123,10 @@ export function GoodBadEventsChart({
             pointerUpdateTrigger={'x'}
             locale={i18n.getLocale()}
             onElementClick={barClickHandler as ElementClickListener}
-            onBrushEnd={(brushArea) => {
+            onBrushEnd={wrapOnBrushEnd((brushArea) => {
               onBrushed?.(getBrushTimeBounds(brushArea));
-            }}
+            })}
+            onAnnotationClick={onAnnotationClick}
           />
           {annotation}
           <Axis

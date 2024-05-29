@@ -1,0 +1,198 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { i18n } from '@kbn/i18n';
+
+import React, { useState } from 'react';
+import {
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+  EuiSearchBarProps,
+  EuiButton,
+  formatDate,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { DatePicker } from './date_picker';
+import { useDeleteAnnotation } from '../../components/annotations/use_delete_annotation';
+import { AnnotationsListChart } from './annotations_list_chart';
+import { Annotation } from '../../../common/annotations';
+import { useFetchAnnotations } from '../../components/annotations/use_fetch_annotations';
+
+export function AnnotationsList() {
+  const [selection, setSelection] = useState<Annotation[]>([]);
+
+  const [isEditing, setIsEditing] = useState<Annotation | null>(null);
+
+  const [start, setStart] = useState('now-7d');
+  const [end, setEnd] = useState('now');
+  const { data, isLoading, refetch } = useFetchAnnotations({
+    start,
+    end,
+  });
+
+  const { mutateAsync: deleteAnnotation, isLoading: isDeleteLoading } = useDeleteAnnotation();
+
+  const renderToolsLeft = () => {
+    if (selection.length === 0) {
+      return;
+    }
+    const onClick = () => {
+      deleteAnnotation({ annotations: selection });
+      setSelection([]);
+    };
+    return (
+      <EuiButton
+        data-test-subj="o11yRenderToolsLeftUsersButton"
+        color="danger"
+        iconType="trash"
+        onClick={onClick}
+        isLoading={isDeleteLoading}
+      >
+        {i18n.translate('xpack.observability.renderToolsLeft.deleteButtonLabel', {
+          defaultMessage: 'Delete {no} annotations',
+          values: { no: selection.length },
+        })}
+      </EuiButton>
+    );
+  };
+  const renderToolsRight = () => {
+    return [
+      <DatePicker start={start} end={end} setStart={setStart} setEnd={setEnd} refetch={refetch} />,
+    ];
+  };
+  const allTags = data?.map((obj) => obj.tags ?? []).flat() ?? [];
+  const search: EuiSearchBarProps = {
+    toolsLeft: renderToolsLeft(),
+    toolsRight: renderToolsRight(),
+    box: {
+      incremental: true,
+    },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'tags',
+        name: TAGS_LABEL,
+        multiSelect: true,
+        options: [...new Set(allTags)].map((tag) => ({ value: tag, name: tag })),
+      },
+    ],
+  };
+  const pagination = {
+    initialPageSize: 5,
+    pageSizeOptions: [3, 5, 8],
+  };
+  const selectionValue: EuiTableSelectionType<Annotation> = {
+    selectable: (annot) => true,
+    onSelectionChange: (annotSel) => setSelection(annotSel),
+    initialSelected: selection,
+  };
+
+  const columns: Array<EuiBasicTableColumn<Annotation>> = [
+    {
+      field: 'name',
+      name: NAME_LABEL,
+      sortable: true,
+    },
+    {
+      field: '@timestamp',
+      name: TIMESTAMP_LABEL,
+      dataType: 'date',
+      sortable: true,
+      render: (timestamp: string) => formatDate(timestamp, 'longDateTime'),
+    },
+    {
+      field: 'message',
+      name: MESSAGE_LABEL,
+      sortable: true,
+      truncateText: true,
+    },
+    {
+      field: 'annotation.type',
+      name: TYPE_LABEL,
+    },
+    {
+      field: 'tags',
+      name: TAGS_LABEL,
+      render: (tags: string[]) => <TagsList tags={tags} />,
+    },
+    {
+      name: META_LABEL,
+      render: (annotation: Annotation) => {
+        return (
+          <EuiText size="s">
+            {i18n.translate('xpack.observability.columns.sloIDTextLabel', {
+              defaultMessage: 'SLO ID:',
+            })}
+            {annotation.slo?.id}
+          </EuiText>
+        );
+      },
+    },
+    {
+      actions: [
+        {
+          name: EDIT_LABEL,
+          description: EDIT_LABEL,
+          type: 'icon',
+          icon: 'pencil',
+          onClick: (annotation) => {
+            setIsEditing(annotation);
+          },
+        },
+      ],
+    },
+  ];
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <EuiInMemoryTable
+        childrenBetween={
+          <AnnotationsListChart
+            data={data ?? []}
+            start={start}
+            end={end}
+            isEditing={isEditing}
+            setIsEditing={setIsEditing}
+          />
+        }
+        tableCaption="Demo of EuiInMemoryTable with uncontrolled selection"
+        items={data ?? []}
+        itemId="id"
+        loading={isLoading}
+        columns={columns}
+        search={search}
+        pagination={pagination}
+        sorting={true}
+        selection={selectionValue}
+        tableLayout="auto"
+      />
+    </>
+  );
+}
+
+const NAME_LABEL = i18n.translate('xpack.observability.nameLabel', { defaultMessage: 'Name' });
+const META_LABEL = i18n.translate('xpack.observability.metaLabel', { defaultMessage: 'Meta' });
+const EDIT_LABEL = i18n.translate('xpack.observability.editAnnotation', { defaultMessage: 'Edit' });
+
+const TAGS_LABEL = i18n.translate('xpack.observability.tagsAnnotations', {
+  defaultMessage: 'Tags',
+});
+
+const TYPE_LABEL = i18n.translate('xpack.observability.typeAnnotations', {
+  defaultMessage: 'Type',
+});
+
+const MESSAGE_LABEL = i18n.translate('xpack.observability.messageAnnotations', {
+  defaultMessage: 'Message',
+});
+
+const TIMESTAMP_LABEL = i18n.translate('xpack.observability.timestampAnnotations', {
+  defaultMessage: 'Timestamp',
+});

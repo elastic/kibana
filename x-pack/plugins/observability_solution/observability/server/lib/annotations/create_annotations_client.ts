@@ -6,22 +6,19 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { ILicense } from '@kbn/licensing-plugin/server';
+import { ANNOTATION_RESOURCES_VERSION } from './index_templates/annotation_index_templates';
+import { ANNOTATION_MAPPINGS } from './component_templates/annotation_mappings_template';
 import {
-  createAnnotationRt,
-  deleteAnnotationRt,
   Annotation,
-  getAnnotationByIdRt,
+  CreateAnnotationParams,
+  DeleteAnnotationParams,
+  GetByIdAnnotationParams,
+  FindAnnotationParams,
 } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
-import { mappings } from './mappings';
 import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
-
-type CreateParams = t.TypeOf<typeof createAnnotationRt>;
-type DeleteParams = t.TypeOf<typeof deleteAnnotationRt>;
-type GetByIdParams = t.TypeOf<typeof getAnnotationByIdRt>;
 
 export function createAnnotationsClient(params: {
   index: string;
@@ -33,8 +30,8 @@ export function createAnnotationsClient(params: {
 
   const initIndex = () =>
     createOrUpdateIndex({
-      index,
-      mappings,
+      index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+      mappings: ANNOTATION_MAPPINGS,
       client: esClient,
       logger,
     });
@@ -54,12 +51,12 @@ export function createAnnotationsClient(params: {
     },
     create: ensureGoldLicense(
       async (
-        createParams: CreateParams
+        createParams: CreateAnnotationParams
       ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
         const indexExists = await unwrapEsResponse(
           esClient.indices.exists(
             {
-              index,
+              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
             },
             { meta: true }
           )
@@ -79,7 +76,43 @@ export function createAnnotationsClient(params: {
         const body = await unwrapEsResponse(
           esClient.index(
             {
-              index,
+              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+              body: annotation,
+              refresh: 'wait_for',
+            },
+            { meta: true }
+          )
+        );
+
+        return (
+          await esClient.get<Annotation>(
+            {
+              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+              id: body._id,
+            },
+            { meta: true }
+          )
+        ).body as { _id: string; _index: string; _source: Annotation };
+      }
+    ),
+    update: ensureGoldLicense(
+      async (
+        updateParams: Annotation
+      ): Promise<{ _id: string; _index: string; _source: Annotation }> => {
+        const { id, ...rest } = updateParams;
+
+        const annotation = {
+          ...rest,
+          event: {
+            created: new Date().toISOString(),
+          },
+        };
+
+        const body = await unwrapEsResponse(
+          esClient.index(
+            {
+              index: index + `-v${ANNOTATION_RESOURCES_VERSION}`,
+              id,
               body: annotation,
               refresh: 'wait_for',
             },
@@ -92,38 +125,90 @@ export function createAnnotationsClient(params: {
             {
               index,
               id: body._id,
+              // expand_wildcards: 'all',
             },
             { meta: true }
           )
         ).body as { _id: string; _index: string; _source: Annotation };
       }
     ),
-    getById: ensureGoldLicense(async (getByIdParams: GetByIdParams) => {
+    getById: ensureGoldLicense(async (getByIdParams: GetByIdAnnotationParams) => {
       const { id } = getByIdParams;
 
-      return unwrapEsResponse(
-        esClient.get(
-          {
-            id,
-            index,
+      const response = await esClient.search({
+        index: index + `-*`,
+        expand_wildcards: 'all',
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  _id: id,
+                },
+              },
+            ],
           },
-          { meta: true }
-        )
-      );
+        },
+      });
+      return response.hits.hits?.[0];
     }),
-    delete: ensureGoldLicense(async (deleteParams: DeleteParams) => {
+    find: ensureGoldLicense(async (findParams: FindAnnotationParams) => {
+      const { start, end, sloId, sloInstanceId } = findParams ?? {};
+
+      const result = await esClient.search({
+        index: index + `-*`,
+        expand_wildcards: 'all',
+        size: 10000,
+        query: {
+          bool: {
+            filter: [
+              {
+                range: {
+                  '@timestamp': {
+                    gte: start,
+                    lte: end,
+                  },
+                },
+              },
+              ...(sloId
+                ? [
+                    {
+                      term: {
+                        'slo.id': sloId,
+                      },
+                    },
+                  ]
+                : []),
+              ...(sloInstanceId && sloInstanceId !== '*'
+                ? [
+                    {
+                      term: {
+                        'slo.instanceId': sloInstanceId,
+                      },
+                    },
+                  ]
+                : []),
+            ],
+          },
+        },
+      });
+      return result.hits.hits.map((hit) => ({ ...(hit._source as Annotation), id: hit._id }));
+    }),
+    delete: ensureGoldLicense(async (deleteParams: DeleteAnnotationParams) => {
       const { id } = deleteParams;
 
-      return unwrapEsResponse(
-        esClient.delete(
-          {
-            index,
-            id,
-            refresh: 'wait_for',
+      return await esClient.deleteByQuery({
+        index: index + `-*`,
+        expand_wildcards: 'all',
+        body: {
+          query: {
+            term: {
+              _id: id,
+            },
           },
-          { meta: true }
-        )
-      );
+        },
+        refresh: true,
+      });
     }),
   };
 }

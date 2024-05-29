@@ -87,6 +87,7 @@ export function SliChartPanel({ data, isLoading, slo, selectedTabId, onBrushed }
 
         <EuiFlexItem>
           <WideChart
+            slo={slo}
             chart="line"
             id={i18n.translate('xpack.slo.sloDetails.sliHistoryChartPanel.chartTitle', {
               defaultMessage: 'SLI value',

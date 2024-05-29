@@ -5,79 +5,75 @@
  * 2.0.
  */
 
-import {
-  AreaSeries,
-  Axis,
-  Chart,
-  Fit,
-  LineSeries,
-  Position,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
-import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
+import React, { useRef } from 'react';
+import { useAnnotations } from '@kbn/observability-plugin/public';
+import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import moment from 'moment';
-import React, { useRef } from 'react';
-
-import { i18n } from '@kbn/i18n';
-import { useAnnotations } from '@kbn/observability-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { getBrushTimeBounds } from '../../../utils/slo/duration';
 import { TimeBounds } from '../types';
 import { useKibana } from '../../../utils/kibana_react';
-import { ChartData } from '../../../typings';
 
-type ChartType = 'area' | 'line';
-type State = 'success' | 'error';
-
-export interface Props {
-  id: string;
-  data: ChartData[];
-  chart: ChartType;
-  state: State;
-  isLoading: boolean;
+export function EventsAreaChart({
+  slo,
+  data,
+  minValue,
+  maxValue,
+  annotation,
+  onBrushed,
+}: {
+  data?: GetPreviewDataResponse;
+  maxValue?: number | null;
+  minValue?: number | null;
   slo: SLOWithSummaryResponse;
+  annotation?: React.ReactNode;
   onBrushed?: (timeBounds: TimeBounds) => void;
-}
-
-export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }: Props) {
+}) {
   const { charts, uiSettings } = useKibana().services;
   const baseTheme = charts.theme.useChartsBaseTheme();
-  const { euiTheme } = useEuiTheme();
   const dateFormat = uiSettings.get('dateFormat');
-  const percentFormat = uiSettings.get('format:percent:defaultPattern');
+  const chartRef = useRef(null);
+  const yAxisNumberFormat = slo.indicator.type === 'sli.metric.timeslice' ? '0,0[.00]' : '0,0';
 
-  const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
-  const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
-
-  const { ObservabilityAnnotations, annotations, onAnnotationClick } = useAnnotations({
-    sloId: slo?.id,
-    sloInstanceId: slo?.instanceId,
+  const { ObservabilityAnnotations, annotations } = useAnnotations({
+    sloId: slo.id,
+    sloInstanceId: slo.instanceId,
   });
 
-  const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
 
-  if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="wideChartLoading" />;
-  }
+  const threshold =
+    slo.indicator.type === 'sli.metric.timeslice'
+      ? slo.indicator.params.metric.threshold
+      : undefined;
+
+  const domain = {
+    fit: true,
+    min:
+      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
+    max:
+      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
+  };
 
   return (
     <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
       <ObservabilityAnnotations annotations={annotations} />
       <Settings
         baseTheme={baseTheme}
-        showLegend={false}
+        showLegend={slo.indicator.type !== 'sli.metric.timeslice'}
+        legendPosition={Position.Left}
         noResults={
           <EuiIcon
             type="visualizeApp"
             size="l"
             color="subdued"
-            title={i18n.translate('xpack.slo.wideChart.euiIcon.noResultsLabel', {
+            title={i18n.translate('xpack.slo.eventsChartPanel.euiIcon.noResultsLabel', {
               defaultMessage: 'no results',
             })}
           />
@@ -92,8 +88,9 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
         onBrushEnd={(brushArea) => {
           onBrushed?.(getBrushTimeBounds(brushArea));
         }}
-        onAnnotationClick={onAnnotationClick}
       />
+      {annotation}
+
       <Axis
         id="bottom"
         position={Position.Bottom}
@@ -102,31 +99,20 @@ export function WideChart({ chart, data, id, isLoading, state, onBrushed, slo }:
       />
       <Axis
         id="left"
-        ticks={4}
         position={Position.Left}
-        tickFormat={(d) => numeral(d).format(percentFormat)}
-        domain={{
-          fit: true,
-          min: NaN,
-          max: NaN,
-        }}
+        tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+        domain={domain}
       />
-      <ChartComponent
-        color={color}
-        data={data}
-        fit={Fit.Nearest}
-        id={id}
-        lineSeriesStyle={{
-          line: {
-            strokeWidth: 1,
-          },
-          point: { visible: false },
-        }}
-        xAccessor="key"
+      <AreaSeries
+        id="Metric"
         xScaleType={ScaleType.Time}
-        yAccessors={['value']}
         yScaleType={ScaleType.Linear}
-        yNice
+        xAccessor="date"
+        yAccessors={['value']}
+        data={(data ?? []).map((datum) => ({
+          date: new Date(datum.date).getTime(),
+          value: datum.sliValue,
+        }))}
       />
     </Chart>
   );
