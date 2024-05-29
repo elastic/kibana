@@ -7,4 +7,4 @@
  */
 
 export { updateESQLQueryTrigger, UPDATE_ESQL_QUERY_TRIGGER } from './update_esql_query_trigger';
-export { UpdateESQLQueryAction } from './update_esql_query_action';
+export { UpdateESQLQueryAction } from './update_esql_query_actions';
