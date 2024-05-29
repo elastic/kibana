@@ -75,6 +75,8 @@ export const isIsolationSupported = ({
   version: string;
   capabilities?: ImmutableArray<string>;
 }): boolean => {
+  // FIXME:PT Delete module once refactor is done
+
   if (!version || !isVersionSupported({ currentVersion: version })) return false;
 
   return isCapabilitiesSupported(version)

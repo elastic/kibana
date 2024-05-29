@@ -16,6 +16,8 @@ import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 export const isTimelineEventItemAnAlert = (
   timelineEventItem: TimelineEventsDetailsItem[]
 ): boolean => {
+  // FIXME:PT Delete once refactor is done
+
   return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, timelineEventItem);
 };
 

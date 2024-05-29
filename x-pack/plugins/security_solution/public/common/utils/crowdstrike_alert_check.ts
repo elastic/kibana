@@ -20,6 +20,7 @@ export const isTimelineEventItemAnAlert = (
   return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, timelineEventItem);
 };
 
+// FIXME:PT move const once refactor is done
 export const CROWDSTRIKE_AGENT_ID_FIELD = 'crowdstrike.event.DeviceId';
 
 export const getCrowdstrikeAgentId = (
@@ -58,6 +59,8 @@ export const isAlertFromCrowdstrikeAlert = ({
 }: {
   ecsData: Ecs | null | undefined;
 }): boolean => {
+  // FIXME:PT delete once refactor is done. Not currently being used
+
   if (ecsData == null) {
     return false;
   }

@@ -20,6 +20,7 @@ export const isTimelineEventItemAnAlert = (
   return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, timelineEventItem);
 };
 
+// FIXME:PT move const below when refactor is done
 export const SENTINEL_ONE_AGENT_ID_FIELD = 'observer.serial_number';
 
 export const getSentinelOneAgentId = (data: TimelineEventsDetailsItem[] | null) =>

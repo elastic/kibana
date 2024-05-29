@@ -42,6 +42,7 @@ export const getFieldValue = (
   },
   data: TimelineEventsDetailsItem[] | null
 ) => {
+  // FIXME:PT move these utlities to common place
   const currentField = getFieldValues({ category, field }, data);
   return currentField && currentField.length > 0 ? currentField[0] : '';
 };
