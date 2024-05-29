@@ -41,7 +41,6 @@ export function definePutRolesRoutes({
   authz,
   getFeatures,
   getFeatureUsageService,
-  buildFlavor,
 }: RouteDefinitionParams) {
   router.put(
     {
