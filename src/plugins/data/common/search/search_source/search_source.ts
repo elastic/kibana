@@ -146,7 +146,7 @@ interface ExpressionAstOptions {
   asDatatable?: boolean;
 }
 
-const omitByIsNil = <T>(object: Record<string, unknown>) => omitBy(object, isNil) as T;
+const omitByIsNil = <T>(object: Record<string, T>) => omitBy<T>(object, isNil);
 
 /** @public **/
 export class SearchSource {
@@ -909,15 +909,15 @@ export class SearchSource {
       indexType: this.getIndexType(index),
       highlightAll:
         searchRequest.highlightAll && builtQuery ? undefined : searchRequest.highlightAll,
-    }) as SearchRequest;
+    });
   }
 
   private getFieldFilter({
     bodySourceExcludes,
     metaFields,
   }: {
-    bodySourceExcludes: any;
-    metaFields: any;
+    bodySourceExcludes: string[];
+    metaFields: string[];
   }) {
     const filter = fieldWildcardFilter(bodySourceExcludes, metaFields);
     return (fieldsToFilter: any) =>
@@ -928,8 +928,8 @@ export class SearchSource {
     fields,
     fieldsFromSource,
   }: {
-    fields: any;
-    fieldsFromSource: any;
+    fields: SearchFieldValue[];
+    fieldsFromSource: SearchFieldValue[];
   }) {
     const bodyFieldNames = fields.map((field: SearchFieldValue) => this.getFieldName(field));
     return [...new Set([...bodyFieldNames, ...fieldsFromSource])];
@@ -939,8 +939,8 @@ export class SearchSource {
     uniqFieldNames,
     scriptFields,
   }: {
-    uniqFieldNames: any;
-    scriptFields: any;
+    uniqFieldNames: SearchFieldValue[];
+    scriptFields: Record<string, estypes.ScriptField>;
   }) {
     return uniqFieldNames.includes('*')
       ? scriptFields
@@ -951,19 +951,7 @@ export class SearchSource {
         );
   }
 
-  private getBuiltEsQuery({
-    index,
-    query,
-    filters,
-    getConfig,
-    sort,
-  }: {
-    index: any;
-    query: any;
-    filters: any;
-    getConfig: (key: string) => any;
-    sort?: any;
-  }) {
+  private getBuiltEsQuery({ index, query = [], filters = [], getConfig, sort }: SearchRequest) {
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const filtersInMustClause = (sort ?? []).some((srt: EsQuerySortValue[]) =>
       srt.hasOwnProperty('_score')
@@ -981,10 +969,10 @@ export class SearchSource {
     runtimeFields,
     _source,
   }: {
-    uniqFieldNames: any;
-    scriptFields: any;
-    runtimeFields: any;
-    _source: any;
+    uniqFieldNames: SearchFieldValue[];
+    scriptFields: SearchFieldValue[];
+    runtimeFields: estypes.MappingRuntimeFields;
+    _source: { includes?: string[]; excludes?: string[] };
   }) {
     return difference(uniqFieldNames, [
       ...Object.keys(scriptFields),
@@ -992,7 +980,7 @@ export class SearchSource {
     ]).filter((remainingField) => {
       if (!remainingField) return false;
       if (!_source || !_source.excludes) return true;
-      return !_source.excludes.includes(remainingField);
+      return !_source.excludes.includes(remainingField as string);
     });
   }
 
@@ -1007,11 +995,11 @@ export class SearchSource {
     sourceFieldsProvided,
   }: {
     index?: DataView;
-    fields: any;
-    docvalueFields: any;
-    fieldsFromSource: any;
-    filteredDocvalueFields: any;
-    metaFields: string;
+    fields: SearchFieldValue[];
+    docvalueFields: Array<{ field: string; format: string }>;
+    fieldsFromSource: SearchFieldValue[];
+    filteredDocvalueFields: Array<{ field: string; format: string }>;
+    metaFields: string[];
     fieldListProvided: boolean;
     sourceFieldsProvided: boolean;
   }) {
@@ -1051,9 +1039,9 @@ export class SearchSource {
     filteredDocvalueFields,
   }: {
     index?: DataView;
-    fields: any;
-    metaFields: string;
-    filteredDocvalueFields: any;
+    fields: SearchFieldValue[];
+    metaFields: string[];
+    filteredDocvalueFields: Array<{ field: string; format: string }>;
   }) {
     const bodyFields = this.getFieldsWithoutSourceFilters(index, fields);
     // if items that are in the docvalueFields are provided, we should
