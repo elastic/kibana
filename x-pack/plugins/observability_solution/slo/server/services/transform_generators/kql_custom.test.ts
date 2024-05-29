@@ -121,4 +121,28 @@ describe('KQL Custom Transform Generator', () => {
 
     expect(transform.pivot!.aggregations!['slo.denominator']).toMatchSnapshot();
   });
+
+  it("overrides the range filter when 'preventInitialBackfill' is true", () => {
+    const slo = createSLO({
+      indicator: createKQLCustomIndicator(),
+      settings: {
+        frequency: twoMinute(),
+        syncDelay: twoMinute(),
+        preventInitialBackfill: true,
+      },
+    });
+
+    const transform = generator.getTransformParams(slo);
+
+    // @ts-ignore
+    const rangeFilter = transform.source.query.bool.filter.find((f) => 'range' in f);
+
+    expect(rangeFilter).toEqual({
+      range: {
+        log_timestamp: {
+          gte: 'now-300s/m', // 2m + 2m + 60s
+        },
+      },
+    });
+  });
 });
