@@ -1022,8 +1022,8 @@ export const getDisabledActionsWarningText = ({
     : 'Rule action';
 
   if (disabledActions.length > 1) {
-    return `${alertsGeneratedText}ule action connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics license / tier`;
+    return `${alertsGeneratedText} connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics license / tier`;
   } else {
-    return `${alertsGeneratedText}ule action connector ${actionTypes} is not enabled. To send notifications, you need a higher Security Analytics license / tier`;
+    return `${alertsGeneratedText} connector ${actionTypes} is not enabled. To send notifications, you need a higher Security Analytics license / tier`;
   }
 };
