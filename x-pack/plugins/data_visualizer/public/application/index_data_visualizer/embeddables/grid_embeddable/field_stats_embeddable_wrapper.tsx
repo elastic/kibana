@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import type { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -101,27 +101,54 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
     unifiedSearch,
   };
 
-  const { overridableServices, ...restProps } = props;
+  const { overridableServices } = props;
 
-  const kibanaRenderServices = pick(coreStart, 'analytics', 'i18n', 'theme');
-  const servicesWithOverrides = { ...services, ...(overridableServices ?? {}) };
+  const kibanaRenderServices = useMemo(
+    () => pick(coreStart, 'analytics', 'i18n', 'theme'),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+  const servicesWithOverrides = useMemo(
+    () => ({ ...services, ...(overridableServices ?? {}) }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  const datePickerDeps: DatePickerDependencies = {
-    ...pick(servicesWithOverrides, [
-      'data',
-      'http',
-      'notifications',
-      'theme',
-      'uiSettings',
-      'i18n',
-    ]),
-    uiSettingsKeys: UI_SETTINGS,
-  };
+  const datePickerDeps: DatePickerDependencies = useMemo(
+    () => ({
+      ...pick(servicesWithOverrides, [
+        'data',
+        'http',
+        'notifications',
+        'theme',
+        'uiSettings',
+        'i18n',
+      ]),
+      uiSettingsKeys: UI_SETTINGS,
+    }),
+    [servicesWithOverrides]
+  );
+
   return (
     <KibanaRenderContextProvider {...kibanaRenderServices}>
       <KibanaContextProvider services={servicesWithOverrides}>
         <DatePickerContextProvider {...datePickerDeps}>
-          <FieldStatisticsWrapperContent {...restProps} />
+          <FieldStatisticsWrapperContent
+            dataView={props.dataView}
+            esql={props.esql}
+            filters={props.filters}
+            lastReloadRequestTime={props.lastReloadRequestTime}
+            onAddFilter={props.onAddFilter}
+            onTableUpdate={props.onTableUpdate}
+            query={props.query}
+            samplingOption={props.samplingOption}
+            savedSearch={props.savedSearch}
+            sessionId={props.sessionId}
+            shouldGetSubfields={props.shouldGetSubfields}
+            showPreviewByDefault={props.showPreviewByDefault}
+            totalDocuments={props.totalDocuments}
+            visibleFieldNames={props.visibleFieldNames}
+          />
         </DatePickerContextProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

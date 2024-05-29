@@ -63,7 +63,7 @@ export const DocumentViewModeToggle = ({
 
   useEffect(
     function checkForPatternAnalysis() {
-      if (!aiopsService) {
+      if (!aiopsService || isEsqlMode) {
         setShowPatternAnalysisTab(false);
         return;
       }
@@ -76,7 +76,7 @@ export const DocumentViewModeToggle = ({
         })
         .catch(() => setShowPatternAnalysisTabWrapper(false));
     },
-    [aiopsService, dataView, setShowPatternAnalysisTabWrapper]
+    [aiopsService, dataView, isEsqlMode, setShowPatternAnalysisTabWrapper]
   );
 
   useEffect(() => {

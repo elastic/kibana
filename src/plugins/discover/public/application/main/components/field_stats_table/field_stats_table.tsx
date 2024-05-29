@@ -10,11 +10,12 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import useObservable from 'react-use/lib/useObservable';
-import { of, map } from 'rxjs';
+import { of, map, filter } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FIELD_STATISTICS_LOADED } from './constants';
+
 import type { NormalSamplingOption, FieldStatisticsTableProps } from './types';
 export type { FieldStatisticsTableProps };
 
@@ -28,8 +29,9 @@ const statsTableCss = css({
 });
 
 const fallBacklastReloadRequestTime$ = new BehaviorSubject(0);
+const fallbackTotalHits = of(undefined);
 
-export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
+export const FieldStatisticsTable = React.memo((props: FieldStatisticsTableProps) => {
   const {
     isEsqlMode,
     dataView,
@@ -43,8 +45,14 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     searchSessionId,
   } = props;
 
-  const totalHits = useObservable(stateContainer?.dataState.data$.totalHits$ ?? of(undefined));
-  const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
+  const totalHitsComplete$ = useMemo(() => {
+    return stateContainer
+      ? stateContainer.dataState.data$.totalHits$.pipe(
+          filter((d) => d.fetchStatus === 'complete'),
+          map((d) => d?.result)
+        )
+      : fallbackTotalHits;
+  }, [stateContainer]);
 
   const services = useDiscoverServices();
 
@@ -65,11 +73,16 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
 
   const lastReloadRequestTime$ = useMemo(() => {
     return stateContainer?.dataState?.refetch$
-      ? stateContainer?.dataState?.refetch$.pipe(map(() => Date.now()))
+      ? stateContainer?.dataState?.refetch$.pipe(
+          map((d) => {
+            return Date.now();
+          })
+        )
       : fallBacklastReloadRequestTime$;
   }, [stateContainer]);
 
-  const lastReloadRequestTime = useObservable(lastReloadRequestTime$, 0);
+  const totalDocuments = useObservable(totalHitsComplete$);
+  const lastReloadRequestTime = useObservable(lastReloadRequestTime$);
 
   useEffect(() => {
     // Track should only be called once when component is loaded
@@ -118,4 +131,4 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       />
     </EuiFlexItem>
   );
-};
+});
