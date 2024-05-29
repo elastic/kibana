@@ -21,11 +21,12 @@ import { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import type {
-  RequestHandlerContextBase,
-  IContextContainer,
-  IContextProvider,
-  IRouter,
+import {
+  type RequestHandlerContextBase,
+  type IContextContainer,
+  type IContextProvider,
+  type IRouter,
+  RouterService,
 } from '@kbn/core-http-server';
 import type {
   InternalContextSetup,
@@ -77,7 +78,7 @@ export class HttpService
   private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: IContextContainer;
-  private afterRequestHandledCallback?: InternalCoreDiServiceStart['disposeRequestContainer'];
+  private afterRequestHandledCallback?: any; // InternalCoreDiServiceStart['disposeRequestContainer'];
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -240,8 +241,11 @@ export class HttpService
   }
 
   public async start(deps: StartDeps) {
-    this.afterRequestHandledCallback = deps.injection.disposeRequestContainer.bind(deps.injection);
-
+    // trigger the activation handler for the routes registered via `ContainerModule`
+    // @todo the routers should be registered in the activation of the HTTP service when it's moved to its own `ContainerModule`
+    if (deps.injection.root.isBound(RouterService)) {
+      deps.injection.root.getAll(RouterService);
+    }
     const config = await firstValueFrom(this.config$);
     if (this.shouldListen(config)) {
       this.log.debug('stopping preboot server');
