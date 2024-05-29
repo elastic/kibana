@@ -162,6 +162,7 @@ export class SavedObjectsService
       migratorPromise: firstValueFrom(this.migrator$),
       kibanaIndex: MAIN_SAVED_OBJECT_INDEX,
       kibanaVersion: this.kibanaVersion,
+      isServerless: this.coreContext.env.packageInfo.buildFlavor === 'serverless',
     });
 
     registerCoreObjectTypes(this.typeRegistry);

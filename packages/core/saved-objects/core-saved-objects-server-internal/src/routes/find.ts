@@ -7,21 +7,24 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { RouteAccess } from '@kbn/core-http-server';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
 import { logWarnOnExternalRequest } from './utils';
+
 interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
+  access: RouteAccess;
 }
 
 export const registerFindRoute = (
   router: InternalSavedObjectRouter,
-  { config, coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger, access }: RouteDependencies
 ) => {
   const referenceSchema = schema.object({
     type: schema.string(),
@@ -34,6 +37,10 @@ export const registerFindRoute = (
   router.get(
     {
       path: '/_find',
+      options: {
+        access,
+        description: `Search for saved objects`,
+      },
       validate: {
         query: schema.object({
           per_page: schema.number({ min: 0, defaultValue: 20 }),
