@@ -6,12 +6,17 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregate,
+  SearchResponse,
+  SortResults,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Tier, UsageRecord } from '../types';
 import type { CloudSecurityMeteringCallbackInput } from './types';
 import { CLOUD_DEFEND, CLOUD_SECURITY_TASK_TYPE, CLOUD_DEFEND_HEARTBEAT_INDEX } from './constants';
 
-const BATCH_SIZE = 1000;
+const BATCH_SIZE = 1;
+const SAMPLE_WEIGHT_SECONDS = 3600; // 1 Hour
 
 export interface CloudDefendHeartbeat {
   '@timestamp': string;
@@ -34,13 +39,13 @@ const buildMeteringRecord = (
   timestamp.setMilliseconds(0);
   const creationTimestamp = new Date();
   const usageRecord = {
-    id: `defend-for-containers-${agentId}-${timestamp.toISOString()}`,
+    id: `${projectId}_${agentId}_${timestamp.toISOString()}`,
     usage_timestamp: timestampStr,
     creation_timestamp: creationTimestamp.toISOString(),
     usage: {
       type: CLOUD_SECURITY_TASK_TYPE,
       sub_type: CLOUD_DEFEND,
-      period_seconds: 3600,
+      period_seconds: SAMPLE_WEIGHT_SECONDS,
       quantity: 1,
     },
     source: {
@@ -57,7 +62,7 @@ const buildMeteringRecord = (
 export const getUsageRecords = async (
   esClient: ElasticsearchClient,
   searchFrom: Date,
-  searchAfter?: number[]
+  searchAfter?: SortResults
 ): Promise<SearchResponse<CloudDefendHeartbeat, Record<string, AggregationsAggregate>>> => {
   return esClient.search<CloudDefendHeartbeat>(
     {
@@ -99,7 +104,7 @@ export const getCloudDefendUsageRecords = async ({
 }: CloudSecurityMeteringCallbackInput): Promise<UsageRecord[] | undefined> => {
   try {
     let allRecords: UsageRecord[] = [];
-    let searchAfter: number[] | undefined;
+    let searchAfter: SortResults | undefined;
     let fetchMore = true;
 
     while (fetchMore) {
