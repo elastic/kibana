@@ -23,8 +23,9 @@ export const useAgentless = () => {
   const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
   const { cloud } = useStartServices();
   const isServerless = !!cloud?.isServerlessEnabled;
+  const isCloud = !!cloud?.isCloudEnabled;
 
-  const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
+  const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && (isServerless || isCloud);
 
   const isAgentlessAgentPolicy = (agentPolicy: AgentPolicy | undefined) => {
     if (!agentPolicy) return false;
