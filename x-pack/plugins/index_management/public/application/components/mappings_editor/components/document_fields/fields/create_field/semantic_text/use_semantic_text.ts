@@ -13,6 +13,7 @@ import { useComponentTemplatesContext } from '../../../../../../component_templa
 import { useDispatch, useMappingsState } from '../../../../../mappings_state_context';
 import { FormHook } from '../../../../../shared_imports';
 import { Field } from '../../../../../types';
+import { NotificationToasts } from '../../../field_parameters/notification_toasts';
 
 interface UseSemanticTextProps {
   form: FormHook<Field, Field>;
@@ -144,30 +145,10 @@ export function useSemanticText(props: UseSemanticTextProps) {
             .then(() => ml?.mlApi?.trainedModels.startModelAllocation(trainedModelId))
             .then(() => createInferenceEndpoint(trainedModelId, defaultInferenceEndpoint, data));
         }
-        toasts?.addSuccess({
-          title: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentStartedNotification',
-            {
-              defaultMessage: 'Model deployment started',
-            }
-          ),
-          text: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentNotification',
-            {
-              defaultMessage: '1 model is being deployed on your ml_node.',
-            }
-          ),
-        });
+        NotificationToasts({ toasts });
       } catch (error) {
         setErrorsInTrainedModelDeployment?.((prevItems) => [...prevItems, trainedModelId]);
-        toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
-          title: i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.createField.modelDeploymentErrorTitle',
-            {
-              defaultMessage: 'Model deployment failed',
-            }
-          ),
-        });
+        NotificationToasts({ toasts, error });
       }
     }
 

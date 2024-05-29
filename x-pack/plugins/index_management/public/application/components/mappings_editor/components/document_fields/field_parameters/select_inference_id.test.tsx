@@ -30,6 +30,14 @@ jest.mock('../../../../../app_context', () => ({
   }),
 }));
 
+jest.mock('../../../../component_templates/component_templates_context', () => ({
+  useComponentTemplatesContext: jest.fn().mockReturnValue({
+    toasts: {
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+    },
+  }),
+}));
 describe('SelectInferenceId', () => {
   let exists: any;
   let find: any;
