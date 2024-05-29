@@ -34,6 +34,7 @@ describe('When using calculateRouteAuthz()', () => {
       readPackageInfo: false,
       readInstalledPackages: false,
       installPackages: false,
+      installPackageAssets: false,
       upgradePackages: false,
       removePackages: false,
       uploadPackages: false,

@@ -51,6 +51,7 @@ const fleetAuthzMock: FleetAuthz = {
     readPackageInfo: true,
     readInstalledPackages: true,
     installPackages: true,
+    installPackageAssets: true,
     upgradePackages: true,
     uploadPackages: true,
     removePackages: true,

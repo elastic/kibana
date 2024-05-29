@@ -122,6 +122,7 @@ export const StorybookContext: React.FC<{
           readPackageInfo: true,
           readInstalledPackages: true,
           installPackages: true,
+          installPackageAssets: true,
           upgradePackages: true,
           uploadPackages: true,
           removePackages: true,
