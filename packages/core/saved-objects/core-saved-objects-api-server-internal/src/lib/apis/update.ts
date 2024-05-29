@@ -180,8 +180,7 @@ export const executeUpdate = async <T>(
       },
       created_at: time,
       updated_at: time,
-      ...(updatedBy && { created_by: updatedBy }),
-      ...(updatedBy && { updated_by: updatedBy }),
+      ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
       ...(Array.isArray(references) && { references }),
     }) as SavedObjectSanitizedDoc<T>;
     validationHelper.validateObjectForCreate(type, migratedUpsert);
@@ -239,8 +238,7 @@ export const executeUpdate = async <T>(
       type,
       created_at: time,
       updated_at: time,
-      ...(updatedBy && { created_by: updatedBy }),
-      ...(updatedBy && { updated_by: updatedBy }),
+      ...(updatedBy && { created_by: updatedBy, updated_by: updatedBy }),
       version: encodeHitVersion(createDocResponseBody),
       namespaces,
       ...(originId && { originId }),
