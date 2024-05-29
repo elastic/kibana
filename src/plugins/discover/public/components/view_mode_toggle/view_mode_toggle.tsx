@@ -121,7 +121,7 @@ export const DocumentViewModeToggle = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        {isEsqlMode || (showFieldStatisticsTab === false && showPatternAnalysisTab === false) ? (
+        {showFieldStatisticsTab === false && showPatternAnalysisTab === false ? (
           <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
         ) : (
           <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
