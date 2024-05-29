@@ -10,21 +10,25 @@ import { pipe } from 'fp-ts/lib/function';
 import { uniq } from 'lodash';
 import { AdditionalFieldGroups } from '../types';
 
-/**
- * Convert fields to fallback fields where necessary, e.g. in the case of Smart Fields which
- * don't map 1:1 with a real backing field.
- */
-
-interface Props {
+interface FieldsInfo {
   fields: string[];
   additionalFieldGroups?: AdditionalFieldGroups;
 }
-export const convertFieldsToFallbackFields = (props: Props) => {
+
+/**
+ * Converts fields to fallback fields where necessary, e.g. in the case of Smart Fields which
+ * don't map 1:1 with a real backing field.
+ */
+
+export const convertFieldsToFallbackFields = (props: FieldsInfo) => {
   const convertedFields = pipe(props, convertSmartFields);
   return uniq(convertedFields.fields);
 };
 
-const convertSmartFields = ({ fields, additionalFieldGroups }: Props) => {
+/**
+ * Specifically converts Smart Fields to their associated fallback fields. Part of the convertFieldsToFallbackFields pipeline.
+ */
+const convertSmartFields = ({ fields, additionalFieldGroups }: FieldsInfo) => {
   if (!additionalFieldGroups?.smartFields) return { fields, additionalFieldGroups };
 
   const convertedFields = fields.flatMap((fieldName) => {
@@ -40,9 +44,15 @@ const convertSmartFields = ({ fields, additionalFieldGroups }: Props) => {
   return { fields: convertedFields, additionalFieldGroups };
 };
 
+/**
+ * Provides a flat list of all fallback fields
+ */
 export const getAllFallbackFields = (additionalFieldGroups?: AdditionalFieldGroups) =>
   Object.entries(additionalFieldGroups?.fallbackFields ?? {}).flatMap(([key, value]) => value);
 
+/**
+ * Returns a list of Smart Fields associated with a given fallback field name.
+ */
 export const getAssociatedSmartFields = (
   fieldName: string,
   additionalFieldGroups?: AdditionalFieldGroups
@@ -57,6 +67,9 @@ export const getAssociatedSmartFields = (
     []
   );
 
+/**
+ * Returns a list of Smart Fields associated with a given fallback field name formatted as a string.
+ */
 export const getAssociatedSmartFieldsAsString = (
   fieldName: string,
   additionalFieldGroups?: AdditionalFieldGroups,

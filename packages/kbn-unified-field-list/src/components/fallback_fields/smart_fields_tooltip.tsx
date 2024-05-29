@@ -14,7 +14,7 @@ interface Props {
   associatedSmartFields: string;
 }
 
-export const SmartFieldFallbackTooltip: React.FC<Props> = ({ associatedSmartFields }) => {
+const SmartFieldFallbackTooltip: React.FC<Props> = ({ associatedSmartFields }) => {
   return (
     <EuiToolTip
       position="bottom"
@@ -34,3 +34,7 @@ export const SmartFieldFallbackTooltip: React.FC<Props> = ({ associatedSmartFiel
     </EuiToolTip>
   );
 };
+
+// For lazy import
+// eslint-disable-next-line import/no-default-export
+export default SmartFieldFallbackTooltip;

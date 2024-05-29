@@ -21,7 +21,6 @@ export type {
   FieldStatsState,
 } from './src/components/field_stats';
 export { FieldStats } from './src/components/field_stats';
-export { SmartFieldFallbackTooltip } from './src/components/fallback_fields/smart_fields';
 export {
   FieldPopover,
   type FieldPopoverProps,
