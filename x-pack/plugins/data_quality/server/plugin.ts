@@ -19,8 +19,11 @@ export class DataQualityPlugin implements Plugin<void, void, any, any> {
       },
       privileges: [
         {
-          requiredClusterPrivileges: ['monitor'],
           ui: [],
+          requiredClusterPrivileges: [],
+          requiredIndexPrivileges: {
+            ['logs-*-*']: ['read'],
+          },
         },
       ],
     });
