@@ -37,6 +37,10 @@ export interface FleetAuthz {
     readPackageInfo: boolean;
     readInstalledPackages: boolean;
     installPackages: boolean;
+    /**
+     * Can install integrations, but unlike `installPackages`, does not require additional Fleet privileges.
+     */
+    installPackageAssets: boolean;
     upgradePackages: boolean;
     removePackages: boolean;
     uploadPackages: boolean;
@@ -154,6 +158,7 @@ export const calculateAuthz = ({
       readPackageInfo: hasFleetAll || fleet.setup || integrations.all || integrations.read,
       readInstalledPackages: integrations.all || integrations.read,
       installPackages: writeIntegrationPolicies && integrations.all,
+      installPackageAssets: integrations.all,
       upgradePackages: writeIntegrationPolicies && integrations.all,
       removePackages: writeIntegrationPolicies && integrations.all,
       uploadPackages: writeIntegrationPolicies && integrations.all,
