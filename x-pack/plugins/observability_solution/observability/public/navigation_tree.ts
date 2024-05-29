@@ -1,20 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import type {
-  NavigationTreeDefinition,
-  SolutionNavigationDefinition,
-} from '@kbn/core-chrome-browser';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { of } from 'rxjs';
 
-const title = i18n.translate('navigation.obltNav.headerSolutionSwitcher.obltSolutionTitle', {
-  defaultMessage: 'Observability',
-});
+const title = i18n.translate(
+  'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
+  {
+    defaultMessage: 'Observability',
+  }
+);
 const icon = 'logoObservability';
 
 const navTree: NavigationTreeDefinition = {
@@ -67,14 +67,14 @@ const navTree: NavigationTreeDefinition = {
         },
         {
           id: 'aiMl',
-          title: i18n.translate('navigation.obltNav.ml.aiAndMlGroupTitle', {
+          title: i18n.translate('xpack.observability.obltNav.ml.aiAndMlGroupTitle', {
             defaultMessage: 'AI & ML',
           }),
           renderAs: 'accordion',
           children: [
             {
               link: 'observabilityAIAssistant',
-              title: i18n.translate('navigation.obltNav.aiMl.aiAssistant', {
+              title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
                 defaultMessage: 'AI Assistant',
               }),
             },
@@ -94,7 +94,7 @@ const navTree: NavigationTreeDefinition = {
               ],
             },
             {
-              title: i18n.translate('navigation.obltNav.ml.logRateAnalysis', {
+              title: i18n.translate('xpack.observability.obltNav.ml.logRateAnalysis', {
                 defaultMessage: 'Log rate analysis',
               }),
               link: 'ml:logRateAnalysis',
@@ -109,7 +109,7 @@ const navTree: NavigationTreeDefinition = {
               link: 'logs:log-categories',
             },
             {
-              title: i18n.translate('navigation.obltNav.ml.changePointDetection', {
+              title: i18n.translate('xpack.observability.obltNav.ml.changePointDetection', {
                 defaultMessage: 'Change point detection',
               }),
               link: 'ml:changePointDetections',
@@ -118,7 +118,7 @@ const navTree: NavigationTreeDefinition = {
               },
             },
             {
-              title: i18n.translate('navigation.obltNav.ml.job.notifications', {
+              title: i18n.translate('xpack.observability.obltNav.ml.job.notifications', {
                 defaultMessage: 'Job notifications',
               }),
               link: 'ml:notifications',
@@ -127,7 +127,7 @@ const navTree: NavigationTreeDefinition = {
         },
         {
           id: 'apm',
-          title: i18n.translate('navigation.obltNav.applications', {
+          title: i18n.translate('xpack.observability.obltNav.applications', {
             defaultMessage: 'Applications',
           }),
           renderAs: 'accordion',
@@ -153,14 +153,14 @@ const navTree: NavigationTreeDefinition = {
             },
             {
               id: 'synthetics',
-              title: i18n.translate('navigation.obltNav.apm.syntheticsGroupTitle', {
+              title: i18n.translate('xpack.observability.obltNav.apm.syntheticsGroupTitle', {
                 defaultMessage: 'Synthetics',
               }),
               renderAs: 'accordion',
               children: [
                 {
                   link: 'synthetics',
-                  title: i18n.translate('navigation.obltNav.apm.synthetics.monitors', {
+                  title: i18n.translate('xpack.observability.obltNav.apm.synthetics.monitors', {
                     defaultMessage: 'Monitors',
                   }),
                 },
@@ -172,7 +172,7 @@ const navTree: NavigationTreeDefinition = {
         },
         {
           id: 'metrics',
-          title: i18n.translate('navigation.obltNav.infrastructure', {
+          title: i18n.translate('xpack.observability.obltNav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
           renderAs: 'accordion',
@@ -194,9 +194,12 @@ const navTree: NavigationTreeDefinition = {
             },
             {
               id: 'profiling',
-              title: i18n.translate('navigation.obltNav.infrastructure.universalProfiling', {
-                defaultMessage: 'Universal Profiling',
-              }),
+              title: i18n.translate(
+                'xpack.observability.obltNav.infrastructure.universalProfiling',
+                {
+                  defaultMessage: 'Universal Profiling',
+                }
+              ),
               renderAs: 'accordion',
               children: [
                 {
@@ -214,14 +217,14 @@ const navTree: NavigationTreeDefinition = {
         },
         {
           id: 'otherTools',
-          title: i18n.translate('navigation.obltNav.otherTools', {
+          title: i18n.translate('xpack.observability.obltNav.otherTools', {
             defaultMessage: 'Other tools',
           }),
           renderAs: 'accordion',
           children: [
             {
               link: 'logs:stream',
-              title: i18n.translate('navigation.obltNav.otherTools.logsStream', {
+              title: i18n.translate('xpack.observability.obltNav.otherTools.logsStream', {
                 defaultMessage: 'Logs stream',
               }),
             },
@@ -234,7 +237,7 @@ const navTree: NavigationTreeDefinition = {
     { type: 'recentlyAccessed' },
     {
       type: 'navItem',
-      title: i18n.translate('navigation.obltNav.getStarted', {
+      title: i18n.translate('xpack.observability.obltNav.getStarted', {
         defaultMessage: 'Get started',
       }),
       link: 'observabilityOnboarding',
@@ -243,7 +246,7 @@ const navTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       id: 'devTools',
-      title: i18n.translate('navigation.obltNav.devTools', {
+      title: i18n.translate('xpack.observability.obltNav.devTools', {
         defaultMessage: 'Developer tools',
       }),
       link: 'dev_tools',
@@ -252,7 +255,7 @@ const navTree: NavigationTreeDefinition = {
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',
-      title: i18n.translate('navigation.obltNav.management', {
+      title: i18n.translate('xpack.observability.obltNav.management', {
         defaultMessage: 'Management',
       }),
       icon: 'gear',
@@ -260,7 +263,7 @@ const navTree: NavigationTreeDefinition = {
       children: [
         {
           link: 'management',
-          title: i18n.translate('navigation.obltNav.stackManagement', {
+          title: i18n.translate('xpack.observability.obltNav.stackManagement', {
             defaultMessage: 'Stack Management',
           }),
           renderAs: 'panelOpener',
@@ -345,10 +348,11 @@ const navTree: NavigationTreeDefinition = {
   ],
 };
 
-export const definition: SolutionNavigationDefinition = {
+export const definition: AddSolutionNavigationArg = {
   id: 'oblt',
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
   navigationTree$: of(navTree),
+  dataTestSubj: 'observabilitySideNav',
 };
