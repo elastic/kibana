@@ -20,7 +20,6 @@ if [[ -x "$NODE_BINARY" ]]; then
     echo "Failed to enable FIPS"
     exit 1
   fi
-
 else
   echo "Node binary not found at $NODE_BINARY"
   exit 1
