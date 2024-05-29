@@ -10,7 +10,6 @@ import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
-import { isEmpty } from 'lodash';
 import { useKibana } from '../utils/kibana_react';
 import { createMaintenanceWindow, CreateParams } from '../services/maintenance_windows_api/create';
 
@@ -56,7 +55,7 @@ export function useCreateMaintenanceWindow(props?: UseCreateMaintenanceWindowPro
     },
     onError: (error: IHttpFetchError<KibanaServerError>) => {
       const getDefaultErrorMessage = (message?: string): string =>
-        message == null || isEmpty(message) ? onErrorWithoutMessage : onErrorWithMessage(message);
+        !message ? onErrorWithoutMessage : onErrorWithMessage(message);
 
       toasts.addDanger(
         getDefaultErrorMessage(error.body?.statusCode === 400 ? error.body?.message : '')
