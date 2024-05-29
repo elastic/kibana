@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
-import type { TimeRange } from '@kbn/es-query';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { HasEditCapabilities, SerializedTitles } from '@kbn/presentation-publishing';
 import { HasVisualizeConfig } from '../embeddable';
-import type { VisParams, Vis } from '../types';
+import type { Vis, VisParams } from '../types';
 import type { SerializedVis } from '../vis';
 
 export type VisualizeRuntimeState = SerializedTitles & {
   vis: Vis<VisParams>;
+  indexPatternId?: string;
 };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
@@ -29,6 +30,7 @@ export type VisualizeSavedObjectInputState = SerializedTitles & {
 
 export type VisualizeSavedVisInputState = SerializedTitles & {
   savedVis: SerializedVis<VisParams>;
+  indexPatternId?: string;
 };
 
 export type VisualizeSerializedState = VisualizeSavedObjectInputState | VisualizeSavedVisInputState;

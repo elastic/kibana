@@ -249,6 +249,7 @@ export const getTopNavConfig = (
     const state = {
       input: {
         savedVis: vis.serialize(),
+        indexPatternId: vis.data.indexPattern?.id,
       } as VisualizeSerializedState,
       embeddableId,
       type: VISUALIZE_EMBEDDABLE_TYPE,

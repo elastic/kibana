@@ -28,7 +28,7 @@ import {
 } from '../utils/saved_visualization_references';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
-import { createVisAsync } from '../vis_async';
+import { createVisInstance } from './create_vis_instance';
 import {
   isVisualizeSavedObjectState,
   VisualizeSavedObjectInputState,
@@ -54,8 +54,7 @@ export const deserializeState = async (
   const references: Reference[] = state.references ?? [];
 
   const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
-  const vis = await createVisAsync(deserializedSavedVis.type, deserializedSavedVis);
-
+  const vis = await createVisInstance(deserializedSavedVis, serializedState.indexPatternId);
   return {
     ...serializedState,
     vis,
@@ -134,14 +133,17 @@ export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInp
 export const serializeState = ({
   serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
+  indexPatternId,
 }: {
   serializedVis: SerializedVis;
   titles: SerializedTitles;
+  indexPatternId?: string;
 }) => {
   const { references, serializedSearchSource } = serializeReferences(serializedVis);
   return {
     rawState: {
       ...titles,
+      indexPatternId,
       savedVis: {
         ...serializedVis,
         data: {

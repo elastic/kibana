@@ -32,7 +32,7 @@ import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
 import { getInspector, getUiActions } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import type { Vis } from '../vis';
-import { createVisAsync } from '../vis_async';
+import { createVisInstance } from './create_vis_instance';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { deserializeState, serializeState } from './state';
 import { VisualizeApi, VisualizeRuntimeState, VisualizeSerializedState } from './types';
@@ -51,6 +51,8 @@ export const getVisualizeEmbeddableFactory: (
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
     const vis$ = new BehaviorSubject<Vis>(state.vis);
+    const indexPatternId$ = new BehaviorSubject<string | undefined>(state.indexPatternId);
+
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
@@ -76,6 +78,7 @@ export const getVisualizeEmbeddableFactory: (
         ...titlesApi,
         serializeState: () => {
           return serializeState({
+            indexPatternId: indexPatternId$.getValue(),
             serializedVis: vis$.getValue().serialize(),
             titles: serializeTitles(),
           });
@@ -107,7 +110,7 @@ export const getVisualizeEmbeddableFactory: (
         },
         isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
         setVis: async (newSerializedVis) => {
-          vis$.next(await createVisAsync(newSerializedVis.type, newSerializedVis));
+          vis$.next(await createVisInstance(newSerializedVis, indexPatternId$.getValue()));
         },
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
         openInspector: () => {
@@ -133,6 +136,7 @@ export const getVisualizeEmbeddableFactory: (
           },
           (a, b) => isEqual(a, b),
         ],
+        indexPatternId: [indexPatternId$, (value) => indexPatternId$.next(value), isEqual],
       }
     );
     fetch$(api)
