@@ -42,7 +42,7 @@ export interface DefaultEmbeddableApi<
 export type SetReactEmbeddableApiRegistration<
   SerializedState extends object = object,
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
-> = Omit<Api, 'uuid' | 'parent' | 'type'>;
+> = Omit<Api, 'uuid' | 'parent' | 'type' | 'phase$'>;
 
 /**
  * Defines the subset of the default embeddable API that the `buildApi` method uses, which allows implementors
@@ -53,7 +53,7 @@ export type BuildReactEmbeddableApiRegistration<
   Api extends DefaultEmbeddableApi<SerializedState> = DefaultEmbeddableApi<SerializedState>
 > = Omit<
   SetReactEmbeddableApiRegistration<SerializedState, Api>,
-  'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState' | 'phase$'
+  'unsavedChanges' | 'resetUnsavedChanges' | 'snapshotRuntimeState'
 >;
 
 /**

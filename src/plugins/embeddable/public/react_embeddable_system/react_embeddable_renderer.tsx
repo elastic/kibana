@@ -106,6 +106,7 @@ export const ReactEmbeddableRenderer = <
           const fullApi = {
             ...apiRegistration,
             uuid,
+            phase$,
             parentApi,
             type: factory.type,
           } as unknown as Api;
@@ -151,7 +152,6 @@ export const ReactEmbeddableRenderer = <
 
           const fullApi = setApi({
             ...apiRegistration,
-            phase$,
             unsavedChanges,
             resetUnsavedChanges,
             snapshotRuntimeState,
