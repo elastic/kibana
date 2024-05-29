@@ -18,7 +18,6 @@ import {
 } from '@kbn/presentation-publishing';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   Container,
   DefaultEmbeddableApi,
@@ -57,8 +56,6 @@ import { DashboardContainerInput, DashboardPanelState } from '../../../common';
 import { getReferencesForPanelId } from '../../../common/dashboard_container/persistable_state/dashboard_container_references';
 import {
   DASHBOARD_APP_ID,
-  DASHBOARD_LOADED_EVENT,
-  DASHBOARD_LOAD_TYPES,
   DASHBOARD_UI_METRIC_ID,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
@@ -74,12 +71,7 @@ import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api'
 import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_placement_registry';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
 import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
-import {
-  DashboardPublicState,
-  DashboardReduxState,
-  DashboardRenderPerformanceStats,
-  UnsavedPanelState,
-} from '../types';
+import { DashboardPublicState, DashboardReduxState, UnsavedPanelState } from '../types';
 import {
   addFromLibrary,
   addOrUpdateEmbeddable,
@@ -118,8 +110,6 @@ type DashboardReduxEmbeddableTools = ReduxEmbeddableTools<
   DashboardReduxState,
   typeof dashboardContainerReducers
 >;
-
-let isFirstDashboardLoadOfSession = true;
 
 export const DashboardContainerContext = createContext<DashboardContainer | null>(null);
 export const useDashboardContainer = (): DashboardContainer => {
@@ -164,17 +154,20 @@ export class DashboardContainer
 
   public readonly executionContext: KibanaExecutionContext;
 
-  // cleanup
-  public stopSyncingWithUnifiedSearch?: () => void;
-  private cleanupStateTools: () => void;
-
-  // performance monitoring
-  private dashboardCreationStartTime?: number;
-
   private domNode?: HTMLElement;
   private overlayRef?: OverlayRef;
   private allDataViews: DataView[] = [];
+
+  // performance monitoring
+  public lastloadStartTime?: number;
+  public creationStartTime?: number;
+  public creationEndTime?: number;
+  public firstLoad: boolean = true;
   private hadContentfulRender = false;
+
+  // cleanup
+  public stopSyncingWithUnifiedSearch?: () => void;
+  private cleanupStateTools: () => void;
 
   // Services that are used in the Dashboard container code
   private creationOptions?: DashboardCreationOptions;
@@ -184,7 +177,6 @@ export class DashboardContainer
   private theme;
   private chrome;
   private customBranding;
-  private firstLoadOnThisDashboard: boolean = true;
 
   public trackContentfulRender() {
     if (!this.hadContentfulRender && this.analyticsService) {
@@ -237,7 +229,7 @@ export class DashboardContainer
     this.creationOptions = creationOptions;
     this.searchSessionId = initialSessionId;
     this.searchSessionId$.next(initialSessionId);
-    this.dashboardCreationStartTime = dashboardCreationStartTime;
+    this.creationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
     const diffingMiddleware = getDiffingMiddleware.bind(this)();
@@ -327,34 +319,6 @@ export class DashboardContainer
 
   public getDashboardSavedObjectId() {
     return this.getState().componentState.lastSavedId;
-  }
-
-  public reportPerformanceMetrics(stats: DashboardRenderPerformanceStats) {
-    if (this.analyticsService && this.dashboardCreationStartTime) {
-      let loadType = DASHBOARD_LOAD_TYPES.subsequentDashboardLoad;
-      if (isFirstDashboardLoadOfSession) {
-        loadType = DASHBOARD_LOAD_TYPES.initialKibanaLoad;
-      } else if (this.firstLoadOnThisDashboard) {
-        loadType = DASHBOARD_LOAD_TYPES.initialDashboardLoad;
-      }
-
-      const panelCount = Object.keys(this.getState().explicitInput.panels).length;
-      const totalDuration = stats.panelsRenderDoneTime - this.dashboardCreationStartTime;
-      reportPerformanceMetricEvent(this.analyticsService, {
-        eventName: DASHBOARD_LOADED_EVENT,
-        duration: totalDuration,
-        key1: 'time_to_data',
-        value1: (stats.lastTimeToData || stats.panelsRenderDoneTime) - stats.panelsRenderStartTime,
-        key2: 'num_of_panels',
-        value2: panelCount,
-        key3: 'total_load_time',
-        value3: totalDuration,
-        key4: 'load_type',
-        value4: loadType,
-      });
-      isFirstDashboardLoadOfSession = false;
-      this.firstLoadOnThisDashboard = false;
-    }
   }
 
   protected createNewPanelState<
@@ -712,7 +676,7 @@ export class DashboardContainer
       this.dispatch.setLastSavedId(newSavedObjectId);
       this.setExpandedPanelId(undefined);
     });
-    this.firstLoadOnThisDashboard = true;
+    this.firstLoad = true;
     this.updateInput(newInput);
     dashboardContainerReady$.next(this);
   };
