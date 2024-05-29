@@ -8,6 +8,7 @@
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
 import { find, some } from 'lodash/fp';
+import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { CROWDSTRIKE_AGENT_ID_FIELD } from '../../utils/crowdstrike_alert_check';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../utils/sentinelone_alert_check';
@@ -21,16 +22,18 @@ import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/
 export interface AlertResponseActionsSupport {
   isSupported: boolean;
   /** Only defined when `isSupported` is set to `true` */
-  details?: {
+  details: {
+    /** Defaults to `endpoint` when unable to determine agent type */
     agentType: ResponseActionAgentType;
+    /** Agent ID could be an empty string if `isSupported` is `false` */
     agentId: string;
+    /** Host name could be an empty string if `isSupported` is `false` */
+    hostName: string;
+    /** The OS platform - normally the ECS value from `host.os.family. could be an empty string if `isSupported` is `false` */
+    platform: string;
     /** A map with the response actions supported by this alert's agent type */
     supports: AlertAgentActionsSupported;
   };
-}
-
-export interface UseAlertResponseActionsSupportOptions {
-  eventData: TimelineEventsDetailsItem[];
 }
 
 type AlertAgentActionsSupported = Record<ResponseActionsApiCommandNames, boolean>;
@@ -38,9 +41,16 @@ type AlertAgentActionsSupported = Record<ResponseActionsApiCommandNames, boolean
 /**
  * Determines the level of support that an alert's host has for Response Actions
  */
-export const useAlertResponseActionsSupport = ({
-  eventData,
-}: UseAlertResponseActionsSupportOptions): AlertResponseActionsSupport => {
+export const useAlertResponseActionsSupport = (
+  eventData: TimelineEventsDetailsItem[] | null = []
+): AlertResponseActionsSupport => {
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
+  const isCrowdstrikeHostIsolationEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
+
   const isAlert = useMemo(() => {
     return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, eventData);
   }, [eventData]);
@@ -67,6 +77,15 @@ export const useAlertResponseActionsSupport = ({
     return undefined;
   }, [eventData, isAlert]);
 
+  const isFeatureEnabled: boolean = useMemo(() => {
+    return Boolean(
+      agentType &&
+        (agentType === 'endpoint' ||
+          (agentType === 'sentinel_one' && isSentinelOneV1Enabled) ||
+          (agentType === 'crowdstrike' && isCrowdstrikeHostIsolationEnabled))
+    );
+  }, [agentType, isCrowdstrikeHostIsolationEnabled, isSentinelOneV1Enabled]);
+
   const agentId: string = useMemo(() => {
     if (!isAlert || !agentType) {
       return '';
@@ -92,7 +111,7 @@ export const useAlertResponseActionsSupport = ({
       (acc, responseActionName) => {
         acc[responseActionName] = false;
 
-        if (agentType) {
+        if (agentType && isFeatureEnabled) {
           acc[responseActionName] = isActionSupportedByAgentType(
             agentType,
             responseActionName,
@@ -104,20 +123,26 @@ export const useAlertResponseActionsSupport = ({
       },
       {} as AlertAgentActionsSupported
     );
-  }, [agentType]);
+  }, [agentType, isFeatureEnabled]);
+
+  const hostName = useMemo(() => {
+    return getFieldValue({ category: 'host', field: 'host.os.name' }, eventData);
+  }, [eventData]);
+
+  const platform = useMemo(() => {
+    return getFieldValue({ category: 'host', field: 'host.os.family' }, eventData);
+  }, [eventData]);
 
   return useMemo<AlertResponseActionsSupport>(() => {
-    if (agentType && agentId) {
-      return {
-        isSupported: true,
-        details: {
-          agentType,
-          agentId,
-          supports: supportedActions,
-        },
-      };
-    }
-
-    return { isSupported: false };
-  }, [agentId, agentType, supportedActions]);
+    return {
+      isSupported: Boolean(isFeatureEnabled && agentId && agentType),
+      details: {
+        agentType: agentType || 'endpoint',
+        agentId,
+        hostName,
+        platform,
+        supports: supportedActions,
+      },
+    };
+  }, [agentId, agentType, hostName, isFeatureEnabled, platform, supportedActions]);
 };
