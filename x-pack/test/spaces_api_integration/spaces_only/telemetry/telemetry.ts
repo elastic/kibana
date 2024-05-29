@@ -109,6 +109,9 @@ export default function ({ getService }: FtrProviderContext) {
         observability: 0,
         classic: 0,
       });
+
+      await spacesService.delete('space-3');
+      await spacesService.delete('space-4');
     });
   });
 }
