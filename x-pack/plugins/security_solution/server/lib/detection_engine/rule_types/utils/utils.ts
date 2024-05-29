@@ -1018,8 +1018,8 @@ export const getDisabledActionsWarningText = ({
   const actionTypes = disabledActions.map((action) => action.actionTypeId);
   // This rule generated alerts but did not send external notifications because rule action connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics tier.
   const alertsGeneratedText = alertsCreated
-    ? 'This rule generated alerts but did not send external notifications because r'
-    : 'R';
+    ? 'This rule generated alerts but did not send external notifications because rule action'
+    : 'Rule action';
 
   if (disabledActions.length > 1) {
     return `${alertsGeneratedText}ule action connectors ${actionTypes} aren't enabled. To send notifications, you need a higher Security Analytics license / tier`;
