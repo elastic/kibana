@@ -11,11 +11,11 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { ExternalRouteDeps } from '.';
 import type { Space } from '../../../../common';
 import { wrapError } from '../../../lib/errors';
-import { spaceSchema } from '../../../lib/space_schema';
+import { getSpaceSchema } from '../../../lib/space_schema';
 import { createLicensedRouteHandler } from '../../lib';
 
 export function initPutSpacesApi(deps: ExternalRouteDeps) {
-  const { router, getSpacesService } = deps;
+  const { router, getSpacesService, isServerless } = deps;
 
   router.put(
     {
@@ -24,7 +24,7 @@ export function initPutSpacesApi(deps: ExternalRouteDeps) {
         params: schema.object({
           id: schema.string(),
         }),
-        body: spaceSchema,
+        body: getSpaceSchema(isServerless),
       },
     },
     createLicensedRouteHandler(async (context, request, response) => {

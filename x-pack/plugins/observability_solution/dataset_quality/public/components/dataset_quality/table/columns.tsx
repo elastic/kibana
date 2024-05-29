@@ -162,6 +162,7 @@ export const getDatasetQualityTableColumns = ({
   loadingDataStreamStats,
   loadingDegradedStats,
   showFullDatasetNames,
+  isSizeStatsAvailable,
   isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
@@ -169,6 +170,7 @@ export const getDatasetQualityTableColumns = ({
   loadingDataStreamStats: boolean;
   loadingDegradedStats: boolean;
   showFullDatasetNames: boolean;
+  isSizeStatsAvailable: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
   isActiveDataset: (lastActivity: number) => boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
@@ -228,22 +230,31 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '160px',
     },
-    {
-      name: sizeColumnName,
-      field: 'sizeBytes',
-      sortable: true,
-      render: (_, dataStreamStat: DataStreamStat) => (
-        <EuiSkeletonRectangle
-          width="60px"
-          height="20px"
-          borderRadius="m"
-          isLoading={loadingDataStreamStats}
-        >
-          {formatNumber(dataStreamStat.sizeBytes || 0, BYTE_NUMBER_FORMAT)}
-        </EuiSkeletonRectangle>
-      ),
-      width: '100px',
-    },
+    ...(isSizeStatsAvailable
+      ? [
+          {
+            name: sizeColumnName,
+            field: 'sizeBytes',
+            sortable: true,
+            render: (_: any, dataStreamStat: DataStreamStat) => {
+              return (
+                <EuiSkeletonRectangle
+                  width="60px"
+                  height="20px"
+                  borderRadius="m"
+                  isLoading={loadingDataStreamStats || loadingDegradedStats}
+                >
+                  {formatNumber(
+                    DataStreamStat.calculateFilteredSize(dataStreamStat),
+                    BYTE_NUMBER_FORMAT
+                  )}
+                </EuiSkeletonRectangle>
+              );
+            },
+            width: '100px',
+          },
+        ]
+      : []),
     {
       name: (
         <EuiToolTip content={datasetQualityColumnTooltip}>

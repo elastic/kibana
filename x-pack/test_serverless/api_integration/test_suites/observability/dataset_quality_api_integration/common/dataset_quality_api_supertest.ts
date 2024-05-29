@@ -13,7 +13,7 @@ import type { APIEndpoint } from '@kbn/dataset-quality-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
 import { InheritedFtrProviderContext } from '../../../../services';
 
-export function createDatasetQualityApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createDatasetQualityApiClient(st: supertest.Agent) {
   return async <TEndpoint extends APIEndpoint>(
     options: {
       type?: 'form-data';

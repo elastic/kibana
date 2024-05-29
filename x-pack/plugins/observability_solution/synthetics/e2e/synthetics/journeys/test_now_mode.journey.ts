@@ -7,15 +7,12 @@
 
 import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { recordVideo } from '../../helpers/record_video';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
 import { SyntheticsServices } from './services/synthetics_services';
 
 journey(`TestNowMode`, async ({ page, params }) => {
-  page.setDefaultTimeout(60 * 1000);
-  recordVideo(page);
-  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
+  const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl, params });
 
   const services = new SyntheticsServices(params);
 

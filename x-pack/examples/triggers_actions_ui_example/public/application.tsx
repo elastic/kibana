@@ -13,6 +13,7 @@ import { Route } from '@kbn/shared-ux-router';
 import { EuiPage, EuiTitle, EuiText, EuiSpacer } from '@elastic/eui';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -189,29 +190,31 @@ export const renderApp = (
   const { triggersActionsUi } = deps;
   const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUi;
   ReactDOM.render(
-    <KibanaContextProvider
-      services={{
-        ...core,
-        ...deps,
-        ruleTypeRegistry,
-        actionTypeRegistry,
-      }}
-    >
-      <QueryClientProvider client={queryClient}>
+    <KibanaRenderContextProvider {...core}>
+      <KibanaContextProvider
+        services={{
+          ...core,
+          ...deps,
+          ruleTypeRegistry,
+          actionTypeRegistry,
+        }}
+      >
         <IntlProvider locale="en">
-          <TriggersActionsUiExampleApp
-            basename={appBasePath}
-            http={http}
-            triggersActionsUi={deps.triggersActionsUi}
-            data={deps.data}
-            charts={deps.charts}
-            dataViews={deps.dataViews}
-            dataViewsEditor={deps.dataViewsEditor}
-            unifiedSearch={deps.unifiedSearch}
-          />
+          <QueryClientProvider client={queryClient}>
+            <TriggersActionsUiExampleApp
+              basename={appBasePath}
+              http={http}
+              triggersActionsUi={deps.triggersActionsUi}
+              data={deps.data}
+              charts={deps.charts}
+              dataViews={deps.dataViews}
+              dataViewsEditor={deps.dataViewsEditor}
+              unifiedSearch={deps.unifiedSearch}
+            />
+          </QueryClientProvider>
         </IntlProvider>
-      </QueryClientProvider>
-    </KibanaContextProvider>,
+      </KibanaContextProvider>
+    </KibanaRenderContextProvider>,
     element
   );
 

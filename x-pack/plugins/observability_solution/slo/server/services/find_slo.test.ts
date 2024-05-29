@@ -45,6 +45,7 @@ describe('FindSLO', () => {
             "page": 1,
             "perPage": 25,
           },
+          undefined,
         ]
       `);
 
@@ -79,6 +80,7 @@ describe('FindSLO', () => {
             settings: {
               syncDelay: '1m',
               frequency: '1m',
+              preventInitialBackfill: false,
             },
             summary: {
               status: 'HEALTHY',
@@ -139,6 +141,7 @@ describe('FindSLO', () => {
             "page": 2,
             "perPage": 10,
           },
+          undefined,
         ]
       `);
     });
