@@ -79,7 +79,7 @@ import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/cloud_security_posture/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/cloud_security_posture/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/cloud_security_posture/post_install_azure_arm_template_modal';
-import { UnprivilegedConfirmModal } from './confirm_modal';
+import { RootPrivilegesCallout } from './root_callout';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -463,15 +463,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             dataStreams={rootPrivilegedDataStreams}
           />
         )}
-        {formState === 'CONFIRM_UNPRIVILEGED' && agentPolicy ? (
-          <UnprivilegedConfirmModal
-            onCancel={() => setFormState('VALID')}
-            onConfirm={onSubmit}
-            unprivilegedAgentsCount={agentPolicy?.unprivileged_agents ?? 0}
-            agentPolicyName={agentPolicy?.name ?? ''}
-            dataStreams={rootPrivilegedDataStreams}
-          />
-        ) : null}
         {formState === 'SUBMITTED_NO_AGENTS' &&
           agentPolicy &&
           packageInfo &&
@@ -515,21 +506,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
         )}
         {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
           <>
-            <EuiCallOut
-              size="s"
-              color="warning"
-              title={
-                <FormattedMessage
-                  id="xpack.fleet.createPackagePolicy.requireRootCalloutTitle"
-                  defaultMessage="Requires root privileges"
-                />
-              }
-            >
-              <FormattedMessage
-                id="xpack.fleet.createPackagePolicy.requireRootCalloutDescription"
-                defaultMessage="Elastic Agent needs to be run with root/administrator privileges for this integration."
-              />
-            </EuiCallOut>
+            <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
             <EuiSpacer size="m" />
           </>
         ) : null}

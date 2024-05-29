@@ -30,6 +30,8 @@ import type { TimelineItem, TimelineNonEcsData } from '../../../../../common/sea
 import type { ColumnHeaderOptions, OnRowSelected } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useTourContext } from '../../guided_onboarding_tour';
+import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
 
 type Props = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -83,6 +85,11 @@ const RowActionComponent = ({
   const isExpandableFlyoutInCreateRuleEnabled = useIsExperimentalFeatureEnabled(
     'expandableFlyoutInCreateRuleEnabled'
   );
+  const { activeStep, isTourShown } = useTourContext();
+  const shouldFocusOnOverviewTab =
+    (activeStep === AlertsCasesTourSteps.expandEvent ||
+      activeStep === AlertsCasesTourSteps.reviewAlertDetailsFlyout) &&
+    isTourShown(SecurityStepId.alertsCases);
 
   const columnValues = useMemo(
     () =>
@@ -123,6 +130,7 @@ const RowActionComponent = ({
       openFlyout({
         right: {
           id: DocumentDetailsRightPanelKey,
+          path: shouldFocusOnOverviewTab ? { tab: 'overview' } : undefined,
           params: {
             id: eventId,
             indexName,
@@ -156,7 +164,17 @@ const RowActionComponent = ({
         })
       );
     }
-  }, [dispatch, eventId, indexName, openFlyout, tabType, tableId, showExpandableFlyout, telemetry]);
+  }, [
+    eventId,
+    indexName,
+    showExpandableFlyout,
+    tableId,
+    openFlyout,
+    shouldFocusOnOverviewTab,
+    telemetry,
+    dispatch,
+    tabType,
+  ]);
 
   const Action = controlColumn.rowCellRender;
 
