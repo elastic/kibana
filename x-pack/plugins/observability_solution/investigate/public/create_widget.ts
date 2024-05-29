@@ -14,22 +14,28 @@ type MakePartial<T extends Record<string, any>, K extends keyof T> = Omit<T, K> 
 
 type PredefinedKeys = 'rows' | 'columns' | 'locked' | 'type';
 
-export type WidgetFactory<TParameters extends Record<string, any>> = <
-  T extends MakePartial<InvestigateWidgetCreate<TParameters>, PredefinedKeys>
->(
+type Defaults = Partial<Pick<InvestigateWidgetCreate, 'columns' | 'rows'>>;
+
+export type WidgetFactory<
+  TParameters extends Record<string, any>,
+  TDefaults extends Defaults | undefined
+> = <T extends MakePartial<InvestigateWidgetCreate<TParameters>, PredefinedKeys>>(
   widgetCreate: T
 ) => Pick<InvestigateWidgetCreate<TParameters>, PredefinedKeys> &
+  TDefaults &
   Omit<T, 'parameters'> & { parameters: T['parameters'] & DeepPartial<GlobalWidgetParameters> };
 
-export function createWidgetFactory<TParameters extends Record<string, any>>(
-  type: string
-): WidgetFactory<TParameters> {
-  const createWidget: WidgetFactory<TParameters> = (widgetCreate) => {
+export function createWidgetFactory<
+  TParameters extends Record<string, any>,
+  TDefaults extends Defaults | undefined
+>(type: string, defaults?: TDefaults): WidgetFactory<TParameters, TDefaults> {
+  const createWidget: WidgetFactory<any, any> = (widgetCreate) => {
     return {
       rows: 12,
       columns: InvestigateWidgetColumnSpan.Four,
       locked: false,
       type,
+      ...defaults,
       ...widgetCreate,
     };
   };

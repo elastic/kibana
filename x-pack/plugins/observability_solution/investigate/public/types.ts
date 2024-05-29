@@ -9,7 +9,13 @@
 import type { FromSchema } from 'json-schema-to-ts';
 import type { CompatibleJSONSchema } from '@kbn/observability-ai-assistant-plugin/public';
 import type { InvestigateWidget } from '../common';
-import type { GlobalWidgetParameters } from '../common/types';
+import type { GlobalWidgetParameters, InvestigateWidgetCreate } from '../common/types';
+
+interface WidgetRenderOptions<TInvestigateWidget extends InvestigateWidget> {
+  widget: TInvestigateWidget;
+  onDelete: () => void;
+  onWidgetAdd: (create: InvestigateWidgetCreate) => Promise<void>;
+}
 
 export interface WidgetDefinition {
   type: string;
@@ -19,7 +25,7 @@ export interface WidgetDefinition {
     parameters: GlobalWidgetParameters;
     signal: AbortSignal;
   }) => Promise<Record<string, any>>;
-  render: (options: { widget: InvestigateWidget; onDelete: () => void }) => React.ReactNode;
+  render: (options: WidgetRenderOptions<InvestigateWidget>) => React.ReactNode;
   chrome?: 'disabled';
 }
 
@@ -42,10 +48,9 @@ export type RegisterWidget = <
 >(
   definition: Omit<RegisterWidgetOptions, 'schema'> & { schema: TSchema },
   generateCallback: GenerateCallback<TSchema, TData>,
-  renderCallback: (options: {
-    widget: InvestigateWidget<MaybeSchemaFrom<TSchema>, TData>;
-    onDelete: () => void;
-  }) => React.ReactNode
+  renderCallback: (
+    options: WidgetRenderOptions<InvestigateWidget<MaybeSchemaFrom<TSchema>, TData>>
+  ) => React.ReactNode
 ) => void;
 
 export interface ConfigSchema {}

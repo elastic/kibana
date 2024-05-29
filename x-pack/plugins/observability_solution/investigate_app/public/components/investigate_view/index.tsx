@@ -175,6 +175,39 @@ export function InvestigateView({}: {}) {
     };
   }, [range, filterOverrides]);
 
+  const createWidget = (widgetCreate: InvestigateWidgetCreate) => {
+    return regenerateItem({
+      widget: widgetCreate,
+      signal: new AbortController().signal,
+      globalWidgetParameters,
+      user,
+      widgetDefinitions,
+    })
+      .then((generatedWidget) => {
+        setTimeline((currentTimeline) => {
+          return {
+            ...currentTimeline,
+            items: currentTimeline.items.concat({
+              ...generatedWidget,
+              loading: false,
+            }),
+          };
+        });
+      })
+      .catch((error) => {
+        notifications.showErrorDialog({
+          title: i18n.translate('xpack.investigateApp.failedToAddWidget', {
+            defaultMessage: 'Failed to add widget',
+          }),
+          error,
+        });
+      });
+  };
+
+  const createWidgetRef = useRef(createWidget);
+
+  createWidgetRef.current = createWidget;
+
   const gridItems = useMemo(() => {
     const widgetDefinitionsByType = keyBy(widgetDefinitions, 'type');
 
@@ -188,6 +221,9 @@ export function InvestigateView({}: {}) {
             ...prevTimeline,
             items: prevTimeline.items.filter((itemAtIndex) => itemAtIndex.id !== item.id),
           }));
+        },
+        onWidgetAdd: (create) => {
+          return createWidgetRef.current(create);
         },
       });
 
@@ -453,32 +489,7 @@ export function InvestigateView({}: {}) {
                 query={globalWidgetParameters.query}
                 timeRange={globalWidgetParameters.timeRange}
                 onWidgetAdd={(widget) => {
-                  return regenerateItem({
-                    widget,
-                    signal: new AbortController().signal,
-                    globalWidgetParameters,
-                    user,
-                    widgetDefinitions,
-                  })
-                    .then((generatedWidget) => {
-                      setTimeline((currentTimeline) => {
-                        return {
-                          ...currentTimeline,
-                          items: currentTimeline.items.concat({
-                            ...generatedWidget,
-                            loading: false,
-                          }),
-                        };
-                      });
-                    })
-                    .catch((error) => {
-                      notifications.showErrorDialog({
-                        title: i18n.translate('xpack.investigateApp.failedToAddWidget', {
-                          defaultMessage: 'Failed to add widget',
-                        }),
-                        error,
-                      });
-                    });
+                  return createWidgetRef.current(widget);
                 }}
               />
             </EuiFlexItem>
