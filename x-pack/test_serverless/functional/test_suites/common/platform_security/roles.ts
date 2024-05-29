@@ -35,7 +35,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
 
-  describe.only('Roles', function () {
+  describe('Roles', function () {
     before(async () => {
       await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('management');
