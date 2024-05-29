@@ -17,6 +17,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -26,10 +27,9 @@ import { UnifiedDataTableContext } from '../table_context';
 
 export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueElementProps) => {
   const { euiTheme } = useEuiTheme();
-  const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
-    useContext(UnifiedDataTableContext);
+  const { selectedDocsState, expanded, rows, isDarkMode } = useContext(UnifiedDataTableContext);
+  const { isDocSelected, toggleDocSelection } = selectedDocsState;
   const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const checked = useMemo(() => selectedDocs.includes(doc.id), [selectedDocs, doc.id]);
 
   const toggleDocumentSelectionLabel = i18n.translate('unifiedDataTable.grid.selectDoc', {
     defaultMessage: `Select document '{rowNumber}'`,
@@ -41,8 +41,6 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
       setCellProps({
         className: 'unifiedDataTable__cell--selected',
       });
-    } else {
-      setCellProps({ style: undefined });
     }
   }, [expanded, doc, setCellProps, isDarkMode]);
 
@@ -61,19 +59,50 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
         <EuiCheckbox
           id={doc.id}
           aria-label={toggleDocumentSelectionLabel}
-          checked={checked}
+          checked={isDocSelected(doc.id)}
           data-test-subj={`dscGridSelectDoc-${doc.id}`}
           onChange={() => {
-            if (checked) {
-              const newSelection = selectedDocs.filter((docId) => docId !== doc.id);
-              setSelectedDocs(newSelection);
-            } else {
-              setSelectedDocs([...selectedDocs, doc.id]);
-            }
+            toggleDocSelection(doc.id);
           }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+};
+
+export const SelectAllButton = () => {
+  const { selectedDocsState } = useContext(UnifiedDataTableContext);
+  const { isIndeterminate, hasSelectedDocs, clearSelectedDocs, selectAllDocs } = selectedDocsState;
+  return (
+    <>
+      <EuiScreenReaderOnly>
+        <span>
+          {i18n.translate('unifiedDataTable.selectRowsHeader', {
+            defaultMessage: 'Select rows',
+          })}
+        </span>
+      </EuiScreenReaderOnly>
+      <EuiCheckbox
+        id="select-all-docs-toggle"
+        aria-label={i18n.translate('unifiedDataTable.selectColumnHeader', {
+          defaultMessage: 'Select all rows',
+        })}
+        indeterminate={isIndeterminate}
+        checked={hasSelectedDocs}
+        onChange={(e) => {
+          if (isIndeterminate) {
+            clearSelectedDocs();
+            return;
+          }
+
+          if (e.target.checked) {
+            selectAllDocs();
+          } else {
+            clearSelectedDocs();
+          }
+        }}
+      />
+    </>
   );
 };
 
@@ -83,14 +112,14 @@ export function DataTableDocumentToolbarBtn({
   rows,
   selectedDocs,
   setIsFilterActive,
-  setSelectedDocs,
+  clearSelectedDocs,
 }: {
   isPlainRecord: boolean;
   isFilterActive: boolean;
   rows: DataTableRecord[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
-  setSelectedDocs: (value: string[]) => void;
+  clearSelectedDocs: () => void;
 }) {
   const [isSelectionPopoverOpen, setIsSelectionPopoverOpen] = useState(false);
 
@@ -174,14 +203,14 @@ export function DataTableDocumentToolbarBtn({
         icon="cross"
         onClick={() => {
           setIsSelectionPopoverOpen(false);
-          setSelectedDocs([]);
+          clearSelectedDocs();
           setIsFilterActive(false);
         }}
       >
         <FormattedMessage id="unifiedDataTable.clearSelection" defaultMessage="Clear selection" />
       </EuiContextMenuItem>,
     ];
-  }, [isFilterActive, isPlainRecord, rows, selectedDocs, setIsFilterActive, setSelectedDocs]);
+  }, [isFilterActive, isPlainRecord, rows, selectedDocs, setIsFilterActive, clearSelectedDocs]);
 
   const toggleSelectionToolbar = useCallback(
     () => setIsSelectionPopoverOpen((prevIsOpen) => !prevIsOpen),

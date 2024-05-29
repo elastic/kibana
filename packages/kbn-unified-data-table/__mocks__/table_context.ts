@@ -28,8 +28,16 @@ const buildTableContext = (dataView: DataView, rows: EsHitRecord[]): DataTableCo
     onFilter: jest.fn(),
     dataView,
     isDarkMode: false,
-    selectedDocs: [],
-    setSelectedDocs: jest.fn(),
+    selectedDocsState: {
+      toggleDocSelection: jest.fn(),
+      selectAllDocs: jest.fn(),
+      clearSelectedDocs: jest.fn(),
+      replaceSelectedDocs: jest.fn(),
+      isDocSelected: jest.fn(),
+      isIndeterminate: false,
+      hasSelectedDocs: false,
+      usedSelectedDocs: [],
+    },
     valueToStringConverter: (rowIndex, columnId, options) =>
       convertValueToString({
         rowIndex,

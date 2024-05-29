@@ -93,7 +93,7 @@ const renderColumns = ({
   if (wrapperWidth) {
     Object.defineProperty(wrapper, 'offsetWidth', { value: wrapperWidth });
   }
-  const setSelectedDocs = jest.fn();
+  const replaceSelectedDocs = jest.fn();
   const {
     result: { current: columns },
   } = renderHook(() =>
@@ -103,15 +103,15 @@ const renderColumns = ({
       fieldColumnId,
       selectedDocs,
       getDocById,
-      setSelectedDocs,
+      replaceSelectedDocs,
     })
   );
-  return { columns, setSelectedDocs };
+  return { columns, replaceSelectedDocs };
 };
 
 describe('useComparisonColumns', () => {
   it('should return comparison columns', () => {
-    const { columns, setSelectedDocs } = renderColumns();
+    const { columns, replaceSelectedDocs } = renderColumns();
     expect(columns).toEqual([
       {
         id: fieldColumnId,
@@ -192,12 +192,12 @@ describe('useComparisonColumns', () => {
     const removeAction = actions.additional?.[1].onClick;
     render(<button onClick={pinAction} data-test-subj="pin" />);
     userEvent.click(screen.getByTestId('pin'));
-    expect(setSelectedDocs).toHaveBeenCalledTimes(1);
-    expect(setSelectedDocs).toHaveBeenLastCalledWith(['1', '0', '2', '3']);
+    expect(replaceSelectedDocs).toHaveBeenCalledTimes(1);
+    expect(replaceSelectedDocs).toHaveBeenLastCalledWith(['1', '0', '2', '3']);
     render(<button onClick={removeAction} data-test-subj="remove" />);
     userEvent.click(screen.getByTestId('remove'));
-    expect(setSelectedDocs).toHaveBeenCalledTimes(2);
-    expect(setSelectedDocs).toHaveBeenLastCalledWith(['0', '2', '3']);
+    expect(replaceSelectedDocs).toHaveBeenCalledTimes(2);
+    expect(replaceSelectedDocs).toHaveBeenLastCalledWith(['0', '2', '3']);
   });
 
   it('should not set column widths if there is sufficient space', () => {

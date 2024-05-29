@@ -24,7 +24,7 @@ export interface UseComparisonColumnsProps {
   fieldColumnId: string;
   selectedDocs: string[];
   getDocById: (docId: string) => DataTableRecord | undefined;
-  setSelectedDocs: (selectedDocs: string[]) => void;
+  replaceSelectedDocs: (selectedDocs: string[]) => void;
 }
 
 export const DEFAULT_COLUMN_WIDTH = 300;
@@ -39,7 +39,7 @@ export const useComparisonColumns = ({
   fieldColumnId,
   selectedDocs,
   getDocById,
-  setSelectedDocs,
+  replaceSelectedDocs,
 }: UseComparisonColumnsProps) => {
   const comparisonColumns = useMemo<EuiDataGridColumn[]>(() => {
     const fieldsColumn: EuiDataGridColumn = {
@@ -82,7 +82,7 @@ export const useComparisonColumns = ({
             newSelectedDocs[0] = docId;
             newSelectedDocs[index] = baseDocId;
 
-            setSelectedDocs(newSelectedDocs);
+            replaceSelectedDocs(newSelectedDocs);
           },
         });
       }
@@ -95,7 +95,7 @@ export const useComparisonColumns = ({
           }),
           size: 'xs',
           onClick: () => {
-            setSelectedDocs(selectedDocs.filter((id) => id !== docId));
+            replaceSelectedDocs(selectedDocs.filter((id) => id !== docId));
           },
         });
       }
@@ -165,7 +165,7 @@ export const useComparisonColumns = ({
     getDocById,
     isPlainRecord,
     selectedDocs,
-    setSelectedDocs,
+    replaceSelectedDocs,
     wrapper?.offsetWidth,
   ]);
 

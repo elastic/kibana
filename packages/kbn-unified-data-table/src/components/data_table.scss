@@ -60,6 +60,11 @@
     padding-right: 0;
   }
 
+  .euiDataGridHeaderCell.euiDataGridHeaderCell--controlColumn[data-gridcell-column-id='select'] {
+    padding-left: $euiSizeXS;
+    padding-right: 0;
+  }
+
   .euiDataGrid--rowHoverHighlight .euiDataGridRow:hover {
     background-color: tintOrShade($euiColorLightShade, 50%, 0);
   }

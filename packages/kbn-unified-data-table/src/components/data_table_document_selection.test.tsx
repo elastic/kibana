@@ -66,7 +66,12 @@ describe('document selection', () => {
     test('is checked', () => {
       const contextMock = {
         ...dataTableContextMock,
-        selectedDocs: ['i::1::'],
+        selectedDocsState: {
+          ...dataTableContextMock.selectedDocsState,
+          usedSelectedDocs: ['i::1::'],
+          isDocSelected: (docId: string) => docId === 'i::1::',
+          hasSelectedDocs: true,
+        },
       };
 
       const component = mountWithIntl(
@@ -108,13 +113,18 @@ describe('document selection', () => {
 
       const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
       checkBox.simulate('change');
-      expect(contextMock.setSelectedDocs).toHaveBeenCalledWith(['i::1::']);
+      expect(contextMock.selectedDocsState.toggleDocSelection).toHaveBeenCalledWith('i::1::');
     });
 
     test('removing a selection', () => {
       const contextMock = {
         ...dataTableContextMock,
-        selectedDocs: ['i::1::'],
+        selectedDocsState: {
+          ...dataTableContextMock.selectedDocsState,
+          usedSelectedDocs: ['i::1::'],
+          isDocSelected: (docId: string) => docId === 'i::1::',
+          hasSelectedDocs: true,
+        },
       };
 
       const component = mountWithIntl(
@@ -133,7 +143,7 @@ describe('document selection', () => {
 
       const checkBox = findTestSubject(component, 'dscGridSelectDoc-i::1::');
       checkBox.simulate('change');
-      expect(contextMock.setSelectedDocs).toHaveBeenCalledWith([]);
+      expect(contextMock.selectedDocsState.toggleDocSelection).toHaveBeenCalledWith('i::1::');
     });
   });
 
@@ -145,7 +155,7 @@ describe('document selection', () => {
         rows: dataTableContextMock.rows,
         selectedDocs: ['i::1::'],
         setIsFilterActive: jest.fn(),
-        setSelectedDocs: jest.fn(),
+        clearSelectedDocs: jest.fn(),
         setIsCompareActive: jest.fn(),
       };
       const component = mountWithIntl(<DataTableDocumentToolbarBtn {...props} />);
