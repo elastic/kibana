@@ -514,35 +514,32 @@ function buildTree({
   const tree = { ...root };
   const queue: IWaterfallNode[] = [tree];
 
-  while (queue.length > 0 && maxLevelOpen > queue[0].level) {
-    const node = queue.shift()!;
+  for (let queueIndex = 0; queueIndex < queue.length; queueIndex++) {
+    const node = queue[queueIndex];
 
     const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
+    // Set childrenToLoad for all nodes enqueued.
+    // this allows lazy loading of child nodes
     node.childrenToLoad = children.length;
 
-    children.forEach((child, index) => {
-      const level = node.level + 1;
+    if (maxLevelOpen > node.level) {
+      children.forEach((child, index) => {
+        const level = node.level + 1;
 
-      const currentNode: IWaterfallNode = {
-        id: btoa(`${node.id}-${child.id}-${index}`),
-        item: child,
-        children: [],
-        level,
-        expanded: level < maxLevelOpen,
-        childrenToLoad: 0,
-      };
+        const currentNode: IWaterfallNode = {
+          id: btoa(`${node.id}-${child.id}-${index}`),
+          item: child,
+          children: [],
+          level,
+          expanded: level < maxLevelOpen,
+          childrenToLoad: 0,
+        };
 
-      node.children.push(currentNode);
-      queue.push(currentNode);
-    });
+        node.children.push(currentNode);
+        queue.push(currentNode);
+      });
+    }
   }
-
-  // Set childrenToLoad for the remaning visible nodes in the tree
-  // this allows lazy loading of child nodes
-  queue.forEach((node) => {
-    const children = getChildren({ path, waterfall, waterfallItemId: node.item.id });
-    node.childrenToLoad = children.length;
-  });
 
   return tree;
 }
