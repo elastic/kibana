@@ -31,10 +31,12 @@ export function registerRelatedRoutes(router: IRouter) {
         }),
       },
     },
-    async (_, req, res) => {
+    async (context, req, res) => {
       const { packageName, dataStreamName, rawSamples, currentPipeline } =
         req.body as RelatedApiRequest;
-      const graph = await getRelatedGraph();
+      const services = await context.resolve(['core']);
+      const { client } = services.core.elasticsearch;
+      const graph = await getRelatedGraph(client);
       let results = { results: { docs: {}, pipeline: {} } };
       try {
         results = (await graph.invoke({
