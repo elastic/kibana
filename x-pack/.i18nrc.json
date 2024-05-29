@@ -24,6 +24,7 @@
     "xpack.csp": "plugins/cloud_security_posture",
     "xpack.customBranding": "plugins/custom_branding",
     "xpack.dashboard": "plugins/dashboard_enhanced",
+    "xpack.dataQuality": "plugins/data_quality",
     "xpack.datasetQuality": "plugins/observability_solution/dataset_quality",
     "xpack.discover": "plugins/discover_enhanced",
     "xpack.crossClusterReplication": "plugins/cross_cluster_replication",

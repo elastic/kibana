@@ -337,6 +337,7 @@ x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 src/plugins/dashboard @elastic/kibana-presentation
 x-pack/packages/kbn-data-forge @elastic/obs-ux-management-team
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
+x-pack/plugins/data_quality @elastic/obs-ux-logs-team
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
 packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
@@ -820,7 +821,6 @@ packages/kbn-shared-ux-utility @elastic/appex-sharedux
 x-pack/plugins/observability_solution/slo @elastic/obs-ux-management-team
 x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/kibana-management
-packages/solution-nav/oblt @elastic/appex-sharedux @elastic/obs-ux-management-team
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-sort-predicates @elastic/kibana-visualizations
