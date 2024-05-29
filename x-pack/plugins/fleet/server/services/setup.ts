@@ -82,7 +82,7 @@ export async function setupFleet(
         },
         { id: FLEET_SETUP_LOCK_TYPE }
       );
-      logger.info(`Fleet setup lock created: ${JSON.stringify(created)}`);
+      logger.debug(`Fleet setup lock created: ${JSON.stringify(created)}`);
     } catch (error) {
       logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
       return {
@@ -101,7 +101,7 @@ export async function setupFleet(
     if (created) {
       try {
         await soClient.delete(FLEET_SETUP_LOCK_TYPE, FLEET_SETUP_LOCK_TYPE, { refresh: true });
-        logger.info(`Fleet setup lock deleted`);
+        logger.debug(`Fleet setup lock deleted`);
       } catch (error) {
         // ignore 404 errors
         if (error.statusCode !== 404) {

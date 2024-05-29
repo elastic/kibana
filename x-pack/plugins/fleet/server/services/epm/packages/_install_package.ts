@@ -103,7 +103,7 @@ export async function _installPackage({
       const hasExceededTimeout =
         Date.now() - Date.parse(installedPkg.attributes.install_started_at) <
         MAX_TIME_COMPLETE_INSTALL;
-      logger.info(
+      logger.debug(
         `Package install - Install status ${pkgName}-${pkgVersion}: ${installedPkg.attributes.install_status}`
       );
 
@@ -144,7 +144,7 @@ export async function _installPackage({
         });
       }
     } else {
-      logger.info(`Package install - Create installation ${pkgName}-${pkgVersion}`);
+      logger.debug(`Package install - Create installation ${pkgName}-${pkgVersion}`);
       await createInstallation({
         savedObjectsClient,
         packageInfo,

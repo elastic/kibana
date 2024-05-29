@@ -517,7 +517,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = item;
+        const { id, updated_at, version, ...newPolicy } = item;
 
         expect(newPolicy).to.eql({
           name: 'Copied policy',

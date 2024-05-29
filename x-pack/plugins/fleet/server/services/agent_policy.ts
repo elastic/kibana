@@ -182,10 +182,10 @@ class AgentPolicyService {
             : { is_protected: agentPolicy.is_protected }),
           updated_at: new Date().toISOString(),
           updated_by: user ? user.username : 'system',
+        },
+        {
+          version: existingAgentPolicy.version,
         }
-        // {
-        //   version: existingAgentPolicy.version,
-        // }
       );
     } catch (err) {
       logger.error(err);
@@ -195,7 +195,7 @@ class AgentPolicyService {
     if (options.bumpRevision || options.removeProtection) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
-    logger.info(
+    logger.debug(
       `Agent policy ${id} update completed, revision: ${
         options.bumpRevision ? existingAgentPolicy.revision + 1 : existingAgentPolicy.revision
       }`
@@ -1060,7 +1060,7 @@ class AgentPolicyService {
 
     appContextService
       .getLogger()
-      .info(
+      .debug(
         `Deploying policies: ${fleetServerPolicies
           .map((pol) => `${pol.policy_id}:${pol.revision_idx}`)
           .join(', ')}`
