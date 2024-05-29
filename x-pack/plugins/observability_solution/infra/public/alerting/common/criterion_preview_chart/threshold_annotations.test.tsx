@@ -6,7 +6,7 @@
  */
 import { shallow } from 'enzyme';
 import React from 'react';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Color } from '../../../../common/color_palette';
 import { ThresholdAnnotations } from './threshold_annotations';
 
@@ -29,7 +29,7 @@ describe('ThresholdAnnotations', () => {
     const defaultProps = {
       threshold: [20, 30],
       sortedThresholds: [20, 30],
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       color: Color.color0,
       id: 'testId',
       firstTimestamp: 123456789,
@@ -53,7 +53,7 @@ describe('ThresholdAnnotations', () => {
   });
 
   it('should render a rectangular annotation for in between thresholds', async () => {
-    const wrapper = await setup({ comparator: Comparator.BETWEEN });
+    const wrapper = await setup({ comparator: COMPARATORS.BETWEEN });
 
     const annotation = wrapper.find('[data-test-subj="between-rect"]');
     const expectedValues = [
@@ -72,7 +72,7 @@ describe('ThresholdAnnotations', () => {
   });
 
   it('should render an upper rectangular annotation for outside range thresholds', async () => {
-    const wrapper = await setup({ comparator: Comparator.OUTSIDE_RANGE });
+    const wrapper = await setup({ comparator: COMPARATORS.NOT_BETWEEN });
 
     const annotation = wrapper.find('[data-test-subj="outside-range-lower-rect"]');
     const expectedValues = [
@@ -91,7 +91,7 @@ describe('ThresholdAnnotations', () => {
   });
 
   it('should render a lower rectangular annotation for outside range thresholds', async () => {
-    const wrapper = await setup({ comparator: Comparator.OUTSIDE_RANGE });
+    const wrapper = await setup({ comparator: COMPARATORS.NOT_BETWEEN });
 
     const annotation = wrapper.find('[data-test-subj="outside-range-upper-rect"]');
     const expectedValues = [
@@ -110,7 +110,7 @@ describe('ThresholdAnnotations', () => {
   });
 
   it('should render a rectangular annotation for below thresholds', async () => {
-    const wrapper = await setup({ comparator: Comparator.LT });
+    const wrapper = await setup({ comparator: COMPARATORS.LESS_THAN });
 
     const annotation = wrapper.find('[data-test-subj="below-rect"]');
     const expectedValues = [
@@ -129,7 +129,7 @@ describe('ThresholdAnnotations', () => {
   });
 
   it('should render a rectangular annotation for above thresholds', async () => {
-    const wrapper = await setup({ comparator: Comparator.GT });
+    const wrapper = await setup({ comparator: COMPARATORS.GREATER_THAN });
 
     const annotation = wrapper.find('[data-test-subj="above-rect"]');
     const expectedValues = [

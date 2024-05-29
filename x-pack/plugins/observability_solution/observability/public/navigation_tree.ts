@@ -19,7 +19,6 @@ const icon = 'logoObservability';
 
 const navTree: NavigationTreeDefinition = {
   body: [
-    { type: 'recentlyAccessed' },
     {
       type: 'navGroup',
       id: 'observability_project_nav',
@@ -235,6 +234,7 @@ const navTree: NavigationTreeDefinition = {
     },
   ],
   footer: [
+    { type: 'recentlyAccessed' },
     {
       type: 'navItem',
       title: i18n.translate('xpack.observability.obltNav.getStarted', {
