@@ -187,10 +187,10 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
     // If there are some concrete indices but none of them are the write index, we'll throw an error
     // because one of the existing indices should have been the write target.
     if (concreteIndicesExist && !concreteWriteIndicesExist) {
-      logger.error(
+      logger.debug(
         `Indices matching pattern ${indexPatterns.pattern} exist but none are set as the write index for alias ${indexPatterns.alias}`
       );
-      await setConcreteWriteIndex({ logger, esClient, indexPatterns });
+      await setConcreteWriteIndex({ logger, esClient, concreteIndices });
       concreteWriteIndicesExist = true;
     }
   }
@@ -223,10 +223,9 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
           { logger }
         );
         if (!existingIndices[indexPatterns.name]?.aliases?.[indexPatterns.alias]?.is_write_index) {
-          logger.error(
+          throw Error(
             `Attempted to create index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}, but the index already exists and is not the write index for the alias`
           );
-          await setConcreteWriteIndex({ logger, esClient, indexPatterns });
         }
       } else {
         throw error;

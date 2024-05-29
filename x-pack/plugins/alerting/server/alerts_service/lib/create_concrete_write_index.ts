@@ -7,7 +7,7 @@
 
 import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { get } from 'lodash';
+import { get, sortBy } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import { DataStreamAdapter } from './data_stream_adapter';
@@ -169,13 +169,15 @@ export const createConcreteWriteIndex = async (opts: CreateConcreteWriteIndexOpt
 interface SetConcreteWriteIndexOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
-  indexPatterns: IIndexPatternString;
+  concreteIndices: ConcreteIndexInfo[];
 }
 
 export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
-  const { logger, esClient, indexPatterns } = opts;
+  const { logger, esClient, concreteIndices } = opts;
+  const lastIndex = concreteIndices.length - 1;
+  const concreteIndex = sortBy(concreteIndices, ['index'])[lastIndex];
   logger.debug(
-    `Attempting to set index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}.`
+    `Attempting to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
   );
   try {
     await retryTransientEsErrors(
@@ -183,11 +185,11 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
         esClient.indices.updateAliases({
           body: {
             actions: [
-              { remove: { index: indexPatterns.name, alias: indexPatterns.alias } },
+              { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
               {
                 add: {
-                  index: indexPatterns.name,
-                  alias: indexPatterns.alias,
+                  index: concreteIndex.index,
+                  alias: concreteIndex.alias,
                   is_write_index: true,
                 },
               },
@@ -196,9 +198,12 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
         }),
       { logger }
     );
+    logger.info(
+      `Successfully set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
+    );
   } catch (error) {
     throw new Error(
-      `Failed to set index: ${indexPatterns.name} as the write index for alias: ${indexPatterns.alias}.`
+      `Failed to set index: ${concreteIndex.index} as the write index for alias: ${concreteIndex.alias}.`
     );
   }
 }

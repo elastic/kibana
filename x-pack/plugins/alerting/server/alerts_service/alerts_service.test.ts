@@ -1227,7 +1227,7 @@ describe('Alerts Service', () => {
           }
         });
 
-        test('should log error and set initialized to true when concrete indices exist but none are write index and then a concrete index is set as a write index', async () => {
+        test('should log error and set initialized to false if concrete indices exist but none are write index', async () => {
           // not applicable for data streams
           if (useDataStreamForAlerts) return;
 
@@ -1255,7 +1255,7 @@ describe('Alerts Service', () => {
             )
           ).toEqual({ result: true });
 
-          expect(logger.error).toHaveBeenCalledWith(
+          expect(logger.debug).toHaveBeenCalledWith(
             `Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default`
           );
 
@@ -1387,7 +1387,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.create).toHaveBeenCalled();
         });
 
-        test('should log error and set initialized to true if create concrete index throws resource_already_exists_exception error and write index does not already exists and then a concrete index is set as a write index', async () => {
+        test('should log error and set initialized to false if create concrete index throws resource_already_exists_exception error and write index does not already exists', async () => {
           // not applicable for data streams
           if (useDataStreamForAlerts) return;
 
@@ -1414,13 +1414,12 @@ describe('Alerts Service', () => {
               DEFAULT_NAMESPACE_STRING
             )
           ).toEqual({
-            result: true,
+            error:
+              'Failure during installation. Attempted to create index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default, but the index already exists and is not the write index for the alias',
+            result: false,
           });
 
-          expect(logger.error.mock.calls[0][0]).toBe('Error creating concrete write index - fail');
-          expect(logger.error.mock.calls[1][0]).toBe(
-            'Attempted to create index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default, but the index already exists and is not the write index for the alias'
-          );
+          expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
           expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
