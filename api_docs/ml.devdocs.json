@@ -1298,7 +1298,7 @@
         "MlHasPrivilegesResponse",
         ">; checkMlCapabilities(): Promise<",
         "MlCapabilitiesResponse",
-        ">; checkIndicesExists({ indices }: { indices: string[]; }): Promise<Record<string, { exists: boolean; }>>; getFieldCaps({ index, fields }: { index: string; fields: string[]; }): Promise<any>; recognizeIndex({ indexPatternTitle, filter, }: { indexPatternTitle: string; filter?: string[] | undefined; }): Promise<",
+        ">; checkIndicesExists({ indices }: { indices: string[]; }): Promise<Record<string, { exists: boolean; }>>; recognizeIndex({ indexPatternTitle, filter, }: { indexPatternTitle: string; filter?: string[] | undefined; }): Promise<",
         "RecognizeResult",
         "[]>; listDataRecognizerModules(filter?: string[] | undefined): Promise<any>; getDataRecognizerModule({ moduleId, filter }: { moduleId: string; filter?: string[] | undefined; }): Promise<",
         "Module",

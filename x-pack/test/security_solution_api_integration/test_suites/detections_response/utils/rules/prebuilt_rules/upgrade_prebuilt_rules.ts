@@ -26,7 +26,7 @@ import { refreshSavedObjectIndices } from '../../refresh_index';
  */
 export const upgradePrebuiltRules = async (
   es: Client,
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   rules?: RuleVersionSpecifier[]
 ): Promise<PerformRuleUpgradeResponseBody> => {
   let payload = {};

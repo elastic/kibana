@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { EuiCheckboxGroup } from '@elastic/eui';
+import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
+import type { Capabilities } from '@kbn/core/public';
+import { QueryState } from '@kbn/data-plugin/common';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
+import { omit } from 'lodash';
 import moment from 'moment';
 import React, { ReactElement, useState } from 'react';
-import { omit } from 'lodash';
-
-import { i18n } from '@kbn/i18n';
-import { EuiCheckboxGroup } from '@elastic/eui';
-import { QueryState } from '@kbn/data-plugin/common';
-import type { Capabilities } from '@kbn/core/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { getStateFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
-import type { SerializableControlGroupInput } from '@kbn/controls-plugin/common';
-
-import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import {
+  convertPanelMapToSavedPanels,
+  DashboardContainerInput,
+  DashboardPanelMap,
+} from '../../../../common';
+import { DashboardLocatorParams } from '../../../dashboard_container';
+import { pluginServices } from '../../../services/plugin_services';
 import { dashboardUrlParams } from '../../dashboard_router';
 import { shareModalStrings } from '../../_dashboard_app_strings';
-import { pluginServices } from '../../../services/plugin_services';
-import { convertPanelMapToSavedPanels } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container';
 
 const showFilterBarId = 'showFilterBar';
 
@@ -33,6 +34,7 @@ export interface ShowShareModalProps {
   savedObjectId?: string;
   dashboardTitle?: string;
   anchorElement: HTMLElement;
+  getDashboardState: () => DashboardContainerInput;
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
@@ -48,6 +50,7 @@ export function ShowShareModal({
   anchorElement,
   savedObjectId,
   dashboardTitle,
+  getDashboardState,
 }: ShowShareModalProps) {
   const {
     dashboardCapabilities: { createShortUrl: allowShortUrl },
@@ -123,18 +126,41 @@ export function ShowShareModal({
   };
 
   let unsavedStateForLocator: DashboardLocatorParams = {};
-  const unsavedDashboardState = dashboardBackup.getState(savedObjectId);
+
+  const { dashboardState: unsavedDashboardState, panels: unsavedPanelStates } =
+    dashboardBackup.getState(savedObjectId) ?? {};
+
+  const latestPanels = getDashboardState().panels;
+  const unsavedPanelsMap = unsavedPanelStates
+    ? Object.entries(unsavedPanelStates).reduce((acc, [panelId, unsavedPanel]) => {
+        if (unsavedPanel && latestPanels?.[panelId]) {
+          acc[panelId] = {
+            ...latestPanels[panelId],
+            explicitInput: {
+              ...latestPanels?.[panelId].explicitInput,
+              ...unsavedPanel,
+              id: panelId,
+            },
+          };
+        }
+        return acc;
+      }, {} as DashboardPanelMap)
+    : {};
+
+  const allPanels: DashboardPanelMap = {
+    ...(unsavedDashboardState?.panels ?? {}),
+    ...unsavedPanelsMap,
+  };
 
   if (unsavedDashboardState) {
     unsavedStateForLocator = {
       query: unsavedDashboardState.query,
       filters: unsavedDashboardState.filters,
       controlGroupInput: unsavedDashboardState.controlGroupInput as SerializableControlGroupInput,
-      panels: unsavedDashboardState.panels
-        ? (convertPanelMapToSavedPanels(
-            unsavedDashboardState.panels
-          ) as DashboardLocatorParams['panels'])
-        : undefined,
+      panels:
+        allPanels && Object.keys(allPanels).length > 0
+          ? (convertPanelMapToSavedPanels(allPanels) as DashboardLocatorParams['panels'])
+          : undefined,
 
       // options
       useMargins: unsavedDashboardState?.useMargins,
@@ -176,6 +202,11 @@ export function ShowShareModal({
     shareableUrl,
     objectId: savedObjectId,
     objectType: 'dashboard',
+    objectTypeMeta: {
+      title: i18n.translate('dashboard.share.shareModal.title', {
+        defaultMessage: 'Share this dashboard',
+      }),
+    },
     sharingData: {
       title:
         dashboardTitle ||

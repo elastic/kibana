@@ -9,6 +9,7 @@ import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui'
 import React from 'react';
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { composeStateUpdaters } from '../../lib/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -311,6 +312,6 @@ const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
   margin-top: 2px;
   overflow-x: hidden;
   overflow-y: scroll;
-  z-index: ${(props) => props.theme.eui.euiZLevel1};
+  z-index: ${euiThemeVars.euiZLevel1};
   max-height: 322px;
 `;

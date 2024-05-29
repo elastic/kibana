@@ -424,7 +424,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
               </>
             }
             onDocumentsChange={(json: string) => {
-              editSubActionProperty('otherFields', json);
+              editSubActionProperty('otherFields', json === '' ? null : json);
             }}
           />
         </EuiFormRow>

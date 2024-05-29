@@ -15,18 +15,23 @@ test.each([
   [
     'processMap',
     processMap,
-    schema.mapOf(schema.string(), schema.object({ a: schema.string() }, { meta: { id: 'myRef' } })),
+    schema.mapOf(
+      schema.string(),
+      schema.object({ a: schema.string() }, { meta: { id: 'myRef1' } })
+    ),
+    'myRef1',
   ],
   [
     'processRecord',
     processRecord,
     schema.recordOf(
       schema.string(),
-      schema.object({ a: schema.string() }, { meta: { id: 'myRef' } })
+      schema.object({ a: schema.string() }, { meta: { id: 'myRef2' } })
     ),
+    'myRef2',
   ],
-])('%p parses any additional properties specified', (_, processFn, obj) => {
-  const ctx = createCtx({ refs: true });
+])('%p parses any additional properties specified', (_, processFn, obj, refId) => {
+  const ctx = createCtx();
   const parsed = joi2JsonInternal(obj.getSchema());
 
   processFn(ctx, parsed);
@@ -34,17 +39,19 @@ test.each([
   expect(parsed).toEqual({
     type: 'object',
     additionalProperties: {
-      $ref: '#/components/schemas/myRef',
+      $ref: `#/components/schemas/${refId}`,
     },
   });
-  expect(ctx.sharedSchemas.get('myRef')).toEqual({
-    type: 'object',
-    additionalProperties: false,
-    properties: {
-      a: {
-        type: 'string',
+  expect(ctx.getSharedSchemas()).toEqual({
+    [refId]: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        a: {
+          type: 'string',
+        },
       },
+      required: ['a'],
     },
-    required: ['a'],
   });
 });

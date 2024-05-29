@@ -50,7 +50,7 @@ function getCacheDetails(body: UnencryptedTelemetryPayload): CacheDetails[] {
  * @param timestamp The new timestamp to be set
  */
 function updateMonitoringDates(
-  esSupertest: SuperTest.SuperTest<SuperTest.Test>,
+  esSupertest: SuperTest.Agent,
   fromTimestamp: string,
   toTimestamp: string,
   timestamp: string

@@ -6,12 +6,14 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { HostMetricsExplanationContent } from '../../../lens';
 import { TitleWithTooltip } from '../../components/section_title';
 import { AlertsTooltipContent } from '../../components/alerts_tooltip_content';
 import { ServicesTooltipContent } from '../../components/services_tooltip_content';
+import { ContainerMetricsExplanationContent } from '../../../lens/metric_explanation/container_metrics_explanation_content';
 
-export const MetricsSectionTitle = () => {
+export const MetricsSectionTitle = ({ assetType }: { assetType: InventoryItemType }) => {
   return (
     <TitleWithTooltip
       title={i18n.translate('xpack.infra.assetDetails.overview.metricsSectionTitle', {
@@ -19,7 +21,7 @@ export const MetricsSectionTitle = () => {
       })}
       data-test-subj="infraAssetDetailsMetricsTitle"
       tooltipTestSubj="infraAssetDetailsMetricsPopoverButton"
-      tooltipContent={<HostMetricsExplanationContent />}
+      tooltipContent={getTooltipContent(assetType)}
     />
   );
 };
@@ -47,3 +49,12 @@ export const ServicesSectionTitle = () => (
     tooltipContent={<ServicesTooltipContent />}
   />
 );
+
+function getTooltipContent(assetType: InventoryItemType) {
+  switch (assetType) {
+    case 'host':
+      return <HostMetricsExplanationContent />;
+    default:
+      return <ContainerMetricsExplanationContent />;
+  }
+}

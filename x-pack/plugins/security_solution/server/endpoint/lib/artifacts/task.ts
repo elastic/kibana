@@ -170,7 +170,6 @@ export class ManifestTask {
           this.logger.error(
             `unable to recover from error while attempting to retrieve last computed manifest`
           );
-
           return;
         }
       }

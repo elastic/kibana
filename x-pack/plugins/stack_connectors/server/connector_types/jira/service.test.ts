@@ -13,6 +13,7 @@ import { ExternalService } from './types';
 import { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { getBasicAuthHeader } from '@kbn/actions-plugin/server';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -203,6 +204,21 @@ describe('Jira service', () => {
           configurationUtilities
         )
       ).toThrow();
+    });
+
+    test('uses the basic auth header for authentication', () => {
+      createExternalService(
+        {
+          config: { apiUrl: 'https://coolsite.net/', projectKey: 'CK' },
+          secrets: { apiToken: 'token', email: 'elastic@elastic.com' },
+        },
+        logger,
+        configurationUtilities
+      );
+
+      expect(axios.create).toHaveBeenCalledWith({
+        headers: getBasicAuthHeader({ username: 'elastic@elastic.com', password: 'token' }),
+      });
     });
   });
 

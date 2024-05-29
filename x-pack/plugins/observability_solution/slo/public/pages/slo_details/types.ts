@@ -11,8 +11,6 @@ export interface SloDetailsPathParams {
 }
 
 export interface TimeBounds {
-  from: number;
-  to: number;
-  fromUtc: string;
-  toUtc: string;
+  from: Date;
+  to: Date;
 }
