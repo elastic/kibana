@@ -30,6 +30,7 @@ import {
   DatasourceDimensionTriggerProps,
   DataSourceInfo,
   UserMessage,
+  OperationMetadata,
 } from '../../types';
 import { generateId } from '../../id_generator';
 import type {
@@ -533,6 +534,18 @@ export function getTextBasedDatasource({
           const layer = state.layers[layerId];
           const column = layer?.columns?.find((c) => c.columnId === columnId);
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
+          let scale: OperationMetadata['scale'] = 'ordinal';
+          switch (column?.meta?.type) {
+            case 'date':
+              scale = 'interval';
+              break;
+            case 'number':
+              scale = 'ratio';
+              break;
+            default:
+              scale = 'ordinal';
+              break;
+          }
 
           if (column) {
             return {
@@ -542,6 +555,7 @@ export function getTextBasedDatasource({
               inMetricDimension: column.inMetricDimension,
               hasTimeShift: false,
               hasReducedTimeRange: false,
+              scale,
             };
           }
           return null;
