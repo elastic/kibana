@@ -318,6 +318,12 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             />
           </h3>
         }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.globalDataTagDescription"
+            defaultMessage="Add a field and value set to all data colected from the agents enrolled in this policy."
+          />
+        }
       >
         <GlobalDataTagsTable
           updateAgentPolicy={updateAgentPolicy}
