@@ -153,7 +153,7 @@ export class SecurityUsageReportingTask {
       return { state: taskInstance.state, runAt: new Date() };
     }
 
-    this.logger.warn(`received usage records: ${JSON.stringify(usageRecords)}`); // TODO: change to info before merge
+    this.logger.debug(`received usage records: ${JSON.stringify(usageRecords)}`);
 
     let usageReportResponse: Response | undefined;
 
