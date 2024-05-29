@@ -7,7 +7,7 @@
 
 import type { Pipeline } from '../../common';
 
-export const categorizationInitialPipeline: Pipeline = {
+export const relatedInitialPipeline: Pipeline = {
   description: 'Pipeline to process mysql_enterprise audit logs',
   processors: [
     {
@@ -36,7 +36,7 @@ export const categorizationInitialPipeline: Pipeline = {
   ],
 };
 
-export const categorizationExpectedResults = {
+export const relatedExpectedResults = {
   docs: [
     {
       key: 'value',
@@ -54,16 +54,18 @@ export const categorizationExpectedResults = {
       },
       {
         append: {
-          field: 'event.type',
-          value: ['change'],
-          if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+          field: 'related.ip',
+          value: ['{{{source.ip}}}'],
+          allow_duplicates: false,
+          if: 'ctx.source?.ip != null',
         },
       },
       {
         append: {
-          field: 'event.category',
-          value: ['database'],
-          if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+          field: 'related.ip',
+          value: ['{{{destination.ip}}}'],
+          allow_duplicates: false,
+          if: 'ctx.destination?.ip != null',
         },
       },
       {
@@ -87,70 +89,59 @@ export const categorizationExpectedResults = {
   },
 };
 
-export const categorizationInitialMockedResponse = [
+export const relatedInitialMockedResponse = [
   {
     append: {
-      field: 'event.type',
-      value: ['creation'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+      field: 'related.ip',
+      value: ['{{{source.ip}?.split(":")[0]}}'],
+      allow_duplicates: false,
+      if: 'ctx.source?.ip != null',
     },
   },
   {
     append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
-    },
-  },
-];
-
-export const categorizationErrorMockedResponse = [
-  {
-    append: {
-      field: 'event.type',
-      value: ['creation'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
-    },
-  },
-  {
-    append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+      field: 'related.ip',
+      value: ['{{{destination.ip}}}'],
+      allow_duplicates: false,
+      if: 'ctx.destination?.ip != null',
     },
   },
 ];
 
-export const categorizationInvalidMockedResponse = [
+export const relatedErrorMockedResponse = [
   {
     append: {
-      field: 'event.type',
-      value: ['change'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+      field: 'related.ip',
+      value: ['{{{source.ip}}}'],
+      allow_duplicates: false,
+      if: 'ctx.source?.ip != null',
     },
   },
   {
     append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+      field: 'related.ip',
+      value: ['{{{destination.ip}}}'],
+      allow_duplicates: false,
+      if: 'ctx.destination?.ip != null',
     },
   },
 ];
 
-export const categorizationReviewMockedResponse = [
+export const relatedReviewMockedResponse = [
   {
     append: {
-      field: 'event.type',
-      value: ['change'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+      field: 'related.ip',
+      value: ['{{{source.ip}}}'],
+      allow_duplicates: false,
+      if: 'ctx.source?.ip != null',
     },
   },
   {
     append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+      field: 'related.ip',
+      value: ['{{{destination.ip}}}'],
+      allow_duplicates: false,
+      if: 'ctx.destination?.ip != null',
     },
   },
 ];
@@ -165,18 +156,12 @@ export const testPipelineValidResult: [object[], object[]] = [
   [{ key: 'value', anotherKey: 'anotherValue' }],
 ];
 
-export const testPipelineInvalidEcs: [object[], object[]] = [
-  [],
-  [{ event: { type: ['database'], category: ['creation'] }, anotherKey: 'anotherValue' }],
-];
-export const categorizationTestState = {
+export const relatedTestState = {
   rawSamples: ['{"test1": "test1"}'],
   samples: ['{ "test1": "test1" }'],
   formattedSamples: '{"test1": "test1"}',
-  ecsTypes: 'testtypes',
-  ecsCategories: 'testcategories',
+  ecs: 'testtypes',
   exAnswer: 'testanswer',
-  lastExecutedChain: 'testchain',
   packageName: 'testpackage',
   dataStreamName: 'testdatastream',
   errors: { test: 'testerror' },
@@ -187,42 +172,46 @@ export const categorizationTestState = {
   currentProcessors: [
     {
       append: {
-        field: 'event.type',
-        value: ['creation'],
-        if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+        field: 'related.ip',
+        value: ['{{{source.ip}?.split(":")[0]}}'],
+        allow_duplicates: false,
+        if: 'ctx.source?.ip != null',
       },
     },
     {
       append: {
-        field: 'event.category',
-        value: ['database'],
-        if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+        field: 'related.ip',
+        value: ['{{{destination.ip}}}'],
+        allow_duplicates: false,
+        if: 'ctx.destination?.ip != null',
       },
     },
   ],
-  invalidCategorization: { test: 'testinvalid' },
-  initialPipeline: categorizationInitialPipeline,
+  initialPipeline: relatedInitialPipeline,
   results: { test: 'testresults' },
+  lastExecutedChain: 'testchain',
 };
 
-export const categorizationMockProcessors = [
+export const relatedMockProcessors = [
   {
     append: {
-      field: 'event.type',
-      value: ['creation'],
-      if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+      field: 'related.ip',
+      value: ['{{{source.ip}?.split(":")[0]}}'],
+      allow_duplicates: false,
+      if: 'ctx.source?.ip != null',
     },
   },
   {
     append: {
-      field: 'event.category',
-      value: ['database'],
-      if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+      field: 'related.ip',
+      value: ['{{{destination.ip}}}'],
+      allow_duplicates: false,
+      if: 'ctx.destination?.ip != null',
     },
   },
 ];
 
-export const categorizationExpectedHandlerResponse = {
+export const relatedExpectedHandlerResponse = {
   currentPipeline: {
     description: 'Pipeline to process mysql_enterprise audit logs',
     processors: [
@@ -234,16 +223,18 @@ export const categorizationExpectedHandlerResponse = {
       },
       {
         append: {
-          field: 'event.type',
-          value: ['creation'],
-          if: "ctx.mysql_enterprise?.audit?.general_data?.sql_command == 'create_db'",
+          field: 'related.ip',
+          value: ['{{{source.ip}?.split(":")[0]}}'],
+          allow_duplicates: false,
+          if: 'ctx.source?.ip != null',
         },
       },
       {
         append: {
-          field: 'event.category',
-          value: ['database'],
-          if: "ctx.mysql_enterprise.audit.general_data.sql_command == 'create_db'",
+          field: 'related.ip',
+          value: ['{{{destination.ip}}}'],
+          allow_duplicates: false,
+          if: 'ctx.destination?.ip != null',
         },
       },
       {

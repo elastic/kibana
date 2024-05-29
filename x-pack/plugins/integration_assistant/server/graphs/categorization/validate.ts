@@ -7,6 +7,8 @@
 import { CategorizationState } from '../../types';
 import { ECS_EVENT_TYPES_PER_CATEGORY, EVENT_CATEGORIES, EVENT_TYPES } from './constants';
 
+import type { EventCategories } from './constants';
+
 interface Event {
   type?: string[];
   category?: string[];
@@ -96,28 +98,6 @@ function findInvalidTypes(types: string[]): string[] {
   }
   return invalidTypes;
 }
-
-type EventCategories =
-  | 'api'
-  | 'authentication'
-  | 'configuration'
-  | 'database'
-  | 'driver'
-  | 'email'
-  | 'file'
-  | 'host'
-  | 'iam'
-  | 'intrusion_detection'
-  | 'library'
-  | 'network'
-  | 'package'
-  | 'process'
-  | 'registry'
-  | 'session'
-  | 'threat'
-  | 'user'
-  | 'vulnerability'
-  | 'web';
 
 function getTypeCategoryIncompatibleError(
   categories: string[],

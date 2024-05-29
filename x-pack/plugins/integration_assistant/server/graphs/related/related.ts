@@ -8,7 +8,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { RELATED_MAIN_PROMPT } from './prompts';
 import { getModel } from '../../providers/bedrock';
 import { RelatedState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 
 export async function handleRelated(state: RelatedState) {
@@ -30,6 +30,6 @@ export async function handleRelated(state: RelatedState) {
     currentPipeline,
     currentProcessors,
     reviewed: false,
-    lastExecutedChain: 'main',
+    lastExecutedChain: 'related',
   };
 }

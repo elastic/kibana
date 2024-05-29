@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
 import { RelatedState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
@@ -12,6 +13,7 @@ import { handleRelated } from './related';
 import { handleErrors } from './errors';
 import { handleReview } from './review';
 import { RELATED_ECS_FIELDS, RELATED_EXAMPLE_ANSWER } from './constants';
+import { ESClient } from '../../util/es';
 
 const graphState: StateGraphArgs<RelatedState>['channels'] = {
   lastExecutedChain: {
@@ -61,10 +63,6 @@ const graphState: StateGraphArgs<RelatedState>['channels'] = {
   pipelineResults: {
     value: (x: object[], y?: object[]) => y ?? x,
     default: () => [],
-  },
-  currentMapping: {
-    value: (x: object, y?: object) => y ?? x,
-    default: () => ({}),
   },
   currentPipeline: {
     value: (x: object, y?: object) => y ?? x,
@@ -134,7 +132,8 @@ function chainRouter(state: RelatedState): string {
   return END;
 }
 
-export async function getRelatedGraph() {
+export async function getRelatedGraph(client: IScopedClusterClient) {
+  ESClient.setClient(client);
   const workflow = new StateGraph({ channels: graphState })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)

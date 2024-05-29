@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EcsMappingState, CategorizationState, RelatedState } from '../types';
-import { testPipeline } from './es';
+import { testPipeline } from './pipeline';
 
 export async function handleValidatePipeline(
   state: EcsMappingState | CategorizationState | RelatedState

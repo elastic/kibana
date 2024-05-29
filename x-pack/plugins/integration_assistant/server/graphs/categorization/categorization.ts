@@ -7,7 +7,7 @@
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { getModel } from '../../providers/bedrock';
 import { CategorizationState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 import { CATEGORIZATION_MAIN_PROMPT } from './prompts';
 

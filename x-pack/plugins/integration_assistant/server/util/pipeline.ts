@@ -4,22 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { deepCopy } from './util';
-import type { Pipeline } from '../../common';
+import { ESClient } from './es';
 
-export function combineProcessors(initialPipeline: Pipeline, processors: any[]): Pipeline {
-  // Create a deep copy of the initialPipeline to avoid modifying the original input
-  const currentPipeline = deepCopy(initialPipeline);
+interface DocTemplate {
+  _index: string;
+  _id: string;
+  _source: {
+    message: string;
+  };
+}
 
-  // Add the new processors right before the last 2 removeprocessor in the initial pipeline.
-  // This is so all the processors if conditions are not accessing possibly removed fields.
-  const currentProcessors = currentPipeline.processors;
-  const combinedProcessors = [
-    ...currentProcessors.slice(0, -2),
-    ...processors,
-    ...currentProcessors.slice(-2),
-  ];
-  currentPipeline.processors = combinedProcessors;
+function formatSample(sample: string): DocTemplate {
+  const docsTemplate: DocTemplate = {
+    _index: 'index',
+    _id: 'id',
+    _source: { message: '' },
+  };
+  const formatted: DocTemplate = { ...docsTemplate };
+  formatted._source.message = sample;
+  return formatted;
+}
 
-  return currentPipeline;
+export async function testPipeline(
+  samples: string[],
+  pipeline: object
+): Promise<[object[], object[]]> {
+  const docs = samples.map((sample) => formatSample(sample));
+  const results: object[] = [];
+  const errors: object[] = [];
+
+  const client = ESClient.getClient();
+  try {
+    const output = await client.asCurrentUser.ingest.simulate({ docs, pipeline });
+    for (const doc of output.docs) {
+      if (doc.doc?._source?.error) {
+        errors.push(doc.doc._source.error);
+      } else if (doc.doc?._source) {
+        results.push(doc.doc._source);
+      }
+    }
+  } catch (e) {
+    errors.push({ error: (e as Error).message });
+  }
+
+  return [errors, results];
 }

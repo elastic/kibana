@@ -8,7 +8,7 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { CATEGORIZATION_ERROR_PROMPT } from './prompts';
 import { getModel } from '../../providers/bedrock';
 import { CategorizationState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 
 export async function handleErrors(state: CategorizationState) {

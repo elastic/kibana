@@ -8,13 +8,12 @@ import { JsonOutputParser } from '@langchain/core/output_parsers';
 import { RELATED_ERROR_PROMPT } from './prompts';
 import { getModel } from '../../providers/bedrock';
 import { RelatedState } from '../../types';
-import { combineProcessors } from '../../util/pipeline';
+import { combineProcessors } from '../../util/processors';
 import { Pipeline } from '../../../common';
 
 export async function handleErrors(state: RelatedState) {
   const relatedErrorPrompt = RELATED_ERROR_PROMPT;
   const model = getModel();
-
   const outputParser = new JsonOutputParser();
   const relatedErrorGraph = relatedErrorPrompt.pipe(model).pipe(outputParser);
 
@@ -27,7 +26,6 @@ export async function handleErrors(state: RelatedState) {
   })) as any[];
 
   const currentPipeline = combineProcessors(state.initialPipeline as Pipeline, currentProcessors);
-
   return {
     currentPipeline,
     currentProcessors,

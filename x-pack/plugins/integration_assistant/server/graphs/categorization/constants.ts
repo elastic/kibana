@@ -111,7 +111,7 @@ export const EVENT_CATEGORIES = [
   'web',
 ];
 
-type EventCategories =
+export type EventCategories =
   | 'api'
   | 'authentication'
   | 'configuration'

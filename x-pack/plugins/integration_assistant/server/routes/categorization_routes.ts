@@ -30,10 +30,12 @@ export function registerCategorizationRoutes(router: IRouter) {
         }),
       },
     },
-    async (_, req, res) => {
+    async (context, req, res) => {
       const { packageName, dataStreamName, rawSamples, currentPipeline } =
         req.body as CategorizationApiRequest;
-      const graph = await getCategorizationGraph();
+      const services = await context.resolve(['core']);
+      const { client } = services.core.elasticsearch;
+      const graph = await getCategorizationGraph(client);
       let results = { results: { docs: {}, pipeline: {} } };
       try {
         results = (await graph.invoke({

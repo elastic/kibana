@@ -63,7 +63,6 @@ export interface RelatedState {
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
-  currentMapping: object;
   currentPipeline: object;
   currentProcessors: object[];
   initialPipeline: object;
