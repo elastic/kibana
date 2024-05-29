@@ -68,7 +68,6 @@ describe('AgentService', () => {
               readPackageInfo: false,
               readInstalledPackages: false,
               installPackages: false,
-              installPackageAssets: false,
               upgradePackages: false,
               uploadPackages: false,
               removePackages: false,
