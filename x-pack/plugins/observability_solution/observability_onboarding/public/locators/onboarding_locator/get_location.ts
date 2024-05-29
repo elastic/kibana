@@ -11,15 +11,19 @@ import { PLUGIN_ID } from '../../../common';
 export function getLocation(params: ObservabilityOnboardingLocatorParams) {
   const { source, category } = params;
 
-  let path = ['/', source].filter(Boolean).join('');
+  const path = ['/'];
+
+  if (source) {
+    path.push(source);
+  }
 
   if (category) {
-    path = path.concat(`?category=${category}`);
+    path.push(`?category=${category}`);
   }
 
   return {
     app: PLUGIN_ID,
-    path,
+    path: path.join(''),
     state: {},
   };
 }
