@@ -132,7 +132,7 @@ function buildRootCrumb({
   }
 
   return {
-    text: i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
+    text: i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
       defaultMessage: 'Deployment',
     }),
     'data-test-subj': 'solutionNavSwitcher',
