@@ -2,9 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows.sh
     label: "Defend Workflows Cypress Tests"
     agents:
-      image: family/kibana-fips-ubuntu-2004
-      imageProject: elastic-images-qa
-      provider: gcp
       enableNestedVirtualization: true
       localSsds: 1
       localSsdInterface: nvme
@@ -22,9 +19,6 @@ steps:
   - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
     label: "Defend Workflows Cypress Tests on Serverless"
     agents:
-      image: family/kibana-fips-ubuntu-2004
-      imageProject: elastic-images-qa
-      provider: gcp
       enableNestedVirtualization: true
       localSsds: 1
       localSsdInterface: nvme
