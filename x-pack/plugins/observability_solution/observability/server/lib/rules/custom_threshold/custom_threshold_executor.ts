@@ -33,11 +33,7 @@ import {
   CustomThresholdActionGroup,
   CustomThresholdAlert,
 } from './types';
-import {
-  buildFiredAlertReason,
-  buildNoDataAlertReason,
-  // buildRecoveredAlertReason,
-} from './messages';
+import { buildFiredAlertReason, buildNoDataAlertReason } from './messages';
 import {
   createScopedLogger,
   hasAdditionalContext,
@@ -91,6 +87,7 @@ export const createCustomThresholdExecutor = ({
     } = options;
 
     const { criteria } = params;
+
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
     const thresholdLogger = createScopedLogger(logger, 'thresholdRule', {
       alertId: ruleId,
