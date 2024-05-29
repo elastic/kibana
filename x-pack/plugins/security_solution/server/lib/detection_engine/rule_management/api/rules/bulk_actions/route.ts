@@ -35,7 +35,6 @@ import {
   dryRunValidateBulkEditRule,
   validateBulkDuplicateRule,
 } from '../../../logic/bulk_actions/validations';
-import { deleteRules } from '../../../logic/crud/delete_rules';
 import { getExportByObjectIds } from '../../../logic/export/get_export_by_object_ids';
 import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 import type { BulkActionError } from './bulk_actions_response';
@@ -121,6 +120,7 @@ export const performBulkActionRoute = (
           const exceptionsClient = ctx.lists?.getExceptionListClient();
           const savedObjectsClient = ctx.core.savedObjects.client;
           const actionsClient = ctx.actions.getActionsClient();
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           const { getExporter, getClient } = ctx.core.savedObjects;
           const client = getClient({ includedHiddenTypes: ['action'] });
@@ -203,9 +203,8 @@ export const performBulkActionRoute = (
                     return null;
                   }
 
-                  await deleteRules({
+                  await rulesManagementClient.deleteRule({
                     ruleId: rule.id,
-                    rulesClient,
                   });
 
                   return null;
