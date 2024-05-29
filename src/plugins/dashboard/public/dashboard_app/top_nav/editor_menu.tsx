@@ -114,16 +114,14 @@ export const mergeGroupedItemsProvider =
     return panelGroups;
   };
 
-export const EditorMenu = ({
-  createNewVisType,
-  isDisabled,
-  api,
-}: {
+interface EditorMenuProps {
   api: PresentationContainer;
   isDisabled?: boolean;
   /** Handler for creating new visualization of a specified type */
   createNewVisType: (visType: BaseVisType | VisTypeAlias) => () => void;
-}) => {
+}
+
+export const EditorMenu = ({ createNewVisType, isDisabled, api }: EditorMenuProps) => {
   const isMounted = useRef(false);
 
   useEffect(() => {
@@ -230,39 +228,56 @@ export const EditorMenu = ({
     }
   });
 
-  const getVisTypeMenuItem = (visType: BaseVisType): PanelSelectionMenuItem => {
+  const augmentedCreateNewVisType = (
+    visType: Parameters<EditorMenuProps['createNewVisType']>[0],
+    cb: () => void
+  ) => {
+    const visClickHandler = createNewVisType(visType);
+    return () => {
+      visClickHandler();
+      cb();
+    };
+  };
+
+  const getVisTypeMenuItem = (
+    onClickCb: () => void,
+    visType: BaseVisType
+  ): PanelSelectionMenuItem => {
     const { name, title, titleInWizard, description, icon = 'empty', isDeprecated } = visType;
     return {
       id: name,
       name: titleInWizard || title,
       isDeprecated,
       icon,
-      onClick: createNewVisType(visType),
+      onClick: augmentedCreateNewVisType(visType, onClickCb),
       'data-test-subj': `visType-${name}`,
       description,
     };
   };
 
-  const getVisTypeAliasMenuItem = (visTypeAlias: VisTypeAlias): PanelSelectionMenuItem => {
+  const getVisTypeAliasMenuItem = (
+    onClickCb: () => void,
+    visTypeAlias: VisTypeAlias
+  ): PanelSelectionMenuItem => {
     const { name, title, description, icon = 'empty' } = visTypeAlias;
 
     return {
       id: name,
       name: title,
       icon,
-      onClick: createNewVisType(visTypeAlias),
+      onClick: augmentedCreateNewVisType(visTypeAlias, onClickCb),
       'data-test-subj': `visType-${name}`,
       description,
     };
   };
 
-  const getEditorMenuPanels = (closePopover: () => void): GroupedAddPanelActions[] => {
-    const getEmbeddableFactoryMenuItem = getEmbeddableFactoryMenuItemProvider(api, closePopover);
+  const getEditorMenuPanels = (closeFlyout: () => void): GroupedAddPanelActions[] => {
+    const getEmbeddableFactoryMenuItem = getEmbeddableFactoryMenuItemProvider(api, closeFlyout);
 
     const groupedAddPanelAction = getAddPanelActionMenuItemsGroup(
       api,
       addPanelActions,
-      closePopover
+      closeFlyout
     );
 
     const initialPanelGroups = mergeGroupedItemsProvider(getEmbeddableFactoryMenuItem)(
@@ -277,22 +292,26 @@ export const EditorMenu = ({
           return {
             ...panelGroup,
             items: (panelGroup.items ?? []).concat(
-              promotedVisTypes.map(getVisTypeMenuItem),
+              promotedVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout)),
               // TODO: actually add grouping to vis type alias so we wouldn't randomly display an unintended item
-              visTypeAliases.map(getVisTypeAliasMenuItem)
+              visTypeAliases.map(getVisTypeAliasMenuItem.bind(null, closeFlyout))
             ),
           };
         }
         case COMMON_EMBEDDABLE_GROUPING.legacy.id: {
           return {
             ...panelGroup,
-            items: (panelGroup.items ?? []).concat(legacyVisTypes.map(getVisTypeMenuItem)),
+            items: (panelGroup.items ?? []).concat(
+              legacyVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
+            ),
           };
         }
         case COMMON_EMBEDDABLE_GROUPING.annotation.id: {
           return {
             ...panelGroup,
-            items: (panelGroup.items ?? []).concat(toolVisTypes.map(getVisTypeMenuItem)),
+            items: (panelGroup.items ?? []).concat(
+              toolVisTypes.map(getVisTypeMenuItem.bind(null, closeFlyout))
+            ),
           };
         }
         default: {
