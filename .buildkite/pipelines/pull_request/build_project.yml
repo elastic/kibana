@@ -2,7 +2,11 @@ steps:
   - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: 'Build Project Image'
     agents:
-      queue: n2-16-spot
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-16
+      preemptible: true
     timeout_in_minutes: 60
     soft_fail: true
     retry:

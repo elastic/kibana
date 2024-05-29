@@ -35,7 +35,6 @@ export const startQueryPerformanceTracking = (dashboard: DashboardContainer) => 
     totalLoadTime: number;
     loadType: DashboardLoadType;
   }) => {
-    console.log('reporting!', { timeToData, totalLoadTime, loadType });
     reportPerformanceMetricEvent(analytics, {
       eventName: DASHBOARD_LOADED_EVENT,
       duration: Math.max(timeToData, totalLoadTime),
@@ -56,7 +55,7 @@ export const startQueryPerformanceTracking = (dashboard: DashboardContainer) => 
           if (apiPublishesPhaseEvents(child)) childPhaseEventTrackers.push(child);
         }
         if (childPhaseEventTrackers.length === 0) return of([]);
-        return combineLatest(childPhaseEventTrackers.map((child) => child.onPhaseChange));
+        return combineLatest(childPhaseEventTrackers.map((child) => child.phase$));
       }),
       map((latestPhaseEvents) =>
         latestPhaseEvents.some((phaseEvent) => phaseEvent && phaseEvent.status !== 'rendered')

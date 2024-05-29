@@ -3572,7 +3572,13 @@
             "label": "aiops",
             "description": [],
             "signature": [
-              "AiopsPluginStart"
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.AiopsPluginStart",
+                "text": "AiopsPluginStart"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
@@ -10332,7 +10338,7 @@
                 "label": "value",
                 "description": [],
                 "signature": [
-                  "true"
+                  "false"
                 ],
                 "path": "x-pack/plugins/observability_solution/observability/server/ui_settings.ts",
                 "deprecated": false,
@@ -13070,6 +13076,48 @@
               "string"
             ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.convertToBuiltInComparators",
+        "type": "Function",
+        "tags": [],
+        "label": "convertToBuiltInComparators",
+        "description": [],
+        "signature": [
+          "(comparator: ",
+          "LegacyComparator",
+          ") => ",
+          {
+            "pluginId": "@kbn/alerting-comparators",
+            "scope": "common",
+            "docId": "kibKbnAlertingComparatorsPluginApi",
+            "section": "def-common.COMPARATORS",
+            "text": "COMPARATORS"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/utils/convert_legacy_outside_comparator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.convertToBuiltInComparators.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "comparator",
+            "description": [],
+            "signature": [
+              "LegacyComparator"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/common/utils/convert_legacy_outside_comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

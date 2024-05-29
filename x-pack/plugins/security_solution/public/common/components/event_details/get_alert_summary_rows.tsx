@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { useMemo } from 'react';
 import { find, isEmpty, uniqBy } from 'lodash/fp';
 import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
 
@@ -38,6 +38,11 @@ import {
   SENTINEL_ONE_AGENT_ID_FIELD,
   isAlertFromSentinelOneEvent,
 } from '../../utils/sentinelone_alert_check';
+import {
+  CROWDSTRIKE_AGENT_ID_FIELD,
+  isAlertFromCrowdstrikeEvent,
+} from '../../utils/crowdstrike_alert_check';
+import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const THRESHOLD_TERMS_FIELD = `${ALERT_THRESHOLD_RESULT}.terms.field`;
 const THRESHOLD_TERMS_VALUE = `${ALERT_THRESHOLD_RESULT}.terms.value`;
@@ -52,6 +57,11 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   {
     id: SENTINEL_ONE_AGENT_ID_FIELD,
+    overrideField: AGENT_STATUS_FIELD_NAME,
+    label: i18n.AGENT_STATUS,
+  },
+  {
+    id: CROWDSTRIKE_AGENT_ID_FIELD,
     overrideField: AGENT_STATUS_FIELD_NAME,
     label: i18n.AGENT_STATUS,
   },
@@ -297,7 +307,7 @@ export function getEventCategoriesFromData(data: TimelineEventsDetailsItem[]): E
   return { primaryEventCategory, allEventCategories };
 }
 
-export const getSummaryRows = ({
+export const useSummaryRows = ({
   data,
   browserFields,
   scopeId,
@@ -305,7 +315,6 @@ export const getSummaryRows = ({
   isDraggable = false,
   isReadOnly = false,
   investigationFields,
-  sentinelOneManualHostActionsEnabled,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
@@ -314,97 +323,122 @@ export const getSummaryRows = ({
   investigationFields?: string[];
   isDraggable?: boolean;
   isReadOnly?: boolean;
-  sentinelOneManualHostActionsEnabled?: boolean;
 }) => {
-  const eventCategories = getEventCategoriesFromData(data);
+  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'sentinelOneManualHostActionsEnabled'
+  );
+  const crowdstrikeManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsCrowdstrikeManualHostIsolationEnabled'
+  );
+  return useMemo(() => {
+    const eventCategories = getEventCategoriesFromData(data);
 
-  const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
+    const eventCodeField = find({ category: 'event', field: 'event.code' }, data);
 
-  const eventCode = Array.isArray(eventCodeField?.originalValue)
-    ? eventCodeField?.originalValue?.[0]
-    : eventCodeField?.originalValue;
+    const eventCode = Array.isArray(eventCodeField?.originalValue)
+      ? eventCodeField?.originalValue?.[0]
+      : eventCodeField?.originalValue;
 
-  const eventRuleTypeField = find({ category: 'kibana', field: ALERT_RULE_TYPE }, data);
-  const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
-    ? eventRuleTypeField?.originalValue?.[0]
-    : eventRuleTypeField?.originalValue;
+    const eventRuleTypeField = find({ category: 'kibana', field: ALERT_RULE_TYPE }, data);
+    const eventRuleType = Array.isArray(eventRuleTypeField?.originalValue)
+      ? eventRuleTypeField?.originalValue?.[0]
+      : eventRuleTypeField?.originalValue;
 
-  const tableFields = getEventFieldsToDisplay({
-    eventCategories,
-    eventCode,
-    eventRuleType,
-    highlightedFieldsOverride: investigationFields ?? [],
-  });
+    const tableFields = getEventFieldsToDisplay({
+      eventCategories,
+      eventCode,
+      eventRuleType,
+      highlightedFieldsOverride: investigationFields ?? [],
+    });
 
-  return data != null
-    ? tableFields.reduce<AlertSummaryRow[]>((acc, field) => {
-        const item = data.find(
-          (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
-        );
-        if (!item || isEmpty(item.values)) {
-          return acc;
-        }
-
-        // If we found the data by its legacy id we swap the ids to display the correct one
-        if (item.field === field.legacyId) {
-          field.id = field.legacyId;
-        }
-
-        const linkValueField =
-          field.linkField != null && data.find((d) => d.field === field.linkField);
-        const description = {
-          ...getEnrichedFieldInfo({
-            item,
-            linkValueField: linkValueField || undefined,
-            contextId: scopeId,
-            scopeId,
-            browserFields,
-            eventId,
-            field,
-          }),
-          isDraggable,
-          isReadOnly,
-        };
-
-        if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
-          return acc;
-        }
-
-        if (
-          field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
-          sentinelOneManualHostActionsEnabled &&
-          !isAlertFromSentinelOneEvent({ data })
-        ) {
-          return acc;
-        }
-
-        if (field.id === THRESHOLD_TERMS_FIELD) {
-          const enrichedInfo = enrichThresholdTerms(item, data, description);
-          if (enrichedInfo) {
-            return [...acc, ...enrichedInfo];
-          } else {
+    return data != null
+      ? tableFields.reduce<AlertSummaryRow[]>((acc, field) => {
+          const item = data.find(
+            (d) => d.field === field.id || (field.legacyId && d.field === field.legacyId)
+          );
+          if (!item || isEmpty(item.values)) {
             return acc;
           }
-        }
 
-        if (field.id === THRESHOLD_CARDINALITY_FIELD) {
-          const enrichedInfo = enrichThresholdCardinality(item, data, description);
-          if (enrichedInfo) {
-            return [...acc, enrichedInfo];
-          } else {
+          // If we found the data by its legacy id we swap the ids to display the correct one
+          if (item.field === field.legacyId) {
+            field.id = field.legacyId;
+          }
+
+          const linkValueField =
+            field.linkField != null && data.find((d) => d.field === field.linkField);
+          const description = {
+            ...getEnrichedFieldInfo({
+              item,
+              linkValueField: linkValueField || undefined,
+              contextId: scopeId,
+              scopeId,
+              browserFields,
+              eventId,
+              field,
+            }),
+            isDraggable,
+            isReadOnly,
+          };
+
+          if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {
             return acc;
           }
-        }
 
-        return [
-          ...acc,
-          {
-            title: field.label ?? field.id,
-            description,
-          },
-        ];
-      }, [])
-    : [];
+          if (
+            field.id === SENTINEL_ONE_AGENT_ID_FIELD &&
+            sentinelOneManualHostActionsEnabled &&
+            !isAlertFromSentinelOneEvent({ data })
+          ) {
+            return acc;
+          }
+
+          if (
+            field.id === CROWDSTRIKE_AGENT_ID_FIELD &&
+            crowdstrikeManualHostActionsEnabled &&
+            !isAlertFromCrowdstrikeEvent({ data })
+          ) {
+            return acc;
+          }
+
+          if (field.id === THRESHOLD_TERMS_FIELD) {
+            const enrichedInfo = enrichThresholdTerms(item, data, description);
+            if (enrichedInfo) {
+              return [...acc, ...enrichedInfo];
+            } else {
+              return acc;
+            }
+          }
+
+          if (field.id === THRESHOLD_CARDINALITY_FIELD) {
+            const enrichedInfo = enrichThresholdCardinality(item, data, description);
+            if (enrichedInfo) {
+              return [...acc, enrichedInfo];
+            } else {
+              return acc;
+            }
+          }
+
+          return [
+            ...acc,
+            {
+              title: field.label ?? field.id,
+              description,
+            },
+          ];
+        }, [])
+      : [];
+  }, [
+    browserFields,
+    data,
+    eventId,
+    isDraggable,
+    scopeId,
+    isReadOnly,
+    investigationFields,
+    sentinelOneManualHostActionsEnabled,
+    crowdstrikeManualHostActionsEnabled,
+  ]);
 };
 
 /**
