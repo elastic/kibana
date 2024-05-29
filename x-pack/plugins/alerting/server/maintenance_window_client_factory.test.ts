@@ -13,6 +13,7 @@ import {
   savedObjectsClientMock,
   savedObjectsServiceMock,
   loggingSystemMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
@@ -23,12 +24,13 @@ jest.mock('./maintenance_window_client');
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
-
 const securityPluginStart = securityMock.createStart();
+const uiSettings = uiSettingsServiceMock.createStartContract();
 
 const maintenanceWindowClientFactoryParams: jest.Mocked<MaintenanceWindowClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
   savedObjectsService,
+  uiSettings,
 };
 
 beforeEach(() => {
