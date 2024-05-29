@@ -16,6 +16,7 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_TAGS,
+  ALERT_RULE_SNOOZED,
   ALERT_START,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
@@ -45,6 +46,7 @@ interface BuildNewAlertOpts<
 > {
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  snoozed: boolean;
   payload?: DeepPartial<AlertData>;
   runTimestamp?: string;
   timestamp: string;
@@ -65,6 +67,7 @@ export const buildNewAlert = <
 >({
   legacyAlert,
   rule,
+  snoozed,
   runTimestamp,
   timestamp,
   payload,
@@ -86,6 +89,7 @@ export const buildNewAlert = <
         [EVENT_ACTION]: 'open',
         [EVENT_KIND]: 'signal',
         [ALERT_RULE_EXECUTION_TIMESTAMP]: runTimestamp ?? timestamp,
+        [ALERT_RULE_SNOOZED]: snoozed,
         [ALERT_ACTION_GROUP]: legacyAlert.getScheduledActionOptions()?.actionGroup,
         [ALERT_FLAPPING]: legacyAlert.getFlapping(),
         [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),

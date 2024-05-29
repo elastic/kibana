@@ -98,6 +98,7 @@ import {
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_RULE_SNOOZED,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
@@ -320,6 +321,7 @@ describe('Task Runner', () => {
               bar: true,
             },
             revision: 0,
+            snoozed: false,
             spaceId: 'default',
             tags: ['rule-', '-tags'],
           },
@@ -581,6 +583,7 @@ describe('Task Runner', () => {
               [ALERT_RULE_REVISION]: 0,
               [ALERT_RULE_TYPE_ID]: 'test',
               [ALERT_RULE_TAGS]: ['rule-', '-tags'],
+              [ALERT_RULE_SNOOZED]: false,
               [ALERT_RULE_UUID]: '1',
               [ALERT_START]: DATE_1970,
               [ALERT_STATUS]: 'active',

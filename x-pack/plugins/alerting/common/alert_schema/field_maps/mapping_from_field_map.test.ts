@@ -285,6 +285,9 @@ describe('mappingFromFieldMap', () => {
                     rule_type_id: {
                       type: 'keyword',
                     },
+                    snoozed: {
+                      type: 'boolean',
+                    },
                     tags: {
                       type: 'keyword',
                     },

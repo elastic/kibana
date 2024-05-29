@@ -26,6 +26,7 @@ import {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_REVISION,
+  ALERT_RULE_SNOOZED,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -149,6 +150,11 @@ export const alertFieldMap = {
     type: 'long',
     array: false,
     required: true,
+  },
+  [ALERT_RULE_SNOOZED]: {
+    type: 'boolean',
+    array: false,
+    required: false,
   },
   [ALERT_RULE_TAGS]: {
     type: 'keyword',

@@ -48,6 +48,7 @@ export interface AlertRuleData {
   spaceId: string;
   tags: string[];
   alertDelay: number;
+  snoozed: boolean;
 }
 
 export interface AlertRule {

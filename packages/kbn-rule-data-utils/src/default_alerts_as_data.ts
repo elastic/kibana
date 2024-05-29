@@ -100,6 +100,9 @@ const ALERT_RULE_PRODUCER = `${ALERT_RULE_NAMESPACE}.producer` as const;
 // kibana.alert.rule.revision - current revision of the rule that generated this alert
 const ALERT_RULE_REVISION = `${ALERT_RULE_NAMESPACE}.revision` as const;
 
+// kibana.alert.rule.snooze_schedule - snoozed status of the rule that generated this alert
+const ALERT_RULE_SNOOZED = `${ALERT_RULE_NAMESPACE}.snoozed` as const;
+
 // kibana.alert.rule.tags - rule tags for rule that generated this alert
 const ALERT_RULE_TAGS = `${ALERT_RULE_NAMESPACE}.tags` as const;
 
@@ -138,6 +141,7 @@ const fields = {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_REVISION,
+  ALERT_RULE_SNOOZED,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
@@ -180,6 +184,7 @@ export {
   ALERT_RULE_PARAMETERS,
   ALERT_RULE_PRODUCER,
   ALERT_RULE_REVISION,
+  ALERT_RULE_SNOOZED,
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,

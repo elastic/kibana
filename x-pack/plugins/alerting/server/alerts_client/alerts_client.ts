@@ -66,6 +66,7 @@ import {
   filterMaintenanceWindows,
   filterMaintenanceWindowsIds,
 } from '../task_runner/get_maintenance_windows';
+import { isRuleSnoozed } from '../lib';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -464,6 +465,7 @@ export class AlertsClient<
             >({
               legacyAlert: activeAlerts[id],
               rule: this.rule,
+              snoozed: this.options.rule.snoozed,
               runTimestamp: this.runTimestampString,
               timestamp: currentTime,
               payload: this.reportedAlerts[id],

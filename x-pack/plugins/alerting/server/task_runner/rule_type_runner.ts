@@ -16,7 +16,7 @@ import {
 import { some } from 'lodash';
 import { IAlertsClient } from '../alerts_client/types';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
-import { ErrorWithReason } from '../lib';
+import { ErrorWithReason, isRuleSnoozed } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
 import { NormalizedRuleType } from '../rule_type_registry';
 import {

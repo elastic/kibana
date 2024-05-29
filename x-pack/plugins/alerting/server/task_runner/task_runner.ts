@@ -328,6 +328,7 @@ export class TaskRunner<
         alertDelay: rule.alertDelay,
         params: rule.params,
       },
+      snoozed: isRuleSnoozed(rule),
       ruleType: this.ruleType as UntypedNormalizedRuleType,
       startedAt: this.taskInstance.startedAt,
       taskInstance: this.taskInstance,
