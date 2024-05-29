@@ -74,7 +74,7 @@ import { getFileHandler } from './file_handler';
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
 export const INSTALL_PACKAGES_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
-  integrations: { installPackageAssets: true },
+  integrations: { installPackages: true },
 };
 
 export const READ_PACKAGE_INFO_AUTHZ: FleetAuthzRouteConfig['fleetAuthz'] = {
