@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { EmbeddableStart, ReactEmbeddableFactory, ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
@@ -224,7 +224,7 @@ export const getVisualizeEmbeddableFactory: (
         const expressionParams = useStateFromPublishingSubject(expressionParams$);
         const renderCount = useStateFromPublishingSubject(renderCount$);
         const domNode = useRef<HTMLDivElement>(null);
-        useExpressionRenderer(domNode, expressionParams);
+        const { error, isLoading } = useExpressionRenderer(domNode, expressionParams);
 
         return (
           <div
@@ -236,7 +236,25 @@ export const getVisualizeEmbeddableFactory: (
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup style={{ height: '100%' }} justifyContent="center" alignItems="center">
-              <EuiLoadingChart size="l" mono />
+              {isLoading && <EuiLoadingChart size="l" mono />}
+              {!isLoading && error && (
+                <EuiEmptyPrompt
+                  iconType="error"
+                  color="danger"
+                  title={
+                    <h2>
+                      {i18n.translate('visualizations.embeddable.errorTitle', {
+                        defaultMessage: 'Unable to load visualization ',
+                      })}
+                    </h2>
+                  }
+                  body={
+                    <p>
+                      {error.name}: {error.message}
+                    </p>
+                  }
+                />
+              )}
             </EuiFlexGroup>
           </div>
         );
