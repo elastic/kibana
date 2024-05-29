@@ -146,7 +146,7 @@ function select_list() {
   done
 
   echo -e "\n"
-  read -p "Ingest all of them? [Y/n] (default: Yes): " confirmation_reply
+  read -p "Do you want to ingest all of these logs? [Y/n] (default: Yes): " confirmation_reply
   confirmation_reply="${confirmation_reply:-Y}"
 
   if [[ ! "$confirmation_reply" =~ ^[Yy]$ ]]; then
@@ -233,12 +233,12 @@ if [[ -n "$excluded_options_string" ]]; then
   echo -e "$excluded_options_string"
 fi
 
-echo -e "\nList any custom logs that we have not detected (e.g. /var/log/myapp/*.log, /home/j/myapp/*.log). Press Enter to skip."
+echo -e "\nAdd paths to any custom logs we've missed (e.g. /var/log/myapp/*.log, /home/j/myapp/*.log). Press Enter to skip."
 read custom_log_file_path_list_string
 
 IFS=', ' read -r -a custom_log_file_path_list_array <<< "$custom_log_file_path_list_string"
 
-echo -e "\nThese logs will be ingested:"
+echo -e "\nYou've selected these logs to ingest:"
 for item in "${selected_known_integrations_array[@]}"; do
   printf "• %s\n" "$(known_integration_title "${item}")"
 done
@@ -251,7 +251,7 @@ read -p "Confirm selection [Y/n] (default: Yes): " confirmation_reply
 confirmation_reply="${confirmation_reply:-Y}"
 
 if [[ ! "$confirmation_reply" =~ ^[Yy]$ ]]; then
-  echo -e "You can run the script again to select different logs."
+  echo -e "Rerun the script again to select different logs."
   exit 1
 fi
 
