@@ -48,7 +48,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.clearSearchFilter();
       });
 
-      describe('by text', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/168281
+      describe.skip('by text', () => {
         it('matches on the first word', async function () {
           await retry.try(async () => {
             await listingTable.searchForItemWithName('search');
