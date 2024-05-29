@@ -142,7 +142,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/cloud-defend-plugin",
     "@kbn/expandable-flyout",
-    "@kbn/securitysolution-grouping",
+    "@kbn/grouping",
     "@kbn/securitysolution-data-table",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
