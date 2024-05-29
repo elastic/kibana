@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 
+import type { BuildFlavor } from '@kbn/config/src/types';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
@@ -80,12 +81,17 @@ export interface ISpacesClient {
  * Client for interacting with spaces.
  */
 export class SpacesClient implements ISpacesClient {
+  private isServerless = false;
+
   constructor(
     private readonly debugLogger: (message: string) => void,
     private readonly config: ConfigType,
     private readonly repository: ISavedObjectsRepository,
-    private readonly nonGlobalTypeNames: string[]
-  ) {}
+    private readonly nonGlobalTypeNames: string[],
+    private readonly buildFlavour: BuildFlavor
+  ) {
+    this.isServerless = this.buildFlavour === 'serverless';
+  }
 
   public async getAll(options: v1.GetAllSpacesOptions = {}): Promise<v1.GetSpaceResult[]> {
     const { purpose = DEFAULT_PURPOSE } = options;
@@ -130,10 +136,19 @@ export class SpacesClient implements ISpacesClient {
       );
     }
 
+    if (this.isServerless && space.hasOwnProperty('solution')) {
+      throw Boom.badRequest('Unable to create Space, solution property is forbidden in serverless');
+    }
+
+    if (space.hasOwnProperty('solution') && !space.solution) {
+      throw Boom.badRequest('Unable to create Space, solution property cannot be empty');
+    }
+
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
     const id = space.id;
     const attributes = this.generateSpaceAttributes(space);
+
     const createdSavedObject = await this.repository.create('space', attributes, { id });
 
     this.debugLogger(`SpacesClient.create(), created space object`);
@@ -146,6 +161,14 @@ export class SpacesClient implements ISpacesClient {
       throw Boom.badRequest(
         'Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled'
       );
+    }
+
+    if (this.isServerless && space.hasOwnProperty('solution')) {
+      throw Boom.badRequest('Unable to update Space, solution property is forbidden in serverless');
+    }
+
+    if (space.hasOwnProperty('solution') && !space.solution) {
+      throw Boom.badRequest('Unable to update Space, solution property cannot be empty');
     }
 
     const attributes = this.generateSpaceAttributes(space);
@@ -181,7 +204,7 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.bulkUpdate(objectsToUpdate);
   }
 
-  private transformSavedObjectToSpace(savedObject: SavedObject<any>): v1.Space {
+  private transformSavedObjectToSpace = (savedObject: SavedObject<any>): v1.Space => {
     return {
       id: savedObject.id,
       name: savedObject.attributes.name ?? '',
@@ -191,10 +214,11 @@ export class SpacesClient implements ISpacesClient {
       imageUrl: savedObject.attributes.imageUrl,
       disabledFeatures: savedObject.attributes.disabledFeatures ?? [],
       _reserved: savedObject.attributes._reserved,
+      ...(!this.isServerless ? { solution: savedObject.attributes.solution } : {}),
     } as v1.Space;
-  }
+  };
 
-  private generateSpaceAttributes(space: v1.Space) {
+  private generateSpaceAttributes = (space: v1.Space) => {
     return {
       name: space.name,
       description: space.description,
@@ -202,6 +226,7 @@ export class SpacesClient implements ISpacesClient {
       initials: space.initials,
       imageUrl: space.imageUrl,
       disabledFeatures: space.disabledFeatures,
+      ...(!this.isServerless && space.solution ? { solution: space.solution } : {}),
     };
-  }
+  };
 }

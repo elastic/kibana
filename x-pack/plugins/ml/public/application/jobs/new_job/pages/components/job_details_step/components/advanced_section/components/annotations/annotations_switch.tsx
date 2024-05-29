@@ -53,6 +53,7 @@ export const AnnotationsSwitch: FC = () => {
       </Description>
       {showCallOut && (
         <EuiCallOut
+          data-test-subj="mlJobWizardAlsoEnableAnnotationsRecommendationCallout"
           title={
             <FormattedMessage
               id="xpack.ml.newJob.wizard.jobDetailsStep.advancedSection.annotationsSwitchCallout.title"

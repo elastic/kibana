@@ -16,6 +16,7 @@ import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
+import { useIsAddToCaseOpen } from './components/cases_context/state/use_is_add_to_case_open';
 import { createClientAPI } from './client/api';
 import { canUseCases } from './client/helpers/can_use_cases';
 import { getRuleIdFromEvent } from './client/helpers/get_rule_id_from_event';
@@ -190,6 +191,7 @@ export class CasesUiPlugin
       hooks: {
         useCasesAddToNewCaseFlyout,
         useCasesAddToExistingCaseModal,
+        useIsAddToCaseOpen,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),
