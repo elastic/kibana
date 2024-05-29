@@ -947,7 +947,7 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
         createdPolicyIds.push(updatedPolicy.id);
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { id, updated_at, ...newPolicy } = updatedPolicy;
+        const { id, updated_at, version, ...newPolicy } = updatedPolicy;
 
         expect(newPolicy).to.eql({
           status: 'active',
