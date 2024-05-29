@@ -7,29 +7,29 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/constants';
+import { POST_INDEX_RESULTS, INTERNAL_API_VERSION } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
-import { PostResultBody } from '../../schemas/result';
+import { PostIndexResultBody } from '../../schemas/result';
 import { API_CURRENT_USER_ERROR_MESSAGE, API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { checkIndicesPrivileges } from './privileges';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 
-export const postResultsRoute = (
+export const postIndexResultsRoute = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,
   logger: Logger
 ) => {
   router.versioned
     .post({
-      path: RESULTS_ROUTE_PATH,
+      path: POST_INDEX_RESULTS,
       access: 'internal',
       options: { tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
         version: INTERNAL_API_VERSION,
-        validate: { request: { body: buildRouteValidation(PostResultBody) } },
+        validate: { request: { body: buildRouteValidation(PostIndexResultBody) } },
       },
       async (context, request, response) => {
         const services = await context.resolve(['core', 'dataQualityDashboard']);

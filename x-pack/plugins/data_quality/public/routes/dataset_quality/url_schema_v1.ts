@@ -10,7 +10,8 @@ import {
   DatasetQualityPublicStateUpdate,
 } from '@kbn/dataset-quality-plugin/public/controller';
 import * as rt from 'io-ts';
-import { datasetQualityUrlSchemaV1, deepCompactObject } from '../../../../common';
+import { deepCompactObject } from '../../../common/utils/deep_compact_object';
+import { datasetQualityUrlSchemaV1 } from '../../../common/url_schema';
 
 export const getStateFromUrlValue = (
   urlValue: datasetQualityUrlSchemaV1.UrlSchema

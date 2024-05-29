@@ -932,6 +932,7 @@
   ],
   "slo-settings": [],
   "space": [
+    "disabledFeatures",
     "name",
     "solution"
   ],
