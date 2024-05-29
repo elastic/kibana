@@ -5,14 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 
 interface Context {
   data: DataPublicPluginStart;
-  embeddable: IEmbeddable;
   queryString: string;
 }
 
@@ -23,7 +21,7 @@ export async function isActionCompatible(data: DataPublicPluginStart) {
   return currentQueryString && isOfAggregateQueryType(currentQueryString);
 }
 
-export async function executeAction({ embeddable, queryString, data }: Context) {
+export async function executeAction({ queryString, data }: Context) {
   const isCompatibleAction = await isActionCompatible(data);
   if (!isCompatibleAction) {
     throw new IncompatibleActionError();
