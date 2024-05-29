@@ -15,12 +15,6 @@ import { Global } from '@kbn/core-di-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './internal_contracts';
 
-interface Reference<T = unknown> {
-  id: PluginOpaqueId;
-  index?: number;
-  service: interfaces.ServiceIdentifier<T>;
-}
-
 /** @internal */
 export class CoreInjectionService {
   private static readonly Context = Symbol(
@@ -31,40 +25,34 @@ export class CoreInjectionService {
     'Scope'
   ) as interfaces.ServiceIdentifier<interfaces.Container>;
 
-  private static getReference<T>({ id, index, service }: Reference<T>): interfaces.DynamicValue<T> {
-    return ({ container }) => {
-      const scope = container
-        .get(CoreInjectionService.Context)
-        .getNamed(CoreInjectionService.Scope, id);
-
-      if (index == null) {
-        return scope.get(service);
-      }
-
-      return scope.getAll(service)[index];
-    };
-  }
-
   private static bindGlobals(target: interfaces.Container, source: interfaces.Container) {
-    const id = source.get(this.Id);
+    const id = source.isCurrentBound(this.Id) ? source.get(this.Id) : undefined;
+    const getScope: (container: interfaces.Container) => interfaces.Container = id
+      ? (container) =>
+          container.get(CoreInjectionService.Context).getNamed(CoreInjectionService.Scope, id)
+      : () => source;
 
-    if (!source.isBound(Global)) {
-      return;
-    }
-
-    chain(source.getAll(Global))
+    chain(source.isCurrentBound(Global) ? source.getAll(Global) : [])
       .groupBy()
+      // `.groupBy` creates an object with symbol keys that are ignored by lodash down the chain
+      .cloneWith((services) =>
+        Reflect.ownKeys(services).map((service) => services[service as keyof typeof services])
+      )
       .flatMap((services) =>
         services.map((service, index) => ({
-          id,
           service,
           index: services.length === 1 ? undefined : index,
         }))
       )
-      .forEach((reference) => {
+      .value()
+      .forEach(({ index, service }) => {
         target
-          .bind(reference.service)
-          .toDynamicValue(this.getReference(reference))
+          .bind(service)
+          .toDynamicValue(({ container }) => {
+            const scope = getScope(container);
+
+            return index == null ? scope.get(service) : scope.getAll(service)[index];
+          })
           .inRequestScope();
       });
   }
@@ -77,7 +65,13 @@ export class CoreInjectionService {
     this.load = this.load.bind(this);
   }
 
-  protected getContainer(id: PluginOpaqueId) {
+  protected getContainer(id: PluginOpaqueId, root = this.root) {
+    return root.isBoundNamed(CoreInjectionService.Scope, id)
+      ? root.getNamed(CoreInjectionService.Scope, id)
+      : undefined;
+  }
+
+  protected load(id: PluginOpaqueId, module: interfaces.ContainerModule): void {
     if (!this.root.isBoundNamed(CoreInjectionService.Scope, id)) {
       const scope = this.root.createChild();
 
@@ -85,18 +79,16 @@ export class CoreInjectionService {
       this.root.bind(CoreInjectionService.Scope).toConstantValue(scope).whenTargetNamed(id);
     }
 
-    return this.root.getNamed(CoreInjectionService.Scope, id);
-  }
-
-  protected load(id: PluginOpaqueId, module: interfaces.ContainerModule): void {
-    this.getContainer(id).load(module);
+    this.getContainer(id)!.load(module);
   }
 
   protected fork(root: interfaces.Container = this.root) {
     const fork = root.createChild();
+    const scopes = root.isCurrentBound(CoreInjectionService.Scope)
+      ? root.getAll(CoreInjectionService.Scope)
+      : [];
 
-    root
-      .getAll(CoreInjectionService.Scope)
+    scopes
       .map((scope) => scope.get(CoreInjectionService.Id))
       .forEach((id) => {
         fork
@@ -138,6 +130,7 @@ export class CoreInjectionService {
     return {
       getContainer: this.getContainer,
       fork: this.fork,
+      root: this.root,
     };
   }
 }

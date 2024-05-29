@@ -573,8 +573,8 @@ export class Server {
     coreSetup.http.registerRouteHandlerContext<RequestHandlerContext, 'core'>(
       coreId,
       'core',
-      (context, req) => {
-        return new CoreRouteHandlerContext(this.coreStart!, req, context._source);
+      (context, req, res) => {
+        return new CoreRouteHandlerContext(this.coreStart!, req, res, context._source);
       }
     );
   }

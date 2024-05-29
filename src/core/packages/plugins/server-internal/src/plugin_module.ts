@@ -13,9 +13,18 @@ import {
   ConfigService,
   LoggerService,
   LoggingService,
+  HttpService,
   OpaqueIdToken,
   type PluginInitializerContext,
 } from '@kbn/core-plugins-server';
+import {
+  type IRouteHandler,
+  Route,
+  type RouteRegistrar,
+  RouterService,
+} from '@kbn/core-http-server';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { Global } from '@kbn/core-di-common';
 
 export function createCoreModule() {
   return new ContainerModule(() => {});
@@ -34,5 +43,26 @@ export function createPluginInitializerModule(
 export function createPluginSetupModule(context: CoreSetup): interfaces.ContainerModule {
   return new ContainerModule((bind) => {
     bind(LoggingService).toConstantValue(context.logging);
+    bind(HttpService).toConstantValue(context.http);
+    bind(RouterService)
+      .toDynamicValue(({ container }) => container.get(HttpService).createRouter())
+      .inSingletonScope()
+      .onActivation(({ container }, router) => {
+        const route = container.get(Route);
+        const register = router[route.method] as RouteRegistrar<
+          typeof route.method,
+          RequestHandlerContext
+        >;
+
+        register(route, async ({ core }) => {
+          const { injection } = await core;
+
+          return injection.container.get<IRouteHandler>(route).handle();
+        });
+
+        return router;
+      });
+
+    bind(Global).toConstantValue(RouterService);
   });
 }
