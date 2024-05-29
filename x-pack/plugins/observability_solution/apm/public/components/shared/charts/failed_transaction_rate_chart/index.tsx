@@ -15,7 +15,7 @@ import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
+import { TimeseriesChartWithoutAppContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -24,8 +24,13 @@ import { useEnvironmentsContext } from '../../../../context/environments_context
 import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
 import { ChartType, getTimeSeriesColor } from '../helper/get_timeseries_color';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
+import {
+  PreferredDataSourceAndBucketSize,
+  usePreferredDataSourceAndBucketSize,
+} from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 import { ApmDocumentType } from '../../../../../common/document_type';
+import { Environment } from '../../../../../common/environment_rt';
+import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 
 function yLabelFormat(y?: number | null) {
   return asPercent(y || 0, 1);
@@ -55,35 +60,42 @@ export const errorRateI18n = i18n.translate('xpack.apm.errorRate.tip', {
   defaultMessage:
     "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
 });
-export function FailedTransactionRateChart({ height, showAnnotations = true, kuery }: Props) {
-  const {
-    urlParams: { transactionName },
-  } = useLegacyUrlParams();
 
-  const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
-  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const preferred = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    numBuckets: 100,
-    kuery,
-    type: transactionName
-      ? ApmDocumentType.TransactionMetric
-      : ApmDocumentType.ServiceTransactionMetric,
-  });
-
-  const { environment } = useEnvironmentsContext();
-
-  const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
-    AnomalyDetectorType.txFailureRate
-  );
-
-  const { serviceName, transactionType, transactionTypeStatus } = useApmServiceContext();
-
+export function FailedTransactionRateWithoutAppContext({
+  start,
+  end,
+  kuery,
+  environment,
+  serviceName,
+  transactionType,
+  transactionTypeStatus,
+  previousPeriodLabel,
+  comparisonEnabled,
+  offset,
+  transactionName,
+  showAnnotations,
+  height,
+  preferred,
+  preferredAnomalyTimeseries,
+}: {
+  start: string;
+  end: string;
+  kuery: string;
+  environment: Environment;
+  serviceName: string;
+  transactionType: string | undefined;
+  transactionTypeStatus: FETCH_STATUS;
+  previousPeriodLabel: string | undefined;
+  comparisonEnabled: boolean;
+  offset: string | undefined;
+  transactionName: string | undefined;
+  showAnnotations: boolean;
+  height?: number;
+  preferred: PreferredDataSourceAndBucketSize<
+    ApmDocumentType.ServiceTransactionMetric | ApmDocumentType.TransactionMetric
+  >;
+  preferredAnomalyTimeseries: ServiceAnomalyTimeseries | undefined;
+}) {
   const comparisonChartTheme = getComparisonChartTheme();
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -136,7 +148,6 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
     ChartType.FAILED_TRANSACTION_RATE
   );
 
-  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
       data: data?.currentPeriod?.timeseries ?? [],
@@ -152,11 +163,66 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
             data: data?.previousPeriod?.timeseries ?? [],
             type: 'area',
             color: previousPeriodColor,
-            title: previousPeriodLabel,
+            title: previousPeriodLabel ?? '',
           },
         ]
       : []),
   ];
+
+  return (
+    <TimeseriesChartWithoutAppContext
+      id="errorRate"
+      height={height}
+      showAnnotations={showAnnotations}
+      fetchStatus={status}
+      timeseries={timeseries}
+      yLabelFormat={yLabelFormat}
+      yDomain={{ min: 0, max: 1 }}
+      customTheme={comparisonChartTheme}
+      comparisonEnabled={comparisonEnabled}
+      offset={offset}
+      anomalyTimeseries={
+        preferredAnomalyTimeseries
+          ? {
+              ...preferredAnomalyTimeseries,
+              color: previousPeriodColor,
+            }
+          : undefined
+      }
+    />
+  );
+}
+
+export function FailedTransactionRateChart({ height, showAnnotations = true, kuery }: Props) {
+  const {
+    urlParams: { transactionName },
+  } = useLegacyUrlParams();
+
+  const {
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+  } = useAnyOfApmParams('/services/{serviceName}', '/mobile-services/{serviceName}');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    numBuckets: 100,
+    kuery,
+    type: transactionName
+      ? ApmDocumentType.TransactionMetric
+      : ApmDocumentType.ServiceTransactionMetric,
+  });
+
+  const { environment } = useEnvironmentsContext();
+
+  const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
+    AnomalyDetectorType.txFailureRate
+  );
+
+  const { serviceName, transactionType, transactionTypeStatus } = useApmServiceContext();
+
+  const previousPeriodLabel = usePreviousPeriodLabel();
 
   return (
     <EuiPanel hasBorder={true}>
@@ -176,23 +242,22 @@ export function FailedTransactionRateChart({ height, showAnnotations = true, kue
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <TimeseriesChartWithContext
-        id="errorRate"
-        height={height}
+      <FailedTransactionRateWithoutAppContext
+        start={start}
+        end={end}
+        kuery={kuery}
+        environment={environment}
+        serviceName={serviceName}
+        transactionName={transactionName}
+        transactionType={transactionType}
+        transactionTypeStatus={transactionTypeStatus}
+        comparisonEnabled={comparisonEnabled}
+        offset={offset}
+        previousPeriodLabel={previousPeriodLabel}
         showAnnotations={showAnnotations}
-        fetchStatus={status}
-        timeseries={timeseries}
-        yLabelFormat={yLabelFormat}
-        yDomain={{ min: 0, max: 1 }}
-        customTheme={comparisonChartTheme}
-        anomalyTimeseries={
-          preferredAnomalyTimeseries
-            ? {
-                ...preferredAnomalyTimeseries,
-                color: previousPeriodColor,
-              }
-            : undefined
-        }
+        preferred={preferred}
+        preferredAnomalyTimeseries={preferredAnomalyTimeseries}
+        height={height}
       />
     </EuiPanel>
   );

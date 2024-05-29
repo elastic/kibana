@@ -7,7 +7,7 @@
 import type { Pagination } from '@elastic/eui';
 import type { GlobalWidgetParameters } from '@kbn/investigate-plugin/public';
 import { compact, uniq } from 'lodash';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { isMobileAgentName } from '../../../../../common/agent_name';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import type { Environment } from '../../../../../common/environment_rt';
@@ -31,7 +31,12 @@ export function InvestigateServiceInventory({
   environment,
   timeRange,
   query,
-}: { environment: Environment; serviceGroup: string } & GlobalWidgetParameters) {
+  onServiceClick,
+}: {
+  environment: Environment;
+  serviceGroup: string;
+  onServiceClick: (service: { serviceName: string }) => Promise<void>;
+} & GlobalWidgetParameters) {
   const start = timeRange.from;
   const end = timeRange.to;
 
@@ -104,6 +109,9 @@ export function InvestigateServiceInventory({
     });
   }, [breakpoints, showAlertsColumn, showHealthStatusColumn]);
 
+  const onServiceClickRef = useRef(onServiceClick);
+  onServiceClickRef.current = onServiceClick;
+
   const items = useMemo<InteractiveServiceListItem[]>(() => {
     return mainStatisticsFetch.mainStatisticsData.items.map((item): InteractiveServiceListItem => {
       const queryForLink = {
@@ -146,6 +154,7 @@ export function InvestigateServiceInventory({
             onClick={(event) => {
               event.preventDefault();
               event.stopPropagation();
+              onServiceClickRef.current({ serviceName: item.serviceName });
             }}
           />
         ),

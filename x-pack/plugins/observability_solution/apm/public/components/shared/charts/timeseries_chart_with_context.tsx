@@ -26,6 +26,7 @@ import { unit } from '../../../utils/style';
 import { getTimeZone } from './helper/timezone';
 import { TimeseriesChart } from './timeseries_chart';
 import { useTheme } from '../../../hooks/use_theme';
+import { useKibana } from '../../../context/kibana_context/use_kibana';
 
 interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
   color?: string;
@@ -49,6 +50,56 @@ export interface TimeseriesChartWithContextProps {
   anomalyTimeseries?: AnomalyTimeseries;
   customTheme?: Record<string, unknown>;
   anomalyTimeseriesColor?: string;
+}
+
+export function TimeseriesChartWithoutAppContext({
+  comparisonEnabled,
+  offset,
+  ...passThroughProps
+}: TimeseriesChartWithContextProps & {
+  comparisonEnabled: boolean;
+  offset: string | undefined;
+}) {
+  const {
+    services: { uiSettings },
+  } = useKibana();
+
+  const theme = useTheme();
+
+  const timeZone = getTimeZone(uiSettings);
+
+  const annotationColor = theme.eui.euiColorSuccess;
+  const { annotations } = useAnnotationsContext();
+
+  const timeseriesAnnotations = [
+    <LineAnnotation
+      key="annotations"
+      id="annotations"
+      domainType={AnnotationDomainType.XDomain}
+      dataValues={annotations.map((annotation) => ({
+        dataValue: annotation['@timestamp'],
+        header: asAbsoluteDateTime(annotation['@timestamp']),
+        details: `${i18n.translate('xpack.apm.chart.annotation.version', {
+          defaultMessage: 'Version',
+        })} ${annotation.text}`,
+      }))}
+      style={{
+        line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
+      }}
+      marker={<EuiIcon type="dot" color={annotationColor} />}
+      markerPosition={Position.Top}
+    />,
+  ];
+
+  return (
+    <TimeseriesChart
+      {...passThroughProps}
+      annotations={timeseriesAnnotations}
+      timeZone={timeZone}
+      comparisonEnabled={comparisonEnabled}
+      offset={offset}
+    />
+  );
 }
 
 export function TimeseriesChartWithContext({

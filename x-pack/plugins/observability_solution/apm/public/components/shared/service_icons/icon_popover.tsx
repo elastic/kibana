@@ -20,6 +20,19 @@ interface IconPopoverProps {
   icon: PopoverItem['icon'];
 }
 
+const getButtonSize = (iconSize: 's' | 'm' | 'l') => {
+  switch (iconSize) {
+    case 'l':
+      return 'm';
+
+    case 'm':
+      return 's';
+
+    case 's':
+      return 'xs';
+  }
+};
+
 export function IconPopover({
   icon,
   title,
@@ -46,7 +59,7 @@ export function IconPopover({
           iconSize={icon.size ?? 'l'}
           className="serviceIcon_button"
           data-test-subj={`popover_${title}`}
-          size="m"
+          size={getButtonSize(icon.size ?? 'l')}
         />
       }
       isOpen={isOpen}

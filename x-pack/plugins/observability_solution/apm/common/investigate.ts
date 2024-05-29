@@ -6,3 +6,4 @@
  */
 
 export const APM_SERVICE_INVENTORY_WIDGET_NAME = 'apm_service_inventory';
+export const APM_SERVICE_DETAIL_WIDGET_NAME = 'apm_service_detail';
