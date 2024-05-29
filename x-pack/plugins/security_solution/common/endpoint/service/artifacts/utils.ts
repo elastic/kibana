@@ -41,18 +41,18 @@ export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'ta
  * Given a list of artifact tags, returns the tags that are not policy tags
  * policy tags follow the format: `policy:id`
  */
-export function getArtifactTagsWithoutPolicies(tags?: string[]): string[] {
+export const getArtifactTagsWithoutPolicies = (tags?: string[]): string[] => {
   return tags?.filter((tag) => !tag.startsWith('policy:')) || [];
-}
+};
 
 /**
  * Return a list of artifact policy tags based on a current
  * selection by the EffectedPolicySelection component.
  */
-export function getArtifactTagsByEffectedPolicySelection(
+export const getArtifactTagsByEffectedPolicySelection = (
   selection: EffectedPolicySelection,
   otherTags: string[] = []
-): string[] {
+): string[] => {
   if (selection.isGlobal) {
     return [GLOBAL_ARTIFACT_TAG, ...otherTags];
   }
@@ -61,7 +61,7 @@ export function getArtifactTagsByEffectedPolicySelection(
   });
 
   return newTags.concat(otherTags);
-}
+};
 
 /**
  * Given a list of an Exception item tags it will return
@@ -70,10 +70,10 @@ export function getArtifactTagsByEffectedPolicySelection(
  * Policy tags follow the pattern `policy:id`
  * non policy tags will be ignored.
  */
-export function getEffectedPolicySelectionByTags(
+export const getEffectedPolicySelectionByTags = (
   tags: string[],
   policies: PolicyData[]
-): EffectedPolicySelection {
+): EffectedPolicySelection => {
   if (tags.find((tag) => tag === GLOBAL_ARTIFACT_TAG)) {
     return {
       isGlobal: true,
@@ -95,7 +95,7 @@ export function getEffectedPolicySelectionByTags(
     isGlobal: false,
     selected,
   };
-}
+};
 
 export const createExceptionListItemForCreate = (listId: string): CreateExceptionListItemSchema => {
   return {
