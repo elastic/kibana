@@ -45,8 +45,7 @@ import type { ArtifactFormComponentProps } from '../../../../components/artifact
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
-  GLOBAL_ARTIFACT_TAG,
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
+  getArtifactTagsByPolicySelection,
 } from '../../../../../../common/endpoint/service/artifacts';
 
 import {
@@ -533,9 +532,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     // policy and handler
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = change.isGlobal
-          ? [GLOBAL_ARTIFACT_TAG]
-          : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
+        const tags = getArtifactTagsByPolicySelection(change);
 
         // Preserve old selected policies when switching to global
         if (!change.isGlobal) {

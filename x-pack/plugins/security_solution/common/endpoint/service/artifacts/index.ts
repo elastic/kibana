@@ -10,8 +10,7 @@ export {
   isArtifactByPolicy,
   getPolicyIdsFromArtifact,
   getEffectedPolicySelectionByTags,
-  getArtifactTagsWithoutPolicies,
-  getArtifactTagsByEffectedPolicySelection,
+  getArtifactTagsByPolicySelection,
 } from './utils';
 
 export { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants';

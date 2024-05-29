@@ -42,6 +42,7 @@ import {
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
+  getArtifactTagsByPolicySelection,
 } from '../../../../../../common/endpoint/service/artifacts';
 import {
   isMacosLinuxTrustedAppCondition,
@@ -66,10 +67,6 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import type { EffectedPolicySelection } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
-import {
-  GLOBAL_ARTIFACT_TAG,
-  BY_POLICY_ARTIFACT_TAG_PREFIX,
-} from '../../../../../../common/endpoint/service/artifacts/constants';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 
@@ -307,9 +304,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
-        const tags = change.isGlobal
-          ? [GLOBAL_ARTIFACT_TAG]
-          : change.selected.map((policy) => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`);
+        const tags = getArtifactTagsByPolicySelection(change);
 
         const nextItem = { ...item, tags };
         // Preserve old selected policies when switching to global

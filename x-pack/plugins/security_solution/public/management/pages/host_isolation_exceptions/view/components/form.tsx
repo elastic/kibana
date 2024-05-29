@@ -25,8 +25,7 @@ import type {
 } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import {
-  getArtifactTagsByEffectedPolicySelection,
-  getArtifactTagsWithoutPolicies,
+  getArtifactTagsByPolicySelection,
   getEffectedPolicySelectionByTags,
   isArtifactGlobal,
 } from '../../../../../../common/endpoint/service/artifacts';
@@ -139,13 +138,10 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
         }
 
         notifyOfChange({
-          tags: getArtifactTagsByEffectedPolicySelection(
-            selection,
-            getArtifactTagsWithoutPolicies(exception.tags)
-          ),
+          tags: getArtifactTagsByPolicySelection(selection),
         });
       },
-      [exception.tags, notifyOfChange]
+      [notifyOfChange]
     );
 
     const handleOnDescriptionChange = useCallback(

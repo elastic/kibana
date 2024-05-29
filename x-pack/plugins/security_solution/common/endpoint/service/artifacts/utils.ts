@@ -38,29 +38,17 @@ export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'ta
 };
 
 /**
- * Given a list of artifact tags, returns the tags that are not policy tags
- * policy tags follow the format: `policy:id`
- */
-export const getArtifactTagsWithoutPolicies = (tags?: string[]): string[] => {
-  return tags?.filter((tag) => !tag.startsWith('policy:')) || [];
-};
-
-/**
  * Return a list of artifact policy tags based on a current
  * selection by the EffectedPolicySelection component.
  */
-export const getArtifactTagsByEffectedPolicySelection = (
-  selection: EffectedPolicySelection,
-  otherTags: string[] = []
-): string[] => {
+export const getArtifactTagsByPolicySelection = (selection: EffectedPolicySelection): string[] => {
   if (selection.isGlobal) {
-    return [GLOBAL_ARTIFACT_TAG, ...otherTags];
+    return [GLOBAL_ARTIFACT_TAG];
   }
-  const newTags = selection.selected.map((policy) => {
-    return `policy:${policy.id}`;
-  });
 
-  return newTags.concat(otherTags);
+  return selection.selected.map((policy) => {
+    return `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`;
+  });
 };
 
 /**
