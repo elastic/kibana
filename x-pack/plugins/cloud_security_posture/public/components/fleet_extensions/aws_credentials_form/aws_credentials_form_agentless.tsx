@@ -14,10 +14,13 @@ import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
 } from '@kbn/fleet-plugin/common';
-import type { CloudSecurityIntegrationAwsAccountType } from '@kbn/fleet-plugin/public/components/agent_enrollment_flyout/types';
 
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import { ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT, TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR } from "../../../../common/constants";
+import {
+  ORGANIZATION_ACCOUNT,
+  SINGLE_ACCOUNT,
+  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
+} from '../../../../common/constants';
 import {
   DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE,
   getAwsCredentialsFormAgentlessOptions,
@@ -188,27 +191,26 @@ export const AwsCredentialsFormAgentless = ({
         }}
       />
       <EuiSpacer size="m" />
-      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE && (
-        <>
-          <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
-          <EuiSpacer size="m" />
-          automationCredentialTemplate && (
-          <EuiButton
-            data-test-subj="launchCloudFormationAgentlessButton"
-            target="_blank"
-            iconSide="left"
-            iconType="launch"
-            href={automationCredentialTemplate}
-          >
-            <FormattedMessage
-              id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
-              defaultMessage="Launch CloudFormation"
-            />
-          </EuiButton>
-          <EuiSpacer size="m" />
-          )
-        </>
-      )}
+      {awsCredentialsType === DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE &&
+        automationCredentialTemplate && (
+          <>
+            <CloudFormationCloudCredentialsGuide isOrganization={isOrganization} />
+            <EuiSpacer size="m" />
+            <EuiButton
+              data-test-subj="launchCloudFormationAgentlessButton"
+              target="_blank"
+              iconSide="left"
+              iconType="launch"
+              href={automationCredentialTemplate}
+            >
+              <FormattedMessage
+                id="xpack.csp.agentlessForm.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+                defaultMessage="Launch CloudFormation"
+              />
+            </EuiButton>
+            <EuiSpacer size="m" />
+          </>
+        )}
       <AwsInputVarFields
         fields={fields}
         packageInfo={packageInfo}
