@@ -16,7 +16,7 @@ export const LogTextSeparator: FC<PropsWithChildren<unknown>> = ({ children }) =
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={false}>{children}</EuiFlexItem>
       <EuiFlexItem>
-        <EuiHorizontalRule />
+        <EuiHorizontalRule aria-hidden="true" />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
