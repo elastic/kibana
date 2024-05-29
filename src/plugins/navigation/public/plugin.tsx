@@ -18,7 +18,6 @@ import type {
   NavigationPublicStart,
   NavigationPublicSetupDependencies,
   NavigationPublicStartDependencies,
-  ConfigSchema,
   AddSolutionNavigationArg,
 } from './types';
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
@@ -41,7 +40,7 @@ export class NavigationPublicPlugin
   private depsStart?: NavigationPublicStartDependencies;
   private isSolutionNavExperiementEnabled$ = of(false);
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(_core: CoreSetup): NavigationPublicSetup {
     return {
@@ -96,10 +95,10 @@ export class NavigationPublicPlugin
             ).pipe(shareReplay(1));
     }
 
-    this.initiateChromeStyleAndSideNav(chrome);
-
     // Initialize the solution navigation if it is enabled
     this.isSolutionNavExperiementEnabled$.pipe(take(1)).subscribe((isEnabled) => {
+      this.initiateChromeStyleAndSideNav(chrome, { isFeatureEnabled: isEnabled, isServerless });
+
       if (!isEnabled) return;
 
       chrome.project.setCloudUrls(cloud!);
@@ -158,17 +157,26 @@ export class NavigationPublicPlugin
     });
   }
 
-  private initiateChromeStyleAndSideNav(chrome: InternalChromeStart) {
+  private initiateChromeStyleAndSideNav(
+    chrome: InternalChromeStart,
+    { isFeatureEnabled, isServerless }: { isFeatureEnabled: boolean; isServerless: boolean }
+  ) {
     // Here we will read the space state and decide if we are in classic or project style
     const mockSpaceState: { solutionView?: 'classic' | 'es' | 'oblt' | 'security' } = {
       solutionView: 'security', // Change this value to test different solution views
     };
 
-    const isProjectNav = Boolean(mockSpaceState.solutionView)
-      ? mockSpaceState.solutionView !== 'classic'
-      : false;
+    let isProjectNav = false;
+    if (isFeatureEnabled) {
+      isProjectNav = Boolean(mockSpaceState.solutionView)
+        ? mockSpaceState.solutionView !== 'classic'
+        : false;
+    }
 
-    chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
+    // On serverless the chrome style is already set by the serverless plugin
+    if (!isServerless) {
+      chrome.setChromeStyle(isProjectNav ? 'project' : 'classic');
+    }
 
     if (isProjectNav && mockSpaceState.solutionView) {
       chrome.project.changeActiveSolutionNavigation(mockSpaceState.solutionView);

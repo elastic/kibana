@@ -58,10 +58,3 @@ export interface NavigationPublicStartDependencies {
 }
 
 export type SolutionType = 'es' | 'oblt' | 'security' | 'analytics';
-
-export interface ConfigSchema {
-  solutionNavigation: {
-    enabled: boolean;
-    defaultSolution: SolutionType;
-  };
-}
