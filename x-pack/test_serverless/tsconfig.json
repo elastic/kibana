@@ -99,6 +99,7 @@
     "@kbn/utility-types",
     "@kbn/synthetics-plugin",
     "@kbn/dataset-quality-plugin",
+    "@kbn/alerting-comparators",
     "@kbn/search-types"
   ]
 }
