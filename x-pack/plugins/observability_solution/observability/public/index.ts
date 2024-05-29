@@ -78,7 +78,6 @@ export { useCreateRule } from './hooks/use_create_rule';
 
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
 export { buildEsQuery } from './utils/build_es_query';
-export { KibanaReactStorybookDecorator } from './utils/kibana_react.storybook_decorator';
 
 export type {
   ObservabilityRuleTypeFormatter,

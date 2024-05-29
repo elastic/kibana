@@ -9,7 +9,7 @@ import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { BASE_ALERTING_API_PATH, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { v4 } from 'uuid';
-import {
+import type {
   CreateRuleRequestBody,
   CreateRuleResponse,
 } from '@kbn/alerting-plugin/common/routes/rule/apis/create';

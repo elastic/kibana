@@ -13,7 +13,7 @@ import type { CreateAnnotationForm } from './components/create_annotation';
 import { ObservabilityAnnotations, CreateAnnotation } from './components';
 import { useEditAnnotation } from './hooks/use_edit_annotation';
 import { useFetchAnnotations } from './use_fetch_annotations';
-import { Annotation } from '../../../common/annotations';
+import type { Annotation } from '../../../common/annotations';
 
 export const useAnnotations = ({
   sloId,
