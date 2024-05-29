@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import React, { useState, useEffect } from 'react';
 import {
   EuiBasicTable,
@@ -15,6 +14,9 @@ import {
   EuiIcon,
   EuiText,
   EuiBadge,
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 
 import type { NewAgentPolicy, AgentPolicy, GlobalDataTag } from '../../../../../../../common/types';
@@ -185,6 +187,13 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
     color: '#6a52b3',
   };
 
+  const panelStyle = {
+    backgroundColor: '#f5f7fa',
+    textAlign: 'center',
+    padding: '20px',
+    borderRadius: '8px',
+  };
+
   const columns = [
     {
       field: 'name',
@@ -254,6 +263,7 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
               <EuiButtonIcon
                 aria-label="Edit"
                 iconType="pencil"
+                color="text"
                 onClick={() => handleEdit(index)}
               />
             );
@@ -279,7 +289,7 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
               <EuiButtonIcon
                 aria-label="Delete"
                 iconType="trash"
-                color="danger"
+                color="text"
                 onClick={() => handleDelete(index)}
               />
             );
@@ -294,9 +304,18 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
   return (
     <>
       {globalDataTags.length === 0 && !isAdding ? (
-        <EuiButton onClick={handleAddField} style={{ marginTop: '16px' }}>
-          Add Field
-        </EuiButton>
+        <EuiPanel style={panelStyle} hasShadow={false}>
+          <EuiText>
+            <h4>This policy has no custom fields</h4>
+          </EuiText>
+          <EuiButton
+            iconType="plusInCircle"
+            onClick={handleAddField}
+            style={{ marginTop: '16px', textAlign: 'left' }}
+          >
+            Add another field
+          </EuiButton>
+        </EuiPanel>
       ) : (
         <>
           <EuiBasicTable
@@ -304,9 +323,18 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
             columns={columns}
             noItemsMessage="No global data tags available"
           />
-          <EuiButton onClick={handleAddField} style={{ marginTop: '16px' }} isDisabled={isAdding}>
-            Add Field
-          </EuiButton>
+          <EuiFlexGroup justifyContent="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="plusInCircle"
+                onClick={handleAddField}
+                style={{ marginTop: '16px' }}
+                isDisabled={isAdding}
+              >
+                Add another field
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
     </>
