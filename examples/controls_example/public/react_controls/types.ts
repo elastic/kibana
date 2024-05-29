@@ -36,7 +36,6 @@ export interface HasCustomPrepend {
   getCustomPrepend: () => React.FC<{}>;
 }
 
-/** This is the stuff the control group cares about */
 export type DefaultControlApi = PublishesDataLoading &
   PublishesBlockingError &
   PublishesUnsavedChanges &
@@ -61,8 +60,12 @@ export type ControlApiRegistration<ControlApi extends DefaultControlApi = Defaul
 >;
 
 export type ControlApiInitialization<ControlApi extends DefaultControlApi = DefaultControlApi> =
-  Omit<ControlApiRegistration<ControlApi>, 'serializeState' | 'getTypeDisplayName'>;
+  Omit<
+    ControlApiRegistration<ControlApi>,
+    'serializeState' | 'getTypeDisplayName' | 'clearSelections'
+  >;
 
+// TODO: Move this to the Control plugin's setup contract
 export interface ControlFactory<
   State extends DefaultControlState = DefaultControlState,
   ControlApi extends DefaultControlApi = DefaultControlApi

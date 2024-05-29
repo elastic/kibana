@@ -48,6 +48,18 @@ export class ControlsExamplePlugin
       });
     });
 
+    registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
+      const [{ getSearchEmbeddableFactory }, [coreStart, depsStart]] = await Promise.all([
+        import('./react_controls/data_controls/search_control/get_search_control_factory'),
+        core.getStartServices(),
+      ]);
+
+      return getSearchEmbeddableFactory({
+        core: coreStart,
+        dataViewsService: depsStart.data.dataViews,
+      });
+    });
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Controls examples',
@@ -71,16 +83,6 @@ export class ControlsExamplePlugin
     const editControlAction = new EditControlAction();
     deps.uiActions.registerAction(editControlAction);
     deps.uiActions.attachAction(PANEL_HOVER_TRIGGER, editControlAction.id);
-
-    registerControlFactory(SEARCH_CONTROL_TYPE, async () => {
-      const { getSearchEmbeddableFactory } = await import(
-        './react_controls/data_controls/search_control/get_search_control_factory'
-      );
-      return getSearchEmbeddableFactory({
-        core,
-        dataViewsService: deps.data.dataViews,
-      });
-    });
   }
 
   public stop() {}

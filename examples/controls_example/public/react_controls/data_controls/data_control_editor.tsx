@@ -37,7 +37,6 @@ import {
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
 
-// import { getDataControlFieldRegistry } from '@kbn/controls-plugin/public/control_group/editor/data_control_editor_tools';
 import {
   ControlWidth,
   DEFAULT_CONTROL_GROW,
@@ -101,7 +100,8 @@ export const DataControlEditor = ({
   const [selectedFieldDisplayName, setSelectedFieldDisplayName] = useState(selectedFieldName);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlEditorValid, setControlEditorValid] = useState(false);
-  // const editorConfig = controlGroup.getEditorConfig(); // TODO: Make this work
+  /** TODO: Make `editorConfig`  work when refactoring the `ControlGroupRenderer` */
+  // const editorConfig = controlGroup.getEditorConfig();
 
   const { loading: dataViewListLoading, value: dataViewListItems = [] } = useAsync(() => {
     return dataViewService.getIdsWithTitle();
@@ -250,7 +250,7 @@ export const DataControlEditor = ({
             <EuiFormRow label={DataControlEditorStrings.manageControl.dataSource.getFieldTitle()}>
               <FieldPicker
                 filterPredicate={(field: DataViewField) => {
-                  // TODO: Handle custom `fieldFilterPredicate`, which is provided through the control group renderer
+                  /** TODO: Make `fieldFilterPredicate` work when refactoring the `ControlGroupRenderer` */
                   // const customPredicate = controlGroup.fieldFilterPredicate?.(field) ?? true;
                   return Boolean(fieldRegistry?.[field.name]);
                 }}

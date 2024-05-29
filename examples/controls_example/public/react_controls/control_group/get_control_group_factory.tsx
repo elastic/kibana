@@ -13,7 +13,9 @@ import {
   ControlGroupChainingSystem,
   ControlWidth,
   CONTROL_GROUP_TYPE,
+  DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
+  DEFAULT_CONTROL_WIDTH,
 } from '@kbn/controls-plugin/common';
 import { ControlStyle, ParentIgnoreSettings } from '@kbn/controls-plugin/public';
 import { CoreStart } from '@kbn/core/public';
@@ -69,24 +71,38 @@ export const getControlGroupEmbeddableFactory = <
         ignoreParentSettings: initialParentSettings,
       } = initialState;
 
-      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
-      const grow = new BehaviorSubject<boolean | undefined>(defaultControlGrow);
-      const width = new BehaviorSubject<ControlWidth | undefined>(defaultControlWidth);
       const children$ = new BehaviorSubject<{ [key: string]: DefaultControlApi }>({});
       const filters$ = new BehaviorSubject<Filter[] | undefined>([]);
       const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
-      const controlStyle$ = new BehaviorSubject<ControlStyle>(
-        controlStyle ?? DEFAULT_CONTROL_STYLE
-      );
       const chainingSystem$ = new BehaviorSubject<ControlGroupChainingSystem>(chainingSystem);
       const showApplySelections = new BehaviorSubject<boolean | undefined>(initialShowApply);
       const ignoreParentSettings = new BehaviorSubject<ParentIgnoreSettings | undefined>(
         initialParentSettings
       );
+      const grow = new BehaviorSubject<boolean | undefined>(
+        defaultControlGrow === undefined ? DEFAULT_CONTROL_GROW : defaultControlGrow
+      );
+      const width = new BehaviorSubject<ControlWidth | undefined>(
+        defaultControlWidth ?? DEFAULT_CONTROL_WIDTH
+      );
+      const controlStyle$ = new BehaviorSubject<ControlStyle>(
+        controlStyle ?? DEFAULT_CONTROL_STYLE
+      );
+
+      /** TODO: Handle loading; loading should be true if any child is loading */
+      const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
+
+      /** TODO: Handle unsaved changes
+       * - Each child has an unsaved changed behaviour subject it pushes to
+       * - The control group listens to all of them (anyChildHasUnsavedChanges) and publishes its
+       *   own unsaved changes if either one of its children has unsaved changes **or** one of
+       *   the control group settings changed.
+       * - Children should **not** publish unsaved changes based on their output filters or selections.
+       *   Instead, the control group will handle unsaved changes for filters.
+       */
       const unsavedChanges = new BehaviorSubject<Partial<ControlGroupUnsavedChanges> | undefined>(
         undefined
       );
-      // const anyChildHasUnsavedChanges = new BehaviorSubject<boolean>(false);
 
       const controlOrder = new BehaviorSubject<Array<{ id: string; order: number; type: string }>>(
         Object.keys(childControlState)
@@ -97,11 +113,6 @@ export const getControlGroupEmbeddableFactory = <
           }))
           .sort((a, b) => (a.order > b.order ? 1 : -1))
       );
-
-      // each child has an unsaved changed behaviour subject it pushes to
-      // control group listens to all of them
-      // any time they change, it pops it into an object
-
       const api = setApi({
         unsavedChanges,
         resetUnsavedChanges: () => {},
@@ -162,7 +173,13 @@ export const getControlGroupEmbeddableFactory = <
         controlStyle: controlStyle$,
       });
 
-      /** Subscribe to all children's output filters, combine them, and output them */
+      /**
+       * Subscribe to all children's output filters, combine them, and output them
+       * TODO: If `showApplySelections` is true, publish to "unpublishedFilters" instead
+       * and only output to filters$ when the apply button is clicked.
+       * - Note: Unsaved changes of control group **should** take into consideration the
+       *         output filters,  but not the "unpublishedFilters"
+       */
       const outputFiltersSubscription = combineCompatibleApis<PublishesFilters, Filter[]>(
         api,
         'filters$',

@@ -50,8 +50,8 @@ export type ControlGroupApi<ChildStateType extends DefaultControlState = Default
     PublishesFilters &
     PublishesDataViews &
     HasSerializedChildState<ChildStateType> &
-    HasEditCapabilities & // editing for control group settings - this will be a custom action
-    PublishesDataLoading & // loading = true if any children loading
+    HasEditCapabilities &
+    PublishesDataLoading &
     PublishesUnsavedChanges &
     PublishesControlGroupDisplaySettings &
     Partial<HasParentApi<PublishesUnifiedSearch>>;

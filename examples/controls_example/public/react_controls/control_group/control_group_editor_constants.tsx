@@ -44,24 +44,6 @@ export const ControlGroupEditorStrings = {
           defaultMessage: 'Above',
         }),
     },
-    deleteControls: {
-      getDeleteAllTitle: () =>
-        i18n.translate('controls.controlGroup.management.delete.deleteAllTitle', {
-          defaultMessage: 'Delete all controls?',
-        }),
-      getSubtitle: () =>
-        i18n.translate('controls.controlGroup.management.delete.sub', {
-          defaultMessage: 'Controls are not recoverable once removed.',
-        }),
-      getConfirm: () =>
-        i18n.translate('controls.controlGroup.management.delete.confirm', {
-          defaultMessage: 'Delete',
-        }),
-      getCancel: () =>
-        i18n.translate('controls.controlGroup.management.delete.cancel', {
-          defaultMessage: 'Cancel',
-        }),
-    },
     selectionSettings: {
       getSelectionSettingsTitle: () =>
         i18n.translate('controls.controlGroup.management.selectionSettings', {

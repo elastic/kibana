@@ -6,7 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, distinctUntilChanged, skip } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  combineLatestWith,
+  debounceTime,
+  distinctUntilChanged,
+  mergeMap,
+  of,
+  skip,
+  tap,
+} from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -20,6 +30,7 @@ import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
 import { DataControlApi, DefaultDataControlState } from './types';
+import { FieldSpec } from '@kbn/data-plugin/common';
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
@@ -45,7 +56,7 @@ export const initializeDataControl = <EditorState extends object = {}>(
   } = initializeDefaultControlApi(state);
 
   const panelTitle = new BehaviorSubject<string | undefined>(state.title);
-  const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.fieldName);
+  const defaultPanelTitle = new BehaviorSubject<string | undefined>(undefined);
   const dataViewId = new BehaviorSubject<string>(state.dataViewId);
   const fieldName = new BehaviorSubject<string>(state.fieldName);
   const dataViews = new BehaviorSubject<DataView[] | undefined>(undefined);
@@ -66,21 +77,29 @@ export const initializeDataControl = <EditorState extends object = {}>(
   };
 
   /**
-   * The default panel title will always be the same as the field name, so keep these two things in sync;
-   * Skip the first fired event because it was initialized above
+   * Fetch the data view + field whenever the selected data view ID or field name changes; use the
+   * fetched field spec to set the default panel title, which is always equal to either the field
+   * name or the field's display name.
    */
-  fieldName.pipe(skip(1), distinctUntilChanged()).subscribe((newFieldName) => {
-    defaultPanelTitle.next(newFieldName);
-  });
-
-  /**
-   * Fetch the data view whenever the selected id changes
-   */
-  dataViewId.pipe(distinctUntilChanged()).subscribe(async (id: string) => {
-    defaultControlApi.setDataLoading(true);
-    dataViews.next([await services.dataViews.get(id)]);
-    defaultControlApi.setDataLoading(false);
-  });
+  dataViewId
+    .pipe(
+      combineLatestWith(fieldName),
+      distinctUntilChanged(
+        ([oldId, oldField], [newId, newField]) => oldId === newId && oldField === newField
+      ),
+      mergeMap(async ([currentDataViewId, currentFieldName]) => {
+        defaultControlApi.setDataLoading(true);
+        const dataView = await services.dataViews.get(currentDataViewId);
+        const field = dataView.getFieldByName(currentFieldName);
+        defaultControlApi.setDataLoading(false);
+        return { dataView, field };
+      })
+    )
+    .subscribe(async ({ dataView, field }) => {
+      if (!dataView || !field) return;
+      dataViews.next([dataView]);
+      defaultPanelTitle.next(field.displayName || field.name);
+    });
 
   const onEdit = async () => {
     openDataControlEditor<DefaultDataControlState & EditorState>(
@@ -100,11 +119,11 @@ export const initializeDataControl = <EditorState extends object = {}>(
     defaultPanelTitle,
     dataViews,
     onEdit,
-    isEditingEnabled: () => true,
     filters$: filters,
     setOutputFilter: (newFilter: Filter | undefined) => {
       filters.next(newFilter ? [newFilter] : undefined);
     },
+    isEditingEnabled: () => true,
   };
 
   return {

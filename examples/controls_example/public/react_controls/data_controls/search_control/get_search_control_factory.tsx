@@ -28,12 +28,16 @@ import {
 const allSearchOptions = [
   {
     id: 'match',
-    label: 'Fuzzy match',
+    label: i18n.translate('controlsExamples.searchControl.searchTechnique.match', {
+      defaultMessage: 'Fuzzy match',
+    }),
     'data-test-subj': 'searchControl__matchSearchOptionAdditionalSetting',
   },
   {
     id: 'simple_query_string',
-    label: 'Query string',
+    label: i18n.translate('controlsExamples.searchControl.searchTechnique.simpleQueryString', {
+      defaultMessage: 'Query string',
+    }),
     'data-test-subj': 'optionsListControl__queryStringSearchOptionAdditionalSetting',
   },
 ];
@@ -102,9 +106,10 @@ export const getSearchEmbeddableFactory = ({
       const api = buildApi(
         {
           ...dataControlApi,
-          getTypeDisplayName: () => {
-            return 'TEST';
-          },
+          getTypeDisplayName: () =>
+            i18n.translate('controlsExamples.searchControl.displayName', {
+              defaultMessage: 'Search',
+            }),
           serializeState: () => {
             const { rawState: dataControlState, references } = serializeDataControl();
             return {

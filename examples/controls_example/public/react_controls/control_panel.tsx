@@ -47,9 +47,9 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
 
   const viewModeSubject = (() => {
     if (
-      apiHasParentApi(api) && // api.parentApi => controGroupApi
-      apiHasParentApi(api.parentApi) && // controlGroupApi.parentApi => dashboardApi
-      apiPublishesViewMode(api.parentApi.parentApi)
+      apiHasParentApi(api) &&
+      apiHasParentApi(api.parentApi) && // api.parentApi => controlGroupApi
+      apiPublishesViewMode(api.parentApi.parentApi) // controlGroupApi.parentApi => dashboardApi
     )
       return api.parentApi.parentApi.viewMode; // get view mode from dashboard API
   })();
@@ -94,6 +94,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
         'controlFrameWrapper--small': width === 'small',
         'controlFrameWrapper--medium': width === 'medium',
         'controlFrameWrapper--large': width === 'large',
+        // TODO: Add the following classes back once drag and drop logic is added
         // 'controlFrameWrapper-isDragging': isDragging,
         // 'controlFrameWrapper--insertBefore': isOver && (index ?? -1) < (draggingIndex ?? -1),
         // 'controlFrameWrapper--insertAfter': isOver && (index ?? -1) > (draggingIndex ?? -1),
@@ -145,7 +146,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
                     />{' '}
                     <EuiFormLabel
                       className="eui-textTruncate"
-                      // TODO: Convert this to a class
+                      // TODO: Convert this to a class when replacing the legacy control group
                       css={css`
                         background-color: transparent !important;
                       `}
@@ -157,7 +158,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
               }
             >
               <Component
-                // TODO: Convert this to a class
+                // TODO: Convert this to a class when replacing the legacy control group
                 css={css`
                   height: calc(${euiThemeVars.euiButtonHeight} - 2px);
                   box-shadow: none !important;

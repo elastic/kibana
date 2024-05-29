@@ -17,7 +17,6 @@ import { BehaviorSubject } from 'rxjs';
 
 import { ControlStateManager } from '../types';
 import { ControlGroupEditor } from './control_group_editor';
-import { ControlGroupEditorStrings } from './control_group_editor_constants';
 import { ControlGroupApi, ControlGroupEditorState } from './types';
 
 export const openEditControlGroupFlyout = (
@@ -29,7 +28,7 @@ export const openEditControlGroupFlyout = (
 ) => {
   /**
    * Duplicate all state into a new manager because we do not want to actually apply the changes
-   * to the control until the user hits save.
+   * to the control group until the user hits save.
    */
   const editorStateManager: ControlStateManager<ControlGroupEditorState> = Object.keys(
     stateManager
@@ -51,12 +50,23 @@ export const openEditControlGroupFlyout = (
 
   const onDeleteAll = (ref: OverlayRef) => {
     services.core.overlays
-      .openConfirm(ControlGroupEditorStrings.management.deleteControls.getSubtitle(), {
-        confirmButtonText: ControlGroupEditorStrings.management.deleteControls.getConfirm(),
-        cancelButtonText: ControlGroupEditorStrings.management.deleteControls.getCancel(),
-        title: ControlGroupEditorStrings.management.deleteControls.getDeleteAllTitle(),
-        buttonColor: 'danger',
-      })
+      .openConfirm(
+        i18n.translate('controls.controlGroup.management.delete.sub', {
+          defaultMessage: 'Controls are not recoverable once removed.',
+        }),
+        {
+          confirmButtonText: i18n.translate('controls.controlGroup.management.delete.confirm', {
+            defaultMessage: 'Delete',
+          }),
+          cancelButtonText: i18n.translate('controls.controlGroup.management.delete.cancel', {
+            defaultMessage: 'Cancel',
+          }),
+          title: i18n.translate('controls.controlGroup.management.delete.deleteAllTitle', {
+            defaultMessage: 'Delete all controls?',
+          }),
+          buttonColor: 'danger',
+        }
+      )
       .then((confirmed) => {
         if (confirmed)
           Object.keys(controlGroupApi.children$.getValue()).forEach((childId) => {

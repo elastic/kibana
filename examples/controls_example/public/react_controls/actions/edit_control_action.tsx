@@ -9,10 +9,9 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   apiCanAccessViewMode,
@@ -24,6 +23,8 @@ import {
   getInheritedViewMode,
   hasEditCapabilities,
 } from '@kbn/presentation-publishing';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+
 import { DataControlApi } from '../data_controls/types';
 
 const isApiCompatible = (api: unknown | null): api is DataControlApi =>
@@ -63,7 +64,9 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return 'Edit';
+    return i18n.translate('controls.controlGroup.floatingActions.editTitle', {
+      defaultMessage: 'Edit',
+    });
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
