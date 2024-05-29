@@ -53,7 +53,8 @@ describe('DELETE /api/saved_objects/{type}/{id} with allowApiAccess true', () =>
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     const config = setupConfig(true);
-    registerDeleteRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerDeleteRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

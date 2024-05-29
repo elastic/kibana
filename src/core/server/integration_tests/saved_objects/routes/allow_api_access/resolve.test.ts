@@ -78,8 +78,9 @@ describe('GET /api/saved_objects/resolve/{type}/{id} with allowApiAccess true', 
     const logger = loggerMock.create();
 
     const config = setupConfig(true);
+    const access = 'public';
 
-    registerResolveRoute(router, { config, coreUsageData, logger });
+    registerResolveRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });

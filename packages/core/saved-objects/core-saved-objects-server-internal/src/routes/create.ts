@@ -22,7 +22,6 @@ interface RouteDependencies {
   config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
-  isServerless: boolean;
   access: RouteAccess;
 }
 

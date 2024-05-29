@@ -63,7 +63,6 @@ export function registerRoutes({
     config,
     coreUsageData,
     logger,
-    isServerless,
     access: internalOnServerless,
   });
   registerDeleteRoute(router, { config, coreUsageData, logger, access: internalOnServerless });

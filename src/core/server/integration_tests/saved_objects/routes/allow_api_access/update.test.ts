@@ -54,7 +54,8 @@ describe('PUT /api/saved_objects/{type}/{id?} with allowApiAccess true', () => {
     const logger = loggerMock.create();
 
     const config = setupConfig(true);
-    registerUpdateRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerUpdateRoute(router, { config, coreUsageData, logger, access });
 
     await server.start();
   });
