@@ -28,5 +28,5 @@ export interface CoreDiServiceStart {
   /**
    * The plugin-scoped container
    */
-  getContainer(): interfaces.Container;
+  getContainer(root?: interfaces.Container): interfaces.Container | undefined;
 }
