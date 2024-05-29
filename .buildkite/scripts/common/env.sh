@@ -14,11 +14,6 @@ PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
-echo "PARENT_DIR=$PARENT_DIR"
-echo "WORKSPACE=$WORKSPACE"
-echo "KIBANA_DIR=$KIBANA_DIR"
-echo "HOME=$HOME"
-
 export DOCS_REPO_CACHE_DIR="$HOME/.docs-repos"
 
 # A few things, such as Chrome, respect this variable
