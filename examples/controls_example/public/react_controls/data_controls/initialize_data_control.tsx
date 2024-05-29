@@ -6,17 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  combineLatestWith,
-  debounceTime,
-  distinctUntilChanged,
-  mergeMap,
-  of,
-  skip,
-  tap,
-} from 'rxjs';
+import { BehaviorSubject, combineLatestWith, distinctUntilChanged, mergeMap } from 'rxjs';
 
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataView, DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
@@ -30,7 +20,6 @@ import { initializeDefaultControlApi } from '../initialize_default_control_api';
 import { ControlApiInitialization, ControlStateManager, DefaultControlState } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
 import { DataControlApi, DefaultDataControlState } from './types';
-import { FieldSpec } from '@kbn/data-plugin/common';
 
 export const initializeDataControl = <EditorState extends object = {}>(
   controlId: string,
