@@ -15,6 +15,7 @@ import {
   getRemoteIndicesList,
   esqlHasPipes,
   esqlSourceNeedsFields,
+  trimZeroLimit,
 } from './helpers';
 
 describe('helpers', function () {
@@ -369,7 +370,7 @@ describe('helpers', function () {
         '',
       ];
       for (const query of queries) {
-        expect(esqlSourceNeedsFields(query)).toEqual(false);
+        expect(esqlSourceNeedsFields(query)).toBe(false);
       }
     });
 
@@ -387,7 +388,41 @@ describe('helpers', function () {
         '\nasd\n',
       ];
       for (const query of queries) {
-        expect(esqlSourceNeedsFields(query)).toEqual(true);
+        expect(esqlSourceNeedsFields(query)).toBe(true);
+      }
+    });
+  });
+
+  describe('trimZeroLimit', function () {
+    it('removes "| limit 0" from the end of a query', async function () {
+      const queries: Array<[query: string, trimmed: string]> = [
+        ['from kibana_sample_data_ecommerce | limit 0', 'from kibana_sample_data_ecommerce'],
+        [
+          'from kibana_sample_data_ecommerce | cmd | limit 0 ',
+          'from kibana_sample_data_ecommerce | cmd',
+        ],
+        ['from|limit\n 0\n', 'from'],
+        ['|limit 0', ''],
+        ['f|  limit  0\n', 'f'],
+        ['', ''],
+      ];
+      for (const [query, trimmed] of queries) {
+        expect(trimZeroLimit(query)).toBe(trimmed);
+      }
+    });
+
+    it('leaves untouched queries without "| limit 0" ending', async function () {
+      const queries: string[] = [
+        'from kibana_sample_data_ecommerce | limit 10',
+        'from kibana_sample_data_ecommerce | command',
+        'from kibana_sample_data_ecommerce | cmd | limit 100 ',
+        'from kibana_sample_data_ecommerce | cmd | cmd2\n ',
+        'from|limit\n 5\n',
+        '|limit 9',
+        'f|  limit  3\n',
+      ];
+      for (const query of queries) {
+        expect(trimZeroLimit(query)).toBe(query);
       }
     });
   });

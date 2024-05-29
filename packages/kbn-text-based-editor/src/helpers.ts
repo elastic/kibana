@@ -255,3 +255,13 @@ export const esqlSourceNeedsFields = (esqlQuery: string): boolean => {
   if (!esqlQuery) return false;
   return !/^\s*(from|row|show).*/i.test(esqlQuery);
 };
+
+/**
+ * Checks if an ES|QL query has a trailing zero limit: " | limit 0"; and
+ * removes it. The trailing zero limit a common pattern for queries that are
+ * used to load fields for autocomplete but don't want to actually run the query.
+ */
+export const trimZeroLimit = (esqlQuery: string): string => {
+  const match = /(.*)\s*\|\s*limit\s*0\s*$/.exec(esqlQuery);
+  return match ? match[1].trimEnd() : esqlQuery;
+};
