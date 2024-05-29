@@ -82,7 +82,7 @@ const mergeVersions = <TValue>({
     case ThreeWayDiffOutcome.CustomizedValueCanUpdate: {
       return {
         mergeOutcome: ThreeWayMergeOutcome.Conflict,
-        mergedVersion: targetVersion,
+        mergedVersion: currentVersion,
       };
     }
     default:
