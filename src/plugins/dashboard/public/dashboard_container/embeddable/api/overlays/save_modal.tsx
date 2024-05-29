@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiFormRow, EuiSwitch, EuiIconTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 
 import type { DashboardSaveOptions } from '../../../types';
@@ -96,27 +96,35 @@ export const DashboardSaveModal: React.FC<DashboardSaveModalProps> = ({
       <Fragment>
         {tagSelector}
         {showStoreTimeOnSave ? (
-          <EuiFormRow
-            helpText={
-              <FormattedMessage
-                id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
-                defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
-              />
-            }
-          >
-            <EuiSwitch
-              data-test-subj="storeTimeWithDashboard"
-              checked={persistSelectedTimeInterval}
-              onChange={(event) => {
-                setPersistSelectedTimeInterval(event.target.checked);
-              }}
-              label={
-                <FormattedMessage
-                  id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
-                  defaultMessage="Store time with dashboard"
+          <EuiFormRow>
+            <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  data-test-subj="storeTimeWithDashboard"
+                  checked={persistSelectedTimeInterval}
+                  onChange={(event) => {
+                    setPersistSelectedTimeInterval(event.target.checked);
+                  }}
+                  label={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowLabel"
+                      defaultMessage="Store time with dashboard"
+                    />
+                  }
                 />
-              }
-            />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIconTip
+                  content={
+                    <FormattedMessage
+                      id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
+                      defaultMessage="This changes the time filter to the currently selected time each time this dashboard is loaded."
+                    />
+                  }
+                  position="top"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFormRow>
         ) : null}
       </Fragment>
