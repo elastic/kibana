@@ -29,6 +29,7 @@ export default function (providerContext: FtrProviderContext) {
     skipIfNoDockerRegistry(providerContext);
     let apiKey: string;
     let agent: AgentProcess;
+    let agentImage: string;
 
     const esHost = `http://host.docker.internal:${config.get('servers.elasticsearch.port')}`;
 
@@ -38,6 +39,12 @@ export default function (providerContext: FtrProviderContext) {
       });
       apiKey = `${res.id}:${res.api_key}`;
     });
+    before(async () => {
+      agentImage = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
+      log.info(agentImage);
+      await execa('docker', ['pull', agentImage]);
+    });
+
     afterEach(async () => {
       agent?.stop();
     });
@@ -64,7 +71,7 @@ outputs:
 ${inputsYaml}
 `;
 
-      agent = await startAgent({ log, elasticAgentYaml: policyYaml });
+      agent = await startAgent({ log, elasticAgentYaml: policyYaml, agentImage });
 
       // Poll for metrics
       const MAX_ITERATIONS = 20;
@@ -82,7 +89,7 @@ ${inputsYaml}
           break;
         }
 
-        await new Promise((resolve) => setTimeout(resolve, 2 * 1000));
+        await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
       }
 
       expect(foundMetrics).to.be(true);
@@ -98,14 +105,13 @@ interface AgentProcess {
 async function startAgent({
   log,
   elasticAgentYaml,
+  agentImage,
 }: {
   log: ToolingLog;
+  agentImage: string;
   elasticAgentYaml: string;
 }): Promise<AgentProcess> {
   log.info('Running the agent');
-
-  const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
-  log.info(artifact);
 
   const fileName = `${uuid()}-elastic-agent.yml`;
 
@@ -118,8 +124,6 @@ async function startAgent({
     '--detach',
     '--name',
     hostName,
-    '--net',
-    'elastic',
     '--hostname',
     hostName,
     '--add-host',
@@ -127,7 +131,7 @@ async function startAgent({
     '--mount',
     `type=bind,source=${filePath},target=/etc/elastic-agent/agent.yml`,
     '--rm',
-    artifact,
+    agentImage,
     '/usr/local/bin/docker-entrypoint',
     '-c',
     '/etc/elastic-agent/agent.yml',
