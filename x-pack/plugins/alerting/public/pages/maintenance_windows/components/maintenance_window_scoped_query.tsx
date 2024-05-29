@@ -16,7 +16,7 @@ import { useKibana } from '../../../utils/kibana_react';
 export interface MaintenanceWindowScopedQueryProps {
   featureIds: AlertConsumers[];
   query: string;
-  filters: Filter[];
+  initialFilters?: Filter[];
   errors?: string[];
   isLoading?: boolean;
   isEnabled?: boolean;
@@ -29,7 +29,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
     const {
       featureIds,
       query,
-      filters,
+      initialFilters,
       errors = [],
       isLoading,
       isEnabled = true,
@@ -79,7 +79,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
               featureIds={featureIds}
               disableQueryLanguageSwitcher={true}
               query={query}
-              filters={filters}
+              initialFilters={initialFilters}
               onQueryChange={onQueryChangeInternal}
               onQuerySubmit={onQueryChangeInternal}
               onFiltersUpdated={onFiltersChange}
@@ -90,7 +90,7 @@ export const MaintenanceWindowScopedQuery = React.memo(
               http={http}
               toasts={toasts}
               unifiedSearchBar={SearchBar}
-              dataViewsService={data.dataViews}
+              dataService={data}
             />
           </EuiFormRow>
         </EuiFlexItem>

@@ -49,7 +49,7 @@ describe('MaintenanceWindowScopedQuery', () => {
       <MaintenanceWindowScopedQuery
         featureIds={['observability', 'management', 'securitySolution'] as AlertConsumers[]}
         query={''}
-        filters={[]}
+        initialFilters={[]}
         onQueryChange={jest.fn()}
         onFiltersChange={jest.fn()}
       />
@@ -63,7 +63,7 @@ describe('MaintenanceWindowScopedQuery', () => {
         featureIds={['observability', 'management', 'securitySolution'] as AlertConsumers[]}
         isEnabled={false}
         query={''}
-        filters={[]}
+        initialFilters={[]}
         onQueryChange={jest.fn()}
         onFiltersChange={jest.fn()}
       />
@@ -77,7 +77,7 @@ describe('MaintenanceWindowScopedQuery', () => {
         featureIds={['observability', 'management', 'securitySolution'] as AlertConsumers[]}
         isLoading={true}
         query={''}
-        filters={[]}
+        initialFilters={[]}
         onQueryChange={jest.fn()}
         onFiltersChange={jest.fn()}
       />

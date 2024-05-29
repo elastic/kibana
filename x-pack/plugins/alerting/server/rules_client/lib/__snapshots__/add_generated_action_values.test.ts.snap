@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`addGeneratedActionValues() throws error if KQL is not valid: "Error creating DSL query: invalid KQL" 1`] = `"Error creating DSL query: invalid KQL"`;

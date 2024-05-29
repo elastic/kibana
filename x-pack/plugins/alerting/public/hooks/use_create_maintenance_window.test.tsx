@@ -79,7 +79,25 @@ describe('useCreateMaintenanceWindow', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Failed to create maintenance window.')
+      expect(mockAddDanger).toBeCalledWith('Failed to create maintenance window')
+    );
+  });
+
+  it('should show 400 error messages', async () => {
+    createMaintenanceWindow.mockRejectedValue({
+      body: { statusCode: 400, message: 'Bad request' },
+    });
+
+    const { result } = renderHook(() => useCreateMaintenanceWindow(), {
+      wrapper: appMockRenderer.AppWrapper,
+    });
+
+    act(() => {
+      result.current.mutate(maintenanceWindow);
+    });
+
+    await waitFor(() =>
+      expect(mockAddDanger).toBeCalledWith('Failed to create maintenance window: Bad request')
     );
   });
 });

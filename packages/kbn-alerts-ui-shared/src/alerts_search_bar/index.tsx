@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -25,10 +25,8 @@ export const AlertsSearchBar = ({
   featureIds,
   ruleTypeId,
   query,
-  filters,
   onQueryChange,
   onQuerySubmit,
-  onFiltersUpdated,
   rangeFrom,
   rangeTo,
   showFilterBar = false,
@@ -39,14 +37,16 @@ export const AlertsSearchBar = ({
   http,
   toasts,
   unifiedSearchBar,
-  dataViewsService,
+  dataService,
+  initialFilters,
+  onFiltersUpdated,
 }: AlertsSearchBarProps) => {
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataViews, loading } = useAlertDataView({
     featureIds: featureIds ?? [],
     http,
     toasts,
-    dataViewsService,
+    dataViewsService: dataService.dataViews,
   });
   const { aadFields, loading: fieldsLoading } = useRuleAADFields({
     ruleTypeId,
@@ -97,6 +97,24 @@ export const AlertsSearchBar = ({
     });
   };
 
+  useEffect(() => {
+    if (initialFilters) {
+      dataService.query.filterManager.addFilters(initialFilters);
+    }
+
+    const subscription = dataService.query.state$.subscribe((state) => {
+      if (state.changes.filters) {
+        onFiltersUpdated?.(state.state.filters ?? []);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      dataService.query.filterManager.removeAll();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return unifiedSearchBar({
     appName,
     disableQueryLanguageSwitcher,
@@ -104,13 +122,11 @@ export const AlertsSearchBar = ({
     indexPatterns: loading || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns,
     placeholder,
     query: { query: query ?? '', language: queryLanguage },
-    filters,
     dateRangeFrom: rangeFrom,
     dateRangeTo: rangeTo,
     displayStyle: 'inPage',
     showFilterBar,
     onQuerySubmit: onSearchQuerySubmit,
-    onFiltersUpdated,
     onRefresh,
     showDatePicker,
     showQueryInput: true,
