@@ -72,6 +72,7 @@ export function openDashboardPanelSelectionFlyout({
     size: 'm',
     paddingSize: flyoutPanelPaddingSize,
     'aria-labelledby': 'addPanelsFlyout',
+    'data-test-subj': 'dashboardPanelSelectionFlyout',
   });
 
   return flyoutRef;

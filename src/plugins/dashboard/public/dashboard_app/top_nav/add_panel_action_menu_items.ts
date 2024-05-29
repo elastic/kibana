@@ -22,7 +22,10 @@ export interface PanelSelectionMenuItem extends Pick<CommonProps, 'data-test-sub
   isDeprecated?: boolean;
 }
 
-export type GroupedAddPanelActions = Pick<PanelSelectionMenuItem, 'id' | 'isDisabled'> & {
+export type GroupedAddPanelActions = Pick<
+  PanelSelectionMenuItem,
+  'id' | 'isDisabled' | 'data-test-subj'
+> & {
   title: string;
   items: PanelSelectionMenuItem[];
 };
@@ -77,10 +80,12 @@ export const getAddPanelActionMenuItemsGroup = (
   actions?.forEach((item) => {
     if (Array.isArray(item.grouping)) {
       item.grouping.forEach((group) => {
-        if (!grouped[group.id]) {
-          grouped[group.id] = {
-            id: group.id,
+        const groupId = group.id;
+        if (!grouped[groupId]) {
+          grouped[groupId] = {
+            id: groupId,
             title: group.getDisplayName ? group.getDisplayName(context) : '',
+            'data-test-subj': `dashboardEditorMenu-${groupId}Group`,
             placementPriority: group.placementPriority ?? 0,
             items: [],
           };

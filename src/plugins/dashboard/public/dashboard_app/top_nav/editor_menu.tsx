@@ -63,7 +63,7 @@ const sortGroupPanelsByPlacementPriority = (
   return (
     panelGroups
       .sort(
-        // bigger number on top
+        // bigger number sorted to the top
         (panelGroupA, panelGroupB) => panelGroupB.placementPriority - panelGroupA.placementPriority
       )
       // strip out placement priority before return
@@ -81,7 +81,7 @@ export const mergeGroupedItemsProvider =
 
     new Set(Object.keys(factoryGroupMap).concat(Object.keys(groupedAddPanelAction))).forEach(
       (groupId) => {
-        // const dataTestSubj = `dashboardEditorMenu-${groupId}Group`;
+        const dataTestSubj = `dashboardEditorMenu-${groupId}Group`;
 
         const factoryGroup = factoryGroupMap[groupId];
         const addPanelGroup = groupedAddPanelAction[groupId];
@@ -90,6 +90,7 @@ export const mergeGroupedItemsProvider =
           panelGroups.push({
             id: factoryGroup.id,
             title: factoryGroup.appName,
+            'data-test-subj': dataTestSubj,
             placementPriority: factoryGroup.placementPriority,
             items: [
               ...factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
@@ -100,6 +101,7 @@ export const mergeGroupedItemsProvider =
           panelGroups.push({
             id: factoryGroup.id,
             title: factoryGroup.appName,
+            'data-test-subj': dataTestSubj,
             placementPriority: factoryGroup.placementPriority,
             items: factoryGroup.factories.map(getEmbeddableFactoryMenuItem),
           });
