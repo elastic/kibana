@@ -147,6 +147,7 @@ exports[`ResetSLO resets all associated resources 6`] = `
             "unit": "m",
             "value": 1,
           },
+          "preventInitialBackfill": false,
           "syncDelay": Duration {
             "unit": "m",
             "value": 1,
@@ -410,6 +411,7 @@ exports[`ResetSLO resets all associated resources 9`] = `
             "unit": "m",
             "value": 1,
           },
+          "preventInitialBackfill": false,
           "syncDelay": Duration {
             "unit": "m",
             "value": 1,
