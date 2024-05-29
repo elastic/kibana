@@ -45,6 +45,10 @@ export function buildQueryForFieldsForStringSources(queryString: string, ast: ES
  * Used for too-many, too-few arguments validation
  */
 export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
+  if (definition.signatures.length === 0) {
+    return { min: 0, max: 0 };
+  }
+
   let min = Infinity;
   let max = 0;
   definition.signatures.forEach(({ params, minParams }) => {
