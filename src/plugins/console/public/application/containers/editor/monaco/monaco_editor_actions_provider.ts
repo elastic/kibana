@@ -9,13 +9,12 @@
 import { CSSProperties, Dispatch } from 'react';
 import { debounce } from 'lodash';
 import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
-import { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { isQuotaExceededError } from '../../../../services/history';
 import { DEFAULT_VARIABLES } from '../../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../../services';
 import { sendRequest } from '../../../hooks';
-import { MetricsTracker } from '../../../../types';
 import { Actions } from '../../../stores/request';
 
 import {
@@ -38,6 +37,8 @@ import {
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
+import { StorageQuotaError } from '../../../components/storage_quota_error';
+import { ContextValue } from '../../../contexts';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
 
@@ -180,12 +181,12 @@ export class MonacoEditorActionsProvider {
     return curlRequests.join('\n');
   }
 
-  public async sendRequests(
-    toasts: IToasts,
-    dispatch: Dispatch<Actions>,
-    trackUiMetric: MetricsTracker,
-    http: HttpSetup
-  ): Promise<void> {
+  public async sendRequests(dispatch: Dispatch<Actions>, context: ContextValue): Promise<void> {
+    const {
+      services: { notifications, trackUiMetric, http, settings, history, autocompleteInfo },
+      startServices,
+    } = context;
+    const { toasts } = notifications;
     try {
       const requests = await this.getRequests();
       if (!requests.length) {
@@ -205,8 +206,63 @@ export class MonacoEditorActionsProvider {
 
       const results = await sendRequest({ http, requests });
 
-      // TODO save to history
-      // TODO restart autocomplete polling
+      let saveToHistoryError: undefined | Error;
+      const isHistoryEnabled = settings.getIsHistoryEnabled();
+
+      if (isHistoryEnabled) {
+        results.forEach(({ request: { path, method, data } }) => {
+          try {
+            history.addToHistory(path, method, data);
+          } catch (e) {
+            // Grab only the first error
+            if (!saveToHistoryError) {
+              saveToHistoryError = e;
+            }
+          }
+        });
+
+        if (saveToHistoryError) {
+          const errorTitle = i18n.translate('console.notification.error.couldNotSaveRequestTitle', {
+            defaultMessage: 'Could not save request to Console history.',
+          });
+          if (isQuotaExceededError(saveToHistoryError)) {
+            const toast = notifications.toasts.addWarning({
+              title: i18n.translate('console.notification.error.historyQuotaReachedMessage', {
+                defaultMessage:
+                  'Request history is full. Clear the console history or disable saving new requests.',
+              }),
+              text: toMountPoint(
+                StorageQuotaError({
+                  onClearHistory: () => {
+                    history.clearHistory();
+                    notifications.toasts.remove(toast);
+                  },
+                  onDisableSavingToHistory: () => {
+                    settings.setIsHistoryEnabled(false);
+                    notifications.toasts.remove(toast);
+                  },
+                }),
+                startServices
+              ),
+            });
+          } else {
+            // Best effort, but still notify the user.
+            notifications.toasts.addError(saveToHistoryError, {
+              title: errorTitle,
+            });
+          }
+        }
+      }
+
+      const polling = settings.getPolling();
+      if (polling) {
+        // If the user has submitted a request against ES, something in the fields, indices, aliases,
+        // or templates may have changed, so we'll need to update this data. Assume that if
+        // the user disables polling they're trying to optimize performance or otherwise
+        // preserve resources, so they won't want this request sent either.
+        autocompleteInfo.retrieve(settings, settings.getAutocomplete());
+      }
+
       dispatch({
         type: 'requestSuccess',
         payload: {
@@ -345,6 +401,54 @@ export class MonacoEditorActionsProvider {
     token: monaco.CancellationToken
   ): monaco.languages.ProviderResult<monaco.languages.CompletionList> {
     return this.getSuggestions(model, position, context);
+  }
+
+  /*
+   * This function inserts a request from the history into the editor
+   */
+  public async restoreRequestFromHistory(request: string) {
+    const model = this.editor.getModel();
+    if (!model) {
+      return;
+    }
+    let position = this.editor.getPosition() as monaco.IPosition;
+    const requests = await this.getSelectedParsedRequests();
+    let prefix = '';
+    let suffix = '';
+    // if there are requests at the cursor/selection, insert either before or after
+    if (requests.length > 0) {
+      // if on the 1st line of the 1st request, insert at the beginning of that line
+      if (position && position.lineNumber === requests[0].startLineNumber) {
+        position = { column: 1, lineNumber: position.lineNumber };
+        suffix = '\n';
+      } else {
+        // otherwise insert at the end of the last line of the last request
+        const lastLineNumber = requests[requests.length - 1].endLineNumber;
+        position = { column: model.getLineMaxColumn(lastLineNumber), lineNumber: lastLineNumber };
+        prefix = '\n';
+      }
+    } else {
+      // if not inside a request, insert the request at the cursor line
+      if (position) {
+        // insert at the beginning of the cursor line
+        position = { lineNumber: position.lineNumber, column: 1 };
+      } else {
+        // otherwise insert on line 1
+        position = { lineNumber: 1, column: 1 };
+      }
+      suffix = '\n';
+    }
+    const edit: monaco.editor.IIdentifiedSingleEditOperation = {
+      range: {
+        startLineNumber: position.lineNumber,
+        startColumn: position.column,
+        endLineNumber: position.lineNumber,
+        endColumn: position.column,
+      },
+      text: prefix + request + suffix,
+      forceMoveMarkers: true,
+    };
+    this.editor.executeEdits('restoreFromHistory', [edit]);
   }
 
   /*

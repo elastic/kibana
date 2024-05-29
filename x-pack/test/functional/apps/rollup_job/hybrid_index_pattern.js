@@ -17,7 +17,9 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'settings']);
   const esDeleteAllIndices = getService('esDeleteAllIndices');
 
-  describe('hybrid index pattern', function () {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/183975
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/183976
+  describe.skip('hybrid index pattern', function () {
     //Since rollups can only be created once with the same name (even if you delete it),
     //we add the Date.now() to avoid name collision if you run the tests locally back to back.
     const rollupJobName = `hybrid-index-pattern-test-rollup-job-${Date.now()}`;

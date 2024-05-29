@@ -100,8 +100,6 @@ export const LatestVulnerabilitiesTable = ({
       nonPersistedFilters,
     });
 
-  const { filters } = cloudPostureDataTable;
-
   const createVulnerabilityRuleFn = (rowIndex: number) => {
     const finding = getCspVulnerabilityFinding(rows[rowIndex].raw._source);
     if (!finding) return;
@@ -131,7 +129,8 @@ export const LatestVulnerabilitiesTable = ({
           title={title}
           customCellRenderer={customCellRenderer}
           groupSelectorComponent={groupSelectorComponent}
-          height={height ?? `calc(100vh - ${filters?.length > 0 ? 404 : 364}px)`}
+          height={height}
+          hasDistributionBar={false}
         />
       )}
     </>

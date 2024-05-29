@@ -29,6 +29,7 @@ import {
   getRuleForAlertTesting,
   waitForRulePartialFailure,
   waitForRuleSuccess,
+  manualRuleRun,
 } from '../../../../../../common/utils/security_solution';
 import {
   failedGapExecution,
@@ -51,7 +52,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   // FLAKY: https://github.com/elastic/kibana/issues/177223
   // Failing: See https://github.com/elastic/kibana/issues/177223
-  describe.skip('@ess @serverless Get Rule Execution Results', () => {
+  describe('@ess @serverless Get Rule Execution Results', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
@@ -260,6 +261,89 @@ export default ({ getService }: FtrProviderContext) => {
       // failed executions
       expect(response.body.total).to.eql(1002);
       expect(response.body.events[0].duration_ms).to.eql(3);
+    });
+
+    it('should return execution events with backfill information', async () => {
+      const rule = {
+        ...getRuleForAlertTesting(['auditbeat-*']),
+        query: 'process.executable: "/usr/bin/sudo"',
+      };
+      const { id } = await createRule(supertest, log, rule);
+      const fromManualRuleRun = dateMath.parse('now-1m')?.utc().toISOString() ?? '';
+      const toManualRuleRun = dateMath.parse('now', { roundUp: true })?.utc().toISOString() ?? '';
+      await manualRuleRun({
+        ruleId: id,
+        supertest,
+        start: fromManualRuleRun,
+        end: toManualRuleRun,
+      });
+
+      await waitForRuleSuccess({ supertest, log, id });
+      await waitForEventLogExecuteComplete(es, log, id, 1, 'execute-backfill');
+
+      const start = dateMath.parse('now-24h')?.utc().toISOString();
+      const end = dateMath.parse('now', { roundUp: true })?.utc().toISOString();
+      const response = await supertest
+        .get(getRuleExecutionResultsUrl(id))
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .query({ start, end, run_type_filters: ['backfill'] });
+
+      expect(response.status).to.eql(200);
+      expect(response.body.total).to.eql(1);
+      expect(response.body.events[0].duration_ms).to.greaterThan(0);
+      expect(response.body.events[0].search_duration_ms).to.greaterThan(0);
+      expect(response.body.events[0].schedule_delay_ms).to.greaterThan(0);
+      expect(response.body.events[0].indexing_duration_ms).to.greaterThan(0);
+      expect(response.body.events[0].gap_duration_s).to.eql(0);
+      expect(response.body.events[0].security_status).to.eql('succeeded');
+      expect(response.body.events[0].security_message).to.eql(
+        'Rule execution completed successfully'
+      );
+      const backfillStart = moment(fromManualRuleRun).add(5, 'm').toISOString();
+      expect(response.body.events[0].backfill.to).to.eql(backfillStart);
+      expect(response.body.events[0].backfill.from).to.eql(fromManualRuleRun);
+    });
+
+    it('should reflect run_type_filters in params', async () => {
+      const rule = {
+        ...getRuleForAlertTesting(['auditbeat-*']),
+        query: 'process.executable: "/usr/bin/sudo"',
+      };
+      const { id } = await createRule(supertest, log, rule);
+      const startManualRuleRun = dateMath.parse('now-1m')?.utc().toISOString() ?? '';
+      const endManualRuleRun = dateMath.parse('now', { roundUp: true })?.utc().toISOString() ?? '';
+      await manualRuleRun({
+        ruleId: id,
+        supertest,
+        start: startManualRuleRun,
+        end: endManualRuleRun,
+      });
+      await waitForRuleSuccess({ supertest, log, id });
+      await waitForEventLogExecuteComplete(es, log, id, 1, 'execute-backfill');
+
+      const start = dateMath.parse('now-24h')?.utc().toISOString();
+      const end = dateMath.parse('now', { roundUp: true })?.utc().toISOString();
+      const responseWithAllRunTypes = await supertest
+        .get(getRuleExecutionResultsUrl(id))
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .query({ start, end, run_type_filters: [] });
+
+      expect(responseWithAllRunTypes.status).to.eql(200);
+      expect(responseWithAllRunTypes.body.total).to.eql(2);
+
+      const responseWithOnlyStandard = await supertest
+        .get(getRuleExecutionResultsUrl(id))
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .query({ start, end, run_type_filters: ['standard'] });
+
+      expect(responseWithOnlyStandard.status).to.eql(200);
+      expect(responseWithOnlyStandard.body.total).to.eql(1);
     });
   });
 };

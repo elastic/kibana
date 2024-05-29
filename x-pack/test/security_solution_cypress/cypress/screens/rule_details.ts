@@ -163,3 +163,15 @@ export const MAX_SIGNALS_DETAILS = '[data-test-subj="maxSignalsPropertyValue"]';
 export const DESCRIPTION_SETUP_GUIDE_BUTTON = '[data-test-subj="stepAboutDetailsToggle-setup"]';
 
 export const DESCRIPTION_SETUP_GUIDE_CONTENT = '[data-test-subj="stepAboutDetailsSetupContent"]';
+
+export const EXECUTIONS_TAB = 'a[data-test-subj="navigation-execution_results"]';
+
+export const EXECUTION_SHOWING = `[data-test-subj="executionsShowing"]`;
+
+export const EXECUTION_TABLE = `[data-test-subj="executionsTable"]`;
+
+export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]`;
+
+export const EXECUTION_RUN_TYPE_FILTER = `[data-test-subj="ExecutionRunTypeFilter"]`;
+
+export const EXECUTION_RUN_TYPE_FILTER_ITEM = `[data-test-subj="ExecutionRunTypeFilter-item"]`;

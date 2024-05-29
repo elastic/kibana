@@ -16,7 +16,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const pageObjects = getPageObjects(['common', 'header']);
+  const pageObjects = getPageObjects(['common', 'header', 'timePicker']);
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const endpointTestResources = getService('endpointTestResources');
@@ -29,11 +29,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const comboBox = getService('comboBox');
   const toasts = getService('toasts');
 
-  // Failing: See https://github.com/elastic/kibana/issues/176009
-  describe.skip('Endpoint Exceptions', function () {
+  const MINUTES = 60_000;
+
+  describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
-    this.timeout(10 * 60_000);
+    this.timeout(10 * MINUTES);
 
     const clearPrefilledEntries = async () => {
       const entriesContainer = await testSubjects.find('exceptionEntriesContainer');
@@ -50,6 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const openNewEndpointExceptionFlyout = async () => {
+      await testSubjects.scrollIntoView('timeline-context-menu-button');
       await testSubjects.click('timeline-context-menu-button');
       await testSubjects.click('add-endpoint-exception-menu-item');
       await testSubjects.existOrFail('addExceptionFlyout');
@@ -102,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     const checkArtifact = (expectedArtifact: object) => {
-      return retry.tryForTime(120_000, async () => {
+      return retry.tryForTime(2 * MINUTES, async () => {
         const artifacts = await endpointArtifactTestResources.getArtifacts();
 
         const manifestArtifact = artifacts.find((artifact) =>
@@ -133,7 +135,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const waitForAlertsToAppear = async () => {
         await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await retry.waitForWithTimeout('alerts to appear', 10 * 60_000, async () => {
+        await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
+        await retry.waitForWithTimeout('alerts to appear', 10 * MINUTES, async () => {
           await queryBar.clickQuerySubmitButton();
           return testSubjects.exists('timeline-context-menu-button');
         });
@@ -164,6 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should add `event.module=endpoint` to entry if only wildcard operator is present', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
       await clearPrefilledEntries();
@@ -208,6 +212,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     it('should NOT add `event.module=endpoint` to entry if there is another operator', async () => {
       await pageObjects.common.navigateToUrlWithBrowserHistory('security', `/alerts`);
+      await pageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
 
       await openNewEndpointExceptionFlyout();
       await clearPrefilledEntries();

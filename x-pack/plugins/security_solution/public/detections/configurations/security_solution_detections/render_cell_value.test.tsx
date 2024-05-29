@@ -29,6 +29,7 @@ jest.mock('../../../common/containers/sourcerer', () => ({
     indicesExist: true,
   }),
 }));
+jest.mock('../../../common/components/guided_onboarding_tour/tour_step');
 
 describe('RenderCellValue', () => {
   const columnId = '@timestamp';
@@ -81,5 +82,22 @@ describe('RenderCellValue', () => {
     );
 
     expect(wrapper.find(DefaultCellRenderer).props()).toEqual(props);
+  });
+
+  test('it renders a GuidedOnboardingTourStep', () => {
+    const RenderCellValue = getRenderCellValueHook({
+      scopeId: SourcererScopeName.default,
+      tableId: TableId.test,
+    });
+
+    const wrapper = mount(
+      <TestProviders>
+        <DragDropContextWrapper browserFields={mockBrowserFields}>
+          <RenderCellValue {...props} />
+        </DragDropContextWrapper>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="GuidedOnboardingTourStep"]').exists()).toEqual(true);
   });
 });

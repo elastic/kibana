@@ -95,6 +95,7 @@ export const LatestFindingsTable = ({
     rows,
     error,
     isFetching,
+    isLoading,
     fetchNextPage,
     passed,
     failed,
@@ -136,7 +137,7 @@ export const LatestFindingsTable = ({
           )}
           <CloudSecurityDataTable
             data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
-            isLoading={isFetching}
+            isLoading={isFetching || isLoading}
             defaultColumns={defaultColumns}
             rows={rows}
             total={total}
