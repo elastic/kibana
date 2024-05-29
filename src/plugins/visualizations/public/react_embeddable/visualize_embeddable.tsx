@@ -234,6 +234,7 @@ export const getVisualizeEmbeddableFactory: (
             data-test-subj="visualizationLoader"
             data-rendering-count={renderCount /* Used for functional tests */}
             data-description={api.panelDescription?.getValue()}
+            data-shared-item
           >
             {/* Replicate the loading state for the expression renderer to avoid FOUC  */}
             <EuiFlexGroup style={{ height: '100%' }} justifyContent="center" alignItems="center">
