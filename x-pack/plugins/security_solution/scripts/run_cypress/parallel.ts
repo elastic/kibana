@@ -499,7 +499,8 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
       try {
         renderSummaryTable(finalResults);
       } catch (e) {
-        log.error('Failed to render summary table', e);
+        log.error('Failed to render summary table');
+        log.error(e);
       }
 
       const hasFailedTests = (
