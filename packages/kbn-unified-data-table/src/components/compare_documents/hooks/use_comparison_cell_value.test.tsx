@@ -443,7 +443,7 @@ describe('useComparisonCellValue', () => {
     renderComparisonCell(cellProps6);
     expect(calculateDiff).toHaveBeenCalledTimes(6);
   });
-  it('should render a tooltip when the field is derived from a Smart Field', () => {
+  it('should render a tooltip when the field is derived from a Smart Field', async () => {
     const { renderCellValue } = renderComparisonCellValue({
       comparisonFields: ['message'],
       additionalFieldGroups,
@@ -454,6 +454,8 @@ describe('useComparisonCellValue', () => {
       rowIndex: 0,
       renderCellValue,
     });
+
+    await screen.findByTestId('smartFieldFallbackTooltipIcon');
     expect(baseCell.getCell()).toMatchSnapshot();
   });
 });

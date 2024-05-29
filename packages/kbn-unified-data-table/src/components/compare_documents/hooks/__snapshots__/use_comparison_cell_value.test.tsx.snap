@@ -34,6 +34,7 @@ exports[`useComparisonCellValue should render a tooltip when the field is derive
         >
           <span
             data-euiicon-type="questionInCircle"
+            data-test-subj="smartFieldFallbackTooltipIcon"
             tabindex="0"
             title="Smart Fields information"
           />

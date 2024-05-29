@@ -17,6 +17,7 @@ interface Props {
 const SmartFieldFallbackTooltip: React.FC<Props> = ({ associatedSmartFields }) => {
   return (
     <EuiToolTip
+      data-test-subj="smartFieldFallbackTooltip"
       position="bottom"
       content={i18n.translate('unifiedFieldList.smartFieldFallbackTooltip', {
         defaultMessage: 'Forms part of the following Smart Fields: {smartFields}',
@@ -24,6 +25,7 @@ const SmartFieldFallbackTooltip: React.FC<Props> = ({ associatedSmartFields }) =
       })}
     >
       <EuiIcon
+        data-test-subj="smartFieldFallbackTooltipIcon"
         size="s"
         tabIndex={0}
         type="questionInCircle"
