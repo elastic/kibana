@@ -29,6 +29,10 @@ export function skipIfNoDockerRegistry(providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const dockerServers = getService('dockerServers');
 
+  if (process.env.FLEET_SKIP_RUNNING_PACKAGE_REGISTRY === 'true') {
+    return;
+  }
+
   const server = dockerServers.get('registry');
   const log = getService('log');
 
