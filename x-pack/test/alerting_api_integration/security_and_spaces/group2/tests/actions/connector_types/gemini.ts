@@ -118,14 +118,14 @@ export default function geminiTest({ getService }: FtrProviderContext) {
       });
 
       it('should return 400 Bad Request when creating the connector without the project id', async () => {
-        const config = { gcpRegion: 'us-central-1', url: '' };
+        const testConfig = { gcpRegion: 'us-central-1', url: '' };
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name,
             connector_type_id: connectorTypeId,
-            config,
+            testConfig,
             secrets,
           })
           .expect(400)
@@ -140,14 +140,14 @@ export default function geminiTest({ getService }: FtrProviderContext) {
       });
 
       it('should return 400 Bad Request when creating the connector without the region', async () => {
-        const config = { gcpProjectID: 'test-project', url: '' };
+        const testConfig = { gcpProjectID: 'test-project', url: '' };
         await supertest
           .post('/api/actions/connector')
           .set('kbn-xsrf', 'foo')
           .send({
             name,
             connector_type_id: connectorTypeId,
-            config,
+            testConfig,
             secrets,
           })
           .expect(400)
