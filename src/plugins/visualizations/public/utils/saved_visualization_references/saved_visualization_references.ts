@@ -14,7 +14,7 @@ import {
   SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
 import { isObject } from 'lodash';
-import { VisualizeSerializedState } from '../../react_embeddable/types';
+import { VisualizeSavedVisInputState } from '../../react_embeddable/types';
 import { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';
@@ -55,7 +55,7 @@ export function serializeReferences(savedVis: SerializedVis) {
 }
 
 export function deserializeReferences(
-  state: VisualizeSerializedState,
+  state: VisualizeSavedVisInputState,
   references: Reference[] = []
 ) {
   const { savedVis } = state;

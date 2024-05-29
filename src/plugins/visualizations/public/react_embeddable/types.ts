@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Reference } from '@kbn/content-management-utils';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import type { TimeRange } from '@kbn/es-query';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
@@ -14,28 +13,33 @@ import { HasVisualizeConfig } from '../embeddable';
 import type { VisParams, Vis } from '../types';
 import type { SerializedVis } from '../vis';
 
-export type VisualizeSerializedState = SerializedTitles & {
-  id: string;
-  savedVis: SerializedVis<VisParams>;
+export type VisualizeRuntimeState = SerializedTitles & {
+  vis: Vis<VisParams>;
 };
 
-export type VisualizeEditorInput = Omit<VisualizeSerializedState, 'savedVis'> & {
+export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
   savedVis?: SerializedVis<VisParams>;
   timeRange: TimeRange;
   vis?: Vis<VisParams> & { colors?: Record<string, string>; legendOpen?: boolean };
 };
 
-export interface VisualizeSavedObjectState {
-  id: string;
+export type VisualizeSavedObjectInputState = SerializedTitles & {
   savedObjectId: string;
-  references?: Reference[];
-}
+};
 
-export const isVisualizeSavedObjectState = (state: unknown): state is VisualizeSavedObjectState => {
+export type VisualizeSavedVisInputState = SerializedTitles & {
+  savedVis: SerializedVis<VisParams>;
+};
+
+export type VisualizeSerializedState = VisualizeSavedObjectInputState | VisualizeSavedVisInputState;
+
+export const isVisualizeSavedObjectState = (
+  state: unknown
+): state is VisualizeSavedObjectInputState => {
   return (
     typeof state !== 'undefined' &&
-    (state as VisualizeSavedObjectState).savedObjectId !== undefined &&
-    !('savedVis' in (state as VisualizeSavedObjectState))
+    (state as VisualizeSavedObjectInputState).savedObjectId !== undefined &&
+    !('savedVis' in (state as VisualizeSavedObjectInputState))
   );
 };
 

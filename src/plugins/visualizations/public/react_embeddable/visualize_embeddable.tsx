@@ -26,7 +26,7 @@ import {
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEqual } from 'lodash';
 import React, { useRef } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, switchMap } from 'rxjs';
 import { VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from '../embeddable';
 import { getInspector, getUiActions } from '../services';
@@ -34,34 +34,23 @@ import { urlFor } from '../utils/saved_visualize_utils';
 import type { Vis } from '../vis';
 import { createVisAsync } from '../vis_async';
 import { getExpressionRendererProps } from './get_expression_renderer_props';
-import { deserializeSavedObjectState, deserializeState, serializeState } from './state';
-import {
-  isVisualizeSavedObjectState,
-  VisualizeApi,
-  VisualizeSavedObjectState,
-  VisualizeSerializedState,
-} from './types';
+import { deserializeState, serializeState } from './state';
+import { VisualizeApi, VisualizeRuntimeState, VisualizeSerializedState } from './types';
 
 export const getVisualizeEmbeddableFactory: (
   embeddableStart: EmbeddableStart
-) => ReactEmbeddableFactory<VisualizeSerializedState | VisualizeSavedObjectState, VisualizeApi> = (
+) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeApi, VisualizeRuntimeState> = (
   embeddableStart
 ) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
   deserializeState,
-  buildEmbeddable: async (inputState, buildApi, uuid, parentApi) => {
-    const state = isVisualizeSavedObjectState(inputState)
-      ? await deserializeSavedObjectState(inputState)
-      : inputState;
+  buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
     const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-    const vis = await createVisAsync(state.savedVis.type, state.savedVis);
 
     const renderCount$ = new BehaviorSubject<number>(0);
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
-    const id$ = new BehaviorSubject<string>(state.id);
-    const vis$ = new BehaviorSubject<Vis>(vis);
-    const savedVis$ = new BehaviorSubject(state.savedVis);
+    const vis$ = new BehaviorSubject<Vis>(state.vis);
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
@@ -87,8 +76,7 @@ export const getVisualizeEmbeddableFactory: (
         ...titlesApi,
         serializeState: () => {
           return serializeState({
-            savedVis: vis$.getValue().serialize(),
-            id: id$.getValue(),
+            serializedVis: vis$.getValue().serialize(),
             titles: serializeTitles(),
           });
         },
@@ -106,7 +94,7 @@ export const getVisualizeEmbeddableFactory: (
             state: {
               embeddableId: uuid,
               valueInput: {
-                savedVis: savedVis$.getValue(),
+                savedVis: vis$.getValue().serialize(),
                 title: api.panelTitle?.getValue(),
                 description: api.panelDescription?.getValue(),
                 timeRange: timeRange$.getValue(),
@@ -138,85 +126,97 @@ export const getVisualizeEmbeddableFactory: (
       },
       {
         ...titleComparators,
-        id: [id$, (value) => id$.next(value)],
-        savedVis: [
-          savedVis$,
+        vis: [
+          vis$,
           async (value) => {
-            savedVis$.next(value);
-            vis$.next(await createVisAsync(value.type, value));
+            vis$.next(value);
           },
           (a, b) => isEqual(a, b),
         ],
       }
     );
-    fetch$(api).subscribe(async (data) => {
-      const unifiedSearch = apiPublishesUnifiedSearch(parentApi)
-        ? {
-            query: data.query,
-            filters: data.filters,
-            timeRange: data.timeRange,
-          }
-        : {};
-      const searchSessionId = apiPublishesSearchSession(parentApi) ? data.searchSessionId : '';
-      timeRange$.next(data.timeRange);
-      searchSessionId$.next(searchSessionId);
-      const settings = apiPublishesSettings(parentApi)
-        ? {
-            syncColors: parentApi.settings.syncColors$.getValue(),
-            syncCursor: parentApi.settings.syncCursor$.getValue(),
-            syncTooltips: parentApi.settings.syncTooltips$.getValue(),
-          }
-        : {};
-      const { params, abortController } = await getExpressionRendererProps({
-        unifiedSearch,
-        vis: vis$.getValue(),
-        settings,
-        disableTriggers,
-        searchSessionId,
-        parentExecutionContext: executionContext,
-        abortController: expressionAbortController$.getValue(),
-        onRender: () => {
-          renderCount$.next(renderCount$.getValue() + 1);
-          if (hasRendered$.getValue() === true) return;
-          hasRendered$.next(true);
-          hasRendered$.complete();
-        },
-        onEvent: async (event) => {
-          // Visualize doesn't respond to sizing events, so ignore.
-          if (isChartSizeEvent(event)) {
-            return;
-          }
-          const currentVis = vis$.getValue();
-          if (!disableTriggers) {
-            const triggerId = get(VIS_EVENT_TO_TRIGGER, event.name, VIS_EVENT_TO_TRIGGER.filter);
-            let context;
+    fetch$(api)
+      .pipe(
+        switchMap((data) => {
+          return (async () => {
+            const unifiedSearch = apiPublishesUnifiedSearch(parentApi)
+              ? {
+                  query: data.query,
+                  filters: data.filters,
+                  timeRange: data.timeRange,
+                }
+              : {};
+            const searchSessionId = apiPublishesSearchSession(parentApi)
+              ? data.searchSessionId
+              : '';
+            timeRange$.next(data.timeRange);
+            searchSessionId$.next(searchSessionId);
+            const settings = apiPublishesSettings(parentApi)
+              ? {
+                  syncColors: parentApi.settings.syncColors$.getValue(),
+                  syncCursor: parentApi.settings.syncCursor$.getValue(),
+                  syncTooltips: parentApi.settings.syncTooltips$.getValue(),
+                }
+              : {};
+            const { params, abortController } = await getExpressionRendererProps({
+              unifiedSearch,
+              vis: vis$.getValue(),
+              settings,
+              disableTriggers,
+              searchSessionId,
+              parentExecutionContext: executionContext,
+              abortController: expressionAbortController$.getValue(),
+              onRender: () => {
+                renderCount$.next(renderCount$.getValue() + 1);
+                if (hasRendered$.getValue() === true) return;
+                hasRendered$.next(true);
+                hasRendered$.complete();
+              },
+              onEvent: async (event) => {
+                // Visualize doesn't respond to sizing events, so ignore.
+                if (isChartSizeEvent(event)) {
+                  return;
+                }
+                const currentVis = vis$.getValue();
+                if (!disableTriggers) {
+                  const triggerId = get(
+                    VIS_EVENT_TO_TRIGGER,
+                    event.name,
+                    VIS_EVENT_TO_TRIGGER.filter
+                  );
+                  let context;
 
-            if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
-              context = {
-                timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
-                ...event.data,
-              };
-            } else {
-              context = {
-                data: {
-                  timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
-                  ...event.data,
-                },
-              };
-            }
+                  if (triggerId === VIS_EVENT_TO_TRIGGER.applyFilter) {
+                    context = {
+                      timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
+                      ...event.data,
+                    };
+                  } else {
+                    context = {
+                      data: {
+                        timeFieldName: currentVis.data.indexPattern?.timeFieldName!,
+                        ...event.data,
+                      },
+                    };
+                  }
 
-            await getUiActions().getTrigger(triggerId).exec(context);
-          }
-        },
-        onData: (_, inspectorAdapters) => {
-          inspectorAdapters$.next(
-            typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters
-          );
-        },
+                  await getUiActions().getTrigger(triggerId).exec(context);
+                }
+              },
+              onData: (_, inspectorAdapters) => {
+                inspectorAdapters$.next(
+                  typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters
+                );
+              },
+            });
+            return { params, abortController };
+          })();
+        })
+      )
+      .subscribe(({ params, abortController }) => {
+        if (params) expressionParams$.next(params);
+        expressionAbortController$.next(abortController);
       });
-      if (params) expressionParams$.next(params);
-      expressionAbortController$.next(abortController);
-    });
 
     return {
       api,

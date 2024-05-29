@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { serializeState, deserializeState } from './state';
-import { VisualizeSerializedState } from './types';
+import { serializeState, deserializeSavedVisState } from './state';
 
-describe('visualize_embeddable', () => {
+describe('visualize_embeddable state', () => {
   test('extracts saved search references for search source state and does not store them in state', () => {
     const { rawState, references } = serializeState({
-      savedVis: {
+      serializedVis: {
         type: 'area',
         params: {},
         uiState: {},
@@ -37,7 +36,6 @@ describe('visualize_embeddable', () => {
         },
         title: 'owo',
       },
-      id: 'uwu',
       titles: {},
     });
     expect(references).toEqual([
@@ -52,7 +50,7 @@ describe('visualize_embeddable', () => {
 
   test('extracts data view references for search source state and does not store them in state', () => {
     const { rawState, references } = serializeState({
-      savedVis: {
+      serializedVis: {
         type: 'area',
         params: {},
         uiState: {},
@@ -77,7 +75,6 @@ describe('visualize_embeddable', () => {
         },
         title: 'owo',
       },
-      id: 'uwu',
       titles: {},
     });
     expect(references).toEqual([
@@ -94,9 +91,9 @@ describe('visualize_embeddable', () => {
     expect(rawState.savedVis.data.searchSource.index).toBeUndefined();
   });
 
-  test('injects data view references into search source state', () => {
-    const embeddedState = deserializeState({
-      rawState: {
+  test('injects data view references into search source state', async () => {
+    const deserializedSavedVis = await deserializeSavedVisState(
+      {
         savedVis: {
           type: 'area',
           params: {},
@@ -122,19 +119,18 @@ describe('visualize_embeddable', () => {
           },
           title: 'owo',
         },
-        id: 'uwu',
       },
-      references: [{ name: 'x', id: '123', type: 'index-pattern' }],
-    }) as VisualizeSerializedState;
-    expect(embeddedState.savedVis.data.searchSource.index).toBe('123');
-    expect(
-      (embeddedState.savedVis.data.searchSource as { indexRefName: string }).indexRefName
-    ).toBe(undefined);
+      [{ name: 'x', id: '123', type: 'index-pattern' }]
+    );
+    expect(deserializedSavedVis.data.searchSource.index).toBe('123');
+    expect((deserializedSavedVis.data.searchSource as { indexRefName: string }).indexRefName).toBe(
+      undefined
+    );
   });
 
-  test('injects data view reference into search source state even if it is injected already', () => {
-    const embeddedState = deserializeState({
-      rawState: {
+  test('injects data view reference into search source state even if it is injected already', async () => {
+    const deserializedSavedVis = await deserializeSavedVisState(
+      {
         savedVis: {
           type: 'area',
           params: {},
@@ -160,19 +156,16 @@ describe('visualize_embeddable', () => {
           },
           title: 'owo',
         },
-        id: 'uwu',
       },
-      references: [
-        { name: 'kibanaSavedObjectMeta.searchSourceJSON.index', id: '123', type: 'index-pattern' },
-      ],
-    }) as VisualizeSerializedState;
-    expect(embeddedState.savedVis.data.searchSource.index).toBe('123');
-    expect(embeddedState.savedVis.data.searchSource.indexRefName).toBe(undefined);
+      [{ name: 'kibanaSavedObjectMeta.searchSourceJSON.index', id: '123', type: 'index-pattern' }]
+    );
+    expect(deserializedSavedVis.data.searchSource?.index).toBe('123');
+    expect(deserializedSavedVis.data.searchSource?.indexRefName).toBe(undefined);
   });
 
-  test('injects search reference into search source state', () => {
-    const embeddedState = deserializeState({
-      rawState: {
+  test('injects search reference into search source state', async () => {
+    const deserializedSavedVis = await deserializeSavedVisState(
+      {
         savedVis: {
           type: 'area',
           params: {},
@@ -197,16 +190,15 @@ describe('visualize_embeddable', () => {
           },
           title: 'owo',
         },
-        id: 'uwu',
       },
-      references: [{ name: 'search_0', id: '123', type: 'search' }],
-    }) as VisualizeSerializedState;
-    expect(embeddedState.savedVis.data.savedSearchId).toBe('123');
+      [{ name: 'search_0', id: '123', type: 'search' }]
+    );
+    expect(deserializedSavedVis.data.savedSearchId).toBe('123');
   });
 
-  test('injects search reference into search source state even if it is injected already', () => {
-    const embeddedState = deserializeState({
-      rawState: {
+  test('injects search reference into search source state even if it is injected already', async () => {
+    const deserializedSavedVis = await deserializeSavedVisState(
+      {
         savedVis: {
           type: 'area',
           params: {},
@@ -232,10 +224,9 @@ describe('visualize_embeddable', () => {
           },
           title: 'owo',
         },
-        id: 'uwu',
       },
-      references: [{ name: 'search_0', id: '123', type: 'search' }],
-    }) as VisualizeSerializedState;
-    expect(embeddedState.savedVis.data.savedSearchId).toBe('123');
+      [{ name: 'search_0', id: '123', type: 'search' }]
+    );
+    expect(deserializedSavedVis.data.savedSearchId).toBe('123');
   });
 });

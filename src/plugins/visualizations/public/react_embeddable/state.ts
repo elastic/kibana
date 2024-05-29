@@ -28,41 +28,49 @@ import {
 } from '../utils/saved_visualization_references';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
+import { createVisAsync } from '../vis_async';
 import {
   isVisualizeSavedObjectState,
-  VisualizeSavedObjectState,
+  VisualizeSavedObjectInputState,
   VisualizeSerializedState,
+  VisualizeRuntimeState,
+  VisualizeSavedVisInputState,
 } from './types';
 
-export const deserializeState = (
-  state:
-    | SerializedPanelState<VisualizeSerializedState | VisualizeSavedObjectState>
-    | { rawState: undefined }
+export const deserializeState = async (
+  state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }
 ) => {
   if (!state.rawState)
     return {
-      id: '',
-      savedVis: {
+      vis: {
         data: {},
       },
-    } as VisualizeSerializedState;
-  const serializedState = cloneDeep(state.rawState);
+    } as VisualizeRuntimeState;
+  let serializedState = cloneDeep(state.rawState);
   if (isVisualizeSavedObjectState(serializedState)) {
-    // Defer deserialization to the embeddable factory, as it requires an async call
-    return { ...serializedState, references: state.references };
+    serializedState = await deserializeSavedObjectState(serializedState);
   }
 
   const references: Reference[] = state.references ?? [];
 
+  const deserializedSavedVis = deserializeSavedVisState(serializedState, references);
+  const vis = await createVisAsync(deserializedSavedVis.type, deserializedSavedVis);
+
+  return {
+    ...serializedState,
+    vis,
+  } as VisualizeRuntimeState;
+};
+
+export const deserializeSavedVisState = (
+  serializedState: VisualizeSavedVisInputState,
+  references: Reference[]
+) => {
   const { data } = serializedState.savedVis ?? { data: {} };
   let serializedSearchSource = data.searchSource as SerializedSearchSourceFields & {
     indexRefName: string;
   };
-  if (
-    data.searchSource.index &&
-    references.some((ref) => ref.id === data.searchSource.index) &&
-    !('indexRefName' in data.searchSource)
-  ) {
+  if (references.some((ref) => ref.id) && !('indexRefName' in data.searchSource)) {
     // due to a bug in 8.0, some visualizations were saved with an injected state - re-extract in that case and inject the upstream references because they might have changed
     serializedSearchSource = extractSearchSourceReferences(
       serializedSearchSource
@@ -82,83 +90,68 @@ export const deserializeState = (
   );
 
   return {
-    ...serializedState,
-    savedVis: {
-      ...serializedState.savedVis,
-      data: {
-        ...data,
-        searchSource: deserializedSearchSource,
-        savedSearchId: deserializedReferences.find((r) => r.name === 'search_0')?.id,
-      },
+    ...serializedState.savedVis,
+    data: {
+      ...data,
+      searchSource: deserializedSearchSource,
+      savedSearchId: deserializedReferences.find((r) => r.name === 'search_0')?.id,
     },
-  } as VisualizeSerializedState;
+  };
 };
 
-export const deserializeSavedObjectState = async (state: VisualizeSavedObjectState) => {
-  const {
+export const deserializeSavedObjectState = async (state: VisualizeSavedObjectInputState) => {
+  const { title, description, visState, searchSource, searchSourceFields, savedSearchId } =
+    await getSavedVisualization(
+      {
+        dataViews: getDataViews(),
+        search: getSearch(),
+        savedObjectsTagging: getSavedObjectTagging().getTaggingApi(),
+        spaces: getSpaces(),
+        i18n: getI18n(),
+        overlays: getOverlays(),
+        analytics: getAnalytics(),
+        theme: getTheme(),
+      },
+      state.savedObjectId
+    );
+
+  return {
+    savedVis: {
+      title,
+      type: visState.type,
+      params: visState.params,
+      data: {
+        aggs: visState.aggs,
+        searchSource: (searchSource ?? searchSourceFields) as SerializedSearchSourceFields,
+        savedSearchId,
+      },
+    },
     title,
     description,
-    id = state.id,
-    visState,
-    searchSource,
-    searchSourceFields,
-    savedSearchId,
-  } = await getSavedVisualization(
-    {
-      dataViews: getDataViews(),
-      search: getSearch(),
-      savedObjectsTagging: getSavedObjectTagging().getTaggingApi(),
-      spaces: getSpaces(),
-      i18n: getI18n(),
-      overlays: getOverlays(),
-      analytics: getAnalytics(),
-      theme: getTheme(),
-    },
-    state.savedObjectId
-  );
-
-  return deserializeState({
-    rawState: {
-      id,
-      savedVis: {
-        title,
-        type: visState.type,
-        params: visState.params,
-        data: {
-          aggs: visState.aggs,
-          searchSource: (searchSource ?? searchSourceFields) as SerializedSearchSourceFields,
-          savedSearchId,
-        },
-      },
-      title,
-      description,
-    },
-    references: state.references,
-  }) as VisualizeSerializedState;
+  };
 };
 
 export const serializeState = ({
-  savedVis,
-  id,
+  serializedVis, // Serialize the vis before passing it to this function for easier testing
   titles,
 }: {
-  savedVis: SerializedVis;
-  id: string;
+  serializedVis: SerializedVis;
   titles: SerializedTitles;
 }) => {
-  const { references, serializedSearchSource } = serializeReferences(savedVis);
+  const { references, serializedSearchSource } = serializeReferences(serializedVis);
   return {
     rawState: {
       ...titles,
-      id,
       savedVis: {
-        ...savedVis,
+        ...serializedVis,
         data: {
-          ...omit(savedVis.data, 'savedSearchId'),
+          ...omit(serializedVis.data, 'savedSearchId'),
           searchSource: serializedSearchSource,
-          ...(savedVis.data.savedSearchId
+          ...(serializedVis.data.savedSearchId
             ? {
-                savedSearchRefName: references.find((r) => r.id === savedVis.data.savedSearchId),
+                savedSearchRefName: references.find(
+                  (r) => r.id === serializedVis.data.savedSearchId
+                ),
               }
             : {}),
         },
