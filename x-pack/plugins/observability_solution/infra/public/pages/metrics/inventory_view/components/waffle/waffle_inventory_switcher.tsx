@@ -57,7 +57,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
   );
   const goToHost = useCallback(() => goToNodeType('host'), [goToNodeType]);
   const goToK8 = useCallback(() => goToNodeType('pod'), [goToNodeType]);
-  const goToDocker = useCallback(() => goToNodeType('container'), [goToNodeType]);
+  const goToContainer = useCallback(() => goToNodeType('container'), [goToNodeType]);
   const goToAwsEC2 = useCallback(() => goToNodeType('awsEC2'), [goToNodeType]);
   const goToAwsS3 = useCallback(() => goToNodeType('awsS3'), [goToNodeType]);
   const goToAwsRDS = useCallback(() => goToNodeType('awsRDS'), [goToNodeType]);
@@ -79,9 +79,9 @@ export const WaffleInventorySwitcher: React.FC = () => {
               onClick: goToK8,
             },
             {
-              'data-test-subj': 'goToDocker',
+              'data-test-subj': 'goToContainer',
               name: getDisplayNameForType('container'),
-              onClick: goToDocker,
+              onClick: goToContainer,
             },
             {
               name: 'AWS',
@@ -117,7 +117,7 @@ export const WaffleInventorySwitcher: React.FC = () => {
           ],
         },
       ] as EuiContextMenuPanelDescriptor[],
-    [goToAwsEC2, goToAwsRDS, goToAwsS3, goToAwsSQS, goToDocker, goToHost, goToK8]
+    [goToAwsEC2, goToAwsRDS, goToAwsS3, goToAwsSQS, goToContainer, goToHost, goToK8]
   );
 
   const selectedText = useMemo(() => {

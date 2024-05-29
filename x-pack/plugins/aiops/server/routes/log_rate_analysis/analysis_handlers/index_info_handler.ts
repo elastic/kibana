@@ -36,6 +36,7 @@ export const indexInfoHandlerFactory =
     let fieldCandidatesCount = fieldCandidates.length;
 
     const textFieldCandidates: string[] = [];
+    let textFieldCandidatesCount = textFieldCandidates.length;
 
     let zeroDocsFallback = false;
 
@@ -68,6 +69,7 @@ export const indexInfoHandlerFactory =
         fieldCandidates.push(...indexInfo.fieldCandidates);
         fieldCandidatesCount = fieldCandidates.length;
         textFieldCandidates.push(...indexInfo.textFieldCandidates);
+        textFieldCandidatesCount = textFieldCandidates.length;
         zeroDocsFallback = indexInfo.zeroDocsFallback;
       } catch (e) {
         if (!isRequestAbortedError(e)) {
@@ -92,7 +94,7 @@ export const indexInfoHandlerFactory =
               defaultMessage:
                 'Identified {fieldCandidatesCount, plural, one {# field candidate} other {# field candidates}}.',
               values: {
-                fieldCandidatesCount,
+                fieldCandidatesCount: fieldCandidatesCount + textFieldCandidatesCount,
               },
             }
           ),

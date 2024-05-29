@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import { fetchActionResponses } from './fetch_action_responses';
+import { fetchActionResponses } from './utils/fetch_action_responses';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {
   formatEndpointActionResults,

@@ -35,8 +35,7 @@ node scripts/build \
   --skip-docker-chainguard \
   --skip-docker-ubi \
   --skip-docker-fips \
-  --skip-docker-cloud \
-  --skip-docker-contexts
+  --skip-docker-cloud
 
 echo "--- Tag images"
 docker rmi "$KIBANA_IMAGE"
@@ -102,8 +101,9 @@ ts-node "$(git rev-parse --show-toplevel)/.buildkite/scripts/steps/artifacts/val
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.gz"
+buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-build-context.tar.gz"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
 buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 

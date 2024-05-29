@@ -246,6 +246,12 @@ export const schema: FormSchema<DefineStepRule> = {
   },
   relatedIntegrations: {
     type: FIELD_TYPES.JSON,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
+      {
+        defaultMessage: 'Related integrations',
+      }
+    ),
   },
   requiredFields: {
     label: i18n.translate(

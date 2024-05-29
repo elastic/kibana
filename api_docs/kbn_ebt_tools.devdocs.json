@@ -21,6 +21,38 @@
     "functions": [
       {
         "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.PerformanceContextProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "PerformanceContextProvider",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<{ children: React.ReactElement<any, string | React.JSXElementConstructor<any>>; } & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-ebt-tools/src/performance_metrics/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.PerformanceContextProvider.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
         "id": "def-common.registerPerformanceMetricEventType",
         "type": "Function",
         "tags": [
@@ -155,6 +187,24 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.usePerformanceContext",
+        "type": "Function",
+        "tags": [],
+        "label": "usePerformanceContext",
+        "description": [],
+        "signature": [
+          "() => ",
+          "PerformanceApi"
+        ],
+        "path": "packages/kbn-ebt-tools/src/performance_metrics/context/use_performance_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }
@@ -509,6 +559,43 @@
     ],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ebt-tools",
+        "id": "def-common.perfomanceMarkers",
+        "type": "Object",
+        "tags": [],
+        "label": "perfomanceMarkers",
+        "description": [],
+        "path": "packages/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.perfomanceMarkers.startPageChange",
+            "type": "string",
+            "tags": [],
+            "label": "startPageChange",
+            "description": [],
+            "path": "packages/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-tools",
+            "id": "def-common.perfomanceMarkers.endPageReady",
+            "type": "string",
+            "tags": [],
+            "label": "endPageReady",
+            "description": [],
+            "path": "packages/kbn-ebt-tools/src/performance_metrics/performance_markers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

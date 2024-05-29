@@ -30,12 +30,14 @@ import {
 } from '@elastic/eui';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
+import type { RiskEngineStatus } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
+import { RiskEngineStatusEnum } from '../../../common/api/entity_analytics/risk_engine/engine_status_route.gen';
 import * as i18n from '../translations';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
 import { useEnableRiskEngineMutation } from '../api/hooks/use_enable_risk_engine_mutation';
 import { useDisableRiskEngineMutation } from '../api/hooks/use_disable_risk_engine_mutation';
-import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/entity_analytics/risk_engine';
+import { MAX_SPACES_COUNT } from '../../../common/entity_analytics/risk_engine';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { RiskInformationFlyout } from './risk_information';
 import { useOnOpenCloseHandler } from '../../helper_hooks';
@@ -145,7 +147,7 @@ const RiskEngineHealth: React.FC<{ currentRiskEngineStatus?: RiskEngineStatus | 
   if (!currentRiskEngineStatus) {
     return <EuiHealth color="subdued">{'-'}</EuiHealth>;
   }
-  if (currentRiskEngineStatus === RiskEngineStatus.ENABLED) {
+  if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
     return <EuiHealth color="success">{i18n.RISK_SCORE_MODULE_STATUS_ON}</EuiHealth>;
   }
   return <EuiHealth color="subdued">{i18n.RISK_SCORE_MODULE_STATUS_OFF}</EuiHealth>;
@@ -178,7 +180,7 @@ const RiskEngineStatusRow: React.FC<{
         <EuiSwitch
           label={''}
           data-test-subj="risk-score-switch"
-          checked={currentRiskEngineStatus === RiskEngineStatus.ENABLED}
+          checked={currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED}
           onChange={onSwitchClick}
           compressed
           disabled={btnIsDisabled}
@@ -236,28 +238,23 @@ export const RiskScoreEnableSection: React.FC<{
       return;
     }
 
-    if (currentRiskEngineStatus === RiskEngineStatus.NOT_INSTALLED) {
+    if (currentRiskEngineStatus === RiskEngineStatusEnum.NOT_INSTALLED) {
       initRiskEngineMutation.mutate();
-    } else if (currentRiskEngineStatus === RiskEngineStatus.ENABLED) {
+    } else if (currentRiskEngineStatus === RiskEngineStatusEnum.ENABLED) {
       disableRiskEngineMutation.mutate();
-    } else if (currentRiskEngineStatus === RiskEngineStatus.DISABLED) {
+    } else if (currentRiskEngineStatus === RiskEngineStatusEnum.DISABLED) {
       enableRiskEngineMutation.mutate();
     }
   };
 
   let initRiskEngineErrors: string[] = [];
-
   if (initRiskEngineMutation.isError) {
     const errorBody = initRiskEngineMutation.error.body;
-    if (errorBody?.full_error?.errors) {
-      initRiskEngineErrors = errorBody.full_error?.errors;
-    } else {
-      initRiskEngineErrors = [errorBody.message];
-    }
+    initRiskEngineErrors = [errorBody.message];
   }
 
   if (
-    currentRiskEngineStatus !== RiskEngineStatus.ENABLED &&
+    currentRiskEngineStatus !== RiskEngineStatusEnum.ENABLED &&
     riskEngineStatus?.is_max_amount_of_risk_engines_reached
   ) {
     return (

@@ -13,6 +13,8 @@ import React from 'react';
 import {
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureAssetCustomDashboards,
+  enableInfrastructureContainerAssetView,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -75,6 +77,12 @@ export function FeaturesConfigurationPanel({
           onFieldChange={handleFieldChange}
           unsavedChange={unsavedChanges[enableInfrastructureHostsView]}
         />
+        <FieldRow
+          field={fields[enableInfrastructureAssetCustomDashboards]}
+          isSavingEnabled={true}
+          onFieldChange={handleFieldChange}
+          unsavedChange={unsavedChanges[enableInfrastructureAssetCustomDashboards]}
+        />
         {featureFlags.profilingEnabled && (
           <FieldRow
             field={fields[enableInfrastructureProfilingIntegration]}
@@ -83,6 +91,12 @@ export function FeaturesConfigurationPanel({
             unsavedChange={unsavedChanges[enableInfrastructureProfilingIntegration]}
           />
         )}
+        <FieldRow
+          field={fields[enableInfrastructureContainerAssetView]}
+          isSavingEnabled={true}
+          onFieldChange={handleFieldChange}
+          unsavedChange={unsavedChanges[enableInfrastructureContainerAssetView]}
+        />
       </FieldRowProvider>
     </EuiForm>
   );

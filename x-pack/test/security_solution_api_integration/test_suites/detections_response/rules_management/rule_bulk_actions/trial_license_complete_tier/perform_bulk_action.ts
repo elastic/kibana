@@ -142,6 +142,10 @@ export default ({ getService }: FtrProviderContext): void => {
         ],
         max_signals: 100,
         setup: '# some setup markdown',
+        required_fields: [
+          { name: '@timestamp', type: 'date' },
+          { name: 'my-non-ecs-field', type: 'keyword' },
+        ],
       };
       const mockRule = getCustomQueryRuleParams(defaultableFields);
 

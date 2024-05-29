@@ -141,7 +141,7 @@ export function SvlCasesApiServiceProvider({ getService }: FtrProviderContext) {
       params: CasePostRequest,
       expectedHttpCode: number = 200,
       auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-      headers: Record<string, unknown> = {}
+      headers: Record<string, string | string[]> = {}
     ): Promise<Case> {
       const apiCall = supertest.post(`${CASES_URL}`);
 
