@@ -68,15 +68,16 @@ export class RolesAPIClient {
         kibanaPrivilege.feature = {};
       }
     });
-    if (this.options?.buildFlavor === 'serverless') {
-      delete role.elasticsearch.remote_cluster;
-    }
 
     // @ts-expect-error
     delete role.name;
     delete role.transient_metadata;
     delete role._unrecognized_applications;
     delete role._transform_error;
+
+    if (this.options?.buildFlavor === 'serverless') {
+      delete role.elasticsearch.remote_cluster;
+    }
 
     return role;
   }
