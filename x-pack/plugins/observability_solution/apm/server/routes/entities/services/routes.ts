@@ -43,13 +43,15 @@ const servicesEntitiesRoute = createApmServerRoute({
       esClient: coreContext.elasticsearch.client.asCurrentUser,
     });
 
-    const { start, end, kuery, documentType, rollupInterval, useDurationSummary } = params.query;
+    const { start, end, kuery, documentType, rollupInterval, useDurationSummary, environment } =
+      params.query;
 
     const services = await getServiceEntities({
       assetsESClient,
       start,
       end,
       kuery,
+      environment,
       logger: resources.logger,
       apmEventClient,
       logsDataAccessStart,

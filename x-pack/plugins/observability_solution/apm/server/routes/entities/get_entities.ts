@@ -6,7 +6,8 @@
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
+import { ENTITY_ENVIRONMENT, FIRST_SEEN, LAST_SEEN } from '../../../common/es_fields/entities';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import { EntitiesESClient } from '../../lib/helpers/create_es_client/create_assets_es_client/create_assets_es_clients';
 
 export function assetsRangeQuery(start: number, end: number): QueryDslQueryContainer[] {
@@ -32,12 +33,14 @@ export async function getEntities({
   assetsESClient,
   start,
   end,
+  environment,
   kuery,
   size,
 }: {
   assetsESClient: EntitiesESClient;
   start: number;
   end: number;
+  environment: string;
   kuery: string;
   size: number;
 }) {
@@ -50,6 +53,7 @@ export async function getEntities({
         bool: {
           filter: [
             ...kqlQuery(kuery),
+            ...environmentQuery(environment, ENTITY_ENVIRONMENT),
             // Not supported for now
             //...assetsRangeQuery(start, end),
           ],
@@ -57,8 +61,6 @@ export async function getEntities({
       },
     },
   });
-
-  console.log(response);
 
   return response;
 }

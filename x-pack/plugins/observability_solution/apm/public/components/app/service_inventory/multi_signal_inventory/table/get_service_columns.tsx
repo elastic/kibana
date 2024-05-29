@@ -12,10 +12,11 @@
  * 2.0.
  */
 
-import { RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
+import { AgentIcon } from '@kbn/custom-icons';
 import { EntityServiceListItem } from '../../../../../../common/assets/types';
 import {
   asMillisecondDuration,
@@ -30,6 +31,7 @@ import { EnvironmentBadge } from '../../../../shared/environment_badge';
 import { ServiceLink } from '../../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../../shared/list_metric';
 import { ITableColumn, ManagedTable, SortFunction } from '../../../../shared/managed_table';
+import { TruncateWithTooltip } from '../../../../shared/truncate_with_tooltip';
 
 export enum ServiceInventoryFieldName {
   ServiceName = 'identity.service.name',
@@ -59,11 +61,18 @@ export function getServiceColumns({
         defaultMessage: 'Name',
       }),
       sortable: true,
-      render: (_, { entity, agent }) => (
-        <ServiceLink
-          query={{ ...query }}
-          agentName={agent.name[0]} // data transform returns agent name as arr
-          serviceName={entity.identity.service.name}
+      render: (_, { name, agent }) => (
+        <TruncateWithTooltip
+          data-test-subj="apmServiceListAppLink"
+          text={name}
+          content={
+            <EuiFlexGroup gutterSize="s" justifyContent="flexStart">
+              <EuiFlexItem grow={false}>
+                <AgentIcon agentName={agent.name[0]} size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+            </EuiFlexGroup>
+          }
         />
       ),
     },
@@ -75,13 +84,7 @@ export function getServiceColumns({
       sortable: true,
       width: `${unit * 9}px`,
       dataType: 'number',
-      render: (_, { entity }) => (
-        <EnvironmentBadge
-          environments={
-            entity.identity.service.environment ? [entity.identity.service.environment] : []
-          }
-        />
-      ),
+      render: (_, { environments }) => <EnvironmentBadge environments={environments ?? []} />,
       align: RIGHT_ALIGNMENT,
     },
     {

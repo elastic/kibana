@@ -33,7 +33,7 @@ export function PopoverBadge({
 }: PopoverBadgeProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={

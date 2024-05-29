@@ -10,13 +10,15 @@ import { i18n } from '@kbn/i18n';
 import { ItemsBadge } from '../item_badge';
 import { PopoverBadge } from '../popover_badge';
 import { EuiLink } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 
 interface Props {
   environments?: string[];
 }
 
 export function EnvironmentBadge({ environments = [] }: Props) {
-  if (environments.length === 0) {
+  console.log('environments', environments);
+  if (isEmpty(environments)) {
     return (
       <PopoverBadge
         title={i18n.translate('xpack.apm.servicesTable.notAvailable.title', {
