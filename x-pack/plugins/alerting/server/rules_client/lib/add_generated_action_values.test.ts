@@ -183,12 +183,10 @@ describe('addGeneratedActionValues()', () => {
           minimumScheduleIntervalInMs: 0,
         }
       )
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `
-      "Invalid KQL: Expected AND, OR, end of input but \\":\\" found.
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Invalid KQL: Expected AND, OR, end of input, whitespace but \\":\\" found.
       foo:bar:1
       -------^"
-    `
-    );
+    `);
   });
 });
