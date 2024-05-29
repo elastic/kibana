@@ -190,7 +190,7 @@
   position: relative;
   height: 100%;
 
-  .embPanel_floatingActionsWrapper {
+  .embPanel__floatingActionsWrapper {
     position: absolute;
     top: 0;
     left: 0;
@@ -221,17 +221,17 @@
     height: $euiSizeXL;
 
     &:not(.embPanel__floatingActions--openContextMenu) {
-      z-index: -1;
-      opacity: 0;
-      // slower transition on hover leave in case the user accidentally stops hover
-      transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
-      top: $euiSizeXS;
+      // z-index: -1;
+      // opacity: 0;
+      // // slower transition on hover leave in case the user accidentally stops hover
+      // transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
+      // top: $euiSizeXS;
       
       // Always show: REMOVE THESE
-      // opacity: 1;
-      // transition: visibility $euiAnimSpeedFast, opacity $euiAnimSpeedFast;
-      // top: -$euiSizeXL;
-      // z-index: $euiZLevel9; 
+      opacity: 1;
+      transition: opacity $euiAnimSpeedFast;
+      top: -$euiSizeXL;
+      z-index: $euiZLevel9; 
     }
   }
 
