@@ -181,3 +181,12 @@ export type {
 } from './src/versioning';
 
 export type { IStaticAssets } from './src/static_assets';
+
+export {
+  type IRouteHandler,
+  RequestToken,
+  ResponseToken,
+  Route,
+  type RouteDefinition,
+  RouterService,
+} from './src/services';

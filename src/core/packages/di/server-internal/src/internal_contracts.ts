@@ -20,7 +20,9 @@ export interface InternalCoreDiServiceSetup {
 
 /** @internal */
 export interface InternalCoreDiServiceStart {
-  getContainer(id: PluginOpaqueId): interfaces.Container;
+  root: interfaces.Container;
+
+  getContainer(id: PluginOpaqueId, root?: interfaces.Container): interfaces.Container | undefined;
 
   fork(root?: interfaces.Container): interfaces.Container;
 }
