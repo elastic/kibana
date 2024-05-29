@@ -6,7 +6,8 @@
  */
 
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { kqlQuerySchema, QuerySchema } from '@kbn/slo-schema';
+import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
+import { Logger } from '@kbn/logging';
 import { SLODefinition } from '../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 import { InvalidTransformError } from '../../errors';
@@ -28,6 +29,19 @@ export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
   } catch (err) {
     throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
   }
+}
+
+export function parseStringFilters(filters: string, logger: Logger) {
+  if (!filters) {
+    return {};
+  }
+  try {
+    return JSON.parse(filters);
+  } catch (e) {
+    logger.error(`Failed to parse filters: ${e.message}`);
+  }
+
+  return {};
 }
 
 export function parseIndex(index: string): string | string[] {
