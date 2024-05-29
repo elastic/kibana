@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCheckbox,
+  EuiButtonGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -43,9 +43,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
   const { mutateAsync: createEntry, isLoading } = useCreateKnowledgeBaseEntry();
   const { mutateAsync: deleteEntry, isLoading: isDeleting } = useDeleteKnowledgeBaseEntry();
 
-  const isSystemPromptDefaultValue = entry?.labels?.category === 'instruction' ?? false;
-  const [isSystemPrompt, setIsSystemPrompt] = useState(isSystemPromptDefaultValue);
-
   const [isPublic, setIsPublic] = useState(entry?.public ?? false);
 
   const [newEntryId, setNewEntryId] = useState(entry?.id ?? '');
@@ -61,11 +58,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
         id: newEntryId,
         text: newEntryText,
         public: isPublic,
-        labels: isSystemPrompt
-          ? {
-              category: 'instruction',
-            }
-          : {},
       },
     });
 
@@ -145,6 +137,37 @@ export function KnowledgeBaseEditManualEntryFlyout({
           </EuiFlexGroup>
         )}
         <EuiSpacer size="m" />
+
+        <EuiFormRow fullWidth>
+          <EuiButtonGroup
+            legend={i18n.translate(
+              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.visibilityLabel',
+              { defaultMessage: 'Visibility' }
+            )}
+            options={[
+              {
+                id: 'user',
+                label: i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.userLabel',
+                  { defaultMessage: 'User' }
+                ),
+              },
+              {
+                id: 'global',
+                label: i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.globalLabel',
+                  { defaultMessage: 'Global' }
+                ),
+              },
+            ]}
+            idSelected={isPublic ? 'global' : 'user'}
+            onChange={(optionId) => setIsPublic(optionId === 'global')}
+            buttonSize="m"
+          />
+        </EuiFormRow>
+
+        <EuiSpacer size="m" />
+
         <EuiFormRow
           fullWidth
           label={i18n.translate(
@@ -170,33 +193,6 @@ export function KnowledgeBaseEditManualEntryFlyout({
           />
         </EuiFormRow>
         <EuiSpacer size="m" />
-
-        <EuiFormRow fullWidth>
-          <EuiCheckbox
-            id="isPublicCheckbox"
-            checked={isPublic}
-            label={i18n.translate(
-              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiCheckbox.isPublicLabel',
-              { defaultMessage: 'Public: Entry should be available to all users' }
-            )}
-            onChange={(e) => {
-              setIsPublic(e.target.checked);
-            }}
-          />
-        </EuiFormRow>
-        <EuiFormRow fullWidth>
-          <EuiCheckbox
-            id="isSystemPromptCheckbox"
-            checked={isSystemPrompt}
-            label={i18n.translate(
-              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiCheckbox.isSystemPromptLabel',
-              { defaultMessage: 'System prompt: Entry should be included in the system prompt' }
-            )}
-            onChange={(e) => {
-              setIsSystemPrompt(e.target.checked);
-            }}
-          />
-        </EuiFormRow>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
