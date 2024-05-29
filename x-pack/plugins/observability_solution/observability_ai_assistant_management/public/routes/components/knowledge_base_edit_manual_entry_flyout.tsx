@@ -19,6 +19,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiFormRow,
+  EuiIconTip,
   EuiMarkdownEditor,
   EuiSpacer,
   EuiText,
@@ -138,33 +139,42 @@ export function KnowledgeBaseEditManualEntryFlyout({
         )}
         <EuiSpacer size="m" />
 
-        <EuiFormRow fullWidth>
-          <EuiButtonGroup
-            legend={i18n.translate(
-              'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.visibilityLabel',
-              { defaultMessage: 'Visibility' }
-            )}
-            options={[
-              {
-                id: 'user',
-                label: i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.userLabel',
-                  { defaultMessage: 'User' }
-                ),
-              },
-              {
-                id: 'global',
-                label: i18n.translate(
-                  'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.globalLabel',
-                  { defaultMessage: 'Global' }
-                ),
-              },
-            ]}
-            idSelected={isPublic ? 'global' : 'user'}
-            onChange={(optionId) => setIsPublic(optionId === 'global')}
-            buttonSize="m"
-          />
-        </EuiFormRow>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiButtonGroup
+              legend={i18n.translate(
+                'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.visibilityLabel',
+                { defaultMessage: 'Visibility' }
+              )}
+              options={[
+                {
+                  id: 'user',
+                  label: i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.userLabel',
+                    { defaultMessage: 'User' }
+                  ),
+                },
+                {
+                  id: 'global',
+                  label: i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.knowledgeBaseEditManualEntryFlyout.euiButtonGroup.globalLabel',
+                    { defaultMessage: 'Global' }
+                  ),
+                },
+              ]}
+              idSelected={isPublic ? 'global' : 'user'}
+              onChange={(optionId) => setIsPublic(optionId === 'global')}
+              buttonSize="m"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content="Global entries will be available to all users. User entries will only be available to the author."
+              position="top"
+              type="iInCircle"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
         <EuiSpacer size="m" />
 

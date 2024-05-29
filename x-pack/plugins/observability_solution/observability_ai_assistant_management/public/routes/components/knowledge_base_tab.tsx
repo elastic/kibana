@@ -106,8 +106,8 @@ export function KnowledgeBaseTab() {
       },
     },
     {
-      name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.createdBy', {
-        defaultMessage: 'Created by',
+      name: i18n.translate('xpack.observabilityAiAssistantManagement.kbTab.columns.author', {
+        defaultMessage: 'Author',
       }),
       width: '140px',
       render: (category: KnowledgeBaseEntryCategory) => {
