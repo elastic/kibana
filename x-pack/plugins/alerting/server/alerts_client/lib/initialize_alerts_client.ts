@@ -94,7 +94,7 @@ export const initializeAlertsClient = async <
           name: rule.name,
           parameters: rule.params,
           revision: rule.revision,
-          snoozed: snoozed,
+          snoozed,
           spaceId: context.spaceId,
           tags: rule.tags,
           alertDelay: rule.alertDelay?.active ?? 0,

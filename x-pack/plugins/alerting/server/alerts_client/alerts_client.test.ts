@@ -173,7 +173,7 @@ const fetchedAlert1 = {
   [ALERT_RULE_TYPE_ID]: 'test.rule-type',
   [ALERT_RULE_TAGS]: ['rule-', '-tags'],
   [ALERT_RULE_UUID]: '1',
-  [ALERT_RULE_SNOOZED] : false,
+  [ALERT_RULE_SNOOZED]: false,
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_STATUS]: 'active',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
