@@ -17,26 +17,27 @@ import {
   CanAccessViewMode,
   HasType,
 } from '@kbn/presentation-publishing';
-import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { SLOAlertsEmbeddable } from '../embeddable/slo/alerts/slo_alerts_embeddable';
-import { SLO_ALERTS_EMBEDDABLE } from '../embeddable/slo/constants';
+import { type UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { SLO_ALERTS_EMBEDDABLE_ID } from '../embeddable/slo/alerts/constants';
 import { SloPublicPluginsStart, SloPublicStart } from '..';
-import { HasSloAlertsConfig } from '../embeddable/slo/alerts/types';
-
+import {
+  HasSloAlertsConfig,
+  SloAlertsEmbeddableActionContext,
+} from '../embeddable/slo/alerts/types';
 export const EDIT_SLO_ALERTS_ACTION = 'editSloAlertsPanelAction';
 type EditSloAlertsPanelApi = CanAccessViewMode & HasType & HasSloAlertsConfig;
 const isEditSloAlertsPanelApi = (api: unknown): api is EditSloAlertsPanelApi =>
   Boolean(
     apiHasType(api) &&
-      apiIsOfType(api, SLO_ALERTS_EMBEDDABLE) &&
+      apiIsOfType(api, SLO_ALERTS_EMBEDDABLE_ID) &&
       apiCanAccessViewMode(api) &&
       getInheritedViewMode(api) === ViewMode.EDIT
   );
 
 export function createEditSloAlertsPanelAction(
   getStartServices: CoreSetup<SloPublicPluginsStart, SloPublicStart>['getStartServices']
-) {
-  return createAction<EmbeddableApiContext>({
+): UiActionsActionDefinition<SloAlertsEmbeddableActionContext> {
+  return {
     id: EDIT_SLO_ALERTS_ACTION,
     type: EDIT_SLO_ALERTS_ACTION,
     getIconType(): string {
@@ -46,7 +47,7 @@ export function createEditSloAlertsPanelAction(
       i18n.translate('xpack.slo.actions.editSloAlertsEmbeddableTitle', {
         defaultMessage: 'Edit configuration',
       }),
-    async execute({ embeddable }: EmbeddableApiContext) {
+    async execute({ embeddable }) {
       if (!embeddable) {
         throw new Error('Not possible to execute an action without the embeddable context');
       }
@@ -54,21 +55,21 @@ export function createEditSloAlertsPanelAction(
       const [coreStart, pluginStart] = await getStartServices();
 
       try {
-        const { resolveEmbeddableSloUserInput } = await import(
-          '../embeddable/slo/alerts/handle_explicit_input'
+        const { openSloConfiguration } = await import(
+          '../embeddable/slo/alerts/slo_alerts_open_configuration'
         );
 
-        const result = await resolveEmbeddableSloUserInput(
+        const result = await openSloConfiguration(
           coreStart,
           pluginStart,
-          (embeddable as SLOAlertsEmbeddable).getSloAlertsConfig()
+          embeddable.getSloAlertsConfig()
         );
-        (embeddable as SLOAlertsEmbeddable).updateInput(result);
+        embeddable.updateSloAlertsConfig(result);
       } catch (e) {
         return Promise.reject();
       }
     },
     isCompatible: async ({ embeddable }: EmbeddableApiContext) =>
       isEditSloAlertsPanelApi(embeddable),
-  });
+  };
 }

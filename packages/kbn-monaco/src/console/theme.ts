@@ -37,6 +37,26 @@ export const buildConsoleTheme = (): monaco.editor.IStandaloneThemeData => {
         ['constant.numeric'],
         makeHighContrastColor(euiThemeVars.euiColorAccentText)(background)
       ),
+      ...buildRuleGroup(
+        ['status.info'],
+        makeHighContrastColor(euiThemeVars.euiColorWarningText)(background),
+        true
+      ),
+      ...buildRuleGroup(
+        ['status.success'],
+        makeHighContrastColor(euiThemeVars.euiColorSuccessText)(background),
+        true
+      ),
+      ...buildRuleGroup(
+        ['status.redirect'],
+        makeHighContrastColor(euiThemeVars.euiColorWarningText)(background),
+        true
+      ),
+      ...buildRuleGroup(
+        ['status.error'],
+        makeHighContrastColor(euiThemeVars.euiColorDangerText)(background),
+        true
+      ),
       ...buildRuleGroup(['method'], makeHighContrastColor(methodTextColor)(background)),
       ...buildRuleGroup(['url'], makeHighContrastColor(urlTextColor)(background)),
     ],
