@@ -313,7 +313,6 @@ export default ({ getService }: FtrProviderContext) => {
         alert_suppression: alertSuppression,
         enabled: false,
       });
-
       await patchRule(supertest, log, { id: createdRule.id, enabled: true });
 
       const afterTimestamp = new Date();
@@ -327,9 +326,9 @@ export default ({ getService }: FtrProviderContext) => {
         afterTimestamp
       );
 
-      const sortedAlerts = sortBy(secondAlerts.hits.hits, ALERT_ORIGINAL_TIME);
-
       expect(secondAlerts.hits.hits.length).toEqual(2);
+
+      const sortedAlerts = sortBy(secondAlerts.hits.hits, ALERT_ORIGINAL_TIME);
 
       // second alert is generated with suppression
       expect(sortedAlerts[1]._source).toEqual(
