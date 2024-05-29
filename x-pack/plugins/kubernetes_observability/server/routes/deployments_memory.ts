@@ -6,8 +6,8 @@
  */
 import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
-import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod, toPct } from '../lib/utils';
-import { defineQueryForAllPodsMemoryUtilisation, calulcatePodsMemoryUtilisation, calulcateNodesMemory } from '../lib/pods_memory_utils';
+import { checkDefaultPeriod } from '../lib/utils';
+import { getPodsMemory } from '../lib/pods_memory_utils';
 import { IRouter, Logger } from '@kbn/core/server';
 import {
   DEPLOYMENT_MEMORY_ROUTE,
@@ -55,7 +55,7 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
               field: 'resource.attributes.k8s.deployment.name'
              },
            }
-         )
+          )
           const dslDeploys: estypes.SearchRequest = {
             index: ["metrics-otel.*"],
             _source: false,
@@ -86,94 +86,28 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
         } else if (request.query.name !== undefined) {
           deployNames.push(request.query.name)
         }
-        for (const name of deployNames) {
-          const mustsPods = [
-            {
-              term: {
-                'resource.attributes.k8s.deployment.name': name,
-              },
-            },
-            { exists: { field: 'metrics.k8s.pod.phase' } }
-          ];
-          const dslPods: estypes.SearchRequest = {
-            index: ["metrics-otel.*"],
-            sort: [{ '@timestamp': 'desc' }],
-            _source: false,
-            fields: [
-              '@timestamp',
-              'resource.attributes.k8s.*',
-            ],
-            query: {
-              bool: {
-                must: mustsPods,
-              },
-            },
-            aggs: {
-              unique_values: {
-                terms: { field: 'resource.attributes.k8s.pod.name' },
-              },
-            },
-          };
-          // console.log(mustsPods);
-          // console.log(dslPods);
-          const esResponsePods = await client.search(dslPods);
-          console.log("rs"+esResponsePods);
-          if (esResponsePods.hits.hits.length > 0) {
-            var pod_reasons = new Array();
-            var pod_metrics = new Array();
+        var time = '';
+        for (const deploy of deployNames) {
+          const podObjects = await getPodsMemory(client, period, undefined, request.query.namespace, deploy, undefined);
+          console.log("POD OBJECTS");
+          console.log(podObjects);
+          var reasons = '';
+          var memory = '';
+          var deviation_alarm = '';
+          if (podObjects !== null) {
+            //Create overall message for deployment
             var pods_memory_medium = new Array();
             var pods_memory_high = new Array();
             var pods_deviation_high = new Array();
-            var reasons = '';
-            var deviation_alarm = '';
-            var memory = '';
-
-            const hitsPods = esResponsePods.hits.hits[0];
-            const { fields = {} } = hitsPods
-            var time = extractFieldValue(fields['@timestamp']);
-            var namespace1 = extractFieldValue(fields['resource.attributes.k8s.namespace.name'])
-            console.log("ns:"+namespace1)
-            const{ after_key2: _, buckets = []} = (esResponsePods.aggregations?.unique_values || {}) as any;
-            //console.log("hitspods:"+hitsPodsAggs);
-            for (var entries of buckets) {
-              const podName = entries.key;
-
-              const dslPodsMemory = defineQueryForAllPodsMemoryUtilisation(podName, namespace1, client, period)
-              //console.log(dslPodsMemory);
-              const esResponsePods = await client.search(dslPodsMemory);
-              const [pod] = calulcatePodsMemoryUtilisation(podName, namespace1, esResponsePods)
-              // Node memory available
-              const dslNode = calulcateNodesMemory(pod.node, client)
-              const esResponsedslNode = await client.search(dslNode);
-              console.table("node" + esResponsedslNode)
-              const hitsNodes = esResponsedslNode.hits.hits[0];
-              const { fields = {} } = hitsNodes;
-              var node_memory_available = extractFieldValue(fields['metrics.k8s.node.memory.available'])
-              // End of Node memory available
-              if (pod.memory_available.avg === null) {
-                console.table("node" + node_memory_available)
-                pod.node_memory_available.value = node_memory_available
-                pod.memory_usage.memory_utilization = (pod.memory_usage.avg / node_memory_available)
-                console.log("node" + pod.memory_usage.memory_utilization)
-                pod.message = pod.message + `and ${toPct(pod.memory_usage.memory_utilization)}% memory_utilisation based on node Limit`
+            time = podObjects.time;
+            for (const podObject of podObjects.pods) {
+              if (podObject.alarm == "Medium") {
+                pods_memory_medium.push(podObject.name);
+              } else if (podObject.alarm == "High") {
+                pods_memory_high.push(podObject.name);
               }
-
-              pod_reasons.push(pod.reason);
-              pod_metrics.push(pod);
-            }
-            //Create overall message for deployment
-            for (var pod_reason of pod_reasons) {
-              console.table(pod_reason);
-              //Check for memory pod_reason.reason[0]
-              if (pod_reason.memory == "Medium") {
-                pods_memory_medium.push(pod_reason.pod);
-              } else if (pod_reason.memory == "High") {
-                pods_memory_high.push(pod_reason.pod);
-              }
-
-              //Check for memory_usage_median_absolute_deviation pod_reason.reason[1]
-              if (pod_reason.memory_usage_median_absolute_deviation == "High") {
-                pods_deviation_high.push(pod_reason.pod);
+              if (podObject.deviation_alarm == "High") {
+                pods_deviation_high.push(podObject.name);
               }
             }
 
@@ -195,34 +129,32 @@ export const registerDeploymentsMemoryRoute = (router: IRouter, logger: Logger) 
               deviation_alarm = "Low"
             }
 
-            var deployments_single = {
-              'name': name,
-              'pods': pod_metrics,
-              'message': `Deployment has memory usage ${memory} and deviation ${deviation_alarm}`,
+            const deployment = {
+              'name': deploy,
+              'pods': podObjects.pods,
+              'message': `Deployment has ${memory} memory usage  and ${deviation_alarm} deviation from median value`,
               'reason': reasons,
             };
 
-            deployments.push(deployments_single)
+            deployments.push(deployment)
           } else {
-            const message = `Deployment ${name} not found`
-            deployments_single = {
-              'name': name,
-              'pods': [],
-              'message': message,
-              'reason': "Not found",
-            }
-            deployments.push(deployments_single)
+              const message = `Deployment ${deploy} has no pods or it does not exist`
+              const deployment = {
+                'name': deploy,
+                'pods': [],
+                'message': message,
+                'reason': 'No pods found',
+              };
+    
+              deployments.push(deployment)
           }
         }
-        //End of Create overall message for deployment
         return response.ok({
           body: {
             time: time,
             deployments: deployments
           },
         });
-
-
       }
     );
 };

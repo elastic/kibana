@@ -8,8 +8,8 @@ import { schema } from '@kbn/config-schema';
 import { estypes } from '@elastic/elasticsearch';
 // import { transformError } from '@kbn/securitysolution-es-utils';
 // import type { ElasticsearchClient } from '@kbn/core/server';
-import { extractFieldValue, checkDefaultNamespace, checkDefaultPeriod , toPct} from '../lib/utils';
-import { defineQueryForAllPodsMemoryUtilisation, calulcatePodsMemoryUtilisation, calulcateNodesMemory } from '../lib/pods_memory_utils';
+import { checkDefaultPeriod } from '../lib/utils';
+import { getPodsMemory } from '../lib/pods_memory_utils';
 
 import { IRouter, Logger } from '@kbn/core/server';
 import {
@@ -90,91 +90,38 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
         } else if (request.query.name !== undefined) {
           daemonNames.push(request.query.name)
         }
-        for (const name of daemonNames) {
-          const mustsPods = [
-            {
-              term: {
-                'resource.attributes.k8s.daemonset.name': name,
-              },
-            },
-            { exists: { field: 'metrics.k8s.pod.phase' } }
-          ];
-          const dslPods: estypes.SearchRequest = {
-            index: ["metrics-otel.*"],
-            sort: [{ '@timestamp': 'desc' }],
-            _source: false,
-            fields: [
-              '@timestamp',
-              'resource.attributes.k8s.*',
-            ],
-            query: {
-              bool: {
-                must: mustsPods,
-              },
-            },
-            aggs: {
-              unique_values: {
-                terms: { field: 'resource.attributes.k8s.pod.name' },
-              },
-            },
-          };
-          // console.log(mustsPods);
-          // console.log(dslPods);
-          const esResponsePods = await client.search(dslPods);
-          //console.log(esResponsePods);
-          if (esResponsePods.hits.hits.length > 0) {
-            var pod_reasons = new Array();
-            var pod_metrics = new Array();
+
+        var time = '';
+        for (const daemonsetName of daemonNames) {
+          const daemonPods = await getDaemonPodsasList(client, daemonsetName, request.query.namespace)
+          var podObjects = new Array();
+          for (const podName of daemonPods){
+            const podObject = await getPodsMemory(client, period, podName, request.query.namespace, undefined, undefined);
+            if (podObject !== null) {
+              time = podObject.time;
+              const pod = podObject.pods[0];
+              podObjects.push(pod)
+            }
+          }
+          // const podObjects = await getPodsMemory(client, period, undefined, request.query.namespace, undefined, daemonsetName);
+          console.log("POD OBJECTS");
+          console.log(podObjects);
+          var reasons = '';
+          var memory = '';
+          var deviation_alarm = '';
+          if (podObjects.length !== 0) {
+            //Create overall message for deployment
             var pods_memory_medium = new Array();
             var pods_memory_high = new Array();
             var pods_deviation_high = new Array();
-            var reasons = '';
-            var memory = '';
-            var deviation_alarm = '';
-
-            const hitsPods = esResponsePods.hits.hits[0];
-            const { fields = {} } = hitsPods;
-            var namespace1 = extractFieldValue(fields['resource.attributes.k8s.namespace.name'])
-            var time = extractFieldValue(fields['@timestamp']);
-            const { after_key2: _, buckets = [] } = (esResponsePods.aggregations?.unique_values || {}) as any;
-            //console.log("hitspods:"+hitsPodsAggs);
-            for (const entries of buckets) {
-              const podName = entries.key;
-              console.log(podName);
-              const dslPodsCpu = defineQueryForAllPodsMemoryUtilisation(podName, namespace1, client, period);
-              const esResponsePodsCpu = await client.search(dslPodsCpu);
-              const [pod] = calulcatePodsMemoryUtilisation(podName, namespace1, esResponsePodsCpu);
-              // Node memory available
-              const dslNode = calulcateNodesMemory(pod.node, client)
-              const esResponsedslNode = await client.search(dslNode);
-              console.table("node" + esResponsedslNode)
-              const hitsNodes = esResponsedslNode.hits.hits[0];
-              const { fields = {} } = hitsNodes;
-              var node_memory_available = extractFieldValue(fields['metrics.k8s.node.memory.available'])
-              // End of Node memory available
-              if (pod.memory_available.avg === null) {
-                console.table("node" + node_memory_available)
-                pod.node_memory_available.value = node_memory_available
-                pod.memory_usage.memory_utilization = (pod.memory_usage.avg / node_memory_available)
-                console.log("node" + pod.memory_usage.memory_utilization)
-                pod.message = pod.message + `and ${toPct(pod.memory_usage.memory_utilization)}% memory_utilisation based on node Limit`
+            for (const podObject of podObjects) {
+              if (podObject.alarm == "Medium") {
+                pods_memory_medium.push(podObject.name);
+              } else if (podObject.alarm == "High") {
+                pods_memory_high.push(podObject.name);
               }
-
-              pod_reasons.push(pod.reason);
-              pod_metrics.push(pod);
-            }
-            //Create overall message for deployment
-            for (var pod_reason of pod_reasons) {
-              //Check for memory pod_reason.reason[0]
-              if (pod_reason.memory == "Medium") {
-                pods_memory_medium.push(pod_reason.pod);
-              } else if (pod_reason.memory == "High") {
-                pods_memory_high.push(pod_reason.pod);
-              }
-
-              //Check for memory_usage_median_absolute_deviation pod_reason.reason[1]
-              if (pod_reason.memory_usage_median_absolute_deviation == "High") {
-                pods_deviation_high.push(pod_reason.pod);
+              if (podObject.deviation_alarm == "High") {
+                pods_deviation_high.push(podObject.name);
               }
             }
 
@@ -195,32 +142,86 @@ export const registerDaemonsetsMemoryRoute = (router: IRouter, logger: Logger) =
             } else {
               deviation_alarm = "Low"
             }
-            //End of Create overall message for deployment
 
-            var daemonsets_single = {
-              'name': name,
-              'pods': pod_metrics,
-              'message': `Daemonset has cpu utilization ${memory} and deviation ${deviation_alarm}`,
+            const daemonset = {
+              'name': daemonsetName,
+              'pods': podObjects,
+              'message': `${resource} has ${memory} memory usage  and ${deviation_alarm} deviation from median value`,
               'reason': reasons,
             };
-            daemonsets.push(daemonsets_single);
+
+            daemonsets.push(daemonset)
           } else {
-            const message = `Daemonset ${name} not found`
-            daemonsets_single = {
-              'name': name,
-              'pods': [],
-              'message': message,
-              'reason': "Not found",
-            }
-            daemonsets.push(daemonsets_single);
+              const message = `${resource} ${daemonsetName} has no pods or it does not exist`
+              const daemonset = {
+                'name': daemonsetName,
+                'pods': [],
+                'message': message,
+                'reason': 'No pods found',
+              };
+    
+              daemonsets.push(daemonset)
           }
-        } return response.ok({
+        }
+        return response.ok({
           body: {
             time: time,
-            namespace: namespace1,
             daemonsets: daemonsets
           },
         });
       }
     );
 };
+
+export async function getDaemonPodsasList(client: any, daemonName: string, namespace?: string, ){
+  var pods = new Array();
+  var musts = new Array();
+  musts.push(
+    {
+      term: {
+        'resource.attributes.k8s.daemonset.name': daemonName,
+      },
+    },
+    { exists: { field: 'metrics.k8s.pod.phase' } }
+  )
+
+  if (namespace !== undefined) {
+    musts.push(
+      {
+        term: {
+          'resource.attributes.k8s.namespace.name': namespace,
+        },
+      }
+    )
+  }
+
+  const dslPods: estypes.SearchRequest = {
+    index: ["metrics-otel.*"],
+    size: 0,
+    sort: [{ '@timestamp': 'desc' }],
+    _source: false,
+    fields: [
+      '@timestamp',
+      'metrics.k8s.pod.phase',
+      'resource.attributes.k8s.*',
+    ],
+    query: {
+      bool: {
+        must: musts,
+      },
+    },
+    aggs: {
+      unique_values: {
+        terms: { field: 'resource.attributes.k8s.pod.name', size: 500 },
+      },
+    },
+  };
+  const esResponsePods = await client.search(dslPods);
+  const { after_key: _, buckets = [] } = (esResponsePods.aggregations?.unique_values || {}) as any;
+  if (buckets.length > 0) {
+    for (const bucket of buckets) {
+      pods.push(bucket.key)
+    }
+  }
+  return pods;
+}

@@ -52,24 +52,14 @@ export type PodMem = {
     name: string;
     namespace: string;
     node: string;
-    node_memory_available:{
-        value: number | undefined;
-    }
-    memory_available: {
-        avg: number | undefined;
-    }
-    memory_usage:{
-        min: number | undefined;
-        max: number | undefined;
-        avg: number | undefined;
-        memory_utilization: number | undefined;
-        median_absolute_deviation: number | undefined;
-    },
-    reason: {
-        memory: string | undefined;
-        memory_usage_median_absolute_deviation: String | undefined;
-    },
+    memory_available: number | undefined;
+    memory_usage: number | undefined;
+    memory_usage_median_deviation: number| undefined;
+    memory_utilization: number| undefined;
     message: string | undefined;
+    reason: string | undefined;
+    alarm: string | undefined;
+    deviation_alarm: string | undefined;
 }
 
 export type PodCpu = {
