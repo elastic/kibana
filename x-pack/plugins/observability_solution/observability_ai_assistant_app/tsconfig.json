@@ -70,6 +70,7 @@
     "@kbn/cloud-plugin",
     "@kbn/observability-plugin",
     "@kbn/esql-datatable",
+    "@kbn/alerting-comparators"
   ],
   "exclude": ["target/**/*"]
 }
