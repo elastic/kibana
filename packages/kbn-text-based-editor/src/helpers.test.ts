@@ -13,6 +13,7 @@ import {
   getWrappedInPipesCode,
   getIndicesList,
   getRemoteIndicesList,
+  esqlHasPipes,
 } from './helpers';
 
 describe('helpers', function () {
@@ -312,6 +313,41 @@ describe('helpers', function () {
       };
       const indices = await getRemoteIndicesList(updatedDataViewsMock);
       expect(indices).toStrictEqual([{ name: 'remote:logs', hidden: false }]);
+    });
+  });
+
+  describe('esqlHasPipes', function () {
+    it('returns false for queries with no pipes', async function () {
+      const queries = [
+        'FROM asdf',
+        'from asdf',
+        ' fROM adsf',
+        'asdf',
+        'fROM asdf metadata _id',
+        'metrics asdf',
+        'METRICS adsf',
+        'mETRICS asdf metadata _id',
+      ];
+      for (const query of queries) {
+        expect(esqlHasPipes(query)).toEqual(false);
+      }
+    });
+
+    it('returns true for queries with pipes', async function () {
+      const queries = [
+        'FROM asdf|',
+        'from asdf |',
+        ' fROM adsf | ',
+        'asdf |',
+        'fROM asdf metadata _id | dissect',
+        'metrics asdf | asdf',
+        'METRICS adsf ||',
+        'mETRICS asdf metadata _id | test | foo| bar  |',
+        '|',
+      ];
+      for (const query of queries) {
+        expect(esqlHasPipes(query)).toEqual(true);
+      }
     });
   });
 });

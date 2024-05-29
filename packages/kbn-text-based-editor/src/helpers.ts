@@ -236,3 +236,11 @@ export const getESQLSources = async (dataViews: DataViewsPublicPluginStart) => {
   ]);
   return [...localIndices, ...remoteIndices];
 };
+
+/**
+ * Checks if an ES|QL query has at least one pipe, i.e. has at least one
+ * sub-command. Uses a text search heuristic, not full AST parsing.
+ */
+export const esqlHasPipes = (esqlQuery: string): boolean => {
+  return esqlQuery.lastIndexOf('|') > -1;
+};
