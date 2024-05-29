@@ -95,7 +95,11 @@ export function internalMonitoringCheckRoute(server: MonitoringCore, npRoute: Ro
         const { ccs } = request.body;
         const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
         const kbnIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_KIBANA, ccs);
-        const lsIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_LOGSTASH_MONITORING, ccs);
+        const lsIndexPattern = prefixIndexPatternWithCcs(
+          config,
+          INDEX_PATTERN_LOGSTASH_MONITORING,
+          ccs
+        );
         const indexCounts = await Promise.all([
           checkLatestMonitoringIsLegacy(context, esIndexPattern),
           checkLatestMonitoringIsLegacy(context, kbnIndexPattern),
