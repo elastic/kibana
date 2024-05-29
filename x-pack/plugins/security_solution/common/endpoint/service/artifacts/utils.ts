@@ -16,7 +16,7 @@ import { BY_POLICY_ARTIFACT_TAG_PREFIX, GLOBAL_ARTIFACT_TAG } from './constants'
 
 const POLICY_ID_START_POSITION = BY_POLICY_ARTIFACT_TAG_PREFIX.length;
 
-export const isArtifactGlobal = (item: Pick<ExceptionListItemSchema, 'tags'>): boolean => {
+export const isArtifactGlobal = (item: Partial<Pick<ExceptionListItemSchema, 'tags'>>): boolean => {
   return (item.tags ?? []).find((tag) => tag === GLOBAL_ARTIFACT_TAG) !== undefined;
 };
 
@@ -95,10 +95,6 @@ export function getEffectedPolicySelectionByTags(
     isGlobal: false,
     selected,
   };
-}
-
-export function isGlobalPolicyEffected(tags?: string[]): boolean {
-  return tags !== undefined && tags.find((tag) => tag === GLOBAL_ARTIFACT_TAG) !== undefined;
 }
 
 export const createExceptionListItemForCreate = (listId: string): CreateExceptionListItemSchema => {

@@ -28,7 +28,7 @@ import {
   getArtifactTagsByEffectedPolicySelection,
   getArtifactTagsWithoutPolicies,
   getEffectedPolicySelectionByTags,
-  isGlobalPolicyEffected,
+  isArtifactGlobal,
 } from '../../../../../../common/endpoint/service/artifacts';
 import {
   DESCRIPTION_LABEL,
@@ -71,7 +71,7 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     const getTestId = useTestIdGenerator(testIdPrefix);
 
     const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
-      isGlobal: isGlobalPolicyEffected(exception.tags),
+      isGlobal: isArtifactGlobal(exception),
       selected: [],
     });
 

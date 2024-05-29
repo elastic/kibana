@@ -28,7 +28,6 @@ import {
   ConditionEntryField,
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import type {
   TrustedAppConditionEntry,
@@ -43,7 +42,6 @@ import {
 import {
   isArtifactGlobal,
   getPolicyIdsFromArtifact,
-  isGlobalPolicyEffected,
 } from '../../../../../../common/endpoint/service/artifacts';
 import {
   isMacosLinuxTrustedAppCondition,
@@ -253,13 +251,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
 
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     useEffect(() => {
       if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
       }
     }, [item.tags, hasFormChanged]);
 

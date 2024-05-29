@@ -26,7 +26,6 @@ import {
 import type { BlocklistConditionEntryField } from '@kbn/securitysolution-utils';
 import { OperatingSystem, isPathValid } from '@kbn/securitysolution-utils';
 import { isOneOfOperator } from '@kbn/securitysolution-list-utils';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { uniq } from 'lodash';
 
 import { OS_TITLES } from '../../../../common/translations';
@@ -56,10 +55,7 @@ import {
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useLicense } from '../../../../../common/hooks/use_license';
 import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
-import {
-  isArtifactGlobal,
-  isGlobalPolicyEffected,
-} from '../../../../../../common/endpoint/service/artifacts';
+import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
@@ -113,8 +109,8 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const errorsRef = useRef<ItemValidation>({ name: {}, value: {} });
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(() => isArtifactGlobal(item as ExceptionListItemSchema), [item]);
-    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(item.tags));
+    const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(item));
     const [hasFormChanged, setHasFormChanged] = useState(false);
 
     const showAssignmentSection = useMemo(() => {
@@ -127,7 +123,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     // set initial state of `wasByPolicy` that checks if the initial state of the exception was by policy or not
     useEffect(() => {
       if (!hasFormChanged && item.tags) {
-        setWasByPolicy(!isGlobalPolicyEffected(item.tags));
+        setWasByPolicy(!isArtifactGlobal({ tags: item.tags }));
       }
     }, [item.tags, hasFormChanged]);
 

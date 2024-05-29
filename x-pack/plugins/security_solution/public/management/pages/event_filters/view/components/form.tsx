@@ -47,7 +47,6 @@ import {
   getPolicyIdsFromArtifact,
   GLOBAL_ARTIFACT_TAG,
   BY_POLICY_ARTIFACT_TAG_PREFIX,
-  isGlobalPolicyEffected,
 } from '../../../../../../common/endpoint/service/artifacts';
 
 import {
@@ -140,11 +139,8 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     const [hasBeenInputNameVisited, setHasBeenInputNameVisited] = useState(false);
     const [selectedPolicies, setSelectedPolicies] = useState<PolicyData[]>([]);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
-    const isGlobal = useMemo(
-      () => isArtifactGlobal(exception as ExceptionListItemSchema),
-      [exception]
-    );
-    const [wasByPolicy, setWasByPolicy] = useState(!isGlobalPolicyEffected(exception?.tags));
+    const isGlobal = useMemo(() => isArtifactGlobal(exception), [exception]);
+    const [wasByPolicy, setWasByPolicy] = useState(!isArtifactGlobal(exception));
     const [hasDuplicateFields, setHasDuplicateFields] = useState<boolean>(false);
     const [hasWildcardWithWrongOperator, setHasWildcardWithWrongOperator] =
       useState<boolean>(false);
@@ -212,7 +208,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
     // if the initial state of the exception was by policy or not
     useEffect(() => {
       if (!hasFormChanged && exception.tags) {
-        setWasByPolicy(!isGlobalPolicyEffected(exception.tags));
+        setWasByPolicy(!isArtifactGlobal({ tags: exception.tags }));
       }
     }, [exception.tags, hasFormChanged]);
 
