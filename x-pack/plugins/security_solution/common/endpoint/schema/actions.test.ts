@@ -759,4 +759,6 @@ describe('actions schemas', () => {
       }).toThrow('[file]: expected value of type [Stream] but got [Object]');
     });
   });
+
+  describe('ScanActionRequestSchema', () => {});
 });

@@ -7,6 +7,7 @@
 
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
+import type { ScanActionRequestBody } from '../../../../../../common/api/endpoint/actions/scan_route';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
@@ -42,6 +43,8 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   UploadedFileInfo,
+  ResponseActionsScanParameters,
+  ResponseActionScanOutputContent,
 } from '../../../../../../common/endpoint/types';
 import type {
   CommonResponseActionMethodOptions,
@@ -284,6 +287,16 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       ExecuteActionRequestBody,
       ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>
     >('execute', actionRequestWithDefaults, options);
+  }
+
+  async scan(
+    actionRequest: ScanActionRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>> {
+    return this.handleResponseAction<
+      ScanActionRequestBody,
+      ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>
+    >('scan', actionRequest, options);
   }
 
   async upload(

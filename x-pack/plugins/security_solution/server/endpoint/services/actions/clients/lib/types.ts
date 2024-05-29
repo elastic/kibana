@@ -6,6 +6,7 @@
  */
 
 import type { Readable } from 'stream';
+import type { ScanActionRequestBody } from '../../../../../../common/api/endpoint/actions/scan_route';
 import type {
   ActionDetails,
   KillOrSuspendProcessRequestBody,
@@ -22,6 +23,8 @@ import type {
   EndpointActionData,
   LogsEndpointActionResponse,
   UploadedFileInfo,
+  ResponseActionScanOutputContent,
+  ResponseActionsScanParameters,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -140,4 +143,14 @@ export interface ResponseActionsClient {
    * @param fileId
    */
   getFileInfo(actionId: string, fileId: string): Promise<UploadedFileInfo>;
+
+  /**
+   * Scan a file path/folder
+   * @param actionRequest
+   * @param options
+   */
+  scan: (
+    actionRequest: OmitUnsupportedAttributes<ScanActionRequestBody>,
+    options?: CommonResponseActionMethodOptions
+  ) => Promise<ActionDetails<ResponseActionScanOutputContent, ResponseActionsScanParameters>>;
 }

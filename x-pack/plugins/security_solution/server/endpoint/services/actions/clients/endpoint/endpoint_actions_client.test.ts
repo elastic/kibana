@@ -261,6 +261,8 @@ describe('EndpointActionsClient', () => {
     execute: responseActionsClientMock.createExecuteOptions(getCommonResponseActionOptions()),
 
     upload: responseActionsClientMock.createUploadOptions(getCommonResponseActionOptions()),
+
+    scan: responseActionsClientMock.createUploadOptions(getCommonResponseActionOptions()),
   };
 
   it.each(Object.keys(responseActionMethods) as ResponseActionsMethodsOnly[])(

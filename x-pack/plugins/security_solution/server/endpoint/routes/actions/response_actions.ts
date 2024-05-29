@@ -7,6 +7,8 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { ScanActionRequestBody } from '../../../../common/api/endpoint/actions/scan_route';
+import { ScanActionRequestSchema } from '../../../../common/api/endpoint/actions/scan_route';
 import { responseActionsWithLegacyActionProperty } from '../../services/actions/constants';
 import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient, NormalizedExternalConnectorClient } from '../../services';
@@ -41,6 +43,7 @@ import {
   GET_FILE_ROUTE,
   EXECUTE_ROUTE,
   UPLOAD_ROUTE,
+  SCAN_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointActionDataParameterTypes,
@@ -48,6 +51,7 @@ import type {
   ResponseActionsExecuteParameters,
   ActionDetails,
   KillOrSuspendProcessRequestBody,
+  ResponseActionsScanParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -279,6 +283,26 @@ export function registerResponseActionRoutes(
         responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'upload')
       )
     );
+
+  router.versioned
+    .post({
+      access: 'public',
+      path: SCAN_ROUTE,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: ScanActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteScanOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsScanParameters>(endpointContext, 'scan')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -366,6 +390,10 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
         case 'upload':
           action = await responseActionsClient.upload(req.body as UploadActionApiRequestBody);
+          break;
+
+        case 'scan':
+          action = await responseActionsClient.scan(req.body as ScanActionRequestBody);
           break;
 
         default:
