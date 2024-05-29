@@ -478,9 +478,11 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               (action) => !actions.isActionTypeEnabled(action.actionTypeId)
             );
 
+            const createdSignalsCount = result.createdSignals.length;
+
             if (disabledActions.length > 0) {
               const disabledActionsWarning = getDisabledActionsWarningText({
-                alertsCreated: true,
+                alertsCreated: createdSignalsCount > 0,
                 disabledActions,
               });
               warningMessage = [
@@ -501,8 +503,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 },
               });
             }
-
-            const createdSignalsCount = result.createdSignals.length;
 
             if (result.success) {
               ruleExecutionLogger.debug('Security Rule execution completed');
