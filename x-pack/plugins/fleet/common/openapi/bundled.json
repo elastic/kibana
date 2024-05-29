@@ -1,6 +1,5 @@
 {
   "openapi": "3.0.0",
-  "tags": [],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -19,6 +18,12 @@
       "description": "Public and supported Fleet API"
     }
   ],
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ],
+  "tags": [],
   "paths": {
     "/health_check": {
       "post": {
@@ -1621,6 +1626,14 @@
           },
           "name": "prerelease",
           "description": "Specify if version is prerelease",
+          "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "ignoreUnverified",
+          "description": "Ignore if the package is fails signature verification",
           "in": "query"
         }
       ]
@@ -9391,10 +9404,5 @@
         }
       }
     }
-  },
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ]
+  }
 }
