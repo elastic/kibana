@@ -45,6 +45,10 @@ export const EDIT_LABEL = i18n.translate('xpack.synthetics.management.editLabel'
   defaultMessage: 'Edit',
 });
 
+export const CLONE_LABEL = i18n.translate('xpack.synthetics.management.cloneLabel', {
+  defaultMessage: 'Clone',
+});
+
 export const ENABLE_STATUS_ALERT = i18n.translate('xpack.synthetics.management.enableStatusAlert', {
   defaultMessage: 'Enable status alerts',
 });
