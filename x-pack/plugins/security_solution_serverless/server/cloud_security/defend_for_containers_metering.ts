@@ -15,7 +15,7 @@ import type { Tier, UsageRecord } from '../types';
 import type { CloudSecurityMeteringCallbackInput } from './types';
 import { CLOUD_DEFEND, CLOUD_SECURITY_TASK_TYPE, CLOUD_DEFEND_HEARTBEAT_INDEX } from './constants';
 
-const BATCH_SIZE = 1;
+const BATCH_SIZE = 1000;
 const SAMPLE_WEIGHT_SECONDS = 3600; // 1 Hour
 
 export interface CloudDefendHeartbeat {
