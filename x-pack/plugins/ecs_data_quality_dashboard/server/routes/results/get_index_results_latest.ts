@@ -7,15 +7,15 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 
-import { INTERNAL_API_VERSION, RESULTS_INDICES_LATEST_ROUTE_PATH } from '../../../common/constants';
+import { INTERNAL_API_VERSION, GET_INDEX_RESULTS_LATEST } from '../../../common/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
-import { GetResultParams } from '../../schemas/result';
+import { GetIndexResultsLatestParams } from '../../schemas/result';
 import type { ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
-import { checkIndicesPrivileges } from './privileges';
+import { getAuthorizedIndexNames } from '../../helpers/get_authorized_index_names';
 
 export const getQuery = (indexName: string[]) => ({
   size: 0,
@@ -33,13 +33,13 @@ export interface LatestAggResponseBucket {
   latest_doc: { hits: { hits: Array<{ _source: ResultDocument }> } };
 }
 
-export const getResultsIndicesLatestRoute = (
+export const getIndexResultsLatestRoute = (
   router: IRouter<DataQualityDashboardRequestHandlerContext>,
   logger: Logger
 ) => {
   router.versioned
     .get({
-      path: RESULTS_INDICES_LATEST_ROUTE_PATH,
+      path: GET_INDEX_RESULTS_LATEST,
       access: 'internal',
       options: { tags: ['access:securitySolution'] },
     })
@@ -48,7 +48,7 @@ export const getResultsIndicesLatestRoute = (
         version: INTERNAL_API_VERSION,
         validate: {
           request: {
-            params: buildRouteValidation(GetResultParams),
+            params: buildRouteValidation(GetIndexResultsLatestParams),
           },
         },
       },
@@ -71,50 +71,8 @@ export const getResultsIndicesLatestRoute = (
           const { client } = services.core.elasticsearch;
           const { pattern } = request.params;
 
-          // Discover all indices for the pattern using internal user
-          const indicesResponse = await client.asInternalUser.indices.get({
-            index: pattern,
-            features: 'aliases', // omit 'settings' and 'mappings' to reduce response size
-          });
+          const authorizedIndexNames = await getAuthorizedIndexNames(client, pattern);
 
-          // map data streams to their backing indices and collect indices to authorize
-          const indicesToAuthorize: string[] = [];
-          const dataStreamIndices: Record<string, string[]> = {};
-          Object.entries(indicesResponse).forEach(([indexName, { data_stream: dataStream }]) => {
-            if (dataStream) {
-              if (!dataStreamIndices[dataStream]) {
-                dataStreamIndices[dataStream] = [];
-              }
-              dataStreamIndices[dataStream].push(indexName);
-            } else {
-              indicesToAuthorize.push(indexName);
-            }
-          });
-          indicesToAuthorize.push(...Object.keys(dataStreamIndices));
-          if (indicesToAuthorize.length === 0) {
-            return response.ok({ body: [] });
-          }
-
-          // check privileges for indices or data streams
-          const hasIndexPrivileges = await checkIndicesPrivileges({
-            client,
-            indices: indicesToAuthorize,
-          });
-
-          // filter out unauthorized indices, and expand data streams backing indices
-          const authorizedIndexNames = Object.entries(hasIndexPrivileges).reduce<string[]>(
-            (acc, [indexName, authorized]) => {
-              if (authorized) {
-                if (dataStreamIndices[indexName]) {
-                  acc.push(...dataStreamIndices[indexName]);
-                } else {
-                  acc.push(indexName);
-                }
-              }
-              return acc;
-            },
-            []
-          );
           if (authorizedIndexNames.length === 0) {
             return response.ok({ body: [] });
           }
