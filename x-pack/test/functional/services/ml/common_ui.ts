@@ -447,5 +447,9 @@ export function MachineLearningCommonUIProvider({
         await testSubjects.missingOrFail(selector);
       }
     },
+
+    async toggleSwitchIfNeeded(testSubj: string, targetState: boolean) {
+      await testSubjects.setEuiSwitch(testSubj, targetState ? 'check' : 'uncheck');
+    },
   };
 }
