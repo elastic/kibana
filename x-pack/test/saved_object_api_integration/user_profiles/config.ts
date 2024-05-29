@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export const settingsObjectType = 'uptime-dynamic-settings';
-export const settingsObjectId = 'uptime-dynamic-settings-singleton';
+import { createTestConfig } from '../common/config';
+
+// eslint-disable-next-line import/no-default-export
+export default createTestConfig('user_profiles', { license: 'basic' });
