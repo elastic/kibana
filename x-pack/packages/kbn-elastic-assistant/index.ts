@@ -145,13 +145,6 @@ export type { PromptContextTemplate } from './impl/assistant/prompt_context/type
  */
 export type { QuickPrompt } from './impl/assistant/quick_prompts/types';
 
-/**
- * Knowledge Base API Responses
- */
-export type { DeleteKnowledgeBaseResponse } from './impl/assistant/api';
-export type { GetKnowledgeBaseStatusResponse } from './impl/assistant/api';
-export type { PostKnowledgeBaseResponse } from './impl/assistant/api';
-
 export { useFetchCurrentUserConversations } from './impl/assistant/api/conversations/use_fetch_current_user_conversations';
 export * from './impl/assistant/api/conversations/bulk_update_actions_conversations';
 export { getConversationById } from './impl/assistant/api/conversations/conversations';

@@ -57,6 +57,7 @@ import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { memoize, noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
 import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/public';
 import { DiscoverStartPlugins } from './plugin';
 import { DiscoverContextAppLocator } from './application/context/services/locator';
@@ -77,6 +78,7 @@ export interface UrlTracker {
 }
 
 export interface DiscoverServices {
+  aiops?: AiopsPluginStart;
   application: ApplicationStart;
   addBasePath: (path: string) => string;
   analytics: AnalyticsServiceStart;
@@ -157,6 +159,7 @@ export const buildServices = memoize(
     const storage = new Storage(localStorage);
 
     return {
+      aiops: plugins.aiops,
       application: core.application,
       addBasePath: core.http.basePath.prepend,
       analytics: core.analytics,

@@ -14,6 +14,10 @@ export const registerDeleteRoute = (router: IRouter, url: ServerUrlService) => {
   router.delete(
     {
       path: '/api/short_url/{id}',
+      options: {
+        access: 'public',
+        description: `Delete a short URL`,
+      },
       validate: {
         params: schema.object({
           id: schema.string({
