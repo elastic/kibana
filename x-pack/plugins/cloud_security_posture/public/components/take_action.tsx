@@ -197,7 +197,7 @@ export const TakeAction = ({
     </EuiButton>
   ) : (
     <EuiButtonIcon
-      aria-label="show actions"
+      aria-label="More actions"
       iconType="boxesHorizontal"
       color="primary"
       isLoading={isLoading}
