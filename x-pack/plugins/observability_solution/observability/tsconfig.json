@@ -98,6 +98,7 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/cases-components",
     "@kbn/aiops-log-rate-analysis",
+    "@kbn/alerting-comparators",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
   ],
