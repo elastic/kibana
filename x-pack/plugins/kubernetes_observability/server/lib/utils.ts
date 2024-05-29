@@ -66,18 +66,30 @@ export type PodCpu = {
     name: string;
     namespace: string;
     node: string;
-    cpu_utilization: {
-        min: number | undefined;
-        max: number | undefined
-        avg: number | undefined
-        median_absolute_deviation: number | undefined;
-    },
-    reason: {
-        cpu_utilisation: string | undefined;
-        cpu_utilisation_median_absolute_deviation: String | undefined;
-    },
-    message: string | undefined; 
+    cpu_utilization: number| undefined;
+    cpu_utilization_median_deviation: number| undefined;
+    message: string | undefined;
+    reason: string | undefined;
+    alarm: string | undefined;
+    deviation_alarm: string | undefined;
 }
+
+// export type PodCpu = {
+//     name: string;
+//     namespace: string;
+//     node: string;
+//     cpu_utilization: {
+//         min: number | undefined;
+//         max: number | undefined
+//         avg: number | undefined
+//         median_absolute_deviation: number | undefined;
+//     },
+//     reason: {
+//         cpu_utilisation: string | undefined;
+//         cpu_utilisation_median_absolute_deviation: String | undefined;
+//     },
+//     message: string | undefined; 
+// }
 
 export type Node = {
     name: string;

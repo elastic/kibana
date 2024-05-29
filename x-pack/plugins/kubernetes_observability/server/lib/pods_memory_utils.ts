@@ -12,18 +12,43 @@ const limits: Limits = {
 // Define the global Deviation limit to categorise memory memory_usage_median_absolute_deviation
 const deviation = 5e+7 // We define that deviations more than 50Megabytes should be looked by the user
 
-export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespace: any, client: ElasticsearchClient, period: string) {
-    var mustsPodsCpu = new Array;
-    mustsPodsCpu.push(
-        {
-            term: {
-                'resource.attributes.k8s.pod.name': podName,
-            },
-        },
+export async function getPodsMemory(client: ElasticsearchClient, period: string, podName?: any, namespace?: any, deployment?: any, daemonset?: any ){
+    const dsl = defineQueryGeneralMemoryUtilisation(client, period, podName, namespace, deployment, daemonset);
+    console.log(dsl);
+    const esResponseAll = await client.search(dsl);
+    const { after_key: _, buckets = [] } = (esResponseAll.aggregations?.group_by_category || {}) as any;
+    if (buckets.length > 0) {
+        const hits = esResponseAll.hits.hits[0];
+        const { fields = {} } = hits;
+        const time = extractFieldValue(fields['@timestamp']);
+        var pods = new Array();
+        for (const bucket of buckets) {
+            console.log(bucket);
+            const podName = bucket.key[0];
+            const podNs = bucket.key[1];
+            const podNode = bucket.key[2];
+            console.log(podName + podNs + podNode);
+            const pod = await calulcatePodsMemoryUtilisation(podName, podNs, podNode, client, bucket);
+            pods.push(pod);
+            console.log(pod.name);
+        }
+        return {
+            time: time,
+            pods: pods
+        }
+    }
+    return null
+}
+
+
+export function defineQueryGeneralMemoryUtilisation(client: ElasticsearchClient, period: string, podName: any, namespace: any, deployment: any, daemonset: any) {
+    var mustsPodsMem = new Array();
+    mustsPodsMem.push(
         { exists: { field: 'metrics.k8s.pod.memory.usage' } }
     )
+
     if (namespace !== undefined) {
-        mustsPodsCpu.push(
+        mustsPodsMem.push(
             {
                 term: {
                     'resource.attributes.k8s.namespace.name': namespace,
@@ -31,6 +56,37 @@ export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespac
             }
         )
     }
+
+    if (podName !== undefined) {
+        mustsPodsMem.push(
+            {
+                term: {
+                    'resource.attributes.k8s.pod.name': podName,
+                },
+            }
+        )
+    }
+
+    if (deployment !== undefined) {
+        mustsPodsMem.push(
+            {
+                term: {
+                    'resource.attributes.k8s.deployment.name': deployment,
+                },
+            }
+        )
+    }
+
+    if (daemonset !== undefined) {
+        mustsPodsMem.push(
+            {
+                term: {
+                    'resource.attributes.k8s.daemonset.name': daemonset,
+                },
+            }
+        )
+    }
+
     const filter = [
         {
             range: {
@@ -40,39 +96,60 @@ export function defineQueryForAllPodsMemoryUtilisation(podName: string, namespac
             }
         }
     ]
-    const dslPodsCpu: estypes.SearchRequest = {
+    console.log(mustsPodsMem);
+    const dslPodsMem: estypes.SearchRequest = {
         index: ["metrics-otel.*"],
-        sort: [{ '@timestamp': 'desc' }],
         _source: false,
+        sort: [{ '@timestamp': 'desc' }],
         fields: [
             '@timestamp',
-            'metrics.k8s.pod.memory.*',
+            'metrics.k8s.pod.memory.usage',
+            'metrics.k8s.pod.memory.available',
             'resource.attributes.k8s.*',
         ],
         query: {
             bool: {
-                must: mustsPodsCpu,
+                must: mustsPodsMem,
                 filter: filter,
             },
         },
+
         aggs: {
-            memory_usage: { stats: { field: 'metrics.k8s.pod.memory.usage' } },
-            memory_usage_variability: {
-                median_absolute_deviation: {
-                    field: 'metrics.k8s.pod.memory.usage'
-                }
-            },
-            memory_available: { stats: { field: 'metrics.k8s.pod.memory.available' } },
-            memory_available_variability: {
-                median_absolute_deviation: {
-                    field: 'metrics.k8s.pod.memory.available'
+            "group_by_category": {
+                multi_terms: {
+                    terms: [{
+                      field: "resource.attributes.k8s.pod.name"
+                    }, {
+                      field: "resource.attributes.k8s.namespace.name"
+                    },
+                    {
+                        field: "resource.attributes.k8s.node.name"
+                    }],
+                    size: 500 
+                },
+                aggs: {
+                    "stats_memory": {
+                        "stats": { field: "metrics.k8s.pod.memory.usage" }
+                    },
+                    "review_variability_memory_usage": {
+                        median_absolute_deviation: {
+                            field: "metrics.k8s.pod.memory.usage"
+                        }
+                    },
+                    "stats_available": {
+                        stats: { field: "metrics.k8s.pod.memory.available" }
+                    },
+                    "review_variability_memory_available": {
+                        median_absolute_deviation: {
+                            field: "metrics.k8s.pod.memory.available"
+                        }
+                    },
                 }
             }
-        },
+        }
     };
-    return dslPodsCpu;
+    return dslPodsMem;
 }
-
 
 export async function calulcatePodsMemoryUtilisation(podName: string, namespace: string, node: string, client: any, bucket: any) {
     var alarm = '';
@@ -131,173 +208,4 @@ export async function calulcatePodsMemoryUtilisation(podName: string, namespace:
         console.log(pod);
     }
     return pod;
-}
-
-export async function getPodsMemory(client: ElasticsearchClient, period: string, podName?: any, namespace?: any, deployment?: any, daemonset?: any ){
-    const dsl = defineQueryGeneralMemoryUtilisation(client, period, podName, namespace, deployment, daemonset);
-    console.log(dsl);
-    const esResponseAll = await client.search(dsl);
-    const { after_key: _, buckets = [] } = (esResponseAll.aggregations?.group_by_category || {}) as any;
-    if (buckets.length > 0) {
-        const hits = esResponseAll.hits.hits[0];
-        const { fields = {} } = hits;
-        const time = extractFieldValue(fields['@timestamp']);
-        var pods = new Array();
-        for (const bucket of buckets) {
-            console.log(bucket);
-            const podName = bucket.key[0];
-            const podNs = bucket.key[1];
-            const podNode = bucket.key[2];
-            console.log(podName + podNs + podNode);
-            const pod = await calulcatePodsMemoryUtilisation(podName, podNs, podNode, client, bucket);
-            pods.push(pod);
-            console.log(pod.name);
-        }
-        return {
-            time: time,
-            pods: pods
-        }
-    }
-    return null
-}
-
-
-export function defineQueryGeneralMemoryUtilisation(client: ElasticsearchClient, period: string, podName: any, namespace: any, deployment: any, daemonset: any) {
-    var mustsPodsCpu = new Array();
-    mustsPodsCpu.push(
-        { exists: { field: 'metrics.k8s.pod.memory.usage' } }
-    )
-
-    if (namespace !== undefined) {
-        mustsPodsCpu.push(
-            {
-                term: {
-                    'resource.attributes.k8s.namespace.name': namespace,
-                },
-            }
-        )
-    }
-
-    if (podName !== undefined) {
-        mustsPodsCpu.push(
-            {
-                term: {
-                    'resource.attributes.k8s.pod.name': podName,
-                },
-            }
-        )
-    }
-
-    if (deployment !== undefined) {
-        mustsPodsCpu.push(
-            {
-                term: {
-                    'resource.attributes.k8s.deployment.name': deployment,
-                },
-            }
-        )
-    }
-
-    if (daemonset !== undefined) {
-        mustsPodsCpu.push(
-            {
-                term: {
-                    'resource.attributes.k8s.daemonset.name': daemonset,
-                },
-            }
-        )
-    }
-
-    const filter = [
-        {
-            range: {
-                "@timestamp": {
-                    "gte": period
-                }
-            }
-        }
-    ]
-    console.log(mustsPodsCpu);
-    const dslPodsCpu: estypes.SearchRequest = {
-        index: ["metrics-otel.*"],
-        _source: false,
-        sort: [{ '@timestamp': 'desc' }],
-        fields: [
-            '@timestamp',
-            'metrics.k8s.pod.memory.usage',
-            'metrics.k8s.pod.memory.available',
-            'resource.attributes.k8s.*',
-        ],
-        query: {
-            bool: {
-                must: mustsPodsCpu,
-                filter: filter,
-            },
-        },
-
-        aggs: {
-            "group_by_category": {
-                multi_terms: {
-                    terms: [{
-                      field: "resource.attributes.k8s.pod.name"
-                    }, {
-                      field: "resource.attributes.k8s.namespace.name"
-                    },
-                    {
-                        field: "resource.attributes.k8s.node.name"
-                    }],
-                    size: 500 
-                },
-                aggs: {
-                    "stats_memory": {
-                        "stats": { field: "metrics.k8s.pod.memory.usage" }
-                    },
-                    "review_variability_memory_usage": {
-                        median_absolute_deviation: {
-                            field: "metrics.k8s.pod.memory.usage"
-                        }
-                    },
-                    "stats_available": {
-                        stats: { field: "metrics.k8s.pod.memory.available" }
-                    },
-                    "review_variability_memory_available": {
-                        median_absolute_deviation: {
-                            field: "metrics.k8s.pod.memory.available"
-                        }
-                    },
-                }
-            }
-        }
-    };
-    return dslPodsCpu;
-}
-
-
-export function calulcateNodesMemory(node: string, client: ElasticsearchClient) {
-    const mustsPodsCpu = [
-        {
-            term: {
-                'resource.attributes.k8s.node.name': node,
-            },
-        },
-        { exists: { field: 'metrics.k8s.node.memory.available' } }
-    ];
-
-    const dslNode: estypes.SearchRequest = {
-        index: ["metrics-otel.*"],
-        _source: false,
-        sort: [{ '@timestamp': 'desc' }],
-        size: 1,
-        fields: [
-            '@timestamp',
-            'metrics.k8s.node.memory.*',
-            'resource.attributes.k8s.*',
-        ],
-        query: {
-            bool: {
-                must: mustsPodsCpu,
-            },
-        },
-    };
-    return dslNode;
 }
