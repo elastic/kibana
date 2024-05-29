@@ -124,7 +124,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('do not apply global filters', async () => {
         it('- filter pills', async () => {
-          debugger;
           await filterBar.addFilter({ field: 'animal.keyword', operation: 'is', value: 'cat' });
           await dashboardControls.optionsListOpenPopover(firstOptionsListId);
           let afterCount = await dashboardControls.optionsListPopoverGetAvailableOptionsCount();

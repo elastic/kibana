@@ -10,7 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { combineCompatibleApis } from '@kbn/presentation-containers';
 import { apiPublishesDataViews, PublishesDataViews } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
-import { combineLatest, map, Observable, of, switchMap, tap } from 'rxjs';
+import { combineLatest, map, Observable, of, switchMap } from 'rxjs';
 import { pluginServices } from '../../../../services/plugin_services';
 import { DashboardContainer } from '../../dashboard_container';
 
