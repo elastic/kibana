@@ -40,25 +40,52 @@ read_open_log_file_list() {
 }
 
 detect_known_integrations() {
-    if [[ -d "/var/log/nginx" ]]; then
+  local nginx_patterns=(
+    "/var/log/nginx/access.log*"
+    "/var/log/nginx/error.log*"
+  )
+
+  for pattern in "${nginx_patterns[@]}"; do
+    if compgen -G "$pattern" > /dev/null; then
       known_integrations_list_string+="nginx"$'\n'
+      break
     fi
+  done
 
-    if [ -f "/var/log/apache2/access.log" ] || [ -f "/var/log/httpd/access.log" ] ; then
+  local apache_patterns=(
+    "/var/log/apache2/access.log*"
+    "/var/log/apache2/other_vhosts_access.log*"
+    "/var/log/apache2/error.log*"
+    "/var/log/httpd/access_log*"
+    "/var/log/httpd/error_log*"
+  )
+
+  for pattern in "${apache_patterns[@]}"; do
+    if compgen -G "$pattern" > /dev/null; then
       known_integrations_list_string+="apache"$'\n'
+      break
     fi
+  done
 
-    if [ -d "/var/lib/docker/containers" ]; then
-      known_integrations_list_string+="docker"$'\n'
-    fi
+  if compgen -G "/var/lib/docker/containers/*/*-json.log" > /dev/null; then
+    known_integrations_list_string+="docker"$'\n'
+  fi
 
-    if [ -f "/var/log/syslog" ] ||
-       [ -f "/var/log/auth.log" ] ||
-       [ -f "/var/log/system.log" ] ||
-       [ -f "/var/log/messages" ] ||
-       [ -f "/var/log/secure" ]; then
+  local system_patterns=(
+    "/var/log/messages*"
+    "/var/log/syslog*"
+    "/var/log/system*"
+    "/var/log/auth.log*"
+    "/var/log/secure*"
+    "/var/log/system.log*"
+  )
+
+  for pattern in "${system_patterns[@]}"; do
+    if compgen -G "$pattern" > /dev/null; then
       known_integrations_list_string+="system"$'\n'
+      break
     fi
+  done
 }
 
 known_integration_title() {
