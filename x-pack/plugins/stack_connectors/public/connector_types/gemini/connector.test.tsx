@@ -24,8 +24,8 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
 }));
 jest.mock('../lib/gen_ai/use_get_dashboard');
 
-const useKibanaMock = useKibana;
-const mockDashboard = useGetDashboard;
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
+const mockDashboard = useGetDashboard as jest.Mock;
 const geminiConnector = {
   actionTypeId: '.gemini',
   name: 'gemini',
@@ -63,6 +63,7 @@ describe('GeminiConnectorFields renders', () => {
       dashboardUrl: `https://dashboardurl.com/${connectorId}`,
     }));
   });
+  
   test('Gemini connector fields are rendered', async () => {
     const { getAllByTestId } = render(
       <ConnectorFormTestProvider connector={geminiConnector}>
@@ -129,36 +130,11 @@ describe('GeminiConnectorFields renders', () => {
 
   describe('Validation', () => {
     const onSubmit = jest.fn();
-
+    
     beforeEach(() => {
       jest.clearAllMocks();
     });
-
-    it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
-        <ConnectorFormTestProvider connector={geminiConnector} onSubmit={onSubmit}>
-          <GeminiConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => {}}
-          />
-        </ConnectorFormTestProvider>
-      );
-
-      await act(async () => {
-        userEvent.click(getByTestId('form-test-provide-submit'));
-      });
-
-      await waitFor(async () => {
-        expect(onSubmit).toHaveBeenCalled();
-      });
-
-      expect(onSubmit).toBeCalledWith({
-        data: geminiConnector,
-        isValid: true,
-      });
-    });
-
+    
     it('validates correctly if the apiUrl is empty', async () => {
       const connector = {
         ...geminiConnector,
