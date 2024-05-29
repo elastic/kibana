@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-
-
+import { PluginInitializerContext } from '@kbn/core/server';
+import { coreMock } from '@kbn/core/server/mocks';
+import { StackConnectorsPlugin } from './plugin';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 describe('Stack Connectors Plugin', () => {
   describe('setup()', () => {
-    let context;
-    let plugin;
-    let coreSetup;
+    let context: PluginInitializerContext;
+    let plugin: StackConnectorsPlugin;
+    let coreSetup: ReturnType<typeof coreMock.createSetup>;
 
     beforeEach(() => {
-      let coreMock = require('@kbn/core/server/mocks');
       context = coreMock.createPluginInitializerContext();
-      let StackConnectorsPlugin = require('./plugin');
       plugin = new StackConnectorsPlugin(context);
       coreSetup = coreMock.createSetup();
     });
 
     it('should register built in connector types', () => {
-      let actionsMock = require('@kbn/actions-plugin/server/mocks');
       const actionsSetup = actionsMock.createSetup();
       plugin.setup(coreSetup, { actions: actionsSetup });
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(16);
@@ -132,7 +131,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(7);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(8);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -164,24 +163,25 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         5,
         expect.objectContaining({
-          id: '.d3security',
-          name: 'D3 Security',
+          id: '.gemini',
+          name: 'Google Gemini',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         6,
         expect.objectContaining({
-          id: '.resilient',
-          name: 'IBM Resilient',
+          id: '.d3security',
+          name: 'D3 Security',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         7,
         expect.objectContaining({
-          id: '.gemini',
-          name: 'Google Gemini',
+          id: '.resilient',
+          name: 'IBM Resilient',
         })
       );
+      
     });
   });
 });
