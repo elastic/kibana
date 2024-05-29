@@ -55,6 +55,7 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
     - [**Scenario: User can see correct rule information in preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-preview-before-upgrading)
     - [**Scenario: Tabs and sections without content should be hidden in preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-upgrading)
   - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
+  - [Rule upgrade workflow: diff algorithms](#rule-upgrade-workflow-diff-algorithms)
   - [Rule upgrade workflow: viewing rule changes in JSON diff view](#rule-upgrade-workflow-viewing-rule-changes-in-json-diff-view)
     - [**Scenario: User can see changes in a side-by-side JSON diff view**](#scenario-user-can-see-changes-in-a-side-by-side-json-diff-view)
     - [**Scenario: User can see precisely how property values would change after upgrade**](#scenario-user-can-see-precisely-how-property-values-would-change-after-upgrade)
@@ -814,6 +815,65 @@ And the Investigation Guide tab should NOT be displayed
 ### Rule upgrade workflow: filtering, sorting, pagination
 
 TODO: add scenarios https://github.com/elastic/kibana/issues/166215
+
+### Rule upgrade workflow: diff algorithms
+
+#### **Scenario: Simple diff algorithm AAA**
+
+**Automation** 1 integration test
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And this rule has an existing base version for <field>
+And the current version of <field> is identical to the base version
+And the target version of <field> is identical to the base version
+Then the diff algorithm should return with no update
+And there should be no conflict
+
+Examples:
+| field     |
+| name      |
+| risk_score|
+```
+
+#### **Scenario: Simple diff algorithm ABA**
+
+**Automation** 1 integration test
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And this rule has an existing base version for <field>
+And the current version of <field> is different from the base version
+And the target version of <field> is identical to the base version
+Then the diff algorithm should return the current version of <field>
+And there should be no conflict
+
+Examples:
+| field     |
+| name      |
+| risk_score|
+```
+
+#### **Scenario: Simple diff algorithm AAB**
+
+**Automation** 1 integration test
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And this rule has an existing base version for <field>
+And the current version of <field> is identical to the base version
+And the target version of <field> is different from the base version
+Then the diff algorithm should return the target version of <field>
+And there should be no conflict
+
+Examples:
+| field     |
+| name      |
+| risk_score|
+```
 
 ### Rule upgrade workflow: viewing rule changes in JSON diff view
 
