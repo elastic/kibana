@@ -109,7 +109,7 @@ async function enhanceEdges(
 
   const criticality = await getHostCriticalityData(esClient, hostNames);
 
-  const criticalityData = criticality?.hits.hits.reduce(
+  const criticalityData: Record<string, string> | undefined = criticality?.hits.hits.reduce(
     (acc, hit) => ({
       ...acc,
       [hit?._source?.id_value ?? '']: hit?._source?.criticality_level,
