@@ -11,23 +11,35 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-
+const scope = 'elasticAssistantAttackDiscovery';
 export const AttackDiscoveryTaskConstants = {
   TITLE: 'Attack Discovery Background Task',
   TYPE: 'elastic-assistant:attack-discovery-task',
   VERSION: '1.0.0',
-  SCOPE: ['elasticAssistant'],
+  SCOPE: [scope],
   TIMEOUT: '20m',
 };
 
+export const AttackDiscoveryTaskId = `${AttackDiscoveryTaskConstants.TYPE}:${AttackDiscoveryTaskConstants.VERSION}`;
+const taskManagerQuery = {
+  bool: {
+    filter: {
+      bool: {
+        must: [
+          {
+            term: {
+              'task.scope': scope,
+            },
+          },
+        ],
+      },
+    },
+  },
+};
 export interface AttackDiscoveryTaskSetupContract {
   core: CoreSetup;
   logFactory: LoggerFactory;
   taskManager: TaskManagerSetupContract;
-}
-
-export interface AttackDiscoveryTaskStartContract {
-  taskManager: TaskManagerStartContract;
 }
 
 /**
@@ -82,8 +94,8 @@ export class AttackDiscoveryTask {
     this.wasStarted = true;
 
     try {
-      await this.taskManager?.ensureScheduled({
-        id: this.taskId,
+      console.log('stephh schedule start');
+      const currentTask = await this.taskManager?.schedule({
         taskType: AttackDiscoveryTaskConstants.TYPE,
         scope: AttackDiscoveryTaskConstants.SCOPE,
         // schedule: {
@@ -92,6 +104,14 @@ export class AttackDiscoveryTask {
         state: {},
         params: { version: AttackDiscoveryTaskConstants.VERSION },
       });
+      console.log('stephh schedule end', currentTask);
+
+      // Removes the specified task
+      if (currentTask) {
+        // console.log('stephh remove end');
+        // await this.taskManager?.remove(currentTask.id);
+        // console.log('stephh remove end');
+      }
     } catch (e) {
       this.logger.error(
         `Error scheduling task ${AttackDiscoveryTaskConstants.TYPE}, received ${e.message}`
@@ -99,8 +119,24 @@ export class AttackDiscoveryTask {
     }
   };
 
+  public async statusCheck() {
+    try {
+      console.log('stephh statusCheck start');
+      const statusCheckResult = await this.taskManager?.fetch({
+        query: taskManagerQuery,
+      });
+      console.log('stephh statusCheck ned', statusCheckResult);
+    } catch (e) {
+      this.logger.error(
+        `Error status checking task ${AttackDiscoveryTaskConstants.TYPE}, received ${e.message}`
+      );
+    }
+  }
+
   private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+    console.log('stephh runTask start');
     this.logger.info(`runTask start ${AttackDiscoveryTaskConstants.TYPE}.`);
+    this.logger.info(`runTask taskInstance ${JSON.stringify(taskInstance, null, 2)}.`);
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. Task not started yet');
@@ -108,19 +144,28 @@ export class AttackDiscoveryTask {
     }
 
     try {
-      this.logger.info(`Successfully ran attack discovery`);
+      const result = await resolveAfterManySeconds(60000);
+      this.logger.info(`Successfully runTask ran attack discovery in ${result}`);
     } catch (err) {
-      this.logger.error(`Failed to run attack discovery: ${err}`);
+      this.logger.error(`Failed runTask to run attack discovery: ${err}`);
       return;
     }
 
     this.logger.info(`Task completed successfully!`);
 
     const state = {};
+    console.log('stephh runTask end');
     return { state };
   };
 
   private get taskId() {
-    return `${AttackDiscoveryTaskConstants.TYPE}:${AttackDiscoveryTaskConstants.VERSION}`;
+    return AttackDiscoveryTaskId;
   }
+}
+function resolveAfterManySeconds(x: number) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(`${x} milliseconds`);
+    }, x);
+  });
 }

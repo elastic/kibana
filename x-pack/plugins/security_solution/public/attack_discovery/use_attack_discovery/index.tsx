@@ -14,6 +14,7 @@ import {
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostResponse,
+  AttackDiscoveryGetResponse,
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { uniq } from 'lodash/fp';
@@ -168,6 +169,40 @@ export const useAttackDiscovery = ({
 
   // number of alerts sent as context to the LLM:
   const [alertsContextCount, setAlertsContextCount] = useState<number | null>(null);
+
+  const [inProgressRequests, setInProgressRequests] = useState<string[]>([]);
+
+  const getInProgressRequests = useCallback(async () => {
+    console.log('steph getInProgressRequests');
+    try {
+      setIsLoading(true);
+
+      // call the internal API to generate attack discoveries:
+      const rawResponse = await http.fetch('/internal/elastic_assistant/attack_discovery', {
+        method: 'GET',
+        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+      });
+
+      console.log('steph rawResponse', rawResponse);
+      const parsedResponse = AttackDiscoveryGetResponse.safeParse(rawResponse);
+      if (!parsedResponse.success) {
+        throw new Error('Failed to parse the response');
+      }
+      setInProgressRequests(parsedResponse.data.inProgressRequests);
+    } catch (error) {
+      toasts?.addDanger(error, {
+        title: ERROR_GENERATING_ATTACK_DISCOVERIES,
+        text: getErrorToastText(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [http, toasts]);
+
+  useEffect(() => {
+    console.log('steph useEffect');
+    getInProgressRequests();
+  }, [getInProgressRequests]);
 
   /** The callback when users click the Generate button */
   const fetchAttackDiscoveries = useCallback(async () => {

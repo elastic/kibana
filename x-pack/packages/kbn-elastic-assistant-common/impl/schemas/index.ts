@@ -22,6 +22,7 @@ export const INTERNAL_API_ACCESS = 'internal';
 export * from './common_attributes.gen';
 
 // Attack discovery Schemas
+export * from './attack_discovery/get_attack_discovery_route.gen';
 export * from './attack_discovery/post_attack_discovery_route.gen';
 
 // Evaluation Schemas
