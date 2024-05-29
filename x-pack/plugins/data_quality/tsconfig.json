@@ -23,6 +23,7 @@
     "@kbn/core-notifications-browser",
     "@kbn/i18n-react",
     "@kbn/core-chrome-browser",
+    "@kbn/features-plugin",
   ],
   "exclude": ["target/**/*"]
 }
