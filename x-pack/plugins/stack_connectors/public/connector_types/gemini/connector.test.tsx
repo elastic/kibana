@@ -24,8 +24,8 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
 }));
 jest.mock('../lib/gen_ai/use_get_dashboard');
 
-const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
-const mockDashboard = useGetDashboard as jest.Mock;
+const useKibanaMock = useKibana;
+const mockDashboard = useGetDashboard;
 const geminiConnector = {
   actionTypeId: '.gemini',
   name: 'gemini',

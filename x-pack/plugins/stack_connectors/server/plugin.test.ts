@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
-import { StackConnectorsPlugin } from './plugin';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+
+
 
 describe('Stack Connectors Plugin', () => {
   describe('setup()', () => {
-    let context: PluginInitializerContext;
-    let plugin: StackConnectorsPlugin;
-    let coreSetup: ReturnType<typeof coreMock.createSetup>;
+    let context;
+    let plugin;
+    let coreSetup;
 
     beforeEach(() => {
+      let coreMock = require('@kbn/core/server/mocks');
       context = coreMock.createPluginInitializerContext();
+      let StackConnectorsPlugin = require('./plugin');
       plugin = new StackConnectorsPlugin(context);
       coreSetup = coreMock.createSetup();
     });
 
     it('should register built in connector types', () => {
+      let actionsMock = require('@kbn/actions-plugin/server/mocks');
       const actionsSetup = actionsMock.createSetup();
       plugin.setup(coreSetup, { actions: actionsSetup });
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(16);
