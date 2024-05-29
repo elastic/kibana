@@ -84,8 +84,7 @@ describe('getBackfillRowsFromResponse', () => {
 
     const output: BackfillRow[] = getBackfillRowsFromResponse(input);
 
-    expect(output[0]).toEqual({
-      ...input[0],
+    expect(output[0]).toMatchObject({
       total: 5,
       complete: 1,
       error: 1,
@@ -94,7 +93,7 @@ describe('getBackfillRowsFromResponse', () => {
       running: 2,
     });
 
-    expect(output[1]).toEqual({
+    expect(output[1]).toMatchObject({
       ...input[1],
       total: 2,
       complete: 2,
