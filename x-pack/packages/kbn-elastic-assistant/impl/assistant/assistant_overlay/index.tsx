@@ -37,6 +37,11 @@ export interface Props {
   currentUserAvatar?: UserAvatar;
 }
 
+export enum FlyoutPositionMode {
+  PUSH = 'push',
+  OVERLAY = 'overlay',
+}
+
 export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAvatar }) => {
   const { euiTheme } = useEuiTheme();
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -126,6 +131,18 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
     });
   }, []);
 
+  const [flyoutPositionMode, setFlyoutPositionMode] = useState<FlyoutPositionMode>(
+    FlyoutPositionMode.OVERLAY
+  );
+
+  const handleToggleFlyoutPositionMode = useCallback(() => {
+    setFlyoutPositionMode((prevValue) =>
+      prevValue === FlyoutPositionMode.OVERLAY
+        ? FlyoutPositionMode.PUSH
+        : FlyoutPositionMode.OVERLAY
+    );
+  }, []);
+
   const flyoutRef = useRef<HTMLDivElement>();
 
   if (!isModalVisible) return null;
@@ -145,6 +162,8 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
         data-test-subj="ai-assistant-flyout"
         paddingSize="none"
         hideCloseButton
+        size={flyoutPositionMode === FlyoutPositionMode.OVERLAY ? 'm' : 's'}
+        type={flyoutPositionMode}
         // EUI TODO: This z-index override of EuiOverlayMask is a workaround, and ideally should be resolved with a cleaner UI/UX flow long-term
         maskProps={{ style: `z-index: ${(euiTheme.levels.flyout as number) + 3}` }} // we need this flyout to be above the timeline flyout (which has a z-index of 1002)
       >
@@ -156,6 +175,8 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
           chatHistoryVisible={chatHistoryVisible}
           setChatHistoryVisible={toggleChatHistory}
           currentUserAvatar={currentUserAvatar}
+          flyoutPositionMode={flyoutPositionMode}
+          toggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
         />
       </EuiFlyoutResizable>
     );
@@ -171,6 +192,8 @@ export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode, currentUserAv
             chatHistoryVisible={chatHistoryVisible}
             setChatHistoryVisible={toggleChatHistory}
             currentUserAvatar={currentUserAvatar}
+            flyoutPositionMode={flyoutPositionMode}
+            toggleFlyoutPositionMode={handleToggleFlyoutPositionMode}
           />
         </StyledEuiModal>
       )}
