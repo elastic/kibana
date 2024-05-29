@@ -16,9 +16,9 @@ interface Props {
   isLoading: boolean;
   height?: string;
 }
-const EmbeddableFlamegraphComponent = getProfilingComponent<Props>(EMBEDDABLE_FLAMEGRAPH);
 
 export function EmbeddableFlamegraph({ height, ...props }: Props) {
+  const EmbeddableFlamegraphComponent = getProfilingComponent<Props>(EMBEDDABLE_FLAMEGRAPH);
   return (
     <div
       css={css`

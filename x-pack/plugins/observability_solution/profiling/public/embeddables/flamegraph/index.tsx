@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { EmbeddableFlamegraphSharedComponent } from './embeddable_flamegraph';
+import type { EmbeddableFlamegraphSharedComponent, FlamegraphProps } from './embeddable_flamegraph';
 import { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 
 const LazyEmbeddableFlamegraph = dynamic(async () => {
@@ -18,13 +18,7 @@ const LazyEmbeddableFlamegraph = dynamic(async () => {
 export const getEmbeddableFlamegraphComponent = (
   profilingEmbeddableDependencies: ProfilingEmbeddablesDependencies
 ): EmbeddableFlamegraphSharedComponent => {
-  return ({ isLoading, data }) => {
-    return (
-      <LazyEmbeddableFlamegraph
-        isLoading={isLoading}
-        data={data}
-        {...profilingEmbeddableDependencies}
-      />
-    );
+  return (props: FlamegraphProps) => {
+    return <LazyEmbeddableFlamegraph {...props} {...profilingEmbeddableDependencies} />;
   };
 };

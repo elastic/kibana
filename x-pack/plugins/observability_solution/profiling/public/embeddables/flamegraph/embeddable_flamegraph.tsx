@@ -19,7 +19,7 @@ export type EmbeddableFlamegraphProps = FlamegraphProps & ProfilingEmbeddablesDe
 
 export type EmbeddableFlamegraphSharedComponent = React.FC<FlamegraphProps>;
 
-interface FlamegraphProps {
+export interface FlamegraphProps {
   data?: BaseFlameGraph;
   isLoading: boolean;
 }
