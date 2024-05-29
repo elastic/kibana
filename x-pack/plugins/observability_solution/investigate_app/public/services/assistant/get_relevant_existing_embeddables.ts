@@ -55,8 +55,11 @@ export async function getRelevantExistingEmbeddables({
       type,
       title,
       description,
+      originalId: id,
     };
   });
+
+  console.log(objectsForLlm);
 
   const { chunks } = await apiClient(
     'POST /internal/investigate_app/assistant/chunk_on_token_count',
@@ -169,6 +172,10 @@ export async function getRelevantExistingEmbeddables({
   );
 
   const flattenedIds = allIds.flat();
+
+  console.log({
+    flattenedIds,
+  });
 
   const storedEmbeddablesById = keyBy(storedEmbeddables, (storedEmbeddable) => storedEmbeddable.id);
 
