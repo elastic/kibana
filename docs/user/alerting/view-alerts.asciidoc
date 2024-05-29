@@ -1,0 +1,63 @@
+[[view-alerts]]
+== View alerts
+:frontmatter-description: View and manage alerts in the {kib} {stack-manage-app} app.
+:frontmatter-tags-products: [kibana, alerting]
+:frontmatter-tags-content-type: [how-to]
+:frontmatter-tags-user-goals: [manage]
+
+You can view a rule's alerts when you <<rule-details,view its details>> in *{stack-manage-app}* > *{rules-ui}*.
+
+preview:[] Alternatively, you can list, filter, and manage your alerts in *{stack-manage-app}* > *Alerts*.
+
+[float]
+=== Required permissions
+
+Access to alerts is granted based on your {alert-features} privileges.
+For more information, go to <<alerting-security>>.
+
+// [role="screenshot"]
+// image::images/alerts-page.png[Alerts page]
+
+[discrete]
+[[alert-status]]
+=== Alert statuses
+
+When an alert is created, it generates actions.
+If the conditions that caused the alert persist, the actions run again according to the rule notification settings.
+There are four common alert statuses:
+
+`active`:: The conditions for the rule are met and actions should be generated according to the notification settings.
+`flapping`:: The alert is switching repeatedly between active and recovered states.
+`recovered`:: The conditions for the rule are no longer met and recovery actions should be generated.
+`untracked`:: Actions are no longer generated. For example, you can choose to move active alerts to this state when you disable or delete rules.
+
+[NOTE]
+====
+The `flapping` state is possible only if you have enabled alert flapping detection in *{stack-manage-app} > {rules-ui} > Settings*. For each space, you can choose a look back window and threshold that are used to determine whether alerts are flapping. For example, you can specify that the alert must change status at least 6 times in the last 10 runs. If the rule has actions that run when the alert status changes, those actions are suppressed while the alert is flapping.
+====
+
+If an alert was affected by a maintenance window, its identifier appears in the *Maintenance windows* column.
+For more information about their impact on alert notifications, refer to <<maintenance-windows>>.
+
+[discrete]
+[[mute-alerts]]
+=== Mute alerts
+
+You can mute an alert to temporarily suppress future actions.
+Open the action menu (…) for the appropriate alert in the table and select *Mute*.
+To permanently suppress actions for an alert, open the actions menu and select *Mark as untracked*.
+
+To affect the behavior of the rule rather than individual alerts, check out <<controlling-rules>>.
+////
+[discrete]
+[[filter-alerts]]
+=== Filter alerts
+
+TBD
+
+[discrete]
+[[customize-alerts-table]]
+=== Customize the alerts table
+
+TBD
+////
