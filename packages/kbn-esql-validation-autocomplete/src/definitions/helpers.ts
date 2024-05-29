@@ -95,12 +95,10 @@ export function printArguments(
     name,
     type,
     optional,
-    reference,
   }: {
     name: string;
     type: string | string[];
     optional?: boolean;
-    reference?: string;
   },
   withTypes: boolean
 ): string {

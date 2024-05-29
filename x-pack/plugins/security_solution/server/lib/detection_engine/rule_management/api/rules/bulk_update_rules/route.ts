@@ -17,9 +17,6 @@ import {
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { DETECTION_ENGINE_RULES_BULK_UPDATE } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { getIdBulkError } from '../../../utils/utils';
 import { transformValidateBulkError } from '../../../utils/validate';
 import {
@@ -27,8 +24,7 @@ import {
   buildSiemResponse,
   createBulkErrorObject,
 } from '../../../../routes/utils';
-import { updateRules } from '../../../logic/crud/update_rules';
-import { readRules } from '../../../logic/crud/read_rules';
+import { readRules } from '../../../logic/rule_management/read_rules';
 import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../../deprecation';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { validateRulesWithDuplicatedDefaultExceptionsList } from '../../../logic/exceptions/validate_rules_with_duplicated_default_exceptions_list';
@@ -37,11 +33,7 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../timeouts';
 /**
  * @deprecated since version 8.2.0. Use the detection_engine/rules/_bulk_action API instead
  */
-export const bulkUpdateRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  logger: Logger
-) => {
+export const bulkUpdateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .put({
       access: 'public',
@@ -69,16 +61,8 @@ export const bulkUpdateRulesRoute = (
 
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-
           const rulesClient = ctx.alerting.getRulesClient();
-          const savedObjectsClient = ctx.core.savedObjects.client;
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           const rules = await Promise.all(
             request.body.map(async (payloadRule) => {
@@ -93,13 +77,15 @@ export const bulkUpdateRulesRoute = (
                   });
                 }
 
-                throwAuthzError(await mlAuthz.validateRuleType(payloadRule.type));
-
                 const existingRule = await readRules({
                   rulesClient,
                   ruleId: payloadRule.rule_id,
                   id: payloadRule.id,
                 });
+
+                if (!existingRule) {
+                  return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
+                }
 
                 validateRulesWithDuplicatedDefaultExceptionsList({
                   allRules: request.body,
@@ -113,16 +99,11 @@ export const bulkUpdateRulesRoute = (
                   ruleId: payloadRule.id,
                 });
 
-                const rule = await updateRules({
-                  rulesClient,
-                  existingRule,
+                const rule = await rulesManagementClient.updateRule({
                   ruleUpdate: payloadRule,
                 });
-                if (rule != null) {
-                  return transformValidateBulkError(rule.id, rule);
-                } else {
-                  return getIdBulkError({ id: payloadRule.id, ruleId: payloadRule.rule_id });
-                }
+
+                return transformValidateBulkError(rule.id, rule);
               } catch (err) {
                 return transformBulkError(idOrRuleIdOrUnknown, err);
               }
