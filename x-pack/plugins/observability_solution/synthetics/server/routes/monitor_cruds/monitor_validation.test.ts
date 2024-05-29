@@ -241,7 +241,7 @@ describe('validateMonitor', () => {
         valid: false,
         reason: 'Monitor schedule is invalid',
         details:
-          'Invalid schedule 4 minutes supplied to monitor configuration. Supported schedule values in minutes are 1, 3, 5, 10, 15, 20, 30, 60, 120, 240',
+          'Invalid schedule 4 minutes supplied to monitor configuration. Supported schedule values in minutes are 1, 2, 3, 5, 10, 15, 20, 30, 60, 120, 240',
       });
     });
 
