@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GroupOption } from '@kbn/securitysolution-grouping';
+import { GroupOption } from '@kbn/grouping';
 import { FindingsBaseURLQuery } from '../../common/types';
 import { CloudSecurityDefaultColumn } from '../../components/cloud_security_data_table';
 import { GROUPING_LABELS } from './translations';

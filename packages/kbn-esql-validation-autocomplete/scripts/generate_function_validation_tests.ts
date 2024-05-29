@@ -24,6 +24,7 @@ import {
   isSupportedFieldType,
 } from '../src/definitions/types';
 import { FUNCTION_DESCRIBE_BLOCK_NAME } from '../src/validation/function_describe_block_name';
+import { getMaxMinNumberOfParams } from '../src/validation/helpers';
 
 export const fieldNameFromType = (type: SupportedFieldType) => `${camelCase(type)}Field`;
 
@@ -51,6 +52,7 @@ function generateTestsForEvalFunction(definition: FunctionDefinition) {
   generateWhereCommandTestsForEvalFunction(definition, testCases);
   generateEvalCommandTestsForEvalFunction(definition, testCases);
   generateSortCommandTestsForEvalFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -60,6 +62,7 @@ function generateTestsForAggFunction(definition: FunctionDefinition) {
   generateSortCommandTestsForAggFunction(definition, testCases);
   generateWhereCommandTestsForAggFunction(definition, testCases);
   generateEvalCommandTestsForAggFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
   return testCases;
 }
 
@@ -67,7 +70,58 @@ function generateTestsForGroupingFunction(definition: FunctionDefinition) {
   const testCases: Map<string, string[]> = new Map();
   generateStatsCommandTestsForGroupingFunction(definition, testCases);
   generateSortCommandTestsForGroupingFunction(definition, testCases);
+  generateNullAcceptanceTestsForFunction(definition, testCases);
   return testCases;
+}
+
+function generateNullAcceptanceTestsForFunction(
+  definition: FunctionDefinition,
+  testCases: Map<string, string[]>
+) {
+  const { max, min } = getMaxMinNumberOfParams(definition);
+  const numberOfArgsToTest = max === Infinity ? min : max;
+  const signatureWithGreatestNumberOfParams = definition.signatures.find(
+    (signature) => signature.params.length === numberOfArgsToTest
+  )!;
+
+  const commandToTestWith = definition.supportedCommands.includes('eval') ? 'eval' : 'stats';
+
+  // test that the function accepts nulls
+  testCases.set(
+    `from a_index | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...signatureWithGreatestNumberOfParams,
+              params: new Array(numberOfArgsToTest).fill({ name: 'null' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
+
+  testCases.set(
+    `row nullVar = null | ${commandToTestWith} ${
+      getFunctionSignatures(
+        {
+          ...definition,
+          signatures: [
+            {
+              ...signatureWithGreatestNumberOfParams,
+              params: new Array(numberOfArgsToTest).fill({ name: 'nullVar' }),
+            },
+          ],
+        },
+        { withTypes: false }
+      )[0].declaration
+    }`,
+    []
+  );
 }
 
 function generateRowCommandTestsForEvalFunction(
@@ -262,9 +316,11 @@ function generateWhereCommandTestsForAggFunction(
 }
 
 function generateEvalCommandTestsForEvalFunction(
-  { name, signatures, alias, ...defRest }: FunctionDefinition,
+  definition: FunctionDefinition,
   testCases: Map<string, string[]>
 ) {
+  const { name, signatures, alias, ...defRest } = definition;
+
   for (const { params, ...signRest } of signatures) {
     const fieldMapping = getFieldMapping(params);
     testCases.set(
@@ -401,26 +457,10 @@ function generateEvalCommandTestsForEvalFunction(
 
   // test that additional args are spotted
 
-  const getNumberOfParams = (signature: FunctionDefinition['signatures'][number]) => ({
-    all: signature.params.length,
-    required: signature.params.filter(({ optional }) => !optional).length,
-  });
-
-  // get the signature with the greatest number of params
-  const [first, ...rest] = signatures;
-  let signatureWithGreatestNumberOfParams = first;
-  let { all: maxNumberOfArgs, required: minNumberOfArgs } = getNumberOfParams(first);
-
-  for (const signature of rest) {
-    const numberOfParams = signature.params.length;
-    if (numberOfParams > signatureWithGreatestNumberOfParams.params.length) {
-      signatureWithGreatestNumberOfParams = signature;
-    }
-
-    maxNumberOfArgs = Math.max(maxNumberOfArgs, numberOfParams);
-    const numberOfRequiredParams = signature.params.filter(({ optional }) => !optional).length;
-    minNumberOfArgs = Math.min(minNumberOfArgs, numberOfRequiredParams);
-  }
+  const { max: maxNumberOfArgs, min: minNumberOfArgs } = getMaxMinNumberOfParams(definition);
+  const signatureWithGreatestNumberOfParams = signatures.find(
+    (signature) => signature.params.length === maxNumberOfArgs
+  )!;
 
   const fieldMappingWithOneExtraArg = getFieldMapping(
     signatureWithGreatestNumberOfParams.params
