@@ -29,11 +29,10 @@ import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 
 import { extract, inject } from '../../common/embeddable/search_inject_extract';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
-import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import { DiscoverServices } from '../build_services';
 import { SearchEmbeddablFieldStatsTableComponent } from './components/search_embeddable_field_stats_table_component';
 import { SearchEmbeddableGridComponent } from './components/search_embeddable_grid_component';
-import { initializeFetch } from './initialize_fetch';
+import { initializeFetch, isEsqlMode } from './initialize_fetch';
 import { initializeSearchEmbeddableApi } from './initialize_search_embeddable_api';
 import {
   SearchEmbeddableApi,
@@ -221,7 +220,8 @@ export const getSearchEmbeddableFactory = ({
               columns: savedSearch.columns ?? [],
               viewMode: getValidViewMode({
                 viewMode: savedSearch.viewMode,
-                isTextBasedQueryMode: isTextBasedQuery(savedSearch.searchSource.getField('query')),
+                isEsqlMode: isEsqlMode(savedSearch),
+                // isTextBasedQueryMode: isTextBasedQuery(savedSearch.searchSource.getField('query')),
               }),
             };
           }, [savedSearch]);

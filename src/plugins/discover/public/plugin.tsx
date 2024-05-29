@@ -23,13 +23,8 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { ENABLE_ESQL, TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  registerReactEmbeddableFactory,
-  registerReactEmbeddableSavedObject,
-} from '@kbn/embeddable-plugin/public';
+import { TRUNCATE_MAX_HEIGHT } from '@kbn/discover-utils';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
@@ -83,6 +78,7 @@ import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import { injectTruncateStyles } from './utils/truncate_styles';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 
 /**
  * @public
@@ -477,7 +473,7 @@ export class DiscoverPlugin
       return this.getDiscoverServices(coreStart, deps);
     };
 
-    registerReactEmbeddableSavedObject({
+    plugins.embeddable.registerReactEmbeddableSavedObject({
       onAdd: (container, savedObject) => {
         container.addNewPanel({
           panelType: SEARCH_EMBEDDABLE_TYPE,
@@ -492,7 +488,7 @@ export class DiscoverPlugin
       getIconForSavedObject: () => 'discoverApp',
     });
 
-    registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
+    plugins.embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
       const [startServices, discoverServices, { getSearchEmbeddableFactory }] = await Promise.all([
         getStartServices(),
         getDiscoverServicesInternal(),

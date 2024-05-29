@@ -22,7 +22,6 @@ import { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 
-import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import { DiscoverDocTableEmbeddable } from '../../components/doc_table/create_doc_table_embeddable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getSortForEmbeddable } from '../../utils';
@@ -30,6 +29,7 @@ import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { DiscoverGridEmbeddable } from './saved_search_grid';
 import type { EmbeddableComponentSearchProps, SearchEmbeddableApi } from '../types';
+import { isEsqlMode } from '../initialize_fetch';
 
 interface SavedSearchEmbeddableComponentProps {
   api: SearchEmbeddableApi & {
@@ -103,16 +103,13 @@ export function SearchEmbeddableGridComponent({
     };
   }, [api.savedSearch$, savedSearch, discoverServices]);
 
-  const isTextBasedQueryMode = useMemo(
-    () => isTextBasedQuery(savedSearch.searchSource.getField('query')),
-    [savedSearch]
-  );
+  const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 
   const useLegacyTable = useMemo(
     () =>
       isLegacyTableEnabled({
         uiSettings: discoverServices.uiSettings,
-        isTextBasedQueryMode,
+        isEsqlMode: isEsql,
       }),
     [discoverServices, isTextBasedQueryMode]
   );

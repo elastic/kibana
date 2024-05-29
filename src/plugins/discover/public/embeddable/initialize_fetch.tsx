@@ -20,12 +20,17 @@ import { fetch$, FetchContext, PublishingSubject } from '@kbn/presentation-publi
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { SearchResponseWarning } from '@kbn/search-response-warnings';
 
-import { fetchTextBased } from '../application/main/utils/fetch_text_based';
-import { isTextBasedQuery } from '../application/main/utils/is_text_based_query';
 import { DiscoverServices } from '../build_services';
 import { getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { SearchEmbeddableApi } from './types';
 import { updateSearchSource } from './utils/update_search_source';
+import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+
+export const isEsqlMode = (savedSearch: SavedSearch): boolean => {
+  const query = savedSearch.searchSource.getField('query');
+  return isOfAggregateQueryType(query);
+};
 
 export function initializeFetch({
   api,
@@ -60,7 +65,7 @@ export function initializeFetch({
 
         const searchSessionId = fetchContext.searchSessionId;
         const useNewFieldsApi = !discoverServices.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
-        const useTextBased = isTextBasedQuery(query);
+
         updateSearchSource(
           discoverServices,
           savedSearch.searchSource,
@@ -79,29 +84,20 @@ export function initializeFetch({
           // Log request to inspector
           requestAdapter.reset();
 
-          if (useTextBased && query && !isTextBasedQuery(fetchContext.query)) {
-            /**
-             * Fetch via text based / ESQL query
-             */
-            const result = await fetchTextBased(
-              query!,
-              dataView,
-              discoverServices.data,
-              discoverServices.expressions,
-              discoverServices.inspector,
-              abortController.signal,
-              fetchContext.filters,
-              fetchContext.query
-            );
-            // searchProps.columnsMeta = result.textBasedQueryColumns
-            //   ? getTextBasedColumnsMeta(result.textBasedQueryColumns)
-            //   : undefined;
-            // searchProps.totalHitCount = result.records.length;
-            // searchProps.isPlainRecord = true;
-            // searchProps.isSortEnabled = true;
-            return { rows: result.records, fetchContext };
-          }
+          const esqlMode = isEsqlMode(savedSearch);
 
+          if (esqlMode && query) {
+            const result = await fetchEsql(
+              savedSearch.searchSource.getField('query')!,
+              dataView,
+              this.services.data,
+              this.services.expressions,
+              this.services.inspector,
+              this.abortController.signal,
+              this.input.filters,
+              this.input.query
+            );
+          }
           // const parentContext = api.parentApi?.executionContext;
           // const child: KibanaExecutionContext = {
           //   type: SEARCH_EMBEDDABLE_TYPE,

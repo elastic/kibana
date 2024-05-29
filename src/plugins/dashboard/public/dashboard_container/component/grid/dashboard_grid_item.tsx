@@ -98,7 +98,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         embeddable: { reactEmbeddableRegistryHasKey },
       } = pluginServices.getServices();
 
-      const references = getReferencesForPanelId(id, container.savedObjectReferences);
       const panelProps = {
         showBadges: true,
         showBorder: useMargins,

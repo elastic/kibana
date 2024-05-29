@@ -14,11 +14,7 @@ import type { SOWithMetadata } from '@kbn/content-management-utils';
 import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import {
-  EmbeddableSetup,
-  EmbeddableStart,
-  registerSavedObjectToPanelMethod,
-} from '@kbn/embeddable-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
@@ -135,15 +131,6 @@ export class SavedSearchPublicPlugin
         };
       }
     );
-
-    embeddable.registerReactEmbeddableFactory(SEARCH_EMBEDDABLE_TYPE, async () => {
-      // const startServices = await getStartServices();
-      const [{ getSearchEmbeddableFactory }, [coreStart, depsStart]] = await Promise.all([
-        import('./embeddable/get_search_embeddable_factory'),
-        getStartServices(),
-      ]);
-      return getSearchEmbeddableFactory({ services: depsStart });
-    });
 
     return {};
   }
