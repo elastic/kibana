@@ -17,10 +17,8 @@ import {
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
-import type { SetupPlugins } from '../../../../../../plugin';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
 import type { BulkError, ImportRuleResponse } from '../../../../routes/utils';
 import { buildSiemResponse, isBulkError, isImportRegular } from '../../../../routes/utils';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
@@ -37,11 +35,7 @@ import { RULE_MANAGEMENT_IMPORT_EXPORT_SOCKET_TIMEOUT_MS } from '../../timeouts'
 
 const CHUNK_PARSED_OBJECT_SIZE = 50;
 
-export const importRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  config: ConfigType,
-  ml: SetupPlugins['ml']
-) => {
+export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: ConfigType) => {
   router.versioned
     .post({
       access: 'public',
@@ -80,7 +74,7 @@ export const importRulesRoute = (
             'licensing',
           ]);
 
-          const rulesClient = ctx.alerting.getRulesClient();
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -89,13 +83,6 @@ export const importRulesRoute = (
 
           const savedObjectsClient = ctx.core.savedObjects.client;
           const exceptionsClient = ctx.lists?.getExceptionListClient();
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
 
           const { filename } = (request.body.file as HapiReadableStream).hapi;
           const fileExtension = extname(filename).toLowerCase();
@@ -166,9 +153,8 @@ export const importRulesRoute = (
           const importRuleResponse: ImportRuleResponse[] = await importRulesHelper({
             ruleChunks: chunkParseObjects,
             rulesResponseAcc: [...actionConnectorErrors, ...duplicateIdErrors],
-            mlAuthz,
             overwriteRules: request.query.overwrite,
-            rulesClient,
+            rulesManagementClient,
             existingLists: foundReferencedExceptionLists,
             allowMissingConnectorSecrets: !!actionConnectors.length,
           });
