@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BuildFlavor } from '@kbn/config';
 import type { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -59,7 +58,6 @@ interface TestOptions {
     recordSubFeaturePrivilegeUsage?: boolean;
   };
   features?: KibanaFeature[];
-  buildFlavor?: BuildFlavor;
 }
 
 const putRoleTest = (
@@ -72,14 +70,12 @@ const putRoleTest = (
     apiResponses,
     asserts,
     features,
-    buildFlavor,
   }: TestOptions
 ) => {
   test(description, async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
-    mockRouteDefinitionParams.buildFlavor = buildFlavor || 'traditional';
 
     const mockCoreContext = coreMock.createRequestHandlerContext();
     const mockLicensingContext = {
@@ -995,53 +991,5 @@ describe('PUT role', () => {
         result: undefined,
       },
     });
-
-    putRoleTest(
-      'creates role for serverless mode by correctly removing remote_cluster privileges',
-      {
-        name: 'foo-role-serverless',
-        payload: {
-          kibana: [],
-          elasticsearch: {
-            remote_cluster: [
-              {
-                clusters: ['cluster1', 'cluster2'],
-                privileges: ['monitor_enrich'],
-              },
-              {
-                clusters: ['cluster3', 'cluster4'],
-                privileges: ['monitor_enrich'],
-              },
-            ],
-          },
-        },
-        apiResponses: {
-          get: () => ({}),
-          put: () => {},
-        },
-        asserts: {
-          recordSubFeaturePrivilegeUsage: false,
-          apiArguments: {
-            get: [{ name: 'foo-role-serverless' }, { ignore: [404] }],
-            put: [
-              {
-                name: 'foo-role-serverless',
-                body: {
-                  applications: [],
-                  cluster: [],
-                  indices: [],
-                  remote_indices: undefined,
-                  run_as: [],
-                  metadata: undefined,
-                },
-              },
-            ],
-          },
-          statusCode: 204,
-          result: undefined,
-        },
-        buildFlavor: 'serverless',
-      }
-    );
   });
 });

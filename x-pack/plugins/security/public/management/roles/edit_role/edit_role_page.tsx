@@ -211,7 +211,7 @@ function useRole(
       : Promise.resolve({
           name: '',
           description: '',
-          elasticsearch: { cluster: [], indices: [], run_as: [], remote_cluster: [] },
+          elasticsearch: { cluster: [], indices: [], run_as: [] },
           kibana: [],
           _unrecognized_applications: [],
         } as Role);
