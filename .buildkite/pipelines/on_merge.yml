@@ -7,7 +7,7 @@ steps:
     timeout_in_minutes: 10
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     retry:
@@ -20,7 +20,7 @@ steps:
     branches: main
     agents:
       image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-qa
+      imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
     # TODO: this can probably be deleted after the migration https://github.com/elastic/kibana-operations/issues/15
