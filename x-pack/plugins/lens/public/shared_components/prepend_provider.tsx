@@ -9,7 +9,6 @@ import {
   type EuiResizeObserverProps,
   useEuiTheme,
   EuiFormLabel,
-  EuiResizeObserver,
   useResizeObserver,
 } from '@elastic/eui';
 import React, {
