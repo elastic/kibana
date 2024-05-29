@@ -24,7 +24,6 @@ export interface CategorizationState {
   pipelineResults: object[];
   finalized: boolean;
   reviewed: boolean;
-  currentMapping: object;
   currentPipeline: object;
   currentProcessors: object[];
   invalidCategorization: object;

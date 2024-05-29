@@ -135,7 +135,7 @@ function chainRouter(state: EcsMappingState): string {
   return END;
 }
 
-export function getEcsGraph() {
+export async function getEcsGraph() {
   const workflow = new StateGraph({
     channels: graphState,
   })

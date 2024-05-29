@@ -7,7 +7,7 @@
 import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
 import { RelatedState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
-import { handleValidatePipeline } from '../../util/es';
+import { handleValidatePipeline } from '../../util/graph';
 import { handleRelated } from './related';
 import { handleErrors } from './errors';
 import { handleReview } from './review';
@@ -134,7 +134,7 @@ function chainRouter(state: RelatedState): string {
   return END;
 }
 
-export function getRelatedGraph() {
+export async function getRelatedGraph() {
   const workflow = new StateGraph({ channels: graphState })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)

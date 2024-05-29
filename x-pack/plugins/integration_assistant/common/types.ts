@@ -8,6 +8,7 @@
 export interface ESProcessorOptions {
   on_failure?: ESProcessorItem[];
   ignore_failure?: boolean;
+  ignore_missing?: boolean;
   if?: string;
   tag?: string;
   [key: string]: any;

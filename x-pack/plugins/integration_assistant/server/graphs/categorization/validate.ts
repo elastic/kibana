@@ -16,15 +16,15 @@ interface PipelineResult {
   event?: Event;
 }
 
-interface ErrorMessage {
+interface CategorizationError {
   error: string;
 }
 
 export function handleCategorizationValidation(state: CategorizationState): {
-  invalidCategorization: ErrorMessage[];
+  invalidCategorization: CategorizationError[];
   lastExecutedChain: string;
 } {
-  const errors: ErrorMessage[] = [];
+  const errors: CategorizationError[] = [];
   const pipelineResults = state.pipelineResults as PipelineResult[];
 
   // Loops through the pipeline results to find invalid categories and types
@@ -69,7 +69,7 @@ function createErrorMessage(
   field: string,
   errorList: string[],
   allowedValues: string[]
-): ErrorMessage {
+): CategorizationError {
   return {
     error: `field ${field}'s values (${errorList.join(
       ', '
@@ -119,8 +119,11 @@ type EventCategories =
   | 'vulnerability'
   | 'web';
 
-function getTypeCategoryIncompatibleError(categories: string[], types: string[]): ErrorMessage[] {
-  const errors: ErrorMessage[] = [];
+function getTypeCategoryIncompatibleError(
+  categories: string[],
+  types: string[]
+): CategorizationError[] {
+  const errors: CategorizationError[] = [];
   let unmatchedTypes = new Set(types);
   const matchCategories = new Set(categories);
   let categoryExists = false;

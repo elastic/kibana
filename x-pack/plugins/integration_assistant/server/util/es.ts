@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { Client } from '@elastic/elasticsearch';
-import { EcsMappingState, CategorizationState, RelatedState } from '../types';
 
 interface DocTemplate {
   _index: string;
@@ -41,7 +40,10 @@ function newClient(): Client {
   return client;
 }
 
-async function testPipeline(samples: string[], pipeline: object): Promise<[any[], any[]]> {
+export async function testPipeline(
+  samples: string[],
+  pipeline: object
+): Promise<[object[], object[]]> {
   const docs = samples.map((sample) => formatSample(sample));
   const results: object[] = [];
   const errors: object[] = [];
@@ -61,15 +63,4 @@ async function testPipeline(samples: string[], pipeline: object): Promise<[any[]
   }
 
   return [errors, results];
-}
-
-export async function handleValidatePipeline(
-  state: EcsMappingState | CategorizationState | RelatedState
-): Promise<Partial<CategorizationState> | Partial<RelatedState> | Partial<EcsMappingState>> {
-  const [errors, results] = await testPipeline(state.rawSamples, state.currentPipeline);
-  return {
-    errors,
-    pipelineResults: results,
-    lastExecutedChain: 'validate_pipeline',
-  };
 }

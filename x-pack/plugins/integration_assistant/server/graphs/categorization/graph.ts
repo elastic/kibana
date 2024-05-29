@@ -8,7 +8,7 @@ import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
 import { CategorizationState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
 import { handleCategorization } from './categorization';
-import { handleValidatePipeline } from '../../util/es';
+import { handleValidatePipeline } from '../../util/graph';
 import { handleCategorizationValidation } from './validate';
 import { handleInvalidCategorization } from './invalid';
 import { handleErrors } from './errors';
@@ -67,10 +67,6 @@ const graphState: StateGraphArgs<CategorizationState>['channels'] = {
   pipelineResults: {
     value: (x: object[], y?: object[]) => y ?? x,
     default: () => [{}],
-  },
-  currentMapping: {
-    value: (x: object, y?: object) => y ?? x,
-    default: () => ({}),
   },
   currentPipeline: {
     value: (x: object, y?: object) => y ?? x,
@@ -145,7 +141,7 @@ function chainRouter(state: CategorizationState): string {
   return END;
 }
 
-export function getCategorizationGraph() {
+export async function getCategorizationGraph() {
   const workflow = new StateGraph({
     channels: graphState,
   })
