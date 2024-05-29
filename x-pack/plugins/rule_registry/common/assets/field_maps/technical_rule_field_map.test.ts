@@ -205,6 +205,11 @@ it('matches snapshot', () => {
         "required": true,
         "type": "keyword",
       },
+      "kibana.alert.rule.snoozed": Object {
+        "array": false,
+        "required": false,
+        "type": "boolean",
+      },
       "kibana.alert.rule.tags": Object {
         "array": true,
         "required": false,
