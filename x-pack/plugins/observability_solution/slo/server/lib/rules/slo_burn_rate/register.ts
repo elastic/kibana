@@ -100,6 +100,16 @@ export function sloBurnRateRuleType(
         { name: 'sloName', description: sloNameActionVariableDescription },
         { name: 'sloInstanceId', description: sloInstanceIdActionVariableDescription },
         { name: 'suppressedAction', description: suppressedActionVariableDescription },
+        { name: 'sliValue', description: sliValueActionVariableDescription },
+        { name: 'sloStatus', description: sloStatusActionVariableDescription },
+        {
+          name: 'sloErrorBudgetRemaining',
+          description: sloErrorBudgetRemainingActionVariableDescription,
+        },
+        {
+          name: 'sloErrorBudgetConsumed',
+          description: sloErrorBudgetConsumedActionVariableDescription,
+        },
       ],
     },
     alerts: {
@@ -178,5 +188,33 @@ export const suppressedActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.suppressedActionDescription',
   {
     defaultMessage: 'The suppressed action group.',
+  }
+);
+
+export const sliValueActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sliValueDescription',
+  {
+    defaultMessage: 'The current SLI value.',
+  }
+);
+
+export const sloStatusActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sloStatusDescription',
+  {
+    defaultMessage: 'The current SLO status.',
+  }
+);
+
+export const sloErrorBudgetRemainingActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sloErrorBudgetRemainingDescription',
+  {
+    defaultMessage: 'The remaining error budget.',
+  }
+);
+
+export const sloErrorBudgetConsumedActionVariableDescription = i18n.translate(
+  'xpack.slo.alerting.sloErrorBudgetConsumedDescription',
+  {
+    defaultMessage: 'The consumed error budget.',
   }
 );
