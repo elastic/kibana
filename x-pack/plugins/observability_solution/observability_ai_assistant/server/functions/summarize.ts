@@ -63,6 +63,37 @@ export function registerSummarizationFunction({
       { arguments: { id, text, is_correction: isCorrection, confidence, public: isPublic } },
       signal
     ) => {
+      if (isCorrection) {
+        return client
+          .updateKnowledgeBaseEntry({
+            entry: {
+              doc_id: id,
+              role: KnowledgeBaseEntryRole.AssistantSummarization,
+              id,
+              text,
+              is_correction: isCorrection,
+              confidence,
+              public: isPublic,
+              labels: {},
+            },
+          })
+          .then((result) => {
+            if (result.status === 'not_found') {
+              return {
+                content: {
+                  message: 'The document could not be found to update it',
+                },
+              };
+            }
+
+            return {
+              content: {
+                message: 'The document has been stored',
+              },
+            };
+          });
+      }
+
       return client
         .createKnowledgeBaseEntry({
           entry: {
@@ -77,11 +108,21 @@ export function registerSummarizationFunction({
           },
           // signal,
         })
-        .then(() => ({
-          content: {
-            message: `The document has been stored`,
-          },
-        }));
+        .then((result) => {
+          if (result.status === 'conflict') {
+            return {
+              content: {
+                message: 'The document could not be stored due to a conflict.',
+              },
+            };
+          }
+
+          return {
+            content: {
+              message: 'The document has been stored',
+            },
+          };
+        });
     }
   );
 }

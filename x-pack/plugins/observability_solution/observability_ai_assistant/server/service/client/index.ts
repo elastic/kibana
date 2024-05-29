@@ -54,6 +54,7 @@ import {
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
+  KnowledgeBaseEntryOperation,
   KnowledgeBaseEntryOperationType,
   KnowledgeBaseService,
   RecalledEntry,
@@ -676,11 +677,11 @@ export class ObservabilityAIAssistantClient {
     entry,
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
-  }): Promise<void> => {
+  }) => {
     return this.dependencies.knowledgeBaseService.addEntry({
-      namespace: this.dependencies.namespace,
-      user: this.dependencies.user,
       entry,
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
     });
   };
 
@@ -689,12 +690,19 @@ export class ObservabilityAIAssistantClient {
   }: {
     entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
   }): Promise<void> => {
-    const operations = entries.map((entry) => ({
-      type: KnowledgeBaseEntryOperationType.Index,
-      document: { ...entry, '@timestamp': new Date().toISOString() },
-    }));
+    const operations = entries.map(
+      (entry) =>
+        ({
+          type: KnowledgeBaseEntryOperationType.Index,
+          document: { ...entry, '@timestamp': new Date().toISOString() },
+        } as KnowledgeBaseEntryOperation)
+    );
 
-    await this.dependencies.knowledgeBaseService.addEntries({ operations });
+    await this.dependencies.knowledgeBaseService.addEntries({
+      operations,
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
+    });
   };
 
   getKnowledgeBaseEntries = async ({
@@ -706,11 +714,41 @@ export class ObservabilityAIAssistantClient {
     sortBy: string;
     sortDirection: 'asc' | 'desc';
   }) => {
-    return this.dependencies.knowledgeBaseService.getEntries({ query, sortBy, sortDirection });
+    return this.dependencies.knowledgeBaseService.getEntries({
+      query,
+      sortBy,
+      sortDirection,
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
+    });
   };
 
-  deleteKnowledgeBaseEntry = async (id: string) => {
-    return this.dependencies.knowledgeBaseService.deleteEntry({ id });
+  getKnowledgeBaseEntry = async ({ id }: { id: string }) => {
+    return this.dependencies.knowledgeBaseService.getEntry({
+      id,
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
+    });
+  };
+
+  updateKnowledgeBaseEntry = async ({
+    entry,
+  }: {
+    entry: Partial<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+  }) => {
+    return this.dependencies.knowledgeBaseService.updateEntry({
+      entry,
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
+    });
+  };
+
+  deleteKnowledgeBaseEntry = async ({ id }: { id: string }) => {
+    return this.dependencies.knowledgeBaseService.deleteEntry({
+      id,
+      user: this.dependencies.user,
+      namespace: this.dependencies.namespace,
+    });
   };
 
   fetchKnowledgeBaseInstructions = async () => {

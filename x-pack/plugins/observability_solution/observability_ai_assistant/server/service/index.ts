@@ -10,6 +10,7 @@ import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-pl
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
 import {
@@ -21,12 +22,17 @@ import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
+import {
+  KnowledgeBaseEntryOperation,
+  KnowledgeBaseEntryOperationType,
+  KnowledgeBaseService,
+} from './knowledge_base_service';
 import type {
-  RegistrationCallback,
   ObservabilityAIAssistantResourceNames,
+  RegistrationCallback,
   RespondFunctionResources,
 } from './types';
+import { INTERNAL_ASSISTANT_USER_NAME } from './util/owner_access_query';
 import { splitKbText } from './util/split_kb_text';
 
 function getResourceName(resource: string) {
@@ -108,7 +114,10 @@ export class ObservabilityAIAssistantService {
           return {
             run: async () => {
               if (this.kbService) {
-                await this.kbService.processQueue();
+                await this.kbService.processQueue({
+                  user: { name: INTERNAL_ASSISTANT_USER_NAME },
+                  namespace: ALL_SPACES_ID,
+                });
               }
             },
           };
@@ -285,7 +294,7 @@ export class ObservabilityAIAssistantService {
     return new ObservabilityAIAssistantClient({
       actionsClient: await plugins.actions.getActionsClientWithRequest(request),
       uiSettingsClient: coreStart.uiSettings.asScopedToClient(soClient),
-      namespace: spaceId,
+      namespace: user ? spaceId : ALL_SPACES_ID,
       esClient: {
         asInternalUser: coreStart.elasticsearch.client.asInternalUser,
         asCurrentUser: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
@@ -297,7 +306,10 @@ export class ObservabilityAIAssistantService {
             id: user.profile_uid,
             name: user.username,
           }
-        : undefined,
+        : {
+            id: INTERNAL_ASSISTANT_USER_NAME,
+            name: INTERNAL_ASSISTANT_USER_NAME,
+          },
       knowledgeBaseService: this.kbService!,
     });
   }
@@ -337,8 +349,8 @@ export class ObservabilityAIAssistantService {
   addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()
       .then(() => {
-        this.kbService!.queue(
-          entries.flatMap((entry) => {
+        this.kbService!.queue({
+          operations: entries.flatMap((entry) => {
             const entryWithSystemProperties = {
               ...entry,
               '@timestamp': new Date().toISOString(),
@@ -359,12 +371,14 @@ export class ObservabilityAIAssistantService {
                     {
                       type: KnowledgeBaseEntryOperationType.Index,
                       document: entryWithSystemProperties,
-                    },
+                    } as KnowledgeBaseEntryOperation,
                   ];
 
             return operations;
-          })
-        );
+          }),
+          user: { name: INTERNAL_ASSISTANT_USER_NAME },
+          namespace: ALL_SPACES_ID,
+        });
       })
       .catch((error) => {
         this.logger.error(

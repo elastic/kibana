@@ -113,7 +113,7 @@ const saveKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources) => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
@@ -149,14 +149,14 @@ const deleteKnowledgeBaseEntry = createObservabilityAIAssistantServerRoute({
   options: {
     tags: ['access:ai_assistant'],
   },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources) => {
     const client = await resources.service.getClient({ request: resources.request });
 
     if (!client) {
       throw notImplemented();
     }
 
-    return client.deleteKnowledgeBaseEntry(resources.params.path.entryId);
+    return client.deleteKnowledgeBaseEntry({ id: resources.params.path.entryId });
   },
 });
 

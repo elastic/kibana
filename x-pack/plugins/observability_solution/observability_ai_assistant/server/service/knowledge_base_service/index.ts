@@ -5,21 +5,25 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { serverUnavailable, gatewayTimeout } from '@hapi/boom';
+import {
+  MlTrainedModelDeploymentNodesStats,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { encode } from 'gpt-tokenizer';
+import { isEmpty, omit, orderBy } from 'lodash';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { isEmpty, map, orderBy } from 'lodash';
-import { encode } from 'gpt-tokenizer';
-import { MlTrainedModelDeploymentNodesStats } from '@elastic/elasticsearch/lib/api/types';
-import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { INDEX_QUEUED_DOCUMENTS_TASK_ID, INDEX_QUEUED_DOCUMENTS_TASK_TYPE } from '..';
+import { aiAssistantSearchConnectorIndexPattern } from '../../../common';
 import { KnowledgeBaseEntry, KnowledgeBaseEntryRole, UserInstruction } from '../../../common/types';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
+import { ownerAccessQuery } from '../util/owner_access_query';
+import { KnowledgeBaseNotReadyError } from './knowledge_base_not_ready_error';
 
 interface Dependencies {
   esClient: ElasticsearchClient;
@@ -37,7 +41,7 @@ export interface RecalledEntry {
   labels?: Record<string, string>;
 }
 
-function isAlreadyExistsError(error: Error) {
+function isKnowledgeBaseNotInstalledError(error: Error): error is errors.ResponseError {
   return (
     error instanceof errors.ResponseError &&
     (error.body.error.type === 'resource_not_found_exception' ||
@@ -46,7 +50,7 @@ function isAlreadyExistsError(error: Error) {
 }
 
 function throwKnowledgeBaseNotReady(body: any) {
-  throw serverUnavailable(`Knowledge base is not ready yet`, body);
+  throw new KnowledgeBaseNotReadyError(`Knowledge base is not ready`, body);
 }
 
 export enum KnowledgeBaseEntryOperationType {
@@ -56,8 +60,7 @@ export enum KnowledgeBaseEntryOperationType {
 
 interface KnowledgeBaseDeleteOperation {
   type: KnowledgeBaseEntryOperationType.Delete;
-  doc_id?: string;
-  labels?: Record<string, string>;
+  id: string;
 }
 
 interface KnowledgeBaseIndexOperation {
@@ -117,7 +120,7 @@ export class KnowledgeBaseService {
       try {
         isModelInstalled = await getIsModelInstalled();
       } catch (error) {
-        if (isAlreadyExistsError(error)) {
+        if (isKnowledgeBaseNotInstalledError(error)) {
           await installModel();
           isModelInstalled = await getIsModelInstalled();
         }
@@ -138,7 +141,7 @@ export class KnowledgeBaseService {
     } catch (error) {
       this.dependencies.logger.debug('Error starting model deployment');
       this.dependencies.logger.debug(error);
-      if (!isAlreadyExistsError(error)) {
+      if (!isKnowledgeBaseNotInstalledError(error)) {
         throw error;
       }
     }
@@ -161,7 +164,9 @@ export class KnowledgeBaseService {
       this.dependencies.logger.debug('Model is not allocated yet');
       this.dependencies.logger.debug(JSON.stringify(response));
 
-      throw gatewayTimeout();
+      throwKnowledgeBaseNotReady({
+        message: 'Failed to allocate model',
+      });
     }, retryOptions);
 
     this.dependencies.logger.info('Model is ready');
@@ -192,32 +197,39 @@ export class KnowledgeBaseService {
       });
   }
 
-  private async processOperation(operation: KnowledgeBaseEntryOperation) {
+  private async processOperation({
+    operation,
+    user,
+    namespace,
+  }: {
+    operation: KnowledgeBaseEntryOperation;
+    user?: { name: string; id?: string };
+    namespace?: string;
+  }) {
     if (operation.type === KnowledgeBaseEntryOperationType.Delete) {
-      await this.dependencies.esClient.deleteByQuery({
-        index: this.dependencies.resources.aliases.kb,
-        query: {
-          bool: {
-            filter: [
-              ...(operation.doc_id ? [{ term: { _id: operation.doc_id } }] : []),
-              ...(operation.labels
-                ? map(operation.labels, (value, key) => {
-                    return { term: { [key]: value } };
-                  })
-                : []),
-            ],
-          },
-        },
+      await this.deleteEntry({
+        id: operation.id,
+        user,
+        namespace,
       });
+
       return;
     }
 
     await this.addEntry({
       entry: operation.document,
+      user,
+      namespace,
     });
   }
 
-  async processQueue() {
+  async processQueue({
+    user,
+    namespace,
+  }: {
+    user?: { name: string; id?: string };
+    namespace?: string;
+  }) {
     if (!this._queue.length) {
       return;
     }
@@ -241,7 +253,11 @@ export class KnowledgeBaseService {
       operations.map((operation) =>
         limiter(async () => {
           this._queue.splice(operations.indexOf(operation), 1);
-          await this.processOperation(operation);
+          await this.processOperation({
+            operation,
+            user,
+            namespace,
+          });
         })
       )
     );
@@ -249,7 +265,15 @@ export class KnowledgeBaseService {
     this.dependencies.logger.info('Processed all queued operations');
   }
 
-  queue(operations: KnowledgeBaseEntryOperation[]): void {
+  queue({
+    operations,
+    user,
+    namespace,
+  }: {
+    operations: KnowledgeBaseEntryOperation[];
+    user?: { name: string; id?: string };
+    namespace?: string;
+  }): void {
     if (!operations.length) {
       return;
     }
@@ -262,7 +286,13 @@ export class KnowledgeBaseService {
     const limiter = pLimit(5);
 
     const limitedFunctions = this._queue.map((operation) =>
-      limiter(() => this.processOperation(operation))
+      limiter(() =>
+        this.processOperation({
+          operation,
+          user,
+          namespace,
+        })
+      )
     );
 
     Promise.all(limitedFunctions).catch((err) => {
@@ -310,42 +340,50 @@ export class KnowledgeBaseService {
     user?: { name: string };
     modelId: string;
   }): Promise<RecalledEntry[]> {
-    const query = {
-      bool: {
-        should: queries.map((text) => ({
-          text_expansion: {
-            'ml.tokens': {
-              model_text: text,
-              model_id: modelId,
+    try {
+      const query = {
+        bool: {
+          should: queries.map((text) => ({
+            text_expansion: {
+              'ml.tokens': {
+                model_text: text,
+                model_id: modelId,
+              },
             },
-          },
-        })),
-        filter: [
-          ...getAccessQuery({
-            user,
-            namespace,
-          }),
-          ...getCategoryQuery({ categories }),
-        ],
-      },
-    };
+          })),
+          filter: [
+            ...getAccessQuery({
+              user,
+              namespace,
+            }),
+            ...getCategoryQuery({ categories }),
+          ],
+        },
+      };
 
-    const response = await this.dependencies.esClient.search<
-      Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
-    >({
-      index: [this.dependencies.resources.aliases.kb],
-      query,
-      size: 20,
-      _source: {
-        includes: ['text', 'is_correction', 'labels'],
-      },
-    });
+      const response = await this.dependencies.esClient.search<
+        Pick<KnowledgeBaseEntry, 'text' | 'is_correction' | 'labels'>
+      >({
+        index: [this.dependencies.resources.aliases.kb],
+        query,
+        size: 20,
+        _source: {
+          includes: ['text', 'is_correction', 'labels'],
+        },
+      });
 
-    return response.hits.hits.map((hit) => ({
-      ...hit._source!,
-      score: hit._score!,
-      id: hit._id,
-    }));
+      return response.hits.hits.map((hit) => ({
+        ...hit._source!,
+        score: hit._score!,
+        id: hit._id,
+      }));
+    } catch (error) {
+      if (isKnowledgeBaseNotInstalledError(error)) {
+        throwKnowledgeBaseNotReady(error.body);
+      }
+
+      throw error;
+    }
   }
 
   private async getConnectorIndices(
@@ -491,7 +529,7 @@ export class KnowledgeBaseService {
         namespace,
         modelId,
       }).catch((error) => {
-        if (isAlreadyExistsError(error)) {
+        if (isKnowledgeBaseNotInstalledError(error)) {
           throwKnowledgeBaseNotReady(error.body);
         }
         throw error;
@@ -571,6 +609,10 @@ export class KnowledgeBaseService {
         text: hit._source?.text ?? '',
       }));
     } catch (error) {
+      if (isKnowledgeBaseNotInstalledError(error)) {
+        throwKnowledgeBaseNotReady(error.body);
+      }
+
       this.dependencies.logger.error('Failed to load instructions from knowledge base');
       this.dependencies.logger.error(error);
       return [];
@@ -581,25 +623,55 @@ export class KnowledgeBaseService {
     query,
     sortBy,
     sortDirection,
+    user,
+    namespace,
   }: {
     query?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc';
+    user?: { name: string; id?: string };
+    namespace?: string;
   }): Promise<{ entries: KnowledgeBaseEntry[] }> => {
+    const accessControlMusts = [
+      {
+        term: {
+          'user.name': user?.name,
+        },
+      },
+      {
+        term: {
+          namespace,
+        },
+      },
+    ];
+
     try {
       const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
         index: this.dependencies.resources.aliases.kb,
         ...(query
           ? {
               query: {
-                wildcard: {
-                  doc_id: {
-                    value: `${query}*`,
-                  },
+                bool: {
+                  must: [
+                    {
+                      wildcard: {
+                        doc_id: {
+                          value: `${query}*`,
+                        },
+                      },
+                    },
+                    ...accessControlMusts,
+                  ],
                 },
               },
             }
-          : {}),
+          : {
+              query: {
+                bool: {
+                  must: accessControlMusts,
+                },
+              },
+            }),
         sort: [
           {
             [String(sortBy)]: {
@@ -631,9 +703,10 @@ export class KnowledgeBaseService {
         })),
       };
     } catch (error) {
-      if (isAlreadyExistsError(error)) {
+      if (isKnowledgeBaseNotInstalledError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
+
       throw error;
     }
   };
@@ -646,32 +719,72 @@ export class KnowledgeBaseService {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
     user?: { name: string; id?: string };
     namespace?: string;
-  }): Promise<void> => {
+  }): Promise<{ status: 'conflict' } | { status: 'created'; entry: KnowledgeBaseEntry }> => {
+    const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+      index: this.dependencies.resources.aliases.kb,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                _id: id,
+              },
+            },
+          ],
+          ...ownerAccessQuery({ user, namespace }),
+        },
+      },
+    });
+
+    if ((response.hits.total as SearchTotalHits).value !== 0) {
+      // This is a leak in the access control since it will report a conflict if another
+      // user has an entry with the same ID that is being used to create the new entry
+      // See https://github.com/elastic/kibana/issues/183897
+      return { status: 'conflict' };
+    }
+
+    const entry = {
+      '@timestamp': new Date().toISOString(),
+      ...document,
+    };
+
     try {
-      await this.dependencies.esClient.index({
+      await this.dependencies.esClient.create({
         index: this.dependencies.resources.aliases.kb,
         id,
         document: {
-          '@timestamp': new Date().toISOString(),
-          ...document,
+          ...entry,
           user,
           namespace,
         },
         pipeline: this.dependencies.resources.pipelines.kb,
         refresh: false,
       });
+
+      return {
+        status: 'created',
+        entry: {
+          ...entry,
+          id,
+        },
+      };
     } catch (error) {
-      if (error instanceof errors.ResponseError && error.body.error.type === 'status_exception') {
+      if (isKnowledgeBaseNotInstalledError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
+
       throw error;
     }
   };
 
   addEntries = async ({
     operations,
+    user,
+    namespace,
   }: {
     operations: KnowledgeBaseEntryOperation[];
+    user?: { name: string; id?: string };
+    namespace?: string;
   }): Promise<void> => {
     this.dependencies.logger.info(`Starting import of ${operations.length} entries`);
 
@@ -680,7 +793,7 @@ export class KnowledgeBaseService {
     await Promise.all(
       operations.map((operation) =>
         limiter(async () => {
-          await this.processOperation(operation);
+          await this.processOperation({ operation, user, namespace });
         })
       )
     );
@@ -688,20 +801,174 @@ export class KnowledgeBaseService {
     this.dependencies.logger.info(`Completed import of ${operations.length} entries`);
   };
 
-  deleteEntry = async ({ id }: { id: string }): Promise<void> => {
-    try {
-      await this.dependencies.esClient.delete({
-        index: this.dependencies.resources.aliases.kb,
+  getEntry = async ({
+    id,
+    user,
+    namespace,
+  }: {
+    id: string;
+    user?: { name: string; id?: string };
+    namespace?: string;
+  }): Promise<{ status: 'not_found' } | { status: 'found'; entry: KnowledgeBaseEntry }> => {
+    const response = await this.dependencies.esClient.search<Omit<KnowledgeBaseEntry, 'id'>>({
+      index: this.dependencies.resources.aliases.kb,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'user.name': user?.name,
+              },
+            },
+            {
+              term: {
+                namespace,
+              },
+            },
+            {
+              term: {
+                _id: id,
+              },
+            },
+          ],
+        },
+      },
+      _source: [
+        '@timestamp',
+        'doc_id',
+        'text',
+        'is_correction',
+        'labels',
+        'confidence',
+        'public',
+        'role',
+      ],
+    });
+
+    if ((response.hits.total as SearchTotalHits).value === 0) {
+      return { status: 'not_found' };
+    }
+
+    return {
+      status: 'found',
+      entry: {
+        ...response.hits.hits[0]._source!,
         id,
-        refresh: 'wait_for',
+      },
+    };
+  };
+
+  updateEntry = async ({
+    entry,
+    user,
+    namespace,
+  }: {
+    entry: Partial<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+    user?: { name: string; id?: string };
+    namespace?: string;
+  }): Promise<{ status: 'updated' | 'not_found' }> => {
+    const response = await this.dependencies.esClient.search<KnowledgeBaseEntry>({
+      index: this.dependencies.resources.aliases.kb,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'user.name': user?.name,
+              },
+            },
+            {
+              term: {
+                namespace,
+              },
+            },
+            {
+              term: {
+                _id: entry.id,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    if ((response.hits.total as SearchTotalHits).value === 0) {
+      return { status: 'not_found' };
+    }
+
+    const storedInstruction = omit(response.hits.hits[0]._source!, [
+      'ml',
+      '@timestamp',
+      'user',
+      'namespace',
+    ]);
+
+    const updatedInstruction = {
+      ...storedInstruction,
+      ...entry,
+      '@timestamp': new Date().toISOString(),
+      user,
+      namespace,
+    };
+
+    try {
+      await this.dependencies.esClient.index({
+        index: this.dependencies.resources.aliases.kb,
+        id: updatedInstruction.id,
+        document: updatedInstruction,
+        pipeline: this.dependencies.resources.pipelines.kb,
+        refresh: false,
       });
 
-      return Promise.resolve();
+      return { status: 'updated' };
     } catch (error) {
-      if (isAlreadyExistsError(error)) {
+      if (isKnowledgeBaseNotInstalledError(error)) {
         throwKnowledgeBaseNotReady(error.body);
       }
+
       throw error;
     }
+  };
+
+  deleteEntry = async ({
+    id,
+    user,
+    namespace,
+  }: {
+    id: string;
+    user?: { name: string; id?: string };
+    namespace?: string;
+  }): Promise<{ status: 'deleted' | 'not_found' }> => {
+    const response = await this.dependencies.esClient.deleteByQuery({
+      refresh: true,
+      index: this.dependencies.resources.aliases.kb,
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'user.name': user?.name,
+              },
+            },
+            {
+              term: {
+                namespace,
+              },
+            },
+            {
+              term: {
+                _id: id,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    if (response.deleted === 0) {
+      return { status: 'not_found' };
+    }
+
+    return { status: 'deleted' };
   };
 }
