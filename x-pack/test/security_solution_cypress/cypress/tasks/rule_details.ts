@@ -212,4 +212,4 @@ export const filterByRunType = (ruleType: string) => {
   cy.get(EXECUTION_RUN_TYPE_FILTER_ITEM).contains(ruleType).click();
 };
 
-export const getBackfillsTable = () => cy.get(RULE_BACKFILLS_TABLE).find('tbody tr');
+export const getBackfillsTableRows = () => cy.get(RULE_BACKFILLS_TABLE).find('tbody tr');

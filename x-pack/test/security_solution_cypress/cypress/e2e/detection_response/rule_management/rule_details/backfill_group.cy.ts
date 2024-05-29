@@ -12,7 +12,7 @@ import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
-import { goToExecutionLogTab, getBackfillsTable } from '../../../../tasks/rule_details';
+import { goToExecutionLogTab, getBackfillsTableRows } from '../../../../tasks/rule_details';
 import { getNewRule } from '../../../../objects/rule';
 import {
   RULE_BACKFILLS_INFO_HEADEAR,
@@ -47,9 +47,7 @@ describe(
     before(() => {
       login();
       deleteAlertsAndRules();
-      createRule({
-        ...getNewRule(),
-      }).then((rule) => {
+      createRule(getNewRule()).then((rule) => {
         cy.wrap(rule.body.id).as('ruleId');
       });
     });
@@ -61,22 +59,22 @@ describe(
       goToExecutionLogTab();
 
       cy.get(RULE_BACKFILLS_INFO_HEADEAR).contains('Backfill runs');
-      getBackfillsTable().should('have.length', 2);
-      getBackfillsTable().eq(0).contains('Pending');
-      getBackfillsTable().eq(0).find(RULE_BACKFILLS_COLUMN_ERROR).contains('1');
-      getBackfillsTable().eq(0).find(RULE_BACKFILLS_COLUMN_PENDING).contains('1');
-      getBackfillsTable().eq(0).find(RULE_BACKFILLS_COLUMN_RUNNING).contains('0');
-      getBackfillsTable().eq(0).find(RULE_BACKFILLS_COLUMN_COMPLETED).contains('2');
-      getBackfillsTable().eq(0).find(RULE_BACKFILLS_COLUMN_TOTAL).contains('4');
+      getBackfillsTableRows().should('have.length', 2);
+      getBackfillsTableRows().eq(0).contains('Pending');
+      getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_COLUMN_ERROR).contains('1');
+      getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_COLUMN_PENDING).contains('1');
+      getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_COLUMN_RUNNING).contains('0');
+      getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_COLUMN_COMPLETED).contains('2');
+      getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_COLUMN_TOTAL).contains('4');
 
-      getBackfillsTable().eq(1).contains('Running');
-      getBackfillsTable().eq(1).find(RULE_BACKFILLS_COLUMN_ERROR).contains('0');
-      getBackfillsTable().eq(1).find(RULE_BACKFILLS_COLUMN_PENDING).contains('0');
-      getBackfillsTable().eq(1).find(RULE_BACKFILLS_COLUMN_RUNNING).contains('1');
-      getBackfillsTable().eq(1).find(RULE_BACKFILLS_COLUMN_COMPLETED).contains('0');
-      getBackfillsTable().eq(1).find(RULE_BACKFILLS_COLUMN_TOTAL).contains('1');
+      getBackfillsTableRows().eq(1).contains('Running');
+      getBackfillsTableRows().eq(1).find(RULE_BACKFILLS_COLUMN_ERROR).contains('0');
+      getBackfillsTableRows().eq(1).find(RULE_BACKFILLS_COLUMN_PENDING).contains('0');
+      getBackfillsTableRows().eq(1).find(RULE_BACKFILLS_COLUMN_RUNNING).contains('1');
+      getBackfillsTableRows().eq(1).find(RULE_BACKFILLS_COLUMN_COMPLETED).contains('0');
+      getBackfillsTableRows().eq(1).find(RULE_BACKFILLS_COLUMN_TOTAL).contains('1');
 
-      getBackfillsTable().eq(0).find(RULE_BACKFILLS_DELETE_BUTTON).click();
+      getBackfillsTableRows().eq(0).find(RULE_BACKFILLS_DELETE_BUTTON).click();
 
       cy.get(RULE_BACKFILLS_DELETE_MODAL).contains('Are you sure you want to stop this run?');
       interceptDeleteBackfill(FIRST_BACKFILL_ID, 'deleteBackfill');

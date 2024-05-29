@@ -9,14 +9,20 @@ import { EuiHealth } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import type { BackfillStatus } from '../../types';
 
+function getBackfillStatusColor(status: BackfillStatus) {
+  switch (status) {
+    case 'pending':
+      return 'warning';
+    case 'running':
+      return 'success';
+    default:
+      return 'subdued';
+  }
+}
+
 export const BackfillStatusInfo = ({ status }: { status: BackfillStatus }) => {
   const capitalizedStatus = capitalize(status);
-  let color = 'subdued';
-  if (status === 'pending') {
-    color = 'warning';
-  } else if (status === 'running') {
-    color = 'success';
-  }
+  const color = getBackfillStatusColor(status);
 
   return <EuiHealth color={color}>{capitalizedStatus}</EuiHealth>;
 };

@@ -16,9 +16,7 @@ export const StopBackfill = ({ id }: { id: string }) => {
   const deleteBackfillMutation = useDeleteBackfill({
     onSuccess: () => {
       closeModal();
-      addSuccess(i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_SUCCESS, {
-        toastLifeTimeMs: 5000,
-      });
+      addSuccess(i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_SUCCESS);
     },
     onError: (error) => {
       addError(error, {
@@ -47,7 +45,6 @@ export const StopBackfill = ({ id }: { id: string }) => {
       {isModalVisible && (
         <EuiConfirmModal
           data-test-subj="rule-backfills-delete-modal"
-          style={{ width: 600 }}
           title={i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_TITLE}
           onCancel={closeModal}
           onConfirm={onConfirm}

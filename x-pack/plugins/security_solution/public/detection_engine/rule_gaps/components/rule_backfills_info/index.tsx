@@ -24,33 +24,10 @@ import { getBackfillRowsFromResponse } from './utils';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
-export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
-  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
-  const [autoRefreshInterval, setAutoRefreshInterval] = useState(3000);
-  const [isAutoRefresh, setIsAutoRefresh] = useState(false);
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [{ canUserCRUD }] = useUserData();
-  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+const AUTO_REFRESH_INTERVAL = 3000;
+const DEFAULT_PAGE_SIZE = 10;
 
-  const { data, isLoading, isError } = useFindBackfillsForRules(
-    {
-      ruleIds: [ruleId],
-      page: pageIndex + 1,
-      perPage: pageSize,
-    },
-    {
-      refetchInterval: isAutoRefresh ? autoRefreshInterval : false,
-      enabled: isManualRuleRunEnabled,
-    }
-  );
-
-  if (!isManualRuleRunEnabled) {
-    return null;
-  }
-
-  const backfills: BackfillRow[] = getBackfillRowsFromResponse(data?.data ?? []);
-
+const getBackfillsTableColumns = (hasCRUDPermissions: boolean) => {
   const stopAction = {
     render: (item: BackfillRow) => <StopBackfill id={item.id} />,
     width: '10%',
@@ -116,21 +93,55 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
     columns.push(stopAction);
   }
 
+  return columns;
+};
+
+export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
+  const isManualRuleRunEnabled = useIsExperimentalFeatureEnabled('manualRuleRunEnabled');
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState(AUTO_REFRESH_INTERVAL);
+  const [isAutoRefresh, setIsAutoRefresh] = useState(false);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [{ canUserCRUD }] = useUserData();
+  const hasCRUDPermissions = hasUserCRUDPermission(canUserCRUD);
+
+  const { data, isLoading, isError } = useFindBackfillsForRules(
+    {
+      ruleIds: [ruleId],
+      page: pageIndex + 1,
+      perPage: pageSize,
+    },
+    {
+      refetchInterval: isAutoRefresh ? autoRefreshInterval : false,
+      enabled: isManualRuleRunEnabled,
+    }
+  );
+
+  if (!isManualRuleRunEnabled) {
+    return null;
+  }
+
+  const backfills: BackfillRow[] = getBackfillRowsFromResponse(data?.data ?? []);
+
+  const columns = getBackfillsTableColumns(hasCRUDPermissions);
+
   const pagination = {
     pageIndex,
     pageSize,
     totalItemCount: data?.total ?? 0,
-    pageSizeOptions: [5, 10, 25],
   };
 
   if (data?.total === 0) return null;
 
-  const onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
+  const handleRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps) => {
     setIsAutoRefresh(!isPaused);
     setAutoRefreshInterval(refreshInterval);
   };
 
-  const onTableChange: (params: CriteriaWithPagination<BackfillRow>) => void = ({ page, sort }) => {
+  const handleTableChange: (params: CriteriaWithPagination<BackfillRow>) => void = ({
+    page,
+    sort,
+  }) => {
     if (page) {
       setPageIndex(page.index);
       setPageSize(page.size);
@@ -150,7 +161,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
           <EuiAutoRefresh
             isPaused={!isAutoRefresh}
             refreshInterval={autoRefreshInterval}
-            onRefreshChange={onRefreshChange}
+            onRefreshChange={handleRefreshChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -161,7 +172,7 @@ export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => 
         pagination={pagination}
         error={isError ? 'error' : undefined}
         loading={isLoading}
-        onChange={onTableChange}
+        onChange={handleTableChange}
         noItemsMessage={'not found'}
       />
     </div>

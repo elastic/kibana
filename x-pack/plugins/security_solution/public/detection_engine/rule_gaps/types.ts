@@ -11,11 +11,13 @@ export type Backfill = FindBackfillResponseBody['data']['0'];
 
 export type BackfillStatus = Backfill['status'];
 
-export interface BackfillRow extends Backfill {
-  error: number;
+export interface BackfillStats {
   total: number;
   complete: number;
-  pending: number;
   running: number;
+  pending: number;
+  error: number;
   timeout: number;
 }
+
+export type BackfillRow = Backfill & BackfillStats;

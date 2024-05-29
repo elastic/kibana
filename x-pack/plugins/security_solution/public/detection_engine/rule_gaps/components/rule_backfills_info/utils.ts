@@ -4,18 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { BackfillRow, Backfill } from '../../types';
+import type { BackfillRow, Backfill, BackfillStats } from '../../types';
 
-const getScheduledEntryAmount = (
-  backfill: Backfill
-): {
-  total: number;
-  complete: number;
-  running: number;
-  pending: number;
-  error: number;
-  timeout: number;
-} => {
+const getScheduledEntryAmount = (backfill: Backfill): BackfillStats => {
   return backfill?.schedule?.reduce(
     (acc, scheduledEntry) => {
       return {
