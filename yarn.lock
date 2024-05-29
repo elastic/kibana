@@ -6303,10 +6303,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/solution-nav-oblt@link:packages/solution-nav/oblt":
-  version "0.0.0"
-  uid ""
-
 "@kbn/some-dev-log@link:packages/kbn-some-dev-log":
   version "0.0.0"
   uid ""
