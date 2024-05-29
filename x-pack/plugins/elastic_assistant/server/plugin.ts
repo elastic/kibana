@@ -106,6 +106,7 @@ export class ElasticAssistantPlugin
   ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
+    this.attackDiscoveryTask?.start(plugins.taskManager);
 
     return {
       actions: plugins.actions,

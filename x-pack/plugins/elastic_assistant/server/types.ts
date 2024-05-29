@@ -21,7 +21,10 @@ import type {
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/server';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
@@ -100,6 +103,7 @@ export interface ElasticAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
   spaces?: SpacesPluginStart;
   security: SecurityPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface ElasticAssistantApiRequestHandlerContext {

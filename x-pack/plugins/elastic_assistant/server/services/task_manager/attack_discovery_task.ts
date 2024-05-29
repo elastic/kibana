@@ -37,6 +37,7 @@ export interface AttackDiscoveryTaskStartContract {
 export class AttackDiscoveryTask {
   private logger: Logger;
   private wasStarted: boolean = false;
+  private taskManager?: TaskManagerStartContract;
 
   constructor(setupContract: AttackDiscoveryTaskSetupContract) {
     const { core, logFactory, taskManager } = setupContract;
@@ -73,29 +74,33 @@ export class AttackDiscoveryTask {
     }
   }
 
-  public start = async ({ taskManager }: AttackDiscoveryTaskStartContract) => {
+  public async start(taskManager: TaskManagerStartContract) {
+    this.taskManager = taskManager;
+  }
+
+  public run = async () => {
     this.wasStarted = true;
-    //
-    // try {
-    //   await taskManager.ensureScheduled({
-    //     id: this.taskId,
-    //     taskType: AttackDiscoveryTaskConstants.TYPE,
-    //     scope: AttackDiscoveryTaskConstants.SCOPE,
-    //     schedule: {
-    //       interval: AttackDiscoveryTaskConstants.INTERVAL,
-    //     },
-    //     state: {},
-    //     params: { version: AttackDiscoveryTaskConstants.VERSION },
-    //   });
-    // } catch (e) {
-    //   this.logger.error(
-    //     `Error scheduling task ${AttackDiscoveryTaskConstants.TYPE}, received ${e.message}`
-    //   );
-    // }
+
+    try {
+      await this.taskManager?.ensureScheduled({
+        id: this.taskId,
+        taskType: AttackDiscoveryTaskConstants.TYPE,
+        scope: AttackDiscoveryTaskConstants.SCOPE,
+        // schedule: {
+        //   interval: AttackDiscoveryTaskConstants.INTERVAL,
+        // },
+        state: {},
+        params: { version: AttackDiscoveryTaskConstants.VERSION },
+      });
+    } catch (e) {
+      this.logger.error(
+        `Error scheduling task ${AttackDiscoveryTaskConstants.TYPE}, received ${e.message}`
+      );
+    }
   };
 
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
-    this.logger.info(`runTask cancel ${AttackDiscoveryTaskConstants.TYPE}.`);
+  private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
+    this.logger.info(`runTask start ${AttackDiscoveryTaskConstants.TYPE}.`);
     // if task was not `.start()`'d yet, then exit
     if (!this.wasStarted) {
       this.logger.debug('[runTask()] Aborted. Task not started yet');

@@ -70,8 +70,8 @@ export const postAttackDiscoveryRoute = (
             logger,
           });
 
-          const hey = await assistantContext.attackDiscoveryTask.runTask();
-          console.log('hey', hey);
+          // const hey = await assistantContext.attackDiscoveryTask.run();
+          // console.log('hey', hey);
 
           // get parameters from the request body
           const alertsIndexPattern = decodeURIComponent(request.body.alertsIndexPattern);
