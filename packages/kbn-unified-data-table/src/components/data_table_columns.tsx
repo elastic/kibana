@@ -279,7 +279,6 @@ export function getEuiGridColumns({
   showColumnTokens,
   headerRowHeightLines,
   customGridColumnsConfiguration,
-  columnHeaders,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -302,8 +301,8 @@ export function getEuiGridColumns({
   showColumnTokens?: boolean;
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
-  columnHeaders?: Record<string, string>;
 }) {
+  const colHeaders = settings?.columnHeaders;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
   const numberOfColumns = columns.length;
@@ -329,7 +328,7 @@ export function getEuiGridColumns({
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
-      columnHeaders,
+      columnHeaders: colHeaders,
     })
   );
 }

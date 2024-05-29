@@ -375,13 +375,6 @@ export interface UnifiedDataTableProps {
    * Optional extra props passed to the renderCellValue function/component.
    */
   cellContext?: EuiDataGridProps['cellContext'];
-
-  /**
-  Optional props passed to Columns to display provided labels as column names instead of field names.
-  This object maps column field names to their corresponding display labels.
-  These labels will take precedence over the data view field names.
-  */
-  columnHeaders?: Record<string, string>;
 }
 
 export const EuiDataGridMemoized = React.memo(EuiDataGrid);
@@ -450,7 +443,6 @@ export const UnifiedDataTable = ({
   customControlColumnsConfiguration,
   enableComparisonMode,
   cellContext,
-  columnHeaders,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -754,7 +746,6 @@ export const UnifiedDataTable = ({
         showColumnTokens,
         headerRowHeightLines,
         customGridColumnsConfiguration,
-        columnHeaders,
       }),
     [
       columnsMeta,
@@ -776,7 +767,6 @@ export const UnifiedDataTable = ({
       valueToStringConverter,
       visibleCellActions,
       visibleColumns,
-      columnHeaders,
     ]
   );
 

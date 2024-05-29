@@ -767,11 +767,6 @@ describe('UnifiedDataTable', () => {
       );
     };
 
-    const getColumnHeaders = () =>
-      screen
-        .getAllByRole('columnheader')
-        .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
-
     const getSelectedDocumentsButton = () => screen.queryByRole('button', { name: /Selected/ });
 
     const selectDocument = (document: EsHitRecord) =>
@@ -792,6 +787,11 @@ describe('UnifiedDataTable', () => {
       screen
         .queryAllByTestId('unifiedDataTableComparisonFieldName')
         .map(({ textContent }) => textContent);
+
+    const getColumnHeaders = () =>
+      screen
+        .getAllByRole('columnheader')
+        .map((header) => header.querySelector('.euiDataGridHeaderCell__content')?.textContent);
 
     const getCellValues = () =>
       Array.from(document.querySelectorAll(`.${CELL_CLASS}`)).map(({ textContent }) => textContent);

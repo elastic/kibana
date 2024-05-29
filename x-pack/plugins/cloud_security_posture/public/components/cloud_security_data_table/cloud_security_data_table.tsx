@@ -124,6 +124,7 @@ export const CloudSecurityDataTable = ({
         const newColumn = { [curr.id]: columnDefaultSettings };
         return { ...prev, ...newColumn };
       }, {} as UnifiedDataTableSettings['columns']),
+      columnHeaders: columnHeaders as UnifiedDataTableSettings['columnHeaders'],
     }
   );
 
@@ -315,7 +316,6 @@ export const CloudSecurityDataTable = ({
           rowLineHeightOverride="24px"
           controlColumnIds={controlColumnIds}
           onFieldEdited={dataViewRefetch}
-          columnHeaders={columnHeaders}
         />
       </div>
     </CellActionsProvider>

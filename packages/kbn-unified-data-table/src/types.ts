@@ -19,6 +19,12 @@ import type { DatatableColumnMeta } from '@kbn/expressions-plugin/common';
  */
 export interface UnifiedDataTableSettings {
   columns?: Record<string, UnifiedDataTableSettingsColumn>;
+  /**
+  Optional props passed to Columns to display provided labels as column names instead of field names.
+  This object maps column field names to their corresponding display labels.
+  These labels will take precedence over the data view field names.
+  */
+  columnHeaders?: Record<string, string>;
 }
 
 export interface UnifiedDataTableSettingsColumn {

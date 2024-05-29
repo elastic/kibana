@@ -470,7 +470,7 @@ describe('Data table columns', function () {
       } as const;
       const customizedGridColumns = getEuiGridColumns({
         columns: ['test_column_1', 'test_column_2', 'test_column_4'],
-        settings: {},
+        settings: { columnHeaders: mockColumnHeaders },
         dataView: dataViewWithTimefieldMock,
         defaultColumns: false,
         isSortEnabled: true,
@@ -483,7 +483,6 @@ describe('Data table columns', function () {
         },
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
-        columnHeaders: mockColumnHeaders,
       });
       const columnDisplayNames = customizedGridColumns.map((column) => column.displayAsText);
       expect(columnDisplayNames.includes('test_column_one')).toBeTruthy();
