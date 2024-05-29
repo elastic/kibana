@@ -199,7 +199,6 @@ class VisEditorVisualizationUI extends Component {
               ...this._parentApi,
               getSerializedStateForChild: () => ({
                 rawState: {
-                  id: '',
                   savedVis: this.getSavedVis(),
                   title,
                   description,

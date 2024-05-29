@@ -106,8 +106,8 @@ export const getVisualizeEmbeddableFactory: (
           });
         },
         isEditingEnabled: () => viewMode$.getValue() === ViewMode.EDIT,
-        setVis: async (newVis) => {
-          vis$.next(await createVisAsync(newVis.type, newVis));
+        setVis: async (newSerializedVis) => {
+          vis$.next(await createVisAsync(newSerializedVis.type, newSerializedVis));
         },
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
         openInspector: () => {

@@ -20,6 +20,7 @@ import {
   EditorRenderProps,
   EmbeddableApiHandler,
   Vis,
+  SerializedVis,
   VISUALIZE_EMBEDDABLE_TYPE,
 } from '@kbn/visualizations-plugin/public';
 
@@ -57,6 +58,9 @@ function DefaultEditor({
     query$: new BehaviorSubject(query),
     filters$: new BehaviorSubject(filters),
   });
+  const [onUpdateVis, setOnUpdateVis] = useState<(serializedVis: SerializedVis) => void>(
+    () => () => {}
+  );
 
   const onClickCollapse = useCallback(() => {
     setIsCollapsed((value) => !value);
@@ -112,7 +116,6 @@ function DefaultEditor({
                     ...parentApi,
                     getSerializedStateForChild: () => ({
                       rawState: {
-                        id: '',
                         savedVis: vis.serialize(),
                       },
                       references: [],
@@ -122,6 +125,7 @@ function DefaultEditor({
                     api.subscribeToInitialRender(() => eventEmitter.emit('embeddableRendered'));
                     const [, setOpenInspector] = embeddableApiHandler.openInspector;
                     setOpenInspector(() => api.openInspector);
+                    setOnUpdateVis(() => api.setVis);
                   }}
                 />
               </EuiResizablePanel>
@@ -144,6 +148,7 @@ function DefaultEditor({
                 <DefaultEditorSideBar
                   isCollapsed={isCollapsed}
                   onClickCollapse={onClickCollapse}
+                  onUpdateVis={onUpdateVis}
                   vis={vis}
                   uiState={uiState}
                   isLinkedSearch={linked}

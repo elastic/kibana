@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
-import { Vis, PersistedState } from '@kbn/visualizations-plugin/public';
+import { Vis, PersistedState, SerializedVis } from '@kbn/visualizations-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -33,6 +33,7 @@ import { useOptionTabs } from './use_option_tabs';
 interface DefaultEditorSideBarProps {
   isCollapsed: boolean;
   onClickCollapse: () => void;
+  onUpdateVis: (vis: SerializedVis) => void;
   uiState: PersistedState;
   vis: Vis;
   isLinkedSearch: boolean;
@@ -44,6 +45,7 @@ interface DefaultEditorSideBarProps {
 function DefaultEditorSideBarComponent({
   isCollapsed,
   onClickCollapse,
+  onUpdateVis,
   uiState,
   vis,
   isLinkedSearch,
@@ -93,19 +95,22 @@ function DefaultEditorSideBarComponent({
       setTouched(true);
       return;
     }
-
-    vis.setState({
-      ...vis.serialize(),
+    const serializedVis = vis.serialize();
+    const updatedVis = {
+      ...serializedVis,
       params: state.params,
       data: {
+        ...serializedVis.data,
         aggs: state.data.aggs ? (state.data.aggs.aggs.map((agg) => agg.serialize()) as any) : [],
       },
-    });
+    };
+    onUpdateVis(updatedVis);
+    vis.setState(updatedVis);
     eventEmitter.emit('dirtyStateChange', {
       isDirty: false,
     });
     setTouched(false);
-  }, [vis, state, formState.invalid, setTouched, isDirty, eventEmitter]);
+  }, [vis, onUpdateVis, state, formState.invalid, setTouched, isDirty, eventEmitter]);
 
   const onSubmit: KeyboardEventHandler<HTMLFormElement> = useCallback(
     (event) => {
