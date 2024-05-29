@@ -44,7 +44,7 @@ detect_known_integrations() {
       known_integrations_list_string+="nginx"$'\n'
     fi
 
-    if [ -d "/var/log/apache2" ] || [ -d "/var/log/httpd" ] ; then
+    if [ -f "/var/log/apache2/access.log" ] || [ -f "/var/log/httpd/access.log" ] ; then
       known_integrations_list_string+="apache"$'\n'
     fi
 
