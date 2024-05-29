@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI');
 
   describe('Verify disabledFeatures telemetry payloads', async () => {
-    beforeEach(async () => {
+    it('includes only disabledFeatures findings', async () => {
       await spacesService.create({
         id: 'space-1',
         name: 'space-1',
@@ -30,14 +30,7 @@ export default function ({ getService }: FtrProviderContext) {
         color: '#00bfb3',
         disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps'],
       });
-    });
 
-    afterEach(async () => {
-      await spacesService.delete('space-1');
-      await spacesService.delete('space-2');
-    });
-
-    it('includes only disabledFeatures findings', async () => {
       const [{ stats }] = await usageAPI.getTelemetryStats({
         unencrypted: true,
         refreshCache: true,
@@ -81,6 +74,40 @@ export default function ({ getService }: FtrProviderContext) {
         filesSharedImage: 0,
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
+      });
+
+      await spacesService.delete('space-1');
+      await spacesService.delete('space-2');
+    });
+
+    it('includes only solution findings', async () => {
+      await spacesService.create({
+        id: 'space-3',
+        name: 'space-3',
+        description: 'This is your space-3!',
+        color: '#00bfb3',
+        disabledFeatures: [],
+        solution: 'search',
+      });
+
+      await spacesService.create({
+        id: 'space-4',
+        name: 'space-4',
+        description: 'This is your space-4!',
+        disabledFeatures: [],
+        solution: 'security',
+      });
+
+      const [{ stats }] = await usageAPI.getTelemetryStats({
+        unencrypted: true,
+        refreshCache: true,
+      });
+
+      expect(stats.stack_stats.kibana.plugins.spaces.solutions).to.eql({
+        security: 1,
+        search: 1,
+        observability: 0,
+        classic: 0,
       });
     });
   });
