@@ -6,7 +6,7 @@
  */
 
 import { LIGHT_THEME } from '@elastic/charts';
-import { Comparator } from '../../../../common/alerting/metrics';
+import { COMPARATORS } from '@kbn/alerting-comparators';
 import { render } from '@testing-library/react';
 import { Props, Threshold } from './threshold';
 import React from 'react';
@@ -15,7 +15,7 @@ describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {
     const defaultProps: Props = {
       chartProps: { baseTheme: LIGHT_THEME },
-      comparator: Comparator.GT,
+      comparator: COMPARATORS.GREATER_THAN,
       id: 'componentId',
       threshold: 90,
       title: 'Threshold breached',
