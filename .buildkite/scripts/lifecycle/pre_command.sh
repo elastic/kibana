@@ -25,6 +25,4 @@ fi
 
 echo '--- FIPS Debug'
 whoami
-printenv | grep OPENSSL
-
-exit 0
+printenv | grep OPENSSL || true
