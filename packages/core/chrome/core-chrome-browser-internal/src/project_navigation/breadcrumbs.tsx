@@ -135,7 +135,7 @@ function buildRootCrumb({
     text: i18n.translate('core.ui.primaryNav.cloud.deploymentLabel', {
       defaultMessage: 'Deployment',
     }),
-    'data-test-subj': 'solutionNavSwitcher',
+    'data-test-subj': 'deploymentCrumb',
     popoverContent: () => (
       <>
         {cloudLinks.deployment && (
@@ -168,7 +168,7 @@ function buildRootCrumb({
       zIndex: 6000,
       panelStyle: { width: 260 },
       panelProps: {
-        'data-test-subj': 'solutionNavSwitcherPanel',
+        'data-test-subj': 'deploymentLinksPanel',
       },
     },
   };
