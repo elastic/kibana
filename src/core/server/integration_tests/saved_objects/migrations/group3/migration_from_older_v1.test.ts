@@ -139,9 +139,7 @@ describe('migrating from 7.3.0-xpack which used v1 migrations', () => {
             typeof modelVersions === 'function' ? modelVersions() : modelVersions ?? {};
 
           Object.entries(modelVersionCreateSchemas).forEach(([key, modelVersion]) => {
-            if (modelVersion.schemas?.create) {
-              migrationsKeys.push(modelVersionToVirtualVersion(key));
-            }
+            migrationsKeys.push(modelVersionToVirtualVersion(key));
           });
 
           const highestVersion = migrationsKeys.sort(Semver.compare).reverse()[0];
