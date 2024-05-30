@@ -213,10 +213,10 @@ export const FLEET_AGENT_LIST_PAGE = {
 export const ASSETS_PAGE = {
   TAB: 'tab-assets',
   getButtonId(type: string) {
-    return `fleetAssestsAccordion.button.${type}`;
+    return `fleetAssetsAccordion.button.${type}`;
   },
   getContentId(type: string, id?: string | number) {
-    return `fleetAssestsAccordion.content.${type}${id ? `.${id}` : ''}`;
+    return `fleetAssetsAccordion.content.${type}${id ? `.${id}` : ''}`;
   },
 };
 

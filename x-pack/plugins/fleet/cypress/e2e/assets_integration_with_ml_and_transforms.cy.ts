@@ -13,9 +13,19 @@ import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 
+interface Asset {
+  type: string;
+  expected: string[];
+  links?: Array<{
+    text: string;
+    expectedEsApi: string;
+    expectedResponseStatus: number;
+    expectedBody?: (resp: any) => void;
+  }>;
+}
 const integrationWithML = 'lmd';
 const destinationIndex = 'ml-rdp-lmd';
-const assets = [
+const assets: Asset[] = [
   {
     type: 'index_template',
     expected: ['logs-lmd.pivot_transform-template'],
@@ -91,7 +101,7 @@ describe('Assets - Real API for integration with ML and transforms', () => {
 
   after(() => {});
 
-  const expandAssetPanelIfNeeded = (asset) => {
+  const expandAssetPanelIfNeeded = (asset: Asset) => {
     cy.get(`[aria-controls="${asset.type}"]`)
       .first()
       .then(($button) => {
@@ -118,9 +128,10 @@ describe('Assets - Real API for integration with ML and transforms', () => {
       });
 
       if (asset.links) {
+        // If asset is a clickable link, click on link and perform neccesary assertions
+        // then navigate back
         asset.links.forEach((link) => {
           expandAssetPanelIfNeeded(asset);
-
           cy.contains('a', link.text).click();
           cy.intercept(link.expectedEsApi, (req) => {
             req.reply((res) => {

@@ -39,7 +39,7 @@ export const AssetsAccordion: FunctionComponent<{
   return (
     <EuiAccordion
       initialIsOpen={isDashboard}
-      data-test-subj={`fleetAssestsAccordion.button.${type}`}
+      data-test-subj={`fleetAssetsAccordion.button.${type}`}
       buttonContent={
         <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -61,7 +61,7 @@ export const AssetsAccordion: FunctionComponent<{
         <EuiSplitPanel.Outer
           hasBorder
           hasShadow={false}
-          data-test-subj={`fleetAssestsAccordion.content.${type}`}
+          data-test-subj={`fleetAssetsAccordion.content.${type}`}
         >
           {savedObjects.map(({ id, attributes, appLink }, idx) => {
             const { title: soTitle, description } = attributes || {};
@@ -76,7 +76,7 @@ export const AssetsAccordion: FunctionComponent<{
                 <EuiSplitPanel.Inner
                   grow={false}
                   key={idx}
-                  data-test-subj={`fleetAssestsAccordion.content.${type}.${title}`}
+                  data-test-subj={`fleetAssetsAccordion.content.${type}.${title}`}
                 >
                   <EuiText size="m">
                     <p>
