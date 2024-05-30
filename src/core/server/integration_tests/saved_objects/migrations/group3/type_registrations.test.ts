@@ -69,6 +69,7 @@ const previouslyRegisteredTypes = [
   'fleet-preconfiguration-deletion-record',
   'fleet-proxy',
   'fleet-uninstall-tokens',
+  'fleet-setup-lock',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
