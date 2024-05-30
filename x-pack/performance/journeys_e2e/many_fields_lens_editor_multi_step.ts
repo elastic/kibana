@@ -42,4 +42,14 @@ export const journey = new Journey({
     await page.click(subj(`lnsChartSwitchPopover_bar`));
     await kibanaPage.waitForCharts({ count: 1, timeout: 60000 });
     await kibanaPage.waitForChartsSuggestions(6);
+  })
+  .step('Add a field', async ({ page, kibanaPage }) => {
+    await page.click(subj('fieldToggle-geo.dest'));
+    await kibanaPage.waitForCharts({ count: 1, timeout: 60000 });
+    await kibanaPage.waitForChartsSuggestions(6);
+  })
+  .step('Remove a field', async ({ page, kibanaPage }) => {
+    await page.click(subj('indexPattern-dimension-remove'));
+    await kibanaPage.waitForCharts({ count: 1, timeout: 60000 });
+    await kibanaPage.waitForChartsSuggestions(6);
   });
