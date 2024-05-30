@@ -23,14 +23,6 @@ type FlattenKeys<T extends Record<string, unknown>, Key = keyof T> = Key extends
     : `${Key}`
   : never;
 
-type RemoveGenericString<K extends string> = K extends `${infer Prefix}.${string}`
-  ? RemoveGenericString<Prefix>
-  : K;
-
-export type Test = RemoveGenericString<
-  FlattenKeys<Omit<ActionContextVariables, 'context' | 'state'>>
->;
-
 export interface ActionContextVariables {
   alertId: string;
   alertName: string;
