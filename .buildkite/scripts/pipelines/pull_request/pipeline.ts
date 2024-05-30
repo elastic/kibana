@@ -106,10 +106,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_cypress.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/fleet/])) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fleet_setup_parallel.yml'));
-    }
-
     if (await doAnyChangesMatch([/^x-pack\/plugins\/observability_solution\/exploratory_view/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/exploratory_view_plugin.yml'));
     }
