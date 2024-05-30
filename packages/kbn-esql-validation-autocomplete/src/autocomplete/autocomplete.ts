@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { uniqBy } from 'lodash';
+import uniqBy from 'lodash/uniqBy';
 import type {
   AstProviderFn,
   ESQLAstItem,

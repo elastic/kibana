@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 
 import type {
   FieldDefinition,

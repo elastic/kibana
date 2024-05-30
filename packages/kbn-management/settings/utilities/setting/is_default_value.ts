@@ -7,7 +7,7 @@
  */
 
 import { UiSettingMetadata, Value } from '@kbn/management-settings-types';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash/isEqual';
 
 /**
  * Utility function to compare a value to the default value of a {@link UiSettingMetadata}.

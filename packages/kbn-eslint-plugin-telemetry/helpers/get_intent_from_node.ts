@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { TSESTree } from '@typescript-eslint/typescript-estree';
-import { camelCase } from 'lodash';
+import camelCase from 'lodash/camelCase';
 
 /*
     Attempts to get a string representation of the intent
