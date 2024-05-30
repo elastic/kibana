@@ -202,25 +202,31 @@ export function getSpacesUsageCollector(
         classic: {
           type: 'long',
           _meta: {
-            description: 'The number of spaces which have solutionn set to classic.',
+            description: 'The number of spaces which have solution set to classic.',
           },
         },
         search: {
           type: 'long',
           _meta: {
-            description: 'The number of spaces which have solutionn set to search.',
+            description: 'The number of spaces which have solution set to search.',
           },
         },
         observability: {
           type: 'long',
           _meta: {
-            description: 'The number of spaces which have solutionn set to observability.',
+            description: 'The number of spaces which have solution set to observability.',
           },
         },
         security: {
           type: 'long',
           _meta: {
-            description: 'The number of spaces which have solutionn set to security.',
+            description: 'The number of spaces which have solution set to security.',
+          },
+        },
+        unset: {
+          type: 'long',
+          _meta: {
+            description: 'The number of spaces without solution set.',
           },
         },
       },
