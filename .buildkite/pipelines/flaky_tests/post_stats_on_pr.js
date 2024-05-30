@@ -17,22 +17,13 @@ async function main() {
   );
   const buildLink = `[${buildkiteBuild.pipeline.slug}#${buildkiteBuild.number}](${buildkiteBuild.web_url})`;
 
-  console.log({
-    buildkiteBuild,
-    buildLink,
-  });
-
   // Calculate success metrics
   const jobs = buildkiteBuild.jobs;
-  console.log({ jobs });
   const testSuiteRuns = jobs.filter((step) => {
     return step.step_key?.includes('test-group');
   });
 
   const testSuiteGroups = groupBy('name', testSuiteRuns);
-
-  console.log({ testSuiteGroups });
-
   const success = testSuiteRuns.every((job) => job.state === 'passed');
   const testGroupResults = Object.entries(testSuiteGroups).map(([name, group]) => {
     const passingTests = group.filter((job) => job.state === 'passed');
