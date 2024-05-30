@@ -265,7 +265,7 @@ export const getVisualizeEmbeddableFactory: (
             data-test-subj="visualizationLoader"
             data-rendering-count={renderCount /* Used for functional tests */}
             data-render-complete={hasRendered}
-            data-title={api.panelTitle?.getValue() ?? ''}
+            data-title={!api.hidePanelTitle?.getValue() ? api.panelTitle?.getValue() ?? '' : ''}
             data-description={api.panelDescription?.getValue() ?? ''}
             data-shared-item
           >
