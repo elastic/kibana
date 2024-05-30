@@ -21,12 +21,12 @@ export const isAlertImproving = <
   alert: Alert & AlertData,
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>,
   actionGroups: Array<ActionGroup<string>>
-): boolean => {
+): boolean | null => {
   const currentActionGroup = legacyAlert.getScheduledActionOptions()?.actionGroup;
   const previousActionGroup = get(alert, ALERT_ACTION_GROUP);
 
   if (!currentActionGroup || !previousActionGroup) {
-    return false;
+    return null;
   }
 
   // Get action group definitions
@@ -38,8 +38,12 @@ export const isAlertImproving = <
     currentActionGroupDef.severity &&
     previousActionGroupDef.severity
   ) {
-    return currentActionGroupDef.severity.level < previousActionGroupDef.severity.level;
+    const toRet =
+      currentActionGroupDef.severity.level === previousActionGroupDef.severity.level
+        ? null
+        : currentActionGroupDef.severity.level < previousActionGroupDef.severity.level;
+    return toRet;
   }
 
-  return false;
+  return null;
 };

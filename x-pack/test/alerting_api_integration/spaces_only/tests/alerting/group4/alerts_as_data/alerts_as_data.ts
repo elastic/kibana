@@ -64,7 +64,6 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
     'kibana.alert.flapping_history',
     'kibana.alert.rule.execution.uuid',
     'kibana.alert.rule.execution.timestamp',
-    'kibana.alert.is_improving',
     'kibana.alert.previous_action_group',
   ];
 
@@ -174,7 +173,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         // tags should equal rule tags because rule type doesn't set any tags
         expect(source.tags).to.eql(['foo']);
 
-        expect(source[ALERT_IS_IMPROVING]).to.equal(false);
+        expect(source[ALERT_IS_IMPROVING]).to.be(undefined);
       }
 
       let alertDoc: SearchHit<PatternFiringAlert> | undefined = alertDocsRun1.find(
@@ -263,7 +262,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(alertADocRun2[ALERT_TIME_RANGE]?.gte).to.equal(alertADocRun1[ALERT_TIME_RANGE]?.gte);
 
       // no severity levels for this rule type
-      expect(alertADocRun2[ALERT_IS_IMPROVING]).to.equal(false);
+      expect(alertADocRun2[ALERT_IS_IMPROVING]).to.be(undefined);
       expect(alertADocRun2[ALERT_PREVIOUS_ACTION_GROUP]).to.equal('default');
 
       // alertB, run 2
@@ -306,7 +305,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(alertBDocRun2[ALERT_TIME_RANGE]?.lte).to.equal(alertBDocRun2[ALERT_END]);
 
       // no severity levels for this rule type
-      expect(alertBDocRun2[ALERT_IS_IMPROVING]).to.equal(true);
+      expect(alertBDocRun2[ALERT_IS_IMPROVING]).to.be(undefined);
       expect(alertBDocRun2[ALERT_PREVIOUS_ACTION_GROUP]).to.equal('default');
 
       // alertC, run 2
@@ -349,7 +348,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(alertCDocRun2[ALERT_TIME_RANGE]?.lte).to.equal(alertCDocRun2[ALERT_END]);
 
       // no severity levels for this rule type
-      expect(alertCDocRun2[ALERT_IS_IMPROVING]).to.equal(true);
+      expect(alertCDocRun2[ALERT_IS_IMPROVING]).to.be(undefined);
       expect(alertCDocRun2[ALERT_PREVIOUS_ACTION_GROUP]).to.equal('default');
 
       // --------------------------
@@ -420,7 +419,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(alertADocRun3[ALERT_TIME_RANGE]?.gte).to.equal(alertADocRun2[ALERT_TIME_RANGE]?.gte);
 
       // no severity levels for this rule type
-      expect(alertADocRun3[ALERT_IS_IMPROVING]).to.equal(false);
+      expect(alertADocRun3[ALERT_IS_IMPROVING]).to.be(undefined);
       expect(alertADocRun3[ALERT_PREVIOUS_ACTION_GROUP]).to.equal('default');
 
       // alertB doc should be unchanged from prior run because it is still recovered
@@ -442,7 +441,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         false,
       ]);
 
-      expect(alertBDocRun3[ALERT_IS_IMPROVING]).to.equal(false);
+      expect(alertBDocRun3[ALERT_IS_IMPROVING]).to.be(undefined);
       expect(alertBDocRun3[ALERT_PREVIOUS_ACTION_GROUP]).to.equal('recovered');
 
       // alertC should have 2 docs
@@ -489,7 +488,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(alertCDocRun3[ALERT_TIME_RANGE]?.gte).to.equal(alertCDocRun3[ALERT_START]);
 
       // no severity levels for this rule type
-      expect(alertCDocRun3[ALERT_IS_IMPROVING]).to.equal(false);
+      expect(alertCDocRun3[ALERT_IS_IMPROVING]).to.be(undefined);
       expect(alertCDocRun3[ALERT_PREVIOUS_ACTION_GROUP]).to.be(undefined);
     });
   });

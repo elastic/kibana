@@ -34,7 +34,7 @@ for (const flattened of [true, false]) {
   const existingAlert = flattened ? existingFlattenedNewAlert : existingExpandedNewAlert;
 
   describe(`isAlertImproving for ${flattened ? 'flattened' : 'expanded'} existing alert`, () => {
-    test('should return false if no scheduled action group', () => {
+    test('should return null if no scheduled action group', () => {
       const legacyAlert = new LegacyAlert<{}, {}, TestActionGroupIds>('alert-A', {
         meta: { uuid: 'abcdefg' },
       });
@@ -46,7 +46,7 @@ for (const flattened of [true, false]) {
           legacyAlert,
           actionGroupsWithSeverity
         )
-      ).toEqual(false);
+      ).toEqual(null);
     });
 
     test('should return false if no previous action group', () => {
@@ -65,7 +65,7 @@ for (const flattened of [true, false]) {
           legacyAlert,
           actionGroupsWithSeverity
         )
-      ).toEqual(false);
+      ).toEqual(null);
     });
 
     test('should return false if no severity defined for action groups', () => {
@@ -80,10 +80,10 @@ for (const flattened of [true, false]) {
           legacyAlert,
           actionGroupsWithoutSeverity
         )
-      ).toEqual(false);
+      ).toEqual(null);
     });
 
-    test('should return false if severity stays the same', () => {
+    test('should return null if severity stays the same', () => {
       const legacyAlert = new LegacyAlert<{}, {}, TestActionGroupIds>('alert-A', {
         meta: { uuid: 'abcdefg' },
       });
@@ -95,7 +95,7 @@ for (const flattened of [true, false]) {
           legacyAlert,
           actionGroupsWithSeverity
         )
-      ).toEqual(false);
+      ).toEqual(null);
     });
 
     test('should return false if severity degrades', () => {

@@ -98,7 +98,6 @@ import {
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
-  ALERT_IS_IMPROVING,
 } from '@kbn/rule-data-utils';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
@@ -571,7 +570,6 @@ describe('Task Runner', () => {
               [ALERT_FLAPPING]: false,
               [ALERT_FLAPPING_HISTORY]: [true],
               [ALERT_INSTANCE_ID]: '1',
-              [ALERT_IS_IMPROVING]: false,
               [ALERT_MAINTENANCE_WINDOW_IDS]: [],
               [ALERT_RULE_CATEGORY]: 'My test rule',
               [ALERT_RULE_CONSUMER]: 'bar',

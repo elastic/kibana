@@ -26,7 +26,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
@@ -44,7 +44,7 @@ interface BuildOngoingAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
-  isImproving: boolean;
+  isImproving: boolean | null;
   payload?: DeepPartial<AlertData>;
   runTimestamp?: string;
   timestamp: string;
@@ -83,6 +83,9 @@ export const buildOngoingAlert = <
   // Make sure that any alert fields that are updateable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
+  // Omit fields that are overwrite-able with undefined value
+  const cleanedAlert = omit(alert, ALERT_IS_IMPROVING);
+
   const alertUpdates = {
     // Set latest rule configuration
     ...rule,
@@ -115,7 +118,7 @@ export const buildOngoingAlert = <
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
       : {}),
-    [ALERT_IS_IMPROVING]: isImproving,
+    ...(isImproving != null ? { [ALERT_IS_IMPROVING]: isImproving } : {}),
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     [SPACE_IDS]: rule[SPACE_IDS],
     [VERSION]: kibanaVersion,
@@ -143,12 +146,12 @@ export const buildOngoingAlert = <
   //   'kibana.alert.field1': 'value2'
   // }
   // the expanded field from the existing alert is removed
-  const cleanedAlert = removeUnflattenedFieldsFromAlert(alert, {
+  const expandedAlert = removeUnflattenedFieldsFromAlert(cleanedAlert, {
     ...cleanedPayload,
     ...alertUpdates,
     ...refreshableAlertFields,
   });
-  return deepmerge.all([cleanedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
+  return deepmerge.all([expandedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
 };

@@ -11,7 +11,6 @@ import {
   ALERT_ACTION_GROUP,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
-  ALERT_IS_IMPROVING,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_EXECUTION_UUID,
@@ -60,8 +59,6 @@ export const buildUpdatedRecoveredAlert = <AlertData extends RuleAlertData>({
     // not get returned for summary alerts. In the future, we may want to restore this and add another field to the
     // alert doc indicating that this is an ongoing recovered alert that can be used for querying.
     [ALERT_RULE_EXECUTION_UUID]: get(alert, ALERT_RULE_EXECUTION_UUID),
-    // Alert is remaining in recovered state so by default it is not improving
-    [ALERT_IS_IMPROVING]: false,
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
   };
 
