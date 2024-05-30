@@ -39,7 +39,7 @@ import { AuthorizationService } from './authorization';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_api';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
-import { ManagementService, UserAPIClient } from './management';
+import { ManagementService, RolesAPIClient, UserAPIClient } from './management';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -120,6 +120,7 @@ export class SecurityPlugin
     this.securityApiClients = {
       userProfiles: new UserProfileAPIClient(core.http),
       users: new UserAPIClient(core.http),
+      roles: new RolesAPIClient(core.http),
     };
 
     this.navControlService.setup({
@@ -222,6 +223,7 @@ export class SecurityPlugin
       navControlService: this.navControlService.start({ core, authc: this.authc }),
       authc: this.authc as AuthenticationServiceStart,
       authz: this.authz as AuthorizationServiceStart,
+      roles: this.securityApiClients.roles,
       userProfiles: {
         getCurrent: this.securityApiClients.userProfiles.getCurrent.bind(
           this.securityApiClients.userProfiles

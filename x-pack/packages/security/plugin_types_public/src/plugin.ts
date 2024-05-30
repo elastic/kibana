@@ -10,6 +10,7 @@ import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './a
 import type { AuthorizationServiceSetup, AuthorizationServiceStart } from './authorization';
 import type { SecurityNavControlServiceStart } from './nav_control';
 import type { UserProfileAPIClient } from './user_profile';
+import type { RolesAPIClient } from './roles';
 
 export interface SecurityPluginSetup {
   /**
@@ -43,4 +44,8 @@ export interface SecurityPluginStart {
    * A set of methods to work with Kibana user profiles.
    */
   userProfiles: UserProfileAPIClient;
+  /**
+   * A set of methods to work with Kibana user roles.
+   */
+  roles: RolesAPIClient;
 }
