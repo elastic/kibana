@@ -101,6 +101,8 @@
     "@kbn/alerting-comparators",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
+    "@kbn/core-chrome-browser",
+    "@kbn/navigation-plugin",
   ],
   "exclude": [
     "target/**/*"
