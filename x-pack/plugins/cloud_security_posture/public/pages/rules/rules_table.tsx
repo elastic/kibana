@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Criteria,
   EuiButtonEmpty,
@@ -27,7 +27,7 @@ import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detect
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
+import { RuleStateUpdateRequest, useChangeCspRuleState } from './use_change_csp_rule_state';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
@@ -41,7 +41,6 @@ type RulesTableProps = Pick<
   setPagination(pagination: Pick<RulesState, 'perPage' | 'page'>): void;
   onRuleClick: (ruleID: string) => void;
   selectedRuleId?: string;
-  refetchRulesStates: () => void;
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
   onSortChange: (value: 'asc' | 'desc') => void;
@@ -49,12 +48,9 @@ type RulesTableProps = Pick<
 
 type GetColumnProps = Pick<
   RulesTableProps,
-  'onRuleClick' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
+  'onRuleClick' | 'selectedRules' | 'setSelectedRules'
 > & {
-  postRequestChangeRulesStates: (
-    actionOnRule: 'mute' | 'unmute',
-    ruleIds: RuleStateAttributesWithoutStates[]
-  ) => void;
+  mutateRulesStates: (ruleStateUpdateRequest: RuleStateUpdateRequest) => void;
   items: CspBenchmarkRulesWithStates[];
   setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
   isAllRulesSelectedThisPage: boolean;
@@ -75,7 +71,6 @@ export const RulesTable = ({
   loading,
   error,
   selectedRuleId,
-  refetchRulesStates,
   selectedRules,
   setSelectedRules,
   onRuleClick,
@@ -116,7 +111,7 @@ export const RulesTable = ({
 
   const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
 
-  const postRequestChangeRulesStates = useChangeCspRuleState();
+  const { mutate: mutateRulesStates } = useChangeCspRuleState();
 
   const isCurrentPageRulesASubset = (
     currentPageRulesArray: CspBenchmarkRulesWithStates[],
@@ -140,35 +135,19 @@ export const RulesTable = ({
     else setIsAllRulesSelectedThisPage(false);
   }, [items.length, selectedRules.length]);
 
-  const columns = useMemo(() => {
-    const startServices = { notifications, analytics, i18n: i18nStart, theme };
-    return getColumns({
-      refetchRulesStates,
-      postRequestChangeRulesStates,
-      selectedRules,
-      setSelectedRules,
-      items,
-      setIsAllRulesSelectedThisPage,
-      isAllRulesSelectedThisPage,
-      isCurrentPageRulesASubset,
-      onRuleClick,
-      http,
-      startServices,
-    });
-  }, [
-    refetchRulesStates,
-    postRequestChangeRulesStates,
+  const startServices = { notifications, analytics, i18n: i18nStart, theme };
+  const columns = getColumns({
+    mutateRulesStates,
     selectedRules,
     setSelectedRules,
     items,
+    setIsAllRulesSelectedThisPage,
     isAllRulesSelectedThisPage,
+    isCurrentPageRulesASubset,
     onRuleClick,
-    notifications,
     http,
-    analytics,
-    i18nStart,
-    theme,
-  ]);
+    startServices,
+  });
 
   return (
     <>
@@ -189,8 +168,7 @@ export const RulesTable = ({
 };
 
 const getColumns = ({
-  refetchRulesStates,
-  postRequestChangeRulesStates,
+  mutateRulesStates,
   selectedRules,
   setSelectedRules,
   items,
@@ -316,18 +294,22 @@ const getColumns = ({
       const changeCspRuleStateFn = async () => {
         if (rule?.metadata.benchmark.rule_number) {
           // Calling this function this way to make sure it didn't get called on every single row render, its only being called when user click on the switch button
-          const detectionRuleCount = (
+          const detectionRulesForSelectedRule = (
             await fetchDetectionRulesByTags(
               getFindingsDetectionRuleSearchTags(rule.metadata),
               { match: 'all' },
               http
             )
           ).total;
-          postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
-          refetchRulesStates();
+
+          mutateRulesStates({
+            newState: nextRuleState,
+            ruleIds: [rulesObjectRequest],
+          });
+
           showChangeBenchmarkRuleStatesSuccessToast(startServices, isRuleMuted, {
             numberOfRules: 1,
-            numberOfDetectionRules: detectionRuleCount || 0,
+            numberOfDetectionRules: detectionRulesForSelectedRule || 0,
           });
         }
       };

@@ -4,7 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import {
+  UPGRADE_INVESTIGATION_GUIDE,
+  UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
+} from '@kbn/security-solution-upselling/messages';
+import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import type {
   MessageUpsellings,
   PageUpsellings,
@@ -12,31 +19,26 @@ import type {
   UpsellingMessageId,
   UpsellingSectionId,
 } from '@kbn/security-solution-upselling/service/types';
-import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 import React from 'react';
+import type { SecurityProductTypes } from '../../common/config';
+import { getProductProductFeatures } from '../../common/pli/pli_features';
+import type { Services } from '../common/services';
+import { withServicesProvider } from '../common/services';
+import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
 import {
-  UPGRADE_INVESTIGATION_GUIDE,
-  UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
-} from '@kbn/security-solution-upselling/messages';
-import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
-import type { ProductFeatureKeyType } from '@kbn/security-solution-features';
+  EndpointExceptionsDetailsUpsellingLazy,
+  EntityAnalyticsUpsellingPageLazy,
+  EntityAnalyticsUpsellingSectionLazy,
+  OsqueryResponseActionsUpsellingSectionLazy,
+  ThreatIntelligencePaywallLazy,
+} from './lazy_upselling';
 import {
   EndpointAgentTamperProtectionLazy,
   EndpointPolicyProtectionsLazy,
   EndpointProtectionUpdatesLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
-import type { SecurityProductTypes } from '../../common/config';
-import { getProductProductFeatures } from '../../common/pli/pli_features';
-import {
-  EndpointExceptionsDetailsUpsellingLazy,
-  EntityAnalyticsUpsellingLazy,
-  OsqueryResponseActionsUpsellingSectionLazy,
-  ThreatIntelligencePaywallLazy,
-} from './lazy_upselling';
-import { getProductTypeByPLI } from './hooks/use_product_type_by_pli';
-import type { Services } from '../common/services';
-import { withServicesProvider } from '../common/services';
+import * as i18n from './translations';
 
 interface UpsellingsConfig {
   pli: ProductFeatureKeyType;
@@ -73,7 +75,7 @@ export const registerUpsellings = (
   const upsellingSectionsToRegister = upsellingSections.reduce<SectionUpsellings>(
     (sectionUpsellings, { id, pli, component }) => {
       if (!enabledPLIsSet.has(pli)) {
-        sectionUpsellings[id] = component;
+        sectionUpsellings[id] = withServicesProvider(component, services);
       }
       return sectionUpsellings;
     },
@@ -102,8 +104,9 @@ export const upsellingPages: UpsellingPages = [
     pageName: SecurityPageName.entityAnalytics,
     pli: ProductFeatureKey.advancedInsights,
     component: () => (
-      <EntityAnalyticsUpsellingLazy
-        requiredProduct={getProductTypeByPLI(ProductFeatureKey.advancedInsights) ?? undefined}
+      <EntityAnalyticsUpsellingPageLazy
+        upgradeToLabel={entityAnalyticsProductType}
+        upgradeMessage={i18n.UPGRADE_PRODUCT_MESSAGE(entityAnalyticsProductType)}
       />
     ),
   },
@@ -122,6 +125,8 @@ export const upsellingPages: UpsellingPages = [
     ),
   },
 ];
+
+const entityAnalyticsProductType = getProductTypeByPLI(ProductFeatureKey.advancedInsights) ?? '';
 
 // Upselling for sections, linked by arbitrary ids
 export const upsellingSections: UpsellingSections = [
@@ -154,6 +159,16 @@ export const upsellingSections: UpsellingSections = [
     id: 'endpoint_protection_updates',
     pli: ProductFeatureKey.endpointProtectionUpdates,
     component: EndpointProtectionUpdatesLazy,
+  },
+  {
+    id: 'entity_analytics_panel',
+    pli: ProductFeatureKey.advancedInsights,
+    component: () => (
+      <EntityAnalyticsUpsellingSectionLazy
+        upgradeToLabel={entityAnalyticsProductType}
+        upgradeMessage={i18n.UPGRADE_PRODUCT_MESSAGE(entityAnalyticsProductType)}
+      />
+    ),
   },
 ];
 

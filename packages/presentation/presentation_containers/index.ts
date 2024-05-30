@@ -8,10 +8,15 @@
 
 export { apiCanAddNewPanel, type CanAddNewPanel } from './interfaces/can_add_new_panel';
 export {
-  apiPublishesLastSavedState,
-  getLastSavedStateSubjectForChild,
-  type PublishesLastSavedState,
-} from './interfaces/last_saved_state';
+  apiHasRuntimeChildState,
+  apiHasSerializedChildState,
+  type HasRuntimeChildState,
+  type HasSerializedChildState,
+} from './interfaces/child_state';
+export {
+  apiHasSaveNotification,
+  type HasSaveNotification,
+} from './interfaces/has_save_notification';
 export {
   apiCanDuplicatePanels,
   apiCanExpandPanels,
@@ -26,12 +31,13 @@ export {
   type PresentationContainer,
 } from './interfaces/presentation_container';
 export {
-  canTrackContentfulRender,
-  type TrackContentfulRender,
-} from './interfaces/track_contentful_render';
-export {
   apiHasSerializableState,
   type HasSerializableState,
+  type HasSnapshottableState,
   type SerializedPanelState,
 } from './interfaces/serialized_state';
 export { tracksOverlays, type TracksOverlays } from './interfaces/tracks_overlays';
+export {
+  canTrackContentfulRender,
+  type TrackContentfulRender,
+} from './interfaces/track_contentful_render';

@@ -24,7 +24,8 @@ export default function ({ getService }) {
     cleanUp,
   } = registerHelpers(getService);
 
-  describe('jobs', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/184073
+  describe.skip('jobs', () => {
     after(() => cleanUp());
 
     describe('indices', () => {
@@ -92,7 +93,8 @@ export default function ({ getService }) {
         });
       });
 
-      describe('create', () => {
+      // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/183928
+      describe.skip('create', () => {
         let indexName;
 
         beforeEach(async () => {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Aggregators, Comparator } from '../../../../../../common/custom_threshold_rule/types';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+import { Aggregators } from '../../../../../../common/custom_threshold_rule/types';
 import { CustomThresholdRuleTypeParams } from '../../../types';
 import { getLogRateAnalysisEQQuery } from './log_rate_analysis_query';
 
@@ -29,7 +30,7 @@ describe('buildEsQuery', () => {
         timeSize: 1,
         timeUnit: 'm',
         threshold: [90],
-        comparator: Comparator.GT,
+        comparator: COMPARATORS.GREATER_THAN,
       },
     ],
   };
@@ -85,7 +86,7 @@ describe('buildEsQuery', () => {
             timeSize: 1,
             timeUnit: 'm',
             threshold: [90],
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
           },
         ],
       },
@@ -108,7 +109,7 @@ describe('buildEsQuery', () => {
             timeSize: 1,
             timeUnit: 'm',
             threshold: [90],
-            comparator: Comparator.GT,
+            comparator: COMPARATORS.GREATER_THAN,
           },
         ],
       },
