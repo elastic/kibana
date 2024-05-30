@@ -11,7 +11,7 @@ import { EuiIcon, EuiBadge, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { sourcererModel } from '../../store/sourcerer';
+import type { sourcererModel } from '../store';
 
 import * as i18n from './translations';
 

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { mockGlobalState, mockSourcererState } from '../../mock';
+import { mockGlobalState, mockSourcererState } from '../../common/mock';
 import { SourcererScopeName } from './model';
 import {
   checkIfIndicesExist,
   getScopePatternListSelection,
   validateSelectedPatterns,
 } from './helpers';
-import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 
 const signalIndexName = mockGlobalState.sourcerer.signalIndexName;
 

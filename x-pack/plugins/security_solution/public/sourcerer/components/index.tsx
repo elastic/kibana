@@ -18,22 +18,22 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as i18n from './translations';
-import type { sourcererModel } from '../../store/sourcerer';
-import { sourcererActions, sourcererSelectors } from '../../store/sourcerer';
-import type { SourcererUrlState } from '../../store/sourcerer/model';
-import type { State } from '../../store';
+import type { sourcererModel } from '../store';
+import { sourcererActions, sourcererSelectors } from '../store';
+import type { SourcererUrlState } from '../store/model';
+import type { State } from '../../common/store';
 import type { ModifiedTypes } from './use_pick_index_patterns';
-import { SourcererScopeName } from '../../store/sourcerer/model';
+import { SourcererScopeName } from '../store/model';
 import { usePickIndexPatterns } from './use_pick_index_patterns';
 import { FormRow, PopoverContent, StyledButtonEmpty, StyledFormRow } from './helpers';
 import { TemporarySourcerer } from './temporary';
-import { useSourcererDataView } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../containers';
 import { useUpdateDataView } from './use_update_data_view';
 import { Trigger } from './trigger';
 import { AlertsCheckbox, SaveButtons, SourcererCallout } from './sub_components';
-import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
-import { useUpdateUrlParam } from '../../utils/global_query_string';
-import { URL_PARAM_KEY } from '../../hooks/use_url_state';
+import { useSignalHelpers } from '../containers/use_signal_helpers';
+import { useUpdateUrlParam } from '../../common/utils/global_query_string';
+import { URL_PARAM_KEY } from '../../common/hooks/use_url_state';
 
 export interface SourcererComponentProps {
   scope: sourcererModel.SourcererScopeName;

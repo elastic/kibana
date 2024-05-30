@@ -9,12 +9,12 @@ import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useKibana } from '../../lib/kibana';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
+import { useKibana } from '../../common/lib/kibana';
+import { DEFAULT_INDEX_KEY } from '../../../common/constants';
 import * as i18n from './translations';
 import { RefreshButton } from './refresh_button';
-import { useAppToasts } from '../../hooks/use_app_toasts';
-import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
+import { useAppToasts } from '../../common/hooks/use_app_toasts';
+import { ensurePatternFormat } from '../../../common/utils/sourcerer';
 
 export const useUpdateDataView = (
   onOpenAndReset: () => void

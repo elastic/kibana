@@ -7,10 +7,10 @@
 
 import { isEmpty } from 'lodash';
 import type { SourcererDataView, SourcererModel, SourcererScopeById } from './model';
+import type { sourcererModel } from '.';
 import { SourcererScopeName } from './model';
 import type { SelectedDataViewPayload } from './actions';
-import type { sourcererModel } from '../model';
-import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
+import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
 
 const getPatternListFromScope = (
   scope: SourcererScopeName,
