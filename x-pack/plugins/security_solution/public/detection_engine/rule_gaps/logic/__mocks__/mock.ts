@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ScheduleRuleRunResponse } from '../types';
+import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
 
-export const scheduleRuleRunMock: ScheduleRuleRunResponse = [
+export const scheduleRuleRunMock: ScheduleBackfillResponseBody = [
   {
     id: '2d0deaa0-6263-4271-9838-ad0a28facaf0',
     duration: '5m',

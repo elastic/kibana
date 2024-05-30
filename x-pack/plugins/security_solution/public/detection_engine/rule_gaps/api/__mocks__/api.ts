@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
 import { scheduleRuleRunMock } from '../../logic/__mocks__/mock';
 
-import type { ScheduleRuleRunProps, ScheduleRuleRunResponse } from '../../logic/types';
+import type { ScheduleBackfillProps } from '../../types';
 
 export const scheduleRuleRun = async ({
   ruleIds,
   timeRange,
-}: ScheduleRuleRunProps): Promise<ScheduleRuleRunResponse> => Promise.resolve(scheduleRuleRunMock);
+}: ScheduleBackfillProps): Promise<ScheduleBackfillResponseBody> =>
+  Promise.resolve(scheduleRuleRunMock);
