@@ -632,7 +632,7 @@ export class FleetPlugin
     this.policyWatcher.start(licenseService);
 
     // We only retry when this feature flag is enabled (Serverless)
-    const setupAttempts = this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
+    const setupAttempts = 25; // this.configInitialValue.internal?.retrySetupOnBoot ? 25 : 1;
 
     const fleetSetupPromise = (async () => {
       try {
