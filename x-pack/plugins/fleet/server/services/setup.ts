@@ -66,26 +66,31 @@ export interface SetupStatus {
 
 export async function setupFleet(
   soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
+  options: {
+    useLock: boolean;
+  } = { useLock: false }
 ): Promise<SetupStatus> {
   const t = apm.startTransaction('fleet-setup', 'fleet');
   const logger = appContextService.getLogger();
   let created;
   try {
-    try {
-      created = await soClient.create<FleetSetupLock>(
-        FLEET_SETUP_LOCK_TYPE,
-        {
-          status: 'in_progress',
-          uuid: uuidv4(),
-          started_at: new Date().toISOString(),
-        },
-        { id: FLEET_SETUP_LOCK_TYPE }
-      );
-      logger.info(`Fleet setup lock created: ${JSON.stringify(created)}`);
-    } catch (error) {
-      logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
-      return { isInitialized: false, nonFatalErrors: [] };
+    if (options.useLock) {
+      try {
+        created = await soClient.create<FleetSetupLock>(
+          FLEET_SETUP_LOCK_TYPE,
+          {
+            status: 'in_progress',
+            uuid: uuidv4(),
+            started_at: new Date().toISOString(),
+          },
+          { id: FLEET_SETUP_LOCK_TYPE }
+        );
+        logger.info(`Fleet setup lock created: ${JSON.stringify(created)}`);
+      } catch (error) {
+        logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
+        return { isInitialized: false, nonFatalErrors: [] };
+      }
     }
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {
@@ -95,7 +100,7 @@ export async function setupFleet(
   } finally {
     t.end();
     // only delete lock if it was created by this instance
-    if (created) {
+    if (options.useLock && created) {
       try {
         await soClient.delete(FLEET_SETUP_LOCK_TYPE, FLEET_SETUP_LOCK_TYPE, { refresh: true });
         logger.info(`Fleet setup lock deleted`);

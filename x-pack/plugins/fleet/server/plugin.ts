@@ -665,7 +665,8 @@ export class FleetPlugin
           async () => {
             await setupFleet(
               new SavedObjectsClient(core.savedObjects.createInternalRepository()),
-              core.elasticsearch.client.asInternalUser
+              core.elasticsearch.client.asInternalUser,
+              { useLock: true }
             );
           },
           {
