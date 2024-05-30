@@ -58,5 +58,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1024
       );
     });
+
+    it('alerts UI screenshots', async () => {
+      await pageObjects.common.navigateToUrl(
+        'management',
+        'insightsAndAlerting/triggersActionsAlerts',
+        {
+          shouldUseHashForSubUrl: false,
+        }
+      );
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await commonScreenshots.takeScreenshot(
+        'stack-management-alerts-page',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+    });
   });
 }
