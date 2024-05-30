@@ -10,6 +10,7 @@ import uniqBy from 'lodash/uniqBy';
 import type {
   AstProviderFn,
   ESQLAstItem,
+  ESQLAstCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandMode,
@@ -746,13 +747,16 @@ function validateColumnForCommand(
   return messages;
 }
 
-function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLMessage[] {
+function validateCommand(astCommand: ESQLAstCommand, references: ReferenceMaps): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
-  if (command.incomplete) {
+  if (astCommand.incomplete) {
     return messages;
   }
   // do not check the command exists, the grammar is already picking that up
-  const commandDef = getCommandDefinition(command.name);
+  const commandDef = getCommandDefinition(astCommand.name);
+
+  if (!(astCommand as ESQLCommand).args) return messages;
+  const command = astCommand as ESQLCommand;
 
   if (commandDef.validate) {
     messages.push(...commandDef.validate(command));
@@ -763,7 +767,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
     const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
     for (const arg of wrappedArg) {
       if (isFunctionItem(arg)) {
-        messages.push(...validateFunction(arg, command.name, undefined, references));
+        messages.push(...validateFunction(arg, astCommand.name, undefined, references));
       }
 
       if (isSettingItem(arg)) {
@@ -781,7 +785,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
         );
       }
       if (isColumnItem(arg)) {
-        if (command.name === 'stats') {
+        if (astCommand.name === 'stats') {
           messages.push(
             getMessageFromId({
               messageId: 'unknownAggregateFunction',
@@ -793,7 +797,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
             })
           );
         } else {
-          messages.push(...validateColumnForCommand(arg, command.name, references));
+          messages.push(...validateColumnForCommand(arg, astCommand.name, references));
         }
       }
       if (isTimeIntervalItem(arg)) {
@@ -801,7 +805,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
           getMessageFromId({
             messageId: 'unsupportedTypeForCommand',
             values: {
-              command: command.name.toUpperCase(),
+              command: astCommand.name.toUpperCase(),
               type: 'date_period',
               value: arg.name,
             },
@@ -810,7 +814,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
         );
       }
       if (isSourceItem(arg)) {
-        messages.push(...validateSource(arg, command.name, references));
+        messages.push(...validateSource(arg, astCommand.name, references));
       }
     }
   }
