@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type ESQLAst = ESQLCommand[];
+export type ESQLAst = ESQLAstCommands[];
+
+export type ESQLAstCommands = ESQLCommand | ESQLAstMetricsCommand;
 
 export type ESQLSingleAstItem =
   | ESQLFunction
@@ -25,8 +27,8 @@ export interface ESQLLocation {
   max: number;
 }
 
-interface ESQLAstBaseItem {
-  name: string;
+export interface ESQLAstBaseItem<Name = string> {
+  name: Name;
   text: string;
   location: ESQLLocation;
   incomplete: boolean;
@@ -35,6 +37,14 @@ interface ESQLAstBaseItem {
 export interface ESQLCommand extends ESQLAstBaseItem {
   type: 'command';
   args: ESQLAstItem[];
+}
+
+export interface ESQLAstMetricsCommand extends ESQLAstBaseItem {
+  type: 'command';
+  name: 'metrics';
+  indices: ESQLSource[];
+  aggregates?: ESQLAstItem[];
+  grouping?: ESQLAstItem[];
 }
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
