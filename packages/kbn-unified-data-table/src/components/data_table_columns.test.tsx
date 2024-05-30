@@ -21,6 +21,7 @@ import { dataViewWithoutTimefieldMock } from '../../__mocks__/data_view_without_
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { servicesMock } from '../../__mocks__/services';
 import { ROWS_HEIGHT_OPTIONS } from '../constants';
+import { UnifiedDataTableSettings } from '../types';
 
 const columns = ['extension', 'message'];
 const columnsWithTimeCol = getVisibleColumns(
@@ -461,16 +462,16 @@ describe('Data table columns', function () {
     });
   });
 
-  describe('columnHeaders', () => {
-    it('Column Name should display provided label from columnHeaders otherwise it defaults to columns name', () => {
-      const mockColumnHeaders: Record<string, string> = {
-        test_column_1: 'test_column_one',
-        test_column_2: 'test_column_two',
-        test_column_3: 'test_column_three',
+  describe('Column label display', () => {
+    it('Column Name should display provided label from display otherwise it defaults to columns name', () => {
+      const mockColumnHeaders: UnifiedDataTableSettings = {
+        test_column_1: { display: 'test_column_one' },
+        test_column_2: { display: 'test_column_two' },
+        test_column_3: { display: 'test_column_three' },
       } as const;
       const customizedGridColumns = getEuiGridColumns({
         columns: ['test_column_1', 'test_column_2', 'test_column_4'],
-        settings: { columnHeaders: mockColumnHeaders },
+        settings: { columns: mockColumnHeaders },
         dataView: dataViewWithTimefieldMock,
         defaultColumns: false,
         isSortEnabled: true,

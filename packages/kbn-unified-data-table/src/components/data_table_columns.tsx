@@ -30,10 +30,10 @@ import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_c
 const getColumnDisplayName = (
   columnName: string,
   dataViewFieldDisplayName: string | undefined,
-  columnHeaders: Record<string, string> | undefined
+  columnDisplay: string | undefined
 ) => {
-  if (columnHeaders?.[columnName]) {
-    return columnHeaders[columnName];
+  if (columnDisplay) {
+    return columnDisplay;
   }
 
   if (columnName === '_source') {
@@ -115,7 +115,7 @@ function buildEuiGridColumn({
   showColumnTokens,
   headerRowHeight,
   customGridColumnsConfiguration,
-  columnHeaders,
+  columnDisplay,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -136,7 +136,7 @@ function buildEuiGridColumn({
   showColumnTokens?: boolean;
   headerRowHeight?: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
-  columnHeaders?: Record<string, string>;
+  columnDisplay?: string;
 }) {
   const dataViewField = !isPlainRecord
     ? dataView.getFieldByName(columnName)
@@ -157,7 +157,7 @@ function buildEuiGridColumn({
   const columnDisplayName = getColumnDisplayName(
     columnName,
     dataViewField?.displayName,
-    columnHeaders
+    columnDisplay
   );
 
   let cellActions: EuiDataGridColumnCellAction[];
@@ -232,7 +232,7 @@ function buildEuiGridColumn({
         dataView={dataView}
         dataViewField={dataViewField}
         headerRowHeight={headerRowHeight}
-        columnLabel={columnHeaders?.[column.id]}
+        columnLabel={columnDisplay}
       />
     );
     if (numberOfColumns > 1) {
@@ -302,7 +302,6 @@ export function getEuiGridColumns({
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
-  const colHeaders = settings?.columnHeaders;
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
   const numberOfColumns = columns.length;
@@ -328,7 +327,7 @@ export function getEuiGridColumns({
       showColumnTokens,
       headerRowHeight,
       customGridColumnsConfiguration,
-      columnHeaders: colHeaders,
+      columnDisplay: settings?.columns?.[column]?.display,
     })
   );
 }
