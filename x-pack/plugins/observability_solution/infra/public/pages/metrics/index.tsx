@@ -20,6 +20,11 @@ import {
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import {
+  ObservabilityOnboardingLocatorParams,
+  OBSERVABILITY_ONBOARDING_LOCATOR,
+} from '@kbn/deeplinks-observability';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsExplorerPage } from './metrics_explorer';
@@ -43,15 +48,18 @@ const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLab
 
 export const InfrastructurePage = () => {
   const config = usePluginConfig();
-  const uiCapabilities = useKibana().services.application?.capabilities;
+  const { application, share } = useKibana<{ share: SharePublicStart }>().services;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
   const isHostsViewEnabled = useUiSetting(enableInfrastructureHostsView);
+
+  const uiCapabilities = application?.capabilities;
+  const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
+    OBSERVABILITY_ONBOARDING_LOCATOR
+  );
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
   });
-
-  const kibana = useKibana();
 
   useReadOnlyBadge(!uiCapabilities?.infrastructure?.save);
 
@@ -92,9 +100,7 @@ export const InfrastructurePage = () => {
                         <MetricsAlertDropdown />
                       )}
                       <EuiHeaderLink
-                        href={kibana.services?.application?.getUrlForApp(
-                          '/observabilityOnboarding'
-                        )}
+                        href={onboardingLocator?.useUrl({ category: 'infra' })}
                         color="primary"
                         iconType="indexOpen"
                       >
