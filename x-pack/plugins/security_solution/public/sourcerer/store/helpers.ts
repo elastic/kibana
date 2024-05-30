@@ -6,12 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import type {
-  SourcererDataView,
-  SourcererModel,
-  sourcererModel,
-  SourcererScopeById,
-} from './model';
+import type { SourcererDataView, SourcererModel, SourcererScopeById } from './model';
+import type { sourcererModel } from '.';
 import { SourcererScopeName } from './model';
 import type { SelectedDataViewPayload } from './actions';
 import { ensurePatternFormat, sortWithExcludesAtEnd } from '../../../common/utils/sourcerer';
