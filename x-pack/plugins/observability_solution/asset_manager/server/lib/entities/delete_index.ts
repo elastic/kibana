@@ -7,7 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateHistoryIndexName, generateSummaryIndexName } from './helpers/generate_index_name';
+import { generateHistoryIndexName, generateLatestIndexName } from './helpers/generate_index_name';
 
 export async function deleteIndices(
   esClient: ElasticsearchClient,
@@ -16,7 +16,7 @@ export async function deleteIndices(
 ) {
   try {
     const response = await esClient.indices.resolveIndex({
-      name: `${generateHistoryIndexName(definition)}.*,${generateSummaryIndexName(definition)}`,
+      name: `${generateHistoryIndexName(definition)}.*,${generateLatestIndexName(definition)}`,
     });
     const indices = response.indices.map((doc) => doc.name);
     if (indices.length) {

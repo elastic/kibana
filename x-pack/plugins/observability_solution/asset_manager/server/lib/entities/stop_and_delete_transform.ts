@@ -8,7 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateSummaryTransformId } from './transform/generate_latest_transform_id';
+import { generateLatestTransformId } from './transform/generate_latest_transform_id';
 import { generateHistoryTransformId } from './transform/generate_history_transform_id';
 
 export async function stopAndDeleteHistoryTransform(
@@ -39,17 +39,17 @@ export async function stopAndDeleteHistoryTransform(
     throw e;
   }
 }
-export async function stopAndDeleteSummaryTransform(
+export async function stopAndDeleteLatestTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ) {
   try {
-    const summaryTransformId = generateSummaryTransformId(definition);
+    const latestTransformId = generateLatestTransformId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.transform.stopTransform(
-          { transform_id: summaryTransformId, wait_for_completion: true, force: true },
+          { transform_id: latestTransformId, wait_for_completion: true, force: true },
           { ignore: [409] }
         ),
       { logger }
@@ -57,13 +57,13 @@ export async function stopAndDeleteSummaryTransform(
     await retryTransientEsErrors(
       () =>
         esClient.transform.deleteTransform(
-          { transform_id: summaryTransformId, force: true },
+          { transform_id: latestTransformId, force: true },
           { ignore: [404] }
         ),
       { logger }
     );
   } catch (e) {
-    logger.error(`Cannot stop or delete summary transform [${definition.id}]`);
+    logger.error(`Cannot stop or delete latest transform [${definition.id}]`);
     throw e;
   }
 }

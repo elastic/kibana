@@ -6,8 +6,8 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_SUMMARY_BASE_PREFIX } from '../../../../common/constants_entities';
+import { ENTITY_LATEST_BASE_PREFIX } from '../../../../common/constants_entities';
 
-export function generateSummaryIngestPipelineId(definition: EntityDefinition) {
-  return `${ENTITY_SUMMARY_BASE_PREFIX}.${definition.id}`;
+export function generateLatestIngestPipelineId(definition: EntityDefinition) {
+  return `${ENTITY_LATEST_BASE_PREFIX}.${definition.id}`;
 }

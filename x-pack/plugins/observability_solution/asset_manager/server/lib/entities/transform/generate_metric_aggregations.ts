@@ -117,7 +117,7 @@ export function generateHistoryMetricAggregations(definition: EntityDefinition) 
   }, {});
 }
 
-export function generateSummaryMetricAggregations(definition: EntityDefinition) {
+export function generateLatestMetricAggregations(definition: EntityDefinition) {
   if (!definition.metrics) {
     return {};
   }

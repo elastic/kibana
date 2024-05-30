@@ -26,7 +26,7 @@ export function generateHistoryMetadataAggregations(definition: EntityDefinition
   );
 }
 
-export function generateSummaryMetadataAggregations(definition: EntityDefinition) {
+export function generateLatestMetadataAggregations(definition: EntityDefinition) {
   if (!definition.metadata) {
     return {};
   }

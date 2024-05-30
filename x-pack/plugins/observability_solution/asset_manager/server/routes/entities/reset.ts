@@ -13,20 +13,20 @@ import { InvalidTransformError } from '../../lib/entities/errors/invalid_transfo
 import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
 import {
   stopAndDeleteHistoryTransform,
-  stopAndDeleteSummaryTransform,
+  stopAndDeleteLatestTransform,
 } from '../../lib/entities/stop_and_delete_transform';
 import {
   deleteHistoryIngestPipeline,
-  deleteSummaryIngestPipeline,
+  deleteLatestIngestPipeline,
 } from '../../lib/entities/delete_ingest_pipeline';
 import { deleteIndices } from '../../lib/entities/delete_index';
 import {
   createAndInstallHistoryIngestPipeline,
-  createAndInstallSummaryIngestPipeline,
+  createAndInstallLatestIngestPipeline,
 } from '../../lib/entities/create_and_install_ingest_pipeline';
 import {
   createAndInstallHistoryTransform,
-  createAndInstallSummaryTransform,
+  createAndInstallLatestTransform,
 } from '../../lib/entities/create_and_install_transform';
 import { startTransform } from '../../lib/entities/start_transform';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
@@ -54,16 +54,16 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         // Delete the transform and ingest pipeline
         await stopAndDeleteHistoryTransform(esClient, definition, logger);
-        await stopAndDeleteSummaryTransform(esClient, definition, logger);
+        await stopAndDeleteLatestTransform(esClient, definition, logger);
         await deleteHistoryIngestPipeline(esClient, definition, logger);
-        await deleteSummaryIngestPipeline(esClient, definition, logger);
+        await deleteLatestIngestPipeline(esClient, definition, logger);
         await deleteIndices(esClient, definition, logger);
 
         // Recreate everything
         await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
-        await createAndInstallSummaryIngestPipeline(esClient, definition, logger);
+        await createAndInstallLatestIngestPipeline(esClient, definition, logger);
         await createAndInstallHistoryTransform(esClient, definition, logger);
-        await createAndInstallSummaryTransform(esClient, definition, logger);
+        await createAndInstallLatestTransform(esClient, definition, logger);
         await startTransform(esClient, definition, logger);
 
         return res.ok({ body: { acknowledged: true } });

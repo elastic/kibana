@@ -6,11 +6,11 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
-import { generateSummaryTransform } from './generate_latest_transform';
+import { generateLatestTransform } from './generate_latest_transform';
 
-describe('generateSummaryTransform(definition)', () => {
-  it('should generate a valid summary transform', () => {
-    const transform = generateSummaryTransform(entityDefinition);
+describe('generateLatestTransform(definition)', () => {
+  it('should generate a valid latest transform', () => {
+    const transform = generateLatestTransform(entityDefinition);
     expect(transform).toMatchSnapshot();
   });
 });

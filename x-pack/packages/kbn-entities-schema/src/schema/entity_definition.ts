@@ -43,7 +43,7 @@ export const entityDefinitionSchema = z.object({
       })
     ),
   }),
-  summary: z.object({
+  latest: z.object({
     settings: z.optional(
       z.object({
         syncField: z.optional(z.string()),

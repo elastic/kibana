@@ -15,7 +15,7 @@ export const entityDefinition = entityDefinitionSchema.parse({
     timestampField: '@timestamp',
     interval: '1m',
   },
-  summary: {
+  latest: {
     lookback: '5m',
   },
   identityFields: ['log.logger', { field: 'event.category', optional: true }],

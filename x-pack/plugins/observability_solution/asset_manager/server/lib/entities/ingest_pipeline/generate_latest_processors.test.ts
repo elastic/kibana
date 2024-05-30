@@ -6,11 +6,11 @@
  */
 
 import { entityDefinition } from '../helpers/fixtures/entity_definition';
-import { generateSummaryProcessors } from './generate_latest_processors';
+import { generateLatestProcessors } from './generate_latest_processors';
 
-describe('generateSummaryProcessors(definition)', () => {
+describe('generateLatestProcessors(definition)', () => {
   it('should genearte a valid pipeline', () => {
-    const processors = generateSummaryProcessors(entityDefinition);
+    const processors = generateLatestProcessors(entityDefinition);
     expect(processors).toMatchSnapshot();
   });
 });

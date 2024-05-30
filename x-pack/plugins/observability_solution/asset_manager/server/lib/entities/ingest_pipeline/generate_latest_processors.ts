@@ -6,7 +6,7 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { generateSummaryIndexName } from '../helpers/generate_index_name';
+import { generateLatestIndexName } from '../helpers/generate_index_name';
 
 function mapDesitnationToPainless(destination: string, source: string) {
   const fieldParts = destination.split('.');
@@ -37,7 +37,7 @@ function createMetadataPainlessScript(definition: EntityDefinition) {
   }, '');
 }
 
-export function generateSummaryProcessors(definition: EntityDefinition) {
+export function generateLatestProcessors(definition: EntityDefinition) {
   return [
     {
       set: {
@@ -68,7 +68,7 @@ export function generateSummaryProcessors(definition: EntityDefinition) {
     {
       set: {
         field: '_index',
-        value: generateSummaryIndexName(definition),
+        value: generateLatestIndexName(definition),
       },
     },
   ];

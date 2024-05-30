@@ -6,8 +6,8 @@
  */
 
 import { EntityDefinition } from '@kbn/entities-schema';
-import { ENTITY_SUMMARY_TRANSFORM_PREFIX } from '../../../../common/constants_entities';
+import { ENTITY_LATEST_TRANSFORM_PREFIX } from '../../../../common/constants_entities';
 
-export function generateSummaryTransformId(definition: EntityDefinition) {
-  return `${ENTITY_SUMMARY_TRANSFORM_PREFIX}-${definition.id}`;
+export function generateLatestTransformId(definition: EntityDefinition) {
+  return `${ENTITY_LATEST_TRANSFORM_PREFIX}-${definition.id}`;
 }

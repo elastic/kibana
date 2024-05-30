@@ -8,8 +8,7 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { EntitySecurityException } from './errors/entity_security_exception';
-import { generateSummaryTransform } from './transform/generate_latest_transform';
+import { generateLatestTransform } from './transform/generate_latest_transform';
 import { generateHistoryTransform } from './transform/generate_history_transform';
 
 export async function createAndInstallHistoryTransform(
@@ -24,25 +23,22 @@ export async function createAndInstallHistoryTransform(
     });
   } catch (e) {
     logger.error(`Cannot create entity history transform for [${definition.id}] entity definition`);
-    if (e.meta?.body?.error?.type === 'security_exception') {
-      throw new EntitySecurityException(e.meta.body.error.reason, definition);
-    }
     throw e;
   }
 }
 
-export async function createAndInstallSummaryTransform(
+export async function createAndInstallLatestTransform(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ) {
   try {
-    const summaryTransform = generateSummaryTransform(definition);
-    await retryTransientEsErrors(() => esClient.transform.putTransform(summaryTransform), {
+    const latestTransform = generateLatestTransform(definition);
+    await retryTransientEsErrors(() => esClient.transform.putTransform(latestTransform), {
       logger,
     });
   } catch (e) {
-    logger.error(`Cannot create entity summary transform for [${definition.id}] entity definition`);
+    logger.error(`Cannot create entity latest transform for [${definition.id}] entity definition`);
     throw e;
   }
 }

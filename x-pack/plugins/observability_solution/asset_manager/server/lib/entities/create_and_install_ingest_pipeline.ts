@@ -8,8 +8,8 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EntityDefinition } from '@kbn/entities-schema';
 import { retryTransientEsErrors } from './helpers/retry';
-import { generateSummaryProcessors } from './ingest_pipeline/generate_latest_processors';
-import { generateSummaryIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
+import { generateLatestProcessors } from './ingest_pipeline/generate_latest_processors';
+import { generateLatestIngestPipelineId } from './ingest_pipeline/generate_latest_ingest_pipeline_id';
 import { generateHistoryProcessors } from './ingest_pipeline/generate_history_processors';
 import { generateHistoryIngestPipelineId } from './ingest_pipeline/generate_history_ingest_pipeline_id';
 
@@ -36,25 +36,25 @@ export async function createAndInstallHistoryIngestPipeline(
     throw e;
   }
 }
-export async function createAndInstallSummaryIngestPipeline(
+export async function createAndInstallLatestIngestPipeline(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ) {
   try {
-    const summaryProcessors = generateSummaryProcessors(definition);
-    const summaryId = generateSummaryIngestPipelineId(definition);
+    const latestProcessors = generateLatestProcessors(definition);
+    const latestId = generateLatestIngestPipelineId(definition);
     await retryTransientEsErrors(
       () =>
         esClient.ingest.putPipeline({
-          id: summaryId,
-          processors: summaryProcessors,
+          id: latestId,
+          processors: latestProcessors,
         }),
       { logger }
     );
   } catch (e) {
     logger.error(
-      `Cannot create entity summary ingest pipelines for [${definition.id}] entity defintion`
+      `Cannot create entity latest ingest pipelines for [${definition.id}] entity defintion`
     );
     throw e;
   }

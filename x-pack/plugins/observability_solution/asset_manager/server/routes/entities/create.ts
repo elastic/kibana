@@ -12,7 +12,7 @@ import { SetupRouteOptions } from '../types';
 import { saveEntityDefinition } from '../../lib/entities/save_entity_definition';
 import {
   createAndInstallHistoryIngestPipeline,
-  createAndInstallSummaryIngestPipeline,
+  createAndInstallLatestIngestPipeline,
 } from '../../lib/entities/create_and_install_ingest_pipeline';
 import { EntityIdConflict } from '../../lib/entities/errors/entity_id_conflict_error';
 import { EntitySecurityException } from '../../lib/entities/errors/entity_security_exception';
@@ -21,16 +21,16 @@ import { startTransform } from '../../lib/entities/start_transform';
 import { deleteEntityDefinition } from '../../lib/entities/delete_entity_definition';
 import {
   deleteHistoryIngestPipeline,
-  deleteSummaryIngestPipeline,
+  deleteLatestIngestPipeline,
 } from '../../lib/entities/delete_ingest_pipeline';
 import {
   stopAndDeleteHistoryTransform,
-  stopAndDeleteSummaryTransform,
+  stopAndDeleteLatestTransform,
 } from '../../lib/entities/stop_and_delete_transform';
 import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
 import {
   createAndInstallHistoryTransform,
-  createAndInstallSummaryTransform,
+  createAndInstallLatestTransform,
 } from '../../lib/entities/create_and_install_transform';
 
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
@@ -54,11 +54,11 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
       const installState = {
         ingestPipelines: {
           history: false,
-          summary: false,
+          latest: false,
         },
         transforms: {
           history: false,
-          summary: false,
+          latest: false,
         },
         definition: false,
       };
@@ -70,13 +70,13 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         await createAndInstallHistoryIngestPipeline(esClient, definition, logger);
         installState.ingestPipelines.history = true;
-        await createAndInstallSummaryIngestPipeline(esClient, definition, logger);
-        installState.ingestPipelines.summary = true;
+        await createAndInstallLatestIngestPipeline(esClient, definition, logger);
+        installState.ingestPipelines.latest = true;
 
         await createAndInstallHistoryTransform(esClient, definition, logger);
         installState.transforms.history = true;
-        await createAndInstallSummaryTransform(esClient, definition, logger);
-        installState.transforms.summary = true;
+        await createAndInstallLatestTransform(esClient, definition, logger);
+        installState.transforms.latest = true;
 
         await startTransform(esClient, definition, logger);
 
@@ -90,15 +90,15 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
         if (installState.ingestPipelines.history) {
           await deleteHistoryIngestPipeline(esClient, req.body, logger);
         }
-        if (installState.ingestPipelines.summary) {
-          await deleteSummaryIngestPipeline(esClient, req.body, logger);
+        if (installState.ingestPipelines.latest) {
+          await deleteLatestIngestPipeline(esClient, req.body, logger);
         }
 
         if (installState.transforms.history) {
           await stopAndDeleteHistoryTransform(esClient, req.body, logger);
         }
-        if (installState.transforms.summary) {
-          await stopAndDeleteSummaryTransform(esClient, req.body, logger);
+        if (installState.transforms.latest) {
+          await stopAndDeleteLatestTransform(esClient, req.body, logger);
         }
 
         if (e instanceof EntityIdConflict) {

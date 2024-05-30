@@ -13,11 +13,11 @@ import { InvalidTransformError } from '../../lib/entities/errors/invalid_transfo
 import { readEntityDefinition } from '../../lib/entities/read_entity_definition';
 import {
   stopAndDeleteHistoryTransform,
-  stopAndDeleteSummaryTransform,
+  stopAndDeleteLatestTransform,
 } from '../../lib/entities/stop_and_delete_transform';
 import {
   deleteHistoryIngestPipeline,
-  deleteSummaryIngestPipeline,
+  deleteLatestIngestPipeline,
 } from '../../lib/entities/delete_ingest_pipeline';
 import { deleteEntityDefinition } from '../../lib/entities/delete_entity_definition';
 import { EntityDefinitionNotFound } from '../../lib/entities/errors/entity_not_found';
@@ -43,9 +43,9 @@ export function deleteEntityDefinitionRoute<T extends RequestHandlerContext>({
 
         const definition = await readEntityDefinition(soClient, req.params.id, logger);
         await stopAndDeleteHistoryTransform(esClient, definition, logger);
-        await stopAndDeleteSummaryTransform(esClient, definition, logger);
+        await stopAndDeleteLatestTransform(esClient, definition, logger);
         await deleteHistoryIngestPipeline(esClient, definition, logger);
-        await deleteSummaryIngestPipeline(esClient, definition, logger);
+        await deleteLatestIngestPipeline(esClient, definition, logger);
         await deleteEntityDefinition(soClient, definition, logger);
 
         return res.ok({ body: { acknowledged: true } });

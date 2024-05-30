@@ -9,7 +9,7 @@ import { entityDefinition } from '../helpers/fixtures/entity_definition';
 import { generateHistoryTransform } from './generate_history_transform';
 
 describe('generateHistoryTransform(definition)', () => {
-  it('should generate a valid summary transform', () => {
+  it('should generate a valid latest transform', () => {
     const transform = generateHistoryTransform(entityDefinition);
     expect(transform).toMatchSnapshot();
   });
