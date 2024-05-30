@@ -170,6 +170,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.rule.references': schemaStringArray,
   'kibana.alert.rule.rule_id': schemaString,
   'kibana.alert.rule.rule_name_override': schemaString,
+  'kibana.alert.rule.snoozed': schemaBoolean,
   'kibana.alert.rule.tags': schemaStringArray,
   'kibana.alert.rule.timeline_id': schemaStringArray,
   'kibana.alert.rule.timeline_title': schemaStringArray,

@@ -97,6 +97,7 @@ const AlertOptional = rt.partial({
   'kibana.alert.rule.execution.timestamp': schemaDate,
   'kibana.alert.rule.execution.uuid': schemaString,
   'kibana.alert.rule.parameters': schemaUnknown,
+  'kibana.alert.rule.snoozed': schemaBoolean,
   'kibana.alert.rule.tags': schemaStringArray,
   'kibana.alert.start': schemaDate,
   'kibana.alert.time_range': schemaDateRange,
