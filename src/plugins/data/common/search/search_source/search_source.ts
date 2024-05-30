@@ -801,9 +801,7 @@ export class SearchSource {
       index && !body.hasOwnProperty('_source') ? index.getSourceFiltering() : body._source;
 
     // get filter if data view specified, otherwise null filter
-    const filter = index
-      ? this.getFieldFilter({ bodySourceExcludes: _source.excludes, metaFields })
-      : (fields: any) => fields;
+    const filter = this.getFieldFilter({ bodySourceExcludes: _source?.excludes, metaFields });
 
     const fieldsFromSource = filter(searchRequest.fieldsFromSource || []);
     // apply source filters from index pattern if specified by the user
