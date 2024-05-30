@@ -894,6 +894,7 @@ export class SearchSource {
         fields,
         docvalueFields: body.docvalue_fields,
         fieldsFromSource,
+        // @ts-expect-error - Needs closer look to fix
         filteredDocvalueFields,
         metaFields,
         fieldListProvided,
