@@ -116,9 +116,10 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     ],
   },
 
-  // Product features without RBAC
+  // Product features without privileges
   [ProductFeatureSecurityKey.osqueryAutomatedResponseActions]: {},
   [ProductFeatureSecurityKey.endpointProtectionUpdates]: {},
   [ProductFeatureSecurityKey.endpointAgentTamperProtection]: {},
   [ProductFeatureSecurityKey.externalRuleActions]: {},
+  [ProductFeatureSecurityKey.integrationsAssistant]: {},
 };

@@ -9,7 +9,12 @@ import { CoreStart, Plugin, CoreSetup, AppMountParameters } from '@kbn/core/publ
 import { i18n } from '@kbn/i18n';
 import { getServices } from './services';
 import { PLUGIN_ID, INTEGRATION_ASSISTANT_APP_ROUTE } from '../common';
-import { IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart } from './types';
+import {
+  IntegrationAssistantPluginSetup,
+  IntegrationAssistantPluginStart,
+  IntegrationAssistantPluginStartDependencies,
+} from './types';
+import { getIntegrationAssistantLazy } from './components/integration_assistant';
 
 export class IntegrationAssistantPlugin
   implements Plugin<IntegrationAssistantPluginSetup, IntegrationAssistantPluginStart>
@@ -35,8 +40,14 @@ export class IntegrationAssistantPlugin
     return {};
   }
 
-  public start(core: CoreStart): IntegrationAssistantPluginStart {
-    return {};
+  public start(
+    core: CoreStart,
+    dependencies: IntegrationAssistantPluginStartDependencies
+  ): IntegrationAssistantPluginStart {
+    const services = { ...core, ...dependencies };
+    return {
+      IntegrationAssistant: () => getIntegrationAssistantLazy(services),
+    };
   }
 
   public stop() {}

@@ -42,6 +42,14 @@ const breadcrumbGetters: {
       }),
     },
   ],
+  integrations_assistant: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.integrationsAssistantPageTitle', {
+        defaultMessage: 'Assistant',
+      }),
+    },
+  ],
   integration_details_overview: ({ pkgTitle }) => [BASE_BREADCRUMB, { text: pkgTitle }],
   integration_policy_edit: ({ pkgTitle, pkgkey, policyName }) => [
     BASE_BREADCRUMB,

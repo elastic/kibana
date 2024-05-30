@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export type Section = 'manage' | 'browse' | 'assistant';
+export interface IntegrationSettings {
+  name?: string;
+  description?: string;
+  dataStreamName?: string;
+  dataStreamDescription?: string;
+  format?: string;
+  logsSampleFileName?: string;
+  logsSampleParsed?: string[];
+}

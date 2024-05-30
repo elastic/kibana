@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export type Section = 'manage' | 'browse' | 'assistant';
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import { IntegrationAssistantServices } from '../../types';
+
+export const useKibana = () => _useKibana<IntegrationAssistantServices>();

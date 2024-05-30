@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export type Section = 'manage' | 'browse' | 'assistant';
+import { i18n } from '@kbn/i18n';
+
+export const INTEGRATIONS_ASSISTANT_TITLE = i18n.translate('xpack.integrationAssistant.pageTitle', {
+  defaultMessage: 'Integration Assistant',
+});

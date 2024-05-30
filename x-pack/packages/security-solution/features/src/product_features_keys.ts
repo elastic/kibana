@@ -67,6 +67,11 @@ export enum ProductFeatureSecurityKey {
    * enables all rule actions
    */
   externalRuleActions = 'external_rule_actions',
+
+  /**
+   * enables the assistant for external integrations
+   */
+  integrationsAssistant = 'integrations_assistant',
 }
 
 export enum ProductFeatureCasesKey {

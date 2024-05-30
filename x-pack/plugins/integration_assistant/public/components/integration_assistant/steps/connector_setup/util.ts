@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export type Section = 'manage' | 'browse' | 'assistant';
+export const isConnectorSetupReady = ({ connectorId }: { connectorId: string | undefined }) =>
+  connectorId != null;

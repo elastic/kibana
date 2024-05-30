@@ -12,11 +12,16 @@
       "integration_assistant"
     ],
     "requiredPlugins": [
+      "kibanaReact",
       "licensing",
       "management",
       "features",
       "share",
-      "fileUpload"
+      "fileUpload",
+      "triggersActionsUi",
+      "actions",
+      "stackConnectors",
+      "spaces",
     ],
     "optionalPlugins": [
       "security",

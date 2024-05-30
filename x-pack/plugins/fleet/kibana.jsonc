@@ -23,7 +23,7 @@
       "taskManager",
       "files",
       "uiActions",
-      "dashboard"
+      "dashboard",
     ],
     "optionalPlugins": [
       "features",
@@ -36,6 +36,7 @@
       "ingestPipelines",
       "spaces",
       "guidedOnboarding",
+      "integrationAssistant",
     ],
     "requiredBundles": [
       "kibanaReact",

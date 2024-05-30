@@ -5,10 +5,17 @@
  * 2.0.
  */
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiNotificationBadge } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiNotificationBadge,
+  EuiButton,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useLink } from '../../../hooks';
+import { useLink, useStartServices } from '../../../hooks';
 import type { Section } from '../sections';
 
 import { WithHeaderLayout } from '.';
@@ -21,6 +28,7 @@ interface Props {
 
 export const DefaultLayout: React.FC<Props> = memo(
   ({ section, children, notificationsBySection }) => {
+    const { integrationAssistant } = useStartServices();
     const { getHref } = useLink();
     const tabs = [
       {
@@ -48,28 +56,40 @@ export const DefaultLayout: React.FC<Props> = memo(
     return (
       <WithHeaderLayout
         leftColumn={
-          <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
-            <EuiText>
-              <h1>
-                <FormattedMessage
-                  id="xpack.fleet.integrationsHeaderTitle"
-                  defaultMessage="Integrations"
-                />
-              </h1>
-            </EuiText>
-
-            <EuiSpacer size="s" />
-
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                <p>
+          <EuiFlexGroup direction="row" gutterSize="none" justifyContent="center">
+            <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+              <EuiText>
+                <h1>
                   <FormattedMessage
-                    id="xpack.fleet.epm.pageSubtitle"
-                    defaultMessage="Choose an integration to start collecting and analyzing your data."
+                    id="xpack.fleet.integrationsHeaderTitle"
+                    defaultMessage="Integrations"
                   />
-                </p>
+                </h1>
               </EuiText>
-            </EuiFlexItem>
+
+              <EuiSpacer size="s" />
+
+              <EuiFlexItem grow={false}>
+                <EuiText size="s" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.epm.pageSubtitle"
+                      defaultMessage="Choose an integration to start collecting and analyzing your data."
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            {integrationAssistant && (
+              <EuiFlexItem grow={false}>
+                <EuiButton fill color="primary" href={getHref('integrations_assistant')}>
+                  <FormattedMessage
+                    id="xpack.fleet.epm.addIntegrationButton"
+                    defaultMessage="Add integration"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
         tabs={tabs.map((tab) => {

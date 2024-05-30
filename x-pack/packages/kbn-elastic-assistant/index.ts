@@ -81,6 +81,7 @@ export {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_LATEST_ALERTS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+  INTEGRATIONS_ASSISTANT_STORAGE_KEY,
 } from './impl/assistant_context/constants';
 
 export { useLoadConnectors } from './impl/connectorland/use_load_connectors';

@@ -5,13 +5,34 @@
  * 2.0.
  */
 
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import type {
+  NavigationPublicPluginStart,
+  NavigationPublicPluginSetup,
+} from '@kbn/navigation-plugin/public';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type {
+  TriggersAndActionsUIPublicPluginSetup,
+  TriggersAndActionsUIPublicPluginStart,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IntegrationAssistantPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IntegrationAssistantPluginStart {}
 
-export interface AppPluginStartDependencies {
-  navigation: NavigationPublicPluginStart;
+export interface IntegrationAssistantPluginStart {
+  IntegrationAssistant: React.ComponentType;
 }
+
+export interface IntegrationAssistantPluginSetupDependencies {
+  navigation: NavigationPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  spaces: SpacesPluginSetup;
+}
+
+export interface IntegrationAssistantPluginStartDependencies {
+  navigation: NavigationPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  spaces: SpacesPluginStart;
+}
+
+export type IntegrationAssistantServices = CoreStart & IntegrationAssistantPluginStartDependencies;
