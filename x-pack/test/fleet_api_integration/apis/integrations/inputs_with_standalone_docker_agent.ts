@@ -88,7 +88,7 @@ ${inputsYaml}
           foundMetrics = true;
           break;
         }
-        await agent.log();
+        // await agent.log(); uncomment if you need to debug agent logs
         await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
       }
 
