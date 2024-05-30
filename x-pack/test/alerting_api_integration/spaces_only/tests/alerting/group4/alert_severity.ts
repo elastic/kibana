@@ -99,15 +99,15 @@ export default function createAlertSeverityTests({ getService }: FtrProviderCont
       }
 
       // Verify is_improving is set correctly
-      expect(allAlertDocs[0][ALERT_IS_IMPROVING]).to.eql(false);
-      expect(allAlertDocs[1][ALERT_IS_IMPROVING]).to.eql(false);
+      expect(allAlertDocs[0][ALERT_IS_IMPROVING]).to.be(undefined);
+      expect(allAlertDocs[1][ALERT_IS_IMPROVING]).to.be(undefined);
       expect(allAlertDocs[2][ALERT_IS_IMPROVING]).to.eql(false);
       expect(allAlertDocs[3][ALERT_IS_IMPROVING]).to.eql(false);
-      expect(allAlertDocs[4][ALERT_IS_IMPROVING]).to.eql(false);
+      expect(allAlertDocs[4][ALERT_IS_IMPROVING]).to.be(undefined);
       expect(allAlertDocs[5][ALERT_IS_IMPROVING]).to.eql(true);
       expect(allAlertDocs[6][ALERT_IS_IMPROVING]).to.eql(false);
       expect(allAlertDocs[7][ALERT_IS_IMPROVING]).to.eql(true);
-      expect(allAlertDocs[8][ALERT_IS_IMPROVING]).to.eql(false);
+      expect(allAlertDocs[8][ALERT_IS_IMPROVING]).to.be(undefined);
       expect(allAlertDocs[9][ALERT_IS_IMPROVING]).to.eql(true);
     });
   });
