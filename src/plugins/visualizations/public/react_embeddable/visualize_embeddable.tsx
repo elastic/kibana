@@ -233,6 +233,7 @@ export const getVisualizeEmbeddableFactory: (
             ref={domNode}
             data-test-subj="visualizationLoader"
             data-rendering-count={renderCount /* Used for functional tests */}
+            data-title={api.panelTitle?.getValue()}
             data-description={api.panelDescription?.getValue()}
             data-shared-item
           >

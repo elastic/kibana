@@ -109,6 +109,9 @@ function DefaultEditor({
                     isCollapsed ? 'visEditor__visualization__wrapper-expanded' : ''
                   }`,
                 }}
+                data-shared-items-container
+                data-title={vis.title}
+                data-description={vis.description}
               >
                 <ReactEmbeddableRenderer<VisualizeSerializedState, VisualizeApi>
                   type={VISUALIZE_EMBEDDABLE_TYPE}
@@ -117,6 +120,8 @@ function DefaultEditor({
                     getSerializedStateForChild: () => ({
                       rawState: {
                         savedVis: vis.serialize(),
+                        title: vis.title,
+                        description: vis.description,
                       },
                       references: [],
                     }),
