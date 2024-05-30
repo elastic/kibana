@@ -137,7 +137,8 @@ export const MetricItem = ({
                   subtitle: locationName,
                   value: medianDuration,
                   trendShape: MetricTrendShape.Area,
-                  trend: data,
+                  // just for CI test, will be removed
+                  trend: data.length ? data : undefined,
                   extra: (
                     <EuiFlexGroup
                       alignItems="center"
