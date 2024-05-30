@@ -100,7 +100,6 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         showBorder: useMargins,
         showNotifications: true,
         showShadow: false,
-        onPanelStatusChange,
       };
 
       // render React embeddable
