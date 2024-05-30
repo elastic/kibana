@@ -170,8 +170,7 @@ export function VisualizeESQL({
       const chartSuggestions = lensHelpersAsync.value.suggestions(
         context,
         dataViewAsync.value,
-        // exclude datatable from suggestions, we are rendering a Discover table instead
-        ['lnsDatatable'],
+        [],
         preferredChartType
       );
 
@@ -242,13 +241,15 @@ export function VisualizeESQL({
     }
   }, [chatFlyoutSecondSlotHandler, lensInput, lensLoadEvent, onActionClick, query]);
 
-  if (!lensHelpersAsync.value || !dataViewAsync.value) {
+  if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
     return <EuiLoadingSpinner />;
   }
+  // if the Lens suggestions api suggests a table then we want to render a Discover table instead
+  const isLensInputTable = lensInput?.attributes?.visualizationType === 'lnsDatatable';
 
   return (
     <>
-      {lensInput && (
+      {!isLensInputTable && (
         <EuiFlexGroup direction="column">
           {Boolean(errorMessages?.length) && (
             <>
@@ -378,7 +379,6 @@ export function VisualizeESQL({
                 columns={columns}
                 dataView={dataViewAsync.value}
                 query={{ esql: query }}
-                // could possibly be set to push when is being rendered on the conversations app
                 flyoutType="overlay"
                 isTableView
               />
@@ -395,13 +395,12 @@ export function VisualizeESQL({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {!lensInput && (
+      {isLensInputTable && (
         <ESQLTable
           rows={rows}
           columns={columns}
           dataView={dataViewAsync.value}
           query={{ esql: query }}
-          // could possibly be set to push when is being rendered on the conversations app
           flyoutType="overlay"
         />
       )}
