@@ -63,7 +63,14 @@ export function deserializeReferences(
   const updatedReferences: Reference[] = [...references];
   let deserializedSearchSource = searchSource;
   if (searchSource) {
-    deserializedSearchSource = injectSearchSourceReferences(searchSource as any, updatedReferences);
+    try {
+      deserializedSearchSource = injectSearchSourceReferences(
+        searchSource as any,
+        updatedReferences
+      );
+    } catch (e) {
+      // Allow missing index pattern error to surface in vis
+    }
   }
   if (savedSearchRefName) {
     const savedSearchReference = updatedReferences.find(
