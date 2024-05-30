@@ -5,14 +5,12 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { ECS_MISSING_KEYS_PROMPT } from './prompts';
-import { getModel } from '../../providers/bedrock';
 import { EcsMappingState } from '../../types';
 
-export async function handleMissingKeys(state: EcsMappingState) {
+export async function handleMissingKeys(state: EcsMappingState, model: BedrockChat) {
   const ecsMissingPrompt = ECS_MISSING_KEYS_PROMPT;
-  const model = getModel();
-
   const outputParser = new JsonOutputParser();
   const ecsMissingGraph = ecsMissingPrompt.pipe(model).pipe(outputParser);
 

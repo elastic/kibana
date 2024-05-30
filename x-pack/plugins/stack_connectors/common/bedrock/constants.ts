@@ -16,6 +16,7 @@ export const BEDROCK_TITLE = i18n.translate(
 export const BEDROCK_CONNECTOR_ID = '.bedrock';
 export enum SUB_ACTION {
   RUN = 'run',
+  RUN_RAW = 'runApiRaw',
   INVOKE_AI = 'invokeAI',
   INVOKE_STREAM = 'invokeStream',
   DASHBOARD = 'getDashboard',

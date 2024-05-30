@@ -12,6 +12,7 @@
       "integration_assistant"
     ],
     "requiredPlugins": [
+      "actions",
       "licensing",
       "management",
       "features",

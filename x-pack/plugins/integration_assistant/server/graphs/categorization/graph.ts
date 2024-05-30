@@ -141,16 +141,16 @@ function chainRouter(state: CategorizationState): string {
   return END;
 }
 
-export async function getCategorizationGraph() {
+export async function getCategorizationGraph(model) {
   const workflow = new StateGraph({
     channels: graphState,
   })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
-    .addNode('handleCategorization', handleCategorization)
+    .addNode('handleCategorization', (state) => handleCategorization(state, model))
     .addNode('handleValidatePipeline', handleValidatePipeline)
     .addNode('handleCategorizationValidation', handleCategorizationValidation)
-    .addNode('handleInvalidCategorization', handleInvalidCategorization)
+    .addNode('handleInvalidCategorization', (state) => handleInvalidCategorization(state, model))
     .addNode('handleErrors', handleErrors)
     .addNode('handleReview', handleReview)
     .addEdge(START, 'modelInput')

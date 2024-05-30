@@ -6,6 +6,7 @@
  */
 
 import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { ECS_EXAMPLE_ANSWER, ECS_FIELDS } from './constants';
 import { modifySamples, mergeSamples } from '../../util/samples';
 import { createPipeline } from './pipeline';
@@ -135,17 +136,17 @@ function chainRouter(state: EcsMappingState): string {
   return END;
 }
 
-export async function getEcsGraph() {
+export async function getEcsGraph(model: BedrockChat) {
   const workflow = new StateGraph({
     channels: graphState,
   })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
-    .addNode('handleEcsMapping', handleEcsMapping)
+    .addNode('handleEcsMapping', (state) => handleEcsMapping(state, model))
     .addNode('handleValidation', handleValidateMappings)
-    .addNode('handleDuplicates', handleDuplicates)
-    .addNode('handleMissingKeys', handleMissingKeys)
-    .addNode('handleInvalidEcs', handleInvalidEcs)
+    .addNode('handleDuplicates', (state) => handleDuplicates(state, model))
+    .addNode('handleMissingKeys', (state) => handleMissingKeys(state, model))
+    .addNode('handleInvalidEcs', (state) => handleInvalidEcs(state, model))
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('handleEcsMapping', 'handleValidation')

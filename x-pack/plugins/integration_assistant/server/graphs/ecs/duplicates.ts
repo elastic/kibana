@@ -5,14 +5,12 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { ECS_DUPLICATES_PROMPT } from './prompts';
-import { getModel } from '../../providers/bedrock';
 import { EcsMappingState } from '../../types';
 
-export async function handleDuplicates(state: EcsMappingState) {
+export async function handleDuplicates(state: EcsMappingState, model: BedrockChat) {
   const ecsDuplicatesPrompt = ECS_DUPLICATES_PROMPT;
-  const model = getModel();
-
   const outputParser = new JsonOutputParser();
   const ecsDuplicatesGraph = ecsDuplicatesPrompt.pipe(model).pipe(outputParser);
 

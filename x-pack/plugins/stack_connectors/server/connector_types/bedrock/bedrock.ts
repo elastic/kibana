@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import fetch from 'node-fetch';
+import { SignatureV4 } from '@smithy/signature-v4';
+import { HttpRequest } from '@smithy/protocol-http';
+import { Sha256 } from '@aws-crypto/sha256-js';
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import aws from 'aws4';
 import { AxiosError, Method } from 'axios';
@@ -18,6 +22,7 @@ import {
   StreamingResponseSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
+  RunRawActionParamsSchema,
 } from '../../../common/bedrock/schema';
 import {
   Config,
@@ -78,6 +83,13 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       method: 'runApi',
       schema: RunActionParamsSchema,
     });
+
+    this.registerSubAction({
+      name: SUB_ACTION.RUN_RAW,
+      method: 'runApiRaw',
+      schema: RunRawActionParamsSchema,
+    });
+
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_AI,
       method: 'invokeAI',
@@ -200,6 +212,50 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       stop_reason: response.data.stop_reason,
       usage: response.data.usage,
     };
+  }
+
+  public async runApiRaw({
+    body,
+    bedrockMethod,
+    model,
+    signal,
+    timeout,
+    endpointHost,
+  }: RunActionParams): Promise<RunActionResponse> {
+    const url = new URL(`https://${endpointHost}/model/${model}/${bedrockMethod}`);
+
+    const request = new HttpRequest({
+      hostname: url.hostname,
+      path: url.pathname,
+      protocol: url.protocol,
+      method: 'POST', // method must be uppercase
+      body,
+      query: Object.fromEntries(url.searchParams.entries()),
+      headers: {
+        // host is required by AWS Signature V4: https://docs.aws.amazon.com/general/latest/gr/sigv4-create-canonical-request.html
+        host: url.host,
+        accept: 'application/json',
+        'content-type': 'application/json',
+      },
+    });
+
+    const signer = new SignatureV4({
+      credentials: {
+        secretAccessKey: this.secrets.secret,
+        accessKeyId: this.secrets.accessKey,
+      },
+      service: 'bedrock',
+      region: 'us-west-2', // this.region,
+      sha256: Sha256,
+    });
+
+    const signedRequest = await signer.sign(request);
+
+    return fetch(url, {
+      headers: signedRequest.headers,
+      body: signedRequest.body,
+      method: signedRequest.method,
+    });
   }
 
   /**

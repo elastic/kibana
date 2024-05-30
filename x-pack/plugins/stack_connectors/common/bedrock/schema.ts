@@ -19,6 +19,17 @@ export const SecretsSchema = schema.object({
   secret: schema.string(),
 });
 
+export const RunRawActionParamsSchema = schema.object(
+  {
+    // body: schema.string(),
+    // model: schema.maybe(schema.string()),
+    // // abort signal from client
+    // signal: schema.maybe(schema.any()),
+    // timeout: schema.maybe(schema.number()),
+  },
+  { unknowns: 'allow' }
+);
+
 export const RunActionParamsSchema = schema.object({
   body: schema.string(),
   model: schema.maybe(schema.string()),

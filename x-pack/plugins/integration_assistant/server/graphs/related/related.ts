@@ -5,16 +5,14 @@
  * 2.0.
  */
 import { JsonOutputParser } from '@langchain/core/output_parsers';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { RELATED_MAIN_PROMPT } from './prompts';
-import { getModel } from '../../providers/bedrock';
 import { RelatedState } from '../../types';
 import { combineProcessors } from '../../util/pipeline';
 import { Pipeline } from '../../../common';
 
-export async function handleRelated(state: RelatedState) {
+export async function handleRelated(state: RelatedState, model: BedrockChat) {
   const relatedMainPrompt = RELATED_MAIN_PROMPT;
-  const model = getModel();
-
   const outputParser = new JsonOutputParser();
   const relatedMainGraph = relatedMainPrompt.pipe(model).pipe(outputParser);
 

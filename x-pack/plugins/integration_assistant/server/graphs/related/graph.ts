@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { StateGraph, StateGraphArgs, END, START } from '@langchain/langgraph';
+import { BedrockChat } from '@kbn/langchain/server/language_models';
 import { RelatedState } from '../../types';
 import { modifySamples, formatSamples } from '../../util/samples';
 import { handleValidatePipeline } from '../../util/graph';
@@ -134,14 +135,14 @@ function chainRouter(state: RelatedState): string {
   return END;
 }
 
-export async function getRelatedGraph() {
+export async function getRelatedGraph(model: BedrockChat) {
   const workflow = new StateGraph({ channels: graphState })
     .addNode('modelInput', modelInput)
     .addNode('modelOutput', modelOutput)
-    .addNode('handleRelated', handleRelated)
+    .addNode('handleRelated', (state) => handleRelated(state, model))
     .addNode('handleValidatePipeline', handleValidatePipeline)
-    .addNode('handleErrors', handleErrors)
-    .addNode('handleReview', handleReview)
+    .addNode('handleErrors', (state) => handleErrors(state, model))
+    .addNode('handleReview', (state) => handleReview(state, model))
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('handleRelated', 'handleValidatePipeline')
