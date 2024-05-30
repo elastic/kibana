@@ -171,11 +171,11 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/apm-data-view",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/esql-utils",
     "@kbn/search-types",
     "@kbn/analytics-ftr-helpers-plugin",
     "@kbn/alerting-comparators",
     "@kbn/alerting-state-types",
-    "@kbn/reporting-server"
+    "@kbn/reporting-server",
+    "@kbn/data-quality-plugin"
   ]
 }

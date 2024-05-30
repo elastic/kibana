@@ -7,8 +7,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { Router } from '@kbn/core-http-router-server-internal';
 import { OasConverter } from './oas_converter';
-import { extractResponses, type InternalRouterRoute } from './process_router';
+import { createOperationIdCounter } from './operation_id_counter';
+import { extractResponses, processRouter, type InternalRouterRoute } from './process_router';
 
 describe('extractResponses', () => {
   let oasConverter: OasConverter;
@@ -73,5 +75,43 @@ describe('extractResponses', () => {
         },
       },
     });
+  });
+});
+
+describe('processRouter', () => {
+  const testRouter = {
+    getRoutes: () => [
+      {
+        path: '/foo',
+        options: {},
+        handler: jest.fn(),
+        validationSchemas: { request: { body: schema.object({}) } },
+      },
+      {
+        path: '/bar',
+        options: {},
+        handler: jest.fn(),
+        validationSchemas: { request: { body: schema.object({}) } },
+      },
+      {
+        path: '/baz',
+        options: {},
+        handler: jest.fn(),
+        validationSchemas: { request: { body: schema.object({}) } },
+      },
+    ],
+  } as unknown as Router;
+
+  it('only provides routes for version 2023-10-31', () => {
+    const result1 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+      version: '2023-10-31',
+    });
+
+    expect(Object.keys(result1.paths!)).toHaveLength(3);
+
+    const result2 = processRouter(testRouter, new OasConverter(), createOperationIdCounter(), {
+      version: '2024-10-31',
+    });
+    expect(Object.keys(result2.paths!)).toHaveLength(0);
   });
 });
