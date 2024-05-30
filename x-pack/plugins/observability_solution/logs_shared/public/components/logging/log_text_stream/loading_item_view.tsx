@@ -206,6 +206,7 @@ const ProgressCta: React.FC<ProgressCtaProps> = ({
       }}
       iconType={iconType}
       size="s"
+      role="cell"
     >
       <ProgressExtendMessage amount={extendedRange.diffAmount} unit={extendedRange.diffUnit} />
     </EuiButton>

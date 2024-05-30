@@ -19,7 +19,15 @@ import {
 } from '@kbn/rule-data-utils';
 import { EsQueryRuleParams } from '@kbn/stack-alerts-plugin/public/rule_types/es_query/types';
 import { i18n } from '@kbn/i18n';
-import { asDuration, asPercent } from '../../../../common';
+import { COMPARATORS } from '@kbn/alerting-comparators';
+
+import {
+  ABOVE_OR_EQ_TEXT,
+  ABOVE_TEXT,
+  BELOW_OR_EQ_TEXT,
+  BELOW_TEXT,
+} from '../../../../common/i18n';
+import { asDuration, asPercent, convertToBuiltInComparators } from '../../../../common';
 import { createFormatter } from '../../../../common/custom_threshold_rule/formatters';
 import { metricValueFormatter } from '../../../../common/custom_threshold_rule/metric_value_formatter';
 import { METRIC_FORMATTERS } from '../../../../common/custom_threshold_rule/formatters/snapshot_metric_formats';
@@ -37,12 +45,34 @@ export interface FlyoutThresholdData {
   pctAboveThreshold: string;
 }
 
-const getPctAboveThreshold = (observedValue?: number, threshold?: number[]): string => {
+const getI18nComparator = (comparator?: COMPARATORS) => {
+  switch (comparator) {
+    case COMPARATORS.GREATER_THAN:
+      return ABOVE_TEXT;
+    case COMPARATORS.GREATER_THAN_OR_EQUALS:
+      return ABOVE_OR_EQ_TEXT;
+    case COMPARATORS.LESS_THAN:
+      return BELOW_TEXT;
+    case COMPARATORS.LESS_THAN_OR_EQUALS:
+      return BELOW_OR_EQ_TEXT;
+    default:
+      return comparator;
+  }
+};
+const getPctAboveThreshold = (
+  threshold: number[],
+  comparator: COMPARATORS,
+  observedValue?: number
+): string => {
   if (!observedValue || !threshold || threshold.length > 1 || threshold[0] <= 0) return '';
+
   return i18n.translate('xpack.observability.alertFlyout.overview.aboveThresholdLabel', {
-    defaultMessage: ' ({pctValue}% above the threshold)',
+    defaultMessage: ' ({pctValue}% {comparator} the threshold)',
     values: {
-      pctValue: parseFloat((((observedValue - threshold[0]) * 100) / threshold[0]).toFixed(2)),
+      pctValue: Math.abs(
+        parseFloat((((observedValue - threshold[0]) * 100) / threshold[0]).toFixed(2))
+      ),
+      comparator: getI18nComparator(convertToBuiltInComparators(comparator)),
     },
   });
 };
@@ -78,7 +108,11 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
+          pctAboveThreshold: getPctAboveThreshold(
+            threshold,
+            convertToBuiltInComparators(comparator),
+            observedValue
+          ),
         } as unknown as FlyoutThresholdData;
       });
 
@@ -113,46 +147,82 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
           observedValue: formattedValue,
           threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, threshold),
+          pctAboveThreshold: getPctAboveThreshold(
+            threshold,
+            convertToBuiltInComparators(comparator),
+            observedValue
+          ),
         } as unknown as FlyoutThresholdData;
       });
 
     case METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID:
       return observedValues.map((observedValue, metricIndex) => {
-        const criteria = ruleCriteria[metricIndex] as BaseMetricExpressionParams & {
+        const { threshold, customMetric, metric, comparator } = ruleCriteria[
+          metricIndex
+        ] as BaseMetricExpressionParams & {
           metric: string;
+          customMetric: {
+            field: string;
+          };
         };
-        const infraType = METRIC_FORMATTERS[criteria.metric].formatter;
-        const formatter = createFormatter(infraType);
-        const comparator = criteria.comparator;
-        const threshold = criteria.threshold;
-        const formatThreshold = threshold.map((v: number) => {
-          if (infraType === 'percent') {
-            v = Number(v) / 100;
+        const metricField = customMetric?.field || metric;
+        const thresholdFormatted = threshold.map((thresholdToFormat) => {
+          if (
+            metricField.endsWith('.pct') ||
+            (METRIC_FORMATTERS[metric] && METRIC_FORMATTERS[metric].formatter === 'percent')
+          ) {
+            thresholdToFormat = thresholdToFormat / 100;
+          } else if (
+            metricField.endsWith('.bytes') ||
+            (METRIC_FORMATTERS[metric] && METRIC_FORMATTERS[metric].formatter === 'bits')
+          ) {
+            thresholdToFormat = thresholdToFormat / 8;
           }
-          if (infraType === 'bits') {
-            v = Number(v) / 8;
-          }
-          return v;
+          return thresholdToFormat;
         });
 
+        let observedValueFormatted: string;
+        let thresholdFormattedAsString: string;
+        if (customMetric.field) {
+          observedValueFormatted = metricValueFormatter(
+            observedValue as number,
+            customMetric.field
+          );
+          thresholdFormattedAsString = threshold
+            .map((thresholdToStringFormat) =>
+              metricValueFormatter(thresholdToStringFormat, metricField)
+            )
+            .join(' AND ');
+        } else {
+          const infraType = METRIC_FORMATTERS[metric].formatter;
+          const formatter = createFormatter(infraType);
+          observedValueFormatted = formatter(observedValue);
+          thresholdFormattedAsString = thresholdFormatted.map(formatter).join(' AND ');
+        }
+
         return {
-          observedValue: formatter(observedValue),
-          threshold: formatThreshold.map(formatter),
+          observedValue: observedValueFormatted,
+          threshold: thresholdFormattedAsString,
           comparator,
-          pctAboveThreshold: getPctAboveThreshold(observedValue, formatThreshold),
+          pctAboveThreshold: getPctAboveThreshold(
+            thresholdFormatted,
+            convertToBuiltInComparators(comparator),
+            observedValue
+          ),
         } as unknown as FlyoutThresholdData;
       });
 
     case LOG_THRESHOLD_ALERT_TYPE_ID:
-      const { comparator } = ruleParams?.count as { comparator: string };
+      const { comparator } = ruleParams?.count as { comparator: COMPARATORS };
       const flyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
         comparator,
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
-          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
-        ]),
+        pctAboveThreshold: getPctAboveThreshold(
+          [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
+          comparator,
+          alert.fields[ALERT_EVALUATION_VALUE]
+        ),
       } as unknown as FlyoutThresholdData;
       return [flyoutMap];
 
@@ -160,10 +230,12 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const APMFlyoutMapErrorCount = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
-        comparator: '>',
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
-          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
-        ]),
+        comparator: COMPARATORS.GREATER_THAN,
+        pctAboveThreshold: getPctAboveThreshold(
+          [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
+          COMPARATORS.GREATER_THAN,
+          alert.fields[ALERT_EVALUATION_VALUE]
+        ),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapErrorCount];
 
@@ -171,10 +243,12 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const APMFlyoutMapTransactionErrorRate = {
         observedValue: [asPercent(alert.fields[ALERT_EVALUATION_VALUE], 100)],
         threshold: [asPercent(alert.fields[ALERT_EVALUATION_THRESHOLD], 100)],
-        comparator: '>',
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
-          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
-        ]),
+        comparator: COMPARATORS.GREATER_THAN,
+        pctAboveThreshold: getPctAboveThreshold(
+          [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
+          COMPARATORS.GREATER_THAN,
+          alert.fields[ALERT_EVALUATION_VALUE]
+        ),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapTransactionErrorRate];
 
@@ -182,22 +256,26 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const APMFlyoutMapTransactionDuration = {
         observedValue: [asDuration(alert.fields[ALERT_EVALUATION_VALUE])],
         threshold: [asDuration(alert.fields[ALERT_EVALUATION_THRESHOLD])],
-        comparator: '>',
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
-          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
-        ]),
+        comparator: COMPARATORS.GREATER_THAN,
+        pctAboveThreshold: getPctAboveThreshold(
+          [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
+          COMPARATORS.GREATER_THAN,
+          alert.fields[ALERT_EVALUATION_VALUE]
+        ),
       } as unknown as FlyoutThresholdData;
       return [APMFlyoutMapTransactionDuration];
 
     case '.es-query':
-      const { thresholdComparator } = ruleParams as EsQueryRuleParams;
+      const { thresholdComparator, threshold } = ruleParams as EsQueryRuleParams;
       const ESQueryFlyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
-        threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
+        threshold: threshold.join(' AND '),
         comparator: thresholdComparator,
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
-          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
-        ]),
+        pctAboveThreshold: getPctAboveThreshold(
+          threshold,
+          thresholdComparator as COMPARATORS,
+          alert.fields[ALERT_EVALUATION_VALUE]
+        ),
       } as unknown as FlyoutThresholdData;
       return [ESQueryFlyoutMap];
 
@@ -205,10 +283,12 @@ export const mapRuleParamsWithFlyout = (alert: TopAlert): FlyoutThresholdData[] 
       const SLOBurnRateFlyoutMap = {
         observedValue: [alert.fields[ALERT_EVALUATION_VALUE]],
         threshold: [alert.fields[ALERT_EVALUATION_THRESHOLD]],
-        comparator: '>',
-        pctAboveThreshold: getPctAboveThreshold(alert.fields[ALERT_EVALUATION_VALUE], [
-          alert.fields[ALERT_EVALUATION_THRESHOLD]!,
-        ]),
+        comparator: COMPARATORS.GREATER_THAN,
+        pctAboveThreshold: getPctAboveThreshold(
+          [alert.fields[ALERT_EVALUATION_THRESHOLD]!],
+          COMPARATORS.GREATER_THAN,
+          alert.fields[ALERT_EVALUATION_VALUE]
+        ),
       } as unknown as FlyoutThresholdData;
       return [SLOBurnRateFlyoutMap];
     default:

@@ -17,7 +17,7 @@ import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_tr
 import { MetricCustomIndicator, SLODefinition } from '../../domain/models';
 import { InvalidTransformError } from '../../errors';
 import { GetCustomMetricIndicatorAggregation } from '../aggregations';
-import { getTimesliceTargetComparator } from './common';
+import { getTimesliceTargetComparator, getFilterRange } from './common';
 
 export const INVALID_EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
@@ -50,13 +50,7 @@ export class MetricCustomTransformGenerator extends TransformGenerator {
       query: {
         bool: {
           filter: [
-            {
-              range: {
-                [indicator.params.timestampField]: {
-                  gte: `now-${slo.timeWindow.duration.format()}/d`,
-                },
-              },
-            },
+            getFilterRange(slo, indicator.params.timestampField),
             getElasticsearchQueryOrThrow(indicator.params.filter),
           ],
         },
