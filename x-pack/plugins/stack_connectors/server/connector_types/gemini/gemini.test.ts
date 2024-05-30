@@ -21,7 +21,7 @@ jest.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', 
   assertURL: jest.fn(),
 }));
 
-jest.mock('@kbn/actions-plugin/server', () => {
+jest.doMock('@kbn/actions-plugin/server', () => {
   const originalModule = jest.requireActual('@kbn/actions-plugin/server');
 
   return {
