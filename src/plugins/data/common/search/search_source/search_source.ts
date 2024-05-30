@@ -970,9 +970,9 @@ export class SearchSource {
     _source,
   }: {
     uniqFieldNames: SearchFieldValue[];
-    scriptFields: SearchFieldValue[];
+    scriptFields: Record<string, estypes.ScriptField>;
     runtimeFields: estypes.MappingRuntimeFields;
-    _source: { includes?: string[]; excludes?: string[] };
+    _source: estypes.MappingSourceField;
   }) {
     return difference(uniqFieldNames, [
       ...Object.keys(scriptFields),
