@@ -28,7 +28,7 @@ import {
   ALERT_IS_IMPROVING,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
-import { get, omit } from 'lodash';
+import { get } from 'lodash';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
@@ -85,9 +85,6 @@ export const buildRecoveredAlert = <
   // Make sure that any alert fields that are updateable are flattened.
   const refreshableAlertFields = replaceRefreshableAlertFields(alert);
 
-  // Omit fields that are overwrite-able with undefined value
-  const cleanedAlert = omit(alert, ALERT_IS_IMPROVING);
-
   const alertUpdates = {
     // Set latest rule configuration
     ...rule,
@@ -101,6 +98,8 @@ export const buildRecoveredAlert = <
     [ALERT_FLAPPING]: legacyAlert.getFlapping(),
     // Set latest flapping_history
     [ALERT_FLAPPING_HISTORY]: legacyAlert.getFlappingHistory(),
+    // Alert is recovering from active state so by default it is improving
+    [ALERT_IS_IMPROVING]: true,
     [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     // Set latest maintenance window IDs
     [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
@@ -151,13 +150,13 @@ export const buildRecoveredAlert = <
   //   'kibana.alert.field1': 'value2'
   // }
   // the expanded field from the existing alert is removed
-  const expandedAlert = removeUnflattenedFieldsFromAlert(cleanedAlert, {
+  const cleanedAlert = removeUnflattenedFieldsFromAlert(alert, {
     ...cleanedPayload,
     ...alertUpdates,
     ...refreshableAlertFields,
   });
 
-  return deepmerge.all([expandedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
+  return deepmerge.all([cleanedAlert, refreshableAlertFields, cleanedPayload, alertUpdates], {
     arrayMerge: (_, sourceArray) => sourceArray,
   }) as Alert & AlertData;
 };
