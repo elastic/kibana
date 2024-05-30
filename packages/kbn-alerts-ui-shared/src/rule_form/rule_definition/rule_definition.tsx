@@ -20,6 +20,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiIconTip,
 } from '@elastic/eui';
 import {
   RuleCreationValidConsumer,
@@ -45,6 +46,8 @@ import {
   SCOPE_DESCRIPTION_TEXT,
   ADVANCED_OPTIONS_TITLE,
   ALERT_DELAY_DESCRIPTION_TEXT,
+  SCHEDULE_TOOLTIP_TEXT,
+  ALERT_DELAY_HELP_TEXT,
 } from '../translations';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
@@ -211,7 +214,18 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
         <EuiDescribedFormGroup
           fullWidth
           title={<h3>{SCHEDULE_TITLE}</h3>}
-          description={<p>{SCHEDULE_DESCRIPTION_TEXT}</p>}
+          description={
+            <EuiText size="s">
+              <p>
+                {SCHEDULE_DESCRIPTION_TEXT}&nbsp;
+                <EuiIconTip
+                  position="right"
+                  type="questionInCircle"
+                  content={SCHEDULE_TOOLTIP_TEXT}
+                />
+              </p>
+            </EuiText>
+          }
         >
           <RuleSchedule
             interval={schedule.interval}
@@ -256,7 +270,14 @@ export const RuleDefinition = (props: RuleDefinitionProps) => {
                 title={<h4>{ALERT_DELAY_TITLE}</h4>}
                 description={
                   <EuiText size="s">
-                    <p>{ALERT_DELAY_DESCRIPTION_TEXT}</p>
+                    <p>
+                      {ALERT_DELAY_DESCRIPTION_TEXT}&nbsp;
+                      <EuiIconTip
+                        position="right"
+                        type="questionInCircle"
+                        content={ALERT_DELAY_HELP_TEXT}
+                      />
+                    </p>
                   </EuiText>
                 }
               >

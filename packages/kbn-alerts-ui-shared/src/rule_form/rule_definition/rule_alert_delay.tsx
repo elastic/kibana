@@ -7,13 +7,9 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import type { SanitizedRule, RuleTypeParams } from '@kbn/alerting-types';
-import {
-  ALERT_DELAY_TITLE_PREFIX,
-  ALERT_DELAY_TITLE_SUFFIX,
-  ALERT_DELAY_HELP_TEXT,
-} from '../translations';
+import { ALERT_DELAY_TITLE_PREFIX, ALERT_DELAY_TITLE_SUFFIX } from '../translations';
 import { RuleFormErrors } from '../types';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
@@ -61,10 +57,7 @@ export const RuleAlertDelay = (props: RuleAlertDelayProps) => {
         value={alertDelay?.active ?? ''}
         name="alertDelay"
         data-test-subj="alertDelayInput"
-        prepend={[
-          ALERT_DELAY_TITLE_PREFIX,
-          <EuiIconTip position="right" type="questionInCircle" content={ALERT_DELAY_HELP_TEXT} />,
-        ]}
+        prepend={[ALERT_DELAY_TITLE_PREFIX]}
         isInvalid={errors.alertDelay?.length > 0}
         append={ALERT_DELAY_TITLE_SUFFIX}
         onChange={onAlertDelayChange}

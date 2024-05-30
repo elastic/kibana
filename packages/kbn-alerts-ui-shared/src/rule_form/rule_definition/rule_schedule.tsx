@@ -7,14 +7,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiFlexItem,
-  EuiFormRow,
-  EuiFlexGroup,
-  EuiSelect,
-  EuiFieldNumber,
-  EuiIconTip,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFormRow, EuiFlexGroup, EuiSelect, EuiFieldNumber } from '@elastic/eui';
 import {
   parseDuration,
   formatDuration,
@@ -27,7 +20,6 @@ import {
   SCHEDULE_TITLE_PREFIX,
   INTERVAL_MINIMUM_TEXT,
   INTERVAL_WARNING_TEXT,
-  SCHEDULE_TOOLTIP_TEXT,
 } from '../translations';
 
 const INTEGER_REGEX = /^[1-9][0-9]*$/;
@@ -114,14 +106,7 @@ export const RuleSchedule = (props: RuleScheduleProps) => {
         <EuiFlexItem grow={2}>
           <EuiFieldNumber
             fullWidth
-            prepend={[
-              SCHEDULE_TITLE_PREFIX,
-              <EuiIconTip
-                position="right"
-                type="questionInCircle"
-                content={SCHEDULE_TOOLTIP_TEXT}
-              />,
-            ]}
+            prepend={[SCHEDULE_TITLE_PREFIX]}
             isInvalid={errors.interval?.length > 0}
             value={intervalNumber}
             name="interval"
