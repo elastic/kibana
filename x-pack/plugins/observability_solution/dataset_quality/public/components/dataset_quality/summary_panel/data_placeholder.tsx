@@ -16,7 +16,9 @@ import {
   EuiIconTip,
   EuiSkeletonTitle,
 } from '@elastic/eui';
-import { PrivilegesLearnMoreWrapper } from '../../common';
+import { PrivilegesWarningIconWrapper } from '../../common';
+import { notAvailableLabel } from '../../../../common/translations';
+
 interface DataPlaceholderParams {
   title: string;
   tooltip: string;
@@ -40,21 +42,24 @@ export function DataPlaceholder({
           <EuiFlexItem grow={false}>
             <EuiIconTip content={tooltip} />
           </EuiFlexItem>
+
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={isUserAuthorizedForDataset}
+            title={title}
+            mode="popover"
+            popoverCss={{ marginLeft: 'auto' }}
+          >
+            <></>
+          </PrivilegesWarningIconWrapper>
         </EuiFlexGroup>
 
-        <PrivilegesLearnMoreWrapper
-          fontSize="s"
-          hasPrivileges={isUserAuthorizedForDataset}
-          title={title}
-        >
-          {isLoading ? (
-            <EuiSkeletonTitle size="m" data-test-subj={`datasetQuality-${title}-loading`} />
-          ) : (
-            <EuiTitle data-test-subj={`datasetQualityDatasetHealthKpi-${title}`} size="m">
-              <h3>{value}</h3>
-            </EuiTitle>
-          )}
-        </PrivilegesLearnMoreWrapper>
+        {isLoading ? (
+          <EuiSkeletonTitle size="m" data-test-subj={`datasetQuality-${title}-loading`} />
+        ) : (
+          <EuiTitle data-test-subj={`datasetQualityDatasetHealthKpi-${title}`} size="m">
+            <h3>{isUserAuthorizedForDataset ? value : notAvailableLabel}</h3>
+          </EuiTitle>
+        )}
       </EuiFlexGroup>
     </EuiPanel>
   );

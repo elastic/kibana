@@ -31,6 +31,10 @@ export const tableSummaryOfText = i18n.translate('xpack.datasetQuality.tableSumm
   defaultMessage: 'of',
 });
 
+export const notAvailableLabel = i18n.translate('xpack.datasetQuality.notAvailableLabel', {
+  defaultMessage: 'N/A',
+});
+
 /*
 Flyout
 */

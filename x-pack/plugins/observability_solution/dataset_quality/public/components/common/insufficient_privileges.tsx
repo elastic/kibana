@@ -12,8 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiLink,
   EuiButtonIcon,
+  EuiButtonIconProps,
   EuiPopover,
-  EuiText,
   EuiToolTip,
   EuiIcon,
   EuiFlexGroup,
@@ -37,40 +37,19 @@ const LearnMoreLink = () => (
   </EuiLink>
 );
 
-export const PrivilegesLearnMoreWrapper = ({
-  hasPrivileges,
-  title,
-  fontSize,
-  children,
-}: {
-  hasPrivileges: boolean;
-  title: string;
-  fontSize: 'xs' | 's';
-  children: React.ReactNode;
-}) => {
-  if (hasPrivileges) {
-    return <>{children}</>;
-  }
-
-  return (
-    <EuiText size={fontSize} data-test-subj={`datasetQualityInsufficientPrivileges-${title}`}>
-      {insufficientPrivilegesText}
-      {/* <LearnMoreLink /> TODO: Add docs link when available */}
-    </EuiText>
-  );
-};
-
 export const PrivilegesWarningIconWrapper = ({
   hasPrivileges,
   title,
   mode = 'popover',
-  iconColor = 'text',
+  iconColor = 'warning',
+  popoverCss,
   children,
 }: {
   hasPrivileges: boolean;
   title: string;
   mode?: 'tooltip' | 'popover';
   iconColor?: EuiButtonIconPropsForButton['color'];
+  popoverCss?: EuiButtonIconProps['css'];
   children: React.ReactNode;
 }) => {
   const [isPopoverOpen, togglePopover] = useToggle(false);
@@ -83,7 +62,7 @@ export const PrivilegesWarningIconWrapper = ({
 
   return mode === 'popover' ? (
     <EuiPopover
-      css={{ width: 200 }}
+      css={popoverCss}
       attachToAnchor={true}
       anchorPosition="downCenter"
       button={

@@ -18,7 +18,8 @@ import {
   EuiSkeletonRectangle,
 } from '@elastic/eui';
 
-import { PrivilegesLearnMoreWrapper } from '../../common';
+import { PrivilegesWarningIconWrapper } from '../../common';
+import { notAvailableLabel } from '../../../../common/translations';
 
 export function FlyoutSummaryKpiItem({
   title,
@@ -48,9 +49,20 @@ export function FlyoutSummaryKpiItem({
     >
       <EuiFlexGroup alignItems="stretch" direction="column" wrap={false}>
         <EuiFlexItem css={{ gap: euiTheme.size.xs }}>
-          <EuiTitle data-test-subj={`datasetQualityFlyoutKpiTitle-${title}`} size="xxxs">
-            <h6>{title}</h6>
-          </EuiTitle>
+          <EuiFlexGroup>
+            <EuiTitle data-test-subj={`datasetQualityFlyoutKpiTitle-${title}`} size="xxxs">
+              <h6>{title}</h6>
+            </EuiTitle>
+
+            <PrivilegesWarningIconWrapper
+              hasPrivileges={userHasPrivilege}
+              title={title}
+              mode="popover"
+              popoverCss={{ marginLeft: 'auto' }}
+            >
+              <></>
+            </PrivilegesWarningIconWrapper>
+          </EuiFlexGroup>
           {link ? (
             <EuiLink
               data-test-subj={`datasetQualityFlyoutKpiLink-${title}`}
@@ -77,17 +89,15 @@ export function FlyoutSummaryKpiItem({
         <EuiFlexItem
           css={{ alignItems: isLoading ? 'stretch' : 'flex-end', justifyContent: 'flex-end' }}
         >
-          <PrivilegesLearnMoreWrapper fontSize="xs" hasPrivileges={userHasPrivilege} title={title}>
-            <EuiSkeletonTitle
-              style={{ width: '50%', marginLeft: 'auto' }}
-              size="m"
-              isLoading={isLoading}
-            >
-              <EuiTitle data-test-subj={`datasetQualityFlyoutKpiValue-${title}`} size="s">
-                <h3 className="eui-textNoWrap">{value}</h3>
-              </EuiTitle>
-            </EuiSkeletonTitle>
-          </PrivilegesLearnMoreWrapper>
+          <EuiSkeletonTitle
+            style={{ width: '50%', marginLeft: 'auto' }}
+            size="m"
+            isLoading={isLoading}
+          >
+            <EuiTitle data-test-subj={`datasetQualityFlyoutKpiValue-${title}`} size="s">
+              <h3 className="eui-textNoWrap">{userHasPrivilege ? value : notAvailableLabel}</h3>
+            </EuiTitle>
+          </EuiSkeletonTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -107,7 +107,6 @@ export function IntegrationActionsMenu({
                 hasPrivileges={canUserViewIntegrations}
                 title={seeIntegrationText}
                 mode="tooltip"
-                iconColor="warning"
               >
                 {seeIntegrationText}
               </PrivilegesWarningIconWrapper>
@@ -147,7 +146,6 @@ export function IntegrationActionsMenu({
             hasPrivileges={canUserAccessDashboards}
             title={viewDashboardsText}
             mode="tooltip"
-            iconColor="warning"
           >
             {viewDashboardsText}
           </PrivilegesWarningIconWrapper>
