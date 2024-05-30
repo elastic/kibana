@@ -10,7 +10,6 @@ import {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { SUMMARY_FILTER } from '../../../common/constants/client_defaults';
 import { UptimeEsClient } from '../../lib';
 import {
@@ -37,20 +36,6 @@ type GetParamsWithFields<F> = GetPingsParams & {
 
 type GetParamsWithoutFields = GetPingsParams;
 
-interface QueryPingsSearchBody {
-  size: number;
-  from: number;
-  query: {
-    bool: {
-      filter: QueryDslQueryContainer[];
-    };
-  };
-  sort: Array<{ '@timestamp': { order: 'asc' | 'desc' } }>;
-  _source: boolean;
-  fields: QueryFields;
-  search_after?: SortResults;
-}
-
 export async function queryPings<F>(
   params: (GetParamsWithFields<F> | GetParamsWithoutFields) & { uptimeEsClient: UptimeEsClient }
 ): Promise<PingsResponse | { total: number; pings: F[] }> {
@@ -68,7 +53,7 @@ export async function queryPings<F>(
   } = params;
   const size = sizeParam ?? DEFAULT_PAGE_SIZE;
 
-  const searchBody: QueryPingsSearchBody = {
+  const searchBody = {
     size,
     from: pageIndex !== undefined ? pageIndex * size : 0,
     ...(index ? { from: index * size } : {}),
@@ -111,36 +96,15 @@ export async function queryPings<F>(
     searchBody._source = false;
     searchBody.fields = params.fields;
 
-    let latestTotal = 0;
-    let hitCount;
-    let afterKey;
-    const mapPromises: Array<Promise<F[]>> = [];
-
-    /**
-     * By default Elasticsearch only returns 10k documents in a single search.
-     * Users may have many thousands of documents in a given time range.
-     * This procedure paginates the results and offloads excess fields in parallel.
-     */
-    do {
-      if (afterKey) {
-        searchBody.search_after = afterKey;
-      }
-      const {
-        body: {
-          hits: { hits, total },
-        },
-      } = await uptimeEsClient.search({ body: searchBody });
-      mapPromises.push(extractFieldsFromDocs(hits, params.fieldsExtractorFn));
-      hitCount = hits.length;
-      latestTotal = total.value;
-      if (hitCount > 0) {
-        afterKey = hits[hitCount - 1].sort;
-      }
-    } while (hitCount === searchBody.size && searchBody.size === 10_000);
+    const {
+      body: {
+        hits: { hits, total },
+      },
+    } = await uptimeEsClient.search({ body: searchBody });
 
     return {
-      total: latestTotal,
-      pings: (await Promise.all(mapPromises)).flat(),
+      total: total.value,
+      pings: hits.map((doc: any) => params.fieldsExtractorFn(doc)),
     };
   }
 
@@ -167,19 +131,6 @@ export async function queryPings<F>(
     total: total.value,
     pings,
   };
-}
-
-async function extractFieldsFromDocs<Doc, Fn>(
-  hits: Doc[],
-  extractor: (doc: Doc) => Fn
-): Promise<Fn[]> {
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(hits.map(extractor));
-    } catch (e: any) {
-      reject(e);
-    }
-  });
 }
 
 function isGetParamsWithFields<F>(
