@@ -51,6 +51,7 @@ export const getVisualizeEmbeddableFactory: (
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
     const vis$ = new BehaviorSubject<Vis>(state.vis);
+    const visData$ = new BehaviorSubject<unknown>({});
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
     const timeRange$ = new BehaviorSubject<TimeRange | undefined>(undefined);
@@ -111,6 +112,7 @@ export const getVisualizeEmbeddableFactory: (
           vis$.next(await createVisInstance(newSerializedVis));
         },
         subscribeToInitialRender: (listener) => hasRendered$.subscribe(listener),
+        subscribeToVisData: (listener) => visData$.subscribe(listener),
         openInspector: () => {
           const adapters = inspectorAdapters$.getValue();
           if (!adapters) return;
@@ -204,7 +206,8 @@ export const getVisualizeEmbeddableFactory: (
                   await getUiActions().getTrigger(triggerId).exec(context);
                 }
               },
-              onData: (_, inspectorAdapters) => {
+              onData: (newData, inspectorAdapters) => {
+                visData$.next(newData);
                 inspectorAdapters$.next(
                   typeof inspectorAdapters === 'function' ? inspectorAdapters() : inspectorAdapters
                 );
