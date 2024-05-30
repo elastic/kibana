@@ -217,12 +217,17 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
 }
 
 function compareLiteralType(argType: string, item: ESQLLiteral) {
+  if (item.literalType === 'null') {
+    return true;
+  }
+
   if (item.literalType !== 'string') {
     if (argType === item.literalType) {
       return true;
     }
     return false;
   }
+
   if (argType === 'chrono_literal') {
     return chronoLiterals.some(({ name }) => name === item.text);
   }
@@ -423,7 +428,7 @@ export function isEqualType(
     }
     const wrappedTypes = Array.isArray(validHit.type) ? validHit.type : [validHit.type];
     // if final type is of type any make it pass for now
-    return wrappedTypes.some((ct) => ct === 'any' || argType === ct);
+    return wrappedTypes.some((ct) => ['any', 'null'].includes(ct) || argType === ct);
   }
 }
 
