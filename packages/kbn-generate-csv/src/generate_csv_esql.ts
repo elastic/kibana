@@ -8,7 +8,6 @@
 
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
@@ -95,7 +94,6 @@ export class CsvESQLGenerator {
         // we will need to add it back in once it is supported again.
         // https://github.com/elastic/elasticsearch/pull/102767
         // timezone
-        version: ESQL_LATEST_VERSION,
       },
     };
 
