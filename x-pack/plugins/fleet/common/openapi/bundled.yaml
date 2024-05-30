@@ -207,7 +207,7 @@ paths:
                       id:
                         type: string
                         nullable: true
-                        description: the key ID of the GPG key used to verify package signatures
+                        description: The key ID of the GPG key used to verify package signatures
                   statusCode:
                     type: number
                   headers:
