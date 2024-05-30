@@ -46,7 +46,7 @@ async function getSpacesUsage(
   }
 
   const knownFeatureIds = features.getKibanaFeatures().map((feature) => feature.id);
-  const knownSolutions = ['classic', 'search', 'observability', 'security'];
+  const knownSolutions = ['classic', 'search', 'observability', 'security', 'unset'];
 
   const resp = (await esClient.search({
     index: kibanaIndex,
@@ -71,6 +71,7 @@ async function getSpacesUsage(
           terms: {
             field: 'space.solution',
             size: knownSolutions.length,
+            missing: 'unset',
           },
         },
       },

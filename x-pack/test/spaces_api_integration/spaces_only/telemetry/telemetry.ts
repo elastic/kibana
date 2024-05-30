@@ -106,6 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
         search: 1,
         observability: 0,
         classic: 0,
+        unset: 2,
       });
     });
   });
