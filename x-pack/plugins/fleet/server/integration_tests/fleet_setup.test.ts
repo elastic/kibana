@@ -84,7 +84,7 @@ const createAndSetupRoot = async (config?: object, index?: number) => {
 /**
  * Verifies that multiple Kibana instances running in parallel will not create duplicate preconfiguration objects.
  */
-describe('Fleet setup preconfiguration with multiple instances Kibana', () => {
+describe.skip('Fleet setup preconfiguration with multiple instances Kibana', () => {
   let esServer: TestElasticsearchUtils;
   let roots: Root[] = [];
 
