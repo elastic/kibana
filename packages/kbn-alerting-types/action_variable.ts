@@ -23,6 +23,9 @@ type FlattenKeys<T extends Record<string, unknown>, Key = keyof T> = Key extends
     : `${Key}`
   : never;
 
+/**
+ * All valid action context variables
+ */
 export interface ActionContextVariables {
   alertId: string;
   alertName: string;
@@ -55,6 +58,9 @@ export interface ActionContextVariables {
   };
 }
 
+/**
+ * All valid summarized action context variables
+ */
 export type SummaryActionContextVariables = ActionContextVariables & {
   alerts: {
     new: {
@@ -76,6 +82,13 @@ export type SummaryActionContextVariables = ActionContextVariables & {
   };
 };
 
+/**
+ * This type takes a deep nested object and returns all flattened keys as a union.
+ * This is needed for the UI where the context variables are used as flattened keys.
+ * We need to remove params and add it ourselves because FlattenKeys
+ * produces `params.${string}` for the params which leads to a TS error
+ * in the UI when the key of the record is `params`
+ */
 export type ActionContextVariablesFlatten =
   | FlattenKeys<Omit<ActionContextVariables, 'context' | 'state' | 'params'>>
   | 'params'
