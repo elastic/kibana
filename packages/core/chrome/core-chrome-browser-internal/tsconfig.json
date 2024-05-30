@@ -52,6 +52,9 @@
     "@kbn/core-base-browser-mocks",
     "@kbn/logging",
     "@kbn/logging-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/react-kibana-context-render",
   ],
   "exclude": [
     "target/**/*",

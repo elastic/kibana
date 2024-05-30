@@ -2017,6 +2017,9 @@
           "name": {
             "type": "keyword"
           },
+          "requires_root": {
+            "type": "boolean"
+          },
           "title": {
             "type": "keyword"
           },
@@ -3059,6 +3062,9 @@
           }
         },
         "type": "text"
+      },
+      "solution": {
+        "type": "keyword"
       }
     }
   },

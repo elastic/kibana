@@ -17,6 +17,7 @@ import {
   enableInfrastructureContainerAssetView,
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureAssetCustomDashboards,
 } from '@kbn/observability-plugin/common';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -24,6 +25,7 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import { PageTemplate } from '../../../components/page_template';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
@@ -33,8 +35,6 @@ import { NameConfigurationPanel } from './name_configuration_panel';
 import { useSourceConfigurationFormState } from './source_configuration_form_state';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { settingsTitle } from '../../../translations';
-
-import { MetricsPageTemplate } from '../page_template';
 import { FeaturesConfigurationPanel } from './features_configuration_panel';
 interface SourceConfigurationSettingsProps {
   shouldAllowEdit: boolean;
@@ -71,12 +71,10 @@ export const SourceConfigurationSettings = ({
   }, [http]);
 
   const {
-    createSourceConfiguration,
+    persistSourceConfiguration: updateSourceConfiguration,
     source,
     sourceExists,
     isLoading,
-    isUninitialized,
-    updateSourceConfiguration,
   } = useSourceContext();
 
   const {
@@ -91,6 +89,7 @@ export const SourceConfigurationSettings = ({
   const infraUiSettings = useEditableSettings([
     enableInfrastructureHostsView,
     enableInfrastructureProfilingIntegration,
+    enableInfrastructureAssetCustomDashboards,
     enableInfrastructureContainerAssetView,
   ]);
 
@@ -101,9 +100,7 @@ export const SourceConfigurationSettings = ({
 
   const persistUpdates = useCallback(async () => {
     await Promise.all([
-      sourceExists
-        ? updateSourceConfiguration(formStateChanges)
-        : createSourceConfiguration(formState),
+      updateSourceConfiguration(sourceExists ? formStateChanges : formState),
       infraUiSettings.saveAll(),
     ]);
     resetForm();
@@ -113,7 +110,6 @@ export const SourceConfigurationSettings = ({
     updateSourceConfiguration,
     formStateChanges,
     infraUiSettings,
-    createSourceConfiguration,
     formState,
   ]);
 
@@ -130,12 +126,12 @@ export const SourceConfigurationSettings = ({
 
   const { hasInfraMLCapabilities } = useInfraMLCapabilitiesContext();
 
-  if ((isLoading || isUninitialized) && !source) {
+  if (isLoading && !source) {
     return <SourceLoadingPage />;
   }
 
   return (
-    <MetricsPageTemplate
+    <PageTemplate
       pageHeader={{
         pageTitle: settingsTitle,
       }}
@@ -219,6 +215,6 @@ export const SourceConfigurationSettings = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-    </MetricsPageTemplate>
+    </PageTemplate>
   );
 };

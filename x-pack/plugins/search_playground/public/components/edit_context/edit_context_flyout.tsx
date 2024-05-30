@@ -85,7 +85,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
   }, [usageTracker]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} size="s">
+    <EuiFlyout ownFocus onClose={onClose} size="s" data-test-subj="editContextFlyout">
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2>
@@ -172,6 +172,7 @@ export const EditContextFlyout: React.FC<EditContextFlyoutProps> = ({ onClose })
                           options={group.source_fields.map((field) => ({
                             value: field,
                             inputDisplay: field,
+                            'data-test-subj': 'contextField',
                           }))}
                           valueOfSelected={tempSourceFields[index]?.[0]}
                           onChange={(value) => updateSourceField(index, value)}

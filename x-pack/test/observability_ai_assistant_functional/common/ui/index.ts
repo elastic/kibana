@@ -6,17 +6,16 @@
  */
 
 import type { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
+import { kbnTestConfig } from '@kbn/test';
 import type { ObservabilityAIAssistantRoutes } from '@kbn/observability-ai-assistant-app-plugin/public/routes/config';
 import qs from 'query-string';
-import type { Role } from '@kbn/security-plugin-types-common';
-import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '@kbn/observability-ai-assistant-plugin/common/feature';
-import { APM_SERVER_FEATURE_ID } from '@kbn/apm-plugin/server';
+import { User } from '../../../observability_ai_assistant_api_integration/common/users/users';
 import type { InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 export interface ObservabilityAIAssistantUIService {
   pages: typeof pages;
   auth: {
-    login: () => Promise<void>;
+    login: (username: User['username']) => Promise<void>;
     logout: () => Promise<void>;
   };
   router: {
@@ -54,42 +53,20 @@ export async function ObservabilityAIAssistantUIProvider({
   getPageObjects,
   getService,
 }: InheritedFtrProviderContext): Promise<ObservabilityAIAssistantUIService> {
-  const browser = getService('browser');
-  const deployment = getService('deployment');
-  const security = getService('security');
-  const pageObjects = getPageObjects(['common']);
-
-  const roleDefinition: Role = {
-    name: 'observability-ai-assistant-functional-test-role',
-    elasticsearch: {
-      cluster: [],
-      indices: [],
-      run_as: [],
-    },
-    kibana: [
-      {
-        spaces: ['*'],
-        base: [],
-        feature: {
-          actions: ['all'],
-          [APM_SERVER_FEATURE_ID]: ['all'],
-          [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID]: ['all'],
-        },
-      },
-    ],
-  };
+  const pageObjects = getPageObjects(['common', 'security']);
 
   return {
     pages,
     auth: {
-      login: async () => {
-        await browser.navigateTo(deployment.getHostPort());
-        await security.role.create(roleDefinition.name, roleDefinition);
-        await security.testUser.setRoles([roleDefinition.name, 'apm_user', 'viewer']); // performs a page reload
+      login: async (username: string) => {
+        const { password } = kbnTestConfig.getUrlParts();
+
+        await pageObjects.security.login(username, password, {
+          expectSpaceSelector: false,
+        });
       },
       logout: async () => {
-        await security.role.delete(roleDefinition.name);
-        await security.testUser.restoreDefaults();
+        await pageObjects.security.forceLogout();
       },
     },
     router: {
