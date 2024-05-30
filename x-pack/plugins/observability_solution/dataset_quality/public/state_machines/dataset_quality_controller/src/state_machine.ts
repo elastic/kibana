@@ -660,9 +660,7 @@ export const createPureDatasetQualityControllerStateMachine = (
       },
       guards: {
         checkIfActionForbidden: (context, event) => {
-          return (
-            'data' in event && 'message' in event.data && /forbidden/i.test(event.data.message)
-          );
+          return 'data' in event && 'statusCode' in event.data && event.data.statusCode === 403;
         },
       },
     }

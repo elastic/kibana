@@ -23,12 +23,12 @@ class DatasetQualityPrivileges {
     });
 
     const indexesList = Object.keys(indexPrivileges.index);
-    return indexesList.reduce((acc, index) => {
+    return indexesList.reduce<Record<string, boolean>>((acc, index) => {
       const privilegesList = Object.values(indexPrivileges.index[index]);
       const hasAllPrivileges = privilegesList.every((hasPrivilege) => hasPrivilege);
 
       return Object.assign(acc, { [index]: hasAllPrivileges });
-    }, {} as Record<string, boolean>);
+    }, {});
   }
 
   public async getCanViewIntegrations(

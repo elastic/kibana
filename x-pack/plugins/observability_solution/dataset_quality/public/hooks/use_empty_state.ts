@@ -12,7 +12,7 @@ export function useEmptyState() {
 
   const canReadDataset = useSelector(
     service,
-    (state) => state.context.datasetUserPrivileges?.canRead ?? true
+    (state) => state.context.datasetUserPrivileges.canRead
   );
 
   const isDatasetEmpty = useSelector(

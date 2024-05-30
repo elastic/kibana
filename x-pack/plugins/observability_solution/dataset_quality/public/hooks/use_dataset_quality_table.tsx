@@ -40,7 +40,7 @@ export const useDatasetQualityTable = () => {
   const isSizeStatsAvailable = useSelector(service, (state) => state.context.isSizeStatsAvailable);
   const canUserMonitorDataset = useSelector(
     service,
-    (state) => state.context.datasetUserPrivileges?.canMonitor ?? true
+    (state) => state.context.datasetUserPrivileges.canMonitor
   );
   const canUserMonitorAnyDataStream = useSelector(
     service,

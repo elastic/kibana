@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
+import useToggle from 'react-use/lib/useToggle';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -72,13 +73,9 @@ export const PrivilegesWarningIconWrapper = ({
   iconColor?: EuiButtonIconPropsForButton['color'];
   children: React.ReactNode;
 }) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, togglePopover] = useToggle(false);
 
-  const handleButtonClick = useCallback(
-    () => setIsPopoverOpen((_isPopoverOpen) => !_isPopoverOpen),
-    []
-  );
-  const handleClosePopover = useCallback(() => setIsPopoverOpen(false), []);
+  const handleButtonClick = useCallback(() => togglePopover(true), [togglePopover]);
 
   if (hasPrivileges) {
     return <>{children}</>;
@@ -100,7 +97,7 @@ export const PrivilegesWarningIconWrapper = ({
         />
       }
       isOpen={isPopoverOpen}
-      closePopover={handleClosePopover}
+      closePopover={togglePopover}
     >
       {insufficientPrivilegesText} {/* <LearnMoreLink /> TODO: Add docs link when available */}
     </EuiPopover>

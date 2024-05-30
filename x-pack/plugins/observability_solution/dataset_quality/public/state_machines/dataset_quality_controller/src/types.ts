@@ -102,7 +102,7 @@ export interface WithIntegrations {
 }
 
 export type DefaultDatasetQualityControllerState = { type: string } & WithTableOptions &
-  Partial<WithDataStreamStats> &
+  WithDataStreamStats &
   Partial<WithDegradedDocs> &
   WithFlyoutOptions &
   WithDatasets &

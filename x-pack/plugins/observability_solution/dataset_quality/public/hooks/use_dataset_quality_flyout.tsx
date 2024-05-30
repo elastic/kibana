@@ -40,7 +40,7 @@ export const useDatasetQualityFlyout = () => {
 
   const canUserViewIntegrations = useSelector(
     service,
-    (state) => state.context.datasetUserPrivileges?.canViewIntegrations ?? true
+    (state) => state.context.datasetUserPrivileges.canViewIntegrations
   );
 
   return {
