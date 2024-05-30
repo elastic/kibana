@@ -8,6 +8,7 @@
 import { omitBy, isUndefined } from 'lodash';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { Logger, SavedObjectsClientContract, SavedObjectsUtils } from '@kbn/core/server';
+import { retryIfConflicts } from '@kbn/alerting-plugin/server/lib/retry_if_conflicts';
 import { ConnectorToken } from '../types';
 import { CONNECTOR_TOKEN_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
@@ -107,22 +108,10 @@ export class ConnectorTokenClient {
         id
       );
     const createTime = Date.now();
-    const conflicts = await this.unsecuredSavedObjectsClient.checkConflicts([
-      { id, type: 'connector_token' },
-    ]);
+
     try {
-      if (conflicts.errors.length > 0) {
-        this.logger.error(
-          `Failed to update connector_token for id "${id}" and tokenType: "${
-            tokenType ?? 'access_token'
-          }". ${conflicts.errors.reduce(
-            (messages, errorObj) => `Error: ${errorObj.error.message} ${messages}`,
-            ''
-          )}`
-        );
-        return null;
-      } else {
-        const result = await this.unsecuredSavedObjectsClient.create<ConnectorToken>(
+      const updateOperation = () => {
+        return this.unsecuredSavedObjectsClient.create<ConnectorToken>(
           CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
           {
             ...attributes,
@@ -141,8 +130,16 @@ export class ConnectorTokenClient {
             isUndefined
           )
         );
-        return result.attributes as ConnectorToken;
-      }
+      };
+
+      const result = await retryIfConflicts(
+        this.logger,
+        `accessToken.create('${id}')`,
+        updateOperation,
+        3
+      );
+
+      return result.attributes as ConnectorToken;
     } catch (err) {
       this.logger.error(
         `Failed to update connector_token for id "${id}" and tokenType: "${
@@ -178,7 +175,7 @@ export class ConnectorTokenClient {
             perPage: MAX_TOKENS_RETURNED,
             type: CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
             filter: `${CONNECTOR_TOKEN_SAVED_OBJECT_TYPE}.attributes.connectorId: "${connectorId}"${tokenTypeFilter}`,
-            sortField: 'updatedAt',
+            sortField: 'updated_at',
             sortOrder: 'desc',
           })
         ).saved_objects
