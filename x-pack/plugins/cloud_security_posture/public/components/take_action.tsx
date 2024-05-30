@@ -20,6 +20,7 @@ import {
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HttpSetup } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n as kbnI18n } from '@kbn/i18n';
 import { QueryClient, useQueryClient } from '@tanstack/react-query';
 import type { RuleResponse } from '../common/types';
 import { CREATE_RULE_ACTION_SUBJ, TAKE_ACTION_SUBJ } from './test_subjects';
@@ -197,7 +198,9 @@ export const TakeAction = ({
     </EuiButton>
   ) : (
     <EuiButtonIcon
-      aria-label="More actions"
+      aria-label={kbnI18n.translate('xpack.csp.flyout.moreActionsButton', {
+        defaultMessage: 'More actions',
+      })}
       iconType="boxesHorizontal"
       color="primary"
       isLoading={isLoading}
