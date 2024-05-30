@@ -31,6 +31,7 @@ interface ESQLDatatableProps {
   dataView: DataView;
   columns: DatatableColumn[];
   query: AggregateQuery;
+  flyoutType?: 'overlay' | 'push';
 }
 
 type DataTableColumnsMeta = Record<
@@ -72,8 +73,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
         onFilter={undefined}
-        // can possibly change to push if on conversations app
-        flyoutType="overlay"
+        flyoutType={props.flyoutType ?? 'push'}
         onRemoveColumn={(column) => {
           setActiveColumns(activeColumns.filter((c) => c !== column));
         }}
@@ -85,7 +85,7 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
         query={props.query}
       />
     ),
-    [activeColumns, deps?.core.notifications, props.dataView, props.query]
+    [activeColumns, deps?.core.notifications, props.dataView, props.flyoutType, props.query]
   );
 
   if (loading || !deps) return <EuiLoadingSpinner />;

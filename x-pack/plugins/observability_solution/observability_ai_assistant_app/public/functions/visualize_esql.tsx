@@ -337,6 +337,8 @@ export function VisualizeESQL({
           columns={columns}
           dataView={dataViewAsync.value}
           query={{ esql: query }}
+          // could possibly be set to push when is being rendered on the conversations app
+          flyoutType="overlay"
         />
       )}
       {isSaveModalOpen ? (
