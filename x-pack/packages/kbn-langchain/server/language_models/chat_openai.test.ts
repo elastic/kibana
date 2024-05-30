@@ -60,10 +60,9 @@ const mockRequest = {
 } as ActionsClientChatOpenAIParams['request'];
 
 const defaultArgs = {
-  actions: mockActions,
+  actionsClient: mockActions,
   connectorId,
   logger: mockLogger,
-  request: mockRequest,
   streaming: false,
   signal,
   timeout: 999999,

@@ -24,6 +24,9 @@ export * from './common_attributes.gen';
 // Attack discovery Schemas
 export * from './attack_discovery/post_attack_discovery_route.gen';
 
+// Chat Schemas
+export * from './chat/post_chat_complete_route.gen';
+
 // Evaluation Schemas
 export * from './evaluation/post_evaluate_route.gen';
 export * from './evaluation/get_evaluate_route.gen';

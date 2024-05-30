@@ -30,7 +30,7 @@ export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
  */
 export const callAgentExecutor: AgentExecutor<true | false> = async ({
   abortSignal,
-  actions,
+  actionsClient,
   alertsIndexPattern,
   anonymizationFields,
   isEnabledKnowledgeBase,
@@ -53,9 +53,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   const llmClass = isOpenAI ? ActionsClientChatOpenAI : ActionsClientSimpleChatModel;
 
   const llm = new llmClass({
-    actions,
+    actionsClient,
     connectorId,
-    request,
     llmType,
     logger,
     // possible client model override,

@@ -46,10 +46,9 @@ describe('ActionsClientLlm', () => {
   describe('getActionResultData', () => {
     it('returns the expected data', async () => {
       const actionsClientLlm = new ActionsClientLlm({
-        actions: mockActions,
+        actionsClient: mockActions,
         connectorId,
         logger: mockLogger,
-        request: mockRequest,
       });
 
       const result = await actionsClientLlm._call(prompt); // ignore the result

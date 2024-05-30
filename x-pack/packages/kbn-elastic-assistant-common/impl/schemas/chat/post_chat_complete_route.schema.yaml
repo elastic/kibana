@@ -1,0 +1,171 @@
+openapi: 3.0.0
+info:
+  title: Chat Complete API endpoint
+  version: '2023-10-31'
+paths:
+  /api/elastic_assistant/chat/complete:
+    post:
+      operationId: ChatComplete
+      x-codegen-enabled: true
+      description: Creates a model response for the given chat conversation.
+      summary: Creates a model response for the given chat conversation.
+      tags:
+        - Chat Complete API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatCompleteProps'
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        400:
+          description: Generic Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+
+components:
+  schemas:
+    RootContext:
+      type: string
+      enum:
+        - security
+
+    ChatMessageRole:
+      type: string
+      description: Message role.
+      enum:
+        - system
+        - user
+        - assistant
+        - function
+        - elastic
+
+    TriggerType:
+      type: string
+      description: Message role.
+      enum:
+        - user
+        - assistant
+        - elastic
+
+    TriggerArguments:
+      type: object
+      additionalProperties: true
+
+    TriggerData:
+      type: object
+      additionalProperties: true
+
+    InstructionsObject:
+      type: object
+      description: AI assistant message.
+      properties:
+        doc_id:
+          type: string
+        text: 
+          type: string
+
+    FunctionCall: 
+      type: object
+      description: AI assistant message.
+      required:
+        - 'trigger'
+      properties:
+        trigger:
+          $ref: '#/components/schemas/TriggerType'
+          description: Trigger type.
+        arguments:
+          $ref: '#/components/schemas/TriggerArguments'
+        data: 
+          $ref: '#/components/schemas/TriggerData'
+
+    MessageData:
+      type: object
+      additionalProperties: true
+
+    ChatMessage:
+      type: object
+      description: AI assistant message.
+      required:
+        - '@timestamp'
+        - 'role'
+      properties:
+        content:
+          type: string
+          description: Message content.
+        name:
+          type: string
+          description: Message name.
+        function_call:
+          $ref: '#/components/schemas/FunctionCall'
+          description: Function definition.
+        role:
+          $ref: '#/components/schemas/ChatMessageRole'
+          description: Message role.
+        '@timestamp':
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          description: The timestamp message was sent or received.
+        data:
+          description: ECS objects array to attach to the context of the message.
+          type: array
+          items:
+              $ref: '#/components/schemas/MessageData'
+        fields_to_anonymize:
+          type: array
+          items:
+            type: string
+
+    ChatCompleteProps:
+      type: object
+      properties:
+        context:
+          $ref: '#/components/schemas/RootContext'
+          description: Solution context.
+        conversationId:
+          type: string
+        responseLanguage:
+          type: string
+        langSmithProject:
+          type: string
+        langSmithApiKey:
+          type: string
+        disableFunctions:
+          type: boolean
+        connectorId:
+          type: string
+        model:
+          type: string
+        title:
+          type: string
+        persist:
+          type: boolean
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/ChatMessage'
+        instructions:
+          type: array
+          items:
+              oneOf:
+                - $ref: '#/components/schemas/InstructionsObject'
+                - type: string
+      required:
+        - messages
+        - persist
+        - connectorId

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { BaseMessage } from '@langchain/core/messages';
 import { Logger } from '@kbn/logging';
@@ -14,6 +14,7 @@ import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ExecuteConnectorRequestBody, Message, Replacements } from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
@@ -21,7 +22,7 @@ import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 export interface AgentExecutorParams<T extends boolean> {
   abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
-  actions: ActionsPluginStart;
+  actionsClient: PublicMethodsOf<ActionsClient>;
   anonymizationFields?: AnonymizationFieldResponse[];
   isEnabledKnowledgeBase: boolean;
   assistantTools?: AssistantTool[];

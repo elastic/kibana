@@ -87,10 +87,9 @@ const mockRequest: CustomChatModelInput['request'] = {
 } as CustomChatModelInput['request'];
 
 const defaultArgs = {
-  actions: mockActions,
+  actionsClient: mockActions,
   connectorId,
   logger: mockLogger,
-  request: mockRequest,
   streaming: false,
 };
 jest.mock('../utils/bedrock');
