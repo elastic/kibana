@@ -41,14 +41,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('xyVisChart');
 
       // expect the button is shown and enabled
+
       await testSubjects.clickWhenNotDisabledWithoutRetry(`lnsApp_openInDiscover`);
 
       const [lensWindowHandler, discoverWindowHandle] = await browser.getAllWindowHandles();
       await browser.switchToWindow(discoverWindowHandle);
 
-      if (await testSubjects.exists('globalLoadingIndicator')) {
-        await PageObjects.header.waitUntilLoadingHasFinished();
-      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('unifiedHistogramChart');
       // check the table columns
       const columns = await PageObjects.discover.getColumnHeaders();
