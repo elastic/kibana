@@ -19,4 +19,6 @@ export interface InjectionRequestHandlerContext {
    * and to the plugin that registered the handler.
    */
   container: interfaces.Container;
+
+  dispose(): void;
 }

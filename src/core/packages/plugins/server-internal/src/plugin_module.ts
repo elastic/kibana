@@ -57,7 +57,11 @@ export function createPluginSetupModule(context: CoreSetup): interfaces.Containe
         register(route, async ({ core }) => {
           const { injection } = await core;
 
-          return injection.container.get<IRouteHandler>(route).handle();
+          try {
+            return await injection.container.get<IRouteHandler>(route).handle();
+          } finally {
+            injection.dispose();
+          }
         });
 
         return router;

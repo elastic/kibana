@@ -43,4 +43,12 @@ export class CoreInjectionRouteHandlerContext implements InjectionRequestHandler
       this.injectionServiceStart.getContainer(this.callerId, this.#container) ?? this.#container
     );
   }
+
+  public dispose(): void {
+    if (!this.#container) {
+      return;
+    }
+
+    this.injectionServiceStart.dispose(this.#container);
+  }
 }
