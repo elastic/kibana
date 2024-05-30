@@ -16,7 +16,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'lens',
     'discover',
-    'visualize',
   ]);
 
   const find = getService('find');
@@ -349,8 +348,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getTitle()).to.be('test');
       // need to delete the lens visualization or it messes up the next test
       await PageObjects.common.navigateToApp('visualize');
-      await listingTable.selectFirstItemInList();
-      await testSubjects.click('deleteSelectedItems');
+      await listingTable.deleteItem('test');
+      await listingTable.waitUntilTableIsLoaded();
     });
   });
 }
