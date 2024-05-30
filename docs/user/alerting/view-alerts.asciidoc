@@ -5,25 +5,53 @@
 :frontmatter-tags-content-type: [how-to]
 :frontmatter-tags-user-goals: [manage]
 
-You can view a rule's alerts when you <<rule-details,view its details>> in *{stack-manage-app}* > *{rules-ui}*.
+When the conditions of a rule are met, it creates an alert.
+If the rule has actions, they run at the defined frequency.
+For example, the rule can send email notifications for each alert at a custom interval.
+For an introduction to the concepts of rules, alerts, and actions, refer to <<alerting-getting-started>>.
 
-preview:[] Alternatively, you can list, filter, and manage your alerts in *{stack-manage-app}* > *Alerts*.
-
-[float]
-=== Required permissions
-
-Access to alerts is granted based on your {alert-features} privileges.
-For more information, go to <<alerting-security>>.
+You can manage the alerts for each rule in *{stack-manage-app}* > *{rules-ui}*.
+Alternatively, manage all your alerts in *{stack-manage-app}* > *Alerts*. preview:[] 
 
 // [role="screenshot"]
 // image::images/alerts-page.png[Alerts page]
 
+[NOTE]
+====
+You must have the appropriate {kib} {alert-features} and index privileges to view alerts.
+Refer to <<alerting-security,Alerting security requirements>>.
+====
+
+[discrete]
+[[filter-alerts]]
+=== Filter alerts
+
+preview::[]
+
+In *{stack-manage-app}* > *Alerts*, you can filter the list by alert status or time period.
+By default, the list contains all the alerts that you have authority to view except those associated with Security rules.
+To view alerts for Security rules, click the query menu and select *Security rule types*.
+
+NOTE: To view or manage alerts for Security rules, you must have the appropriate {kib} feature privileges and index privileges.
+Refer to {security-guide}/detections-permissions-section.html#enable-detections-ui[Enable and access detections].
+
+To search for specific alerts, use the KQL bar to create structured queries using {kibana-ref}/kuery-query.html[{kib} Query Language].
+
+[discrete]
+[[view-alert-details]]
+=== View alert details
+
+To get more information about a specific alert, open its action menu (…) and select *View alert details* in either *{stack-manage-app} > Alerts* or *{rules-ui}*.
+There you'll see the current status of the alert, its duration, and when it was last updated.
+To help you determine what caused the alert, there is information such as the expected and actual threshold values and a summarized reason for the alert.
+
+If an alert is affected by a maintenance window, the alert details include its identifier.
+For more information about their impact on alert notifications, refer to <<maintenance-windows>>.
+
 [discrete]
 [[alert-status]]
-=== Alert statuses
+==== Alert statuses
 
-When an alert is created, it generates actions.
-If the conditions that caused the alert persist, the actions run again according to the rule notification settings.
 There are four common alert statuses:
 
 `active`:: The conditions for the rule are met and actions should be generated according to the notification settings.
@@ -36,28 +64,13 @@ There are four common alert statuses:
 The `flapping` state is possible only if you have enabled alert flapping detection in *{stack-manage-app} > {rules-ui} > Settings*. For each space, you can choose a look back window and threshold that are used to determine whether alerts are flapping. For example, you can specify that the alert must change status at least 6 times in the last 10 runs. If the rule has actions that run when the alert status changes, those actions are suppressed while the alert is flapping.
 ====
 
-If an alert was affected by a maintenance window, its identifier appears in the *Maintenance windows* column.
-For more information about their impact on alert notifications, refer to <<maintenance-windows>>.
 
 [discrete]
 [[mute-alerts]]
 === Mute alerts
 
-You can mute an alert to temporarily suppress future actions.
-Open the action menu (…) for the appropriate alert in the table and select *Mute*.
+If an alert is active or flapping, you can mute it to temporarily suppress future actions.
+In both *{stack-manage-app} > Alerts* and *{rules-ui}*, you can open the action menu (…) for the appropriate alert and select *Mute*.
 To permanently suppress actions for an alert, open the actions menu and select *Mark as untracked*.
 
 To affect the behavior of the rule rather than individual alerts, check out <<controlling-rules>>.
-////
-[discrete]
-[[filter-alerts]]
-=== Filter alerts
-
-TBD
-
-[discrete]
-[[customize-alerts-table]]
-=== Customize the alerts table
-
-TBD
-////
