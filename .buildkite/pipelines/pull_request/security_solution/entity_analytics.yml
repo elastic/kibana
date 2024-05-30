@@ -1,6 +1,6 @@
 steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_entity_analytics.sh
-    label: "Serverless Entity Analytics - Security Cypress Tests"
+    label: 'Serverless Entity Analytics - Security Cypress Tests'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -11,11 +11,11 @@ steps:
     parallelism: 3
     retry:
       automatic:
-        - exit_status: "-1"
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_entity_analytics.sh
-    label: "Entity Analytics - Security Solution Cypress Tests"
+    label: 'Entity Analytics - Security Solution Cypress Tests'
     agents:
       machineType: n2-standard-4
       preemptible: true
@@ -26,5 +26,5 @@ steps:
     parallelism: 2
     retry:
       automatic:
-        - exit_status: "-1"
+        - exit_status: '-1'
           limit: 1

@@ -1,11 +1,11 @@
 steps:
   - command: .buildkite/scripts/steps/next_docs/build_and_validate_docs.sh
-    label: "Build and Validate Next Docs"
+    label: 'Build and Validate Next Docs'
     agents:
       machineType: n2-standard-4
       preemptible: true
     timeout_in_minutes: 30
     retry:
       automatic:
-        - exit_status: "-1"
+        - exit_status: '-1'
           limit: 3
