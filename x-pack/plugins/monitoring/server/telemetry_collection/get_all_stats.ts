@@ -68,7 +68,7 @@ export function handleAllStats(
     beats: BeatsStatsByClusterUuid;
   }
 ) {
-  return clusters.map((cluster) => {
+  const mappedClusters = clusters.map((cluster) => {
     const stats = {
       ...cluster,
       stack_stats: {
@@ -84,6 +84,25 @@ export function handleAllStats(
 
     return stats;
   });
+
+  const mappedClusterUuids = mappedClusters.map(
+    (cluster) => cluster.cluster_uuid || cluster?.elasticsearch?.cluster?.id
+  );
+
+  // Logstash agent driven monitoring isn't based on cluster UUID
+  // or standalone LS clusters will be reported with monitoring cluster UUIDs
+  return Object.entries(logstash)
+    .filter(([clusterUuid]) => !mappedClusterUuids.includes(clusterUuid))
+    .map(([clusterUuid, logstashBaseStats]) => ({
+      cluster_name: LOGSTASH_SYSTEM_ID,
+      timestamp: `${moment.utc().format()}`,
+      version: logstashBaseStats.versions.length > 0 ? logstashBaseStats.versions[0].version : '',
+      cluster_uuid: clusterUuid,
+      stack_stats: {
+        [LOGSTASH_SYSTEM_ID]: logstashBaseStats,
+      },
+      cluster_stats: {},
+    }));
 }
 
 export function getStackStats<T extends { [clusterUuid: string]: K }, K>(

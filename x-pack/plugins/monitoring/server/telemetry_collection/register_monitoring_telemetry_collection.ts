@@ -57,6 +57,7 @@ export function registerMonitoringTelemetryCollection(
               },
               count: { type: 'long' },
               cluster_stats: {
+                monitoringClusterUuid: { type: 'keyword' },
                 collection_types: {
                   DYNAMIC_KEY: { type: 'long' },
                 },
