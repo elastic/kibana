@@ -142,6 +142,7 @@ steps.push({
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
 });
 
+let suiteIndex = 0;
 for (const testSuite of testSuites) {
   const TEST_SUITE = testSuite.key;
   const RUN_COUNT = testSuite.count;
@@ -162,6 +163,7 @@ for (const testSuite of testSuites) {
         steps.push({
           command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/xpack_cigroup.sh`,
           label: `Default CI Group ${CI_GROUP}`,
+          key: `test-group-${suiteIndex++}`,
           agents: getAgentRule('n2-4'),
           depends_on: 'build',
           parallelism: RUN_COUNT,
@@ -173,6 +175,7 @@ for (const testSuite of testSuites) {
         steps.push({
           command: `CI_GROUP=${CI_GROUP} .buildkite/scripts/steps/functional/oss_cigroup.sh`,
           label: `OSS CI Group ${CI_GROUP}`,
+          key: `test-group-${suiteIndex++}`,
           agents: getAgentRule('n2-4-spot'),
           depends_on: 'build',
           parallelism: RUN_COUNT,
@@ -187,6 +190,7 @@ for (const testSuite of testSuites) {
       steps.push({
         command: `.buildkite/scripts/steps/functional/${IS_XPACK ? 'xpack' : 'oss'}_firefox.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Firefox`,
+        key: `test-group-${suiteIndex++}`,
         agents: getAgentRule(IS_XPACK ? 'n2-4' : 'n2-4-spot'),
         depends_on: 'build',
         parallelism: RUN_COUNT,
@@ -202,6 +206,7 @@ for (const testSuite of testSuites) {
           IS_XPACK ? 'xpack' : 'oss'
         }_accessibility.sh`,
         label: `${IS_XPACK ? 'Default' : 'OSS'} Accessibility`,
+        key: `test-group-${suiteIndex++}`,
         agents: getAgentRule(IS_XPACK ? 'n2-4' : 'n2-4-spot'),
         depends_on: 'build',
         parallelism: RUN_COUNT,
