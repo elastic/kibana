@@ -332,7 +332,7 @@ class AgentPolicyService {
       {
         ...agentPolicy,
         status: 'active',
-        is_managed: agentPolicy.is_managed ?? false,
+        is_managed: (agentPolicy.is_managed || agentPolicy?.supports_agentless) ?? false,
         revision: 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username || 'system',
@@ -664,6 +664,7 @@ class AgentPolicyService {
           'download_source_id',
           'fleet_server_host_id',
           'supports_agentless',
+          'global_data_tags',
         ]),
         ...newAgentPolicyProps,
       },
