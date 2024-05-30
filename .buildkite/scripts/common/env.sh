@@ -47,6 +47,7 @@ export MERGE_QUEUE_TARGET_BRANCH
 BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
 export BUILDKITE_BRANCH_MERGE_QUEUE
 
+
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
@@ -137,8 +138,10 @@ if [[ "${FTR_ENABLE_FIPS_AGENT:-}" == "true" ]] || is_pr_with_label "ci:enable-f
   FIPS_ENABLED=true
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
 
-  echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"
-  echo "--openssl-config=$HOME/nodejs.cnf" >>"$KIBANA_DIR/config/node.options"
+  if [[ -f "$KIBANA_DIR/config/node.options" ]]; then
+    echo -e '\n--enable-fips' >>"$KIBANA_DIR/config/node.options"
+    echo "--openssl-config=$HOME/nodejs.cnf" >>"$KIBANA_DIR/config/node.options"
+  fi
 fi
 
 export FIPS_ENABLED
