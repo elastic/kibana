@@ -17,12 +17,21 @@ async function main() {
   );
   const buildLink = `[${buildkiteBuild.pipeline.slug}#${buildkiteBuild.number}](${buildkiteBuild.web_url})`;
 
+  console.log({
+    buildkiteBuild,
+    buildLink,
+  });
+
   // Calculate success metrics
   const jobs = buildkiteBuild.jobs;
+  console.log({ jobs });
   const testSuiteRuns = jobs.filter((step) => {
     return step.step_key?.includes('ftr-suite') || step.step_key?.includes('cypress-suite');
   });
+
   const testSuiteGroups = groupBy('name', testSuiteRuns);
+
+  console.log({ testSuiteGroups });
 
   const success = testSuiteRuns.every((job) => job.state === 'passed');
   const testGroupResults = Object.entries(testSuiteGroups).map(([name, group]) => {
