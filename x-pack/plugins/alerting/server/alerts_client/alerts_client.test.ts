@@ -528,6 +528,39 @@ describe('Alerts Client', () => {
           });
         });
 
+        test('should index a new alert when alert is snoozed', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
+            ...alertsClientParams,
+            rule: { ...alertsClientParams.rule, snoozed: true },
+          });
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+
+          // Report 1 new alert
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('1').scheduleActions('default');
+
+          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
+          const uuid1 = alertsToReturn['1'].meta?.uuid;
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: true,
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                create: { _id: uuid1, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
+              },
+              // new alert doc
+              getNewIndexedAlertDoc({ [ALERT_UUID]: uuid1, [ALERT_RULE_SNOOZED]: true }),
+            ],
+          });
+        });
+
         test('should not index new alerts if the activeCount is less than the rule alertDelay', async () => {
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>({
             ...alertsClientParams,
