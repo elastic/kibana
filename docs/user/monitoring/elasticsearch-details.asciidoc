@@ -108,13 +108,28 @@ model, the number of forecasts, and the node that runs the job.
 == CCR
 
 To view {ccr} metrics, click **CCR**. For each follower index on the cluster, it 
-shows information such as the leader index, an indication of how much the
-follower index is lagging behind the leader index, the last fetch time, the
-number of operations synced, and error messages. If you select a follower index,
-you can view the same information for each shard.
+shows the following information:
 
-If you select a shard, you can see graphs for the fetch and operation delays. 
-You can also see advanced information, which contains the results from the 
+- **Index**: The name of the follower index.
+- **Follows**: The name of the leader index.
+- **Alerts**: Any read exceptions that have been triggered for the index or its shards.
+- **Sync Lag (ops)**: How many operations the follower index is lagging behind the leader index. 
+This is calculated by subtracting the delta of `follower_global_checkpoint` from the delta of 
+`leader_max_seq_no` for each shard, and displaying the maximum value.
+- **Last fetch time**: The time elapsed since the last successful fetch from the leader index. 
+Represents the longest time elapsed across all of the shards in the follower index.
+- **Ops synced**: The number of operations indexed into the follower index from the leader index 
+in the selected time period. This is the sum of the delta between the maximum and minimum number of 
+operations indexed across all of the shards in the follower index during the time period.
+- **Error**: Any exceptions returned for the most recent document in the time period.
+
+For more information on the properties used to calculate these metrics, refer to the {ref}/ccr-get-follow-stats.html[get follower stats API] documentation.
+
+If you select a follower index, you can view the same information for each shard.
+
+If you select a shard, you can see graphs for the fetch and operation delays.
+
+You can also see advanced information, which contains additional stats from the 
 {ref}/ccr-get-follow-stats.html[get follower stats API].
 
 For more information, refer to {ref}/xpack-ccr.html[{ccr-cap}].
