@@ -12,7 +12,7 @@ import {
   FleetUnauthorizedError,
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
-import { v4 as uuidv4 } from 'uuid';
+import type { FullAgentPolicyInput } from '@kbn/fleet-plugin/common';
 import { dump } from 'js-yaml';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
 import {
@@ -21,7 +21,6 @@ import {
 } from '../../saved_objects/observability_onboarding_status';
 import { createObservabilityOnboardingServerRoute } from '../create_observability_onboarding_server_route';
 import { getHasLogs } from './get_has_logs';
-import { getSystemLogsDataStreams } from '../../../common/elastic_agent_logs';
 
 import { getFallbackESUrl } from '../../lib/get_fallback_urls';
 
@@ -250,9 +249,9 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       } as ObservabilityOnboardingFlow,
     });
 
-    let agentInputs: unknown[];
+    let agentPolicyInputs: Array<Partial<FullAgentPolicyInput>> = [];
     try {
-      agentInputs = await ensureInstalledIntegrations(integrationsToInstall, packageClient);
+      agentPolicyInputs = await ensureInstalledIntegrations(integrationsToInstall, packageClient);
     } catch (error) {
       if (error instanceof FleetUnauthorizedError) {
         return response.forbidden({
@@ -274,7 +273,7 @@ const integrationsInstallRoute = createObservabilityOnboardingServerRoute({
       },
       body: generateAgentConfig({
         esHost: elasticsearchUrl,
-        inputs: agentInputs,
+        inputs: agentPolicyInputs,
       }),
     });
   },
@@ -295,23 +294,22 @@ async function ensureInstalledIntegrations(
   integrationsToInstall: Integration[],
   packageClient: PackageClient
 ) {
-  const agentInputs: unknown[] = [];
+  const agentPolicyInputs: Array<Partial<FullAgentPolicyInput>> = [];
   for (const integration of integrationsToInstall) {
     const { pkgName, installSource } = integration;
     if (installSource === 'registry') {
-      await packageClient.ensureInstalledPackage({ pkgName });
-      agentInputs.push(...getSystemLogsDataStreams(uuidv4()));
+      const pkg = await packageClient.ensureInstalledPackage({ pkgName });
+      const inputs = await packageClient.getAgentPolicyInputs(pkg.name, pkg.version);
+      agentPolicyInputs.push(...inputs);
     } else if (installSource === 'custom') {
-      const input = {
-        id: `custom-logs-${uuidv4()}`,
-        type: 'logfile',
-        data_stream: {
-          namespace: 'default',
-        },
+      const input: Partial<FullAgentPolicyInput> = {
+        id: `filestream-${pkgName}`,
+        type: 'filestream',
         streams: [
           {
-            id: `logs-onboarding-${pkgName}`,
+            id: `filestream-${pkgName}`,
             data_stream: {
+              type: 'logs',
               dataset: pkgName,
             },
             paths: integration.logFilePaths,
@@ -323,18 +321,18 @@ async function ensureInstalledIntegrations(
           pkgName,
           datasets: [{ name: pkgName, type: 'logs' }],
         });
-        agentInputs.push(input);
+        agentPolicyInputs.push(input);
       } catch (error) {
         // If the error is a naming collision, we can assume the integration is already installed and treat this step as successful
         if (error instanceof NamingCollisionError) {
-          agentInputs.push(input);
+          agentPolicyInputs.push(input);
         } else {
           throw error;
         }
       }
     }
   }
-  return agentInputs;
+  return agentPolicyInputs;
 }
 
 /**
@@ -358,11 +356,12 @@ function parseIntegrationsTSV(tsv: string) {
       .split('\n')
       .map((line) => line.split('\t', 3))
       .reduce<Record<string, Integration>>((acc, [pkgName, installSource, logFilePath]) => {
+        const key = `${pkgName}-${installSource}`;
         if (installSource === 'registry') {
           if (logFilePath) {
             throw new Error(`Integration '${pkgName}' does not support a file path`);
           }
-          acc[pkgName] = {
+          acc[key] = {
             pkgName,
             installSource,
           };
@@ -372,12 +371,12 @@ function parseIntegrationsTSV(tsv: string) {
             throw new Error(`Missing file path for integration: ${pkgName}`);
           }
           // Append file path if integration is already in the list
-          const existing = acc[pkgName];
+          const existing = acc[key];
           if (existing && existing.installSource === 'custom') {
             existing.logFilePaths.push(logFilePath);
             return acc;
           }
-          acc[pkgName] = {
+          acc[key] = {
             pkgName,
             installSource,
             logFilePaths: [logFilePath],
@@ -389,7 +388,13 @@ function parseIntegrationsTSV(tsv: string) {
   );
 }
 
-const generateAgentConfig = ({ esHost, inputs = [] }: { esHost: string[]; inputs: unknown[] }) => {
+const generateAgentConfig = ({
+  esHost,
+  inputs = [],
+}: {
+  esHost: string[];
+  inputs: Array<Partial<FullAgentPolicyInput>>;
+}) => {
   return dump({
     outputs: {
       default: {

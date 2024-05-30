@@ -35,7 +35,7 @@ import { checkSuperuser, doesNotHaveRequiredFleetAuthz, getAuthzFromRequest } fr
 import { FleetError, FleetUnauthorizedError, PackageNotFoundError } from '../../errors';
 import { INSTALL_PACKAGES_AUTHZ, READ_PACKAGE_INFO_AUTHZ } from '../../routes/epm';
 
-import type { InstallResult } from '../../../common';
+import type { InstallResult, FullAgentPolicyInput } from '../../../common';
 
 import { appContextService } from '..';
 
@@ -46,7 +46,13 @@ import * as Registry from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
 
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
-import { ensureInstalledPackage, getInstallation, getPackages, installPackage } from './packages';
+import {
+  ensureInstalledPackage,
+  getInstallation,
+  getPackages,
+  installPackage,
+  getTemplateInputs,
+} from './packages';
 import { generatePackageInfoFromArchiveBuffer } from './archive';
 import { getEsPackage } from './archive/storage';
 
@@ -101,6 +107,12 @@ export interface PackageClient {
     category?: CategoryId;
     prerelease?: false;
   }): Promise<PackageList>;
+
+  getAgentPolicyInputs(
+    pkgName: string,
+    pkgVersion?: string,
+    prerelease?: false
+  ): Promise<Array<Partial<FullAgentPolicyInput>>>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -261,6 +273,27 @@ class PackageClientImpl implements PackageClient {
     const archiveBuffer = await bundledPackage.getBuffer();
 
     return generatePackageInfoFromArchiveBuffer(archiveBuffer, 'application/zip');
+  }
+
+  public async getAgentPolicyInputs(pkgName: string, pkgVersion?: string, prerelease?: false) {
+    await this.#runPreflight(READ_PACKAGE_INFO_AUTHZ);
+
+    // If pkgVersion isn't specified, find the latest package version
+    if (!pkgVersion) {
+      const pkg = await Registry.fetchFindLatestPackageOrThrow(pkgName, { prerelease });
+      pkgVersion = pkg.version;
+    }
+
+    const { inputs } = await getTemplateInputs(
+      this.internalSoClient,
+      pkgName,
+      pkgVersion,
+      'json',
+      prerelease
+    );
+
+    // The shape of inputs returned by `getTemplateInputs` does not seem to match its type definition so need to manually cast it
+    return inputs as unknown as Array<Partial<FullAgentPolicyInput>>;
   }
 
   public async getPackage(

@@ -61,6 +61,20 @@ export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string,
+  format: 'yml',
+  prerelease?: boolean
+): Promise<string>;
+export async function getTemplateInputs(
+  soClient: SavedObjectsClientContract,
+  pkgName: string,
+  pkgVersion: string,
+  format: 'json',
+  prerelease?: boolean
+): Promise<{ inputs: FullAgentPolicyInputStream[] }>;
+export async function getTemplateInputs(
+  soClient: SavedObjectsClientContract,
+  pkgName: string,
+  pkgVersion: string,
   format: Format,
   prerelease?: boolean
 ) {
