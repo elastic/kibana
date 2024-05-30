@@ -409,19 +409,11 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
       defaultMessage:
         'How often do you want to run this test? Higher frequencies will increase your total cost.',
     }),
-    props: ({ formState, setValue, field }): EuiSelectProps => {
-      const props: EuiSelectProps = {
-        'data-test-subj': 'syntheticsMonitorConfigSchedule',
-        options: getSchedules(formState.defaultValues?.[ConfigKey.MONITOR_TYPE]),
-        disabled: readOnly,
-      };
-      const val = formState?.defaultValues?.schedule?.number;
-      const unit = formState?.defaultValues?.schedule?.unit;
-      if (unit === 's') {
-        props.value = `${val}s`;
-      }
-      return props;
-    },
+    props: ({ formState }): EuiSelectProps => ({
+      'data-test-subj': 'syntheticsMonitorConfigSchedule',
+      options: getSchedules(formState.defaultValues?.[ConfigKey.MONITOR_TYPE]),
+      disabled: readOnly,
+    }),
   },
   [ConfigKey.LOCATIONS]: {
     fieldKey: ConfigKey.LOCATIONS,
