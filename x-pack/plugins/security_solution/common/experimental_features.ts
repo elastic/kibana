@@ -13,7 +13,6 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  */
 export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
-  tGridEventRenderedViewEnabled: true,
 
   // FIXME:PT delete?
   excludePoliciesInFilterEnabled: false,
