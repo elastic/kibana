@@ -7,7 +7,7 @@
  */
 
 import Rx, { firstValueFrom, lastValueFrom, of, throwError } from 'rxjs';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -95,6 +95,11 @@ describe('SearchSource', () => {
       search: mockSearchMethod,
       onResponse: jest.fn().mockImplementation((_, res) => res),
       scriptedFieldsEnabled: true,
+      // todo
+      dataViews: {
+        getMetaFields: jest.fn(),
+        getShortDotsEnable: jest.fn(),
+      } as unknown as jest.Mocked<DataViewsContract>,
     };
 
     searchSource = new SearchSource({}, searchSourceDependencies);

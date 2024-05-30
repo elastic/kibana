@@ -24,6 +24,10 @@ describe('createSearchSource', () => {
       search: jest.fn(),
       onResponse: (req, res) => res,
       scriptedFieldsEnabled: true,
+      dataViews: {
+        getMetaFields: jest.fn(),
+        getShortDotsEnable: jest.fn(),
+      } as unknown as DataViewsContract,
     };
 
     indexPatternContractMock = {

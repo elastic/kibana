@@ -68,6 +68,7 @@ import {
   pick,
   uniqueId,
   concat,
+  compact,
   omitBy,
   isNil,
 } from 'lodash';
@@ -77,13 +78,15 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   buildEsQuery,
   Filter,
+  fromKueryExpression,
   isOfQueryType,
   isPhraseFilter,
   isPhrasesFilter,
+  KueryNode,
 } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewLazy, DataViewsContract } from '@kbn/data-views-plugin/common';
 import {
   ExpressionAstExpression,
   buildExpression,
@@ -134,8 +137,11 @@ export const searchSourceRequiredUiSettings = [
 export interface SearchSourceDependencies extends FetchHandlers {
   aggs: AggsStart;
   search: ISearchGeneric;
+  dataViews: DataViewsContract;
   scriptedFieldsEnabled: boolean;
 }
+
+const DATA_VIEW_KEY = 'index';
 
 interface ExpressionAstOptions {
   /**
@@ -144,6 +150,24 @@ interface ExpressionAstOptions {
    * @default true
    */
   asDatatable?: boolean;
+}
+
+export function getKueryFields(nodes: KueryNode[]): string[] {
+  const allFields = nodes
+    .map((node) => {
+      const {
+        arguments: [fieldNameArg],
+      } = node;
+
+      if (fieldNameArg.type === 'function') {
+        return getKueryFields(node.arguments);
+      }
+
+      return fieldNameArg.value;
+    })
+    .flat();
+
+  return compact(allFields);
 }
 
 /** @public **/
@@ -249,6 +273,15 @@ export class SearchSource {
     }
     const parent = this.getParent();
     return parent && parent.getField(field);
+  }
+
+  getDataView() {
+    return this.getField(DATA_VIEW_KEY);
+  }
+
+  async getDataViewLazy() {
+    const dataView = this.getField(DATA_VIEW_KEY);
+    return dataView ? await this.dependencies.dataViews.toDataViewLazy(dataView) : undefined;
   }
 
   getActiveIndexFilter() {
@@ -695,9 +728,16 @@ export class SearchSource {
    * flat representation (taking into account merging rules)
    * @resolved {Object|null} - the flat data of the SearchSource
    */
-  private mergeProps(root = this, searchRequest: SearchRequest = { body: {} }): SearchRequest {
+  private mergeProps(
+    root = this,
+    searchRequest: SearchRequest = { body: {} },
+    // selects fields to be processed. used by useDataViewLazy param since sort field requires an existing field list
+    filter?: string[]
+  ): SearchRequest {
     Object.entries(this.fields).forEach(([key, value]) => {
-      this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
+      if (!filter || filter.includes(key)) {
+        this.mergeProp(searchRequest, value, key as keyof SearchSourceFields);
+      }
     });
     if (this.parent) {
       this.parent.mergeProps(root, searchRequest);
@@ -710,7 +750,7 @@ export class SearchSource {
   }
 
   private readonly getFieldName = (fld: SearchFieldValue): string =>
-    typeof fld === 'string' ? fld : (fld.field as string);
+    typeof fld === 'string' ? fld : (fld?.field as string);
 
   private getFieldsWithoutSourceFilters(
     index: DataView | undefined,
@@ -776,6 +816,47 @@ export class SearchSource {
     return field;
   }
 
+  public async loadDataViewFields(dataView: DataViewLazy) {
+    const request = this.mergeProps(this, { body: {} }, ['query', 'filter']);
+    let fields = dataView.timeFieldName ? [dataView.timeFieldName] : [];
+    const sort = this.getField('sort');
+    if (sort) {
+      const sortArr = Array.isArray(sort) ? sort : [sort];
+      for (const s of sortArr) {
+        const keys = Object.keys(s);
+        fields = fields.concat(keys);
+      }
+    }
+    for (const query of request.query) {
+      if (query.query) {
+        const nodes = fromKueryExpression(query.query);
+        const queryFields = getKueryFields([nodes]);
+        fields = fields.concat(queryFields);
+      }
+    }
+    const filters = request.filters;
+    if (filters) {
+      const filtersArr = Array.isArray(filters) ? filters : [filters];
+      for (const f of filtersArr) {
+        fields = fields.concat(f.meta.field);
+      }
+    }
+    fields = fields.filter((f) => Boolean(f));
+
+    if (dataView.getSourceFiltering() && dataView.getSourceFiltering().excludes.length) {
+      // if source filtering is enabled, we need to fetch all the fields
+      return (await dataView.getFields({ fieldName: ['*'] })).getFieldMapSorted();
+    } else if (fields.length) {
+      return (
+        await dataView.getFields({
+          fieldName: fields,
+        })
+      ).getFieldMapSorted();
+    }
+    // no fields needed to be loaded for query
+    return {};
+  }
+
   private flatten() {
     const { getConfig } = this.dependencies;
     const searchRequest = this.mergeProps();
@@ -807,7 +888,7 @@ export class SearchSource {
     body.runtime_mappings = runtimeFields || {};
 
     // apply source filters from index pattern if specified by the user
-    let filteredDocvalueFields = docvalueFields;
+    let filteredDocvalueFields = docvalueFields || [];
     if (index) {
       const sourceFilters = index.getSourceFiltering();
       if (!body.hasOwnProperty('_source')) {
@@ -888,6 +969,8 @@ export class SearchSource {
     } else {
       body.fields = filteredDocvalueFields;
     }
+
+    body.fields = body.fields?.filter((field: string) => Boolean(field));
 
     // If sorting by _score, build queries in the "must" clause instead of "filter" clause to enable scoring
     const filtersInMustClause = (body.sort ?? []).some((sort: EsQuerySortValue[]) =>

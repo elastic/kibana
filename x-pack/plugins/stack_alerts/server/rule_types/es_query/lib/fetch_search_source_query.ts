@@ -13,6 +13,7 @@ import {
   ISearchStartSearchSource,
   SortDirection,
 } from '@kbn/data-plugin/common';
+import { DataViewLazy } from '@kbn/data-views-plugin/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -56,13 +57,12 @@ export async function fetchSearchSourceQuery({
   const { logger, searchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
   const isCountAgg = isCountAggregation(params.aggType);
+  const initialSearchSource = await searchSourceClient.createLazy(params.searchConfiguration);
 
-  const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
-
-  const index = initialSearchSource.getField('index') as DataView;
-  const { searchSource, filterToExcludeHitsFromPreviousRun } = updateSearchSource(
+  const dataView = await initialSearchSource.getDataViewLazy();
+  const { searchSource, filterToExcludeHitsFromPreviousRun } = await updateSearchSource(
     initialSearchSource,
-    index,
+    dataView,
     params,
     latestTimestamp,
     dateStart,
@@ -82,7 +82,7 @@ export async function fetchSearchSourceQuery({
     initialSearchSource,
     services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
     services.dataViews,
-    index,
+    dataView!,
     dateStart,
     dateEnd,
     spacePrefix,
@@ -98,21 +98,21 @@ export async function fetchSearchSourceQuery({
       esResult: searchResult,
       sourceFieldsParams: params.sourceFields,
     }),
-    index: [index.name],
+    index: [dataView?.name],
   };
 }
 
-export function updateSearchSource(
+export async function updateSearchSource(
   searchSource: ISearchSource,
-  index: DataView,
+  index: DataViewLazy,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
   dateStart: string,
   dateEnd: string,
   alertLimit?: number
-): { searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null } {
+): Promise<{ searchSource: ISearchSource; filterToExcludeHitsFromPreviousRun: Filter | null }> {
   const isGroupAgg = isGroupAggregation(params.termField);
-  const timeField = index.getTimeField();
+  const timeField = await index.getTimeField();
 
   if (!timeField) {
     throw new Error(`Data view with ID ${index.id} no longer contains a time field.`);
@@ -184,7 +184,7 @@ export async function generateLink(
   searchSource: ISearchSource,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
   dataViews: DataViewsContract,
-  dataViewToUpdate: DataView,
+  dataViewToUpdate: DataViewLazy,
   dateStart: string,
   dateEnd: string,
   spacePrefix: string,
@@ -203,7 +203,7 @@ export async function generateLink(
   // make new adhoc data view
   const newDataView = await dataViews.create(
     {
-      ...dataViewToUpdate.toSpec(false),
+      ...dataViewToUpdate.toSpec({}),
       version: undefined,
       id: undefined,
     },
