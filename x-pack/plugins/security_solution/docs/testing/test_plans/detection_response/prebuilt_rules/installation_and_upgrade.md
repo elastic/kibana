@@ -55,7 +55,12 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
     - [**Scenario: User can see correct rule information in preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-preview-before-upgrading)
     - [**Scenario: Tabs and sections without content should be hidden in preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-upgrading)
   - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
-  - [Rule upgrade workflow: diff algorithms](#rule-upgrade-workflow-diff-algorithms)
+  - [Rule upgrade workflow: simple diff algorithm](#rule-upgrade-workflow-simple-diff-algorithm)
+    - [**Scenario: Rule field doesn't have an update and has no custom value**](#scenario-rule-field-doesnt-have-an-update-and-has-no-custom-value)
+    - [**Scenario: Rule field doesn't have an update but has a custom value**](#scenario-rule-field-doesnt-have-an-update-but-has-a-custom-value)
+    - [**Scenario: Rule field has an update and doesn't have a custom value**](#scenario-rule-field-has-an-update-and-doesnt-have-a-custom-value)
+    - [**Scenario: Rule field has an update and a custom value that are the same**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-the-same)
+    - [**Scenario: Rule field has an update and a custom value that are NOT the same**](#scenario-rule-field-has-an-update-and-a-custom-value-that-are-not-the-same)
   - [Rule upgrade workflow: viewing rule changes in JSON diff view](#rule-upgrade-workflow-viewing-rule-changes-in-json-diff-view)
     - [**Scenario: User can see changes in a side-by-side JSON diff view**](#scenario-user-can-see-changes-in-a-side-by-side-json-diff-view)
     - [**Scenario: User can see precisely how property values would change after upgrade**](#scenario-user-can-see-precisely-how-property-values-would-change-after-upgrade)
@@ -816,19 +821,19 @@ And the Investigation Guide tab should NOT be displayed
 
 TODO: add scenarios https://github.com/elastic/kibana/issues/166215
 
-### Rule upgrade workflow: diff algorithms
+### Rule upgrade workflow: simple diff algorithm
 
-#### **Scenario: Simple diff algorithm AAA**
+#### **Scenario: Rule field doesn't have an update and has no custom value**
 
 **Automation** 1 integration test
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And this rule has an existing base version for <field>
-And the current version of <field> is identical to the base version
-And the target version of <field> is identical to the base version
-Then the diff algorithm should return with no update
+And this rule has an existing base version
+And the current version of <field> is unchanged from the base version
+And there is no update for <field> in this upgrade
+Then the merged output should be the current verison of <field>
 And there should be no conflict
 
 Examples:
@@ -837,17 +842,17 @@ Examples:
 | risk_score|
 ```
 
-#### **Scenario: Simple diff algorithm ABA**
+#### **Scenario: Rule field doesn't have an update but has a custom value**
 
 **Automation** 1 integration test
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And this rule has an existing base version for <field>
-And the current version of <field> is different from the base version
-And the target version of <field> is identical to the base version
-Then the diff algorithm should return the current version of <field>
+And this rule has an existing base version
+And the current version of <field> has changed from the base version
+And there is no update for <field> in this upgrade
+Then the merged output should be the current verison of <field>
 And there should be no conflict
 
 Examples:
@@ -856,18 +861,62 @@ Examples:
 | risk_score|
 ```
 
-#### **Scenario: Simple diff algorithm AAB**
+#### **Scenario: Rule field has an update and doesn't have a custom value**
 
 **Automation** 1 integration test
 
 ```Gherkin
 Given at least 1 prebuilt rule is installed in Kibana
 And for this rule there is a new version available
-And this rule has an existing base version for <field>
-And the current version of <field> is identical to the base version
-And the target version of <field> is different from the base version
-Then the diff algorithm should return the target version of <field>
+And this rule has an existing base version
+And the current version of <field> is unchanged from the base version
+And there is a update for <field> in this upgrade
+Then the merged output should be the target verison of <field>
 And there should be no conflict
+
+Examples:
+| field     |
+| name      |
+| risk_score|
+```
+
+#### **Scenario: Rule field has an update and a custom value that are the same**
+
+**Automation** 1 integration test
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And this rule has an existing base version
+And the current version of <field> has changed from the base version
+And there is a update for <field> in this upgrade
+And the current version and the update have the same value
+Then the merged output should be the current verison of <field>
+And there should be no conflict
+
+CASE: should work the same if rule does not have an existing base version
+
+Examples:
+| field     |
+| name      |
+| risk_score|
+```
+
+#### **Scenario: Rule field has an update and a custom value that are NOT the same**
+
+**Automation** 1 integration test
+
+```Gherkin
+Given at least 1 prebuilt rule is installed in Kibana
+And for this rule there is a new version available
+And this rule has an existing base version
+And the current version of <field> has changed from the base version
+And there is a update for <field> in this upgrade
+And the current version and the update do not have the same value
+Then the merged output should be the current verison of <field>
+And there should be a conflict
+
+CASE: should return target version if rule does not have an existing base version
 
 Examples:
 | field     |
