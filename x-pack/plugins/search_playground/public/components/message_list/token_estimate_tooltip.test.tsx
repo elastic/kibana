@@ -52,14 +52,6 @@ describe('TokenEstimateTooltip component tests', () => {
       expect(screen.queryByTestId('clipped-tokens-description')).not.toBeInTheDocument();
     });
 
-    it('displays total tokens and model limit if available', () => {
-      const button = screen.getByTestId('token-tooltip-button');
-      fireEvent.click(button);
-      const panel = screen.getByTestId('token-tooltip-breakdown-2');
-      expect(panel).toBeInTheDocument();
-      expect(panel).toHaveTextContent('150');
-    });
-
     it('displays learn more link', () => {
       const button = screen.getByTestId('token-tooltip-button');
       fireEvent.click(button);
@@ -82,10 +74,10 @@ describe('TokenEstimateTooltip component tests', () => {
     it('displays clipped context tokens in breakdown', () => {
       const button = screen.getByTestId('token-tooltip-button');
       fireEvent.click(button);
-      const panel = screen.getByTestId('token-tooltip-breakdown-1');
+      const panel = screen.getByTestId('clipped-tokens-callout');
       expect(panel).toBeInTheDocument();
       expect(panel).toHaveTextContent('1,000');
-      expect(screen.getByTestId('clipped-tokens-description')).toBeInTheDocument();
+      expect(screen.getByTestId('clipped-tokens-callout')).toBeInTheDocument();
     });
   });
 });

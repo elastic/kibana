@@ -120,15 +120,8 @@ export function defineRoutes({
         throw Error(e);
       }
 
-      let modelPromptLimit;
-
-      try {
-        const model = MODELS.find((m) => m.model === data.summarization_model);
-        modelPromptLimit = model?.promptTokenLimit;
-      } catch (e) {
-        logger.error('Failed to find the model', e);
-        throw Error(e);
-      }
+      const model = MODELS.find((m) => m.model === data.summarization_model);
+      const modelPromptLimit = model?.promptTokenLimit;
 
       const chain = ConversationalChain({
         model: chatModel,
