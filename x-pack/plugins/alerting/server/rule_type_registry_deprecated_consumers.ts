@@ -73,6 +73,7 @@ export const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
   'test.patternLongRunning.cancelAlertsOnRuleTimeout': [ALERTING_FEATURE_ID],
   'test.patternSuccessOrFailure': [ALERTING_FEATURE_ID],
   'test.restricted-noop': [ALERTING_FEATURE_ID],
+  'test.severity': [ALERTING_FEATURE_ID],
   'test.throw': [ALERTING_FEATURE_ID],
   'test.unrestricted-noop': [ALERTING_FEATURE_ID],
   'test.validation': [ALERTING_FEATURE_ID],

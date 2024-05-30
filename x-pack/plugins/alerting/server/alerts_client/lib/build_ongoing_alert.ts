@@ -13,7 +13,9 @@ import {
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_FLAPPING_HISTORY,
+  ALERT_IS_IMPROVING,
   ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_RULE_TAGS,
   ALERT_TIME_RANGE,
@@ -24,6 +26,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 import { DeepPartial } from '@kbn/utility-types';
+import { get } from 'lodash';
 import { Alert as LegacyAlert } from '../../alert/alert';
 import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
@@ -41,6 +44,7 @@ interface BuildOngoingAlertOpts<
   alert: Alert & AlertData;
   legacyAlert: LegacyAlert<LegacyState, LegacyContext, ActionGroupIds | RecoveryActionGroupId>;
   rule: AlertRule;
+  isImproving: boolean;
   payload?: DeepPartial<AlertData>;
   runTimestamp?: string;
   timestamp: string;
@@ -62,6 +66,7 @@ export const buildOngoingAlert = <
   alert,
   legacyAlert,
   payload,
+  isImproving,
   rule,
   runTimestamp,
   timestamp,
@@ -110,6 +115,8 @@ export const buildOngoingAlert = <
     ...(legacyAlert.getState().duration
       ? { [ALERT_DURATION]: nanosToMicros(legacyAlert.getState().duration) }
       : {}),
+    [ALERT_IS_IMPROVING]: isImproving,
+    [ALERT_PREVIOUS_ACTION_GROUP]: get(alert, ALERT_ACTION_GROUP),
     [SPACE_IDS]: rule[SPACE_IDS],
     [VERSION]: kibanaVersion,
     [TAGS]: Array.from(

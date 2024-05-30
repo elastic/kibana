@@ -38,6 +38,8 @@ import {
   VERSION,
   ALERT_CONSECUTIVE_MATCHES,
   ALERT_RULE_EXECUTION_TIMESTAMP,
+  ALERT_IS_IMPROVING,
+  ALERT_PREVIOUS_ACTION_GROUP,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { createEsQueryRule } from './helpers/alerting_api_helper';
@@ -136,6 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.url',
         'kibana.version',
         'kibana.alert.consecutive_matches',
+        'kibana.alert.previous_action_group',
       ];
 
       for (const field of fields) {
@@ -153,6 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,
         [ALERT_INSTANCE_ID]: 'query matched',
+        [ALERT_IS_IMPROVING]: false,
         [ALERT_STATUS]: 'active',
         [ALERT_WORKFLOW_STATUS]: 'open',
         [ALERT_RULE_CATEGORY]: 'Elasticsearch query',
@@ -249,6 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2[ALERT_DURATION]).not.to.be(0);
       expect(hits2[ALERT_RULE_EXECUTION_TIMESTAMP]).to.eql(hits2['@timestamp']);
       expect(hits2[ALERT_CONSECUTIVE_MATCHES]).to.be.greaterThan(hits1[ALERT_CONSECUTIVE_MATCHES]);
+      expect(hits2[ALERT_PREVIOUS_ACTION_GROUP]).to.be('query matched');
 
       // remove fields we know will be different
       const fields = [
@@ -260,6 +265,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.rule.execution.uuid',
         'kibana.alert.rule.execution.timestamp',
         'kibana.alert.consecutive_matches',
+        'kibana.alert.previous_action_group',
       ];
 
       for (const field of fields) {

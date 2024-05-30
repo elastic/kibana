@@ -240,8 +240,14 @@ describe('mappingFromFieldMap', () => {
                     },
                   },
                 },
+                is_improving: {
+                  type: 'boolean',
+                },
                 last_detected: {
                   type: 'date',
+                },
+                previous_action_group: {
+                  type: 'keyword',
                 },
                 reason: {
                   type: 'keyword',
