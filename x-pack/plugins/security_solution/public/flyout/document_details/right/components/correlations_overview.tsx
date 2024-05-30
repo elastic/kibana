@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +30,11 @@ import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../common/components/guided_onboarding_tour/tour_config';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -40,6 +45,7 @@ export const CorrelationsOverview: React.FC = () => {
   const { dataAsNestedObject, eventId, indexName, getFieldsData, scopeId, isPreview } =
     useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
+  const { isTourShown, activeStep } = useTourContext();
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
@@ -57,6 +63,12 @@ export const CorrelationsOverview: React.FC = () => {
       },
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
+
+  useEffect(() => {
+    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase) {
+      goToCorrelationsTab();
+    }
+  }, [activeStep, goToCorrelationsTab, isTourShown]);
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
