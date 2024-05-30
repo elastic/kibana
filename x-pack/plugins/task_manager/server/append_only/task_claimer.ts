@@ -77,15 +77,7 @@ async function run(opts: TaskClaimerOpts) {
                 has_child: {
                   type: 'lock',
                   query: {
-                    bool: {
-                      must_not: {
-                        range: {
-                          lockedAt: {
-                            lte: config.lockTimeout,
-                          },
-                        },
-                      },
-                    },
+                    match_all: {},
                   },
                 },
               },
