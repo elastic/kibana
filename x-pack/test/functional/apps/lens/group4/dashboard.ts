@@ -350,6 +350,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('visualize');
       await listingTable.deleteItem('test');
       await listingTable.waitUntilTableIsLoaded();
+      // close the window so it doesn't interfere with the next test
+      await browser.closeCurrentWindow();
     });
   });
 }
