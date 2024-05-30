@@ -177,7 +177,7 @@
                   },
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Omit<",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "common",
@@ -187,7 +187,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  ">, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -248,7 +248,7 @@
                   },
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Omit<",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "common",
@@ -258,7 +258,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  ">, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -319,7 +319,7 @@
                   },
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Omit<",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "common",
@@ -329,7 +329,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  ">, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -390,7 +390,7 @@
                   },
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Omit<",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "common",
@@ -400,7 +400,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  ">, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -461,7 +461,7 @@
                   },
                   "<unknown, unknown, unknown, ",
                   "Method",
-                  ">, \"options\" | \"validate\"> & { options?: Omit<",
+                  ">, \"validate\" | \"options\"> & { options?: Omit<",
                   {
                     "pluginId": "@kbn/core-http-server",
                     "scope": "common",
@@ -471,7 +471,7 @@
                   },
                   "<",
                   "Method",
-                  ">, \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
+                  ">, \"description\" | \"access\"> | undefined; access: \"internal\" | \"public\"; enableQueryVersion?: boolean | undefined; description?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts",
                 "deprecated": false,
@@ -714,39 +714,6 @@
               "string[]"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/headers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-http-router-server-internal",
-        "id": "def-common.isKibanaResponse",
-        "type": "Function",
-        "tags": [],
-        "label": "isKibanaResponse",
-        "description": [],
-        "signature": [
-          "(response: Record<string, any>) => boolean"
-        ],
-        "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-http-router-server-internal",
-            "id": "def-common.isKibanaResponse.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "response",
-            "description": [],
-            "signature": [
-              "Record<string, any>"
-            ],
-            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

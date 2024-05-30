@@ -15,7 +15,7 @@ import type { RouteDependencies } from '../../../types';
 
 import { routeHandler } from './route_handler';
 
-export function registerRoute({ router, license }: RouteDependencies) {
+export function registerRoute({ router, getLicense }: RouteDependencies) {
   /**
    * @apiGroup Transforms
    *
@@ -39,6 +39,13 @@ export function registerRoute({ router, license }: RouteDependencies) {
           },
         },
       },
-      license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(routeHandler)
+      async (ctx, request, response) => {
+        const license = await getLicense();
+        return license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(routeHandler)(
+          ctx,
+          request,
+          response
+        );
+      }
     );
 }

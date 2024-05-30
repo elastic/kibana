@@ -20,9 +20,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 
-// FLAKY: https://github.com/elastic/kibana/issues/168340
-// Failing: See https://github.com/elastic/kibana/issues/168340
-describe.skip(
+describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
@@ -75,8 +73,7 @@ describe.skip(
       login();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/169828
-    describe.skip('From alerts', () => {
+    describe('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
 
@@ -102,7 +99,7 @@ describe.skip(
         visitRuleAlerts(ruleName);
         closeAllToasts();
 
-        changeAlertsFilter('process.name: "sshd"');
+        changeAlertsFilter(`process.name: "agentbeat" and agent.id: "${createdHost.agentId}"`);
         cy.getByTestSubj('expand-event').eq(0).click();
         cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();

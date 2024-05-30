@@ -104,7 +104,7 @@ export const getAssetCriticalityDoc = async (opts: {
 };
 
 export const assetCriticalityRouteHelpersFactory = (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   namespace?: string
 ) => ({
   status: async () =>
@@ -126,7 +126,11 @@ export const assetCriticalityRouteHelpersFactory = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send(body)
       .expect(expectStatusCode),
-  delete: async (idField: string, idValue: string) => {
+  delete: async (
+    idField: string,
+    idValue: string,
+    { expectStatusCode }: { expectStatusCode: number } = { expectStatusCode: 200 }
+  ) => {
     const qs = querystring.stringify({ id_field: idField, id_value: idValue });
     const route = `${routeWithNamespace(ASSET_CRITICALITY_URL, namespace)}?${qs}`;
     return supertest
@@ -134,7 +138,7 @@ export const assetCriticalityRouteHelpersFactory = (
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .expect(200);
+      .expect(expectStatusCode);
   },
   get: async (
     idField: string,
@@ -166,7 +170,7 @@ export const assetCriticalityRouteHelpersFactory = (
 });
 
 export const assetCriticalityRouteHelpersFactoryNoAuth = (
-  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  supertestWithoutAuth: SuperTest.Agent,
   namespace?: string
 ) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>

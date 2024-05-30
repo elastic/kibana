@@ -15,7 +15,6 @@ import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   getWindowParametersForTrigger,
   getSnappedTimestamps,
@@ -29,6 +28,7 @@ import type { SignificantItem } from '@kbn/ml-agg-utils';
 import { useLogRateAnalysisStateContext, type GroupTableItem } from '@kbn/aiops-components';
 
 import { useData } from '../../../hooks/use_data';
+import { useDataSource } from '../../../hooks/use_data_source';
 
 import { DocumentCountContent } from '../../document_count_content/document_count_content';
 import {
@@ -63,8 +63,7 @@ export function getDocumentCountStatsSplitLabel(
 }
 
 export interface LogRateAnalysisContentProps {
-  /** The data view to analyze. */
-  dataView: DataView;
+  /** Optional time range override */
   timeRange?: { min: Moment; max: Moment };
   /** Elasticsearch query to pass to analysis endpoint */
   esSearchQuery?: estypes.QueryDslQueryContainer;
@@ -83,7 +82,6 @@ export interface LogRateAnalysisContentProps {
 }
 
 export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
-  dataView,
   timeRange,
   esSearchQuery = DEFAULT_SEARCH_QUERY,
   stickyHistogram,
@@ -93,6 +91,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   onWindowParametersChange,
   embeddingOrigin,
 }) => {
+  const { dataView } = useDataSource();
+
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
   const [isBrushCleared, setIsBrushCleared] = useState(true);
   const [logRateAnalysisType, setLogRateAnalysisType] = useState<LogRateAnalysisType>(
@@ -152,6 +152,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     currentSelectedSignificantItem,
     currentSelectedGroup,
     undefined,
+    true,
     timeRange
   );
 
@@ -272,7 +273,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
       <EuiHorizontalRule />
       {showLogRateAnalysisResults && (
         <LogRateAnalysisResults
-          dataView={dataView}
           analysisType={logRateAnalysisType}
           earliest={earliest}
           isBrushCleared={isBrushCleared}

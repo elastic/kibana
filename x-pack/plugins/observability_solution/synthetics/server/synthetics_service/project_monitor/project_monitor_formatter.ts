@@ -258,8 +258,7 @@ export class ProjectMonitorFormatter {
       );
     }
 
-    // no need to wait for it
-    finder.close();
+    finder.close().catch(() => {});
 
     return hits;
   };

@@ -9,7 +9,6 @@ import { mount } from 'enzyme';
 import React from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { waitFor } from '@testing-library/react';
-import '../../../common/mock/match_media';
 import type { Filter } from '@kbn/es-query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { TestProviders, createMockStore } from '../../../common/mock';
@@ -93,6 +92,9 @@ jest.mock('../../../common/lib/kibana', () => {
         },
         cases: {
           ...mockCasesContract(),
+        },
+        maps: {
+          Map: () => <div data-test-subj="MapPanel">{'mockMap'}</div>,
         },
       },
     }),

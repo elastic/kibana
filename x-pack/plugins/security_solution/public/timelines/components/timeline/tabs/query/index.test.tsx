@@ -11,7 +11,6 @@ import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import { DefaultCellRenderer } from '../../cell_rendering/default_cell_renderer';
 import { defaultHeaders, mockTimelineData } from '../../../../../common/mock';
-import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock/test_providers';
 
 import type { Props as QueryTabContentComponentProps } from '.';
@@ -55,6 +54,10 @@ jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 jest.mock('../../../../../common/lib/kibana');
+
+jest.mock('../../../../containers/use_timeline_data_filters', () => ({
+  useTimelineDataFilters: jest.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+}));
 
 describe('Timeline', () => {
   let props = {} as QueryTabContentComponentProps;
@@ -114,6 +117,8 @@ describe('Timeline', () => {
       timerangeKind: 'absolute',
       activeTab: TimelineTabs.query,
       show: true,
+      pinnedEventIds: {},
+      eventIdToNoteIds: {},
     };
   });
 

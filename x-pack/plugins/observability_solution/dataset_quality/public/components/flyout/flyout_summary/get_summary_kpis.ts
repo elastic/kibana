@@ -109,6 +109,8 @@ function getHostsKpi(
     dateRange: { from: timeRange.from, to: timeRange.to },
     limit: countOfHosts.count,
   });
+
+  // @ts-ignore // TODO: Add link to Infra Hosts page when possible
   const hostsLink = hostsUrl
     ? {
         label: flyoutShowAllText,
@@ -123,7 +125,7 @@ function getHostsKpi(
       countOfHosts.count,
       NUMBER_FORMAT
     ),
-    link: hostsLink,
+    link: undefined,
   };
 }
 

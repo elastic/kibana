@@ -10,6 +10,7 @@ import React, { useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import styled from 'styled-components';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DocumentDetailsIsolateHostPanelKey } from '../shared/constants/panel_keys';
 import { FlyoutFooter } from '../../../timelines/components/side_panel/event_details/flyout';
 import { useRightPanelContext } from './context';
 import { useHostIsolationTools } from '../../../timelines/components/side_panel/event_details/use_host_isolation_tools';
@@ -46,7 +47,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
     (action: 'isolateHost' | 'unisolateHost' | undefined) => {
       showHostIsolationPanel(action);
       openRightPanel({
-        id: 'document-details-isolate-host',
+        id: DocumentDetailsIsolateHostPanelKey,
         params: {
           id: eventId,
           indexName,

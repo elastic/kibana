@@ -1,0 +1,38 @@
+{
+  "connector.sync_job_list": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "from": "",
+      "size": "",
+      "status": [
+        "canceling",
+        "canceled",
+        "completed",
+        "error",
+        "in_progress",
+        "pending",
+        "suspended"
+      ],
+      "connector_id": "",
+      "job_type": [
+        "full",
+        "incremental",
+        "access_control"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_connector/_sync_job"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/list-connector-sync-jobs-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

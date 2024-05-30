@@ -9,7 +9,6 @@ import { useMemo } from 'react';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CustomCard } from './types';
-import { EXPERIMENTAL_ONBOARDING_APP_ROUTE } from '../../common';
 import { toCustomCard } from './utils';
 
 export function toOnboardingPath({
@@ -22,7 +21,7 @@ export function toOnboardingPath({
   search?: string;
 }): string | null {
   if (typeof basePath !== 'string' && !basePath) return null;
-  const path = `${basePath}${EXPERIMENTAL_ONBOARDING_APP_ROUTE}`;
+  const path = `${basePath}/app/observabilityOnboarding`;
   if (!category && !search) return path;
   const params = new URLSearchParams();
   if (category) params.append('category', category);
@@ -80,12 +79,12 @@ function formatCustomCards(
 function useFilteredCards(
   rewriteUrl: (card: IntegrationCardItem) => IntegrationCardItem,
   integrationsList: IntegrationCardItem[],
-  selectedCategory: string,
+  selectedCategory: string[],
   customCards?: CustomCard[]
 ) {
   return useMemo(() => {
     const integrationCards = integrationsList
-      .filter((card) => card.categories.includes(selectedCategory))
+      .filter((card) => card.categories.some((category) => selectedCategory.includes(category)))
       .map(rewriteUrl)
       .map(toCustomCard);
 
@@ -113,7 +112,7 @@ function useFilteredCards(
  */
 export function useIntegrationCardList(
   integrationsList: IntegrationCardItem[],
-  selectedCategory = 'observability',
+  selectedCategory: string[],
   customCards?: CustomCard[],
   flowCategory?: string | null,
   flowSearch?: string,

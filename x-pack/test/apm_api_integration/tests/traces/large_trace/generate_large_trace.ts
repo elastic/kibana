@@ -16,14 +16,14 @@ export function generateLargeTrace({
   start,
   end,
   rootTransactionName,
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   repeaterFactor,
   environment,
 }: {
   start: number;
   end: number;
   rootTransactionName: string;
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   repeaterFactor: number;
   environment: string;
 }) {
@@ -137,5 +137,5 @@ export function generateLargeTrace({
     }).getTransaction();
   });
 
-  return synthtraceEsClient.index(traces);
+  return apmSynthtraceEsClient.index(traces);
 }

@@ -13,20 +13,16 @@ import {
   validateUpdateRuleProps,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
-import type { SetupPlugins } from '../../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
-import { buildMlAuthz } from '../../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../../machine_learning/validation';
 import { buildSiemResponse } from '../../../../routes/utils';
-import { readRules } from '../../../logic/crud/read_rules';
-import { updateRules } from '../../../logic/crud/update_rules';
+import { readRules } from '../../../logic/rule_management/read_rules';
 import { checkDefaultRuleExceptionListReferences } from '../../../logic/exceptions/check_for_default_rule_exception_list';
 import { validateRuleDefaultExceptionList } from '../../../logic/exceptions/validate_rule_default_exception_list';
 import { getIdError } from '../../../utils/utils';
 import { transformValidate, validateResponseActionsPermissions } from '../../../utils/validate';
 
-export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
+export const updateRuleRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
     .put({
       access: 'public',
@@ -52,17 +48,8 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
         }
         try {
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
-
           const rulesClient = ctx.alerting.getRulesClient();
-          const savedObjectsClient = ctx.core.savedObjects.client;
-
-          const mlAuthz = buildMlAuthz({
-            license: ctx.licensing.license,
-            ml,
-            request,
-            savedObjectsClient,
-          });
-          throwAuthzError(await mlAuthz.validateRuleType(request.body.type));
+          const rulesManagementClient = ctx.securitySolution.getRulesManagementClient();
 
           checkDefaultRuleExceptionListReferences({ exceptionLists: request.body.exceptions_list });
 
@@ -79,29 +66,27 @@ export const updateRuleRoute = (router: SecuritySolutionPluginRouter, ml: SetupP
             id: request.body.id,
           });
 
-          await validateResponseActionsPermissions(
-            ctx.securitySolution,
-            request.body,
-            existingRule
-          );
-
-          const rule = await updateRules({
-            rulesClient,
-            existingRule,
-            ruleUpdate: request.body,
-          });
-
-          if (rule != null) {
-            return response.ok({
-              body: transformValidate(rule),
-            });
-          } else {
+          if (existingRule == null) {
             const error = getIdError({ id: request.body.id, ruleId: request.body.rule_id });
             return siemResponse.error({
               body: error.message,
               statusCode: error.statusCode,
             });
           }
+
+          await validateResponseActionsPermissions(
+            ctx.securitySolution,
+            request.body,
+            existingRule
+          );
+
+          const rule = await rulesManagementClient.updateRule({
+            ruleUpdate: request.body,
+          });
+
+          return response.ok({
+            body: transformValidate(rule),
+          });
         } catch (err) {
           const error = transformError(err);
           return siemResponse.error({

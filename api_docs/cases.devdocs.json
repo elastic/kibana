@@ -683,9 +683,9 @@
             "GetCasesProps",
             ") => React.ReactElement<",
             "GetCasesProps",
-            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => React.FC<",
+            ", string | React.JSXElementConstructor<any>>; getCasesContext: () => React.FC<React.PropsWithChildren<",
             "GetCasesContextProps",
-            ">; getAllCasesSelectorModal: (props: ",
+            ">>; getAllCasesSelectorModal: (props: ",
             {
               "pluginId": "cases",
               "scope": "public",
@@ -757,7 +757,9 @@
               "section": "def-public.CaseAttachmentsWithoutOwner",
               "text": "CaseAttachmentsWithoutOwner"
             },
-            ") | undefined; }) => void; close: () => void; }; }"
+            ") | undefined; }) => void; close: () => void; }; useIsAddToCaseOpen: ",
+            "UseIsAddToCaseOpen",
+            "; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false,

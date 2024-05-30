@@ -48,7 +48,7 @@ describe('EventLogger', () => {
 
     eventLogger.logEvent({});
     await waitForLogEvent(systemLogger);
-    delay(WRITE_LOG_WAIT_MILLIS); // sleep a bit since event logging is async
+    await delay(WRITE_LOG_WAIT_MILLIS); // sleep a bit since event logging is async
     expect(esContext.esAdapter.indexDocument).toHaveBeenCalled();
   });
 
@@ -61,7 +61,7 @@ describe('EventLogger', () => {
 
     eventLogger.logEvent({});
     await waitForLogEvent(systemLogger);
-    delay(WRITE_LOG_WAIT_MILLIS); // sleep a bit longer since event logging is async
+    await delay(WRITE_LOG_WAIT_MILLIS); // sleep a bit longer since event logging is async
     expect(esContext.esAdapter.indexDocument).toHaveBeenCalled();
     expect(esContext.esAdapter.indexDocuments).not.toHaveBeenCalled();
   });

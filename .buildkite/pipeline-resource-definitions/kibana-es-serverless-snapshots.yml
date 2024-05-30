@@ -20,8 +20,9 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        ES_SERVERLESS_IMAGE: latest
+        ES_SERVERLESS_IMAGE: docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        REPORT_FAILED_TESTS_TO_GITHUB: 'true'
       allow_rebuilds: true
       branch_configuration: main
       default_branch: main

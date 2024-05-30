@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react';
 
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 
 import { EuiFormRow } from '@elastic/eui';
 import {

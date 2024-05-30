@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { catchAndWrapError } from '../../../../utils';
 import { getPendingActionsSummary } from '../../..';
 import type { RawSentinelOneInfo } from './types';
@@ -13,7 +14,7 @@ import type { ResponseActionAgentType } from '../../../../../../common/endpoint/
 import { AgentStatusClient } from '../lib/base_agent_status_client';
 import { AgentStatusClientError } from '../errors';
 
-const SENTINEL_ONE_AGENT_INDEX = `logs-sentinel_one.agent-default`;
+const SENTINEL_ONE_AGENT_INDEX_PATTERN = `logs-sentinel_one.agent-*`;
 
 enum SENTINEL_ONE_NETWORK_STATUS {
   CONNECTING = 'connecting',
@@ -52,9 +53,9 @@ export class SentinelOneAgentStatusClient extends AgentStatusClient {
       const [searchResponse, allPendingActions] = await Promise.all([
         esClient.search(
           {
-            index: SENTINEL_ONE_AGENT_INDEX,
+            index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
             from: 0,
-            size: 10000,
+            size: DEFAULT_MAX_TABLE_QUERY_SIZE,
             query,
             collapse: {
               field: 'sentinel_one.agent.uuid',

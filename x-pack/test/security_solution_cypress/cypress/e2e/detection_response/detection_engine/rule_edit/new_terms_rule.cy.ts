@@ -44,15 +44,7 @@ const rule = getNewTermsRule();
 describe(
   'Detection rules, New terms, Edit',
   {
-    tags: ['@ess', '@serverless', '@skipServerlessMKI'],
-    env: {
-      // alertSuppressionForNewTermsRuleEnabled feature flag is also enabled in a global config
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'alertSuppressionForNewTermsRuleEnabled',
-        ])}`,
-      ],
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {
@@ -60,7 +52,8 @@ describe(
       deleteAlertsAndRules();
     });
 
-    describe('with suppression configured', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/183941
+    describe.skip('with suppression configured', () => {
       beforeEach(() => {
         createRule({
           ...rule,

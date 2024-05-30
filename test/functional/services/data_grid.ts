@@ -136,6 +136,11 @@ export class DataGridService extends FtrService {
     await actionButton.click();
   }
 
+  public async clickCellFilterOutButton(rowIndex: number = 0, columnIndex: number = 0) {
+    const actionButton = await this.getCellActionButton(rowIndex, columnIndex, 'filterOutButton');
+    await actionButton.click();
+  }
+
   /**
    * The same as getCellElement, but useful when multiple data grids are on the page.
    */
@@ -285,7 +290,7 @@ export class DataGridService extends FtrService {
 
   public async getControlColumnHeaderFields(): Promise<string[]> {
     const result = await this.find.allByCssSelector(
-      '.euiDataGridHeaderCell--controlColumn > .euiDataGridHeaderCell__content'
+      '.euiDataGridHeaderCell--controlColumn .euiDataGridHeaderCell__content'
     );
 
     const textArr = [];
@@ -371,12 +376,12 @@ export class DataGridService extends FtrService {
     await this.testSubjects.click('dataGridDisplaySelectorButton');
   }
 
-  public async getCurrentRowHeightValue() {
+  public async getCurrentRowHeightValue(scope: 'row' | 'header' = 'row') {
     const buttonGroup = await this.testSubjects.find(
-      'unifiedDataTableRowHeightSettings_rowHeightButtonGroup'
+      `unifiedDataTable${scope === 'header' ? 'Header' : ''}RowHeightSettings_rowHeightButtonGroup`
     );
     let value = '';
-    await this.retry.waitFor('row height value not to be empty', async () => {
+    await this.retry.waitFor(`${scope} height value not to be empty`, async () => {
       // to prevent flakiness
       const selectedButton = await buttonGroup.findByCssSelector(
         '.euiButtonGroupButton-isSelected'
@@ -396,12 +401,7 @@ export class DataGridService extends FtrService {
   }
 
   public async getCurrentHeaderRowHeightValue() {
-    const buttonGroup = await this.testSubjects.find(
-      'unifiedDataTableHeaderRowHeightSettings_rowHeightButtonGroup'
-    );
-    return (
-      await buttonGroup.findByCssSelector('.euiButtonGroupButton-isSelected')
-    ).getVisibleText();
+    return await this.getCurrentRowHeightValue('header');
   }
 
   public async changeHeaderRowHeightValue(newValue: string) {

@@ -31,3 +31,18 @@ export const HOST_METRIC_GROUP_TITLES = {
     defaultMessage: 'Kubernetes',
   }),
 };
+
+export const CONTAINER_METRIC_GROUP_TITLES = {
+  cpu: i18n.translate('xpack.infra.metricsGroup.containerCpu', {
+    defaultMessage: 'CPU',
+  }),
+  memory: i18n.translate('xpack.infra.metricsGroup.containerMemory', {
+    defaultMessage: 'Memory',
+  }),
+  network: i18n.translate('xpack.infra.metricsGroup.containerNetwork', {
+    defaultMessage: 'Network',
+  }),
+  disk: i18n.translate('xpack.infra.metricsGroup.containerDisk', {
+    defaultMessage: 'Disk',
+  }),
+};

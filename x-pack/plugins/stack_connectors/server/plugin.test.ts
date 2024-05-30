@@ -25,7 +25,7 @@ describe('Stack Connectors Plugin', () => {
     it('should register built in connector types', () => {
       const actionsSetup = actionsMock.createSetup();
       plugin.setup(coreSetup, { actions: actionsSetup });
-      expect(actionsSetup.registerType).toHaveBeenCalledTimes(17);
+      expect(actionsSetup.registerType).toHaveBeenCalledTimes(16);
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -120,25 +120,18 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
         15,
         expect.objectContaining({
-          id: '.resilient',
-          name: 'IBM Resilient',
-        })
-      );
-      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        16,
-        expect.objectContaining({
           id: '.teams',
           name: 'Microsoft Teams',
         })
       );
       expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
-        17,
+        16,
         expect.objectContaining({
           id: '.torq',
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(6);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(7);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -172,6 +165,13 @@ describe('Stack Connectors Plugin', () => {
         expect.objectContaining({
           id: '.d3security',
           name: 'D3 Security',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        6,
+        expect.objectContaining({
+          id: '.resilient',
+          name: 'IBM Resilient',
         })
       );
     });

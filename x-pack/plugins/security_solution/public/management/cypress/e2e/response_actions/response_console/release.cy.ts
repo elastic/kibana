@@ -27,9 +27,7 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-// FLAKY: https://github.com/elastic/kibana/issues/172326
-// Failing: See https://github.com/elastic/kibana/issues/172326
-describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -64,8 +62,7 @@ describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
     }
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/172418
-  describe.skip('Host Isolation:', () => {
+  describe('Host Isolation:', () => {
     beforeEach(() => {
       login();
     });

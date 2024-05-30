@@ -10,6 +10,9 @@ import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-th
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { useQueryInspector } from '../../../common/components/page/manage_query';
+import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
 import { useRiskScore } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { HostItem } from '../../../../common/search_strategy';
 import { buildHostNamesFilter, RiskScoreEntity } from '../../../../common/search_strategy';
@@ -37,12 +40,11 @@ import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
 import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
-import type { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { RiskScoreDocTooltip } from '../common';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
-  sourcererScopeId?: SourcererScopeName;
+  scopeId?: string;
   data: HostItem;
   id: string;
   isDraggable?: boolean;
@@ -63,11 +65,13 @@ const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
+export const HOST_OVERVIEW_RISK_SCORE_QUERY_ID = 'riskInputsTabQuery';
+
 export const HostOverview = React.memo<HostSummaryProps>(
   ({
     anomaliesData,
     contextID,
-    sourcererScopeId,
+    scopeId,
     data,
     endDate,
     id,
@@ -88,11 +92,29 @@ export const HostOverview = React.memo<HostSummaryProps>(
       () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
       [hostName]
     );
+    const { deleteQuery, setQuery } = useGlobalTime();
 
-    const { data: hostRisk, isAuthorized } = useRiskScore({
+    const {
+      data: hostRisk,
+      isAuthorized,
+      inspect: inspectRiskScore,
+      loading: loadingRiskScore,
+      refetch: refetchRiskScore,
+    } = useRiskScore({
       filterQuery,
       riskEntity: RiskScoreEntity.host,
       skip: hostName == null,
+      onlyLatest: false,
+      pagination: FIRST_RECORD_PAGINATION,
+    });
+
+    useQueryInspector({
+      deleteQuery,
+      inspect: inspectRiskScore,
+      loading: loadingRiskScore,
+      queryId: HOST_OVERVIEW_RISK_SCORE_QUERY_ID,
+      refetch: refetchRiskScore,
+      setQuery,
     });
 
     const getDefaultRenderer = useCallback(
@@ -102,10 +124,10 @@ export const HostOverview = React.memo<HostSummaryProps>(
           attrName={fieldName}
           idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
           isDraggable={isDraggable}
-          sourcererScopeId={sourcererScopeId}
+          scopeId={scopeId}
         />
       ),
-      [contextID, isDraggable, sourcererScopeId]
+      [contextID, isDraggable, scopeId]
     );
 
     const [hostRiskScore, hostRiskLevel] = useMemo(() => {
@@ -233,7 +255,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                 rowItems={getOr([], 'host.ip', data)}
                 attrName={'host.ip'}
                 idPrefix={contextID ? `host-overview-${contextID}` : 'host-overview'}
-                sourcererScopeId={sourcererScopeId}
+                scopeId={scopeId}
                 isDraggable={isDraggable}
                 render={(ip) => (ip != null ? <NetworkDetailsLink ip={ip} /> : getEmptyTagValue())}
               />
@@ -270,7 +292,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           },
         ],
       ],
-      [contextID, sourcererScopeId, data, firstColumn, getDefaultRenderer, isDraggable]
+      [contextID, scopeId, data, firstColumn, getDefaultRenderer, isDraggable]
     );
     return (
       <>
@@ -317,11 +339,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           <>
             <EuiHorizontalRule />
             <OverviewWrapper direction={isInDetailsSidePanel ? 'column' : 'row'}>
-              <EndpointOverview
-                contextID={contextID}
-                data={data.endpoint}
-                sourcererScopeId={sourcererScopeId}
-              />
+              <EndpointOverview contextID={contextID} data={data.endpoint} scopeId={scopeId} />
 
               {loading && (
                 <Loader

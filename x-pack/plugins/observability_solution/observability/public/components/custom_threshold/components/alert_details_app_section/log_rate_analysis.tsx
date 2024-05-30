@@ -14,17 +14,17 @@ import {
   type LogRateAnalysisType,
 } from '@kbn/aiops-log-rate-analysis/log_rate_analysis_type';
 import { LogRateAnalysisContent, type LogRateAnalysisResultsData } from '@kbn/aiops-plugin/public';
-import { Rule } from '@kbn/alerting-plugin/common';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { ALERT_END } from '@kbn/rule-data-utils';
+import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { CustomThresholdRuleTypeParams } from '../../types';
 import { TopAlert } from '../../../..';
 import { Color, colorTransformer } from '../../../../../common/custom_threshold_rule/color_palette';
 import { getLogRateAnalysisEQQuery } from './helpers/log_rate_analysis_query';
-import { getInitialAnalysisStart } from './helpers/get_initial_analysis_start';
+import { getInitialAnalysisStart, getTimeRangeEnd } from './helpers/get_initial_analysis_start';
 
 export interface AlertDetailsLogRateAnalysisProps {
   alert: TopAlert<Record<string, any>>;
@@ -70,13 +70,8 @@ export function LogRateAnalysis({
   // The default time ranges for `initialAnalysisStart` are suitable for a `1m` lookback.
   // If an alert would have a `5m` lookback, this would result in a factor of `5`.
   const lookbackDuration =
-    alert.fields['kibana.alert.rule.parameters'] &&
-    alert.fields['kibana.alert.rule.parameters'].timeSize &&
-    alert.fields['kibana.alert.rule.parameters'].timeUnit
-      ? moment.duration(
-          alert.fields['kibana.alert.rule.parameters'].timeSize as number,
-          alert.fields['kibana.alert.rule.parameters'].timeUnit as any
-        )
+    rule.params.criteria[0]?.timeSize && rule.params.criteria[0]?.timeUnit
+      ? moment.duration(rule.params.criteria[0].timeSize, rule.params.criteria[0].timeUnit)
       : moment.duration(1, 'm');
   const intervalFactor = Math.max(1, lookbackDuration.asSeconds() / 60);
 
@@ -85,7 +80,7 @@ export function LogRateAnalysis({
 
   const timeRange = {
     min: alertStart.clone().subtract(15 * intervalFactor, 'minutes'),
-    max: alertEnd ? alertEnd.clone().add(1 * intervalFactor, 'minutes') : moment(new Date()),
+    max: getTimeRangeEnd({ alertStart, intervalFactor, alertEnd }),
   };
 
   const logRateAnalysisTitle = i18n.translate(

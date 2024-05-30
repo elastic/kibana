@@ -6,12 +6,6 @@
  */
 
 /**
- * Index name where the SentinelOne activity log is written to by the SentinelOne integration
+ * Index pattern where the SentinelOne activity log is written to by the SentinelOne integration
  */
-export const SENTINEL_ONE_ACTIVITY_INDEX = 'logs-sentinel_one.activity-default';
-
-/**
- * The passcode to be used when initiating actions in SentinelOne that require a passcode to be
- * set for the resulting zip file
- */
-export const SENTINEL_ONE_ZIP_PASSCODE = 'Elastic@123';
+export const SENTINEL_ONE_ACTIVITY_INDEX_PATTERN = 'logs-sentinel_one.activity-*';

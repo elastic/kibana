@@ -9,6 +9,13 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { CitationsTable } from './citations_table';
 
+jest.mock('../../hooks/use_usage_tracker', () => ({
+  useUsageTracker: () => ({
+    count: jest.fn(),
+    load: jest.fn(),
+    click: jest.fn(),
+  }),
+}));
 describe('CitationsTable component', () => {
   const citationsMock = [
     {

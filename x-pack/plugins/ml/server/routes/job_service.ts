@@ -702,7 +702,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_line_chart`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canCreateJob'],
       },
     })
     .addVersion(
@@ -768,7 +768,7 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
       path: `${ML_INTERNAL_BASE_PATH}/jobs/new_job_population_chart`,
       access: 'internal',
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canCreateJob'],
       },
     })
     .addVersion(

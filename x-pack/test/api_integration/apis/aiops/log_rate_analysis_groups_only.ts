@@ -37,24 +37,13 @@ export default ({ getService }: FtrProviderContext) => {
       getLogRateAnalysisTestData<typeof apiVersion>().forEach((testData) => {
         let overrides: AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'] = {};
 
-        if (apiVersion === '1') {
-          overrides = {
-            loaded: 0,
-            remainingFieldCandidates: [],
-            significantTerms: testData.expected.significantItems,
-            regroupOnly: true,
-          } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
-        }
-
-        if (apiVersion === '2') {
-          overrides = {
-            loaded: 0,
-            remainingFieldCandidates: [],
-            significantItems: testData.expected
-              .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
-            regroupOnly: true,
-          } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
-        }
+        overrides = {
+          loaded: 0,
+          remainingFieldCandidates: [],
+          significantItems: testData.expected
+            .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
+          regroupOnly: true,
+        } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
 
         describe(`with v${apiVersion} - ${testData.testName}`, () => {
           before(async () => {
@@ -78,13 +67,13 @@ export default ({ getService }: FtrProviderContext) => {
               expect(typeof d.type).to.be('string');
             });
 
-            const addSignificantItemsActions = getAddSignificationItemsActions(data, apiVersion);
+            const addSignificantItemsActions = getAddSignificationItemsActions(data);
             expect(addSignificantItemsActions.length).to.eql(
               0,
               `Expected significant items actions to be 0, got ${addSignificantItemsActions.length}`
             );
 
-            const histogramActions = getHistogramActions(data, apiVersion);
+            const histogramActions = getHistogramActions(data);
 
             // for each significant item we should get a histogram
             expect(histogramActions.length).to.eql(
@@ -92,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
               `Expected histogram actions to be 0, got ${histogramActions.length}`
             );
 
-            const groupActions = getGroupActions(data, apiVersion);
+            const groupActions = getGroupActions(data);
             const groups = groupActions.flatMap((d) => d.payload);
 
             expect(orderBy(groups, ['docCount'], ['desc'])).to.eql(
@@ -102,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
               )}, got ${JSON.stringify(groups)}`
             );
 
-            const groupHistogramActions = getGroupHistogramActions(data, apiVersion);
+            const groupHistogramActions = getGroupHistogramActions(data);
             const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
             // for each significant items group we should get a histogram
             expect(groupHistograms.length).to.be(groups.length);

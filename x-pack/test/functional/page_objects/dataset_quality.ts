@@ -11,9 +11,13 @@ import expect from '@kbn/expect';
 import { TimeUnitId } from '@elastic/eui';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import {
-  OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
+  DATA_QUALITY_URL_STATE_KEY,
   datasetQualityUrlSchemaV1,
-} from '@kbn/observability-logs-explorer-plugin/common';
+} from '@kbn/data-quality-plugin/common';
+import {
+  DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+  DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+} from '@kbn/dataset-quality-plugin/common/constants';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
@@ -22,7 +26,18 @@ const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
     page: 0,
   },
   filters: {},
-  flyout: {},
+  flyout: {
+    degradedFields: {
+      table: {
+        page: 0,
+        rowsPerPage: 10,
+        sort: {
+          field: DEFAULT_DEGRADED_FIELD_SORT_FIELD,
+          direction: DEFAULT_DEGRADED_FIELD_SORT_DIRECTION,
+        },
+      },
+    },
+  },
 };
 
 type SummaryPanelKpi = Record<
@@ -60,6 +75,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityFlyout: 'datasetQualityFlyout',
     datasetQualityFlyoutBody: 'datasetQualityFlyoutBody',
     datasetQualityFlyoutTitle: 'datasetQualityFlyoutTitle',
+    datasetQualityFlyoutDegradedFieldTable: 'datasetQualityFlyoutDegradedFieldTable',
+    datasetQualityFlyoutDegradedTableNoData: 'datasetQualityFlyoutDegradedTableNoData',
     datasetQualityHeaderButton: 'datasetQualityHeaderButton',
     datasetQualityFlyoutFieldValue: 'datasetQualityFlyoutFieldValue',
     datasetQualityFlyoutIntegrationActionsButton: 'datasetQualityFlyoutIntegrationActionsButton',
@@ -70,6 +87,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
+    datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
+    datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDatasetHealthKpi: 'datasetQualityDatasetHealthKpi',
     datasetQualityFlyoutKpiValue: 'datasetQualityFlyoutKpiValue',
     datasetQualityFlyoutKpiLink: 'datasetQualityFlyoutKpiLink',
@@ -95,7 +114,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       pageState?: datasetQualityUrlSchemaV1.UrlSchema;
     } = {}) {
       const queryStringParams = querystring.stringify({
-        [OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY]: rison.encode(
+        [DATA_QUALITY_URL_STATE_KEY]: rison.encode(
           datasetQualityUrlSchemaV1.urlSchemaRT.encode({
             ...defaultPageState,
             ...pageState,
@@ -104,8 +123,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       });
 
       return PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogsExplorer',
-        '/dataset-quality',
+        'management',
+        '/data/data_quality',
         queryStringParams,
         {
           // the check sometimes is too slow for the page so it misses the point
@@ -119,12 +138,18 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading', 20 * 1000);
     },
 
+    async waitUntilTableInFlyoutLoaded() {
+      await find.waitForDeletedByCssSelector('.euiFlyoutBody .euiBasicTable-loading', 20 * 1000);
+    },
+
     async waitUntilSummaryPanelLoaded() {
       await testSubjects.missingOrFail(`datasetQuality-${texts.activeDatasets}-loading`);
       await testSubjects.missingOrFail(`datasetQuality-${texts.estimatedData}-loading`);
     },
 
     async parseSummaryPanel(excludeKeys: string[] = []): Promise<SummaryPanelKpi> {
+      await this.waitUntilSummaryPanelLoaded();
+
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
         { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
@@ -155,6 +180,19 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       return testSubjects.find(testSubjectSelectors.datasetQualityTable);
     },
 
+    getDatasetQualityFlyoutDegradedFieldTable(): Promise<WebElementWrapper> {
+      return testSubjects.find(testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable);
+    },
+
+    async getDatasetQualityFlyoutDegradedFieldTableRows(): Promise<WebElementWrapper[]> {
+      await this.waitUntilTableInFlyoutLoaded();
+      const table = await testSubjects.find(
+        testSubjectSelectors.datasetQualityFlyoutDegradedFieldTable
+      );
+      const tBody = await table.findByTagName('tbody');
+      return tBody.findAllByTagName('tr');
+    },
+
     async refreshTable() {
       const filtersContainer = await testSubjects.find(
         testSubjectSelectors.datasetQualityFiltersContainer
@@ -179,10 +217,16 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         'Dataset Name',
         'Namespace',
         'Size',
-        'Degraded Docs',
+        'Dataset Quality',
+        'Degraded Docs (%)',
         'Last Activity',
         'Actions',
       ]);
+    },
+
+    async parseDegradedFieldTable() {
+      const table = await this.getDatasetQualityFlyoutDegradedFieldTable();
+      return parseDatasetTable(table, ['Field', 'Count', 'Last Occurrence']);
     },
 
     async filterForIntegrations(integrations: string[]) {
@@ -198,6 +242,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
         testSubjectSelectors.datasetQualityNamespacesSelectableButton,
         testSubjectSelectors.datasetQualityNamespacesSelectable,
         namespaces
+      );
+    },
+
+    async filterForQualities(qualities: string[]) {
+      return euiSelectable.selectOnlyOptionsWithText(
+        testSubjectSelectors.datasetQualityQualitiesSelectableButton,
+        testSubjectSelectors.datasetQualityQualitiesSelectable,
+        qualities
       );
     },
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { castArray, chunk, groupBy, uniq } from 'lodash';
-import { lastValueFrom, Observable } from 'rxjs';
-import type { ObservabilityAIAssistantClient } from '../../service/client';
-import { type ChatCompletionChunkEvent, type Message, MessageRole } from '../../../common';
+import { lastValueFrom } from 'rxjs';
+import { MessageRole, type Message } from '../../../common';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { FunctionCallChatFunction } from '../../service/types';
 
 export async function getRelevantFieldNames({
   index,
@@ -22,6 +22,7 @@ export async function getRelevantFieldNames({
   savedObjectsClient,
   chat,
   messages,
+  signal,
 }: {
   index: string | string[];
   start?: string;
@@ -30,19 +31,30 @@ export async function getRelevantFieldNames({
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
   messages: Message[];
-  chat: (
-    name: string,
-    {}: Pick<
-      Parameters<ObservabilityAIAssistantClient['chat']>[1],
-      'functionCall' | 'functions' | 'messages'
-    >
-  ) => Promise<Observable<ChatCompletionChunkEvent>>;
+  chat: FunctionCallChatFunction;
+  signal: AbortSignal;
 }): Promise<{ fields: string[] }> {
   const dataViewsService = await dataViews.dataViewsServiceFactory(savedObjectsClient, esClient);
+
+  const hasAnyHitsResponse = await esClient.search({
+    index,
+    _source: false,
+    track_total_hits: 1,
+    terminate_after: 1,
+  });
+
+  const hitCount =
+    typeof hasAnyHitsResponse.hits.total === 'number'
+      ? hasAnyHitsResponse.hits.total
+      : hasAnyHitsResponse.hits.total?.value ?? 0;
+
+  // all fields are empty in this case, so get them all
+  const includeEmptyFields = hitCount === 0;
 
   const fields = await dataViewsService.getFieldsForWildcard({
     pattern: castArray(index).join(','),
     allowNoIndex: true,
+    includeEmptyFields,
     indexFilter:
       start && end
         ? {
@@ -78,7 +90,8 @@ export async function getRelevantFieldNames({
   const relevantFields = await Promise.all(
     chunk(fieldNames, 500).map(async (fieldsInChunk) => {
       const chunkResponse$ = (
-        await chat('get_relevent_dataset_names', {
+        await chat('get_relevant_dataset_names', {
+          signal,
           messages: [
             {
               '@timestamp': new Date().toISOString(),
@@ -91,7 +104,8 @@ export async function getRelevantFieldNames({
             CIRCUMSTANCES include fields not mentioned in this list.`,
               },
             },
-            ...messages.slice(1),
+            // remove the system message and the function request
+            ...messages.slice(1, -1),
             {
               '@timestamp': new Date().toISOString(),
               message: {

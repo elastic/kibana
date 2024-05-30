@@ -9,9 +9,8 @@ import Boom from '@hapi/boom';
 import type { RequestHandler } from '@kbn/core/server';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import type { License } from '../../../services';
 import { NODES_INFO_PRIVILEGES } from '../../../../common/constants';
-
-import type { RouteDependencies } from '../../../types';
 
 import { wrapError, wrapEsError } from '../../utils/error_utils';
 
@@ -33,7 +32,7 @@ export const isNodes = (arg: unknown): arg is Nodes => {
 };
 
 export const routeHandlerFactory: (
-  license: RouteDependencies['license']
+  license: License
 ) => RequestHandler<undefined, undefined, undefined> = (license) => async (ctx, req, res) => {
   try {
     const esClient = (await ctx.core).elasticsearch.client;

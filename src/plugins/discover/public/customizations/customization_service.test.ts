@@ -70,6 +70,31 @@ describe('createCustomizatonService', () => {
     });
   });
 
+  describe('get', () => {
+    it('should return a customization', async () => {
+      const service = createCustomizationService();
+      const customization: DiscoverCustomization = { id: 'top_nav' };
+      service.set(customization);
+      const current = service.get('top_nav');
+      expect(current).toBe(customization);
+    });
+
+    it('should return undefined if customization is disabled', async () => {
+      const service = createCustomizationService();
+      const customization: DiscoverCustomization = { id: 'top_nav' };
+      service.set(customization);
+      service.disable('top_nav');
+      const current = service.get('top_nav');
+      expect(current).toBeUndefined();
+    });
+
+    it('should return undefined if customization does not exist', async () => {
+      const service = createCustomizationService();
+      const current = service.get('top_nav');
+      expect(current).toBeUndefined();
+    });
+  });
+
   describe('get$', () => {
     it('should return a customization', async () => {
       const service = createCustomizationService();

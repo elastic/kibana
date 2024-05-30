@@ -179,6 +179,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   clearSelected,
 }) => {
   const {
+    analytics,
+    i18n: i18nStart,
+    theme,
     application: {
       navigateToApp,
       capabilities: { actions },
@@ -769,7 +772,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionResults})`}>
-                  <ExecutionLogTable ruleId={ruleId} selectAlertsTab={navigateToAlertsTab} />
+                  <ExecutionLogTable
+                    ruleId={ruleId}
+                    selectAlertsTab={navigateToAlertsTab}
+                    analytics={analytics}
+                    i18n={i18nStart}
+                    theme={theme}
+                  />
                 </Route>
                 <Route path={`/rules/id/:detailName/:tabName(${RuleDetailTabs.executionEvents})`}>
                   <ExecutionEventsTable ruleId={ruleId} />

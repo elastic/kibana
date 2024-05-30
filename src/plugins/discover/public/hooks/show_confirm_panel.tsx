@@ -10,15 +10,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { StartRenderServices } from '../plugin';
 
 let isOpenConfirmPanel = false;
 
 export const showConfirmPanel = ({
   onConfirm,
   onCancel,
+  startServices,
 }: {
   onConfirm: () => void;
   onCancel: () => void;
+  startServices: StartRenderServices;
 }) => {
   if (isOpenConfirmPanel) {
     return;
@@ -34,32 +38,34 @@ export const showConfirmPanel = ({
 
   document.body.appendChild(container);
   const element = (
-    <EuiConfirmModal
-      title={i18n.translate('discover.confirmDataViewSave.title', {
-        defaultMessage: 'Save data view',
-      })}
-      onCancel={() => {
-        onClose();
-        onCancel();
-      }}
-      onConfirm={() => {
-        onClose();
-        onConfirm();
-      }}
-      cancelButtonText={i18n.translate('discover.confirmDataViewSave.cancel', {
-        defaultMessage: 'Cancel',
-      })}
-      confirmButtonText={i18n.translate('discover.confirmDataViewSave.saveAndContinue', {
-        defaultMessage: 'Save and continue',
-      })}
-      defaultFocusedButton="confirm"
-    >
-      <p>
-        {i18n.translate('discover.confirmDataViewSave.message', {
-          defaultMessage: 'The action you chose requires a saved data view.',
+    <KibanaRenderContextProvider {...startServices}>
+      <EuiConfirmModal
+        title={i18n.translate('discover.confirmDataViewSave.title', {
+          defaultMessage: 'Save data view',
         })}
-      </p>
-    </EuiConfirmModal>
+        onCancel={() => {
+          onClose();
+          onCancel();
+        }}
+        onConfirm={() => {
+          onClose();
+          onConfirm();
+        }}
+        cancelButtonText={i18n.translate('discover.confirmDataViewSave.cancel', {
+          defaultMessage: 'Cancel',
+        })}
+        confirmButtonText={i18n.translate('discover.confirmDataViewSave.saveAndContinue', {
+          defaultMessage: 'Save and continue',
+        })}
+        defaultFocusedButton="confirm"
+      >
+        <p>
+          {i18n.translate('discover.confirmDataViewSave.message', {
+            defaultMessage: 'The action you chose requires a saved data view.',
+          })}
+        </p>
+      </EuiConfirmModal>
+    </KibanaRenderContextProvider>
   );
   ReactDOM.render(element, container);
 };

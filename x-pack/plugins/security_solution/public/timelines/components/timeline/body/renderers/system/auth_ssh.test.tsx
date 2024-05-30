@@ -8,7 +8,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import '../../../../../../common/mock/match_media';
 import { AuthSsh } from './auth_ssh';
 
 describe('AuthSsh', () => {

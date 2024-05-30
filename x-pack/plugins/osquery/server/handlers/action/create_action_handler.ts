@@ -29,7 +29,7 @@ interface Metadata {
 interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
-  alertData?: ParsedTechnicalFields;
+  alertData?: ParsedTechnicalFields & { _index: string };
   error?: string;
 }
 

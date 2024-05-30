@@ -37,7 +37,7 @@ import { eventRenderedViewColumns, getColumns } from './columns';
  * from the TGrid
  */
 
-export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = memo(
+export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellContext']>> = memo(
   function RenderCellValue(props) {
     const {
       columnId,
@@ -151,27 +151,27 @@ export const RenderCellValue: React.FC<EuiDataGridCellProps['cellContext']> = me
         </GuidedOnboardingTourStep>
       );
     }, [
-      isTourAnchor,
-      finalData,
-      browserFieldsByName,
       header,
       columnId,
+      browserFieldsByName,
+      columnHeaders,
       ecsData,
-      linkValues,
-      rowRenderers,
-      isDetails,
-      isExpandable,
-      isDraggable,
-      isExpanded,
-      colIndex,
+      isTourAnchor,
+      browserFields,
+      finalData,
       eventId,
+      isDetails,
+      isDraggable,
+      isExpandable,
+      isExpanded,
+      linkValues,
+      rowIndex,
+      colIndex,
+      rowRenderers,
       setCellProps,
+      tableId,
       truncate,
       context,
-      tableId,
-      browserFields,
-      rowIndex,
-      columnHeaders,
     ]);
 
     return columnId === SIGNAL_RULE_NAME_FIELD_NAME && actualSuppressionCount ? (

@@ -62,9 +62,6 @@ import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
 import type { UserProfileServiceStartInternal } from './user_profile';
-import { UserProfileSettingsClient } from './user_profile/user_profile_settings_client';
-import type { UserSettingServiceStart } from './user_profile/user_setting_service';
-import { UserSettingService } from './user_profile/user_setting_service';
 import type { AuthenticatedUser, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
 
@@ -174,9 +171,6 @@ export class SecurityPlugin
   private readonly userProfileService: UserProfileService;
   private userProfileStart?: UserProfileServiceStartInternal;
 
-  private readonly userSettingService: UserSettingService;
-  private userSettingServiceStart?: UserSettingServiceStart;
-  private userProfileSettingsClient: UserProfileSettingsClient;
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
@@ -206,9 +200,6 @@ export class SecurityPlugin
     );
     this.userProfileService = new UserProfileService(
       this.initializerContext.logger.get('user-profile')
-    );
-    this.userSettingService = new UserSettingService(
-      this.initializerContext.logger.get('user-settings')
     );
 
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
@@ -244,8 +235,6 @@ export class SecurityPlugin
       elasticsearch: coreServices.elasticsearch,
       features: depsServices.features,
     }));
-
-    core.userSettings.setUserProfileSettings(this.userProfileSettingsClient);
 
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
@@ -323,6 +312,7 @@ export class SecurityPlugin
     core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
+        audit: this.auditSetup,
       })
     );
     core.userProfile.registerUserProfileDelegate(
@@ -396,8 +386,6 @@ export class SecurityPlugin
     this.session = session;
 
     this.userProfileStart = this.userProfileService.start({ clusterClient, session });
-    this.userSettingServiceStart = this.userSettingService.start(this.userProfileStart);
-    this.userProfileSettingsClient.setUserSettingsServiceStart(this.userSettingServiceStart);
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
     const customLogoutURL =

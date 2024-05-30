@@ -6,8 +6,7 @@
  */
 
 import type { History } from 'history';
-import type { FunctionComponent } from 'react';
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Redirect } from 'react-router-dom';
 
@@ -137,7 +136,7 @@ export interface ProvidersProps {
   onChange?: BreadcrumbsChangeHandler;
 }
 
-export const Providers: FunctionComponent<ProvidersProps> = ({
+export const Providers: FC<PropsWithChildren<ProvidersProps>> = ({
   services,
   history,
   authc,

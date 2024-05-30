@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import { get } from 'lodash';
+import React, { useCallback, useEffect } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
 import { RelatedAlertsBySession } from './related_alerts_by_session';
@@ -22,10 +25,16 @@ import { RelatedCases } from './related_cases';
 import { useShowRelatedCases } from '../../shared/hooks/use_show_related_cases';
 import { CORRELATIONS_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
-import { DocumentDetailsLeftPanelKey, LeftPanelInsightsTab } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { useTimelineDataFilters } from '../../../../timelines/containers/use_timeline_data_filters';
 import { isActiveTimeline } from '../../../../helpers';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
+import {
+  AlertsCasesTourSteps,
+  SecurityStepId,
+} from '../../../../common/components/guided_onboarding_tour/tour_config';
 
 /**
  * Correlations section under Insights section, overview tab.
@@ -36,6 +45,7 @@ export const CorrelationsOverview: React.FC = () => {
   const { dataAsNestedObject, eventId, indexName, getFieldsData, scopeId, isPreview } =
     useRightPanelContext();
   const { openLeftPanel } = useExpandableFlyoutApi();
+  const { isTourShown, activeStep } = useTourContext();
 
   const { selectedPatterns } = useTimelineDataFilters(isActiveTimeline(scopeId));
 
@@ -53,6 +63,12 @@ export const CorrelationsOverview: React.FC = () => {
       },
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
+
+  useEffect(() => {
+    if (isTourShown(SecurityStepId.alertsCases) && activeStep === AlertsCasesTourSteps.viewCase) {
+      goToCorrelationsTab();
+    }
+  }, [activeStep, goToCorrelationsTab, isTourShown]);
 
   const { show: showAlertsByAncestry, documentId } = useShowRelatedAlertsByAncestry({
     getFieldsData,
@@ -76,6 +92,8 @@ export const CorrelationsOverview: React.FC = () => {
     showAlertsBySession ||
     showCases ||
     showSuppressedAlerts;
+
+  const ruleType = get(dataAsNestedObject, ALERT_RULE_TYPE)?.[0];
 
   return (
     <ExpandablePanel
@@ -102,7 +120,7 @@ export const CorrelationsOverview: React.FC = () => {
       {canShowAtLeastOneInsight ? (
         <EuiFlexGroup direction="column" gutterSize="none">
           {showSuppressedAlerts && (
-            <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} />
+            <SuppressedAlerts alertSuppressionCount={alertSuppressionCount} ruleType={ruleType} />
           )}
           {showCases && <RelatedCases eventId={eventId} />}
           {showSameSourceAlerts && (

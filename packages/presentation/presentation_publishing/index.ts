@@ -17,6 +17,7 @@ export interface EmbeddableApiContext {
 export {
   getInitialValuesFromComparators,
   runComparators,
+  getUnchangingComparator,
   type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,
@@ -28,22 +29,41 @@ export {
   useInheritedViewMode,
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
-export { initializeTimeRange } from './interfaces/fetch/initialize_time_range';
-export { fetch$, type FetchContext } from './interfaces/fetch/fetch';
+export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
+export {
+  initializeTimeRange,
+  type SerializedTimeRange,
+} from './interfaces/fetch/initialize_time_range';
 export {
   apiPublishesPartialUnifiedSearch,
   apiPublishesTimeRange,
   apiPublishesUnifiedSearch,
   apiPublishesWritableUnifiedSearch,
+  useSearchApi,
   type PublishesTimeRange,
   type PublishesUnifiedSearch,
   type PublishesWritableUnifiedSearch,
 } from './interfaces/fetch/publishes_unified_search';
-export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
+export {
+  apiHasAppContext,
+  type HasAppContext,
+  type EmbeddableAppContext,
+} from './interfaces/has_app_context';
+export {
+  apiHasDisableTriggers,
+  areTriggersDisabled,
+  type HasDisableTriggers,
+} from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
+export {
+  apiHasExecutionContext,
+  type HasExecutionContext,
+} from './interfaces/has_execution_context';
 export {
   apiHasLegacyLibraryTransforms,
   apiHasLibraryTransforms,
+  apiHasInPlaceLibraryTransforms,
+  type HasInPlaceLibraryTransforms,
   type HasLegacyLibraryTransforms,
   type HasLibraryTransforms,
 } from './interfaces/has_library_transforms';
@@ -59,10 +79,6 @@ export {
   type HasTypeDisplayName,
 } from './interfaces/has_type';
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
-export {
-  apiHasExecutionContext,
-  type HasExecutionContext,
-} from './interfaces/has_execution_context';
 export {
   apiPublishesBlockingError,
   type PublishesBlockingError,
@@ -100,6 +116,7 @@ export {
 export {
   apiPublishesPanelDescription,
   apiPublishesWritablePanelDescription,
+  getPanelDescription,
   type PublishesPanelDescription,
   type PublishesWritablePanelDescription,
 } from './interfaces/titles/publishes_panel_description';

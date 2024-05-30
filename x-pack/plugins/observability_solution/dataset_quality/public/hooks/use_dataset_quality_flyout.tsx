@@ -6,7 +6,6 @@
  */
 
 import { useSelector } from '@xstate/react';
-import { useMemo } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useKibanaContextForPlugin } from '../utils';
 
@@ -23,35 +22,26 @@ export const useDatasetQualityFlyout = () => {
     datasetDetails: dataStreamDetails,
     insightsTimeRange,
     breakdownField,
-  } = useSelector(service, (state) => state.context.flyout);
+    isNonAggregatable,
+  } = useSelector(service, (state) => state.context.flyout) ?? {};
+
   const { timeRange } = useSelector(service, (state) => state.context.filters);
 
-  const dataStreamDetailsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.dataStreamDetails.fetching')
-  );
-  const dataStreamSettingsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.dataStreamSettings.fetching')
-  );
-
-  const datasetIntegrationsLoading = useSelector(service, (state) =>
-    state.matches('flyout.initializing.integrationDashboards.fetching')
-  );
-
-  const loadingState = useMemo(() => {
-    return {
-      dataStreamDetailsLoading,
-      dataStreamSettingsLoading,
-      datasetIntegrationsLoading,
-    };
-  }, [dataStreamDetailsLoading, dataStreamSettingsLoading, datasetIntegrationsLoading]);
+  const loadingState = useSelector(service, (state) => ({
+    dataStreamDetailsLoading: state.matches('flyout.initializing.dataStreamDetails.fetching'),
+    dataStreamSettingsLoading: state.matches('flyout.initializing.dataStreamSettings.fetching'),
+    datasetIntegrationsLoading: state.matches('flyout.initializing.integrationDashboards.fetching'),
+  }));
 
   return {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
+    isNonAggregatable,
     fieldFormats,
     timeRange: insightsTimeRange ?? timeRange,
     breakdownField,
     loadingState,
+    flyoutLoading: !dataStreamStat,
   };
 };

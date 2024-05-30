@@ -35,6 +35,7 @@ export const SecretFormRow: React.FC<{
   initialValue?: any;
   cancelEdit?: () => void;
   label?: JSX.Element;
+  disabled?: boolean;
 }> = ({
   fullWidth,
   error,
@@ -48,6 +49,7 @@ export const SecretFormRow: React.FC<{
   useSecretsStorage,
   isConvertedToSecret = false,
   label,
+  disabled,
 }) => {
   const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(isConvertedToSecret || !initialValue);
@@ -64,6 +66,7 @@ export const SecretFormRow: React.FC<{
       </EuiText>
       <EuiSpacer size="s" />
       <EuiButtonEmpty
+        disabled={disabled}
         onClick={() => setEditMode(true)}
         color="primary"
         iconType="refresh"

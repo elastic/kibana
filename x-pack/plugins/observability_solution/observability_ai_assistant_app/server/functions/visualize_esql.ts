@@ -27,25 +27,22 @@ export function registerVisualizeESQLFunction({
   functions,
   resources,
 }: FunctionRegistrationParameters) {
-  functions.registerFunction(
-    visualizeESQLFunction,
-    async ({ arguments: { query, intention }, connectorId, messages }, signal) => {
-      const { columns, errorMessages } = await validateEsqlQuery({
-        query,
-        client: (await resources.context.core).elasticsearch.client.asCurrentUser,
-      });
+  functions.registerFunction(visualizeESQLFunction, async ({ arguments: { query, intention } }) => {
+    const { columns, errorMessages } = await validateEsqlQuery({
+      query,
+      client: (await resources.context.core).elasticsearch.client.asCurrentUser,
+    });
 
-      const message = getMessageForLLM(intention, query, Boolean(errorMessages?.length));
+    const message = getMessageForLLM(intention, query, Boolean(errorMessages?.length));
 
-      return {
-        data: {
-          columns,
-        },
-        content: {
-          message,
-          errorMessages,
-        },
-      };
-    }
-  );
+    return {
+      data: {
+        columns,
+      },
+      content: {
+        message,
+        errorMessages,
+      },
+    };
+  });
 }

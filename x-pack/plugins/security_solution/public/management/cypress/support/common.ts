@@ -25,7 +25,7 @@ export const setupStackServicesUsingCypressConfig = async (config: Cypress.Plugi
     password: config.env.KIBANA_PASSWORD,
     esUsername: config.env.ELASTICSEARCH_USERNAME,
     esPassword: config.env.ELASTICSEARCH_PASSWORD,
-    asSuperuser: true,
+    asSuperuser: !config.env.CLOUD_SERVERLESS,
   }).then(({ log, ...others }) => {
     return {
       ...others,

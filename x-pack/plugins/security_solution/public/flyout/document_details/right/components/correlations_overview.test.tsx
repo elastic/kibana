@@ -13,7 +13,8 @@ import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
+import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
+import { LeftPanelInsightsTab } from '../../left';
 import {
   CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
   CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID,
@@ -39,6 +40,8 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
+import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
+import { AlertsCasesTourSteps } from '../../../../common/components/guided_onboarding_tour/tour_config';
 
 jest.mock('../../shared/hooks/use_show_related_alerts_by_ancestry');
 jest.mock('../../shared/hooks/use_show_related_alerts_by_same_source_event');
@@ -99,11 +102,24 @@ jest.mock('../../../../timelines/containers/use_timeline_data_filters', () => ({
 }));
 const mockUseTimelineDataFilters = useTimelineDataFilters as jest.Mock;
 
+jest.mock('../../../../common/components/guided_onboarding_tour', () => ({
+  useTourContext: jest.fn(),
+}));
+
 const originalEventId = 'originalEventId';
 
 describe('<CorrelationsOverview />', () => {
   beforeAll(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+    jest.mocked(useTourContext).mockReturnValue({
+      hidden: false,
+      setAllTourStepsHidden: jest.fn(),
+      activeStep: AlertsCasesTourSteps.viewCase,
+      endTourStep: jest.fn(),
+      incrementStep: jest.fn(),
+      isTourShown: jest.fn(),
+      setStep: jest.fn(),
+    });
     mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
   });
 
@@ -200,6 +216,26 @@ describe('<CorrelationsOverview />', () => {
     );
 
     getByTestId(TITLE_LINK_TEST_ID).click();
+    expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
+      id: DocumentDetailsLeftPanelKey,
+      path: { tab: LeftPanelInsightsTab, subTab: CORRELATIONS_TAB_ID },
+      params: {
+        id: panelContextValue.eventId,
+        indexName: panelContextValue.indexName,
+        scopeId: panelContextValue.scopeId,
+      },
+    });
+  });
+
+  it('should navigate to the left section Insights tab automatically when active step is "view case"', () => {
+    render(
+      <TestProviders>
+        <RightPanelContext.Provider value={panelContextValue}>
+          <CorrelationsOverview />
+        </RightPanelContext.Provider>
+      </TestProviders>
+    );
+
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
       id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: CORRELATIONS_TAB_ID },

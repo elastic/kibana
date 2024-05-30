@@ -25,7 +25,6 @@ export function useCustomCardsForCategory(
     services: { application, http },
   } = useKibana();
   const getUrlForApp = application?.getUrlForApp;
-  const basePath = http?.basePath;
 
   const { href: systemLogsUrl } = reactRouterNavigate(history, `/systemLogs/${location.search}`);
   const { href: customLogsUrl } = reactRouterNavigate(history, `/customLogs/${location.search}`);
@@ -60,9 +59,7 @@ export function useCustomCardsForCategory(
           icons: [
             {
               type: 'svg',
-              src:
-                basePath?.prepend('/plugins/observabilityOnboarding/assets/opentelemetry.svg') ??
-                '',
+              src: http?.staticAssets.getPluginAssetHref('opentelemetry.svg') ?? '',
             },
           ],
           url: `${getUrlForApp?.('apm')}/onboarding?agent=openTelemetry` ?? '',
@@ -141,13 +138,13 @@ export function useCustomCardsForCategory(
           id: 'system-logs',
           type: 'virtual',
           title: 'Stream host system logs',
-          description: 'The quickest path to onboard log data from your own machine or server',
+          description: 'Collect system logs from your machine or server',
           name: 'system-logs-virtual',
           categories: ['observability'],
           icons: [
             {
               type: 'svg',
-              src: basePath?.prepend('/plugins/home/assets/logos/system.svg') ?? '',
+              src: http?.staticAssets.getPluginAssetHref('system.svg') ?? '',
             },
           ],
           url: systemLogsUrl,

@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
   EuiPanel,
+  EuiSkeletonRectangle,
 } from '@elastic/eui';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout } from '../../hooks';
@@ -33,76 +34,82 @@ export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
     dataStreamStat,
     dataStreamSettings,
     dataStreamDetails,
+    isNonAggregatable,
     fieldFormats,
     timeRange,
     loadingState,
+    flyoutLoading,
   } = useDatasetQualityFlyout();
 
   return (
     <EuiFlyout
-      outsideClickCloses={false}
       onClose={closeFlyout}
       ownFocus={true}
       data-component-name={'datasetQualityFlyout'}
       data-test-subj="datasetQualityFlyout"
     >
-      <>
-        <Header dataStreamStat={dataset} />
-        <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-            <FlyoutSummary
-              dataStream={dataset.rawName}
-              dataStreamStat={dataStreamStat}
-              dataStreamDetails={dataStreamDetails}
-              dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
-              timeRange={timeRange}
-            />
-          </EuiPanel>
+      {flyoutLoading ? (
+        <EuiSkeletonRectangle width="100%" height={80} />
+      ) : (
+        <>
+          <Header dataStreamStat={dataset} />
+          <EuiFlyoutBody css={flyoutBodyStyles} data-test-subj="datasetQualityFlyoutBody">
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+              <FlyoutSummary
+                dataStream={dataset.rawName}
+                dataStreamStat={dataStreamStat}
+                dataStreamDetails={dataStreamDetails}
+                dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
+                timeRange={timeRange}
+                isNonAggregatable={isNonAggregatable}
+              />
+            </EuiPanel>
 
-          <EuiHorizontalRule margin="none" />
+            <EuiHorizontalRule margin="none" />
 
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-            {loadingState.dataStreamDetailsLoading && loadingState.dataStreamSettingsLoading ? (
-              <DatasetSummaryLoading />
-            ) : dataStreamStat ? (
-              <Fragment>
-                <DatasetSummary
-                  dataStreamSettings={dataStreamSettings}
-                  dataStreamSettingsLoading={loadingState.dataStreamSettingsLoading}
-                  dataStreamDetails={dataStreamDetails}
-                  dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
-                  fieldFormats={fieldFormats}
-                />
+            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+              {loadingState.dataStreamDetailsLoading && loadingState.dataStreamSettingsLoading ? (
+                <DatasetSummaryLoading />
+              ) : dataStreamStat ? (
+                <Fragment>
+                  <DatasetSummary
+                    dataStreamSettings={dataStreamSettings}
+                    dataStreamSettingsLoading={loadingState.dataStreamSettingsLoading}
+                    dataStreamDetails={dataStreamDetails}
+                    dataStreamDetailsLoading={loadingState.dataStreamDetailsLoading}
+                    fieldFormats={fieldFormats}
+                  />
 
-                {dataStreamStat.integration && (
-                  <>
-                    <EuiSpacer />
-                    <IntegrationSummary
-                      integration={dataStreamStat.integration}
-                      dashboardsLoading={loadingState.datasetIntegrationsLoading}
-                    />
-                  </>
-                )}
-              </Fragment>
-            ) : null}
-          </EuiPanel>
-        </EuiFlyoutBody>
+                  {dataStreamStat.integration && (
+                    <>
+                      <EuiSpacer />
+                      <IntegrationSummary
+                        integration={dataStreamStat.integration}
+                        dashboardsLoading={loadingState.datasetIntegrationsLoading}
+                      />
+                    </>
+                  )}
+                </Fragment>
+              ) : null}
+            </EuiPanel>
+          </EuiFlyoutBody>
 
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="datasetQualityFlyoutButton"
-                iconType="cross"
-                onClick={closeFlyout}
-                flush="left"
-              >
-                {flyoutCancelText}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      </>
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="datasetQualityFlyoutButton"
+                  iconType="cross"
+                  onClick={closeFlyout}
+                  flush="left"
+                >
+                  {flyoutCancelText}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        </>
+      )}
     </EuiFlyout>
   );
 }

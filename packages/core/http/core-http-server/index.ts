@@ -104,6 +104,7 @@ export type {
   RouteValidatorRequestAndResponses,
   RouteValidatorFullConfigRequest,
   RouteValidatorFullConfigResponse,
+  LazyValidator,
 } from './src/router';
 export {
   validBodyOutput,
@@ -111,6 +112,7 @@ export {
   getRequestValidation,
   getResponseValidation,
   isFullValidatorContainer,
+  isKibanaResponse,
 } from './src/router';
 
 export type { ICspConfig } from './src/csp';
@@ -139,6 +141,7 @@ export type {
   HttpServicePreboot,
   HttpServiceSetup,
   HttpServiceStart,
+  HttpProtocol,
 } from './src/http_contract';
 
 export type {
@@ -151,6 +154,8 @@ export type {
   VersionedRouteConfig,
   VersionedRouteRegistrar,
   VersionedRouter,
+  VersionedRouteCustomResponseBodyValidation,
+  VersionedResponseBodyValidation,
 } from './src/versioning';
 
 export type { IStaticAssets } from './src/static_assets';

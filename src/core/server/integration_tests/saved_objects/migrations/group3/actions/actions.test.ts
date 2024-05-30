@@ -65,7 +65,7 @@ describe('migration actions', () => {
   beforeAll(async () => {
     esServer = await startES();
     // we don't need a long timeout for testing purposes
-    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 5500 });
+    client = esServer.es.getClient().child({ ...MIGRATION_CLIENT_OPTIONS, requestTimeout: 10_000 });
     esCapabilities = elasticsearchServiceMock.createCapabilities();
 
     // Create test fixture data:
@@ -390,8 +390,7 @@ describe('migration actions', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/152677
-  describe.skip('waitForIndexStatus', () => {
+  describe('waitForIndexStatus', () => {
     afterEach(async () => {
       try {
         await client.indices.delete({ index: 'red_then_yellow_index' });
@@ -426,7 +425,7 @@ describe('migration actions', () => {
       const redStatusResponse = await client.cluster.health({ index: 'red_then_yellow_index' });
       expect(redStatusResponse.status).toBe('red');
 
-      client.indices.putSettings({
+      void client.indices.putSettings({
         index: 'red_then_yellow_index',
         body: {
           // Enable all shard allocation so that the index status turns yellow
@@ -575,7 +574,7 @@ describe('migration actions', () => {
 
       let indexGreen = false;
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'clone_red_then_green_index',
           body: {
             // Enable all shard allocation so that the index status goes green
@@ -1309,7 +1308,7 @@ describe('migration actions', () => {
         query: { match_all: {} },
         batchSize: 1, // small batch size so we don't exceed the maxResponseSize
         searchAfter: undefined,
-        maxResponseSizeBytes: 1000, // set a small size to force the error
+        maxResponseSizeBytes: 5000, // make sure long ids don't cause es_response_too_large
       });
       const rightResponse = await readWithPitTask();
 
@@ -1845,7 +1844,7 @@ describe('migration actions', () => {
       let indexYellow = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'red_then_yellow_index',
           body: {
             // Renable allocation so that the status becomes yellow
@@ -1898,7 +1897,7 @@ describe('migration actions', () => {
       let indexGreen = false;
 
       setTimeout(() => {
-        client.indices.putSettings({
+        void client.indices.putSettings({
           index: 'yellow_then_green_index',
           body: {
             // Set 0 replican so that this index becomes green

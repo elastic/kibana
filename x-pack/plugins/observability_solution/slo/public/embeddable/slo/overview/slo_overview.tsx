@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { Subject } from 'rxjs';
 import { SloOverviewDetails } from '../common/slo_overview_details';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/use_fetch_historical_summary';
@@ -19,15 +20,13 @@ import { SloCardItemBadges } from '../../../pages/slos/components/card_view/slo_
 import { SloCardChart } from '../../../pages/slos/components/card_view/slo_card_item';
 import { useFetchSloDetails } from '../../../hooks/use_fetch_slo_details';
 
-import { SingleSloProps } from './types';
+import { SingleSloCustomInput } from './types';
 
-export function SloOverview({
-  sloId,
-  sloInstanceId,
-  remoteName,
-  onRenderComplete,
-  reloadSubject,
-}: SingleSloProps) {
+interface Props extends SingleSloCustomInput {
+  reloadSubject?: Subject<boolean>;
+}
+
+export function SloOverview({ sloId, sloInstanceId, remoteName, reloadSubject }: Props) {
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
   useEffect(() => {
@@ -67,13 +66,6 @@ export function SloOverview({
   useEffect(() => {
     refetch();
   }, [lastRefreshTime, refetch]);
-  useEffect(() => {
-    if (!onRenderComplete) return;
-
-    if (!isLoading) {
-      onRenderComplete();
-    }
-  }, [isLoading, onRenderComplete]);
 
   const isSloNotFound = !isLoading && slo === undefined;
 
@@ -113,7 +105,7 @@ export function SloOverview({
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   return (
-    <div style={{ width: '100%' }}>
+    <div data-test-subj="sloSingleOverviewPanel" data-shared-item="" style={{ width: '100%' }}>
       <SloCardChart
         slo={slo}
         historicalSliData={historicalSliData ?? []}

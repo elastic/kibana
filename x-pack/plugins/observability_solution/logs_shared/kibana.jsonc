@@ -11,6 +11,7 @@
     "requiredPlugins": [
       "data",
       "dataViews",
+      "discoverShared",
       "usageCollection",
       "observabilityShared",
       "share"

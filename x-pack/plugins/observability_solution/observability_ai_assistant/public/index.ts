@@ -82,6 +82,7 @@ export {
   aiAssistantResponseLanguage,
   aiAssistantLogsIndexPattern,
   aiAssistantSimulatedFunctionCalling,
+  aiAssistantSearchConnectorIndexPattern,
 } from '../common/ui_settings/settings_keys';
 
 export const plugin: PluginInitializer<

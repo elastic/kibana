@@ -11,7 +11,6 @@ import { waitFor } from '@testing-library/react';
 
 import { useKibana, useCurrentUser } from '../../../../common/lib/kibana';
 import { DefaultCellRenderer } from '../cell_rendering/default_cell_renderer';
-import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { Direction } from '../../../../../common/search_strategy';
 import {
@@ -41,6 +40,7 @@ import type {
 } from '@hello-pangea/dnd';
 
 jest.mock('../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
 jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
 );

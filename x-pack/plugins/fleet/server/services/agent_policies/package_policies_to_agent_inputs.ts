@@ -5,7 +5,9 @@
  * 2.0.
  */
 import { merge } from 'lodash';
+import deepMerge from 'deepmerge';
 
+import type { FullAgentPolicyAddFields, GlobalDataTag } from '../../../common/types';
 import { isPackageLimited } from '../../../common/services';
 import type {
   PackagePolicy,
@@ -16,6 +18,7 @@ import type {
 } from '../../types';
 import { DEFAULT_OUTPUT } from '../../constants';
 import { pkgToPkgKey } from '../epm/registry';
+import { GLOBAL_DATA_TAG_EXCLUDED_INPUTS } from '../../../common/constants/epm';
 
 const isPolicyEnabled = (packagePolicy: PackagePolicy) => {
   return packagePolicy.enabled && packagePolicy.inputs && packagePolicy.inputs.length;
@@ -25,7 +28,8 @@ export const storedPackagePolicyToAgentInputs = (
   packagePolicy: PackagePolicy,
   packageInfo?: PackageInfo,
   outputId: string = DEFAULT_OUTPUT.name,
-  agentPolicyNamespace?: string
+  agentPolicyNamespace?: string,
+  addFields?: FullAgentPolicyAddFields
 ): FullAgentPolicyInput[] => {
   const fullInputs: FullAgentPolicyInput[] = [];
 
@@ -63,6 +67,10 @@ export const storedPackagePolicyToAgentInputs = (
       ...getFullInputStreams(input),
     };
 
+    if (addFields && !GLOBAL_DATA_TAG_EXCLUDED_INPUTS.has(fullInput.type)) {
+      fullInput.processors = [addFields];
+    }
+
     // deeply merge the input.config values with the full policy input
     merge(
       fullInput,
@@ -71,7 +79,6 @@ export const storedPackagePolicyToAgentInputs = (
         return acc;
       }, {} as Record<string, unknown>)
     );
-
     if (packagePolicy.package) {
       fullInput.meta = {
         package: {
@@ -80,9 +87,27 @@ export const storedPackagePolicyToAgentInputs = (
         },
       };
     }
-    fullInputs.push(fullInput);
+
+    const fullInputWithOverrides = mergeInputsOverrides(packagePolicy, fullInput);
+    fullInputs.push(fullInputWithOverrides);
   });
   return fullInputs;
+};
+
+export const mergeInputsOverrides = (
+  packagePolicy: PackagePolicy,
+  fullInput: FullAgentPolicyInput
+) => {
+  // check if there are inputs overrides and merge them
+  if (packagePolicy?.overrides?.inputs) {
+    const overrideInputs = packagePolicy.overrides.inputs;
+    const keys = Object.keys(overrideInputs);
+
+    if (keys.length > 0 && fullInput.id === keys[0]) {
+      return deepMerge<FullAgentPolicyInput>(fullInput, overrideInputs[keys[0]]);
+    }
+  }
+  return fullInput;
 };
 
 export const getFullInputStreams = (
@@ -116,9 +141,12 @@ export const storedPackagePoliciesToAgentInputs = async (
   packagePolicies: PackagePolicy[],
   packageInfoCache: Map<string, PackageInfo>,
   outputId: string = DEFAULT_OUTPUT.name,
-  agentPolicyNamespace?: string
+  agentPolicyNamespace?: string,
+  globalDataTags?: GlobalDataTag[]
 ): Promise<FullAgentPolicyInput[]> => {
   const fullInputs: FullAgentPolicyInput[] = [];
+
+  const addFields = globalDataTags ? globalDataTagsToAddFields(globalDataTags) : undefined;
 
   for (const packagePolicy of packagePolicies) {
     if (!isPolicyEnabled(packagePolicy)) {
@@ -134,10 +162,26 @@ export const storedPackagePoliciesToAgentInputs = async (
         packagePolicy,
         packageInfo,
         outputId,
-        agentPolicyNamespace
+        agentPolicyNamespace,
+        addFields
       )
     );
   }
 
   return fullInputs;
+};
+
+const globalDataTagsToAddFields = (tags: GlobalDataTag[]): FullAgentPolicyAddFields => {
+  const fields: { [key: string]: string | number } = {};
+
+  tags.forEach((tag) => {
+    fields[tag.name] = tag.value;
+  });
+
+  return {
+    add_fields: {
+      target: '',
+      fields,
+    },
+  };
 };

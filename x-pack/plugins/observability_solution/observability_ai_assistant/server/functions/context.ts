@@ -21,7 +21,7 @@ import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_
 import { createFunctionResponseMessage } from '../../common/utils/create_function_response_message';
 import { RecallRanking, RecallRankingEventType } from '../analytics/recall_ranking';
 import type { ObservabilityAIAssistantClient } from '../service/client';
-import { ChatFn } from '../service/types';
+import { FunctionCallChatFunction } from '../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';
 
 const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
@@ -37,7 +37,7 @@ export function registerContextFunction({
       name: 'context',
       description:
         'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
-      visibility: FunctionVisibility.AssistantOnly,
+      visibility: FunctionVisibility.Internal,
       parameters: {
         type: 'object',
         properties: {
@@ -61,7 +61,7 @@ export function registerContextFunction({
         required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: args, messages, connectorId, screenContexts, chat }, signal) => {
+    async ({ arguments: args, messages, screenContexts, chat }, signal) => {
       const { analytics } = (await resources.context.core).coreStart;
 
       const { queries, categories } = args;
@@ -118,7 +118,6 @@ export function registerContextFunction({
             queries: queriesOrUserPrompt,
             messages,
             chat,
-            connectorId,
             signal,
             logger: resources.logger,
           });
@@ -209,15 +208,13 @@ async function scoreSuggestions({
   messages,
   queries,
   chat,
-  connectorId,
   signal,
   logger,
 }: {
   suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
   messages: Message[];
   queries: string[];
-  chat: ChatFn;
-  connectorId: string;
+  chat: FunctionCallChatFunction;
   signal: AbortSignal;
   logger: Logger;
 }) {
@@ -274,15 +271,12 @@ async function scoreSuggestions({
   };
 
   const response = await lastValueFrom(
-    (
-      await chat('score_suggestions', {
-        connectorId,
-        messages: [...messages.slice(0, -2), newUserMessage],
-        functions: [scoreFunction],
-        functionCall: 'score',
-        signal,
-      })
-    ).pipe(concatenateChatCompletionChunks())
+    chat('score_suggestions', {
+      messages: [...messages.slice(0, -2), newUserMessage],
+      functions: [scoreFunction],
+      functionCall: 'score',
+      signal,
+    }).pipe(concatenateChatCompletionChunks())
   );
 
   const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);

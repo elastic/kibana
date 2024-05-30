@@ -11,7 +11,6 @@ import pLimit from 'p-limit';
 import Path from 'path';
 import { lastValueFrom, startWith } from 'rxjs';
 import { promisify } from 'util';
-import { ESQL_LATEST_VERSION } from '@kbn/esql-utils';
 import { FunctionVisibility, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   VisualizeESQLUserIntention,
@@ -127,7 +126,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
         path: '_query',
         body: {
           query,
-          version: ESQL_LATEST_VERSION,
         },
       })) as ESQLSearchReponse;
 
@@ -142,7 +140,7 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
       description: `This function generates, executes and/or visualizes a query based on the user's request. It also explains how ES|QL works and how to convert queries from one language to another. Make sure you call one of the get_dataset functions first if you need index or field names. This function takes no input.`,
       visibility: FunctionVisibility.AssistantOnly,
     },
-    async ({ messages, connectorId, chat }, signal) => {
+    async ({ messages, chat }, signal) => {
       const [systemMessage, esqlDocs] = await Promise.all([loadSystemMessage(), loadEsqlDocs()]);
 
       const withEsqlSystemMessage = (message?: string) => [
@@ -155,7 +153,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
 
       const source$ = (
         await chat('classify_esql', {
-          connectorId,
           messages: withEsqlSystemMessage().concat({
             '@timestamp': new Date().toISOString(),
             message: {
@@ -382,7 +379,6 @@ export function registerQueryFunction({ functions, resources }: FunctionRegistra
             },
           },
         ],
-        connectorId,
         signal,
         functions: functions.getActions(),
       });

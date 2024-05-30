@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import {
+  AggregationsSumAggregate,
+  AggregationsTopHitsAggregate,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,
   calendarAlignedTimeWindowSchema,
-  Duration,
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
-  toMomentUnitOfTime,
 } from '@kbn/slo-schema';
-import moment from 'moment';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
+import { Groupings, Meta, SLODefinition, Summary } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { toDateRange } from '../domain/services/date_range';
 import { getFlattenedGroupings } from './utils';
+import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
 
 interface Params {
   slo: SLODefinition;
@@ -53,25 +55,15 @@ export class DefaultSummaryClient implements SummaryClient {
     const instanceIdFilter = shouldIncludeInstanceIdFilter
       ? [{ term: { 'slo.instanceId': instanceId } }]
       : [];
-    const extraGroupingsAgg = {
-      last_doc: {
-        top_hits: {
-          sort: [
-            {
-              '@timestamp': {
-                order: 'desc',
-              },
-            },
-          ],
-          _source: {
-            includes: ['slo.groupings', 'monitor', 'observer', 'config_id'],
-          },
-          size: 1,
-        },
-      },
-    };
 
-    const result = await this.esClient.search({
+    const result = await this.esClient.search<
+      any,
+      {
+        good: AggregationsSumAggregate;
+        total: AggregationsSumAggregate;
+        last_doc: AggregationsTopHitsAggregate;
+      }
+    >({
       index: remoteName
         ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
         : SLO_DESTINATION_INDEX_PATTERN,
@@ -83,16 +75,34 @@ export class DefaultSummaryClient implements SummaryClient {
             { term: { 'slo.revision': slo.revision } },
             {
               range: {
-                '@timestamp': { gte: dateRange.from.toISOString(), lt: dateRange.to.toISOString() },
+                '@timestamp': {
+                  gte: dateRange.from.toISOString(),
+                  lte: dateRange.to.toISOString(),
+                },
               },
             },
             ...instanceIdFilter,
           ],
         },
       },
-      // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
       aggs: {
-        ...(shouldIncludeInstanceIdFilter && extraGroupingsAgg),
+        ...(shouldIncludeInstanceIdFilter && {
+          last_doc: {
+            top_hits: {
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: {
+                includes: ['slo.groupings', 'monitor', 'observer', 'config_id'],
+              },
+              size: 1,
+            },
+          },
+        }),
         ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
           good: {
             sum: { field: 'slo.isGoodSlice' },
@@ -108,38 +118,31 @@ export class DefaultSummaryClient implements SummaryClient {
       },
     });
 
-    // @ts-ignore value is not type correctly
     const good = result.aggregations?.good?.value ?? 0;
-    // @ts-ignore value is not type correctly
     const total = result.aggregations?.total?.value ?? 0;
-    // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
     const source = result.aggregations?.last_doc?.hits?.hits?.[0]?._source;
     const groupings = source?.slo?.groupings;
 
-    const sliValue = computeSLI(good, total);
-    const initialErrorBudget = 1 - slo.objective.target;
-    let errorBudget;
-
-    if (
-      calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
-      timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ) {
+    let sliValue;
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
       const totalSlices = computeTotalSlicesFromDateRange(
         dateRange,
         slo.objective.timesliceWindow!
       );
-      const consumedErrorBudget =
-        sliValue < 0 ? 0 : (total - good) / (totalSlices * initialErrorBudget);
 
-      errorBudget = toErrorBudget(initialErrorBudget, consumedErrorBudget);
+      sliValue = computeSLI(good, total, totalSlices);
     } else {
-      const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
-      errorBudget = toErrorBudget(
-        initialErrorBudget,
-        consumedErrorBudget,
-        calendarAlignedTimeWindowSchema.is(slo.timeWindow)
-      );
+      sliValue = computeSLI(good, total);
     }
+
+    const initialErrorBudget = 1 - slo.objective.target;
+    const consumedErrorBudget = sliValue < 0 ? 0 : (1 - sliValue) / initialErrorBudget;
+    const errorBudget = toErrorBudget(
+      initialErrorBudget,
+      consumedErrorBudget,
+      calendarAlignedTimeWindowSchema.is(slo.timeWindow) &&
+        occurrencesBudgetingMethodSchema.is(slo.budgetingMethod)
+    );
 
     return {
       summary: {
@@ -151,14 +154,6 @@ export class DefaultSummaryClient implements SummaryClient {
       meta: getMetaFields(slo, source ?? {}),
     };
   }
-}
-
-function computeTotalSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {
-  const dateRangeDurationInUnit = moment(dateRange.to).diff(
-    dateRange.from,
-    toMomentUnitOfTime(timesliceWindow.unit)
-  );
-  return Math.ceil(dateRangeDurationInUnit / timesliceWindow!.value);
 }
 
 function getMetaFields(

@@ -170,7 +170,7 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({ isCr
             id="delete-related-index"
             label={i18n.translate(
               'xpack.enterpriseSearch.deleteConnectorModal.euiCheckbox.deleteAlsoRelatedIndexLabel',
-              { defaultMessage: 'Delete also related index' }
+              { defaultMessage: 'Also delete related index' }
             )}
             checked={shouldDeleteIndex}
             onChange={() => setShouldDeleteIndex(!shouldDeleteIndex)}

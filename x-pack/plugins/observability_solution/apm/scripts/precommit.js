@@ -9,7 +9,7 @@
 /* eslint-disable import/no-extraneous-dependencies*/
 
 const execa = require('execa');
-const Listr = require('listr');
+const { Listr } = require('listr2');
 const { resolve } = require('path');
 
 const root = resolve(__dirname, '../../../..');

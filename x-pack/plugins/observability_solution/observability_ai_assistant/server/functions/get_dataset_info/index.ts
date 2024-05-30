@@ -26,7 +26,6 @@ export function registerGetDatasetInfoFunction({
         'This function allows the assistant to get information about available indices and their fields.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
         properties: {
           index: {
             type: 'string',
@@ -37,7 +36,7 @@ export function registerGetDatasetInfoFunction({
         required: ['index'],
       } as const,
     },
-    async ({ arguments: { index }, messages, connectorId, chat }, signal) => {
+    async ({ arguments: { index }, messages, chat }, signal) => {
       const coreContext = await resources.context.core;
 
       const esClient = coreContext.elasticsearch.client.asCurrentUser;
@@ -83,24 +82,14 @@ export function registerGetDatasetInfoFunction({
         esClient,
         dataViews: await resources.plugins.dataViews.start(),
         savedObjectsClient,
-        chat: (
-          operationName,
-          { messages: nextMessages, functionCall, functions: nextFunctions }
-        ) => {
-          return chat(operationName, {
-            messages: nextMessages,
-            functionCall,
-            functions: nextFunctions,
-            connectorId,
-            signal,
-          });
-        },
+        signal,
+        chat,
       });
 
       return {
         content: {
           indices: [index],
-          fields: relevantFieldNames,
+          fields: relevantFieldNames.fields,
         },
       };
     }

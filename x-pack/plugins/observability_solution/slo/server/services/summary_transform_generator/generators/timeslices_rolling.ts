@@ -19,6 +19,10 @@ import { getGroupBy } from './common';
 export function generateSummaryTransformForTimeslicesAndRolling(
   slo: SLODefinition
 ): TransformPutTransformRequest {
+  const sliceDurationInSeconds = slo.objective.timesliceWindow!.asSeconds();
+  const timeWindowInSeconds = slo.timeWindow.duration.asSeconds();
+  const totalSlicesInWindow = Math.ceil(timeWindowInSeconds / sliceDurationInSeconds);
+
   return {
     transform_id: getSLOSummaryTransformId(slo.id, slo.revision),
     dest: {
@@ -71,8 +75,7 @@ export function generateSummaryTransformForTimeslicesAndRolling(
               goodEvents: 'goodEvents',
               totalEvents: 'totalEvents',
             },
-            script:
-              'if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return params.goodEvents / params.totalEvents }',
+            script: `if (params.totalEvents == 0) { return -1 } else if (params.goodEvents >= params.totalEvents) { return 1 } else { return 1 - (params.totalEvents - params.goodEvents) / ${totalSlicesInWindow} }`,
           },
         },
         errorBudgetInitial: {

@@ -46,7 +46,6 @@ export const groupingHandlerFactory =
     logDebugMessage,
     logger,
     stateHandler,
-    version,
   }: ResponseStreamFetchOptions<T>) =>
   async (
     significantCategories: SignificantItem[],
@@ -134,7 +133,7 @@ export const groupingHandlerFactory =
         const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
 
         if (maxItems > 1) {
-          responseStream.push(addSignificantItemsGroupAction(significantItemGroups, version));
+          responseStream.push(addSignificantItemsGroupAction(significantItemGroups));
         }
 
         stateHandler.loaded(PROGRESS_STEP_GROUPING, false);
@@ -203,15 +202,6 @@ export const groupingHandlerFactory =
                   doc_count: 0,
                 };
 
-                if (version === '1') {
-                  return {
-                    key: o.key,
-                    key_as_string: o.key_as_string ?? '',
-                    doc_count_significant_term: current.doc_count,
-                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                  };
-                }
-
                 return {
                   key: o.key,
                   key_as_string: o.key_as_string ?? '',
@@ -221,20 +211,17 @@ export const groupingHandlerFactory =
               }) ?? [];
 
             responseStream.push(
-              addSignificantItemsGroupHistogramAction(
-                [
-                  {
-                    id: cpg.id,
-                    histogram,
-                  },
-                ],
-                version
-              )
+              addSignificantItemsGroupHistogramAction([
+                {
+                  id: cpg.id,
+                  histogram,
+                },
+              ])
             );
           }
         }, MAX_CONCURRENT_QUERIES);
 
-        groupHistogramQueue.push(significantItemGroups);
+        await groupHistogramQueue.push(significantItemGroups);
         await groupHistogramQueue.drain();
       }
     } catch (e) {

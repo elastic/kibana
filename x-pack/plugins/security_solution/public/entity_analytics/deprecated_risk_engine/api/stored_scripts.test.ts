@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import type { HttpSetup } from '@kbn/core/public';
 import { createStoredScript, deleteStoredScript } from './stored_scripts';
 
 const mockRequest = jest.fn();
@@ -15,14 +16,8 @@ const mockHttp = {
   delete: mockRequest,
 } as unknown as HttpSetup;
 
-const mockAddDanger = jest.fn();
-const mockAddError = jest.fn();
-const mockNotification = {
-  toasts: {
-    addDanger: mockAddDanger,
-    addError: mockAddError,
-  },
-} as unknown as NotificationsStart;
+const startServices = coreMock.createStart();
+const mockAddDanger = jest.spyOn(startServices.notifications.toasts, 'addDanger');
 
 const mockRenderDocLink = jest.fn();
 
@@ -33,9 +28,9 @@ describe('createStoredScript', () => {
     mockRequest.mockRejectedValue({ body: { message: 'test error' } });
     await createStoredScript({
       http: mockHttp,
-      notifications: mockNotification,
       options: mockOptions,
       renderDocLink: mockRenderDocLink,
+      startServices,
     });
   });
 
@@ -47,7 +42,12 @@ describe('createStoredScript', () => {
   });
 
   it('handles error', () => {
-    expect(mockAddDanger.mock.calls[0][0].title).toEqual('Failed to create stored script');
+    expect(mockAddDanger.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "text": [Function],
+        "title": "Failed to create stored script",
+      }
+    `);
     expect(mockRenderDocLink.mock.calls[0][0]).toEqual('test error');
   });
 });
@@ -59,9 +59,9 @@ describe('deleteStoredScript', () => {
     mockRequest.mockRejectedValue({ body: { message: 'test error' } });
     await deleteStoredScript({
       http: mockHttp,
-      notifications: mockNotification,
       options: mockOptions,
       renderDocLink: mockRenderDocLink,
+      startServices,
     });
   });
 
@@ -73,7 +73,12 @@ describe('deleteStoredScript', () => {
   });
 
   it('handles error', () => {
-    expect(mockAddDanger.mock.calls[0][0].title).toEqual('Failed to delete stored script');
+    expect(mockAddDanger.mock.calls[0][0]).toMatchInlineSnapshot(`
+      Object {
+        "text": [Function],
+        "title": "Failed to delete stored script",
+      }
+    `);
     expect(mockRenderDocLink.mock.calls[0][0]).toEqual('test error');
   });
 });

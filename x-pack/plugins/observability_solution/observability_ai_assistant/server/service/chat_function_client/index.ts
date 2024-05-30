@@ -13,7 +13,7 @@ import { FunctionVisibility, type FunctionResponse } from '../../../common/funct
 import type { Message, ObservabilityAIAssistantScreenContextRequest } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
 import type {
-  ChatFn,
+  FunctionCallChatFunction,
   FunctionHandler,
   FunctionHandlerRegistry,
   RegisteredInstruction,
@@ -144,14 +144,12 @@ export class ChatFunctionClient {
     args,
     messages,
     signal,
-    connectorId,
   }: {
-    chat: ChatFn;
+    chat: FunctionCallChatFunction;
     name: string;
     args: string | undefined;
     messages: Message[];
     signal: AbortSignal;
-    connectorId: string;
   }): Promise<FunctionResponse> {
     const fn = this.functionRegistry.get(name);
 
@@ -167,7 +165,6 @@ export class ChatFunctionClient {
       {
         arguments: parsedArguments,
         messages,
-        connectorId,
         screenContexts: this.screenContexts,
         chat,
       },

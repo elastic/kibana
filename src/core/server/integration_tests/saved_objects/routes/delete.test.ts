@@ -72,6 +72,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     expect(result.body).toEqual({});
     expect(coreUsageStatsClient.incrementSavedObjectsDelete).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 

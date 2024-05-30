@@ -130,6 +130,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
     };
     const staticAssetsHrefBase = http.staticAssets.getHrefBase();
+    const usingCdn = http.staticAssets.isUsingCdn();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
@@ -205,8 +206,14 @@ export class RenderingService {
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
-    const translationHash = i18n.getTranslationHash();
-    const translationsUrl = `${serverBasePath}/translations/${translationHash}/${i18nLib.getLocale()}.json`;
+    const locale = i18nLib.getLocale();
+    let translationsUrl: string;
+    if (usingCdn) {
+      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
+    } else {
+      const translationHash = i18n.getTranslationHash();
+      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+    }
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
@@ -215,7 +222,7 @@ export class RenderingService {
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18nLib.translate,
-      locale: i18nLib.getLocale(),
+      locale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
@@ -239,7 +246,6 @@ export class RenderingService {
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
-          // TODO: Make this load as part of static assets!
           translationsUrl,
         },
         theme: {
