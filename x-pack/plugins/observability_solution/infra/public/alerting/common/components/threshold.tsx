@@ -11,6 +11,7 @@ import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { COMPARATORS } from '@kbn/alerting-comparators';
+
 export interface ChartProps {
   theme?: PartialTheme;
   baseTheme: Theme;
@@ -18,12 +19,16 @@ export interface ChartProps {
 
 export interface Props {
   chartProps: ChartProps;
-  comparator: COMPARATORS | string;
+  comparator: COMPARATORS;
   id: string;
-  threshold: number;
+  threshold: number[];
   title: string;
   value: number;
   valueFormatter: (d: number) => string;
+  warning?: {
+    threshold: number[];
+    comparator: COMPARATORS;
+  };
 }
 
 export const Threshold = ({
@@ -34,6 +39,7 @@ export const Threshold = ({
   title,
   value,
   valueFormatter,
+  warning,
 }: Props) => {
   const color = useEuiBackgroundColor('danger');
 
@@ -58,12 +64,24 @@ export const Threshold = ({
               {
                 title,
                 extra: (
-                  <span>
+                  <>
                     {i18n.translate('xpack.infra.alerting.thresholdExtraTitle', {
-                      values: { comparator, threshold: valueFormatter(threshold) },
+                      values: {
+                        comparator,
+                        threshold: threshold.map((t) => valueFormatter(t)).join(' - '),
+                      },
                       defaultMessage: `Alert when {comparator} {threshold}`,
                     })}
-                  </span>
+                    <br />
+                    {warning &&
+                      i18n.translate('xpack.infra.alerting.warningExtraTitle', {
+                        values: {
+                          comparator: warning.comparator,
+                          threshold: warning.threshold.map((t) => valueFormatter(t)).join(' - '),
+                        },
+                        defaultMessage: `Warn when {comparator} {threshold}`,
+                      })}
+                  </>
                 ),
                 color,
                 value,
