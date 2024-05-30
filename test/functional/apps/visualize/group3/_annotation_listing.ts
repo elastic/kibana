@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('annotation listing page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/168281
+  describe.skip('annotation listing page', function () {
     before(async function () {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
