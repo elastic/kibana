@@ -231,7 +231,7 @@ describe('getSharingData', () => {
     `);
   });
 
-  test('fields do not have prepended timeField for text based languages', async () => {
+  test('fields do not have prepended timeField for ES|QL', async () => {
     const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 

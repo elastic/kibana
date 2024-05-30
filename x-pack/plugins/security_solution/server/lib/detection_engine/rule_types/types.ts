@@ -135,6 +135,7 @@ export type SecurityAlertType<
 
 export interface CreateSecurityRuleTypeWrapperProps {
   lists: SetupPlugins['lists'];
+  actions: SetupPlugins['actions'];
   logger: Logger;
   config: ConfigType;
   publicBaseUrl: string | undefined;

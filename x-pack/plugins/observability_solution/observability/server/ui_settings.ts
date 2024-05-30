@@ -283,9 +283,9 @@ export const uiSettings: Record<string, UiSettings> = {
       'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
       {
         defaultMessage:
-          '{betaLabel} Enable option to link custom dashboards in the asset details view.',
+          '{technicalPreviewLabel} Enable option to link custom dashboards in the asset details view.',
         values: {
-          betaLabel: `<em>[${betaLabel}]</em>`,
+          technicalPreviewLabel: `<em>[${technicalPreviewLabel}]</em>`,
         },
       }
     ),

@@ -39,9 +39,9 @@ export function getDataViewAppState(
     );
   }
 
-  const isTextBasedQueryMode = isOfAggregateQueryType(query);
+  const isEsqlQuery = isOfAggregateQueryType(query);
 
-  if (isTextBasedQueryMode) {
+  if (isEsqlQuery) {
     columns = [];
   }
 
@@ -49,7 +49,7 @@ export function getDataViewAppState(
   // filter out sorting by timeField in case it is set. data views without timeField don't
   // prepend this field in the table, so in legacy grid you would need to add this column to
   // remove sorting
-  let nextSort = getSortArray(currentSort, nextDataView, isTextBasedQueryMode).filter((value) => {
+  let nextSort = getSortArray(currentSort, nextDataView, isEsqlQuery).filter((value) => {
     return nextDataView.timeFieldName || value[0] !== currentDataView.timeFieldName;
   });
 

@@ -24,7 +24,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import moment from 'moment';
-import { nonNullable } from '../../../../../../utils';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { getAbsoluteDateRange, nonNullable } from '../../../../../../utils';
 import { DateRange } from '../../../../../../../common/types';
 import type { IndexPattern } from '../../../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
@@ -150,7 +151,7 @@ export async function suggest({
   dataViews,
   unifiedSearch,
   dateHistogramInterval,
-  dateRange,
+  timefilter,
 }: {
   expression: string;
   zeroIndexedOffset: number;
@@ -160,7 +161,7 @@ export async function suggest({
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
-  dateRange: DateRange;
+  timefilter: TimefilterContract;
 }): Promise<LensMathSuggestions> {
   const text =
     expression.substr(0, zeroIndexedOffset) + MARKER + expression.substr(zeroIndexedOffset);
@@ -169,6 +170,8 @@ export async function suggest({
 
     const tokenInfo = getInfoAtZeroIndexedPosition(ast, zeroIndexedOffset);
     const tokenAst = tokenInfo?.ast;
+
+    const dateRange = getAbsoluteDateRange(timefilter);
 
     const isNamedArgument =
       tokenInfo?.parent &&

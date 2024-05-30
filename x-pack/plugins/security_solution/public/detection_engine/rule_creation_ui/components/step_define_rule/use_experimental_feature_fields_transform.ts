@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { isMlRule } from '../../../../../common/detection_engine/utils';
+import { isEsqlRule, isMlRule } from '../../../../../common/detection_engine/utils';
 
 /**
  * transforms  DefineStepRule fields according to experimental feature flags
@@ -19,12 +19,17 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
   const isAlertSuppressionForMachineLearningRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForMachineLearningRuleEnabled'
   );
+  const isAlertSuppressionForEsqlRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForEsqlRuleEnabled'
+  );
 
   const transformer = useCallback(
     (fields: T) => {
       const isSuppressionDisabled =
-        isMlRule(fields.ruleType) && !isAlertSuppressionForMachineLearningRuleEnabled;
+        (isMlRule(fields.ruleType) && !isAlertSuppressionForMachineLearningRuleEnabled) ||
+        (isEsqlRule(fields.ruleType) && !isAlertSuppressionForEsqlRuleEnabled);
 
+      // reset any alert suppression values hidden behind feature flag
       if (isSuppressionDisabled) {
         return {
           ...fields,
@@ -37,7 +42,7 @@ export const useExperimentalFeatureFieldsTransform = <T extends Partial<DefineSt
 
       return fields;
     },
-    [isAlertSuppressionForMachineLearningRuleEnabled]
+    [isAlertSuppressionForEsqlRuleEnabled, isAlertSuppressionForMachineLearningRuleEnabled]
   );
 
   return transformer;

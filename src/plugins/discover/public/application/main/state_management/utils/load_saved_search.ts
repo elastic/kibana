@@ -5,10 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { cloneDeep, isEqual } from 'lodash';
-import { getDataViewByTextBasedQueryLang } from './get_data_view_by_text_based_query_lang';
-import { isTextBasedQuery } from '../../utils/is_text_based_query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getEsqlDataView } from './get_esql_data_view';
 import { loadAndResolveDataView } from './resolve_data_view';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -160,7 +161,7 @@ function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps
   }
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
-  dataStateContainer.reset(savedSearch);
+  dataStateContainer.reset();
   // set data service filters
   const filters = savedSearch.searchSource.getField('filter');
   if (Array.isArray(filters) && filters.length) {
@@ -204,14 +205,14 @@ const getStateDataView = async (
   }
 ) => {
   const { dataView, dataViewSpec } = params;
-  const isTextBased = isTextBasedQuery(query);
+  const isEsqlQuery = isOfAggregateQueryType(query);
 
   if (dataView) {
     return dataView;
   }
 
-  if (isTextBased) {
-    return await getDataViewByTextBasedQueryLang(query, dataView, services);
+  if (isEsqlQuery) {
+    return await getEsqlDataView(query, dataView, services);
   }
 
   const result = await loadAndResolveDataView(
@@ -219,7 +220,7 @@ const getStateDataView = async (
       id: dataViewId,
       dataViewSpec,
       savedSearch,
-      isTextBasedQuery: isTextBased,
+      isEsqlMode: isEsqlQuery,
     },
     { services, internalStateContainer }
   );

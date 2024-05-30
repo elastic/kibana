@@ -7,23 +7,7 @@
  */
 
 import { Server, ServerOptions } from '@hapi/hapi';
-import { ListenerOptions } from './get_listener_options';
 
-export function createServer(serverOptions: ServerOptions, listenerOptions: ListenerOptions) {
-  const server = new Server(serverOptions);
-
-  server.listener.keepAliveTimeout = listenerOptions.keepaliveTimeout;
-  server.listener.setTimeout(listenerOptions.socketTimeout);
-  server.listener.on('timeout', (socket) => {
-    socket.destroy();
-  });
-  server.listener.on('clientError', (err, socket) => {
-    if (socket.writable) {
-      socket.end(Buffer.from('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
-    } else {
-      socket.destroy(err);
-    }
-  });
-
-  return server;
+export function createServer(serverOptions: ServerOptions) {
+  return new Server(serverOptions);
 }

@@ -24,6 +24,10 @@ export function registerUpgradeStatusRoute({
   router.get(
     {
       path: `${API_BASE_PATH}/status`,
+      options: {
+        access: 'public',
+        description: `Get upgrade readiness status`,
+      },
       validate: false,
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {

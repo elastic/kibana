@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   title: Find Prompts API endpoint
-  version: '2023-10-31'
+  version: '1'
 paths:
-  /api/elastic_assistant/prompts/_find:
+  /internal/elastic_assistant/prompts/_find:
     get:
       operationId: FindPrompts
       x-codegen-enabled: true

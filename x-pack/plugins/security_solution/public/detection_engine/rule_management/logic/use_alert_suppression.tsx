@@ -17,10 +17,17 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
   const isAlertSuppressionForMachineLearningRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForMachineLearningRuleEnabled'
   );
+  const isAlertSuppressionForEsqlRuleEnabled = useIsExperimentalFeatureEnabled(
+    'alertSuppressionForEsqlRuleEnabled'
+  );
 
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) {
       return false;
+    }
+    // Remove this condition when the Feature Flag for enabling Suppression in the New terms rule is removed.
+    if (ruleType === 'esql') {
+      return isSuppressibleAlertRule(ruleType) && isAlertSuppressionForEsqlRuleEnabled;
     }
 
     if (isMlRule(ruleType)) {
@@ -28,7 +35,11 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
     }
 
     return isSuppressibleAlertRule(ruleType);
-  }, [isAlertSuppressionForMachineLearningRuleEnabled, ruleType]);
+  }, [
+    isAlertSuppressionForEsqlRuleEnabled,
+    isAlertSuppressionForMachineLearningRuleEnabled,
+    ruleType,
+  ]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),

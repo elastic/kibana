@@ -6097,7 +6097,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -6107,7 +6107,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -6596,7 +6596,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -6606,7 +6606,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -7158,7 +7158,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -7168,7 +7168,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -7638,7 +7638,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -7648,7 +7648,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -8178,7 +8178,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -8188,7 +8188,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -8890,7 +8890,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -8900,7 +8900,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
@@ -9602,7 +9602,7 @@ Object {
             Object {
               "additionalProperties": false,
               "properties": Object {
-                "is_customized": Object {
+                "isCustomized": Object {
                   "type": "boolean",
                 },
                 "type": Object {
@@ -9612,7 +9612,7 @@ Object {
               },
               "required": Array [
                 "type",
-                "is_customized",
+                "isCustomized",
               ],
               "type": "object",
             },
