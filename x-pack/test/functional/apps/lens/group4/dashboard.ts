@@ -345,6 +345,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.openNewTab();
       await browser.navigateTo(url);
       expect(await PageObjects.lens.getTitle()).to.be('test');
+      // need to delete the lens from the dashboard or it messes up the next test
+      await PageObjects.dashboard.navigateToApp();
+      await testSubjects.click('embeddablePanelToggleMenuIcon');
+      await testSubjects.click('embeddablePanelAction-deletePanel');
     });
   });
 }
