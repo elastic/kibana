@@ -41,6 +41,15 @@ export const RuleExecutionResult = z.object({
   gap_duration_s: z.number().int(),
   security_status: z.string(),
   security_message: z.string(),
+  /**
+   * Backfill information for the rule execution result with source event date range
+   */
+  backfill: z
+    .object({
+      from: z.string().datetime(),
+      to: z.string().datetime(),
+    })
+    .optional(),
 });
 
 /**

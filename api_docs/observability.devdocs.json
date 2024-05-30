@@ -3256,6 +3256,26 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.navigation",
+            "type": "Object",
+            "tags": [],
+            "label": "navigation",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "navigation",
+                "scope": "public",
+                "docId": "kibNavigationPluginApi",
+                "section": "def-public.NavigationPublicStart",
+                "text": "NavigationPublicStart"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.observabilityShared",
             "type": "Object",
             "tags": [],
@@ -3572,7 +3592,13 @@
             "label": "aiops",
             "description": [],
             "signature": [
-              "AiopsPluginStart"
+              {
+                "pluginId": "aiops",
+                "scope": "public",
+                "docId": "kibAiopsPluginApi",
+                "section": "def-public.AiopsPluginStart",
+                "text": "AiopsPluginStart"
+              }
             ],
             "path": "x-pack/plugins/observability_solution/observability/public/plugin.ts",
             "deprecated": false,
@@ -7876,6 +7902,41 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-server.existsQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "existsQuery",
+        "description": [],
+        "signature": [
+          "(field: string) => ",
+          "QueryDslQueryContainer",
+          "[]"
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-server.existsQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/server/utils/queries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -13070,6 +13131,48 @@
               "string"
             ],
             "path": "x-pack/plugins/observability_solution/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.convertToBuiltInComparators",
+        "type": "Function",
+        "tags": [],
+        "label": "convertToBuiltInComparators",
+        "description": [],
+        "signature": [
+          "(comparator: ",
+          "LegacyComparator",
+          ") => ",
+          {
+            "pluginId": "@kbn/alerting-comparators",
+            "scope": "common",
+            "docId": "kibKbnAlertingComparatorsPluginApi",
+            "section": "def-common.COMPARATORS",
+            "text": "COMPARATORS"
+          }
+        ],
+        "path": "x-pack/plugins/observability_solution/observability/common/utils/convert_legacy_outside_comparator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.convertToBuiltInComparators.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "comparator",
+            "description": [],
+            "signature": [
+              "LegacyComparator"
+            ],
+            "path": "x-pack/plugins/observability_solution/observability/common/utils/convert_legacy_outside_comparator.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

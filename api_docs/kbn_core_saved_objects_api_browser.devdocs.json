@@ -3366,6 +3366,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-api-browser",
+            "id": "def-common.SimpleSavedObject.updatedBy",
+            "type": "string",
+            "tags": [],
+            "label": "updatedBy",
+            "description": [
+              "The user that last updated this object"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-api-browser/src/simple_saved_object.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-api-browser",
             "id": "def-common.SimpleSavedObject.createdAt",
             "type": "string",
             "tags": [],

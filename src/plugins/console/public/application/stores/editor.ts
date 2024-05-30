@@ -12,6 +12,7 @@ import { identity } from 'fp-ts/lib/function';
 import { DevToolsSettings, DEFAULT_SETTINGS } from '../../services';
 import { TextObject } from '../../../common/text_object';
 import { SenseEditor } from '../models';
+import { MonacoEditorActionsProvider } from '../containers/editor/monaco/monaco_editor_actions_provider';
 
 export interface Store {
   ready: boolean;
@@ -29,7 +30,7 @@ export const initialValue: Store = produce<Store>(
 );
 
 export type Action =
-  | { type: 'setInputEditor'; payload: SenseEditor }
+  | { type: 'setInputEditor'; payload: SenseEditor | MonacoEditorActionsProvider }
   | { type: 'setCurrentTextObject'; payload: TextObject }
   | { type: 'updateSettings'; payload: DevToolsSettings };
 

@@ -41,6 +41,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
         '../../../../../functional/apps/ml/data_visualizer/index_data_visualizer_grid_in_discover'
       )
     );
+    loadTestFile(
+      require.resolve(
+        '../../../../../functional/apps/ml/data_visualizer/index_data_visualizer_grid_in_discover_basic'
+      )
+    );
     loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
   });
 }
