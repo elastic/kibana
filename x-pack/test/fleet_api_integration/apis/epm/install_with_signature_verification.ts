@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Installation } from '@kbn/fleet-plugin/server/types';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 const TEST_KEY_ID = 'd2a182a7b0e00c14';
@@ -17,8 +17,6 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es: Client = getService('es');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
-  const server = dockerServers.get('registry');
 
   const uninstallPackage = async (pkg: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${pkg}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -45,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('verified package', async () => {
       after(async () => {
-        if (!server.enabled) return;
+        if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
         await uninstallPackage('verified', '1.0.0');
       });
       it('should install a package with a valid signature', async () => {
@@ -58,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('unverified packages', async () => {
       describe('unverified package content', async () => {
         after(async () => {
-          if (!server.enabled) return;
+          if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
           await uninstallPackage('unverified_content', '1.0.0');
         });
         it('should return 400 for valid signature but incorrect content', async () => {
@@ -78,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       describe('package verified with wrong key', async () => {
         after(async () => {
-          if (!server.enabled) return;
+          if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
           await uninstallPackage('wrong_key', '1.0.0');
         });
         it('should return 400 for valid signature but incorrect key', async () => {
