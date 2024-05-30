@@ -103,6 +103,9 @@ describe('duplicateRule', () => {
       name: expect.anything(), // covered in a separate test
       params: {
         ...rule.params,
+        ruleSource: {
+          type: 'internal',
+        },
         ruleId: expect.anything(), // covered in a separate test
       },
       tags: rule.tags,
