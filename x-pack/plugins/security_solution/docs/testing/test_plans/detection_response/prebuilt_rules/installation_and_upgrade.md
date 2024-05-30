@@ -837,9 +837,9 @@ Then the merged output should be the current verison of <field>
 And there should be no conflict
 
 Examples:
-| field     |
-| name      |
-| risk_score|
+| field      | base_version | current_version | target_version |
+| name       | "A"          | "A"             | "A"            |
+| risk_score | 1            | 1               | 1              |
 ```
 
 #### **Scenario: Rule field doesn't have an update but has a custom value**
@@ -856,9 +856,9 @@ Then the merged output should be the current verison of <field>
 And there should be no conflict
 
 Examples:
-| field     |
-| name      |
-| risk_score|
+| field      | base_version | current_version | target_version |
+| name       | "A"          | "B"             | "A"            |
+| risk_score | 1            | 2               | 1              |
 ```
 
 #### **Scenario: Rule field has an update and doesn't have a custom value**
@@ -875,9 +875,9 @@ Then the merged output should be the target verison of <field>
 And there should be no conflict
 
 Examples:
-| field     |
-| name      |
-| risk_score|
+| field      | base_version | current_version | target_version |
+| name       | "A"          | "A"             | "B"            |
+| risk_score | 1            | 1               | 2              |
 ```
 
 #### **Scenario: Rule field has an update and a custom value that are the same**
@@ -897,9 +897,9 @@ And there should be no conflict
 CASE: should work the same if rule does not have an existing base version
 
 Examples:
-| field     |
-| name      |
-| risk_score|
+| field      | base_version | current_version | target_version |
+| name       | "A"          | "B"             | "B"            |
+| risk_score | 1            | 2               | 2              |
 ```
 
 #### **Scenario: Rule field has an update and a custom value that are NOT the same**
@@ -919,9 +919,9 @@ And there should be a conflict
 CASE: should return target version if rule does not have an existing base version
 
 Examples:
-| field     |
-| name      |
-| risk_score|
+| field      | base_version | current_version | target_version |
+| name       | "A"          | "B"             | "C"            |
+| risk_score | 1            | 2               | 3              |
 ```
 
 ### Rule upgrade workflow: viewing rule changes in JSON diff view
