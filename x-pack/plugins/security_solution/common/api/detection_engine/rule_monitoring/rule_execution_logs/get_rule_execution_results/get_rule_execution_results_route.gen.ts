@@ -18,6 +18,7 @@ import { ArrayFromString } from '@kbn/zod-helpers';
  */
 
 import { RuleExecutionStatus } from '../../model/execution_status.gen';
+import { RuleRunType } from '../../model/execution_run_type.gen';
 import {
   SortFieldOfRuleExecutionResult,
   RuleExecutionResult,
@@ -44,6 +45,10 @@ export const GetRuleExecutionResultsRequestQuery = z.object({
    * Comma-separated list of rule execution statuses to filter results by
    */
   status_filters: ArrayFromString(RuleExecutionStatus).optional().default([]),
+  /**
+   * Comma-separated list of rule run types to filter results by
+   */
+  run_type_filters: ArrayFromString(RuleRunType).optional().default([]),
   /**
    * Field to sort results by
    */

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
 const testSpaceId = 'fleet_test_space';
@@ -18,9 +18,7 @@ export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
   const supertest = getService('supertest');
-  const dockerServers = getService('dockerServers');
   const esArchiver = getService('esArchiver');
-  const server = dockerServers.get('registry');
   const es = getService('es');
 
   const pkgName = 'system';
@@ -77,7 +75,9 @@ export default function (providerContext: FtrProviderContext) {
     setupFleetAndAgents(providerContext);
 
     before(async () => {
-      if (!server.enabled) return;
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
+        return;
+      }
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await installPackage(pkgName, pkgVersion);
 

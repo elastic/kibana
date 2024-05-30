@@ -4230,10 +4230,10 @@
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.Embeddable.onPhaseChange",
+            "id": "def-public.Embeddable.phase$",
             "type": "Object",
             "tags": [],
-            "label": "onPhaseChange",
+            "label": "phase$",
             "description": [],
             "signature": [
               "{ source: ",
@@ -9634,6 +9634,14 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPhaseEvents",
+            "text": "PublishesPhaseEvents"
+          },
+          ",",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PublishesUnsavedChanges",
             "text": "PublishesUnsavedChanges"
           },
@@ -14211,10 +14219,6 @@
               "path": "src/plugins/discover/public/plugin.tsx"
             },
             {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/embeddables/index.ts"
-            },
-            {
               "plugin": "infra",
               "path": "x-pack/plugins/observability_solution/infra/public/plugin.ts"
             },
@@ -14233,10 +14237,6 @@
             {
               "plugin": "profiling",
               "path": "x-pack/plugins/observability_solution/profiling/public/embeddables/register_embeddables.ts"
-            },
-            {
-              "plugin": "slo",
-              "path": "x-pack/plugins/observability_solution/slo/public/plugin.ts"
             },
             {
               "plugin": "links",
@@ -14639,10 +14639,6 @@
             {
               "plugin": "observabilityShared",
               "path": "x-pack/plugins/observability_solution/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx"
-            },
-            {
-              "plugin": "ml",
-              "path": "x-pack/plugins/ml/public/embeddables/get_embeddable_component.tsx"
             },
             {
               "plugin": "dashboard",

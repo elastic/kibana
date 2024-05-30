@@ -190,8 +190,14 @@ export const EmbeddableConsole = ({
               </div>
             </div>
           </EuiThemeProvider>
-          {showConsole ? (
-            <ConsoleWrapper {...{ core, usageCollection, onKeyDown, isMonacoEnabled }} />
+          {consoleState.consoleHasBeenOpened ? (
+            <ConsoleWrapper
+              isOpen={showConsole}
+              core={core}
+              usageCollection={usageCollection}
+              onKeyDown={onKeyDown}
+              isMonacoEnabled={isMonacoEnabled}
+            />
           ) : null}
           {showAlternateView ? (
             <div className="embeddableConsole__content" data-test-subj="consoleEmbeddedBody">
