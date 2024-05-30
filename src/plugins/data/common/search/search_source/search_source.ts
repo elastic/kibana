@@ -920,8 +920,8 @@ export class SearchSource {
     metaFields: string[];
   }) {
     const filter = fieldWildcardFilter(bodySourceExcludes, metaFields);
-    return (fieldsToFilter: any) =>
-      fieldsToFilter.filter((fld: SearchFieldValue) => filter(this.getFieldName(fld)));
+    return (fieldsToFilter: SearchFieldValue[]) =>
+      fieldsToFilter.filter((fld) => filter(this.getFieldName(fld)));
   }
 
   private getUniqueFieldNames({
