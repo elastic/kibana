@@ -7,14 +7,14 @@
 
 import { createReducer } from '@reduxjs/toolkit';
 
-import { MonitorStatusHeatmapResponse } from '../../../../../common/runtime_types';
+import { MonitorStatusHeatmap as HeatmapType } from '../../../../../common/runtime_types';
 
 import { IHttpSerializedFetchError } from '../utils/http_error';
 
 import { getMonitorStatusHeatmapAction } from './actions';
 
 export interface MonitorStatusHeatmap {
-  heatmap: MonitorStatusHeatmapResponse[];
+  heatmap: HeatmapType[];
   loading: boolean;
   error: IHttpSerializedFetchError | null;
 }

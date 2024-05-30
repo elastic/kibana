@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MonitorStatusHeatmapResponse } from '../../../../../common/runtime_types';
+import { MonitorStatusHeatmap } from '../../../../../common/runtime_types';
 import { createAsyncAction } from '../utils/actions';
 
 import { MonitorStatusHeatmapActionArgs } from './models';
 
 export const getMonitorStatusHeatmapAction = createAsyncAction<
   MonitorStatusHeatmapActionArgs,
-  MonitorStatusHeatmapResponse[]
+  MonitorStatusHeatmap[]
 >('MONITOR STATUS HEATMAP');

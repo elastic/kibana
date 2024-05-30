@@ -16,7 +16,7 @@ import {
   COLOR_MODES_STANDARD,
 } from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
-import { MonitorStatusHeatmapResponse } from '../../../../../../common/runtime_types';
+import { MonitorStatusHeatmap } from '../../../../../../common/runtime_types';
 
 export const SUCCESS_VIZ_COLOR = VISUALIZATION_COLORS[0];
 export const DANGER_VIZ_COLOR = VISUALIZATION_COLORS[VISUALIZATION_COLORS.length - 1];
@@ -114,7 +114,7 @@ export function createTimeBuckets(intervalMinutes: number, from: number, to: num
 
 export function createStatusTimeBins(
   timeBuckets: MonitorStatusTimeBucket[],
-  pingStatuses: MonitorStatusHeatmapResponse[]
+  pingStatuses: MonitorStatusHeatmap[]
 ): MonitorStatusTimeBin[] {
   return timeBuckets.map(({ start, end }) => {
     const { up: ups, down: downs } = pingStatuses
