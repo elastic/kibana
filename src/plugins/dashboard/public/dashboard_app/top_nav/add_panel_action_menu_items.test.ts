@@ -65,6 +65,7 @@ describe('getAddPanelActionMenuItems', () => {
         id: 'groupedAddPanelAction',
         title: 'Custom group',
         placementPriority: 0,
+        'data-test-subj': 'dashboardEditorMenu-groupedAddPanelActionGroup',
         items: [
           {
             'data-test-subj': 'create-action-Action name 01',
@@ -72,7 +73,7 @@ describe('getAddPanelActionMenuItems', () => {
             id: 'TEST_ACTION_01',
             name: 'Action name 01',
             onClick: expect.any(Function),
-            toolTipContent: 'Action tooltip',
+            description: 'Action tooltip',
           },
           {
             'data-test-subj': 'create-action-Action name',
@@ -80,7 +81,7 @@ describe('getAddPanelActionMenuItems', () => {
             id: 'TEST_ACTION_02',
             name: 'Action name',
             onClick: expect.any(Function),
-            toolTipContent: 'Action tooltip',
+            description: 'Action tooltip',
           },
         ],
       },

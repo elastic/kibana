@@ -71,7 +71,7 @@ describe('mergeGroupedItemsProvider', () => {
             icon: 'icon1',
             name: 'Factory 1',
             id: 'mockFactory',
-            toolTipContent: 'Factory 1 description',
+            description: 'Factory 1 description',
             'data-test-subj': 'createNew-mockFactory',
             onClick: expect.any(Function),
           },
@@ -79,6 +79,7 @@ describe('mergeGroupedItemsProvider', () => {
             id: 'addPanelActionId',
           },
         ],
+        'data-test-subj': 'dashboardEditorMenu-group1Group',
         placementPriority: 10,
       },
     ]);
@@ -120,12 +121,13 @@ describe('mergeGroupedItemsProvider', () => {
             icon: 'icon1',
             id: 'mockFactory',
             name: 'Factory 1',
-            toolTipContent: 'Factory 1 description',
+            description: 'Factory 1 description',
             'data-test-subj': 'createNew-mockFactory',
             onClick: expect.any(Function),
           },
         ],
         placementPriority: 10,
+        'data-test-subj': 'dashboardEditorMenu-group1Group',
       },
     ]);
   });
