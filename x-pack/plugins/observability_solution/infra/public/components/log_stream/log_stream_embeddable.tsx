@@ -89,7 +89,7 @@ export class LogStreamEmbeddable extends Embeddable<LogStreamEmbeddableInput> {
         theme$={this.core.theme.theme$}
       >
         <EuiThemeProvider darkMode={this.isDarkMode}>
-          <div style={{ width: '100%' }}>
+          <div style={{ width: '100%', height: '100%' }}>
             <LogStream
               logView={{ type: 'log-view-reference', logViewId: 'default' }}
               startTimestamp={startTimestamp}
