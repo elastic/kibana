@@ -31,15 +31,19 @@ export interface AlertResponseActionsSupport {
     hostName: string;
     /** The OS platform - normally the ECS value from `host.os.family. could be an empty string if `isSupported` is `false` */
     platform: string;
-    /** A map with the response actions supported by this alert's agent type */
-    supports: AlertAgentActionsSupported;
+    /**
+     * A map with the response actions supported by this alert's agent type. This is only what is
+     * supported, not what the user has privileges to execute.
+     */
+    agentSupport: AlertAgentActionsSupported;
   };
 }
 
 type AlertAgentActionsSupported = Record<ResponseActionsApiCommandNames, boolean>;
 
 /**
- * Determines the level of support that an alert's host has for Response Actions
+ * Determines the level of support that an alert's host has for Response Actions.
+ * This hook already checks feature flags to determine the level of support that we have available
  */
 export const useAlertResponseActionsSupport = (
   eventData: TimelineEventsDetailsItem[] | null = []
@@ -92,7 +96,7 @@ export const useAlertResponseActionsSupport = (
     }
 
     if (agentType === 'endpoint') {
-      getFieldValue({ category: 'agent', field: 'agent.id' }, eventData);
+      return getFieldValue({ category: 'agent', field: 'agent.id' }, eventData);
     }
 
     if (agentType === 'sentinel_one') {
@@ -100,7 +104,10 @@ export const useAlertResponseActionsSupport = (
     }
 
     if (agentType === 'crowdstrike') {
-      getFieldValue({ category: 'crowdstrike', field: CROWDSTRIKE_AGENT_ID_FIELD }, eventData);
+      return getFieldValue(
+        { category: 'crowdstrike', field: CROWDSTRIKE_AGENT_ID_FIELD },
+        eventData
+      );
     }
 
     return '';
@@ -141,7 +148,7 @@ export const useAlertResponseActionsSupport = (
         agentId,
         hostName,
         platform,
-        supports: supportedActions,
+        agentSupport: supportedActions,
       },
     };
   }, [agentId, agentType, hostName, isFeatureEnabled, platform, supportedActions]);
