@@ -11,60 +11,59 @@ import { ConnectorToken, ConnectorTokenClientContract } from '../types';
 interface GetOAuthJwtAccessTokenOpts {
   connectorId?: string;
   logger: Logger;
-  credentials: string;
+  credentials: object;
   connectorTokenClient?: ConnectorTokenClientContract;
 }
-
-export const getOAuthJwtAccessToken = async ({
+export const getGoogleOAuthJwtAccessToken = async ({
   connectorId,
   logger,
   credentials,
   connectorTokenClient,
 }: GetOAuthJwtAccessTokenOpts) => {
-  let accessToken: string | null | undefined;
+  let accessToken;
   let connectorToken: ConnectorToken | null = null;
   let hasErrors: boolean = false;
-  let credentialsJSON;
-  const expiresInSec = 3600;
+  const expiresInSec = 3500;
 
   if (connectorId && connectorTokenClient) {
-    // Check if there is a token stored for this connector
-    const { connectorToken: token, hasErrors: errors } = await connectorTokenClient.get({
-      connectorId,
-    });
-
-    connectorToken = token;
-    hasErrors = errors;
+    try {
+      // Check if there is a token stored for this connector
+      const { connectorToken: token, hasErrors: errors } = await connectorTokenClient.get({
+        connectorId,
+      });
+      connectorToken = token;
+      hasErrors = errors;
+    } catch (error) {
+      logger.warn(
+        `Failed to get connector token for connectorId: ${connectorId}. Error: ${error.message}`
+      );
+    }
   }
 
-  if (connectorToken === null || Date.parse(connectorToken.expiresAt) <= Date.now()) {
-    // Save the time before requesting token so we can use it to calculate expiration
+  if (!connectorToken || Date.parse(connectorToken.expiresAt) <= Date.now()) {
     const requestTokenStart = Date.now();
 
-    // Validate the service account credentials JSON file input
-    try {
-      credentialsJSON = JSON.parse(credentials);
-    } catch (error) {
-      return `Failed to parse credentials JSON file: Invalid JSON format: ${error.message ?? ''}`;
-    }
-
-    // request access token with service account credentials file
+    // Request access token with service account credentials file
     const auth = new GoogleAuth({
-      credentials: credentialsJSON,
+      credentials,
       scopes: 'https://www.googleapis.com/auth/cloud-platform',
     });
 
     try {
       accessToken = await auth.getAccessToken();
     } catch (error) {
-      return `Unable to retreive access token: ${error.message}`;
+      throw new Error(
+        `Unable to retrieve access token. Ensure the service account has the right permissions and the Vertex AI endpoint is enabled in the GCP project. Error: ${error.message}`
+      );
     }
 
-    if (accessToken === null || accessToken === undefined) {
-      accessToken = '';
+    if (!accessToken) {
+      throw new Error(
+        `Error occurred while retrieving the access token. Ensure that the credentials are vaild.`
+      );
     }
 
-    // try to update connector_token SO
+    // Try to update connector token
     if (connectorId && connectorTokenClient) {
       try {
         await connectorTokenClient.updateOrReplace({
@@ -82,8 +81,9 @@ export const getOAuthJwtAccessToken = async ({
       }
     }
   } else {
-    // use existing valid token
+    // Use existing valid token
     accessToken = connectorToken.token;
   }
+
   return accessToken;
 };

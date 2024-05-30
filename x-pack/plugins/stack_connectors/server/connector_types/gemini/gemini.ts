@@ -8,7 +8,7 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import { AxiosError, Method } from 'axios';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { getOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_access_token';
+import { getGoogleOAuthJwtAccessToken } from '@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token';
 import { Logger } from '@kbn/core/server';
 import { ConnectorTokenClientContract } from '@kbn/actions-plugin/server/types';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
@@ -134,19 +134,21 @@ export class GeminiConnector extends SubActionConnector<Config, Secrets> {
 
   /** Retrieve access token based on the GCP service account credential json file */
   private async getAccessToken(): Promise<string | null> {
+    // Validate the service account credentials JSON file input
+    let credentialsJSON;
     try {
-      const accessToken = await getOAuthJwtAccessToken({
-        connectorId: this.connector.id,
-        logger: this.logger,
-        credentials: this.secrets.credentialsJson,
-        connectorTokenClient: this.connectorTokenClient,
-      });
-      return accessToken || null;
+      credentialsJSON = JSON.parse(this.secrets.credentialsJson);
     } catch (error) {
-      return `Failed to get access token ${error.message}`;
+      throw new Error(`Failed to parse credentials JSON file: Invalid JSON format`);
     }
+    const accessToken = await getGoogleOAuthJwtAccessToken({
+      connectorId: this.connector.id,
+      logger: this.logger,
+      credentials: credentialsJSON,
+      connectorTokenClient: this.connectorTokenClient,
+    });
+    return accessToken;
   }
-
   /**
    * responsible for making a POST request to the Vertex AI API endpoint and returning the response data
    * @param body The stringified request body to be sent in the POST request.

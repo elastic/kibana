@@ -6,13 +6,10 @@
  */
 
 import { GeminiConnector } from './gemini';
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { Config, Secrets, RunActionParams } from '../../../common/gemini/types';
-import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
+import { RunActionParams } from '../../../common/gemini/types';
+import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import type { Services } from '@kbn/actions-plugin/server/types';
-import { KibanaRequest, SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import { ConnectorTokenClient } from '@kbn/actions-plugin/server/lib/connector_token_client';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import { RunApiResponseSchema } from '../../../common/gemini/schema';
 
@@ -21,63 +18,37 @@ jest.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', 
   assertURL: jest.fn(),
 }));
 
-jest.doMock('@kbn/actions-plugin/server', () => {
-  const originalModule = jest.requireActual('@kbn/actions-plugin/server');
+// Mock the imported function
+jest.mock('@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token', () => ({
+  getGoogleOAuthJwtAccessToken: jest.fn().mockResolvedValue('mock_access_token'),
+}));
 
-  return {
-    ...originalModule,
-    SubActionConnector: SubActionConnector.arguments(
-      (
-        ...args: ConstructorParameters<typeof originalModule.SubActionConnector> // Capture constructor arguments
-      ) => {
-        const connectorInstance = new originalModule.SubActionConnector(...args);
-        // Now you can mock the request method on the instance
-        (connectorInstance.request as jest.MockedFunction<
-          typeof originalModule.SubActionConnector.prototype.request
-        >) = jest.fn();
-        return connectorInstance;
-      }
-    ),
-  };
-});
+let mockRequest: jest.Mock;
 
 describe('GeminiConnector', () => {
-  let connector: GeminiConnector;
-  let mockServiceParams: ServiceParams<Config, Secrets>;
-  let mockRequest: jest.Mock;
 
-  const mockConfigurationUtilities: ActionsConfigurationUtilities = {
-    isHostnameAllowed: jest.fn().mockReturnValue(true), // Always allow hostname
-    isUriAllowed: jest.fn().mockReturnValue(true), // Always allow URI
-    isActionTypeEnabled: jest.fn().mockReturnValue(true), // Always enable action type
-    ensureHostnameAllowed: jest.fn(), // Empty implementation for now
-    ensureUriAllowed: jest.fn(), // Empty implementation for now
-    ensureActionTypeEnabled: jest.fn(), // Empty implementation for now
-    getSSLSettings: jest.fn(), // Empty implementation for now
-    getProxySettings: jest.fn(), // Empty implementation for now
-    getResponseSettings: jest.fn(), // Empty implementation for now
-    getCustomHostSettings: jest.fn(), // Empty implementation for now
-    getMicrosoftGraphApiUrl: jest.fn().mockReturnValue('https://graph.microsoft.com/v1.0'),
-    getMicrosoftGraphApiScope: jest.fn().mockReturnValue('https://graph.microsoft.com/.default'),
-    getMicrosoftExchangeUrl: jest.fn().mockReturnValue('https://outlook.office.com/api/v2.0'),
-    getMaxAttempts: jest.fn().mockReturnValue(3),
-    validateEmailAddresses: jest.fn(),
-    enableFooterInEmail: jest.fn().mockReturnValue(true),
-    getMaxQueued: jest.fn().mockReturnValue(100),
-  };
+  const defaultResponse = {
+    data: {
+      candidates: [{ content: { parts: [{ text: 'Paris' }] } }],
+      usageMetadata: { totalTokens: 0, promptTokens: 0, completionTokens: 0 }
+    }
+  }
 
-  const mockServices: Services = {
-    savedObjectsClient: {} as SavedObjectsClientContract, // Empty mock object
-    scopedClusterClient: {} as ElasticsearchClient, // Empty mock object
-    connectorTokenClient: {} as ConnectorTokenClient, // Empty mock object
-  };
-
-  let mockKibana: jest.Mock;
+  const connectorResponse = {
+    completion: 'Paris',
+    usageMetadata: { totalTokens: 0, promptTokens: 0, completionTokens: 0 }
+  }
 
   beforeEach(() => {
-    mockServiceParams = {
-      connector: { id: '1', type: '.gemini' },
-      configurationUtilities: mockConfigurationUtilities,
+    jest.clearAllMocks();
+
+    // @ts-expect-error
+    mockRequest = connector.request = jest.fn().mockResolvedValue(defaultResponse);
+  });
+
+  const connector = new GeminiConnector({
+    connector: { id: '1', type: '.gemini' },
+      configurationUtilities: actionsConfigMock.create(),
       config: {
         apiUrl: 'https://api.gemini.com',
         defaultModel: 'gemini-1.5-pro-preview-0409',
@@ -99,11 +70,58 @@ describe('GeminiConnector', () => {
         }),
       },
       logger: loggingSystemMock.createLogger(),
-      services: mockServices,
-      request: mockKibana as unknown as KibanaRequest,
-    };
+      services: actionsMock.createServices(),
+  });
 
-    connector = new GeminiConnector(mockServiceParams);
+  describe('runApi', () => {
+    it('should send a formatted request to the API and return the response', async () => {
+      const runActionParams: RunActionParams = {
+        body: JSON.stringify({
+          messages: [
+            {
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ],
+            },
+          ],
+        }),
+        model: 'test-model',
+      };
+
+      const response = await connector.runApi(runActionParams);
+
+      // Assertions
+      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledWith({
+        url: 'https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/test-model:generateContent',
+        method: 'post',
+        data: JSON.stringify(
+          {
+            messages: [
+              {
+              contents: [
+                {
+                  role: 'user',
+                  parts: [{ text: 'What is the capital of France?' }],
+                },
+              ]}
+            ],
+          },
+        ),
+        headers: {
+          Authorization: 'Bearer mock_access_token',
+          'Content-Type': 'application/json',
+        },
+        timeout: 60000,
+        responseSchema: RunApiResponseSchema,
+        signal: undefined,
+      });
+
+      expect(response).toEqual(connectorResponse);
+    });
   });
 
   describe('Token dashboard', () => {
@@ -171,57 +189,6 @@ describe('GeminiConnector', () => {
         },
       });
       expect(response).toEqual({ available: false });
-    });
-  });
-
-  describe('runApi', () => {
-    it('should send a formatted request to the API and return the response', async () => {
-      const runActionParams: RunActionParams = {
-        body: JSON.stringify({
-          messages: [
-            {
-              contents: [
-                {
-                  role: 'user',
-                  parts: [{ text: 'What is the capital of France?' }],
-                },
-              ],
-            },
-          ],
-        }),
-        model: 'test-model',
-      };
-
-      // Mock the request function to simulate a successful API call
-      jest
-        .spyOn(connector as GeminiConnector, 'runApi')
-        .mockResolvedValueOnce({ completion: 'true', stop_reason: '200' });
-
-      const response = await connector.runApi(runActionParams);
-
-      // Assert that the request was made with the correct parameters
-      expect(connector.runApi).toHaveBeenCalledWith({
-        url: 'https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/test-model:generateContent',
-        method: 'post',
-        data: JSON.stringify([
-          {
-            contents: [
-              {
-                role: 'user',
-                parts: [{ text: 'What is the capital of France?' }],
-              },
-            ],
-          },
-        ]),
-        headers: {
-          Authorization: 'Bearer fake-access-token',
-          'Content-Type': 'application/json',
-        },
-        responseSchema: RunApiResponseSchema,
-      });
-
-      // Assert the response
-      expect(response).toEqual({ completion: 'Paris' });
     });
   });
 });
