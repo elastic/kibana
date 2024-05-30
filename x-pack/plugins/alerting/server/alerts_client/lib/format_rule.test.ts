@@ -59,6 +59,7 @@ describe('formatRule', () => {
             bar: true,
           },
           revision: 0,
+          snoozed: false,
           spaceId: 'default',
           tags: ['rule-', '-tags'],
           alertDelay: 0,
