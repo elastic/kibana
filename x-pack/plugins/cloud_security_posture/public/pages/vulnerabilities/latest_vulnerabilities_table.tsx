@@ -18,6 +18,7 @@ import { getDefaultQuery, defaultColumns } from './constants';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
+import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
 
 interface LatestVulnerabilitiesTableProps {
   groupSelectorComponent?: JSX.Element;
@@ -115,7 +116,9 @@ export const LatestVulnerabilitiesTable = ({
           title={title}
           customCellRenderer={customCellRenderer}
           groupSelectorComponent={groupSelectorComponent}
-          height={height ?? `calc(100vh - ${filters?.length > 0 ? 404 : 364}px)`}
+          height={height}
+          hasDistributionBar={false}
+          columnHeaders={vulnerabilitiesTableFieldLabels}
         />
       )}
     </>
