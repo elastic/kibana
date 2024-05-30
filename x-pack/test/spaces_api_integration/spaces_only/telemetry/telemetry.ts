@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI');
 
   describe('Verify disabledFeatures telemetry payloads', async () => {
-    it('includes only disabledFeatures findings', async () => {
+    before(async () => {
       await spacesService.create({
         id: 'space-1',
         name: 'space-1',
@@ -28,9 +28,27 @@ export default function ({ getService }: FtrProviderContext) {
         name: 'space-2',
         description: 'This is your space-2!',
         color: '#00bfb3',
+        solution: 'security',
         disabledFeatures: ['savedObjectsManagement', 'canvas', 'maps'],
       });
 
+      await spacesService.create({
+        id: 'space-3',
+        name: 'space-3',
+        description: 'This is your space-3!',
+        color: '#00bfb3',
+        disabledFeatures: [],
+        solution: 'search',
+      });
+    });
+
+    after(async () => {
+      await spacesService.delete('space-1');
+      await spacesService.delete('space-2');
+      await spacesService.delete('space-3');
+    })
+
+    it('includes only disabledFeatures findings', async () => {
       const [{ stats }] = await usageAPI.getTelemetryStats({
         unencrypted: true,
         refreshCache: true,
@@ -75,29 +93,9 @@ export default function ({ getService }: FtrProviderContext) {
         savedObjectsManagement: 1,
         savedQueryManagement: 0,
       });
-
-      await spacesService.delete('space-1');
-      await spacesService.delete('space-2');
     });
 
     it('includes only solution findings', async () => {
-      await spacesService.create({
-        id: 'space-3',
-        name: 'space-3',
-        description: 'This is your space-3!',
-        color: '#00bfb3',
-        disabledFeatures: [],
-        solution: 'search',
-      });
-
-      await spacesService.create({
-        id: 'space-4',
-        name: 'space-4',
-        description: 'This is your space-4!',
-        disabledFeatures: [],
-        solution: 'security',
-      });
-
       const [{ stats }] = await usageAPI.getTelemetryStats({
         unencrypted: true,
         refreshCache: true,
@@ -109,9 +107,6 @@ export default function ({ getService }: FtrProviderContext) {
         observability: 0,
         classic: 0,
       });
-
-      await spacesService.delete('space-3');
-      await spacesService.delete('space-4');
     });
   });
 }
