@@ -46,6 +46,7 @@ describe('Delete from "Shared Exception Lists" page', { tags: ['@ess', '@serverl
   beforeEach(() => {
     deleteAlertsAndRules();
     deleteExceptionLists();
+    deleteEndpointExceptionList();
     login();
   });
 
@@ -60,15 +61,23 @@ describe('Delete from "Shared Exception Lists" page', { tags: ['@ess', '@serverl
     createExceptionList(getExceptionList1(), getExceptionList1().list_id);
     visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS)
+      .invoke('text')
+      .then((numberOfListsText) => {
+        const [numberOfLists] = numberOfListsText.match(/(\d+)/) ?? [0];
+        const totalLists =
+          typeof numberOfLists === 'string' ? parseInt(numberOfLists, 10) : numberOfLists;
 
-    deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
+        // Using cy.contains because we do not care about the exact text,
+        // just checking number of lists shown
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `${totalLists}`);
 
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '0');
+        deleteExceptionListWithoutRuleReferenceByListId(getExceptionList1().list_id);
+
+        // Using cy.contains because we do not care about the exact text,
+        // just checking number of lists shown
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `${totalLists - 1}`);
+      });
   });
 
   it('Deletes exception list with rule reference', () => {
@@ -91,14 +100,22 @@ describe('Delete from "Shared Exception Lists" page', { tags: ['@ess', '@serverl
     visit(EXCEPTIONS_URL);
     waitForExceptionsTableToBeLoaded();
 
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+    cy.get(EXCEPTIONS_TABLE_SHOWING_LISTS)
+      .invoke('text')
+      .then((numberOfListsText) => {
+        const [numberOfLists] = numberOfListsText.match(/(\d+)/) ?? [0];
+        const totalLists =
+          typeof numberOfLists === 'string' ? parseInt(numberOfLists, 10) : numberOfLists;
 
-    deleteExceptionListWithRuleReferenceByListId(getExceptionList2().list_id);
+        // Using cy.contains because we do not care about the exact text,
+        // just checking number of lists shown
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `${totalLists}`);
 
-    // Using cy.contains because we do not care about the exact text,
-    // just checking number of lists shown
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '0');
+        deleteExceptionListWithRuleReferenceByListId(getExceptionList2().list_id);
+
+        // Using cy.contains because we do not care about the exact text,
+        // just checking number of lists shown
+        cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, `${totalLists - 1}`);
+      });
   });
 });
