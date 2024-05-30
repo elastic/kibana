@@ -23,7 +23,6 @@ export interface ProfileProvider<
   TContext,
   TMode extends ProfileProviderMode
 > {
-  order: number;
   profileId: string;
   profile: ComposableProfile<TProfile>;
   resolve: (
@@ -49,7 +48,6 @@ abstract class BaseProfileService<
 
   public registerProvider(provider: ProfileProvider<TProfile, TParams, TContext, TMode>) {
     this.providers.push(provider);
-    this.providers.sort((a, b) => a.order - b.order);
   }
 
   public getProfile(context: ContextWithProfileId<TContext>): ComposableProfile<Profile> {
