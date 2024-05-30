@@ -12,17 +12,11 @@ import type {
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-
 import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { ImportRuleResponse } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
-import { createRules } from '../crud/create_rules';
-import { readRules } from '../crud/read_rules';
-import { updateRules } from '../crud/update_rules';
-import type { MlAuthz } from '../../../../machine_learning/authz';
-import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
+import type { IRulesManagementClient } from '../rule_management/rules_management_client';
 
 export type PromiseFromStreams = RuleToImport | Error;
 export interface RuleExceptionsPromiseFromStreams {
@@ -40,7 +34,7 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param mlAuthz {object}
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
- * @param rulesClient {object}
+ * @param rulesManagementClient {object}
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -48,17 +42,15 @@ export interface RuleExceptionsPromiseFromStreams {
 export const importRules = async ({
   ruleChunks,
   rulesResponseAcc,
-  mlAuthz,
   overwriteRules,
-  rulesClient,
+  rulesManagementClient,
   existingLists,
   allowMissingConnectorSecrets,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
-  mlAuthz: MlAuthz;
   overwriteRules: boolean;
-  rulesClient: RulesClient;
+  rulesManagementClient: IRulesManagementClient;
   existingLists: Record<string, ExceptionListSchema>;
   allowMissingConnectorSecrets?: boolean;
 }) => {
@@ -96,54 +88,28 @@ export const importRules = async ({
 
               importRuleResponse = [...importRuleResponse, ...exceptionErrors];
 
-              throwAuthzError(await mlAuthz.validateRuleType(parsedRule.type));
-              const rule = await readRules({
-                rulesClient,
-                ruleId: parsedRule.rule_id,
-                id: undefined,
+              const importedRule = await rulesManagementClient.importRule({
+                ruleToImport: {
+                  ...parsedRule,
+                  exceptions_list: [...exceptions],
+                },
+                overwriteRules,
+                options: {
+                  allowMissingConnectorSecrets,
+                },
               });
 
-              if (rule == null) {
-                await createRules({
-                  rulesClient,
-                  params: {
-                    ...parsedRule,
-                    exceptions_list: [...exceptions],
-                  },
-                  allowMissingConnectorSecrets,
-                });
-                resolve({
-                  rule_id: parsedRule.rule_id,
-                  status_code: 200,
-                });
-              } else if (rule != null && overwriteRules) {
-                await updateRules({
-                  rulesClient,
-                  existingRule: rule,
-                  ruleUpdate: {
-                    ...parsedRule,
-                    exceptions_list: [...exceptions],
-                  },
-                });
-                resolve({
-                  rule_id: parsedRule.rule_id,
-                  status_code: 200,
-                });
-              } else if (rule != null) {
-                resolve(
-                  createBulkErrorObject({
-                    ruleId: parsedRule.rule_id,
-                    statusCode: 409,
-                    message: `rule_id: "${parsedRule.rule_id}" already exists`,
-                  })
-                );
-              }
+              resolve({
+                rule_id: importedRule.params.ruleId,
+                status_code: 200,
+              });
             } catch (err) {
+              const { error, statusCode, message } = err;
               resolve(
                 createBulkErrorObject({
                   ruleId: parsedRule.rule_id,
-                  statusCode: err.statusCode ?? 400,
-                  message: err.message,
+                  statusCode: statusCode ?? error?.status_code ?? 400,
+                  message: message ?? error?.message ?? 'unknown error',
                 })
               );
             }
