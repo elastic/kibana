@@ -1,5 +1,6 @@
 {
   "openapi": "3.0.0",
+  "tags": [],
   "info": {
     "title": "Fleet",
     "description": "OpenAPI schema for Fleet API endpoints",
@@ -18,12 +19,6 @@
       "description": "Public and supported Fleet API"
     }
   ],
-  "security": [
-    {
-      "basicAuth": []
-    }
-  ],
-  "tags": [],
   "paths": {
     "/health_check": {
       "post": {
@@ -9404,5 +9399,10 @@
         }
       }
     }
-  }
+  },
+  "security": [
+    {
+      "basicAuth": []
+    }
+  ]
 }
