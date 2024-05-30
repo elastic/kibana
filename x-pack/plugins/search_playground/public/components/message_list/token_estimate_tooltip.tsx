@@ -125,10 +125,12 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
                           ? [
                               {
                                 description: (
-                                  <FormattedMessage
-                                    id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.clippedTokens"
-                                    defaultMessage="Context tokens clipped"
-                                  />
+                                  <span data-test-subj="clipped-tokens-description">
+                                    <FormattedMessage
+                                      id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.clippedTokens"
+                                      defaultMessage="Context tokens clipped"
+                                    />
+                                  </span>
                                 ),
                                 title: <EuiI18nNumber value={clipped} />,
                               },
