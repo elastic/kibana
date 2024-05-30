@@ -737,7 +737,7 @@ describe('ConfigureCases', () => {
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
       userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.click(screen.getByTestId('flyout-save'));
+      userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -782,7 +782,7 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('flyout-cancel'));
+      userEvent.click(screen.getByTestId('common-flyout-cancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('common-flyout')).not.toBeInTheDocument();
@@ -797,7 +797,7 @@ describe('ConfigureCases', () => {
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
 
-      userEvent.click(screen.getByTestId('flyout-save'));
+      userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -858,7 +858,9 @@ describe('ConfigureCases', () => {
       userEvent.click(await screen.findByTestId('add-template'));
 
       expect(await screen.findByTestId('common-flyout')).toBeInTheDocument();
-      expect(await screen.findByTestId('flyout-header')).toHaveTextContent(i18n.CRATE_TEMPLATE);
+      expect(await screen.findByTestId('common-flyout-header')).toHaveTextContent(
+        i18n.CRATE_TEMPLATE
+      );
       expect(await screen.findByTestId('template-creation-form-steps')).toBeInTheDocument();
     });
 
@@ -880,7 +882,7 @@ describe('ConfigureCases', () => {
       const caseTitle = await screen.findByTestId('caseTitle');
       userEvent.paste(within(caseTitle).getByTestId('input'), 'Case using template');
 
-      userEvent.click(screen.getByTestId('flyout-save'));
+      userEvent.click(screen.getByTestId('common-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({

@@ -84,7 +84,7 @@ export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormPr
 
   return (
     <EuiFlyout onClose={onCloseFlyout} data-test-subj="common-flyout">
-      <EuiFlyoutHeader hasBorder data-test-subj="flyout-header">
+      <EuiFlyoutHeader hasBorder data-test-subj="common-flyout-header">
         <EuiTitle size="s">
           <h3 id="flyoutTitle">{renderHeader()}</h3>
         </EuiTitle>
@@ -98,12 +98,12 @@ export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormPr
           onChange: setFormState,
         })}
       </EuiFlyoutBody>
-      <EuiFlyoutFooter data-test-subj={'flyout-footer'}>
+      <EuiFlyoutFooter data-test-subj={'common-flyout-footer'}>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onCloseFlyout}
-              data-test-subj={'flyout-cancel'}
+              data-test-subj={'common-flyout-cancel'}
               disabled={disabled}
               isLoading={isLoading}
             >
@@ -115,7 +115,7 @@ export const CommonFlyout = <T extends CustomFieldConfiguration | TemplateFormPr
               <EuiButton
                 fill
                 onClick={handleSaveField}
-                data-test-subj={'flyout-save'}
+                data-test-subj={'common-flyout-save'}
                 disabled={disabled}
                 isLoading={isLoading}
               >

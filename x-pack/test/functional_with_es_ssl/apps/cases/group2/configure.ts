@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -15,9 +15,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const toasts = getService('toasts');
   const header = getPageObject('header');
+  const comboBox = getService('comboBox');
   const find = getService('find');
 
-  describe('Configure', function () {
+  describe.only('Configure', function () {
     before(async () => {
       await cases.navigation.navigateToConfigurationPage();
     });
@@ -81,13 +82,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       it('adds a custom field', async () => {
         await testSubjects.existOrFail('custom-fields-form-group');
-        await common.clickAndValidate('add-custom-field', 'custom-field-flyout');
+        await common.clickAndValidate('add-custom-field', 'common-flyout');
 
         await testSubjects.setValue('custom-field-label-input', 'Summary');
 
         await testSubjects.setCheckbox('text-custom-field-required-wrapper', 'check');
 
-        await testSubjects.click('custom-field-flyout-save');
+        await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
         await testSubjects.existOrFail('custom-fields-list');
@@ -105,7 +106,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await input.type('!!!');
 
-        await testSubjects.click('custom-field-flyout-save');
+        await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
         await testSubjects.existOrFail('custom-fields-list');
@@ -124,6 +125,58 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmModalConfirmButton');
 
         await testSubjects.missingOrFail('custom-fields-list');
+      });
+    });
+
+    describe('Templates', function () {
+      before(async () => {
+        await cases.api.createConfigWithTemplates({
+          templates: [
+            {
+              key: 'o11y_template',
+              name: 'My template 1',
+              description: 'this is my first template',
+              tags: ['foo'],
+              caseFields: null,
+            },
+          ],
+          owner: 'observability',
+        });
+      });
+
+      it('existing configurations do not interfere', async () => {
+        // A configuration created in o11y should not be visible in stack
+        expect(await testSubjects.getVisibleText('empty-templates')).to.be(
+          'You do not have any templates yet'
+        );
+      });
+
+      it('adds a template', async () => {
+        await testSubjects.existOrFail('templates-form-group');
+        await common.clickAndValidate('add-template', 'common-flyout');
+
+        await testSubjects.setValue('template-name-input', 'Template name');
+        await comboBox.setCustom('template-tags', 'tag-t1');
+        await testSubjects.setValue('template-description-input', 'Template description');
+
+        const caseTitle = await find.byCssSelector(
+          `[data-test-subj="input"][aria-describedby="caseTitle"]`
+        );
+        await caseTitle.focus();
+        await caseTitle.type('case with template');
+
+        await cases.create.setDescription('test description');
+
+        await cases.create.setTags('tagme');
+        await cases.create.setCategory('new');
+        await cases.create.setSeverity(CaseSeverity.HIGH);
+
+        await testSubjects.click('common-flyout-save');
+        expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
+
+        await testSubjects.existOrFail('templates-list');
+
+        expect(await testSubjects.getVisibleText('templates-list')).to.be('Template name\ntag-t1');
       });
     });
   });

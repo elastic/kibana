@@ -39,6 +39,14 @@ describe('Templates', () => {
     expect(await screen.findByTestId('add-template')).toBeInTheDocument();
   });
 
+  it('renders empty templates correctly', async () => {
+    appMockRender.render(<Templates {...{ ...props, templates: [] }} />);
+
+    expect(await screen.findByTestId('add-template')).toBeInTheDocument();
+    expect(await screen.findByTestId('empty-templates')).toBeInTheDocument();
+    expect(await screen.queryByTestId('templates-list')).not.toBeInTheDocument();
+  });
+
   it('renders templates correctly', async () => {
     appMockRender.render(<Templates {...{ ...props, templates: templatesConfigurationMock }} />);
 

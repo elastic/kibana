@@ -76,13 +76,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Custom fields', function () {
       it('adds a custom field', async () => {
         await testSubjects.existOrFail('custom-fields-form-group');
-        await common.clickAndValidate('add-custom-field', 'custom-field-flyout');
+        await common.clickAndValidate('add-custom-field', 'common-flyout');
 
         await testSubjects.setValue('custom-field-label-input', 'Summary');
 
         await testSubjects.setCheckbox('text-custom-field-required-wrapper', 'check');
 
-        await testSubjects.click('custom-field-flyout-save');
+        await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
         await testSubjects.existOrFail('custom-fields-list');
@@ -100,7 +100,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await input.type('!!!');
 
-        await testSubjects.click('custom-field-flyout-save');
+        await testSubjects.click('common-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
 
         await testSubjects.existOrFail('custom-fields-list');
