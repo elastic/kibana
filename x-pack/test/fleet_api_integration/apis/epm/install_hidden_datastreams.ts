@@ -19,7 +19,8 @@ export default function (providerContext: FtrProviderContext) {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
   };
 
-  describe('installing with hidden datastream', async () => {
+  // Failing: See https://github.com/elastic/kibana/issues/184310
+  describe.skip('installing with hidden datastream', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
