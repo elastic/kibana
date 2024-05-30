@@ -74,6 +74,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+      const queryMenu = await testSubjects.find('showQueryBarMenu');
+      await queryMenu.click();
+      await commonScreenshots.takeScreenshot(
+        'stack-management-alerts-query-menu',
+        screenshotDirectories,
+        1400,
+        1024
+      );
     });
   });
 }

@@ -59,19 +59,22 @@ a|
 * `All` for the *Management > {stack-rules-feature}* feature.
 * `All` for the *Management > Rules Settings* feature.
 * `All` for the *Management > {connectors-feature}* feature.
-// *  `read`, `maintenance`, `write`, and `view_index_metadata` index privileges for the following system indices and data streams, where `<space-id>` is the Kibana space name: `.alerts-security.alerts-<space-id>`
+* `Read` index privileges for the `.alerts-*` system indices or `.alerts-*-<space-id>`, where `<space-id>` is the {kib} space name
 
 [NOTE]
 ====
-The *{connectors-feature}* feature privilege is required to manage connectors. To add rule actions and test connectors, you require only `Read` privileges.
+The *{connectors-feature}* feature privilege is required to manage connectors.
+To add rule actions and test connectors, you require only `Read` privileges.
 
-By default, `All` for the *Rules Settings* feature includes authority to edit flapping detection settings unless you customize the sub-feature privileges.
+By default, `All` privileges for the *Rules Settings* feature include authority to edit flapping detection settings unless you customize the sub-feature privileges.
 
 preview:[] To create a rule that uses the <<cases-action-type,Cases connector>>, you must also have `all` privileges for the *Cases* feature.
 
 The rule type also affects the privileges that are required.
-For example, to create or edit {ml} rules, you must have the `all` *Analytics > {ml-app}* feature privileges.
+For example, to create or edit {ml} rules, you must have `all` privileges for the *Analytics > {ml-app}* feature.
 For {stack-monitor-app} rules, you must have the `monitoring_user` role.
+For {observability} rules, you must have `all` privileges for the appropriate {observability} features.
+For Security rules, refer to {security-guide}/detections-permissions-section.html[Detections prerequisites and requirements].
 ====
 
 | Give view-only access to alerts, connectors, and rules in  *{stack-manage-app}* or *Discover*
@@ -79,12 +82,15 @@ a|
 * `Read` for the *Management > {stack-rules-feature}* feature.
 * `Read` for the *Management > Rules Settings* feature.
 * `Read` for the *Management > {connectors-feature}* feature.
+* `Read` index privileges for the `.alerts-*` system indices or `.alerts-*-<space-id>`, where `<space-id>` is the {kib} space name
 
 [NOTE]
 ====
 The rule type also affects the privileges that are required.
-For example, to view {ml} rules, you must have the `read` *Analytics > {ml-app}* feature privileges.
+For example, to view {ml} rules, you must have `read` privileges for the *Analytics > {ml-app}* feature.
 For {stack-monitor-app} rules, you must have the `monitoring_user` role.
+For {observability} rules, you must have `read` privileges for the appropriate {observability} features.
+For Security rules, refer to {security-guide}/detections-permissions-section.html[Detections prerequisites and requirements].
 ====
 
 | Revoke all access to alerts, connectors, and rules in *{stack-manage-app}* or *Discover*
@@ -94,10 +100,6 @@ a|
 * `None` for the *Management > {connectors-feature}* feature.
 
 |===
-
-For details about the prerequisites required to run each API, refer to <<alerting-apis>>.
-
-For Security rule details, go to {security-guide}/detections-permissions-section.html[Detections prerequisites and requirements].
 
 For more information on configuring roles that provide access to features, go to <<kibana-feature-privileges>>.
 
