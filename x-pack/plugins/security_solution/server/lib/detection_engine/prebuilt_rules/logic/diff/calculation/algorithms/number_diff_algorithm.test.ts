@@ -11,22 +11,21 @@ import {
   ThreeWayMergeOutcome,
   MissingVersion,
 } from '../../../../../../../../common/api/detection_engine';
-import { simpleDiffAlgorithm } from './simple_diff_algorithm';
+import { numberDiffAlgorithm } from './number_diff_algorithm';
 
-const mockStringFieldVersions: ThreeVersionsOf<string> = {
-  base_version: 'rule name',
-  current_version: 'rule name',
-  target_version: 'rule name',
-};
-
-describe('simpleDiffAlgorithm', () => {
-  // AAA
+describe('numberDiffAlgorithm', () => {
   it('returns current_version as merged output if there is no update', () => {
-    const result = simpleDiffAlgorithm(mockStringFieldVersions);
+    const mockVersions: ThreeVersionsOf<number> = {
+      base_version: 1,
+      current_version: 1,
+      target_version: 1,
+    };
+
+    const result = numberDiffAlgorithm(mockVersions);
 
     expect(result).toEqual(
       expect.objectContaining({
-        merged_version: mockStringFieldVersions.current_version,
+        merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
         has_conflict: false,
@@ -34,17 +33,18 @@ describe('simpleDiffAlgorithm', () => {
     );
   });
 
-  // ABA
   it('returns current_version as merged output if current_version is different and there is no update', () => {
-    const newMockStringFieldVersions: ThreeVersionsOf<string> = {
-      ...mockStringFieldVersions,
-      current_version: 'custom rule name',
+    const mockVersions: ThreeVersionsOf<number> = {
+      base_version: 1,
+      current_version: 2,
+      target_version: 1,
     };
-    const result = simpleDiffAlgorithm(newMockStringFieldVersions);
+
+    const result = numberDiffAlgorithm(mockVersions);
 
     expect(result).toEqual(
       expect.objectContaining({
-        merged_version: newMockStringFieldVersions.current_version,
+        merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
         has_conflict: false,
@@ -52,17 +52,18 @@ describe('simpleDiffAlgorithm', () => {
     );
   });
 
-  // AAB
   it('returns target_version as merged output if current_version is the same and there is an update', () => {
-    const newMockStringFieldVersions: ThreeVersionsOf<string> = {
-      ...mockStringFieldVersions,
-      target_version: 'updated rule name',
+    const mockVersions: ThreeVersionsOf<number> = {
+      base_version: 1,
+      current_version: 1,
+      target_version: 2,
     };
-    const result = simpleDiffAlgorithm(newMockStringFieldVersions);
+
+    const result = numberDiffAlgorithm(mockVersions);
 
     expect(result).toEqual(
       expect.objectContaining({
-        merged_version: newMockStringFieldVersions.target_version,
+        merged_version: mockVersions.target_version,
         diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
         merge_outcome: ThreeWayMergeOutcome.Target,
         has_conflict: false,
@@ -70,18 +71,18 @@ describe('simpleDiffAlgorithm', () => {
     );
   });
 
-  // ABB
   it('returns current_version as merged output if current version is different but it matches the update', () => {
-    const newMockStringFieldVersions: ThreeVersionsOf<string> = {
-      ...mockStringFieldVersions,
-      current_version: 'updated rule name',
-      target_version: 'updated rule name',
+    const mockVersions: ThreeVersionsOf<number> = {
+      base_version: 1,
+      current_version: 2,
+      target_version: 2,
     };
-    const result = simpleDiffAlgorithm(newMockStringFieldVersions);
+
+    const result = numberDiffAlgorithm(mockVersions);
 
     expect(result).toEqual(
       expect.objectContaining({
-        merged_version: newMockStringFieldVersions.current_version,
+        merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
         merge_outcome: ThreeWayMergeOutcome.Current,
         has_conflict: false,
@@ -89,18 +90,18 @@ describe('simpleDiffAlgorithm', () => {
     );
   });
 
-  // ABC
   it('returns current_version as merged output if all three versions are different', () => {
-    const newMockStringFieldVersions: ThreeVersionsOf<string> = {
-      base_version: 'rule name',
-      current_version: 'custom rule name',
-      target_version: 'updated rule name',
+    const mockVersions: ThreeVersionsOf<number> = {
+      base_version: 1,
+      current_version: 2,
+      target_version: 3,
     };
-    const result = simpleDiffAlgorithm(newMockStringFieldVersions);
+
+    const result = numberDiffAlgorithm(mockVersions);
 
     expect(result).toEqual(
       expect.objectContaining({
-        merged_version: newMockStringFieldVersions.current_version,
+        merged_version: mockVersions.current_version,
         diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
         merge_outcome: ThreeWayMergeOutcome.Conflict,
         has_conflict: true,
@@ -110,16 +111,17 @@ describe('simpleDiffAlgorithm', () => {
 
   describe('if base_version is missing', () => {
     it('returns current_version as merged output if current_version and target_version are the same', () => {
-      const newMockFieldVersions: ThreeVersionsOf<string> = {
-        ...mockStringFieldVersions,
+      const mockVersions: ThreeVersionsOf<number> = {
         base_version: MissingVersion,
+        current_version: 1,
+        target_version: 1,
       };
 
-      const result = simpleDiffAlgorithm(newMockFieldVersions);
+      const result = numberDiffAlgorithm(mockVersions);
 
       expect(result).toEqual(
         expect.objectContaining({
-          merged_version: newMockFieldVersions.current_version,
+          merged_version: mockVersions.current_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueNoUpdate,
           merge_outcome: ThreeWayMergeOutcome.Current,
           has_conflict: false,
@@ -128,17 +130,17 @@ describe('simpleDiffAlgorithm', () => {
     });
 
     it('returns target_version as merged output if current_version and target_version are different', () => {
-      const newMockFieldVersions: ThreeVersionsOf<string> = {
-        ...mockStringFieldVersions,
+      const mockVersions: ThreeVersionsOf<number> = {
         base_version: MissingVersion,
-        target_version: 'updated rule name',
+        current_version: 1,
+        target_version: 2,
       };
 
-      const result = simpleDiffAlgorithm(newMockFieldVersions);
+      const result = numberDiffAlgorithm(mockVersions);
 
       expect(result).toEqual(
         expect.objectContaining({
-          merged_version: newMockFieldVersions.target_version,
+          merged_version: mockVersions.target_version,
           diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
           merge_outcome: ThreeWayMergeOutcome.Target,
           has_conflict: false,
