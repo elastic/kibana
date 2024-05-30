@@ -29,7 +29,7 @@ import moment from 'moment';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
-import { useAppContext } from '../../hooks/use_app_context';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function KnowledgeBaseEditManualEntryFlyout({
   entry,
@@ -38,7 +38,7 @@ export function KnowledgeBaseEditManualEntryFlyout({
   entry?: KnowledgeBaseEntry;
   onClose: () => void;
 }) {
-  const { uiSettings } = useAppContext();
+  const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
 
   const { mutateAsync: createEntry, isLoading } = useCreateKnowledgeBaseEntry();

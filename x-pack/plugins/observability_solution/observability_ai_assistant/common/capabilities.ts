@@ -6,5 +6,5 @@
  */
 
 export const aiAssistantCapabilities = {
-  show: 'observabilityAIAssistant:show',
+  show: 'show',
 };

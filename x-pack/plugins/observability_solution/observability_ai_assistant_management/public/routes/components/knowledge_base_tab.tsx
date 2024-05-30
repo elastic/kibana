@@ -25,15 +25,15 @@ import {
 } from '@elastic/eui';
 import moment from 'moment';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { useAppContext } from '../../hooks/use_app_context';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function KnowledgeBaseTab() {
-  const { uiSettings } = useAppContext();
+  const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
