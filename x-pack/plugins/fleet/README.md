@@ -74,8 +74,8 @@ To avoid the enforcing of version headers when running in dev mode, add the foll
 ```
 server.versioned.versionResolution: oldest
 ```
-This will provide a default version for the public apis.
 
+This will provide a default version for the public apis.
 
 If Kibana fails to start, it is possible that your local setup got corrupted. An easy fix is to run:
 
@@ -185,7 +185,9 @@ Note: Docker needs to be running to run these tests.
    ```
    FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test/fleet_api_integration/<configFile>
    ```
+
    where `configFile` is the relevant config file relevant from the following:
+
    - config.agent.ts
    - config.agent_policy.ts
    - config.epm.ts
@@ -210,17 +212,25 @@ Note: you can also supply which Docker image to use for the Package Registry via
 FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
 ```
 
+To speed up test you can also use the `FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true` flag to not re-run the package registry each time. When launching the test for the first time you will get the docker command to run the package registry.
+
+```bash
+FLEET_SKIP_RUNNING_PACKAGE_REGISTRY=true FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
+```
+
 #### API integration tests (serverless)
 
 The process for running serverless API integration tests is similar as above. Security and observability project types have Fleet enabled. At the time of writing, the same tests exist for Fleet under these two project types.
 
 Security:
+
 ```bash
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
 ```
 
 Observability:
+
 ```bash
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
 FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
