@@ -192,7 +192,11 @@ describe('UpdateSLO', () => {
       const slo = createSLO();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
-      const newSettings = { ...slo.settings, timestamp_field: 'newField' };
+      const newSettings = {
+        ...slo.settings,
+        frequency: fiveMinute(),
+        preventInitialBackfill: true,
+      };
       await updateSLO.execute(slo.id, { settings: newSettings });
 
       expectDeletionOfOriginalSLOResources(slo);

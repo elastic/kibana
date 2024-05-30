@@ -11,6 +11,7 @@ import { SelectInferenceId } from './select_inference_id';
 
 const onChangeMock = jest.fn();
 const setValueMock = jest.fn();
+const setNewInferenceEndpointMock = jest.fn();
 
 jest.mock('../../../../../app_context', () => ({
   useAppContext: jest.fn().mockReturnValue({
@@ -21,6 +22,7 @@ jest.mock('../../../../../app_context', () => ({
         mlApi: {
           trainedModels: {
             getTrainedModels: jest.fn().mockResolvedValue([]),
+            getTrainedModelStats: jest.fn().mockResolvedValue([]),
           },
         },
       },
@@ -38,6 +40,7 @@ describe('SelectInferenceId', () => {
         onChange: onChangeMock,
         'data-test-subj': 'data-inference-endpoint-list',
         setValue: setValueMock,
+        setNewInferenceEndpoint: setNewInferenceEndpointMock,
       },
       memoryRouter: { wrapComponent: false },
     });
