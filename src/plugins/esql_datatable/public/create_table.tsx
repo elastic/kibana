@@ -41,13 +41,6 @@ type DataTableColumnsMeta = Record<
   }
 >;
 
-/*
-Remaining tasks:
-- Keep the selected columns in LLM
-- Something goes wrong with the CSS in the conversations app
-- Does it make to load all the time? Even when the user doesnt ask for a table?
-**/
-
 export const ESQLTable = (props: ESQLDatatableProps) => {
   const { loading, value } = useAsync(() => {
     const startServicesPromise = untilPluginStartServicesReady();
@@ -115,47 +108,49 @@ export const ESQLTable = (props: ESQLDatatableProps) => {
       }}
     >
       <CellActionsProvider getTriggerCompatibleActions={deps.uiActions.getTriggerCompatibleActions}>
-        <UnifiedDataTable
-          columns={activeColumns}
-          rows={rows.map((row: Record<string, string>, idx: number) => {
-            return {
-              id: String(idx),
-              raw: row,
-              flattened: row,
-            } as unknown as DataTableRecord;
-          })}
-          columnsMeta={columnsMeta}
-          services={{
-            data: deps.data,
-            theme: deps.core.theme,
-            uiSettings: deps.core.uiSettings,
-            toastNotifications: deps.core.notifications.toasts,
-            fieldFormats: deps.fieldFormats,
-            storage,
-          }}
-          isPlainRecord
-          isSortEnabled={false}
-          loadingState={DataLoadingState.loaded}
-          dataView={props.dataView}
-          sampleSizeState={500}
-          rowsPerPageState={10}
-          onSetColumns={(columns) => {
-            setActiveColumns(columns);
-          }}
-          expandedDoc={expandedDoc}
-          setExpandedDoc={setExpandedDoc}
-          showTimeCol
-          useNewFieldsApi
-          enableComparisonMode
-          sort={[]}
-          ariaLabelledBy="ESQLDatatable"
-          maxDocFieldsDisplayed={100}
-          renderDocumentView={renderDocumentView}
-          showFullScreenButton={false}
-          configRowHeight={5}
-          rowHeightState={rowHeight}
-          onUpdateRowHeight={setRowHeight}
-        />
+        <div style={{ height: 500 }}>
+          <UnifiedDataTable
+            columns={activeColumns}
+            rows={rows.map((row: Record<string, string>, idx: number) => {
+              return {
+                id: String(idx),
+                raw: row,
+                flattened: row,
+              } as unknown as DataTableRecord;
+            })}
+            columnsMeta={columnsMeta}
+            services={{
+              data: deps.data,
+              theme: deps.core.theme,
+              uiSettings: deps.core.uiSettings,
+              toastNotifications: deps.core.notifications.toasts,
+              fieldFormats: deps.fieldFormats,
+              storage,
+            }}
+            isPlainRecord
+            isSortEnabled={false}
+            loadingState={DataLoadingState.loaded}
+            dataView={props.dataView}
+            sampleSizeState={500}
+            rowsPerPageState={10}
+            onSetColumns={(columns) => {
+              setActiveColumns(columns);
+            }}
+            expandedDoc={expandedDoc}
+            setExpandedDoc={setExpandedDoc}
+            showTimeCol
+            useNewFieldsApi
+            enableComparisonMode
+            sort={[]}
+            ariaLabelledBy="ESQLDatatable"
+            maxDocFieldsDisplayed={100}
+            renderDocumentView={renderDocumentView}
+            showFullScreenButton={false}
+            configRowHeight={5}
+            rowHeightState={rowHeight}
+            onUpdateRowHeight={setRowHeight}
+          />
+        </div>
       </CellActionsProvider>
     </KibanaContextProvider>
   );

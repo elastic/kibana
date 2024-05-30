@@ -169,7 +169,8 @@ export function VisualizeESQL({
       const chartSuggestions = lensHelpersAsync.value.suggestions(
         context,
         dataViewAsync.value,
-        [],
+        // exclude datatable from suggestions, we are rendering a Discover table instead
+        ['lnsDatatable'],
         preferredChartType
       );
 
@@ -240,13 +241,13 @@ export function VisualizeESQL({
     }
   }, [chatFlyoutSecondSlotHandler, lensInput, lensLoadEvent, onActionClick, query]);
 
-  if (!lensHelpersAsync.value || !dataViewAsync.value || !lensInput) {
+  if (!lensHelpersAsync.value || !dataViewAsync.value) {
     return <EuiLoadingSpinner />;
   }
 
   return (
     <>
-      {preferredChartType !== ChartType.Table && (
+      {lensInput && (
         <EuiFlexGroup direction="column">
           {Boolean(errorMessages?.length) && (
             <>
@@ -330,7 +331,7 @@ export function VisualizeESQL({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {preferredChartType === ChartType.Table && (
+      {!lensInput && (
         <ESQLTable
           rows={rows}
           columns={columns}
