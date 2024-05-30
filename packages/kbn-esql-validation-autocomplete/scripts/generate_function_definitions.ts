@@ -354,7 +354,6 @@ import type { FunctionDefinition } from './types';
   const pathToElasticsearch = process.argv[2];
 
   const ESFunctionDefinitionsDirectory = join(
-    __dirname,
     pathToElasticsearch,
     'docs/reference/esql/functions/kibana/definition'
   );
@@ -365,7 +364,6 @@ import type { FunctionDefinition } from './types';
   );
 
   const evalFunctionDefinitions: FunctionDefinition[] = [];
-  // const aggFunctionDefinitions = [];
   for (const ESDefinition of ESFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;

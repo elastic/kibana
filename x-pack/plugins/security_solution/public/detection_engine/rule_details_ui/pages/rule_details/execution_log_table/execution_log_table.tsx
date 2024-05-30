@@ -78,6 +78,7 @@ import {
   getSourceEventTimeRangeColumns,
 } from './execution_log_columns';
 import { ExecutionLogSearchBar } from './execution_log_search_bar';
+import { RuleBackfillsInfo } from '../../../../rule_gaps/components/rule_backfills_info';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 const EXECUTION_UUID_FIELD_NAME = 'kibana.alert.rule.execution.uuid';
@@ -593,6 +594,9 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
         itemIdToExpandedRowMap={rows.itemIdToExpandedRowMap}
         data-test-subj="executionsTable"
       />
+
+      <EuiSpacer size="xl" />
+      <RuleBackfillsInfo ruleId={ruleId} />
     </EuiPanel>
   );
 };
