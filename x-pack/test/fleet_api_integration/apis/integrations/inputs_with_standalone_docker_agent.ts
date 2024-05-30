@@ -148,6 +148,7 @@ async function startAgent({
   return {
     name: hostName,
     log: () => {
+      // eslint-disable-next-line no-console
       console.log(execa.sync('docker', ['logs', agentContainerId]));
     },
     stop: () => {
