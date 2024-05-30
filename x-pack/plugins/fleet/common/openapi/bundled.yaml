@@ -1026,6 +1026,11 @@ paths:
         name: prerelease
         description: Specify if version is prerelease
         in: query
+      - schema:
+          type: boolean
+        name: ignoreUnverified
+        description: Ignore if the package is fails signature verification
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info

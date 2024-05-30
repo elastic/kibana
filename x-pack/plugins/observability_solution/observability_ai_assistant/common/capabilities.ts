@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export default function loadTests({ loadTestFile }) {
-  describe('Integrations', () => {
-    loadTestFile(require.resolve('./elastic_agent'));
-    loadTestFile(require.resolve('./inputs_with_standalone_docker_agent'));
-  });
-}
+export const aiAssistantCapabilities = {
+  show: 'show',
+};
