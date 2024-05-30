@@ -50,7 +50,6 @@ describe('TokenEstimateTooltip component tests', () => {
       expect(panel).toHaveTextContent('50'); // context tokens
       expect(panel).toHaveTextContent('100'); // instruction tokens
       expect(screen.queryByTestId('clipped-tokens-description')).not.toBeInTheDocument();
-
     });
 
     it('displays total tokens and model limit if available', () => {
