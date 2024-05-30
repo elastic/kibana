@@ -129,6 +129,10 @@ export function healthRoute(params: HealthRouteParams): {
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
       // options: { tags: ['access:taskManager'] },
       validate: false,
+      options: {
+        access: 'public',
+        description: `Get task manager health`,
+      },
     },
     async function (
       context: RequestHandlerContext,
