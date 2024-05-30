@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isEmpty } from 'lodash/fp';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { IntegrationSettings } from '../../types';
 import { runCategorizationGraph, runEcsGraph, runIntegrationBuilder, runRelatedGraph } from './api';
 
@@ -15,14 +15,7 @@ interface PipelineGenerationProps {
   integrationSettings: IntegrationSettings | undefined;
 }
 
-export const progressOrder = [
-  'ecs',
-  'categorization',
-  'related_graph',
-  'integration_builder',
-  'done',
-] as const;
-export type Progress = typeof progressOrder[number];
+export type ProgressItem = 'ecs' | 'categorization' | 'related_graph' | 'integration_builder';
 
 interface Parameters {
   packageName: string;
@@ -37,8 +30,15 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
   const { http, notifications } = useKibana().services;
   const [result, setResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState<Progress | null>(null);
+  const [progress, setProgress] = useState<ProgressItem[]>([]);
   const [error, setError] = useState<null | string>(null);
+
+  const addProgress = useCallback(
+    (item: ProgressItem) => {
+      setProgress((prev) => [...prev, item]);
+    },
+    [setProgress]
+  );
 
   useEffect(() => {
     if (http == null || integrationSettings == null || notifications?.toasts == null) {
@@ -55,7 +55,7 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
           dataStreamName: integrationSettings.dataStreamName ?? '',
           rawSamples: integrationSettings.logsSampleParsed ?? [],
         };
-        setProgress('ecs');
+        addProgress('ecs');
         const ecsGraphResult = await runEcsGraph(parameters, deps);
         console.log({ ecsGraphResult });
         if (abortController.signal.aborted) return;
@@ -69,7 +69,7 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
           currentPipeline: ecsGraphResult.results.pipeline,
         };
 
-        setProgress('categorization');
+        addProgress('categorization');
         const categorizationResult = await runCategorizationGraph(parametersWithPipeline, deps);
         console.log({ categorizationResult });
         if (abortController.signal.aborted) return;
@@ -77,7 +77,7 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
           parametersWithPipeline.currentPipeline = categorizationResult.results.pipeline;
         }
 
-        // setProgress('related_graph');
+        // addProgress('related_graph');
         // const relatedGraphResult = await runRelatedGraph(parametersWithPipeline, deps);
         // console.log({ relatedGraphResult });
         // if (abortController.signal.aborted) return;
@@ -85,7 +85,7 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
         //   parametersWithPipeline.currentPipeline = relatedGraphResult.results.pipeline;
         // }
 
-        // setProgress('integration_builder');
+        // addProgress('integration_builder');
         // const integrationBuilderResult = await runIntegrationBuilder(parametersWithPipeline, deps);
         // console.log({ integrationBuilderResult });
         // if (abortController.signal.aborted) return;
@@ -93,7 +93,7 @@ export const usePipelineGeneration = ({ integrationSettings }: PipelineGeneratio
         // setResult
       } catch (e) {
         if (abortController.signal.aborted) return;
-        setError(`An error occurred: ${e.message}`);
+        setError(`Error: ${e.message}`);
       } finally {
         setIsLoading(false);
       }

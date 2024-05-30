@@ -33,7 +33,7 @@ export const IntegrationAssistantBottomBar = React.memo<IntegrationAssistantBott
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            color="success"
+            color="primary"
             onClick={() => setStep(currentStep + 1)}
             isDisabled={!isNextStepEnabled}
           >

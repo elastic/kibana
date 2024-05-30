@@ -4,17 +4,31 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiProgress, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiProgress,
+  EuiSpacer,
+} from '@elastic/eui';
 // import { JsonEditor } from '@kbn/es-ui-shared-plugin/public';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { IntegrationSettings } from '../../types';
-import { usePipelineGeneration, progressOrder } from './use_pipeline_generation';
+import { ProgressItem, usePipelineGeneration } from './use_pipeline_generation';
 
 interface PipelineGenerationProps {
   integrationSettings: IntegrationSettings | undefined;
   setIntegrationSettings: (param: IntegrationSettings) => void;
   setIsGenerating: (param: boolean) => void;
 }
+
+const progressText: Record<ProgressItem, string> = {
+  ecs: 'Mapping ECS',
+  categorization: 'Categorization',
+  related_graph: 'Generating related graph',
+  integration_builder: 'Building integration',
+};
 
 export const PipelineGeneration = React.memo<PipelineGenerationProps>(
   ({ integrationSettings, setIsGenerating }) => {
@@ -24,40 +38,41 @@ export const PipelineGeneration = React.memo<PipelineGenerationProps>(
       setIsGenerating(isLoading);
     }, [setIsGenerating, isLoading]);
 
-    const progressLog = useMemo(() => {
-      const log = [];
-      switch (progress) {
-        case 'integration_builder':
-          log.push(`Building integration${progress !== 'integration_builder' ? ' (done)' : '...'}`);
-        case 'related_graph':
-          log.push(`Generating related graph${progress !== 'related_graph' ? ' (done)' : '...'}`);
-        case 'categorization':
-          log.push(`Categorizing${progress !== 'categorization' ? ' (done)' : '...'}`);
-        case 'ecs':
-          log.push(`Mapping ECS${progress !== 'ecs' ? ' (done)' : '...'}`);
-      }
-      return log.reverse();
-    }, [progress]);
-
-    //   return <JsonEditor value={pipeline} onUpdate={() => {}} />;
+    //   return <JsonEditor value={result} onUpdate={() => {}} />;
 
     return (
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
-          {progress && (
+          {(isLoading || error) && (
             <>
-              <EuiProgress value={progressOrder.indexOf(progress) + 1} max={4} size="m" />
+              <EuiProgress value={progress.length - 1} max={4} size="l" />
+              <EuiSpacer size="m" />
               <EuiFlexGroup direction="column" gutterSize="s">
-                {progressLog.map((log, idx) => (
-                  <EuiFlexItem key={idx}>
-                    <EuiText>{log}</EuiText>
+                {progress.map((item, index) => (
+                  <EuiFlexItem key={index}>
+                    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                      {progress.length - 1 === index ? (
+                        <EuiFlexItem grow={false} css={{ width: '16px' }}>
+                          {error ? (
+                            <EuiIcon type="cross" color="danger" />
+                          ) : (
+                            <EuiLoadingSpinner size="s" />
+                          )}
+                        </EuiFlexItem>
+                      ) : (
+                        <EuiFlexItem grow={false}>
+                          <EuiIcon type="check" color="success" />
+                        </EuiFlexItem>
+                      )}
+                      <EuiFlexItem>{progressText[item]}</EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiFlexItem>
                 ))}
+                <EuiSpacer size="m" />
+                {error && <>{error}</>}
               </EuiFlexGroup>
             </>
           )}
-          {isLoading && <EuiLoadingSpinner size="s" />}
-          {error && <>{error}</>}
           {result && <>{result}</>}
         </EuiFlexItem>
       </EuiFlexGroup>
