@@ -629,14 +629,14 @@ export class SearchSource {
     val = typeof val === 'function' ? val(this) : val;
     if (val == null || !key) return;
 
-    const addToRoot = (rootKey: string, value: any) => {
+    const addToRoot = (rootKey: string, value: unknown) => {
       data[rootKey] = value;
     };
 
     /**
      * Add the key and val to the body of the request
      */
-    const addToBody = (bodyKey: string, value: any) => {
+    const addToBody = (bodyKey: string, value: unknown) => {
       // ignore if we already have a value
       if (data.body[bodyKey] == null) {
         data.body[bodyKey] = value;
@@ -748,7 +748,7 @@ export class SearchSource {
   }
 
   private getFieldFromDocValueFieldsOrIndexPattern(
-    docvaluesIndex: Record<string, object>,
+    docvaluesIndex: Record<string, SearchFieldValue>,
     fld: SearchFieldValue,
     index?: DataView
   ) {
@@ -756,10 +756,7 @@ export class SearchSource {
       return fld;
     }
     const fieldName = this.getFieldName(fld);
-    const field = {
-      ...docvaluesIndex[fieldName],
-      ...fld,
-    };
+    const field = Object.assign({}, docvaluesIndex[fieldName], fld);
     if (!index) {
       return field;
     }
@@ -894,7 +891,6 @@ export class SearchSource {
         fields,
         docvalueFields: body.docvalue_fields,
         fieldsFromSource,
-        // @ts-expect-error - Needs closer look to fix
         filteredDocvalueFields,
         metaFields,
         fieldListProvided,
@@ -997,7 +993,7 @@ export class SearchSource {
     fields: SearchFieldValue[];
     docvalueFields: Array<{ field: string; format: string }>;
     fieldsFromSource: SearchFieldValue[];
-    filteredDocvalueFields: Array<{ field: string; format: string }>;
+    filteredDocvalueFields: SearchFieldValue[];
     metaFields: string[];
     fieldListProvided: boolean;
     sourceFieldsProvided: boolean;
@@ -1040,7 +1036,7 @@ export class SearchSource {
     index?: DataView;
     fields: SearchFieldValue[];
     metaFields: string[];
-    filteredDocvalueFields: Array<{ field: string; format: string }>;
+    filteredDocvalueFields: SearchFieldValue[];
   }) {
     const bodyFields = this.getFieldsWithoutSourceFilters(index, fields);
     // if items that are in the docvalueFields are provided, we should
