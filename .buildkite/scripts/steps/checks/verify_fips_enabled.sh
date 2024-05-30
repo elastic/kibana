@@ -9,13 +9,15 @@ source .buildkite/scripts/common/util.sh
 echo --- Verify FIPS enabled
 
 NODE_BINARY="$KIBANA_BUILD_LOCATION/node/bin/node"
+FIPS_STATUS=$("$NODE_BINARY" --enable-fips --openssl-config="$HOME/nodejs.cnf" -p 'crypto.getFips()' | tr -d \\n)
+echo "$FIPS_STATUS" | od -c
 
 if [[ -x "$NODE_BINARY" ]]; then
-  if [[ "$("$NODE_BINARY" --enable-fips --openssl-config="$HOME/nodejs.cnf" -p 'crypto.getFips()' | tr -d '[:cntrl:]')" == "1" ]]; then
+  if [[ "$FIPS_STATUS" == "1" ]]; then
     echo "FIPS enabled successfully"
     exit 0
   else
-    echo "Failed to enable FIPS"
+    echo "Failed to enable FIPS: $FIPS_STATUS"
     exit 1
   fi
 else
