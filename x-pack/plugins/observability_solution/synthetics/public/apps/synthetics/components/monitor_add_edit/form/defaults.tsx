@@ -66,7 +66,7 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
   };
 
   const schedule = monitor[ConfigKey.SCHEDULE];
-  if (schedule.unit === 's') {
+  if (schedule?.unit === 's') {
     schedule.number = `${schedule.number}s`;
   }
 
