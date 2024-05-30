@@ -130,7 +130,7 @@ export const fetchActionRequests = async ({
   const total = (actionRequests.hits?.total as SearchTotalHits)?.value;
 
   logger.debug(
-    `Searching for actions requests found a total of [${total}] records using search query:\n${stringify(
+    `Searching for action requests found a total of [${total}] records using search query:\n${stringify(
       actionsSearchQuery,
       15
     )}`
