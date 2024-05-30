@@ -85,7 +85,7 @@ export async function setupFleet(
       logger.info(`Fleet setup lock created: ${JSON.stringify(created)}`);
     } catch (error) {
       logger.info(`Could not create fleet setup lock, abort setup: ${error}`);
-      throw error;
+      return { isInitialized: false, nonFatalErrors: [] };
     }
     return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
   } catch (error) {

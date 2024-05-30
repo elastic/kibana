@@ -29,6 +29,30 @@ import {
   wrapErrorAndRejectPromise,
 } from './utils';
 
+// retry if not initialized
+const MAX_ATTEMPTS = 5;
+const requestSetupFleet = async (
+  kbnClient: KbnClient,
+  attempt: number = 1
+): Promise<PostFleetSetupResponse> => {
+  const setupResponse = (await kbnClient
+    .request({
+      path: SETUP_API_ROUTE,
+      headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+      method: 'POST',
+    })
+    .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
+
+  if (!setupResponse.data.isInitialized) {
+    if (attempt <= MAX_ATTEMPTS) {
+      return new Promise<PostFleetSetupResponse>((resolve) => {
+        setTimeout(() => resolve(requestSetupFleet(kbnClient, attempt + 1)), 1000);
+      });
+    }
+  }
+  return setupResponse.data;
+};
+
 /**
  * Calls the fleet setup APIs and then installs the latest Endpoint package
  * @param kbnClient
@@ -43,16 +67,10 @@ export const setupFleetForEndpoint = usageTracker.track(
 
     // Setup Fleet
     try {
-      const setupResponse = (await kbnClient
-        .request({
-          path: SETUP_API_ROUTE,
-          headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
-          method: 'POST',
-        })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostFleetSetupResponse>;
+      const setupResponse = await requestSetupFleet(kbnClient);
 
-      if (!setupResponse.data.isInitialized) {
-        log.error(new Error(JSON.stringify(setupResponse.data, null, 2)));
+      if (!setupResponse.isInitialized) {
+        log.error(new Error(JSON.stringify(setupResponse, null, 2)));
         throw new Error('Initializing the ingest manager failed, existing');
       }
     } catch (error) {
