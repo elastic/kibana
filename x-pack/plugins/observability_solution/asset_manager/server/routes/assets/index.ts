@@ -16,7 +16,7 @@ import { AssetsValidationError } from '../../lib/validators/validation_error';
 
 export function assetsRoutes<T extends RequestHandlerContext>({
   router,
-  assetClient,
+  server,
 }: SetupRouteOptions<T>) {
   const validate = createRouteValidationFunction(getAssetsQueryOptionsRT);
   router.get<unknown, GetAssetsQueryOptions, unknown>(
@@ -40,7 +40,7 @@ export function assetsRoutes<T extends RequestHandlerContext>({
       const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
 
       try {
-        const response = await assetClient.getAssets({
+        const response = await server.assetClient.getAssets({
           from,
           to,
           filters,

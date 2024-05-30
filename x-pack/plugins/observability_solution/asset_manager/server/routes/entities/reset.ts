@@ -22,7 +22,7 @@ import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
 
 export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  logger,
+  server,
 }: SetupRouteOptions<T>) {
   router.post<{ id: string }, unknown, unknown>(
     {
@@ -35,6 +35,7 @@ export function resetEntityDefinitionRoute<T extends RequestHandlerContext>({
     },
     async (context, req, res) => {
       try {
+        const { logger } = server;
         const soClient = (await context.core).savedObjects.client;
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 

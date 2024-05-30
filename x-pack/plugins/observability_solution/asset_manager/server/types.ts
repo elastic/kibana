@@ -5,12 +5,34 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+
+import { 
+  CoreStart,
+  ElasticsearchClient,
+  Logger
+} from '@kbn/core/server';
+import { AssetManagerConfig } from '../common/config';
+import { AssetClient } from './lib/asset_client';
 import {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
 } from '@kbn/apm-data-access-plugin/server';
 import { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+
+export interface AssetManagerServerSetup {
+  core: CoreStart;
+  config: AssetManagerConfig;
+  logger: Logger;
+  assetClient: AssetClient;
+  security: SecurityPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  isServerless: boolean;
+}
 
 export interface ElasticsearchAccessorOptions {
   elasticsearchClient: ElasticsearchClient;
@@ -19,7 +41,10 @@ export interface ElasticsearchAccessorOptions {
 export interface AssetManagerPluginSetupDependencies {
   apmDataAccess: ApmDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 export interface AssetManagerPluginStartDependencies {
   apmDataAccess: ApmDataAccessPluginStart;
+  security: SecurityPluginStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }

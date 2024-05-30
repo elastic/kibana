@@ -8,9 +8,9 @@
 import { IRouter, RequestHandlerContextBase } from '@kbn/core-http-server';
 import { Logger } from '@kbn/core/server';
 import { AssetClient } from '../lib/asset_client';
+import { AssetManagerServerSetup } from '../types';
 
 export interface SetupRouteOptions<T extends RequestHandlerContextBase> {
   router: IRouter<T>;
-  assetClient: AssetClient;
-  logger: Logger;
+  server: AssetManagerServerSetup;
 }

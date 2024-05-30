@@ -16,7 +16,7 @@ import { AssetsValidationError } from '../../lib/validators/validation_error';
 
 export function podsRoutes<T extends RequestHandlerContext>({
   router,
-  assetClient,
+  server,
 }: SetupRouteOptions<T>) {
   const validate = createRouteValidationFunction(getPodAssetsQueryOptionsRT);
   router.get<unknown, GetPodAssetsQueryOptions, unknown>(
@@ -40,7 +40,7 @@ export function podsRoutes<T extends RequestHandlerContext>({
       const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
 
       try {
-        const response = await assetClient.getPods({
+        const response = await server.assetClient.getPods({
           from,
           to,
           filters,

@@ -23,7 +23,7 @@ import { ENTITY_API_PREFIX } from '../../../common/constants_entities';
 
 export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
   router,
-  logger,
+  server,
 }: SetupRouteOptions<T>) {
   router.post<unknown, unknown, EntityDefinition>(
     {
@@ -39,6 +39,7 @@ export function createEntityDefinitionRoute<T extends RequestHandlerContext>({
       },
     },
     async (context, req, res) => {
+      const { logger } = server;
       let definitionCreated = false;
       let ingestPipelineCreated = false;
       let transformCreated = false;

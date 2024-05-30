@@ -16,7 +16,7 @@ import { AssetsValidationError } from '../../lib/validators/validation_error';
 
 export function hostsRoutes<T extends RequestHandlerContext>({
   router,
-  assetClient,
+  server,
 }: SetupRouteOptions<T>) {
   const validate = createRouteValidationFunction(getHostAssetsQueryOptionsRT);
   router.get<unknown, GetHostAssetsQueryOptions, unknown>(
@@ -40,7 +40,7 @@ export function hostsRoutes<T extends RequestHandlerContext>({
       const { elasticsearchClient, savedObjectsClient } = await getClientsFromContext(context);
 
       try {
-        const response = await assetClient.getHosts({
+        const response = await server.assetClient.getHosts({
           from,
           to,
           filters, // safe due to route validation, are there better ways to do this?
