@@ -11,7 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
+import { SearchFieldValue, SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
 import { RequestAdapter, RequestResponder } from '@kbn/inspector-plugin/common';
@@ -462,7 +462,11 @@ describe('SearchSource', () => {
             runtimeFields: {},
           }),
         } as unknown as DataView);
-        searchSource.setField('fields', ['hello', 'a', { field: 'c' }]);
+        searchSource.setField('fields', [
+          'hello',
+          'a',
+          { foo: 'c' } as unknown as SearchFieldValue,
+        ]);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.script_fields).toEqual({ hello: {} });
