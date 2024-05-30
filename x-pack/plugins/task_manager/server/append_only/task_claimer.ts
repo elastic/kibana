@@ -77,14 +77,15 @@ async function run(opts: TaskClaimerOpts) {
                 has_child: {
                   type: 'lock',
                   query: {
-                    match_all: {},
-                  },
-                },
-              },
-              {
-                range: {
-                  lockedAt: {
-                    lte: config.lockTimeout,
+                    bool: {
+                      must_not: {
+                        range: {
+                          lockedAt: {
+                            lte: config.lockTimeout,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -192,15 +193,22 @@ async function runTask(task: any) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function scheduleNextRun(task: any, opts: TaskClaimerOpts) {
-  await opts.esClient.index({
-    index: config.taskScheduleIndex,
-    body: {
-      taskId: task._id,
-      // TODO: Pull from task index
-      runAt: new Date(Date.now() + 60000),
-      state: {},
-      join: { name: 'schedule' },
-      partitionId: Math.floor(Math.random() * 360),
-    },
-  });
+  try {
+    const result = await opts.esClient.index({
+      index: config.taskScheduleIndex,
+      body: {
+        taskId: task._id,
+        // TODO: Pull from task index
+        runAt: new Date(Date.now() + 60000),
+        state: {},
+        join: { name: 'schedule' },
+        partitionId: Math.floor(Math.random() * 360),
+      },
+    });
+    // eslint-disable-next-line no-console
+    console.log('Scheduled next task run:', JSON.stringify(result));
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('Failed to schedule next task run:', e);
+  }
 }
