@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const panelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const queryBar = getService('queryBar');
-  const listingTable = getService('listingTable');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
