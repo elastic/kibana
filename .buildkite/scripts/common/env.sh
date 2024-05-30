@@ -47,7 +47,6 @@ export MERGE_QUEUE_TARGET_BRANCH
 BUILDKITE_BRANCH_MERGE_QUEUE="${MERGE_QUEUE_TARGET_BRANCH:-${BUILDKITE_BRANCH:-}}"
 export BUILDKITE_BRANCH_MERGE_QUEUE
 
-
 BUILDKITE_AGENT_GCP_REGION=""
 if [[ "$(curl -is metadata.google.internal || true)" ]]; then
   # projects/1003139005402/zones/us-central1-a -> us-central1-a -> us-central1
@@ -133,6 +132,8 @@ export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 export GH_REPO=github.com/elastic/kibana
 
 # used by FIPS agents to link FIPS OpenSSL modules
-if [[ "$FTR_ENABLE_FIPS_AGENT" == "true" ]] || is_pr_with_label "ci:enable-fips-agent"; then
+if [[ "${FTR_ENABLE_FIPS_AGENT:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-agent"; then
   export OPENSSL_MODULES=$HOME/openssl/lib/ossl-modules
+
+  # TODO: adjust node options
 fi
