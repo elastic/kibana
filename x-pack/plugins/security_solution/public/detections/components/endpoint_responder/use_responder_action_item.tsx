@@ -25,32 +25,6 @@ export const useResponderActionItem = (
     details: { agentType, agentId },
   } = useAlertResponseActionsSupport(eventDetailsData);
 
-  // FIXME:PT Reminder --- cleanup
-
-  // const isAlert = useMemo(() => {
-  //   return isTimelineEventItemAnAlert(eventDetailsData || []);
-  // }, [eventDetailsData]);
-  //
-  // const endpointId: string = useMemo(
-  //   () => getFieldValue({ category: 'agent', field: 'agent.id' }, eventDetailsData),
-  //   [eventDetailsData]
-  // );
-  //
-  // const agentType: ResponseActionAgentType = useMemo(() => {
-  //   if (!eventDetailsData) {
-  //     return 'endpoint';
-  //   }
-  //
-  //   if (isAlertFromSentinelOneEvent({ data: eventDetailsData })) {
-  //     return 'sentinel_one';
-  //   }
-  //   if (isAlertFromCrowdstrikeEvent({ data: eventDetailsData })) {
-  //     return 'crowdstrike';
-  //   }
-  //
-  //   return 'endpoint';
-  // }, [eventDetailsData]);
-
   const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
     endpointId: agentId,
     onClick,
