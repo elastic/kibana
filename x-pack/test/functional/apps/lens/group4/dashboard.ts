@@ -346,12 +346,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.openNewTab();
       await browser.navigateTo(url);
       expect(await PageObjects.lens.getTitle()).to.be('test');
-      // need to delete the lens visualization or it messes up the next test
-      await PageObjects.common.navigateToApp('visualize');
-      await listingTable.deleteItem('test');
-      await listingTable.waitUntilTableIsLoaded();
-      // close the window so it doesn't interfere with the next test
-      await browser.closeCurrentWindow();
+      // need to make sure there aren't extra tabs or it will impact future test suites
+      if ((await browser.getAllWindowHandles()).length !== 1) {
+        await browser.closeCurrentWindow();
+        await browser.switchTab(0);
+      }
     });
   });
 }
