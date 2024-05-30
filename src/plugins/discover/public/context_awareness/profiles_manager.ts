@@ -11,6 +11,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { isEqual, memoize } from 'lodash';
 import { BehaviorSubject, combineLatest, map } from 'rxjs';
 import { DataSourceType, isDataSourceType } from '../../common/data_sources';
+import { addLog } from '../utils/add_log';
 import type {
   RootProfileService,
   DataSourceProfileService,
@@ -70,7 +71,13 @@ export class ProfilesManager {
     this.rootProfileAbortController?.abort();
     this.rootProfileAbortController = abortController;
 
-    const context = await this.rootProfileService.resolve(params);
+    let context = this.rootProfileService.defaultContext;
+
+    try {
+      context = await this.rootProfileService.resolve(params);
+    } catch (e) {
+      logResolutionError(ContextType.Root, serializedParams, e);
+    }
 
     if (abortController.signal.aborted) {
       return;
@@ -91,7 +98,13 @@ export class ProfilesManager {
     this.dataSourceProfileAbortController?.abort();
     this.dataSourceProfileAbortController = abortController;
 
-    const context = await this.dataSourceProfileService.resolve(params);
+    let context = this.dataSourceProfileService.defaultContext;
+
+    try {
+      context = await this.dataSourceProfileService.resolve(params);
+    } catch (e) {
+      logResolutionError(ContextType.DataSource, serializedParams, e);
+    }
 
     if (abortController.signal.aborted) {
       return;
@@ -103,7 +116,17 @@ export class ProfilesManager {
 
   public resolveDocumentProfile(params: DocumentProfileProviderParams) {
     Object.defineProperty(params.record, 'context', {
-      get: memoize(() => this.documentProfileService.resolve(params)),
+      get: memoize(() => {
+        let context = this.documentProfileService.defaultContext;
+
+        try {
+          context = this.documentProfileService.resolve(params);
+        } catch (e) {
+          logResolutionError(ContextType.Document, { recordId: params.record.id }, e);
+        }
+
+        return context;
+      }),
     });
   }
 
@@ -151,4 +174,25 @@ const recordHasContext = (
   record: DataTableRecord | undefined
 ): record is DataTableRecordWithContext => {
   return Boolean(record && 'context' in record);
+};
+
+enum ContextType {
+  Root = 'root',
+  DataSource = 'data source',
+  Document = 'document',
+}
+
+const logResolutionError = <TParams, TError>(
+  profileType: ContextType,
+  params: TParams,
+  error: TError
+) => {
+  addLog(
+    `[ProfilesManager] ${profileType} context resolution failed with params: ${JSON.stringify(
+      params,
+      null,
+      2
+    )}`,
+    error
+  );
 };
