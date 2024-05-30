@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { transparentize } from 'polished';
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
 import { areEqual, ListChildComponentProps, VariableSizeList as List } from 'react-window';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
@@ -42,12 +42,12 @@ interface AccordionWaterfallProps {
   maxLevelOpen: number;
 }
 
-type WaterfallTreeProps = Omit<
+type WaterfallProps = Omit<
   AccordionWaterfallProps,
   'item' | 'maxLevelOpen' | 'showCriticalPath' | 'waterfall' | 'isOpen'
 >;
 
-interface WaterfallNodeProps extends WaterfallTreeProps {
+interface WaterfallNodeProps extends WaterfallProps {
   node: IWaterfallNodeFlatten;
 }
 
@@ -104,7 +104,7 @@ export function AccordionWaterfall({
   );
 }
 
-function Waterfall(props: WaterfallTreeProps) {
+function Waterfall(props: WaterfallProps) {
   const listRef = useRef<List>(null);
   const rowSizeMapRef = useRef(new Map<number, number>());
   const { traceList } = useWaterfallContext();
@@ -118,9 +118,9 @@ function Waterfall(props: WaterfallTreeProps) {
     return rowSizeMapRef.current.get(index) || ACCORDION_HEIGHT + 1;
   };
 
-  const onScroll = useCallback(({ scrollTop }: { scrollTop: number }) => {
+  const onScroll = ({ scrollTop }: { scrollTop: number }) => {
     listRef.current?.scrollTo(scrollTop);
-  }, []);
+  };
 
   return (
     <WindowScroller onScroll={onScroll}>
