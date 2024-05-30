@@ -60,7 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should open editor menu when editor button is clicked', async () => {
       await dashboardAddPanel.clickEditorMenuButton();
-      await testSubjects.existOrFail('dashboardEditorContextMenu');
+      await testSubjects.existOrFail('dashboardPanelSelectionFlyout');
     });
   });
 }
