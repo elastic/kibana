@@ -26,9 +26,14 @@ import { ChatForm, ChatFormFields } from '../../types';
 interface TokenEstimateTooltipProps {
   context: number;
   total: number;
+  clipped?: number;
 }
 
-export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({ context, total }) => {
+export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({
+  context,
+  total,
+  clipped,
+}) => {
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const models = useLLMsModels();
   const { getValues } = useFormContext<ChatForm>();
@@ -116,6 +121,19 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({ cont
                           ),
                           title: <EuiI18nNumber value={context} />,
                         },
+                        ...(clipped
+                          ? [
+                              {
+                                description: (
+                                  <FormattedMessage
+                                    id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.clippedTokens"
+                                    defaultMessage="Context tokens clipped"
+                                  />
+                                ),
+                                title: <EuiI18nNumber value={clipped} />,
+                              },
+                            ]
+                          : []),
                         {
                           description: (
                             <FormattedMessage
@@ -193,7 +211,7 @@ export const TokenEstimateTooltip: React.FC<TokenEstimateTooltipProps> = ({ cont
                       >
                         <FormattedMessage
                           id="xpack.searchPlayground.chat.message.tokenEstimateTooltip.learnMoreLink"
-                          defaultMessage=" Learn more."
+                          defaultMessage="Learn more."
                         />
                       </EuiLink>
                     </EuiPanel>
