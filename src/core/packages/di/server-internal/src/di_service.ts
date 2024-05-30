@@ -60,8 +60,9 @@ export class CoreInjectionService {
   private root = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
 
   constructor(private readonly coreContext: CoreContext) {
-    this.getContainer = this.getContainer.bind(this);
+    this.dispose = this.dispose.bind(this);
     this.fork = this.fork.bind(this);
+    this.getContainer = this.getContainer.bind(this);
     this.load = this.load.bind(this);
   }
 
@@ -80,6 +81,15 @@ export class CoreInjectionService {
     }
 
     this.getContainer(id)!.load(module);
+  }
+
+  protected dispose(container: interfaces.Container) {
+    const scopes = container.isCurrentBound(CoreInjectionService.Scope)
+      ? container.getAll(CoreInjectionService.Scope)
+      : [];
+
+    scopes.forEach((scope) => scope.unbindAll());
+    container.unbindAll();
   }
 
   protected fork(root: interfaces.Container = this.root) {
@@ -128,8 +138,9 @@ export class CoreInjectionService {
     }
 
     return {
-      getContainer: this.getContainer,
+      dispose: this.dispose,
       fork: this.fork,
+      getContainer: this.getContainer,
       root: this.root,
     };
   }
