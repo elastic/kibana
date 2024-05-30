@@ -149,9 +149,7 @@ export const ConnectorFilteringLogic = kea<
     applyDraft: () => {
       if (isConnectorIndex(values.index)) {
         actions.makeRequest({
-          advancedSnippet: values.localAdvancedSnippet ?? '',
           connectorId: values.index.connector.id,
-          filteringRules: values.localFilteringRules ?? [],
         });
       }
     },

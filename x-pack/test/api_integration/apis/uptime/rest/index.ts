@@ -6,9 +6,9 @@
  */
 
 import {
-  settingsObjectId,
-  settingsObjectType,
-} from '@kbn/synthetics-plugin/server/saved_objects/uptime_settings';
+  uptimeSettingsObjectId,
+  uptimeSettingsObjectType,
+} from '@kbn/synthetics-plugin/server/saved_objects/synthetics_settings';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
@@ -19,8 +19,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     beforeEach('clear settings', async () => {
       try {
         await server.savedObjects.delete({
-          type: settingsObjectType,
-          id: settingsObjectId,
+          type: uptimeSettingsObjectType,
+          id: uptimeSettingsObjectId,
         });
       } catch (e) {
         // a 404 just means the doc is already missing

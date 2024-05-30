@@ -22,15 +22,18 @@ export class FormattedAxiosError extends Error {
   };
 
   constructor(axiosError: AxiosError) {
+    const method = axiosError.config?.method ?? '';
+    const url = axiosError.config?.url ?? '';
+
     super(
       `${axiosError.message}${
         axiosError?.response?.data ? `: ${JSON.stringify(axiosError?.response?.data)}` : ''
-      }`
+      }${url ? `\n(Request: ${method} ${url})` : ''}`
     );
 
     this.request = {
-      method: axiosError.config?.method ?? '?',
-      url: axiosError.config?.url ?? '?',
+      method,
+      url,
       data: axiosError.config?.data ?? '',
     };
 

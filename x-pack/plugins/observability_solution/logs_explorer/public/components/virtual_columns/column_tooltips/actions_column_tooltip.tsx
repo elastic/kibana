@@ -17,8 +17,7 @@ import {
   actionsLabel,
   actionsLabelLowerCase,
 } from '../../common/translations';
-import { HoverPopover } from '../../common/hover_popover';
-import { TooltipButtonComponent } from './tooltip_button';
+import { TooltipButton } from './tooltip_button';
 import * as constants from '../../../../common/constants';
 import { FieldWithToken } from './field_with_token';
 
@@ -28,10 +27,7 @@ const spacingCSS = css`
 
 export const ActionsColumnTooltip = () => {
   return (
-    <HoverPopover
-      button={<TooltipButtonComponent displayText={actionsLabelLowerCase} />}
-      title={actionsLabel}
-    >
+    <TooltipButton displayText={actionsLabelLowerCase} popoverTitle={actionsLabel}>
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
           <p>{actionsHeaderTooltipParagraph}</p>
@@ -94,6 +90,6 @@ export const ActionsColumnTooltip = () => {
           ))}
         </div>
       </div>
-    </HoverPopover>
+    </TooltipButton>
   );
 };

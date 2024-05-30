@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import {
-  Aggregators,
-  Comparator,
-  MetricExpressionParams,
-} from '../../../../../common/alerting/metrics';
+import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
 
@@ -50,7 +46,7 @@ export const createBucketSelector = (
           },
           script: createConditionScript(
             condition.warningThreshold as number[],
-            condition.warningComparator as Comparator
+            convertToBuiltInComparators(condition.warningComparator!)
           ),
         },
       }
@@ -75,7 +71,10 @@ export const createBucketSelector = (
       buckets_path: {
         value: bucketPath,
       },
-      script: createConditionScript(condition.threshold, condition.comparator),
+      script: createConditionScript(
+        condition.threshold,
+        convertToBuiltInComparators(condition.comparator)
+      ),
     },
   };
 

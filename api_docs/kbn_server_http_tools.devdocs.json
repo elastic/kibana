@@ -239,8 +239,6 @@
         "signature": [
           "(serverOptions: ",
           "ServerOptions",
-          ", listenerOptions: ",
-          "ListenerOptions",
           ") => ",
           "Server"
         ],
@@ -257,21 +255,6 @@
             "description": [],
             "signature": [
               "ServerOptions"
-            ],
-            "path": "packages/kbn-server-http-tools/src/create_server.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-common.createServer.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "listenerOptions",
-            "description": [],
-            "signature": [
-              "ListenerOptions"
             ],
             "path": "packages/kbn-server-http-tools/src/create_server.ts",
             "deprecated": false,
@@ -355,54 +338,6 @@
       },
       {
         "parentPluginId": "@kbn/server-http-tools",
-        "id": "def-common.getListenerOptions",
-        "type": "Function",
-        "tags": [],
-        "label": "getListenerOptions",
-        "description": [],
-        "signature": [
-          "(config: ",
-          {
-            "pluginId": "@kbn/server-http-tools",
-            "scope": "common",
-            "docId": "kibKbnServerHttpToolsPluginApi",
-            "section": "def-common.IHttpConfig",
-            "text": "IHttpConfig"
-          },
-          ") => ",
-          "ListenerOptions"
-        ],
-        "path": "packages/kbn-server-http-tools/src/get_listener_options.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/server-http-tools",
-            "id": "def-common.getListenerOptions.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/server-http-tools",
-                "scope": "common",
-                "docId": "kibKbnServerHttpToolsPluginApi",
-                "section": "def-common.IHttpConfig",
-                "text": "IHttpConfig"
-              }
-            ],
-            "path": "packages/kbn-server-http-tools/src/get_listener_options.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/server-http-tools",
         "id": "def-common.getRequestId",
         "type": "Function",
         "tags": [],
@@ -469,6 +404,69 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/server-http-tools",
+        "id": "def-common.getServerListener",
+        "type": "Function",
+        "tags": [],
+        "label": "getServerListener",
+        "description": [],
+        "signature": [
+          "(config: ",
+          {
+            "pluginId": "@kbn/server-http-tools",
+            "scope": "common",
+            "docId": "kibKbnServerHttpToolsPluginApi",
+            "section": "def-common.IHttpConfig",
+            "text": "IHttpConfig"
+          },
+          ", options: GetServerListenerOptions) => ",
+          "ServerListener"
+        ],
+        "path": "packages/kbn-server-http-tools/src/get_listener.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/server-http-tools",
+            "id": "def-common.getServerListener.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/server-http-tools",
+                "scope": "common",
+                "docId": "kibKbnServerHttpToolsPluginApi",
+                "section": "def-common.IHttpConfig",
+                "text": "IHttpConfig"
+              }
+            ],
+            "path": "packages/kbn-server-http-tools/src/get_listener.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/server-http-tools",
+            "id": "def-common.getServerListener.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "GetServerListenerOptions"
+            ],
+            "path": "packages/kbn-server-http-tools/src/get_listener.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -565,7 +563,7 @@
           "ServerResponse",
           "> | undefined"
         ],
-        "path": "packages/kbn-server-http-tools/src/get_server_options.ts",
+        "path": "packages/kbn-server-http-tools/src/get_tls_options.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -585,7 +583,7 @@
                 "text": "ISslConfig"
               }
             ],
-            "path": "packages/kbn-server-http-tools/src/get_server_options.ts",
+            "path": "packages/kbn-server-http-tools/src/get_tls_options.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
