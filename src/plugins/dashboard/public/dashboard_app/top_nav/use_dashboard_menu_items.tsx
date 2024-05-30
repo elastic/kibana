@@ -72,9 +72,10 @@ export const useDashboardMenuItems = ({
         anchorElement,
         savedObjectId: lastSavedId,
         isDirty: Boolean(hasUnsavedChanges),
+        getDashboardState: () => dashboard.getState().explicitInput,
       });
     },
-    [dashboardTitle, hasUnsavedChanges, lastSavedId]
+    [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboard]
   );
 
   const maybeRedirect = useCallback(
