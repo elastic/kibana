@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
@@ -275,16 +274,13 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
               return (
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
+                    <EuiButtonIcon
                       size="s"
                       color="primary"
                       iconType="checkInCircleFilled"
                       onClick={isAdding ? handleConfirm : () => handleSaveEdit(index)}
-                      style={{ padding: '0 8px' }}
-                      flush="left"
-                    >
-                      Confirm
-                    </EuiButtonEmpty>
+                      aria-label="Confirm"
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               );
@@ -307,16 +303,13 @@ export const GlobalDataTagsTable: React.FC<Props> = ({ updateAgentPolicy, initia
               return (
                 <EuiFlexGroup alignItems="center" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
+                    <EuiButtonIcon
                       size="s"
                       color="danger"
                       iconType="cross"
                       onClick={isAdding ? handleCancel : () => handleCancelEdit(index)}
-                      style={{ padding: '0 8px' }}
-                      flush="left"
-                    >
-                      Cancel
-                    </EuiButtonEmpty>
+                      aria-label="Cancel"
+                    />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               );

@@ -66,6 +66,7 @@ import {
   useFleetServerHostsOptions,
 } from './hooks';
 import { GlobalDataTagsTable } from './global_data_tags_table';
+import { CustomFields } from './custom_fields';
 
 interface Props {
   agentPolicy: Partial<NewAgentPolicy | AgentPolicy>;
@@ -121,7 +122,18 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
 
-  const findUnsupportedInputs = (policy: AgentPolicy, excludedInputs: Set<string>): string[] => {
+  const isAgentPolicy = (policy: Partial<AgentPolicy | NewAgentPolicy>): policy is AgentPolicy => {
+    return (policy as AgentPolicy).package_policies !== undefined;
+  };
+
+  const findUnsupportedInputs = (
+    policy: Partial<AgentPolicy | NewAgentPolicy>,
+    excludedInputs: Set<string>
+  ): string[] => {
+    if (!isAgentPolicy(policy)) {
+      return [];
+    }
+
     const found = new Set<string>([]);
     policy.package_policies?.forEach((p: PackagePolicy) => {
       p.inputs.forEach((input: PackagePolicyInput) => {
@@ -130,9 +142,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         }
       });
     });
-    console.log('HERE WE ARE ');
     return Array.from(found);
   };
+
   const unsupportedInputs = findUnsupportedInputs(agentPolicy, GLOBAL_DATA_TAG_EXCLUDED_INPUTS);
 
   const AgentTamperProtectionSectionContent = useMemo(
@@ -365,6 +377,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           initialTags={agentPolicy.global_data_tags ? agentPolicy.global_data_tags : []}
         />
       </EuiDescribedFormGroup>
+      <CustomFields updateAgentPolicy={updateAgentPolicy} agentPolicy={agentPolicy} />
       <EuiDescribedFormGroup
         title={
           <h3>
