@@ -10,10 +10,9 @@ is_pr() {
 is_pr_with_label() {
   match="$1"
 
-  IFS=',' read -ra labels <<< "${GITHUB_PR_LABELS:-}"
+  IFS=',' read -ra labels <<<"${GITHUB_PR_LABELS:-}"
 
-  for label in "${labels[@]}"
-  do
+  for label in "${labels[@]}"; do
     if [ "$label" == "$match" ]; then
       return
     fi
@@ -56,7 +55,7 @@ check_for_changed_files() {
       git config --global user.name kibanamachine
       git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
       gh pr checkout "${BUILDKITE_PULL_REQUEST}"
-      git add -A -- . ':!.bazelrc'
+      git add -A -- . ':!.bazelrc' ':!config/node.options'
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push
@@ -84,12 +83,12 @@ check_for_changed_files() {
 docker_run() {
   args=()
 
-  if [[ -n "${BUILDKITE_ENV_FILE:-}" ]] ; then
+  if [[ -n "${BUILDKITE_ENV_FILE:-}" ]]; then
     # Read in the env file and convert to --env params for docker
     # This is because --env-file doesn't support newlines or quotes per https://docs.docker.com/compose/env-file/#syntax-rules
     while read -r var; do
-      args+=( --env "${var%%=*}" )
-    done < "$BUILDKITE_ENV_FILE"
+      args+=(--env "${var%%=*}")
+    done <"$BUILDKITE_ENV_FILE"
   fi
 
   BUILDKITE_AGENT_BINARY_PATH=$(command -v buildkite-agent)
@@ -108,16 +107,18 @@ is_test_execution_step() {
 }
 
 retry() {
-  local retries=$1; shift
-  local delay=$1; shift
+  local retries=$1
+  shift
+  local delay=$1
+  shift
   local attempts=1
 
   until "$@"; do
     retry_exit_status=$?
     echo "Exited with $retry_exit_status" >&2
-    if (( retries == "0" )); then
+    if ((retries == "0")); then
       return $retry_exit_status
-    elif (( attempts == retries )); then
+    elif ((attempts == retries)); then
       echo "Failed $attempts retries" >&2
       return $retry_exit_status
     else
