@@ -292,8 +292,14 @@ export const getUiSettings: (
     category: ['discover'],
     description: i18n.translate('discover.advancedSettings.params.rowHeightText', {
       defaultMessage:
-        'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line.',
+        'The number of lines to allow in a row. A value of -1 automatically adjusts the row height to fit the contents. A value of 0 displays the content in a single line. This is not applied on the ES|QL Discover view',
     }),
+    deprecation: {
+      message: i18n.translate('discover.advancedSettings.params.rowHeightTextDeprecation', {
+        defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+      }),
+      docLinksKey: 'discoverSettings',
+    },
     schema: schema.number({ min: -1 }),
   },
   [TRUNCATE_MAX_HEIGHT]: {

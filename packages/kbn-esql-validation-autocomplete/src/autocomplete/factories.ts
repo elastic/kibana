@@ -289,6 +289,26 @@ export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition =>
   },
 });
 
+export const buildSelectDataDefinition = (): SuggestionRawDefinition[] => [
+  {
+    label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.selectDataLabel', {
+      defaultMessage: 'Open a popover to select data',
+    }),
+    text: '',
+    kind: 'Issue',
+    detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.selectMoreData', {
+      defaultMessage: 'Click to select more',
+    }),
+    sortText: 'D',
+    command: {
+      id: 'esql.sources.select',
+      title: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.selectMoreData', {
+        defaultMessage: 'Click to select more',
+      }),
+    },
+  },
+];
+
 export function getUnitDuration(unit: number = 1) {
   const filteredTimeLiteral = timeLiterals.filter(({ name }) => {
     const result = /s$/.test(name);

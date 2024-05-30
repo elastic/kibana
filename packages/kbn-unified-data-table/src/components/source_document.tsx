@@ -21,6 +21,7 @@ import {
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
 } from '@elastic/eui';
+import { JSONTree } from '@kbn/json-tree';
 import classnames from 'classnames';
 import { getInnerColumns } from '../utils/columns';
 
@@ -37,6 +38,9 @@ export function SourceDocument({
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
   className,
+  isDarkMode,
+  isSingleRow,
+  onTreeExpand,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -48,6 +52,9 @@ export function SourceDocument({
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
   className?: string;
+  isDarkMode?: boolean;
+  isSingleRow?: boolean;
+  onTreeExpand?: () => void;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -55,6 +62,18 @@ export function SourceDocument({
         maxEntries
       )
     : formatHit(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats);
+
+  // return a different view in case of ES|QL (JSON tree view)
+  if (isPlainRecord) {
+    return (
+      <JSONTree
+        data={row.raw as unknown as Record<string, unknown>}
+        isDarkMode={isDarkMode ?? false}
+        isSingleRow={isSingleRow ?? false}
+        onTreeExpand={onTreeExpand}
+      />
+    );
+  }
 
   return (
     <EuiDescriptionList
@@ -64,9 +83,6 @@ export function SourceDocument({
       data-test-subj={dataTestSubj}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
-        // temporary solution for text based mode. As there are a lot of unsupported fields we want to
-        // hide the empty one from the Document view
-        if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
         return (
           <Fragment key={fieldDisplayName}>
             <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">

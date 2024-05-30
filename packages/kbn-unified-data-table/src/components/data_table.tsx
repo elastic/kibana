@@ -449,6 +449,7 @@ export const UnifiedDataTable = ({
   const { darkMode } = useObservable(services.theme?.theme$ ?? of(themeDefault), themeDefault);
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
+  const [autoHeightRows, setAutoHeightRows] = useState<number[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
@@ -587,38 +588,22 @@ export const UnifiedDataTable = ({
   }, [dataView, showMultiFields]);
 
   /**
-   * Cell rendering
-   */
-  const renderCellValue = useMemo(
-    () =>
-      getRenderCellValueFn({
-        dataView,
-        rows: displayedRows,
-        useNewFieldsApi,
-        shouldShowFieldHandler,
-        closePopover: () => dataGridRef.current?.closeCellPopover(),
-        fieldFormats: services.fieldFormats,
-        maxEntries: maxDocFieldsDisplayed,
-        externalCustomRenderers,
-        isPlainRecord,
-      }),
-    [
-      dataView,
-      displayedRows,
-      useNewFieldsApi,
-      shouldShowFieldHandler,
-      maxDocFieldsDisplayed,
-      services.fieldFormats,
-      externalCustomRenderers,
-      isPlainRecord,
-    ]
-  );
-
-  /**
    * Render variables
    */
   const randomId = useMemo(() => htmlIdGenerator()(), []);
   const closeFieldEditor = useRef<() => void | undefined>();
+  const isOnESQLModePrev = useRef<boolean | null>(null);
+  const [modeHasChanged, setModeHasChanged] = useState<boolean>(false);
+
+  useEffect(() => {
+    // transition from ESQL to DSL and vice versa
+    if (isOnESQLModePrev.current !== isPlainRecord) {
+      isOnESQLModePrev.current = isPlainRecord;
+      setModeHasChanged(true);
+    } else {
+      setModeHasChanged(false);
+    }
+  }, [isPlainRecord]);
 
   useEffect(() => {
     return () => {
@@ -711,16 +696,72 @@ export const UnifiedDataTable = ({
     configRowHeight: configHeaderRowHeight ?? 1,
     rowHeightState: headerRowHeightState,
     onUpdateRowHeight: onUpdateHeaderRowHeight,
+    modeHasChanged,
   });
+
+  const isOnDocumentView = Boolean(columns.length === 0);
 
   const { rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = useRowHeight({
     storage,
     consumer,
-    key: 'dataGridRowHeight',
-    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+    key: isPlainRecord ? 'dataGridRowHeightESQL' : 'dataGridRowHeight',
+    configRowHeight:
+      configRowHeight ?? (isPlainRecord && isOnDocumentView)
+        ? ROWS_HEIGHT_OPTIONS.defaultESQL
+        : ROWS_HEIGHT_OPTIONS.default,
     rowHeightState,
     onUpdateRowHeight,
+    modeHasChanged,
   });
+
+  const toggleRowHeight = useCallback(
+    (rowIndex: number) => {
+      if (isPlainRecord) {
+        // mimimize to single row
+        if (autoHeightRows.includes(rowIndex)) {
+          setAutoHeightRows(autoHeightRows.filter((e) => e !== rowIndex));
+        } else {
+          // expand
+          setAutoHeightRows([...autoHeightRows, rowIndex]);
+        }
+      }
+    },
+    [autoHeightRows, isPlainRecord]
+  );
+
+  /**
+   * Cell rendering
+   */
+  const renderCellValue = useMemo(
+    () =>
+      getRenderCellValueFn({
+        dataView,
+        rows: displayedRows,
+        useNewFieldsApi,
+        shouldShowFieldHandler,
+        closePopover: () => dataGridRef.current?.closeCellPopover(),
+        fieldFormats: services.fieldFormats,
+        maxEntries: maxDocFieldsDisplayed,
+        externalCustomRenderers,
+        isPlainRecord,
+        rowHeightLines,
+        autoHeightRows,
+        toggleRowHeight,
+      }),
+    [
+      dataView,
+      displayedRows,
+      useNewFieldsApi,
+      shouldShowFieldHandler,
+      maxDocFieldsDisplayed,
+      services.fieldFormats,
+      externalCustomRenderers,
+      isPlainRecord,
+      rowHeightLines,
+      autoHeightRows,
+      toggleRowHeight,
+    ]
+  );
 
   const euiGridColumns = useMemo(
     () =>
@@ -966,6 +1007,7 @@ export const UnifiedDataTable = ({
   const rowHeightsOptions = useRowHeightsOptions({
     rowHeightLines,
     rowLineHeight: rowLineHeightOverride,
+    autoHeightRows,
   });
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();

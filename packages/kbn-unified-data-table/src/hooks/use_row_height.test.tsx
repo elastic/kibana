@@ -19,11 +19,13 @@ const renderRowHeightHook = (
     previousConfigRowHeight,
     rowHeightState,
     onUpdateRowHeight,
+    modeHasChanged = false,
   }: {
     previousRowHeight?: number;
     previousConfigRowHeight?: number;
     rowHeightState?: number;
     onUpdateRowHeight?: (rowHeight: number) => void;
+    modeHasChanged?: boolean;
   } = { previousRowHeight: 5, previousConfigRowHeight: CONFIG_ROW_HEIGHT }
 ) => {
   const storageValue =
@@ -38,6 +40,7 @@ const renderRowHeightHook = (
     configRowHeight: CONFIG_ROW_HEIGHT,
     rowHeightState,
     onUpdateRowHeight,
+    modeHasChanged,
   };
 
   return {
@@ -54,6 +57,14 @@ describe('useRowHeightsOptions', () => {
     } = renderRowHeightHook({ rowHeightState: 2 });
     expect(result.current.rowHeight).toEqual(RowHeightMode.custom);
     expect(result.current.rowHeightLines).toEqual(2);
+  });
+
+  it('should apply rowHeight from local storage when the mode has just changed', () => {
+    const {
+      hook: { result },
+    } = renderRowHeightHook({ rowHeightState: 2, modeHasChanged: true });
+    expect(result.current.rowHeight).toEqual(RowHeightMode.custom);
+    expect(result.current.rowHeightLines).toEqual(3);
   });
 
   it('should apply rowHeight from local storage', () => {

@@ -23,6 +23,7 @@ interface UseRowHeightProps {
   key: string;
   configRowHeight: number;
   rowHeightState?: number;
+  modeHasChanged: boolean;
   onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
@@ -32,6 +33,7 @@ export const useRowHeight = ({
   key,
   configRowHeight,
   rowHeightState,
+  modeHasChanged,
   onUpdateRowHeight,
 }: UseRowHeightProps) => {
   const rowHeightLines = useMemo(() => {
@@ -43,7 +45,7 @@ export const useRowHeight = ({
       localStorageRecord !== null && configRowHeight === localStorageRecord.previousConfigRowHeight;
 
     let currentRowLines: number;
-    if (isValidRowHeight(rowHeightState)) {
+    if (isValidRowHeight(rowHeightState) && !modeHasChanged) {
       currentRowLines = rowHeightState;
     } else if (configHasNotChanged(rowHeightFromLS)) {
       currentRowLines = rowHeightFromLS.previousRowHeight;
@@ -52,7 +54,7 @@ export const useRowHeight = ({
     }
 
     return currentRowLines;
-  }, [configRowHeight, consumer, key, rowHeightState, storage]);
+  }, [configRowHeight, consumer, key, modeHasChanged, rowHeightState, storage]);
 
   const rowHeight = useMemo<RowHeightSettingsProps['rowHeight']>(() => {
     switch (rowHeightLines) {

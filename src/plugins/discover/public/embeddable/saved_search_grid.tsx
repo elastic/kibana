@@ -100,7 +100,9 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
         totalHits={props.totalHitCount}
         setExpandedDoc={setExpandedDoc}
         expandedDoc={expandedDoc}
-        configRowHeight={props.services.uiSettings.get(ROW_HEIGHT_OPTION)}
+        configRowHeight={
+          !props.isPlainRecord ? props.services.uiSettings.get(ROW_HEIGHT_OPTION) : undefined
+        }
         showMultiFields={props.services.uiSettings.get(SHOW_MULTIFIELDS)}
         maxDocFieldsDisplayed={props.services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
         renderDocumentView={renderDocumentView}

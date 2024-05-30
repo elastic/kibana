@@ -414,7 +414,7 @@ function DiscoverDocumentsComponent({
                   sampleSizeState={getAllowedSampleSize(sampleSizeState, services.uiSettings)}
                   onUpdateSampleSize={!isEsqlMode ? onUpdateSampleSize : undefined}
                   onFieldEdited={onFieldEdited}
-                  configRowHeight={uiSettings.get(ROW_HEIGHT_OPTION)}
+                  configRowHeight={!isEsqlMode ? uiSettings.get(ROW_HEIGHT_OPTION) : undefined}
                   showMultiFields={uiSettings.get(SHOW_MULTIFIELDS)}
                   maxDocFieldsDisplayed={uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)}
                   renderDocumentView={renderDocumentView}
