@@ -30,7 +30,6 @@ export const processRouter = (
   filters?: GenerateOpenApiDocumentOptionsFilters
 ) => {
   const paths: OpenAPIV3.PathsObject = {};
-  // We only process the latest serverless version since these unversioned routes will default to 2023-10-31
   if (filters?.version && filters.version !== SERVERLESS_VERSION_2023_10_31) return { paths };
   const routes = prepareRoutes(appRouter.getRoutes({ excludeVersionedRoutes: true }), filters);
 
