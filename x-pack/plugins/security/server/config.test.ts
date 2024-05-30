@@ -65,8 +65,10 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "fipsMode": Object {
-          "enabled": false,
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
         },
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -122,8 +124,10 @@ describe('config schema', () => {
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-        "fipsMode": Object {
-          "enabled": false,
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
         },
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -178,8 +182,10 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "fipsMode": Object {
-          "enabled": false,
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
         },
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -237,8 +243,10 @@ describe('config schema', () => {
           "selector": Object {},
         },
         "cookieName": "sid",
-        "fipsMode": Object {
-          "enabled": false,
+        "experimental": Object {
+          "fipsMode": Object {
+            "enabled": false,
+          },
         },
         "loginAssistanceMessage": "",
         "public": Object {},
@@ -2526,13 +2534,17 @@ describe('checkFipsConfig', () => {
     mockExit.mockRestore();
   });
 
-  it('should log an error message if FIPS mode is misconfigured - xpack.security.fipsMode.enabled true, Nodejs FIPS mode false', async () => {
+  it('should log an error message if FIPS mode is misconfigured - xpack.security.experimental.fipsMode.enabled true, Nodejs FIPS mode false', async () => {
     const logger = loggingSystemMock.create().get();
 
     try {
-      createConfig(ConfigSchema.validate({ fipsMode: { enabled: true } }), logger, {
-        isTLSEnabled: true,
-      });
+      createConfig(
+        ConfigSchema.validate({ experimental: { fipsMode: { enabled: true } } }),
+        logger,
+        {
+          isTLSEnabled: true,
+        }
+      );
     } catch (e) {
       expect(mockExit).toHaveBeenNthCalledWith(1, 78);
     }
@@ -2540,13 +2552,13 @@ describe('checkFipsConfig', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
                         Array [
                           Array [
-                            "Configuration mismatch error. xpack.security.fipsMode.enabled is set to true and the configured Node.js environment has FIPS disabled",
+                            "Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to true and the configured Node.js environment has FIPS disabled",
                           ],
                         ]
                 `);
   });
 
-  it('should log an error message if FIPS mode is misconfigured - xpack.security.fipsMode.enabled false, Nodejs FIPS mode true', async () => {
+  it('should log an error message if FIPS mode is misconfigured - xpack.security.experimental.fipsMode.enabled false, Nodejs FIPS mode true', async () => {
     mockGetFipsFn.mockImplementationOnce(() => {
       return 1;
     });
@@ -2554,9 +2566,13 @@ describe('checkFipsConfig', () => {
     const logger = loggingSystemMock.create().get();
 
     try {
-      createConfig(ConfigSchema.validate({ fipsMode: { enabled: false } }), logger, {
-        isTLSEnabled: true,
-      });
+      createConfig(
+        ConfigSchema.validate({ experimental: { fipsMode: { enabled: false } } }),
+        logger,
+        {
+          isTLSEnabled: true,
+        }
+      );
     } catch (e) {
       expect(mockExit).toHaveBeenNthCalledWith(1, 78);
     }
@@ -2564,13 +2580,13 @@ describe('checkFipsConfig', () => {
     expect(loggingSystemMock.collect(logger).error).toMatchInlineSnapshot(`
                         Array [
                           Array [
-                            "Configuration mismatch error. xpack.security.fipsMode.enabled is set to false and the configured Node.js environment has FIPS enabled",
+                            "Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to false and the configured Node.js environment has FIPS enabled",
                           ],
                         ]
                 `);
   });
 
-  it('should log an info message if FIPS mode is properly configured - xpack.security.fipsMode.enabled true, Nodejs FIPS mode true', async () => {
+  it('should log an info message if FIPS mode is properly configured - xpack.security.experimental.fipsMode.enabled true, Nodejs FIPS mode true', async () => {
     mockGetFipsFn.mockImplementationOnce(() => {
       return 1;
     });
@@ -2578,9 +2594,13 @@ describe('checkFipsConfig', () => {
     const logger = loggingSystemMock.create().get();
 
     try {
-      createConfig(ConfigSchema.validate({ fipsMode: { enabled: true } }), logger, {
-        isTLSEnabled: true,
-      });
+      createConfig(
+        ConfigSchema.validate({ experimental: { fipsMode: { enabled: true } } }),
+        logger,
+        {
+          isTLSEnabled: true,
+        }
+      );
     } catch (e) {
       logger.error('Should not throw error!');
     }

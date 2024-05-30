@@ -314,13 +314,15 @@ export const ConfigSchema = schema.object({
       roleMappingManagementEnabled: schema.boolean({ defaultValue: true }),
     }),
   }),
-  fipsMode: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+  experimental: schema.object({
+    fipsMode: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 });
 
 function checkFipsConfig(config: RawConfigType, logger: Logger) {
-  const isFipsEnabled = config.fipsMode.enabled;
+  const isFipsEnabled = config.experimental.fipsMode.enabled;
   const isNodeRunningWithFipsEnabled = getFips() === 1;
 
   // Check if FIPS is enabled in either setting
@@ -328,7 +330,7 @@ function checkFipsConfig(config: RawConfigType, logger: Logger) {
     // FIPS must be enabled on both or log and error an exit Kibana
     if (isFipsEnabled !== isNodeRunningWithFipsEnabled) {
       logger.error(
-        `Configuration mismatch error. xpack.security.fipsMode.enabled is set to ${isFipsEnabled} and the configured Node.js environment has FIPS ${
+        `Configuration mismatch error. xpack.security.experimental.fipsMode.enabled is set to ${isFipsEnabled} and the configured Node.js environment has FIPS ${
           isNodeRunningWithFipsEnabled ? 'enabled' : 'disabled'
         }`
       );
