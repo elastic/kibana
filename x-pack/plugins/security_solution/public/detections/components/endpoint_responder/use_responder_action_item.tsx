@@ -8,12 +8,8 @@
 import React, { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isAlertFromCrowdstrikeEvent } from '../../../common/utils/crowdstrike_alert_check';
-import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
-import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { useAlertResponseActionsSupport } from '../../../common/hooks/endpoint/use_alert_response_actions_support';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { isTimelineEventItemAnAlert } from '../../../common/utils/endpoint_alert_check';
-import { getFieldValue } from '../host_isolation/helpers';
 import type { AlertTableContextMenuItem } from '../alerts_table/types';
 import { useResponderActionData } from './use_responder_action_data';
 
@@ -24,32 +20,39 @@ export const useResponderActionItem = (
   const { loading: isAuthzLoading, canAccessResponseConsole } =
     useUserPrivileges().endpointPrivileges;
 
-  const isAlert = useMemo(() => {
-    return isTimelineEventItemAnAlert(eventDetailsData || []);
-  }, [eventDetailsData]);
+  const {
+    isSupported: hostSupportsResponseActions,
+    details: { agentType, agentId },
+  } = useAlertResponseActionsSupport(eventDetailsData);
 
-  const endpointId: string = useMemo(
-    () => getFieldValue({ category: 'agent', field: 'agent.id' }, eventDetailsData),
-    [eventDetailsData]
-  );
+  // FIXME:PT Reminder --- cleanup
 
-  const agentType: ResponseActionAgentType = useMemo(() => {
-    if (!eventDetailsData) {
-      return 'endpoint';
-    }
-
-    if (isAlertFromSentinelOneEvent({ data: eventDetailsData })) {
-      return 'sentinel_one';
-    }
-    if (isAlertFromCrowdstrikeEvent({ data: eventDetailsData })) {
-      return 'crowdstrike';
-    }
-
-    return 'endpoint';
-  }, [eventDetailsData]);
+  // const isAlert = useMemo(() => {
+  //   return isTimelineEventItemAnAlert(eventDetailsData || []);
+  // }, [eventDetailsData]);
+  //
+  // const endpointId: string = useMemo(
+  //   () => getFieldValue({ category: 'agent', field: 'agent.id' }, eventDetailsData),
+  //   [eventDetailsData]
+  // );
+  //
+  // const agentType: ResponseActionAgentType = useMemo(() => {
+  //   if (!eventDetailsData) {
+  //     return 'endpoint';
+  //   }
+  //
+  //   if (isAlertFromSentinelOneEvent({ data: eventDetailsData })) {
+  //     return 'sentinel_one';
+  //   }
+  //   if (isAlertFromCrowdstrikeEvent({ data: eventDetailsData })) {
+  //     return 'crowdstrike';
+  //   }
+  //
+  //   return 'endpoint';
+  // }, [eventDetailsData]);
 
   const { handleResponseActionsClick, isDisabled, tooltip } = useResponderActionData({
-    endpointId,
+    endpointId: agentId,
     onClick,
     agentType,
     eventData: agentType !== 'endpoint' ? eventDetailsData : null,
@@ -58,7 +61,7 @@ export const useResponderActionItem = (
   return useMemo(() => {
     const actions: AlertTableContextMenuItem[] = [];
 
-    if (!isAuthzLoading && canAccessResponseConsole && isAlert) {
+    if (!isAuthzLoading && canAccessResponseConsole && hostSupportsResponseActions) {
       actions.push({
         key: 'endpointResponseActions-action-item',
         'data-test-subj': 'endpointResponseActions-action-item',
@@ -79,7 +82,7 @@ export const useResponderActionItem = (
   }, [
     canAccessResponseConsole,
     handleResponseActionsClick,
-    isAlert,
+    hostSupportsResponseActions,
     isAuthzLoading,
     isDisabled,
     tooltip,

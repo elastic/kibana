@@ -18,6 +18,8 @@ export const getFieldValues = (
   },
   data: TimelineEventsDetailsItem[] | null
 ) => {
+  // FIXME:PT move utility higher up to `common`
+
   const categoryCompat =
     category === 'signal' ? 'kibana' : category === 'kibana' ? 'signal' : category;
   const fieldCompat =
@@ -42,7 +44,7 @@ export const getFieldValue = (
   },
   data: TimelineEventsDetailsItem[] | null
 ) => {
-  // FIXME:PT move these utlities to common place
+  // FIXME:PT move these utilities to common place
   const currentField = getFieldValues({ category, field }, data);
   return currentField && currentField.length > 0 ? currentField[0] : '';
 };
