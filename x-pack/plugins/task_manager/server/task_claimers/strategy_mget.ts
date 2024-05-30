@@ -35,7 +35,7 @@ import {
   TASK_MANAGER_MARK_AS_CLAIMED,
   TaskClaimingBatches,
 } from '../queries/task_claiming';
-import { TaskClaim, startTaskTimer } from '../task_events';
+import { TaskClaim, asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 
 import {
@@ -49,7 +49,7 @@ import {
 } from '../queries/mark_available_tasks_as_claimed';
 
 import { TaskStore, SearchOpts } from '../task_store';
-import { isOk } from '../lib/result_type';
+import { isOk, asOk } from '../lib/result_type';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -235,7 +235,7 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
   const message = `task claimer claimed: ${finalResults.length}; stale: ${staleTasks.size}; conflicts: ${conflicts}; missing: ${missingTasks.size}; updateErrors: ${bulkErrors}; removed: ${removedCount};`;
   logger.debug(message, logMeta);
 
-  return {
+  const finalResult = {
     stats: {
       tasksUpdated: finalResults.length,
       tasksConflicted: conflicts,
@@ -244,6 +244,12 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
     docs: finalResults,
     timing: stopTaskTimer(),
   };
+
+  for (const doc of finalResults) {
+    events$.next(asTaskClaimEvent(doc.id, asOk(doc), finalResult.timing));
+  }
+
+  return finalResult;
 }
 
 interface SearchAvailableTasksResponse {
