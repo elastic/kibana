@@ -39,18 +39,34 @@ describe('ESQL query utils', () => {
           values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
         })
       ).toEqual({
-        hits: [
-          {
-            _id: 'esql_query_document',
-            _index: '',
-            _source: {
-              '@timestamp': '2023-07-12T13:32:04.174Z',
-              'ecs.version': '1.8.0',
-              'error.code': null,
+        hits: {
+          hits: [
+            {
+              _id: 'esql_query_document',
+              _index: '',
+              _source: {
+                '@timestamp': '2023-07-12T13:32:04.174Z',
+                'ecs.version': '1.8.0',
+                'error.code': null,
+              },
             },
+          ],
+          total: 1,
+        },
+        sourceFields: [
+          {
+            label: '@timestamp',
+            searchPath: '@timestamp',
+          },
+          {
+            label: 'ecs.version',
+            searchPath: 'ecs.version',
+          },
+          {
+            label: 'error.code',
+            searchPath: 'error.code',
           },
         ],
-        total: 1,
       });
     });
   });

@@ -38,6 +38,11 @@ export const rowToDocument = (columns: EsqlResultColumn[], row: EsqlResultRow): 
 };
 
 export const toEsQueryHits = (results: EsqlTable) => {
+  const sourceFields = results.columns.map((col) => ({
+    label: col.name,
+    searchPath: col.name,
+  }));
+
   const hits: EsqlHit[] = results.values.map((row) => {
     const document = rowToDocument(results.columns, row);
     return {
@@ -48,8 +53,11 @@ export const toEsQueryHits = (results: EsqlTable) => {
   });
 
   return {
-    hits,
-    total: hits.length,
+    hits: {
+      hits,
+      total: hits.length,
+    },
+    sourceFields,
   };
 };
 

@@ -47,6 +47,7 @@ export async function fetchEsqlQuery({
     path: '/_query',
     body: query,
   });
+  const { hits, sourceFields } = toEsQueryHits(response);
 
   const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
 
@@ -60,10 +61,10 @@ export async function fetchEsqlQuery({
         took: 0,
         timed_out: false,
         _shards: { failed: 0, successful: 0, total: 0 },
-        hits: toEsQueryHits(response),
+        hits,
       },
       resultLimit: alertLimit,
-      sourceFieldsParams: params.sourceFields,
+      sourceFieldsParams: sourceFields,
       generateSourceFieldsFromHits: true,
     }),
     index: null,
