@@ -117,14 +117,14 @@ export function createStatusTimeBins(
   pingStatuses: MonitorStatusHeatmap[]
 ): MonitorStatusTimeBin[] {
   return timeBuckets.map(({ start, end }) => {
-    const { up: ups, down: downs } = pingStatuses
+    const { ups, downs } = pingStatuses
       .filter(({ key }) => key >= start && key <= end)
       .reduce(
         (acc, cur) => ({
-          up: acc.up + cur.up.value,
-          down: acc.down + cur.down.value,
+          ups: acc.ups + cur.up.value,
+          downs: acc.downs + cur.down.value,
         }),
-        { up: 0, down: 0 }
+        { ups: 0, downs: 0 }
       );
     return {
       start,
