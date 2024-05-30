@@ -56,7 +56,7 @@ export function updateVolatileSearchSource(
 
   if (useNewFieldsApi) {
     searchSource.removeField('fieldsFromSource');
-    searchSource.setField('fields', [{ field: '*', include_mapped: true }]);
+    searchSource.setField('fields', [{ field: '*', include_unmapped: true }]);
   } else {
     searchSource.removeField('fields');
   }
