@@ -15,7 +15,7 @@ type ConfigType = Record<string, any>;
  * Enables HTTP2 by adding/changing the appropriate config settings
  *
  * Important: this must be used on "final" (non-reused) configs, otherwise
- * the override from the children configs could remote the overrides
+ * the overrides from the children configs could remove the overrides
  * done in that helper.
  */
 export const configureHTTP2 = (config: ConfigType): ConfigType => {
