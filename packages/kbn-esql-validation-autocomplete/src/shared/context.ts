@@ -15,7 +15,6 @@ import type {
   ESQLCommandOption,
   ESQLCommandMode,
 } from '@kbn/esql-ast';
-import { ESQLAstCommand } from '@kbn/esql-ast/src/types';
 import { ENRICH_MODES } from '../definitions/settings';
 import { EDITOR_MARKER } from './constants';
 import {
@@ -102,20 +101,16 @@ function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
   return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
 }
 
-export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstCommand>(
+export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
   node: T | undefined
 ) {
   if (!node) {
     return;
   }
-  if (
-    (node.type === 'command' && (node as ESQLCommand).args) ||
-    node.type === 'option' ||
-    node.type === 'function'
-  ) {
+  if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
     return {
       ...node,
-      args: (node as ESQLCommand).args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
+      args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
     };
   }
   return node;

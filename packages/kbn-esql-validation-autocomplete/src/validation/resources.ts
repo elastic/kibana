@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLAstCommand, ESQLCommand } from '@kbn/esql-ast';
+import type { ESQLCommand } from '@kbn/esql-ast';
 import { createMapFromList, isSourceItem, nonNullable } from '../shared/helpers';
 import {
   getFieldsByTypeHelper,
@@ -23,7 +23,7 @@ import type { ESQLRealField, ESQLPolicy } from './types';
 
 export async function retrieveFields(
   queryString: string,
-  commands: ESQLAstCommand[],
+  commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLRealField>> {
   if (!callbacks || commands.length < 1) {
@@ -37,7 +37,7 @@ export async function retrieveFields(
 }
 
 export async function retrievePolicies(
-  commands: ESQLAstCommand[],
+  commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLPolicy>> {
   if (!callbacks || commands.every(({ name }) => name !== 'enrich')) {
@@ -49,7 +49,7 @@ export async function retrievePolicies(
 }
 
 export async function retrieveSources(
-  commands: ESQLAstCommand[],
+  commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Set<string>> {
   if (!callbacks || commands.length < 1) {
@@ -63,7 +63,7 @@ export async function retrieveSources(
 }
 
 export async function retrievePoliciesFields(
-  commands: ESQLAstCommand[],
+  commands: ESQLCommand[],
   policies: Map<string, ESQLPolicy>,
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLRealField>> {
@@ -75,11 +75,7 @@ export async function retrievePoliciesFields(
     return new Map();
   }
   const policyNames = enrichCommands
-    .map((command) => {
-      if (!(command as ESQLCommand).args) return undefined;
-      const genericCommand = command as ESQLCommand;
-      return isSourceItem(genericCommand.args[0]) ? genericCommand.args[0].name : undefined;
-    })
+    .map(({ args }) => (isSourceItem(args[0]) ? args[0].name : undefined))
     .filter(nonNullable);
   if (!policyNames.every((name) => policies.has(name))) {
     return new Map();
@@ -93,7 +89,7 @@ export async function retrievePoliciesFields(
 
 export async function retrieveFieldsFromStringSources(
   queryString: string,
-  commands: ESQLAstCommand[],
+  commands: ESQLCommand[],
   callbacks?: ESQLCallbacks
 ): Promise<Map<string, ESQLRealField>> {
   if (!callbacks) {

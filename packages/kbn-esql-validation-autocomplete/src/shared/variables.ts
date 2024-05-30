@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type {
-  ESQLAstItem,
-  ESQLAstCommand,
-  ESQLCommand,
-  ESQLCommandOption,
-  ESQLFunction,
-} from '@kbn/esql-ast';
+import type { ESQLAstItem, ESQLCommand, ESQLCommandOption, ESQLFunction } from '@kbn/esql-ast';
 import type { ESQLVariable, ESQLRealField } from '../validation/types';
 import { DOUBLE_BACKTICK, EDITOR_MARKER, SINGLE_BACKTICK } from './constants';
 import {
@@ -141,14 +135,14 @@ function addVariableFromExpression(
 }
 
 export function collectVariables(
-  commands: ESQLAstCommand[],
+  commands: ESQLCommand[],
   fields: Map<string, ESQLRealField>,
   queryString: string
 ): Map<string, ESQLVariable[]> {
   const variables = new Map<string, ESQLVariable[]>();
   for (const command of commands) {
-    if (['row', 'eval', 'stats'].includes(command.name) && (command as ESQLCommand).args) {
-      for (const arg of (command as ESQLCommand).args) {
+    if (['row', 'eval', 'stats'].includes(command.name)) {
+      for (const arg of command.args) {
         if (isAssignment(arg)) {
           addVariableFromAssignment(arg, variables, fields);
         }

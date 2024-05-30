@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-export type ESQLAst = ESQLAstCommand[];
+export type ESQLAst = ESQLAstCommands[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand;
+export type ESQLAstCommands = ESQLCommand | ESQLAstMetricsCommand;
 
 export type ESQLSingleAstItem =
   | ESQLFunction
