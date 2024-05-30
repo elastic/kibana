@@ -59,7 +59,7 @@ run(
       log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
       const { msg$, proc } = startTSWorker<Result>({
         log,
-        src: path.resolve(__dirname, './kibana_worker'),
+        src: require.resolve('./kibana_worker'),
       });
       await Rx.firstValueFrom(
         msg$.pipe(
