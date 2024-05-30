@@ -194,27 +194,27 @@ export const suppressedActionVariableDescription = i18n.translate(
 export const sliValueActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sliValueDescription',
   {
-    defaultMessage: 'The current SLI value.',
+    defaultMessage: 'The SLI value at the time of firing this alert.',
   }
 );
 
 export const sloStatusActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloStatusDescription',
   {
-    defaultMessage: 'The current SLO status.',
+    defaultMessage: 'The SLO status at the time of firing this alert.',
   }
 );
 
 export const sloErrorBudgetRemainingActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloErrorBudgetRemainingDescription',
   {
-    defaultMessage: 'The remaining error budget.',
+    defaultMessage: 'The remaining error budget at the time of firing this alert.',
   }
 );
 
 export const sloErrorBudgetConsumedActionVariableDescription = i18n.translate(
   'xpack.slo.alerting.sloErrorBudgetConsumedDescription',
   {
-    defaultMessage: 'The consumed error budget.',
+    defaultMessage: 'The consumed error budget at the time of firing this alert.',
   }
 );
