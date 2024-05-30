@@ -43,7 +43,6 @@ export const getDegradedFieldsColumns = ({
     name: countColumnName,
     sortable: true,
     field: 'count',
-    dataType: 'number',
     render: (_, { count, timeSeries }) => {
       return <SparkPlot series={timeSeries} valueLabel={count} isLoading={isLoading} />;
     },

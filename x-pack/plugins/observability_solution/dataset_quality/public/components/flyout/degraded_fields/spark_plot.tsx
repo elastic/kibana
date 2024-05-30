@@ -28,11 +28,16 @@ export function SparkPlot({
   series?: Coordinate[] | null;
 }) {
   return (
-    <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" responsive={false} alignItems="flexEnd">
-      <EuiFlexItem>{valueLabel}</EuiFlexItem>
+    <EuiFlexGroup
+      justifyContent="flexStart"
+      gutterSize="xs"
+      responsive={false}
+      alignItems="flexEnd"
+    >
       <EuiFlexItem grow={false}>
         <SparkPlotItem isLoading={isLoading} series={series} />
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>{valueLabel}</EuiFlexItem>
     </EuiFlexGroup>
   );
 }
