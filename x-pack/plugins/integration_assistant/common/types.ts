@@ -48,7 +48,6 @@ export interface DataStream {
   description: string;
   inputTypes: InputTypes[];
   rawSamples: string[];
-  // TODO: figure out why changing this to `Pipeline` makes the frontend test objects complain about types.
   pipeline: object;
   docs: object[];
 }
@@ -57,14 +56,10 @@ export interface Integration {
   name: string;
   title: string;
   description: string;
-  version: string;
   dataStreams: DataStream[];
-  streamVersion?: string;
-  dockerComposeVersion?: string;
-  initialVersion?: string;
-  formatVersion?: string;
   owner: string;
   minKibanaVersion: string;
+  logo?: string;
 }
 
 // Server Request Schemas
@@ -93,6 +88,11 @@ export interface RelatedApiRequest {
   currentPipeline: object;
 }
 
+export interface TestPipelineApiRequest {
+  rawSamples: string[];
+  pipeline: Pipeline;
+}
+
 // Server Response Schemas
 export interface CategorizationApiResponse {
   results: {
@@ -113,4 +113,9 @@ export interface EcsMappingApiResponse {
     mapping: object;
     pipeline: object;
   };
+}
+
+export interface TestPipelineApiResponse {
+  pipelineResults: object[];
+  errors?: object[];
 }

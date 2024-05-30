@@ -15,8 +15,8 @@ export async function createPackageSystemTests(integrationDir: string, integrati
   const systemTestsSamplesDir = joinPath(systemTestsDockerDir, 'sample_logs');
   await asyncEnsureDir(systemTestsSamplesDir);
 
-  const streamVersion = integration.streamVersion || '0.13.0';
-  const dockerComposeVersion = integration.dockerComposeVersion || '2.3';
+  const streamVersion = '0.13.0';
+  const dockerComposeVersion = '2.3';
   const dockerServices: string[] = [];
   for (const stream of integration.dataStreams) {
     const packageName = integration.name.replace(/_/g, '-');

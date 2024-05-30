@@ -50,8 +50,7 @@ export function registerEcsRoutes(router: IRouter) {
             rawSamples,
           })) as EcsMappingApiResponse;
       } catch (e) {
-        // TODO: Better error responses?
-        return e;
+        return res.badRequest({ body: e });
       }
 
       return res.ok({ body: results });

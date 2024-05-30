@@ -45,8 +45,7 @@ export function registerCategorizationRoutes(router: IRouter) {
           currentPipeline,
         })) as CategorizationApiResponse;
       } catch (e) {
-        // TODO: Better error responses?
-        return e;
+        return res.badRequest({ body: e });
       }
 
       return res.ok({ body: results });

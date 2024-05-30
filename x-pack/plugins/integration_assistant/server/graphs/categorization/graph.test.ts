@@ -55,8 +55,8 @@ jest.mock('../../util/es', () => {
 describe('runCategorizationGraph', () => {
   const mockClient = {
     asCurrentUser: {
-      indices: {
-        getMapping: jest.fn(),
+      ingest: {
+        simulate: jest.fn(),
       },
     },
   } as unknown as IScopedClusterClient;
@@ -137,6 +137,7 @@ describe('runCategorizationGraph', () => {
     } catch (e) {
       // noop
     }
+
     expect(response.results).toStrictEqual(categorizationExpectedResults);
 
     // Check if the functions were called

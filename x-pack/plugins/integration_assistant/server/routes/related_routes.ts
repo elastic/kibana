@@ -46,8 +46,7 @@ export function registerRelatedRoutes(router: IRouter) {
           currentPipeline,
         })) as RelatedApiResponse;
       } catch (e) {
-        // TODO: Better error responses?
-        return e;
+        return res.badRequest({ body: e });
       }
 
       return res.ok({ body: results });
