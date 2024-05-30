@@ -11,11 +11,12 @@ import fs from 'node:fs/promises';
 import { encode } from 'node:querystring';
 import fetch from 'node-fetch';
 import { run } from '@kbn/dev-cli-runner';
+import { startTSWorker } from '@kbn/dev-utils';
 import { createTestEsCluster } from '@kbn/test';
 import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import chalk from 'chalk';
-import { kibana } from './kibana';
+import type { Result } from './kibana_worker';
 
 const OAS_FILE_PATH = path.resolve(REPO_ROOT, './oas_docs/bundle.json');
 
@@ -55,8 +56,18 @@ run(
 
     log.info('Starting Kibana...');
     await log.indent(4, async () => {
-      const { proc$ } = kibana(log);
-      const proc = await Rx.firstValueFrom(proc$);
+      const { msg$, proc } = startTSWorker<Result>({
+        log,
+        src: path.resolve(__dirname, './kibana_worker'),
+      });
+      await Rx.firstValueFrom(
+        msg$.pipe(
+          Rx.map((msg) => {
+            if (msg !== 'ready')
+              throw new Error(`received unexpected message from worker (expected "ready"): ${msg}`);
+          })
+        )
+      );
       addCleanupTask(() => proc.kill('SIGILL'));
     });
 

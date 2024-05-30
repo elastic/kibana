@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { set } from '@kbn/safer-lodash-set';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';

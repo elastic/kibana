@@ -14,18 +14,30 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { SomeDevLog } from '@kbn/some-dev-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
-import type { Result } from './kibana_worker';
+// import type { Result } from './kibana_worker';
 
-export function kibana(log: SomeDevLog) {
+interface StartTSWorkerArgs {
+  log: SomeDevLog;
+  /** Path to worker source */
+  src: string;
+  /** Defaults to repo root */
+  cwd?: string;
+}
+
+/**
+ * Provide a TS file as the src of a NodeJS Worker with some built-in handling
+ * of std streams and debugging.
+ */
+export function startTSWorker<Message>({ log, src, cwd = REPO_ROOT }: StartTSWorkerArgs) {
   log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
 
-  const fork = ChildProcess.fork(require.resolve('./kibana_worker.ts'), {
+  const fork = ChildProcess.fork(require.resolve(src), {
     execArgv: ['--require=@kbn/babel-register/install'],
-    cwd: REPO_ROOT,
+    cwd,
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
   });
 
-  const proc$ = Rx.merge(
+  const msg$ = Rx.merge(
     // the actual value we are interested in
     Rx.fromEvent(fork, 'message'),
 
@@ -41,15 +53,14 @@ export function kibana(log: SomeDevLog) {
     )
   ).pipe(
     Rx.takeUntil(Rx.fromEvent(fork, 'exit')),
-    Rx.map((results) => {
-      const [result] = results as [Result];
-      log.debug('message received from worker', result);
-      if (result !== 'ready') throw new Error('received unexpected message from worker');
-      return fork;
+    Rx.map((mergedResults) => {
+      const [message] = mergedResults as [Message];
+      log.debug('message received from worker', message);
+      return message;
     })
   );
 
-  return { proc$ };
+  return { msg$, proc: fork };
 }
 
 function routeToLog(readable: Readable, log: SomeDevLog, level: 'debug' | 'error') {
