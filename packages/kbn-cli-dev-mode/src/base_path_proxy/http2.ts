@@ -68,6 +68,7 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
 
     this.log.write(
       `basepath proxy server running at ${Url.format({
+        protocol: this.httpConfig.ssl.enabled ? 'https' : 'http',
         host: this.httpConfig.host,
         pathname: this.httpConfig.basePath,
       })}`
