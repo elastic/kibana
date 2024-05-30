@@ -936,7 +936,7 @@ describe('Action Executor', () => {
         expect(e.message).toBe(
           'Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.'
         );
-        expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
+        expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
       }
     });
 
