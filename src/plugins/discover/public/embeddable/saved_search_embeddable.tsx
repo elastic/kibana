@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { lastValueFrom, Subscription } from 'rxjs';
+import { firstValueFrom, lastValueFrom, Subscription } from 'rxjs';
 import {
   onlyDisabledFiltersChanged,
   Filter,
@@ -71,6 +71,7 @@ import { fetchEsql } from '../application/main/data_fetching/fetch_esql';
 import { getValidViewMode } from '../application/main/utils/get_valid_view_mode';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../constants';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
+import { createDataViewDataSource, createEsqlDataSource } from '../../common/data_sources';
 
 export interface SearchEmbeddableConfig {
   editable: boolean;
@@ -162,6 +163,12 @@ export class SavedSearchEmbeddable
       this.panelTitleInternal = this.getCurrentTitle();
 
       await this.initializeOutput();
+
+      const solutionNavId = await firstValueFrom(
+        this.services.core.chrome.getActiveSolutionNavId$()
+      );
+
+      this.services.profilesManager.resolveRootProfile({ solutionNavId });
 
       // deferred loading of this embeddable is complete
       this.setInitializationFinished();
@@ -305,6 +312,16 @@ export class SavedSearchEmbeddable
     const isEsqlMode = this.isEsqlMode(savedSearch);
 
     try {
+      await this.services.profilesManager.resolveDataSourceProfile({
+        dataSource: isOfAggregateQueryType(query)
+          ? createEsqlDataSource()
+          : dataView.id
+          ? createDataViewDataSource({ dataViewId: dataView.id })
+          : undefined,
+        dataView,
+        query,
+      });
+
       // Request ES|QL data
       if (isEsqlMode && query) {
         const result = await fetchEsql(
