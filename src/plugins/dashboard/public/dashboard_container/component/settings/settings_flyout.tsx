@@ -323,7 +323,11 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty data-test-subj="cancelCustomizeDashboardButton" onClick={onClose}>
+            <EuiButtonEmpty
+              flush="left"
+              data-test-subj="cancelCustomizeDashboardButton"
+              onClick={onClose}
+            >
               <FormattedMessage
                 id="dashboard.embeddableApi.showSettings.flyout.cancelButtonTitle"
                 defaultMessage="Cancel"

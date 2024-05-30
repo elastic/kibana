@@ -393,6 +393,20 @@
             "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/deeplinks-observability",
+            "id": "def-common.ObservabilityOnboardingLocatorParams.category",
+            "type": "string",
+            "tags": [],
+            "label": "category",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/deeplinks/observability/locators/observability_onboarding.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
