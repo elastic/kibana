@@ -56,6 +56,7 @@ run(
 
     log.info('Starting Kibana...');
     await log.indent(4, async () => {
+      log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
       const { msg$, proc } = startTSWorker<Result>({
         log,
         src: path.resolve(__dirname, './kibana_worker'),

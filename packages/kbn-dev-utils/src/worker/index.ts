@@ -29,8 +29,6 @@ interface StartTSWorkerArgs {
  * of std streams and debugging.
  */
 export function startTSWorker<Message>({ log, src, cwd = REPO_ROOT }: StartTSWorkerArgs) {
-  log.info('Loading core with all plugins enabled so that we can capture OAS for all...');
-
   const fork = ChildProcess.fork(require.resolve(src), {
     execArgv: ['--require=@kbn/babel-register/install'],
     cwd,
