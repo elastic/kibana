@@ -15,8 +15,8 @@ import {
   EuiBadge,
   useEuiTheme,
 } from '@elastic/eui';
-import type { CasesConfigurationUITemplate } from '../../../common/ui';
 import { css } from '@emotion/react';
+import type { CasesConfigurationUITemplate } from '../../../common/ui';
 import { TruncatedText } from '../truncated_text';
 
 export interface Props {

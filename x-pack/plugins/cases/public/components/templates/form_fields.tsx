@@ -63,7 +63,6 @@ const FormFieldsComponent: React.FC<FormFieldsProps> = ({
               euiFieldProps: {
                 'data-test-subj': 'template-description-input',
                 fullWidth: true,
-                autoFocus: true,
                 isLoading: isSubmitting,
               },
             }}

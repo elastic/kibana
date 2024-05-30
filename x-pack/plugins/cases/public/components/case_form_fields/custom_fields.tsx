@@ -15,14 +15,12 @@ import * as i18n from './translations';
 
 interface Props {
   isLoading: boolean;
-  path?: string;
   setAsOptional?: boolean;
   configurationCustomFields: CasesConfigurationUI['customFields'];
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({
   isLoading,
-  path,
   setAsOptional,
   configurationCustomFields,
 }) => {

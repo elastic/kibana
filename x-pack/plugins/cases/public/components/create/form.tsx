@@ -91,7 +91,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
         title: i18n.STEP_ONE_TITLE,
         children: (
           <>
-            <Title isLoading={isSubmitting} />
+            <Title isLoading={isSubmitting} autoFocus={true} />
             {caseAssignmentAuthorized ? (
               <div css={containerCss(euiTheme)}>
                 <Assignees isLoading={isSubmitting} />

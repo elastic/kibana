@@ -22,14 +22,12 @@ import { schema } from './schema';
 interface Props {
   connectors: ActionConnector[];
   isLoading: boolean;
-  path?: string;
   configurationConnectorId: string;
 }
 
 const ConnectorComponent: React.FC<Props> = ({
   connectors,
   isLoading,
-  path,
   configurationConnectorId,
 }) => {
   const [{ connectorId }] = useFormData({ watch: ['connectorId'] });
