@@ -16,7 +16,7 @@ import { BuildkiteClient, BuildkiteStep } from '../buildkite';
 import { CiStatsClient, TestGroupRunOrderResponse } from './client';
 
 import DISABLED_JEST_CONFIGS from '../../disabled_jest_configs.json';
-import { getAgentImageConfig } from '#pipeline-utils/agentImages';
+import { getAgentImageConfig } from '#pipeline-utils';
 
 type RunGroup = TestGroupRunOrderResponse['types'][0];
 
